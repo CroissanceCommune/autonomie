@@ -769,6 +769,9 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
        * expenseline add route
        */
       this.initialize();
+      if (AppOptions['edit'] === false){
+          return;
+      }
       // Passing the new_element tags a creation used to highlight (or not) the
       // line
       var model = new ExpenseLine({"category": category, new_element: true});
@@ -784,6 +787,9 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
        * expenseline edit route
        */
       this.initialize();
+      if (AppOptions['edit'] === false){
+          return;
+      }
       var model = this._getExpenseLine(id);
       var expense_form = new ExpenseFormView({
         title:"Modifier",
@@ -794,6 +800,9 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     bookmark: function(id){
       this.initialize();
+      if (AppOptions['edit'] === false){
+          return;
+      }
       var model = this._getExpenseLine(id);
       // Get only the attributes necessary for our bookmark
       var attributes = _.pick(model.attributes,
@@ -814,6 +823,9 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     addtel: function(){
       this.initialize();
+      if (AppOptions['edit'] === false){
+          return;
+      }
       // Passing the new_element tags a creation used to highlight (or not) the
       // line
       var model = new ExpenseLine({
@@ -830,6 +842,9 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     addkm: function(category){
       this.initialize();
+      if (AppOptions['edit'] === false){
+          return;
+      }
       // Passing the new_element tags a creation used to highlight (or not) the
       // line
       var model = new ExpenseKmLine({new_element: true, category: category});
@@ -842,6 +857,9 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     editkm: function(id) {
       this.initialize();
+      if (AppOptions['edit'] === false){
+          return;
+      }
       var model = this._getExpenseKmLine(id);
       var expensekm_form = new ExpenseKmFormView({
         title:"Modifier",

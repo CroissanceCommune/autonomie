@@ -31,6 +31,11 @@ def includeme(config):
         template='autonomie:templates/layouts/default.mako'
     )
     config.add_layout(
+        DefaultLayout,
+        template='autonomie:templates/layouts/default.mako',
+        name='default',
+    )
+    config.add_layout(
         OpaLayout,
         template='autonomie:templates/layouts/opa.mako',
         name='opa'

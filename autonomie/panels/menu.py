@@ -137,7 +137,6 @@ def get_companies(request):
     """
     companies = []
     if request.has_permission('manage'):
-        print(u"Has the permission")
         companies = Company.query().all()
     else:
         companies = request.user.companies

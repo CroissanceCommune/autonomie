@@ -89,7 +89,7 @@ from autonomie.views import (
     BaseFormView,
     submit_btn,
 )
-from autonomie.views.taskaction import StatusView
+from autonomie.views.status import StatusView
 from autonomie.views.render_api import (
     month_name,
     format_account,
@@ -723,7 +723,7 @@ class ExpenseStatusView(StatusView):
     """
     Expense status view
     """
-    def notify(self, item, status):
+    def notify(self, status):
         """
         Notify a status change
         """

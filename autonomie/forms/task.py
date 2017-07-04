@@ -74,6 +74,7 @@ from autonomie.models.task import (
 )
 from autonomie.models.project import (
     build_customer_values,
+    Project,
 )
 from autonomie.models.task.estimation import (
     PAYMENTDISPLAYCHOICES
@@ -146,7 +147,7 @@ def get_customers_from_request(request):
         customers = request.context.customers
     elif request.context.__name__ in ('invoice', 'estimation', 'cancelinvoice'):
         if request.context.project is not None:
-            customers = request.context.project.customers
+            customers = request.context.project.company.customers
     return customers
 
 
@@ -157,18 +158,22 @@ def deferred_default_customer(node, kw):
     there is only one in the project
     """
     request = kw['request']
-    customers = request.context.customers
-    if len(customers) == 1:
-        return customers[0].id
-    else:
-        return 0
+    res = 0
+    if request.context.__name__ == 'project':
+        customers = request.context.customers
+        if len(customers) == 1:
+            res = customers[0].id
+
+    elif request.context.type_ in ('invoice', 'estimation', 'cancelinvoice'):
+        res = request.context.customer_id
+    return res
 
 
 @colander.deferred
 def deferred_customer_list(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
-    return deform.widget.Select2Widget(
+    return deform.widget.SelectWidget(
         values=build_customer_values(customers),
         placeholder=u"Sélectionner un client",
     )
@@ -195,6 +200,8 @@ def get_tasktype_from_request(request):
         # Matches estimation and estimations
         if route_name in [predicate, "project_%ss" % (predicate,)]:
             return predicate
+    else:
+        return request.context.type_
     raise Exception(u"You shouldn't have come here with the current route %s"
                     % route_name)
 
@@ -277,39 +284,6 @@ def deferred_default_tva(node, kw):
 
 
 @colander.deferred
-def deferred_default_phase(node, kw):
-    """
-        Return the default phase if one is present in the request arguments
-    """
-    request = kw['request']
-    phases = get_phases_from_request(request)
-    phase = request.params.get('phase')
-    if phase in [str(p.id) for p in phases]:
-        return int(phase)
-    else:
-        return colander.null
-
-
-def get_phase_choices(phases):
-    """
-        Return data structure for phase select options
-    """
-    return ((phase.id, phase.name) for phase in phases)
-
-
-def get_phases_from_request(request):
-    """
-        Get the phases from the current project regarding request context
-    """
-    phases = []
-    if request.context.__name__ == 'project':
-        phases = request.context.phases
-    elif request.context.__name__ in ('invoice', 'cancelinvoice', 'estimation'):
-        phases = request.context.project.phases
-    return phases
-
-
-@colander.deferred
 def deferred_default_name(node, kw):
     """
     Return a default name for the new document
@@ -329,6 +303,25 @@ def deferred_default_name(node, kw):
     return name
 
 
+def get_phases_from_request(request):
+    """
+    Get the phases from the current project regarding request context
+    """
+    phases = []
+    if request.context.__name__ == 'project':
+        phases = request.context.phases
+    elif request.context.__name__ in ('invoice', 'cancelinvoice', 'estimation'):
+        phases = request.context.project.phases
+    return phases
+
+
+def get_phase_choices(phases):
+    """
+        Return data structure for phase select options
+    """
+    return ((phase.id, phase.name) for phase in phases)
+
+
 @colander.deferred
 def deferred_phases_widget(node, kw):
     """
@@ -339,6 +332,62 @@ def deferred_phases_widget(node, kw):
     choices = get_phase_choices(phases)
     wid = deform.widget.SelectWidget(values=choices)
     return wid
+
+
+@colander.deferred
+def deferred_default_phase(node, kw):
+    """
+    Return the default phase if one is present in the request arguments
+    """
+    request = kw['request']
+    phases = get_phases_from_request(request)
+    phase = request.params.get('phase')
+    if phase in [str(p.id) for p in phases]:
+        return int(phase)
+    else:
+        return colander.null
+
+
+def get_projects_from_request(request):
+    """
+    Return the projects regarding the current request
+    """
+    company_id = request.current_company
+    projects = Project.query().filter_by(company_id=company_id).all()
+    return projects
+
+
+def get_project_choices(projects):
+    """
+    Return the choices for project selection
+    """
+    return ((project.id, project.name) for project in projects)
+
+
+@colander.deferred
+def deferred_project_widget(node, kw):
+    """
+        return phase select widget
+    """
+    request = kw['request']
+    projects = get_projects_from_request(request)
+    choices = get_project_choices(projects)
+    wid = deform.widget.SelectWidget(values=choices)
+    return wid
+
+
+@colander.deferred
+def deferred_default_project(node, kw):
+    """
+    Return the default project
+    """
+    res = None
+    request = kw['request']
+    if request.context.type_ == 'project':
+        res = request.context.id
+    elif request.context.type_ in ('estimation', 'invoice', 'cancelinvoice'):
+        res = request.context.project.id
+    return res
 
 
 @colander.deferred
@@ -738,7 +787,7 @@ def get_estimation_schema():
 
 class NewTaskSchema(colander.Schema):
     """
-    schema used to initialize a new estimation
+    schema used to initialize a new task
     """
     name = colander.SchemaNode(
         colander.String(),
@@ -747,12 +796,6 @@ class NewTaskSchema(colander.Schema):
         validator=colander.Length(max=255),
         default=deferred_default_name,
         missing="",
-        )
-    phase_id = colander.SchemaNode(
-        colander.String(),
-        title=u"Dossier dans lequel insérer le document",
-        widget=deferred_phases_widget,
-        default=deferred_default_phase
     )
     customer_id = colander.SchemaNode(
         colander.Integer(),
@@ -760,6 +803,25 @@ class NewTaskSchema(colander.Schema):
         widget=deferred_customer_list,
         validator=deferred_customer_validator,
         default=deferred_default_customer,
+    )
+    project_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Projet dans lequel insérer le document",
+        widget=deferred_project_widget,
+        default=deferred_default_project
+    )
+    phase_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Dossier dans lequel insérer le document",
+        widget=deferred_phases_widget,
+        default=deferred_default_phase
+    )
+    course = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Formation",
+        label=deferred_course_title,
+        widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
+        missing=0,
     )
 
 
@@ -770,6 +832,22 @@ def get_new_task_schema():
     :returns: The schema
     """
     return NewTaskSchema()
+
+
+class DuplicateSchema(NewTaskSchema):
+    """
+    schema used to duplicate a task
+    """
+    pass
+
+
+def get_duplicate_schema():
+    """
+    Return the schema for task duplication
+
+    :returns: The schema
+    """
+    return DuplicateSchema()
 
 
 #  Dans le formulaire de création de devis par exemple, on trouve

@@ -133,7 +133,7 @@ def deferred_phase_validator(node, kw):
 
 class DuplicateSchema(colander.MappingSchema):
     """
-        colander schema for duplication recording
+    colander schema for duplication recording
     """
     customer = colander.SchemaNode(
         colander.Integer(),

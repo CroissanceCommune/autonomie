@@ -59,3 +59,17 @@ def get_avatar(request):
         query = request.dbsession.query(User).options(undefer_group('edit'))
         user = query.filter_by(login=login).first()
         return user
+
+
+def get_current_company(request):
+    """
+    Extract the current company we're visiting
+
+    :param obj request: the current pyramid request
+    :returns: A Company instance
+    """
+    if hasattr(request.context, "get_company_id"):
+        cid = request.context.get_company_id()
+    else:
+        cid = request.user.companies[0].id
+    return cid

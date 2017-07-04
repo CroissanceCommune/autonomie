@@ -209,16 +209,18 @@ class FileEditView(FileUploadView):
         self.request.session.flash(self.valid_msg)
 
 
-def get_add_file_link(request, label=u"Attacher un fichier", perm="add.file"):
+def get_add_file_link(
+    request, label=u"Attacher un fichier", perm="add.file", route=None
+):
     """
         Add a button for file attachment
     """
     context = request.context
-    route_name = context.type_
+    route = route or context.type_
     return ViewLink(
         label,
         perm,
-        path=route_name,
+        path=route,
         id=context.id,
         _query=dict(action="attach_file")
     )

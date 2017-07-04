@@ -71,7 +71,7 @@ from .task import (
     DiscountLine,
     TaskLine,
 )
-from .states import DEFAULT_STATE_MACHINES
+from .actions import DEFAULT_ACTION_MANAGER
 
 log = logging.getLogger(__name__)
 
@@ -182,9 +182,7 @@ class Estimation(Task, EstimationCompute):
         }
     )
 
-    state_machine = DEFAULT_STATE_MACHINES['estimation']
-
-    valid_states = ('valid', 'geninv')
+    state_manager = DEFAULT_ACTION_MANAGER['estimation']
 
     _number_tmpl = u"{s.company.name} {s.date:%Y-%m} D{s.company_index}"
 

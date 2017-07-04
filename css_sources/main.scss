@@ -510,3 +510,19 @@ $blue_status_label: #5bc0de;
   color: #fff;
 }
 
+.overlay{
+  background-color: #fff;
+  top: 0px;
+  left:0px;
+  opacity: 1;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  margin: 0;
+  z-index: 1101;
+  .overlay-content{
+    opacity: 1;
+    position: relative;
+    top: 20vh;
+  }
+}

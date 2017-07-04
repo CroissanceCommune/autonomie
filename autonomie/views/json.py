@@ -38,8 +38,7 @@ def includeme(config):
     """
         Configure the views for this module
     """
-    for route_name in "project", "company", "customer", "estimation", \
-                      "invoice", "cancelinvoice":
+    for route_name in "project", "company", "customer":
         config.add_view(
             json_model_view,
             route_name=route_name,

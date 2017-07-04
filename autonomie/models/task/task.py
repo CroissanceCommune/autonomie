@@ -42,8 +42,6 @@ from sqlalchemy import (
     Boolean,
     Float,
     Date,
-    or_,
-    and_
 )
 from sqlalchemy.event import listen
 
@@ -695,6 +693,7 @@ _{s.date:%m%y}"
             status_record = TaskStatus(
                 statusCode=status,
                 statusPerson=self.statusPersonAccount.id,
+                statusComment=self.statusComment,
             )
             self.statuses.append(status_record)
 

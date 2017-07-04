@@ -43,7 +43,6 @@ from autonomie.models.task import (
     TaskLine,
     TaskLineGroup,
 )
-from autonomie.models.customer import Customer
 from autonomie.forms import (
     merge_session_with_post,
 )
@@ -53,7 +52,7 @@ from autonomie.views import (
     BaseEditView,
 )
 from autonomie.exception import Forbidden
-from autonomie.views.invoices.edit import (
+from autonomie.views.invoices.invoice import (
     InvoiceFormActions,
     CommonInvoiceStatusView,
 )
@@ -85,63 +84,6 @@ def add_lines_to_cancelinvoice(task, appstruct):
     for line in appstruct['lines']:
         task.default_line_group.lines.append(TaskLine(**line))
     return task
-
-
-class CancelInvoiceAdd(TaskFormView):
-    """
-        Invoice Add view
-    """
-    title = "Nouvel avoir"
-    schema = get_cancel_invoice_schema()
-    buttons = (submit_btn,)
-    model = CancelInvoice
-    add_template_vars = ('edit', )
-    form_actions_factory = InvoiceFormActions
-
-    @property
-    def company(self):
-        # Current context is a project
-        return self.context.company
-
-    def before(self, form):
-        super(CancelInvoiceAdd, self).before(form)
-        populate_actionmenu(self.request)
-
-    def submit_success(self, appstruct):
-        log.debug("Submitting cancelinvoice add")
-        appstruct = get_cancel_invoice_dbdatas(appstruct)
-
-        customer_id = appstruct["task"]['customer_id']
-        customer = Customer.get(customer_id)
-
-        cinvoice = CancelInvoice(
-            self.context.company,
-            customer,
-            self.context,
-            self.context.phases[0],
-            self.request.user,
-        )
-        cinvoice = merge_session_with_post(
-            cinvoice,
-            appstruct["task"]
-        )
-        try:
-            cinvoice = self.set_task_status(cinvoice)
-            cinvoice.invoice.check_resulted(user_id=self.request.user.id)
-            self.dbsession.merge(cinvoice.invoice)
-            # Line handling
-            cinvoice = add_lines_to_cancelinvoice(cinvoice, appstruct)
-            self.dbsession.add(cinvoice)
-            self.dbsession.flush()
-            self.session.flash(u"L'avoir a bien été ajoutée.")
-        except Forbidden, err:
-            self.request.session.flash(err.message, queue='error')
-        return HTTPFound(
-            self.request.route_path(
-                "project",
-                id=self.context.id
-            )
-        )
 
 
 class CancelInvoiceEdit(TaskFormView):
@@ -271,45 +213,41 @@ def add_routes(config):
     Add module related routes
     """
     config.add_route(
-        'project_cancelinvoices',
-        '/projects/{id:\d+}/cancelinvoices',
-        traverse='/projects/{id}'
-    )
-
-    config.add_route(
-        'cancelinvoice',
+        '/cancelinvoices/{id}',
         '/cancelinvoice/{id:\d+}',
         traverse='/cancelinvoices/{id}'
     )
+    for extension in ('html', 'pdf'):
+        config.add_route(
+            '/cancelinvoices/{id}.%s' % extension,
+            '/cancelinvoices/{id:\d+}.%s' % extension,
+            traverse='/cancelinvoices/{id}'
+        )
+    for action in (
+        'addfile', 'delete', 'admin',
+        'set_financial_year',
+        'set_products',
+    ):
+        config.add_route(
+            '/cancelinvoices/{id}/%s' % action,
+            '/cancelinvoices/{id:\d+}/%s' % action,
+            traverse='/cancelinvoices/{id}'
+        )
 
 
 def includeme(config):
     add_routes(config)
 
     config.add_view(
-        CancelInvoiceAdd,
-        route_name="project_cancelinvoices",
-        renderer="tasks/edit.mako",
-        permission="add.cancelinvoice",
-    )
-
-    config.add_view(
         CancelInvoiceEdit,
-        route_name='cancelinvoice',
+        route_name='/cancelinvoices/{id}',
         renderer="tasks/edit.mako",
-        permission='edit.cancelinvoice',
-    )
-
-    config.add_view(
-        CancelInvoiceStatusView,
-        route_name='cancelinvoice',
-        request_param='action=status',
         permission='edit.cancelinvoice',
     )
 
     config.add_view(
         AdminCancelInvoice,
-        route_name='cancelinvoice',
+        route_name='/cancelinvoices/{id}/admin',
         renderer="base/formpage.mako",
         permission="admin",
         request_param="token=admin",
@@ -318,14 +256,13 @@ def includeme(config):
     delete_msg = u"L'avoir {task.name} a bien été supprimé."
     config.add_view(
         make_task_delete_view(delete_msg),
-        route_name='cancelinvoice',
-        request_param='action=delete',
+        route_name='/cancelinvoices/{id}/delete',
         permission='delete.invoice',
     )
 
     config.add_view(
         set_financial_year,
-        route_name="cancelinvoice",
+        route_name='/cancelinvoices/{id}/set_financial_year',
         request_param='action=set_financial_year',
         permission="admin_treasury",
         renderer='base/formpage.mako',
@@ -333,31 +270,27 @@ def includeme(config):
 
     config.add_view(
         set_products,
-        route_name="cancelinvoice",
-        request_param='action=set_products',
+        route_name='/cancelinvoices/{id}/set_products',
         permission="admin_treasury",
         renderer='base/formpage.mako',
     )
 
     config.add_view(
         FileUploadView,
-        route_name="cancelinvoice",
+        route_name='/cancelinvoices/{id}/addfile',
         renderer='base/formpage.mako',
         permission='edit.cancelinvoice',
-        request_param='action=attach_file',
     )
 
     config.add_view(
         task_pdf_view,
-        route_name='cancelinvoice',
-        request_param='view=pdf',
+        route_name='/cancelinvoices/{id}.pdf',
         permission='view.cancelinvoice',
     )
 
     config.add_view(
         get_task_html_view(InvoiceFormActions),
-        route_name='cancelinvoice',
+        route_name='/cancelinvoices/{id}.html',
         renderer='tasks/view_only.mako',
         permission='view.cancelinvoice',
-        request_param='view=html',
     )

@@ -199,7 +199,7 @@ devis/une facture,la mention apparaitra dans la sortie PDF
             id=self.id,
             value=self.value,
             name=self.name,
-            default=self.default == 1,
+            default=self.default,
             products=[product.__json__(request) for product in self.products],
         )
 

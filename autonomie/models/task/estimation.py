@@ -40,6 +40,7 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Boolean,
+    Date,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -107,7 +108,13 @@ class Estimation(Task, EstimationCompute):
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
+        info={
+            'colanderalchemy': {
+                "exclude": True,
+                'widget': deform.widget.HiddenWidget(),
+                "missing": colander.drop,
+            }
+        },
     )
     signed_status = Column(
         String(10),
@@ -563,7 +570,7 @@ class PaymentLine(DBBASE):
         Integer,
         primary_key=True,
         nullable=False,
-        info={'colanderalchemy': forms.get_hidden_field_conf()},
+        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
     )
     creationDate = deferred(
         Column(
@@ -592,6 +599,7 @@ class PaymentLine(DBBASE):
     order = Column(
         Integer,
         info={'colanderalchemy': {'title': u"Ordre"}},
+        default=1
     )
     description = Column(
         Text,
@@ -613,12 +621,19 @@ class PaymentLine(DBBASE):
         },
     )
     date = Column(
-        CustomDateType2,
+        Date(),
         info={
             'colanderalchemy': {
                 "title": u"Date",
-                'typ': colander.Date
             }
+        },
+        default=datetime.date.today
+    )
+    # To be removed in version > 3.4
+    paymentDate = Column(
+        CustomDateType2,
+        info={
+            'colanderalchemy': {'exclude': True}
         },
     )
     task = relationship(
@@ -634,7 +649,6 @@ class PaymentLine(DBBASE):
             order=self.order,
             amount=self.amount,
             description=self.description,
-            date=datetime.date.today()
         )
 
     def __repr__(self):

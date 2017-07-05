@@ -31,7 +31,10 @@ import deform
 import deform_extensions
 
 from autonomie.utils.fileupload import FileTempStore
-from autonomie.utils.html import clean_html
+from autonomie.utils.html import (
+    clean_html,
+    strip_html,
+)
 
 
 TEMPLATES_PATH = "autonomie:deform_templates/"
@@ -116,6 +119,19 @@ def come_from_node(**kw):
         widget=deform.widget.HiddenWidget(),
         **kw
     )
+
+
+def _textarea_node_validator(value):
+    """
+    Check that the given value is not void (it could contain void html tags)
+    """
+    return bool(strip_html(value))
+
+
+textarea_node_validator = colander.Function(
+    _textarea_node_validator,
+    msg=u"Ce paramètre est requis"
+)
 
 
 def textarea_node(**kw):
@@ -388,20 +404,24 @@ def get_hidden_field_conf(title=None):
     return res
 
 
-def get_deferred_select_validator(model):
+def get_deferred_select_validator(model, id_key='id'):
     """
     Return a deferred validator based on the given model
 
         model
 
             Option model having at least two attributes id and label
+
+        id_key
+
+            The model attr used to store the related object in db (mostly id)
     """
     @colander.deferred
     def deferred_validator(binding_datas, request):
         """
         The deferred function that will be fired on schema binding
         """
-        return colander.OneOf([m.id for m in model.query()])
+        return colander.OneOf([getattr(m, id_key) for m in model.query()])
     return deferred_validator
 
 
@@ -550,7 +570,9 @@ class CustomSchemaNode(colander.SchemaNode):
         return DBSESSION().query(self.model).get(id)
 
 
-def get_sequence_child_item(model, label_attr='title', filter_out=()):
+def get_sequence_child_item(
+    model, label_attr='title', required=False
+):
     """
     Return the schema node to be used for sequence of related elements
     configuration
@@ -572,12 +594,17 @@ def get_sequence_child_item(model, label_attr='title', filter_out=()):
             backref="company_info",
         )
     """
+    missing = colander.drop
+    if required:
+        missing = colander.required
+
     return [
         CustomSchemaNode(
             colander.Integer(),
             name='id',
             widget=get_deferred_select(model),
-            missing=colander.drop,
+            missing=missing,
             model=model,
+            validator=get_deferred_select_validator(model)
         )
     ]

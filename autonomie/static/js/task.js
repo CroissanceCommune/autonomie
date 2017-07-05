@@ -402,17 +402,17 @@ function addPaymentRow(args, after){
     });
   }
   var date = new Date();
-  if ((args['paymentDate'] !== undefined) && (args['paymentDate'] !== "")) {
-    date = parseDate(args['paymentDate']);
+  if ((args['date'] !== undefined) && (args['date'] !== "")) {
+    date = parseDate(args['date']);
   }
   // We update the date information to fit the configured
   // display format
-  $("#paymentDate_" + args['id']).datepicker({
-                altField:"#paymentDate_" + args['id'] + "_altField",
+  $("#date_" + args['id']).datepicker({
+                altField:"#date_" + args['id'] + "_altField",
                 altFormat:"yy-mm-dd",
                 dateFormat:"dd/mm/yy"
                 });
-  $("#paymentDate_" + args['id']).datepicker('setDate', date);
+  $("#date_" + args['id']).datepicker('setDate', date);
 }
 function getNbPayments(){
   /*

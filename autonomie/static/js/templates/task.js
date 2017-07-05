@@ -47,12 +47,12 @@ templates['payment.mustache'] = template({"1":function(depth0,helpers,partials,d
 },"9":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "value=\""
-    + escapeExpression(((helper = (helper = helpers.paymentDate || (depth0 != null ? depth0.paymentDate : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"paymentDate","hash":{},"data":data}) : helper)))
+    + escapeExpression(((helper = (helper = helpers.date || (depth0 != null ? depth0.date : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"date","hash":{},"data":data}) : helper)))
     + "\"";
 },"11":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "        <span class='help-block'>\n            "
-    + escapeExpression(((helper = (helper = helpers.paymentDate_error || (depth0 != null ? depth0.paymentDate_error : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"paymentDate_error","hash":{},"data":data}) : helper)))
+    + escapeExpression(((helper = (helper = helpers.date_error || (depth0 != null ? depth0.date_error : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"date_error","hash":{},"data":data}) : helper)))
     + "\n        </span>\n";
 },"13":function(depth0,helpers,partials,data) {
   var stack1, buffer = "    <div class='col-md-2 col-md-offset-2 paymentamount form-group ";
@@ -110,24 +110,24 @@ templates['payment.mustache'] = template({"1":function(depth0,helpers,partials,d
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description_error : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
   buffer += "    </div>\n    <div class='col-md-2 form-group ";
-  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.paymentDate_error : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.date_error : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
   buffer += "' id=\"date_"
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
-    + "\">\n        <input type=\"hidden\" name=\"__start__\" value=\"paymentDate:mapping\"></input>\n        <input class='input-sm' type='text' id=\"paymentDate_"
+    + "\">\n        <input type=\"hidden\" name=\"__start__\" value=\"date:mapping\"></input>\n        <input class='input-sm' type='text' id=\"date_"
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
     + "\" name=\"displayDate\" ";
-  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.paymentDate : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.date : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
-  buffer += "></input>\n        <input class='form-control' type='hidden' id=\"paymentDate_"
+  buffer += "></input>\n        <input class='form-control' type='hidden' id=\"date_"
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
     + "_altField\" name=\"date\" ";
-  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.paymentDate : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.date : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
   buffer += "></input>\n";
-  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.paymentDate_error : depth0), {"name":"if","hash":{},"fn":this.program(11, data),"inverse":this.noop,"data":data});
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.date_error : depth0), {"name":"if","hash":{},"fn":this.program(11, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        <input type=\"hidden\" name=\"__end__\" value=\"paymentDate:mapping\"></input>\n    </div>\n";
+  buffer += "        <input type=\"hidden\" name=\"__end__\" value=\"date:mapping\"></input>\n    </div>\n";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.readonly : depth0), {"name":"if","hash":{},"fn":this.program(13, data),"inverse":this.program(18, data),"data":data});
   if (stack1 != null) { buffer += stack1; }
   return buffer + "    <input type=\"hidden\" name=\"__end__\" value=\"payment_lines:mapping\"/>\n</div>\n";

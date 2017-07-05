@@ -115,7 +115,8 @@ class Estimation(Task, EstimationCompute):
         info={
             'colanderalchemy': {
                 'widget': deform.widget.SelectWidget(values=ESTIMATION_STATES),
-                'title': u'Statut du devis'
+                'title': u'Statut du devis',
+                "validator": colander.OneOf([i[0] for i in ESTIMATION_STATES])
             }
         }
     )
@@ -124,7 +125,7 @@ class Estimation(Task, EstimationCompute):
         default=False,
         info={
             'colanderalchemy': {
-                "title": u"Factures générées ?"
+                "title": u"Factures générées ?",
             }
         }
     )
@@ -132,27 +133,48 @@ class Estimation(Task, EstimationCompute):
     # common with only invoices
     deposit = Column(
         Integer,
-        info={'colanderalchemy': {'title': u'Accompte (en %)'}},
-        default=0)
+        info={
+            'colanderalchemy': {
+                'title': u'Accompte (en %)',
+                "validator": colander.Range(
+                    0,
+                    100,
+                    min_err=u"Ce nombre n'est pas compris en 0 et 100",
+                    max_err=u"Ce nombre n'est pas compris en 0 et 100",
+                )
+            }
+        },
+        default=0
+    )
     course = deferred(
         Column(
             Integer,
             nullable=False,
-            info={'colanderalchemy': {'title': u"Concerne une formation ?"}},
-            default=0),
-        group='edit')
+            info={
+                'colanderalchemy': {
+                    'title': u"Concerne une formation ?"
+                }
+            },
+            default=0
+        ),
+        group='edit'
+    )
 
     # Specific to estimations
     exclusions = deferred(
         Column(
             Text,
             info={'colanderalchemy': {'title': u"Notes"}}
-        ), group='edit')
+        ),
+        group='edit'
+    )
     manualDeliverables = deferred(
         Column(
             Integer,
             info={'colanderalchemy': {'exclude': True}}
-        ), group='edit')
+        ),
+        group='edit'
+    )
     paymentDisplay = deferred(
         Column(
             String(20),
@@ -160,17 +182,31 @@ class Estimation(Task, EstimationCompute):
                 'colanderalchemy': {
                     'title': u"Affichage des paiements",
                     'widget': deform.widget.SelectWidget(
-                        values=PAYMENTDISPLAYCHOICES)
+                        values=PAYMENTDISPLAYCHOICES),
+                    'validator': colander.OneOf(
+                        [i[0] for i in PAYMENTDISPLAYCHOICES]
+                    )
                 }
             },
             default=PAYMENTDISPLAYCHOICES[0][0]
         ),
-        group='edit')
+        group='edit'
+    )
     payment_lines = relationship(
         "PaymentLine",
         order_by='PaymentLine.order',
         cascade="all, delete-orphan",
-        back_populates='task'
+        back_populates='task',
+        info={
+            'colanderalchemy': {
+                'title': u"Échéances de paiement",
+                "validator": colander.Length(
+                    min=1,
+                    min_err="Au moins un paiement est requis"
+                ),
+                "missing": colander.required,
+            },
+        }
     )
     invoices = relationship(
         "Invoice",
@@ -286,8 +322,8 @@ class Estimation(Task, EstimationCompute):
         """
             return an intermediary invoice described by "paymentline"
         """
-        invoice.date = paymentline.paymentDate
-        invoice.financial_year = paymentline.paymentDate.year
+        invoice.date = paymentline.date
+        invoice.financial_year = paymentline.date.year
         invoice.display_units = 0
         for tva, amount in amounts.items():
             description = paymentline.description
@@ -316,8 +352,8 @@ class Estimation(Task, EstimationCompute):
         """
             Return the sold invoice
         """
-        invoice.date = paymentline.paymentDate
-        invoice.financial_year = paymentline.paymentDate.year
+        invoice.date = paymentline.date
+        invoice.financial_year = paymentline.date.year
 
         invoice.display_units = self.display_units
         invoice.expenses_ht = self.expenses_ht
@@ -529,28 +565,6 @@ class PaymentLine(DBBASE):
         nullable=False,
         info={'colanderalchemy': forms.get_hidden_field_conf()},
     )
-    task_id = Column(
-        Integer,
-        ForeignKey('estimation.id', ondelete="cascade"),
-        info={'colanderalchemy': forms.get_hidden_field_conf()},
-    )
-    order = Column(
-        Integer,
-        info={'colanderalchemy': {'title': u"Ordre"}},
-    )
-    description = Column(
-        Text,
-        info={'colanderalchemy': {'title': u"Description"}},
-    )
-    amount = Column(
-        BigInteger(),
-        info={
-            'colanderalchemy': {
-                'title': u"Montant",
-                'typ': AmountType(5),
-            }
-        },
-    )
     creationDate = deferred(
         Column(
             CustomDateType,
@@ -565,14 +579,47 @@ class PaymentLine(DBBASE):
             onupdate=get_current_timestamp,
             info={'colanderalchemy': {'exclude': True}},
         ))
-    paymentDate = Column(
+    task_id = Column(
+        Integer,
+        ForeignKey('estimation.id', ondelete="cascade"),
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant du document",
+                'missing': colander.required,
+            }
+        },
+    )
+    order = Column(
+        Integer,
+        info={'colanderalchemy': {'title': u"Ordre"}},
+    )
+    description = Column(
+        Text,
+        info={
+            'colanderalchemy': {
+                'title': u"Description",
+                'validator': forms.textarea_node_validator,
+            }
+        },
+    )
+    amount = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                'title': u"Montant",
+                'typ': AmountType(5),
+                'missing': colander.required,
+            }
+        },
+    )
+    date = Column(
         CustomDateType2,
         info={
             'colanderalchemy': {
                 "title": u"Date",
                 'typ': colander.Date
             }
-        }
+        },
     )
     task = relationship(
         "Estimation",
@@ -587,12 +634,12 @@ class PaymentLine(DBBASE):
             order=self.order,
             amount=self.amount,
             description=self.description,
-            paymentDate=datetime.date.today()
+            date=datetime.date.today()
         )
 
     def __repr__(self):
         return u"<PaymentLine id:{s.id} task_id:{s.task_id} amount:{s.amount}\
- date:{s.paymentDate}".format(s=self)
+ date:{s.date}".format(s=self)
 
     def __json__(self, request):
         return dict(
@@ -601,5 +648,5 @@ class PaymentLine(DBBASE):
             description=self.description,
             cost=self.amount,
             amount=self.amount,
-            paymentDate=self.paymentDate,
+            date=self.date,
         )

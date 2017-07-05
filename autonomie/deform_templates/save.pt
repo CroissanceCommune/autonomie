@@ -10,8 +10,8 @@
             for key, value in solde.items():
                 if value == colander.null:
                     solde.pop(key)
-        if not isinstance(solde.get('paymentDate', '0'), basestring):
-            solde['paymentDate'] = '';
+        if not isinstance(solde.get('date', '0'), basestring):
+            solde['date'] = '';
     %>
     <script
       type='text/javascript'
@@ -25,7 +25,7 @@
         % endfor
         var solde = {amount:formatAmount("${solde.get('amount', '0')}"),
             description:description,
-            paymentDate:"${solde.get('paymentDate')}",
+            date:"${solde.get('date')}",
             readonly:true,
             id:1000};
         % if soldefield.error:
@@ -46,9 +46,9 @@
                         sub[0]['amount'] = " ";
                     %>
                 % endif
-                % if not isinstance(sub[0].get('paymentDate', '0'), basestring):
+                % if not isinstance(sub[0].get('date', '0'), basestring):
                     <%
-                        sub[0]['paymentDate'] = " ";
+                        sub[0]['date'] = " ";
                     %>
                 %endif
                 var description = "";
@@ -59,7 +59,7 @@
                 var line = {
                     amount:formatAmount("${sub[0].get('amount', '0')}"),
                     description:description,
-                    paymentDate:"${sub[0].get('paymentDate', '')}",
+                    date:"${sub[0].get('date', '')}",
                     readonly:true};
                 % if sub[1].error:
                     % for key, value in sub[1].error.asdict().items():

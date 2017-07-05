@@ -33,7 +33,7 @@
           var solde = {
               amount:formatAmount("${solde.get('amount')}"),
               description:description,
-              paymentDate:"${solde.get('paymentDate')}",
+              date:"${solde.get('date')}",
               readonly:true,
               id:1000
           };
@@ -61,7 +61,7 @@
           var row = {
               amount:formatAmount("${sub[0].get('amount')}"),
               description:description,
-              paymentDate:"${sub[0].get('paymentDate')}",
+              date:"${sub[0].get('date')}",
               readonly:true
           };
           <!-- Display errors if needed -->

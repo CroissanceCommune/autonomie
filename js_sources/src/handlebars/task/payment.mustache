@@ -10,16 +10,16 @@
         </span>
         {{/if}}
     </div>
-    <div class='col-md-2 form-group {{#if paymentDate_error}}has-error{{/if}}' id="date_{{ id }}">
-        <input type="hidden" name="__start__" value="paymentDate:mapping"></input>
-        <input class='input-sm' type='text' id="paymentDate_{{ id }}" name="displayDate" {{#if paymentDate}}value="{{ paymentDate }}"{{/if}}></input>
-        <input class='form-control' type='hidden' id="paymentDate_{{ id }}_altField" name="date" {{#if paymentDate}}value="{{ paymentDate }}"{{/if}}></input>
-        {{#if paymentDate_error}}
+    <div class='col-md-2 form-group {{#if date_error}}has-error{{/if}}' id="date_{{ id }}">
+        <input type="hidden" name="__start__" value="date:mapping"></input>
+        <input class='input-sm' type='text' id="date_{{ id }}" name="displayDate" {{#if date}}value="{{ date }}"{{/if}}></input>
+        <input class='form-control' type='hidden' id="date_{{ id }}_altField" name="date" {{#if date}}value="{{ date }}"{{/if}}></input>
+        {{#if date_error}}
         <span class='help-block'>
-            {{ paymentDate_error }}
+            {{ date_error }}
         </span>
         {{/if}}
-        <input type="hidden" name="__end__" value="paymentDate:mapping"></input>
+        <input type="hidden" name="__end__" value="date:mapping"></input>
     </div>
     {{#if readonly}}
     <div class='col-md-2 col-md-offset-2 paymentamount form-group {{#if amount_error}}has-error{{/if}}'>

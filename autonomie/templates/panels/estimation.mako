@@ -94,7 +94,7 @@
                     % for line in task.payment_lines[:-1]:
                         <tr>
                             % if task.paymentDisplay == u"ALL":
-                                <td>${api.format_date(line.paymentDate)}</td>
+                                <td>${api.format_date(line.date)}</td>
                             % endif
                             <td>${line.description}</td>
                             %if task.manualDeliverables == 1:
@@ -108,7 +108,7 @@
                     <tr>
                         % if task.paymentDisplay == u"ALL":
                             <td>
-                                ${api.format_date(task.payment_lines[-1].paymentDate)}
+                                ${api.format_date(task.payment_lines[-1].date)}
                             </td>
                         % endif
                         <td>

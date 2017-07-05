@@ -28,6 +28,10 @@ def update_database_structure():
         'customer',
         sa.Column('type_', sa.String(10), default='company'),
     )
+    op.add_column(
+        'estimation_payment',
+        sa.Column('date', sa.Date()),
+    )
     rename_column(
         "customer",
         'contactLastName',
@@ -196,6 +200,13 @@ def _upgrade_expenses(session):
         session.merge(expense)
 
 
+def _upgrade_estimation_payment_dates(session):
+    from autonomie.models.estimation import PaymentLine
+    for l in PaymentLine.query():
+        l.date = l.date
+        session.merge(l)
+
+
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
@@ -209,6 +220,8 @@ def migrate_datas():
     _upgrade_estimations(session)
     session.flush()
     _upgrade_expenses(session)
+    session.flush()
+    _upgrade_estimation_payment_dates(session)
     session.flush()
 
 

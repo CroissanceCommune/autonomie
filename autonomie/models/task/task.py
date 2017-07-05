@@ -55,7 +55,10 @@ from sqlalchemy.orm import (
 from autonomie_base.models.types import (
     CustomDateType,
 )
-from autonomie.models.tva import Tva
+from autonomie.models.tva import (
+    Tva,
+    Product,
+)
 from autonomie_base.models.utils import get_current_timestamp
 from autonomie_base.models.base import (
     DBBASE,
@@ -77,6 +80,7 @@ from autonomie.models.task.mentions import (
     TASK_MENTION,
     TaskMention,
 )
+from autonomie.models.task.unity import WorkUnit
 
 
 log = logging.getLogger(__name__)
@@ -207,6 +211,7 @@ class Task(Node):
         info={
             "colanderalchemy": {
                 "title": u"Date du document",
+                "missing": colander.required
             }
         },
         default=datetime.date.today
@@ -242,7 +247,9 @@ class Task(Node):
         info={
             'colanderalchemy': {
                 "title": u"Objet",
-                'widget': deform.widget.TextAreaWidget()
+                'widget': deform.widget.TextAreaWidget(),
+                'validator': forms.textarea_node_validator,
+                'missing': colander.required,
             }
         },
     )
@@ -254,7 +261,8 @@ class Task(Node):
                 "typ": AmountType(5),
             }
         },
-        default=0)
+        default=0
+    )
     tva = Column(
         BigInteger(),
         info={
@@ -263,7 +271,8 @@ class Task(Node):
                 "typ": AmountType(5),
             }
         },
-        default=0)
+        default=0
+    )
     ttc = Column(
         BigInteger(),
         info={
@@ -322,10 +331,11 @@ class Task(Node):
         Integer,
         info={
             'colanderalchemy': {
-                "title": u"Identifiant du document (facture/avoir)"
+                "title": u"Identifiant du document (facture/avoir)",
             }
         },
-        default=None)
+        default=None,
+    )
 
     internal_number = deferred(
         Column(
@@ -346,6 +356,7 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     "title": u"Afficher le détail ?",
+                    "validator": colander.OneOf((0, 1))
                 }
             },
             default=0
@@ -369,7 +380,10 @@ class Task(Node):
         Column(
             BigInteger(),
             info={
-                'colanderalchemy': {'title': u'Frais'}
+                'colanderalchemy': {
+                    'title': u'Frais',
+                    'validator': forms.positive_validator
+                }
             },
             default=0
         ),
@@ -382,7 +396,9 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     'title': u'Adresse',
-                    'widget': deform.widget.TextAreaWidget()
+                    'widget': deform.widget.TextAreaWidget(),
+                    'validator': forms.textarea_node_validator,
+                    'missing': colander.required,
                 }
             },
         ),
@@ -406,7 +422,8 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     "title": u"Conditions de paiement",
-                    'widget': deform.widget.TextAreaWidget()
+                    'widget': deform.widget.TextAreaWidget(),
+                    'validator': forms.textarea_node_validator
                 }
             },
         ),
@@ -543,7 +560,7 @@ class Task(Node):
         back_populates="tasks",
         info={
             'colanderalchemy': {
-                'children': forms.get_sequence_child_item(TaskMention)
+                'children': forms.get_sequence_child_item(TaskMention),
             }
         },
     )
@@ -551,7 +568,16 @@ class Task(Node):
         "TaskLineGroup",
         order_by='TaskLineGroup.order',
         cascade="all, delete-orphan",
-        info={'colanderalchemy': {'title': u"Unités d'oeuvre"}},
+        info={
+            'colanderalchemy': {
+                'title': u"Unités d'oeuvre",
+                "validator": colander.Length(
+                    min=1,
+                    min_err=u"Une entrée est requise"
+                ),
+                "missing": colander.required
+            }
+        },
         primaryjoin="TaskLineGroup.task_id==Task.id",
         back_populates='task',
     )
@@ -782,21 +808,47 @@ class DiscountLine(DBBASE, DiscountLineCompute):
         ForeignKey(
             'task.id',
             ondelete="cascade",
+
         ),
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant du document",
+                'missing': colander.required,
+            }
+        }
+    )
+    description = Column(
+        Text,
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.TextAreaWidget(),
+                'validator': forms.textarea_node_validator,
+            }
+        }
+    )
+    amount = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                'typ': AmountType(5),
+                'title': 'Montant',
+                'missing': colander.required,
+            }
+        },
     )
     tva = Column(
         Integer,
         nullable=False,
-        default=196
-    )
-    amount = Column(
-        BigInteger(),
-        info={'colanderalchemy': {'typ': AmountType(5), 'title': 'Montant'}},
-    )
-    description = Column(
-        Text,
-        info={'colanderalchemy': {'widget': deform.widget.TextAreaWidget()}}
+        default=196,
+        info={
+            "colanderalchemy": {
+                "typ": AmountType(2),
+                "validator": forms.get_deferred_select_validator(
+                    Tva, id_key='value'
+                ),
+                "missing": colander.required
+            }
+        }
     )
     task = relationship(
         "Task",
@@ -848,6 +900,7 @@ class TaskStatus(DBBASE):
         default=get_current_timestamp,
         info={'colanderalchemy': {'typ': colander.Date}}
     )
+
     task = relationship(
         "Task",
         backref=backref(
@@ -888,16 +941,37 @@ class TaskLineGroup(DBBASE, GroupCompute):
     task_id = Column(
         Integer,
         ForeignKey('task.id', ondelete="cascade"),
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant du document",
+                'missing': colander.required,
+            }
+        }
     )
+    description = Column(Text(), default="")
+    title = Column(String(255), default="")
+    order = Column(Integer, default=1)
+
     task = relationship(
         "Task",
         primaryjoin="TaskLineGroup.task_id==Task.id",
         info={'colanderalchemy': forms.EXCLUDED}
     )
-    description = Column(Text(), default="")
-    title = Column(String(255), default="")
-    order = Column(Integer, default=1)
+    lines = relationship(
+        "TaskLine",
+        order_by='TaskLine.order',
+        cascade="all, delete-orphan",
+        back_populates='group',
+        info={
+            'colanderalchemy': {
+                'title': u"Prestations",
+                'validator': colander.Length(
+                    min=1,
+                    min_err=u"Une prestation au moins doit être incluse",
+                )
+            }
+        }
+    )
 
     def __json__(self, request):
         return dict(
@@ -925,10 +999,30 @@ class TaskLineGroup(DBBASE, GroupCompute):
         return res
 
 
+@colander.deferred
+def deferred_tva_product_validator(node, kw):
+    product_id = node.get('product_id')
+    if product_id is not None:
+        tva_id = node.get('tva_id')
+        if tva_id is not None:
+            tva = Tva.get(tva_id)
+            if product_id not in [p.id for p in tva.products]:
+                exc = colander.Invalid(
+                    node,
+                    u"Ce produit ne correspond pas à la TVA configurée"
+                )
+                exc['title'] = u"Le code produit doit correspondre à la TVA \
+                    configuré pour cette prestation"
+                raise exc
+
+
 class TaskLine(DBBASE, LineCompute):
     """
         Estimation/Invoice/CancelInvoice lines
     """
+    __colanderalchemy_config__ = {
+        'validator': deferred_tva_product_validator
+    }
     __table_args__ = default_table_args
     id = Column(
         Integer,
@@ -940,16 +1034,6 @@ class TaskLine(DBBASE, LineCompute):
         ForeignKey('task_line_group.id', ondelete="cascade"),
         info={'colanderalchemy': forms.EXCLUDED}
     )
-    group = relationship(
-        TaskLineGroup,
-        primaryjoin="TaskLine.group_id==TaskLineGroup.id",
-        backref=backref(
-            "lines",
-            order_by='TaskLine.order',
-            cascade="all, delete-orphan",
-            info={'colanderalchemy': {'title': u"Prestations"}}
-        )
-    )
     order = Column(Integer, default=1,)
     description = Column(
         Text,
@@ -960,28 +1044,73 @@ class TaskLine(DBBASE, LineCompute):
                         'language': "fr_FR",
                         'content_css': "/fanstatic/fanstatic/css/richtext.css",
                     },
-                )
+                ),
+                'validator': forms.textarea_node_validator,
             }
         },
     )
     cost = Column(
         BigInteger(),
-        info={'colanderalchemy': {'typ': AmountType(5), 'title': 'Montant'}},
+        info={
+            'colanderalchemy': {
+                'typ': AmountType(5),
+                'title': 'Montant',
+                'missing': colander.required,
+            }
+        },
         default=0,
-    )
-    tva = Column(
-        Integer,
-        info={'colanderalchemy': {'typ': AmountType(2), 'title': 'Tva (en %)'}},
-        nullable=False,
-        default=196
     )
     quantity = Column(
         Float(),
-        info={'colanderalchemy': {'typ': QuantityType()}},
-        default=1)
-    unity = Column(String(100),)
+        info={
+            'colanderalchemy': {
+                "title": u"Quantité",
+                'typ': QuantityType(),
+                'missing': colander.required,
+            }
+        },
+        default=1
+    )
+    unity = Column(
+        String(100),
+        info={
+            'colanderalchemy': {
+                'title': u"Unité",
+                'validator': forms.get_deferred_select_validator(
+                    WorkUnit, id_key='label',
+                ),
+                'missing': colander.required,
+            }
+        },
+
+    )
+    tva = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'typ': AmountType(2),
+                'title': 'Tva (en %)',
+                'validator': forms.get_deferred_select_validator(
+                    Tva, id_key='value'
+                ),
+                'missing': colander.required
+            }
+        },
+        nullable=False,
+        default=196
+    )
     product_id = Column(
         Integer,
+        info={
+            'colanderalchemy': {
+                'validator': forms.get_deferred_select_validator(Product),
+                'missing': colander.drop,
+            }
+        }
+    )
+    group = relationship(
+        TaskLineGroup,
+        primaryjoin="TaskLine.group_id==TaskLineGroup.id",
         info={'colanderalchemy': forms.EXCLUDED}
     )
     product = relationship(

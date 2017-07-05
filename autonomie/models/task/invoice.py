@@ -51,7 +51,6 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie import forms
 from autonomie_base.models.types import (
     PersistentACLMixin,
 )
@@ -60,11 +59,14 @@ from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
+from autonomie import forms
+from autonomie.forms.custom_types import (AmountType, )
 from autonomie.compute import math_utils
 from autonomie.compute.task import (
     TaskCompute,
     InvoiceCompute,
 )
+from autonomie.models.tva import Tva
 from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
@@ -579,87 +581,6 @@ class CancelInvoice(Task, TaskCompute):
         return datas
 
 
-class Payment(DBBASE, PersistentACLMixin):
-    """
-        Payment entry
-    """
-    __tablename__ = 'payment'
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True
-    )
-    created_at = Column(
-        DateTime(),
-        info={
-            'colanderalchemy': {
-                'exclude': True, 'title': u"Créé(e) le",
-            }
-        },
-        default=datetime.datetime.now,
-    )
-
-    updated_at = Column(
-        DateTime(),
-        info={
-            'colanderalchemy': {
-                'exclude': True, 'title': u"Mis(e) à jour le",
-            }
-        },
-        default=datetime.datetime.now,
-        onupdate=datetime.datetime.now
-    )
-
-    mode = Column(String(50))
-    amount = Column(BigInteger())
-    remittance_amount = Column(String(255))
-    date = Column(DateTime(), default=datetime.datetime.now)
-    exported = Column(Boolean(), default=False)
-    task_id = Column(Integer, ForeignKey('task.id', ondelete="cascade"))
-    bank_id = Column(ForeignKey('bank_account.id'))
-    tva_id = Column(ForeignKey('tva.id'), nullable=True)
-
-    user_id = Column(ForeignKey('accounts.id'))
-
-    user = relationship("User")
-
-    bank = relationship(
-        "BankAccount",
-        backref=backref(
-            'payments',
-            order_by="Payment.date",
-            info={'colanderalchemy': {'exclude': True}},
-        ),
-    )
-    tva = relationship(
-        "Tva",
-        backref=backref(
-            'payments',
-            order_by="Payment.date",
-            info={'colanderalchemy': {'exclude': True}},
-        ),
-    )
-    # Formatting precision
-    precision = 5
-
-    # Usefull aliases
-    @property
-    def invoice(self):
-        return self.task
-
-    @property
-    def parent(self):
-        return self.task
-
-    # Simple function
-    def get_amount(self):
-        return self.amount
-
-    def __unicode__(self):
-        return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
- mode:{s.mode} date:{s.date}".format(s=self)
-
-
 class PaymentMode(DBBASE):
     """
         Payment mode entry
@@ -718,6 +639,162 @@ class BankAccount(ConfigurableOption):
             "colanderalchemy": {'title': u"Utiliser ce compte par défaut"}
         }
     )
+    payments = relationship(
+        'Payment',
+        order_by="Payment.date",
+        info={'colanderalchemy': {'exclude': True}},
+    )
+
+
+class Payment(DBBASE, PersistentACLMixin):
+    """
+        Payment entry
+    """
+    __tablename__ = 'payment'
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True
+    )
+    created_at = Column(
+        DateTime(),
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Créé(e) le",
+            }
+        },
+        default=datetime.datetime.now,
+    )
+
+    updated_at = Column(
+        DateTime(),
+        info={
+            'colanderalchemy': {
+                'exclude': True, 'title': u"Mis(e) à jour le",
+            }
+        },
+        default=datetime.datetime.now,
+        onupdate=datetime.datetime.now
+    )
+
+    mode = Column(
+        String(50),
+        info={
+            'colanderalchemy': {
+                'title': u"Mode de paiement",
+                'validator': forms.get_deferred_select_validator(
+                    PaymentMode, id_key='label'
+                ),
+                'missing': colander.required,
+            }
+        }
+    )
+    amount = Column(
+        BigInteger(),
+        info={
+            'colanderalchemy': {
+                "title": u"Montant",
+                'missing': colander.required,
+                "typ": AmountType(5)
+            }
+        },
+
+    )
+    remittance_amount = Column(
+        String(255),
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant de remise en banque",
+                'missing': colander.required,
+            }
+        },
+    )
+    date = Column(
+        DateTime(),
+        info={
+            'colanderalchemy': {
+                'title': u"Date de remise",
+                'missing': colander.required,
+            }
+        },
+        default=datetime.datetime.now,
+    )
+    exported = Column(Boolean(), default=False)
+    task_id = Column(
+        Integer,
+        ForeignKey('task.id', ondelete="cascade"),
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant du document",
+                'missing': colander.required,
+            }
+        }
+    )
+    bank_id = Column(
+        ForeignKey('bank_account.id'),
+        info={
+            'colanderalchemy': {
+                'title': u"Compte en banque",
+                'missing': colander.required,
+                'validator': forms.get_deferred_select_validator(BankAccount),
+            }
+        }
+    )
+    tva_id = Column(
+        ForeignKey('tva.id'),
+        info={
+            'colanderalchemy': {
+                'title': u"Tva associée à ce paiement",
+                'validator': forms.get_deferred_select_validator(Tva),
+                'missing': colander.drop,
+            }
+        },
+        nullable=True
+    )
+
+    user_id = Column(
+        ForeignKey('accounts.id'),
+        info={
+            'colanderalchemy': {
+                'title': u"Utilisateur",
+                'missing': colander.required,
+            }
+        },
+    )
+
+    user = relationship(
+        "User",
+        info={'colanderalchemy': {'exclude': True}},
+    )
+
+    bank = relationship(
+        "BankAccount",
+        back_populates='payments',
+        info={'colanderalchemy': {'exclude': True}}
+    )
+    tva = relationship(
+        "Tva",
+        info={'colanderalchemy': {'exclude': True}}
+    )
+    # Formatting precision
+    precision = 5
+
+    # Usefull aliases
+    @property
+    def invoice(self):
+        return self.task
+
+    @property
+    def parent(self):
+        return self.task
+
+    # Simple function
+    def get_amount(self):
+        return self.amount
+
+    def __unicode__(self):
+        return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
+ mode:{s.mode} date:{s.date}".format(s=self)
 
 
 # Usefull queries

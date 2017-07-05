@@ -8,56 +8,6 @@ import colander
 from colanderalchemy import SQLAlchemySchemaNode
 
 
-@pytest.fixture
-def tva(dbsession):
-    from autonomie.models.tva import Tva
-    tva = Tva(value=2000, name='20%')
-    dbsession.add(tva)
-    dbsession.flush()
-    return tva
-
-
-@pytest.fixture
-def product(tva, dbsession):
-    from autonomie.models.tva import Product
-    product = Product(name='product', compte_cg='122', tva_id=tva.id)
-    dbsession.add(product)
-    dbsession.flush()
-    return product
-
-
-@pytest.fixture
-def product_without_tva(dbsession):
-    from autonomie.models.tva import Product
-    product = Product(name='product', compte_cg='122')
-    dbsession.add(product)
-    dbsession.flush()
-    return product
-
-
-@pytest.fixture
-def unity(dbsession):
-    from autonomie.models.task.unity import WorkUnit
-    print([w.label for w in WorkUnit.query()])
-    unity = WorkUnit(label=u"Mètre")
-    dbsession.add(unity)
-    dbsession.flush()
-    return unity
-
-
-@pytest.fixture
-def mention(dbsession):
-    from autonomie.models.task.mentions import TaskMention
-    mention = TaskMention(
-        title=u"TaskMention tet",
-        full_text=u"blabla",
-        label=u"bla",
-    )
-    dbsession.add(mention)
-    dbsession.flush()
-    return mention
-
-
 def test_task_line_description():
     from autonomie.models.task.task import TaskLine
     schema = SQLAlchemySchemaNode(TaskLine, includes=('description',))

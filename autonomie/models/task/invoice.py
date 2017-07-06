@@ -157,7 +157,12 @@ class Invoice(Task, InvoiceCompute):
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.HiddenWidget(),
+                'missing': colander.drop,
+            }
+        },
     )
     paid_status = Column(
         String(10),
@@ -208,7 +213,7 @@ class Invoice(Task, InvoiceCompute):
 
     estimation_id = Column(
         ForeignKey('estimation.id'),
-        info={'colanderalchemy': {'exclude': True}},
+        info={'colanderalchemy': {'missing': colander.drop}},
     )
 
     estimation = relationship(
@@ -467,7 +472,8 @@ class CancelInvoice(Task, TaskCompute):
         ForeignKey('invoice.id'),
         info={
             'colanderalchemy': {
-                'title': u"Identifiant de la facture associée"
+                'title': u"Identifiant de la facture associée",
+                'missing': colander.required,
             }
         },
         default=None

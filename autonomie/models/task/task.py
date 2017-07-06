@@ -426,7 +426,7 @@ class Task(Node):
         }
     )
 
-    # Relationships
+    # Organisationnal Relationships
     statusPersonAccount = relationship(
         "User",
         primaryjoin="Task.statusPerson==User.id",
@@ -475,14 +475,6 @@ class Task(Node):
         },
     )
 
-    discounts = relationship(
-        "DiscountLine",
-        info={'colanderalchemy': {'title': u"Remises"}},
-        order_by='DiscountLine.tva',
-        cascade="all, delete-orphan",
-        back_populates='task',
-    )
-
     company = relationship(
         "Company",
         primaryjoin="Task.company_id==Company.id",
@@ -517,6 +509,15 @@ class Task(Node):
             "export": {'exclude': True},
         },
     )
+    # Content relationships
+    discounts = relationship(
+        "DiscountLine",
+        info={'colanderalchemy': {'title': u"Remises"}},
+        order_by='DiscountLine.tva',
+        cascade="all, delete-orphan",
+        back_populates='task',
+    )
+
     payments = relationship(
         "Payment",
         primaryjoin="Task.id==Payment.task_id",
@@ -527,6 +528,7 @@ class Task(Node):
         order_by='Payment.date',
         cascade="all, delete-orphan"
     )
+
     mentions = relationship(
         "TaskMention",
         secondary=TASK_MENTION,
@@ -538,6 +540,7 @@ class Task(Node):
             }
         },
     )
+
     line_groups = relationship(
         "TaskLineGroup",
         order_by='TaskLineGroup.order',
@@ -569,6 +572,7 @@ _{s.date:%m%y}"
         self.status = self.state_machine.default_state
         self.company = company
         self.customer = customer
+        self.address = customer.full_address
         self.project = project
         self.phase = phase
         self.owner = user
@@ -625,37 +629,50 @@ _{s.date:%m%y}"
         """
         return dict(
             id=self.id,
+            name=self.name,
+            created_at=self.created_at.isoformat(),
+            updated_at=self.updated_at.isoformat(),
+
             phase_id=self.phase_id,
             status=self.status,
-            date=self.date,
+            statusComment=self.statusComment,
+            statusPerson=self.statusPerson,
+            # statusDate=self.statusDate.isoformat(),
+            date=self.date.isoformat(),
             owner_id=self.owner_id,
+            description=self.description,
+            ht=self.ht,
+            tva=self.tva,
+            ttc=self.ttc,
+            company_id=self.company_id,
+            project_id=self.project_id,
             customer_id=self.customer_id,
+            project_index=self.project_index,
+            company_index=self.company_index,
+            official_number=self.official_number,
+            internal_number=self.internal_number,
             display_units=self.display_units,
             expenses_ht=self.expenses_ht,
             address=self.address,
             workplace=self.workplace,
             payment_conditions=self.payment_conditions,
-            description=self.description,
             prefix=self.prefix,
-            mentions=[
-                mention.__json__(request)
-                for mention in self.mentions
-            ],
-            lines=[
-                line.__json__(request)
-                for line in self.default_line_group.lines
-            ],
-            groups=[
-                group.__json__(request) for group in self.get_groups()
-                if group.id != self.default_line_group.id
-            ],
             status_history=[
                 status.__json__(request) for status in self.statuses
             ],
             discounts=[
                 discount.__json__(request) for discount in self.discounts
             ],
-            statusComment=self.statusComment,
+            payments=[
+                payment.__json__(request) for payment in self.payments
+            ],
+            mentions=[
+                mention.__json__(request)
+                for mention in self.mentions
+            ],
+            line_groups=[
+                group.__json__(request) for group in self.line_groups
+            ],
         )
 
     def set_status(self, status, request, user_id, **kw):

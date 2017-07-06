@@ -167,6 +167,7 @@ def test_estimation(unity, tva):
     schema = schema.bind()
 
     value = {
+        "name": u"Devis 1",
         'date': datetime.date.today().isoformat(),
         'address': u"adress",
         "description": u"description",
@@ -202,6 +203,7 @@ def test_estimation(unity, tva):
         ],
     }
     expected_value = {
+        "name": u"Devis 1",
         'date': datetime.date.today(),
         'address': u"adress",
         "description": u"description",

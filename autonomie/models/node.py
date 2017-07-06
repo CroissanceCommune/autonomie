@@ -27,6 +27,7 @@
     This way we can easily use the parent/children relationship on an agnostic
     way as in a CMS
 """
+import colander
 from datetime import datetime
 from sqlalchemy import (
     Column,
@@ -67,7 +68,10 @@ class Node(DBBASE, PersistentACLMixin):
     name = Column(
         String(255),
         info={
-            'colanderalchemy': {'title': u"Nom"},
+            'colanderalchemy': {
+                'title': u"Nom",
+                "missing": colander.required,
+            },
         },
         nullable=True,
     )

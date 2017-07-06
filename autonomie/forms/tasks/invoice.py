@@ -42,12 +42,10 @@ from autonomie.models.tva import (
 
 from autonomie import forms
 from autonomie.forms.task import (
-    TASKSCHEMA,
-    deferred_default_payment_condition,
     TEMPLATES_URL,
 )
 from autonomie.forms import custom_types
-from .custom_types import (
+from autonomie.forms.custom_types import (
     AmountType,
 )
 
@@ -144,97 +142,96 @@ class InvoicePayments(colander.MappingSchema):
 
     payment_conditions = forms.textarea_node(
         title="",
-        default=deferred_default_payment_condition,
     )
 
 
-def get_invoice_schema():
-    """
-        Return the schema for invoice add/edit
-    """
-    schema = TASKSCHEMA.clone()
-    schema['lines']['lines'].doctype = "invoice"
-
-    # title = u"Phase où insérer la facture"
-    # schema['common']['phase_id'].title = title
-    # Ref #689
-    schema['common'].add_before('description', FINANCIAL_YEAR)
-    schema['common'].add_before('description', PREFIX)
-
-    title = u"Date de la facture"
-    schema['common']['date'].title = title
-
-    title = u"Objet de la facture"
-    schema['common']['description'].title = title
-
-    title = u"Conditions de paiement"
-    schema.add_before(
-        "communication",
-        InvoicePayments(title=title, name='payments')
-    )
-
-    product_id = colander.SchemaNode(
-
-        colander.Integer(),
-        title=u"Code produit",
-        widget=deferred_product_widget,
-        validator=deferred_product_validator,
-        missing="",
-        css_class="col-md-2",
-        name='product_id',
-    )
-    schema['lines']['lines']['taskline'].add(product_id.clone())
-    schema['lines']['groups']['groups']['lines']['taskline'].add(
-        product_id.clone()
-    )
-    return schema
-
-
-def get_cancel_invoice_schema():
-    """
-        return the cancel invoice form schema
-    """
-    schema = TASKSCHEMA.clone()
-    schema['lines']['lines'].doctype = "taskschema"
-
-    # title = u"Phase où insérer l'avoir"
-    # schema['common']['phase_id'].title = title
-    # Ref #689
-    schema['common'].add_before('description', FINANCIAL_YEAR)
-    schema['common'].add_before('description', PREFIX)
-
-    title = u"Date de l'avoir"
-    schema['common']['date'].title = title
-
-    title = u"Objet de l'avoir"
-    schema['common']['description'].title = title
-    del schema['common']['course']
-
-    title = u"Conditions de remboursement"
-    del schema['lines']['discounts']
-
-    payments = InvoicePayments(title=title, name='payments').clone()
-    payments['payment_conditions'].title = title
-    payments['payment_conditions'].description = u""
-    payments['payment_conditions'].missing = u""
-
-    schema['lines']['expenses_ht'].validator = forms.negative_validator
-
-    schema.add_before("communication", payments)
-    product_id = colander.SchemaNode(
-        colander.Integer(),
-        title=u"Code produit",
-        widget=deferred_product_widget,
-        validator=deferred_product_validator,
-        missing="",
-        css_class="col-md-2",
-        name='product_id',
-    )
-    schema['lines']['lines']['taskline'].add(product_id.clone())
-    schema['lines']['groups']['groups']['lines']['taskline'].add(
-        product_id.clone()
-    )
-    return schema
+# def get_invoice_schema():
+#     """
+#         Return the schema for invoice add/edit
+#     """
+#     schema = TASKSCHEMA.clone()
+#     schema['lines']['lines'].doctype = "invoice"
+#
+#     # title = u"Phase où insérer la facture"
+#     # schema['common']['phase_id'].title = title
+#     # Ref #689
+#     schema['common'].add_before('description', FINANCIAL_YEAR)
+#     schema['common'].add_before('description', PREFIX)
+#
+#     title = u"Date de la facture"
+#     schema['common']['date'].title = title
+#
+#     title = u"Objet de la facture"
+#     schema['common']['description'].title = title
+#
+#     title = u"Conditions de paiement"
+#     schema.add_before(
+#         "communication",
+#         InvoicePayments(title=title, name='payments')
+#     )
+#
+#     product_id = colander.SchemaNode(
+#
+#         colander.Integer(),
+#         title=u"Code produit",
+#         widget=deferred_product_widget,
+#         validator=deferred_product_validator,
+#         missing="",
+#         css_class="col-md-2",
+#         name='product_id',
+#     )
+#     schema['lines']['lines']['taskline'].add(product_id.clone())
+#     schema['lines']['groups']['groups']['lines']['taskline'].add(
+#         product_id.clone()
+#     )
+#     return schema
+#
+#
+# def get_cancel_invoice_schema():
+#     """
+#         return the cancel invoice form schema
+#     """
+#     schema = TASKSCHEMA.clone()
+#     schema['lines']['lines'].doctype = "taskschema"
+#
+#     # title = u"Phase où insérer l'avoir"
+#     # schema['common']['phase_id'].title = title
+#     # Ref #689
+#     schema['common'].add_before('description', FINANCIAL_YEAR)
+#     schema['common'].add_before('description', PREFIX)
+#
+#     title = u"Date de l'avoir"
+#     schema['common']['date'].title = title
+#
+#     title = u"Objet de l'avoir"
+#     schema['common']['description'].title = title
+#     del schema['common']['course']
+#
+#     title = u"Conditions de remboursement"
+#     del schema['lines']['discounts']
+#
+#     payments = InvoicePayments(title=title, name='payments').clone()
+#     payments['payment_conditions'].title = title
+#     payments['payment_conditions'].description = u""
+#     payments['payment_conditions'].missing = u""
+#
+#     schema['lines']['expenses_ht'].validator = forms.negative_validator
+#
+#     schema.add_before("communication", payments)
+#     product_id = colander.SchemaNode(
+#         colander.Integer(),
+#         title=u"Code produit",
+#         widget=deferred_product_widget,
+#         validator=deferred_product_validator,
+#         missing="",
+#         css_class="col-md-2",
+#         name='product_id',
+#     )
+#     schema['lines']['lines']['taskline'].add(product_id.clone())
+#     schema['lines']['groups']['groups']['lines']['taskline'].add(
+#         product_id.clone()
+#     )
+#     return schema
 
 
 class FinancialYearSchema(colander.MappingSchema):

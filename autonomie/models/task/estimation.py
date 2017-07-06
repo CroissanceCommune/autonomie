@@ -662,5 +662,6 @@ class PaymentLine(DBBASE):
             description=self.description,
             cost=self.amount,
             amount=self.amount,
-            date=self.date,
+            date=self.date.isoformat(),
+            task_id=self.task_id,
         )

@@ -207,6 +207,13 @@ def _upgrade_estimation_payment_dates(session):
         session.merge(l)
 
 
+def drop_old_columns():
+    op.drop_column('task', 'creationDate')
+    op.drop_column('task', 'updateDate')
+    op.drop_column('task', '_number')
+
+
+
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
     session = DBSESSION()

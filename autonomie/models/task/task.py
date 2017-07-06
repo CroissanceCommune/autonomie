@@ -223,25 +223,6 @@ class Task(Node):
             "export": {'exclude': True},
         },
     )
-    creationDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp,
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                "export": {'exclude': True},
-            },
-        )
-    )
-    updateDate = Column(
-        CustomDateType,
-        default=get_current_timestamp,
-        onupdate=get_current_timestamp,
-        info={
-            'colanderalchemy': forms.EXCLUDED,
-            "export": {'exclude': True},
-        },
-    )
     description = Column(
         Text,
         info={
@@ -319,13 +300,6 @@ class Task(Node):
             },
         ),
         group='edit',
-    )
-    # TODO : remove in version > 3.3.0
-    _number = Column(
-        String(100),
-        info={
-            'colanderalchemy': {'exclude': True}
-        },
     )
     official_number = Column(
         Integer,

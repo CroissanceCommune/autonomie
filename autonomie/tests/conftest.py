@@ -124,6 +124,7 @@ def settings():
     _settings["autonomie.ftpdir"] = DATASDIR
     return _settings
 
+
 @fixture(scope='session')
 def registry(settings):
     from pyramid.registry import Registry
@@ -198,6 +199,7 @@ def connection(request, settings):
     DBSESSION.registry.clear()
     DBSESSION.configure(bind=_connection)
     DBBASE.metadata.bind = engine
+
     def drop_db():
         """
             drop the test database
@@ -246,7 +248,6 @@ def populate_db(session):
     phase = Phase(name='Phase de test')
     phase.project = project
     session.add(phase)
-
 
     from autonomie.models.company import Company
     c = Company(
@@ -310,7 +311,7 @@ def get_csrf_request(pyramid_request):
         params.update(post)
         cookies = cookies or {}
         def_csrf = 'default_csrf'
-        if not  u'csrf_token' in post.keys():
+        if u'csrf_token' not in post.keys():
             post.update({'csrf_token': def_csrf})
         pyramid_request.params = params
         pyramid_request.POST = post
@@ -339,7 +340,7 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         post = post or {}
         params.update(post)
         def_csrf = 'default_csrf'
-        if not  u'csrf_token' in post.keys():
+        if u'csrf_token' not in post.keys():
             post.update({'csrf_token': def_csrf})
         pyramid_request.params = params
         pyramid_request.POST = post

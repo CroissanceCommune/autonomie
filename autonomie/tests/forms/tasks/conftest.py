@@ -204,3 +204,31 @@ def estimation(
     dbsession.add(estimation)
     dbsession.flush()
     return estimation
+
+
+@pytest.fixture
+def invoice(
+    dbsession,
+    tva,
+    unity,
+    project,
+    customer,
+    company,
+    user,
+    phase,
+    task_line_group,
+    task_line,
+):
+    from autonomie.models.task.invoice import Invoice
+    invoice = Invoice(
+        company=company,
+        project=project,
+        customer=customer,
+        phase=phase,
+        user=user,
+    )
+    task_line_group.lines = [task_line]
+    invoice.line_groups = [task_line_group]
+    dbsession.add(invoice)
+    dbsession.flush()
+    return invoice

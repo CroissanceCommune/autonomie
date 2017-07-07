@@ -39,6 +39,7 @@ from autonomie.models.tva import (
 )
 
 from autonomie.models.task import (Invoice, CancelInvoice,)
+from autonomie.models.payments import BankAccount
 
 from autonomie import forms
 from autonomie.forms.tasks.lists import (
@@ -48,6 +49,14 @@ from autonomie.forms.tasks.lists import (
 )
 from autonomie.forms.custom_types import (
     AmountType,
+)
+from autonomie.forms.payments import (
+    get_amount_topay,
+    deferred_amount_default,
+    deferred_payment_mode_widget,
+    deferred_payment_mode_validator,
+    deferred_bank_widget,
+    deferred_bank_validator,
 )
 
 
@@ -62,6 +71,8 @@ TYPE_OPTIONS = (
 )
 
 AMOUNT_PRECISION = 5
+# 5€ => 500000 in db format
+PAYMENT_EPSILON = 5 * 10 ** AMOUNT_PRECISION
 
 
 def validate_invoice(invoice_object, request):
@@ -368,14 +379,17 @@ pdfexportSchema = InvoicesPdfExport(
 )
 
 
-
 @colander.deferred
 def deferred_remittance_amount_default(node, kw):
     """
         default value for the payment amount
     """
     from autonomie.views.render_api import format_amount
-    return format_amount(get_amount_topay(kw), precision=5, grouping=False)
+    return format_amount(
+        get_amount_topay(kw),
+        precision=AMOUNT_PRECISION,
+        grouping=False
+    )
 
 
 @colander.deferred
@@ -383,12 +397,18 @@ def deferred_total_validator(node, kw):
     """
         validate the amount to keep the sum under the total
     """
+    from autonomie.views.render_api import format_amount
     topay = get_amount_topay(kw)
     max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
-des paiements + montant d'un éventuel avoir)" % (topay / 100.0)
+des paiements + montant d'un éventuel avoir)" % (
+        format_amount(topay, precision=AMOUNT_PRECISION, grouping=False)
+    )
     min_msg = u"Le montant doit être positif"
+
+    # We insert a large epsilon to allow larger payments to be registered
+    max_value = topay + PAYMENT_EPSILON
     return colander.Range(
-        min=0, max=topay, min_err=min_msg, max_err=max_msg,
+        min=0, max=max_value, min_err=min_msg, max_err=max_msg,
     )
 
 
@@ -422,6 +442,7 @@ retrouver la remise en banque à laquelle cet encaissement est associé",
         title=u"Banque",
         missing=colander.drop,
         widget=deferred_bank_widget,
+        validator=deferred_bank_validator,
         default=forms.get_deferred_default(BankAccount),
     )
     resulted = colander.SchemaNode(
@@ -460,8 +481,8 @@ def deferred_amount_by_tva_validation(node, kw):
             return u"Tva inconnue"
         amount = values.get('amount')
         # Fix #433 : encaissement et tva multiples
-        # Add a tolerance for 1 € of difference
-        if amount > tva_parts[tva.value] + 10**AMOUNT_PRECISION:
+        # Add a tolerance for 5 € of difference
+        if amount > tva_parts[tva.value] + PAYMENT_EPSILON:
             return u"Le montant de l'encaissement doit être inférieur à la \
 part de cette Tva dans la facture"
         return True

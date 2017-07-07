@@ -36,7 +36,7 @@ def get_amount_topay(kw):
     """
     topay = 0
     context = kw['request'].context
-    if context.__name__ in ('invoice', 'expense'):
+    if context.type_ in ('invoice', 'expensesheet'):
         topay = context.topay()
     else:
         if hasattr(context, 'parent'):
@@ -78,3 +78,8 @@ def deferred_bank_widget(node, kw):
     options = [(bank.id, bank.label) for bank in BankAccount.query()]
     widget = forms.get_select(options)
     return widget
+
+
+@colander.deferred
+def deferred_bank_validator(node, kw):
+    return colander.OneOf([bank.id for bank in BankAccount.query()])

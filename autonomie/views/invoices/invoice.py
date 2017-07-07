@@ -34,7 +34,6 @@ from deform import Form
 
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.exception import Forbidden
 from autonomie.models.tva import Tva
 from autonomie.models.task import (
     TaskLine,
@@ -42,37 +41,31 @@ from autonomie.models.task import (
     DiscountLine,
     Invoice,
 )
+from autonomie.models.project import (
+    Phase,
+    Project,
+)
 from autonomie.models.customer import Customer
 from autonomie.utils.widgets import (
     Submit,
     PopUp,
 )
-from autonomie.forms.invoices import (
-    get_invoice_schema,
-)
-from autonomie.forms.task import (
+from autonomie.forms.tasks.base import (
     get_new_task_schema,
-    get_invoice_appstruct,
-    get_invoice_dbdatas,
 )
-from autonomie.forms import (
-    merge_session_with_post,
-)
-from autonomie.forms.invoices import (
+from autonomie.forms.tasks.invoice import (
     FinancialYearSchema,
     SetProductsSchema,
-)
-from autonomie.forms.payments import (
     get_payment_schema,
 )
 from autonomie.views import (
     submit_btn,
     BaseEditView,
     BaseFormView,
+    BaseView,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.taskaction import (
-    TaskFormView,
     TaskFormActions,
     TaskStatusView,
     populate_actionmenu,
@@ -308,109 +301,42 @@ class InvoiceAdd(BaseFormView):
 
     def submit_success(self, appstruct):
         log.debug("Submitting invoice add")
-        appstruct = get_invoice_dbdatas(appstruct)
 
-        customer_id = appstruct["task"]['customer_id']
+        name = appstruct['name']
+        phase_id = appstruct['phase_id']
+        phase = Phase.get(phase_id)
+        project_id = appstruct['project_id']
+        project = Project.get(project_id)
+        customer_id = appstruct['customer_id']
         customer = Customer.get(customer_id)
 
         invoice = Invoice(
             self.context.company,
             customer,
-            self.context,
-            self.context.phases[0],
+            project,
+            phase,
             self.request.user,
         )
-        invoice = merge_session_with_post(
-            invoice,
-            appstruct["task"]
-        )
-        try:
-            invoice = self.set_task_status(invoice)
-            # Line handling
-            invoice = add_lines_to_invoice(invoice, appstruct)
-            self.dbsession.add(invoice)
-            self.dbsession.flush()
-            self.session.flash(u"La facture a bien été ajoutée.")
-        except Forbidden, err:
-            self.request.session.flash(err.message, queue='error')
+        invoice.name = name
+        invoice.course = appstruct['course']
+        self.dbsession.add(invoice)
+        self.dbsession.flush()
         return HTTPFound(
-            self.request.route_path(
-                "project",
-                id=self.context.id
-            )
+            self.request.route_path("/invoices/{id}", id=invoice.id)
         )
 
 
-class InvoiceEdit(TaskFormView):
-    """
-        Invoice edition view
-        current context is an invoice
-    """
-    schema = get_invoice_schema()
-    buttons = (submit_btn,)
-    model = Invoice
-    edit = True
-    add_template_vars = ('edit', )
-    form_actions_factory = InvoiceFormActions
-
-    @property
-    def company(self):
-        # Current context is an invoice
-        return self.context.project.company
+class InvoiceEditView(BaseView):
 
     @property
     def title(self):
-        return u"Édition de la facture {task.name}".format(task=self.context)
+        return u"Modification de la facture {task.name}".format(
+            task=self.context
+        )
 
-    def before(self, form):
-        if not self.request.has_permission('edit.invoice'):
-            raise HTTPFound(
-                self.request.route_path(
-                    "invoice",
-                    id=self.context.id,
-                    _query=dict(view='html')
-                )
-            )
-
-        super(InvoiceEdit, self).before(form)
+    def __call__(self):
         populate_actionmenu(self.request)
-
-    def appstruct(self):
-        """
-            Return the current edited context as a colander data model
-        """
-        dbdatas = self.context.__json__(self.request)
-        # Get colander's schema compatible datas
-        return get_invoice_appstruct(dbdatas)
-
-    def submit_success(self, appstruct):
-        log.debug("Submitting invoice edit")
-        appstruct = get_invoice_dbdatas(appstruct)
-
-        # Since the call to get_next_invoice_number commits the current
-        # transaction, it needs to be called before creating our invoice, to
-        # avoid missing arguments errors
-
-        invoice = self.context
-        invoice = merge_session_with_post(
-            invoice,
-            appstruct["task"]
-        )
-        try:
-            invoice = self.set_task_status(invoice)
-            # Line handling
-            invoice = add_lines_to_invoice(invoice, appstruct)
-            invoice = self.dbsession.merge(invoice)
-            self.dbsession.flush()
-            self.session.flash(u"La facture a bien été modifiée.")
-        except Forbidden, err:
-            self.request.session.flash(err.message, queue='error')
-        return HTTPFound(
-            self.request.route_path(
-                "project",
-                id=self.context.project.id
-            )
-        )
+        return dict(context=self.context, title=self.title)
 
 
 class CommonInvoiceStatusView(TaskStatusView):
@@ -598,7 +524,7 @@ def set_products(request):
 
 class AdminInvoice(BaseEditView):
     """
-    Vue pour l'administration de factures ?token=admin
+    Vue pour l'administration de factures /invoices/id/admin
 
     Vue accessible aux utilisateurs admin
     """
@@ -714,7 +640,7 @@ def includeme(config):
     )
 
     config.add_view(
-        InvoiceEdit,
+        InvoiceEditView,
         route_name="/invoices/{id}",
         renderer='tasks/form.mako',
         permission='edit.invoice',

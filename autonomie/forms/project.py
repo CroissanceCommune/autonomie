@@ -117,7 +117,8 @@ def get_list_schema():
     Return the schema for the project search form
     :rtype: colander.Schema
     """
-    schema = forms.lists.BaseListsSchema().clone()
+    from autonomie.forms.lists import BaseListsSchema
+    schema = BaseListsSchema().clone()
 
     schema['search'].description = u"Projet ou nom du client"
 

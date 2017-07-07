@@ -33,50 +33,12 @@ class ITask(Interface):
     """
         Task interface, need to be implemented by all documents
     """
-    def is_invoice():
-        """
-            is the current task an invoice ?
-        """
-
-    def is_estimation():
-        """
-            Is the current task an estimation ?
-        """
-
-    def is_cancelinvoice():
-        """
-            Is the current task a cancelled invoice ?
-        """
 
 
 class IValidatedTask(ITask):
     """
         Interface for task needing to be validated by the office
     """
-    def is_draft():
-        """
-            Return the draft status of a document
-        """
-
-    def is_valid():
-        """
-            Is the current task valid
-        """
-
-    def has_been_validated():
-        """
-            Has the current task been validated ?
-        """
-
-    def is_waiting():
-        """
-            Is the current task waiting for approval
-        """
-
-    def is_cancelled():
-        """
-            Has the current document been cancelled
-        """
 
 
 class IMoneyTask(Interface):
@@ -128,10 +90,6 @@ class IPaidTask(Interface):
     """
         Task interface for task needing to be paid
     """
-    def is_paid():
-        """
-            Has the current task been paid
-        """
 
 
 class IInvoice(Interface):
@@ -155,21 +113,6 @@ class IInvoice(Interface):
     def total():
         """
             Return the TTC total
-        """
-
-    def is_cancelled():
-        """
-            Has the current document been cancelled
-        """
-
-    def is_paid():
-        """
-            Has the current task been paid
-        """
-
-    def is_resulted():
-        """
-            Return True if the task is resulted (definitively paid)
         """
 
     def get_company():

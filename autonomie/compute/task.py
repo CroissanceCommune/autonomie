@@ -145,7 +145,6 @@ class TaskCompute(object):
             ret_dict[key] = self.floor(ret_dict[key])
         return ret_dict
 
-
     def tva_amount(self):
         """
             Compute the sum of the TVAs amount of TVA

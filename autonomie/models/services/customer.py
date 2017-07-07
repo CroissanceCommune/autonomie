@@ -54,7 +54,6 @@ class CustomerService(object):
         """
         res = u""
         if instance.civilite:
-            print("civilite is not none")
             res += u"{0} ".format(format_civilite(instance.civilite))
             res += instance.lastname
             if instance.firstname:
@@ -86,7 +85,6 @@ class CustomerService(object):
         if instance.type_ == 'company':
             address += u"{0}\n".format(instance.name)
         name = cls.format_name(instance)
-        print("We've got a name")
         if name:
             address += u"{0}\n".format(name)
 

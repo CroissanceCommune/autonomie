@@ -701,7 +701,6 @@ class ActivityReportXlsView(ActivityList):
 
         sheet_writer = self._init_next_sheet(writer)
         for name, activities in conseillers.items():
-            print("Adding a row")
             sheet_writer.add_row({
                 'name': name,
                 'date': '',
@@ -710,7 +709,6 @@ class ActivityReportXlsView(ActivityList):
                 'participants': ''
             })
             for activity in activities:
-                print(u"Adding a row")
                 sheet_writer.add_row({
                     'name': '',
                     'date': activity.datetime,

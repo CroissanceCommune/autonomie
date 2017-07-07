@@ -853,7 +853,6 @@ target='_blank'>Voir l'encaissement</a>"""
 
             if appstruct is not None:
                 payments = self.query(appstruct)
-                print(payments)
                 check_messages = self.check(payments)
 
                 if not check_messages.get('errors'):

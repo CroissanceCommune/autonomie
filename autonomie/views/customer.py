@@ -400,22 +400,15 @@ class CustomerAdd(BaseFormView):
         form.widget = GridFormWidget(named_grid=grid)
 
     def submit_success(self, appstruct):
-        if self.context.__name__ == 'company':
-            # It's an add form
-            model = self.schema.objectify(appstruct)
-            model.company = self.context
-            if self.is_company_form():
-                model.type_ = "company"
-            else:
-                model.type_ = "individual"
-            self.dbsession.add(model)
+        model = self.schema.objectify(appstruct)
+        model.company = self.context
+        if self.is_company_form():
+            model.type_ = "company"
         else:
-            # It's an edition one
-            model = self.schema.objectify(appstruct, self.context)
-            model = self.dbsession.merge(model)
+            model.type_ = "individual"
+        self.dbsession.add(model)
 
         self.dbsession.flush()
-
         self.session.flash(self.validation_msg)
         return HTTPFound(
             self.request.route_path(
@@ -458,6 +451,18 @@ class CustomerEdit(CustomerAdd):
         codes.filter(Customer.id != self.context.id)
         logger.debug(codes.all())
         return codes
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct, self.context)
+        model = self.dbsession.merge(model)
+        self.dbsession.flush()
+        self.session.flash(self.validation_msg)
+        return HTTPFound(
+            self.request.route_path(
+                'customer',
+                id=model.id
+            )
+        )
 
 
 def populate_actionmenu(request, context):

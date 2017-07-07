@@ -36,7 +36,7 @@ def get_amount_topay(kw):
     """
     topay = 0
     context = kw['request'].context
-    if context.type_ in ('invoice', 'expensesheet'):
+    if getattr(context, 'type_', None) in ('invoice', 'expensesheet'):
         topay = context.topay()
     else:
         if hasattr(context, 'parent'):

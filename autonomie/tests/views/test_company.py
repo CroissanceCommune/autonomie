@@ -23,48 +23,50 @@
 #
 
 import pytest
-from autonomie.models.user import User
 from autonomie.models.company import Company
 
 APPSTRUCT = {
-    'name':u"Compané $& test",
-    "goal":u"Be the best",
+    'name': u"Compané $& test",
+    "goal": u"Be the best",
     "contribution": 80,
         }
 
+
 @pytest.fixture
-def company(config, get_csrf_request_with_db):
+def company_add(config, get_csrf_request_with_db):
     from autonomie.views.company import CompanyAdd
     config.add_route('company', '/')
     view = CompanyAdd(get_csrf_request_with_db())
     view.submit_success(APPSTRUCT)
     return getOne()
 
+
 def getOne():
-    return Company.query().filter(Company.name==APPSTRUCT['name']).first()
+    return Company.query().filter(Company.name == APPSTRUCT['name']).first()
 
 
-def test_company_index(config, content, get_csrf_request_with_db):
+def test_company_index(config, content, get_csrf_request_with_db, user,
+                       company):
     from autonomie.views.company import company_index
-    avatar = User.query().first()
     config.add_route('company', '/company/{cid}')
     config.add_static_view('static', 'autonomie:static')
     request = get_csrf_request_with_db()
-    request._user = avatar
-    request.user = avatar
-    request.context = avatar.companies[0]
+    request._user = user
+    request.user = user
+    request.context = company
     response = company_index(request)
-    assert avatar.companies[0].name == response['company'].name
+    assert user.companies[0].name == response['company'].name
 
-def test_add(company):
-    from autonomie.views.company import CompanyAdd
+
+def test_add(company_add):
     for key, val in APPSTRUCT.items():
-        assert getattr(company, key) == val
+        assert getattr(company_add, key) == val
 
-def test_success(company, get_csrf_request_with_db):
+
+def test_success(company_add, get_csrf_request_with_db):
     from autonomie.views.company import CompanyEdit
     req = get_csrf_request_with_db()
-    req.context = company
+    req.context = company_add
     appstruct = APPSTRUCT.copy()
     appstruct['phone'] = "+33 0606060606"
     appstruct['contribution'] = 70

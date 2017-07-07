@@ -119,8 +119,7 @@ class DummyInvoice(Dummy, InvoiceCompute):
 
 
 class DummyCancelInvoice(Dummy, TaskCompute):
-    def is_valid(self):
-        return True
+    status = 'valid'
 
 
 class DummyEstimation(Dummy, EstimationCompute):

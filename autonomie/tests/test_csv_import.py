@@ -22,11 +22,13 @@
 import pytest
 import cStringIO as StringIO
 csv_string = """Nom;Email 1;PRénom;Unknown;Status
-Arthur;b.arthur;Bienaimé;Datas;Réunion d'information
+Arthur;b.arthur;Bienaimé;Datas;CaeSituationOption
 """
+
 
 def get_buffer():
     return StringIO.StringIO(csv_string)
+
 
 @pytest.fixture
 def csv_datas():
@@ -38,16 +40,18 @@ def csv_datas():
     )
     return f
 
+
 @pytest.fixture
 def association_handler():
     from autonomie.csv_import import get_csv_import_associator
     return get_csv_import_associator('userdatas')
 
+
 @pytest.fixture
-def userdata(dbsession):
-    from autonomie.models.user import (UserDatas, CaeSituationOption,)
+def userdata(dbsession, cae_situation_option):
+    from autonomie.models.user import UserDatas
     u = UserDatas(
-        situation_situation=CaeSituationOption.query().first(),
+        situation_situation_id=cae_situation_option.id,
         coordonnees_firstname="firstname",
         coordonnees_lastname="lastname",
         coordonnees_email1="mail@mail.com",
@@ -92,10 +96,10 @@ def test_collect_kwargs(association_handler):
     assert trashed == {'b': 'B data', 'c': 'C data'}
 
 
-def test_import_line(dbsession, csv_datas, association_handler):
+def test_import_line(dbsession, csv_datas, association_handler,
+                     cae_situation_option):
     from autonomie.csv_import import CsvImporter, DEFAULT_ID_LABEL
     from autonomie.models.user import UserDatas
-
 
     association_dict = {
         u"Status": u"situation_situation",
@@ -111,14 +115,16 @@ def test_import_line(dbsession, csv_datas, association_handler):
         UserDatas,
         get_buffer(),
         association_handler,
-        action="update",
+        action="insert",
     )
     res, msg = importer.import_line(line.copy())
 
     assert res.coordonnees_firstname == u'Bienaimé'
     assert res.coordonnees_lastname == u'Arthur'
-    assert res.situation_situation.label == u"Réunion d'information"
-    assert sorted(importer.unhandled_datas[0].keys()) == sorted([DEFAULT_ID_LABEL, 'Unknown'])
+    assert res.situation_situation.label == u"CaeSituationOption"
+    assert sorted(importer.unhandled_datas[0].keys()) == sorted(
+        [DEFAULT_ID_LABEL, 'Unknown']
+    )
     assert importer.in_error_lines == []
 
     # We pop a mandatory argument
@@ -154,7 +160,11 @@ def test_update_line(association_handler, userdata, dbsession):
         association_handler,
         action="update"
     )
-    new_datas = {'id': str(userdata.id), 'firstname': u"Jane", 'email': "g@p.fr"}
+    new_datas = {
+        'id': str(userdata.id),
+        'firstname': u"Jane",
+        'email': "g@p.fr"
+    }
     res, msg = importer.import_line(new_datas)
 
     assert res.coordonnees_lastname == u'lastname'
@@ -179,7 +189,11 @@ def test_override_line(dbsession, association_handler, userdata):
         association_handler,
         action="override"
     )
-    new_datas = {'id': str(userdata.id), 'firstname': u"Jane", 'email': "g@p.fr"}
+    new_datas = {
+        'id': str(userdata.id),
+        'firstname': u"Jane",
+        'email': "g@p.fr"
+    }
     res, msg = importer.import_line(new_datas)
 
     assert res.coordonnees_lastname == u'lastname'
@@ -217,4 +231,3 @@ def test_identification_key(dbsession, association_handler, userdata):
     res, msg = importer.import_line(new_datas)
     assert res.coordonnees_lastname == u'lastname'
     assert res.coordonnees_emergency_name == u"Emergency Contact"
-

@@ -22,86 +22,91 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 import pytest
-from autonomie.models.project import Project
-from autonomie.models.company import Company
 
-
-APPSTRUCT = {'name':u'Projéct&$', "code":"ABDC", "customers":["1"]}
 
 @pytest.fixture
-def project(config, get_csrf_request_with_db):
+def customer2(dbsession, company):
+    from autonomie.models.customer import Customer
+    customer = Customer(
+        name=u"customer2",
+        code=u"CUST",
+        lastname=u"Lastname",
+        firstname=u"Firstname",
+        address=u"1th street",
+        zip_code=u"01234",
+        city=u"City",
+    )
+    customer.company = company
+    dbsession.add(customer)
+    dbsession.flush()
+    return customer
+
+def getone():
+    from autonomie.models.project import Project
+    return Project.query().first()
+
+
+def test_add(company, get_csrf_request_with_db, config, customer):
     from autonomie.views.project import ProjectAdd
     config.add_route('project', '/')
     req = get_csrf_request_with_db()
-    company = Company.query().first()
-    company.__name__ = 'company'
     req.context = company
     view = ProjectAdd(req)
-    appstruct = APPSTRUCT.copy()
+
+    appstruct = {'name':u'Projéct&$', "code":"ABDC", "customers": [customer.id]}
     view.submit_success(appstruct)
-    return getone()
 
+    project = getone()
 
-def getone():
-    val = Project.query().filter(Project.name=="Projéct&$").first()
-    if val is not None:
-        val.__name__ = 'project'
-    return val
-
-
-@pytest.fixture
-def customer(dbsession):
-    from autonomie.models.customer import Customer
-    datas = {
-        'name':'Company', 'lastname':u'Lastname',
-        'firstname':u'FirstName',
-        'address':'Address should be multiline',
-        'zip_code': "21000",
-        "city": "Dijon",
-        'compte_cg':"Compte CG1515",
-        'compte_tiers':"Compte Tiers", 'code': 'CODE',
-        'company_id': 1
-    }
-    c = Customer(**datas)
-    dbsession.add(c)
-    dbsession.flush()
-    return c
-
-
-def test_add(project):
+    assert project.name == u'Projéct&$'
     assert project.code == "ABDC"
-    assert project.company_id == 1
+    assert project.company_id == company.id
     assert len(project.customers) == 1
 
-def test_edit(project, get_csrf_request_with_db):
+def test_edit(config, get_csrf_request_with_db, customer, project):
     from autonomie.views.project import ProjectEdit
+    config.add_route('project', '/')
     req = get_csrf_request_with_db()
     req.context = project
-    appstruct = APPSTRUCT.copy()
     definition = u"Super project, should e ^dmeù*"
-    appstruct['definition'] = definition
+    appstruct = {
+        'name':u'Projéct&$', "code":"ABDC", "customers": [customer.id],
+        'definition': definition
+    }
     view = ProjectEdit(req)
     view.submit_success(appstruct)
+
     project = getone()
     assert(project.definition ==  definition)
 
-def test_customer_remove(project, get_csrf_request_with_db):
+def test_customer_remove(config, get_csrf_request_with_db, project):
+    assert len(project.customers) ==  1
     from autonomie.views.project import ProjectEdit
+    config.add_route('project', '/')
     req = get_csrf_request_with_db()
     req.context = project
-    appstruct = APPSTRUCT.copy()
-    appstruct["customers"] = []
+    appstruct = {
+        'name': project.name,
+        "code": project.code,
+        "customers": []
+    }
     view = ProjectEdit(req)
     view.submit_success(appstruct)
+
     project = getone()
     assert(len(project.customers) == 0)
 
-def test_customer_add(project, customer, get_csrf_request_with_db):
+def test_customer_add(config,
+                      project, customer, customer2, get_csrf_request_with_db):
     from autonomie.views.project import ProjectEdit
+    config.add_route('project', '/')
     req = get_csrf_request_with_db()
     req.context = project
-    appstruct = APPSTRUCT.copy()
-    appstruct['customers'] = ["1", customer.id]
+    appstruct = {
+        'name': project.name,
+        "code": project.code,
+        "customers": [customer.id, customer2.id]
+    }
     view = ProjectEdit(req)
     view.submit_success(appstruct)
     project = getone()
@@ -124,10 +129,10 @@ def test_archive(project, get_csrf_request_with_db):
     project_archive(req)
     assert(getone().archived)
 
-def test_addphase(config, dbsession, project, get_csrf_request_with_db):
+def test_addphase(config, dbsession, phase, project, get_csrf_request_with_db):
     from autonomie.views.project import PhaseAddFormView
     from autonomie.models.project import Phase
-    config.add_route('project/{id}', '/')
+    config.add_route('project', '/')
     req = get_csrf_request_with_db()
     req.context = project
     view = PhaseAddFormView(req)
@@ -143,7 +148,7 @@ def test_editphase(config, dbsession, project, get_csrf_request_with_db):
     dbsession.merge(phase)
     dbsession.flush()
 
-    config.add_route('project/{id}', '/')
+    config.add_route('project', '/')
     req = get_csrf_request_with_db()
     req.context = phase
     view = PhaseEditFormView(req)

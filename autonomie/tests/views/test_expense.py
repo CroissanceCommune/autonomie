@@ -28,32 +28,20 @@
 import pytest
 
 from datetime import date
-from autonomie.models.user import User
-from autonomie.models.company import Company
-from autonomie.models.expense import (ExpenseType, ExpenseKmType,
-                ExpenseSheet, ExpenseLine, ExpenseKmLine)
+from autonomie.models.expense import (
+    ExpenseType,
+    ExpenseKmType,
+    ExpenseLine,
+    ExpenseKmLine
+)
 from autonomie.utils.rest import RestError
 from autonomie.views.expense import (
-        RestExpenseLine,
-        get_expense_sheet,
-        RestExpenseKmLine,
-        ExpenseKmLineJson,
-        ExpenseLineJson,
-        ExpenseSheetView,
-        get_bookmarks,
-        BookMarkHandler,
-        )
-from autonomie.forms.expense import ExpenseKmLineSchema, ExpenseLineSchema
-
-
-@pytest.fixture
-def company(content):
-    return Company.query().first()
-
-
-@pytest.fixture
-def user(content):
-    return User.query().first()
+    RestExpenseLine,
+    get_expense_sheet,
+    RestExpenseKmLine,
+    ExpenseSheetView,
+    BookMarkHandler,
+)
 
 
 @pytest.fixture
@@ -79,7 +67,9 @@ def sheet(user, company, get_csrf_request_with_db, expensetype):
     month = date.today().month
     return get_expense_sheet(request, year, month, company.id, user.id)
 
-def test_reset_success(config, dbsession, get_csrf_request_with_db, sheet, expensetype):
+
+def test_reset_success(config, dbsession, get_csrf_request_with_db, sheet,
+                       expensetype):
     config.add_route('user_expenses', '/')
     request = get_csrf_request_with_db()
     sheet.lines.append(ExpenseLine(tva=1960, ht=150, type_object=expensetype))
@@ -97,23 +87,25 @@ def test_get_line(dbsession, get_csrf_request_with_db, sheet, expensetype):
     dbsession.merge(sheet)
     dbsession.flush()
     line = request.context.lines[-1]
-    request.matchdict = {'lid':line.id}
+    request.matchdict = {'lid': line.id}
     view = RestExpenseLine(request)
     assert view.getOne() == line
-    request.matchdict = {'lid':0}
+    request.matchdict = {'lid': 0}
     view = RestExpenseLine(request)
     with pytest.raises(RestError):
         view.getOne()
 
+
 def test_post_line(get_csrf_request_with_db, sheet, expensetype):
     request = get_csrf_request_with_db()
     request.context = sheet
-    appstruct = {'ht':'150.0',
-                    'tva':'15',
-                    'description':'Test',
-                    'date':'2112-10-12',
-                    'category':'1',
-                    'type_id': expensetype.id}
+    appstruct = {'ht': '150.0',
+                 'tva': '15',
+                 'description': 'Test',
+                 'date': '2112-10-12',
+                 'category': '1',
+                 'type_id': expensetype.id
+                 }
     request.json_body = appstruct
     view = RestExpenseLine(request)
     view.post()
@@ -130,7 +122,7 @@ def test_post_line(get_csrf_request_with_db, sheet, expensetype):
 def sheet_with_kmline(get_csrf_request_with_db, sheet, expensekmtype):
     request = get_csrf_request_with_db()
     request.context = sheet
-    appstruct = {'km':'150.0',
+    appstruct = {'km': '150.0',
                     'start':'point a',
                     'end':'point b',
                     'description':'Test',

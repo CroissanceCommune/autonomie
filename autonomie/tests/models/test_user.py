@@ -77,13 +77,11 @@ def test_account(dbsession):
     assert not a.auth("pwd")
     assert a.auth(strange)
 
-def test_get_company(dbsession):
-    user1 = User.query().first()
-    cid = 1
-    company = user1.get_company(cid)
-    assert company.name == u'company1'
+def test_get_company(dbsession, user, company):
+    company = user.get_company(company.id)
+    assert company.name == company.name
     with pytest.raises(KeyError):
-        user1.get_company(3000)
+        user.get_company(company.id + 1)
 
 def test_gen_account_with_duplicate_login(dbsession, userdatas):
     # First add a user account

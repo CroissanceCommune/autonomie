@@ -404,6 +404,9 @@ def company(dbsession, user):
     company.employees = [user]
     dbsession.add(company)
     dbsession.flush()
+    user.companies = [company]
+    user = dbsession.merge(user)
+    dbsession.flush()
     return company
 
 
@@ -430,7 +433,7 @@ def project(dbsession, company, customer):
     from autonomie.models.project import Project
     project = Project(name=u"Project")
     project.company = company
-    project.customer = [customer]
+    project.customers = [customer]
     dbsession.add(project)
     dbsession.flush()
     return project
@@ -444,3 +447,15 @@ def phase(dbsession, project):
     dbsession.add(phase)
     dbsession.flush()
     return phase
+
+
+@fixture
+def cae_situation_option(dbsession):
+    from autonomie.models.user import (CaeSituationOption,)
+    option = CaeSituationOption(
+        is_integration=False,
+        label=u"CaeSituationOption",
+    )
+    dbsession.add(option)
+    dbsession.flush()
+    return option

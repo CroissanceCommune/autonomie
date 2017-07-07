@@ -45,7 +45,7 @@ def state_machine():
         'invalid',
         ('edit', 'manage'),
         status_attr='status',
-        userid_attr='statusPerson',
+        userid_attr='status_person_id',
         callback=lambda req, model, user_id: (model, 2),
     )
     state_machine = StateMachine()
@@ -63,13 +63,13 @@ def state():
 def model():
     return MagicMock(
         status='draft',
-        statusPerson="toto"
+        status_person_id="toto"
     )
 
 
 class DummyStates(StateMachine):
     status_attr = "status"
-    userid_attr = "statusPerson"
+    userid_attr = "status_person_id"
 
 
 def test_add_transition(state_machine, state):
@@ -138,6 +138,6 @@ def test_affected_attrs(config, state_machine, model):
         'wait',
     )
     # Should not have changed
-    assert model.statusPerson == 'toto'
+    assert model.status_person_id == 'toto'
     # Should have changed
     assert model.status == 'wait'

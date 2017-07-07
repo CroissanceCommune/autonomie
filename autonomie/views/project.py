@@ -50,7 +50,6 @@ from autonomie.models.customer import Customer
 from autonomie.utils.colors import COLORS_SET
 from autonomie.utils.widgets import (
     ViewLink,
-    ToggleLink,
 )
 from autonomie.forms.project import (
     get_list_schema,
@@ -68,7 +67,6 @@ from autonomie.views import (
 )
 from autonomie.views.files import (
     FileUploadView,
-    get_add_file_link,
 )
 
 log = logger = logging.getLogger(__name__)
@@ -437,20 +435,15 @@ class ProjectAdd(BaseFormView):
         """
             Add a project with a default phase in the database
         """
-        if self.context.__name__ == 'company':
-            # It's an add form
-            model = self.schema.objectify(appstruct)
-            model.company = self.context
+        # It's an add form
+        model = self.schema.objectify(appstruct)
+        model.company = self.context
 
-            # Add a default phase to the project
-            default_phase = Phase()
-            model.phases.append(default_phase)
+        # Add a default phase to the project
+        default_phase = Phase()
+        model.phases.append(default_phase)
 
-            self.dbsession.add(model)
-        else:
-            # It's an edition one
-            model = self.schema.objectify(appstruct, self.context)
-            model = self.dbsession.merge(model)
+        self.dbsession.add(model)
 
         self.dbsession.flush()
 
@@ -485,6 +478,21 @@ class ProjectEdit(ProjectAdd):
     def projects(self):
         query = self.context.company.get_project_codes_and_names()
         return query.filter(Project.id != self.context.id)
+
+    def submit_success(self, appstruct):
+        # It's an edition one
+        model = self.schema.objectify(appstruct, self.context)
+        model = self.dbsession.merge(model)
+
+        self.dbsession.flush()
+
+        self.session.flash(self.validation_msg)
+        return HTTPFound(
+            self.request.route_path(
+                'project',
+                id=model.id
+            )
+        )
 
 
 def populate_actionmenu(request, project=None):

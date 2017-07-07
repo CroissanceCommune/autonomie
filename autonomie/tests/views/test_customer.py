@@ -39,12 +39,10 @@ APPSTRUCT = {'name':'Company', 'lastname':u'Lastname',
 
 
 @pytest.fixture
-def customer(config, content, get_csrf_request_with_db):
+def customer(config, content, get_csrf_request_with_db, company):
     config.add_route('customer', '/')
     request = get_csrf_request_with_db()
-    comp = Company.query().first()
-    comp.__name__ = 'company'
-    request.context = comp
+    request.context = company
     request.user = Dummy()
     view = CustomerAdd(request)
     view.submit_success(APPSTRUCT)

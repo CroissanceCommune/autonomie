@@ -21,17 +21,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-import pytest
-from datetime import date
-from autonomie.models.holiday import Holiday
-from mock import Mock
-from autonomie.models.user import User
-from autonomie.views.holiday import (RestHoliday,
-                                    get_holidays)
+from autonomie.views.holiday import (
+    RestHoliday,
+    get_holidays
+)
 
-@pytest.fixture
-def user(content):
-    return User.query().first()
 
 def test_holiday(user, get_csrf_request_with_db):
     # Add
@@ -58,7 +52,7 @@ def test_holiday(user, get_csrf_request_with_db):
     view.delete()
     assert len(get_holidays(user_id=user.id).all()) == 1
 
-    #edition + delete
+    # edition + delete
     appstruct = {"start_date": "2013-04-13", "end_date": "2013-04-27"}
     request.json_body = appstruct
     request.matchdict['lid'] = holidays[0].id

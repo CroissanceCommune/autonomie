@@ -623,6 +623,7 @@ class PaymentLine(DBBASE):
             order=self.order,
             amount=self.amount,
             description=self.description,
+            date=datetime.date.today(),
         )
 
     def __repr__(self):

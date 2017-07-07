@@ -58,7 +58,7 @@ def mention(dbsession):
 
 @pytest.fixture
 def mode(dbsession):
-    from autonomie.models.task.invoice import PaymentMode
+    from autonomie.models.payments import PaymentMode
     mode = PaymentMode(label=u"Chèque")
     dbsession.add(mode)
     dbsession.flush()
@@ -67,7 +67,7 @@ def mode(dbsession):
 
 @pytest.fixture
 def bank(dbsession):
-    from autonomie.models.task.invoice import BankAccount
+    from autonomie.models.payments import BankAccount
     bank = BankAccount(label=u"banque", code_journal='bq', compte_cg='123')
     dbsession.add(bank)
     dbsession.flush()

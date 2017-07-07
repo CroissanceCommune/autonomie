@@ -40,8 +40,10 @@ from autonomie.forms.admin import (
 from autonomie.models.task import (
     TaskMention,
     WorkUnit,
-    PaymentMode,
     PaymentConditions,
+)
+from autonomie.models.payments import (
+    PaymentMode,
     BankAccount,
 )
 from autonomie.models.treasury import CustomInvoiceBookEntryModule

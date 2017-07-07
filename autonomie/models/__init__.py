@@ -34,6 +34,7 @@ import company
 import config
 import customer
 import holiday
+import payments
 import project
 import tva
 import user

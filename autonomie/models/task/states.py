@@ -46,7 +46,7 @@ class TaskStates(StateMachine):
         Task statemachine
     """
     status_attr = "status"
-    userid_attr = "statusPerson"
+    userid_attr = "status_person_id"
 
 
 def valid_callback(request, task, **kw):
@@ -385,25 +385,25 @@ def get_state_machine(data_type):
         'draft',
         'edit_%s' % data_type,
         status_attr='status',
-        userid_attr='statusPerson',
+        userid_attr='status_person_id',
     )
     wait = State(
         'wait',
         'wait.%s' % data_type,
         status_attr='status',
-        userid_attr='statusPerson',
+        userid_attr='status_person_id',
     )
     invalid = State(
         'invalid',
         'invalid.%s' % data_type,
         status_attr='status',
-        userid_attr='statusPerson',
+        userid_attr='status_person_id',
     )
     valid = State(
         'valid',
         'valid.%s' % data_type,
         status_attr='status',
-        userid_attr='statusPerson',
+        userid_attr='status_person_id',
     )
     machine = TaskStates()
     machine.add_transition('draft', draft)

@@ -74,7 +74,6 @@ from autonomie.models.payments import (
 from .interfaces import (
     IMoneyTask,
     IInvoice,
-    IPaidTask,
 )
 from .task import (
     Task,
@@ -146,7 +145,7 @@ def translate_invoices(invoicequery, from_point):
     return from_point
 
 
-@implementer(IPaidTask, IInvoice, IMoneyTask)
+@implementer(IInvoice, IMoneyTask)
 class Invoice(Task, InvoiceCompute):
     """
         Invoice Model
@@ -425,7 +424,7 @@ class Invoice(Task, InvoiceCompute):
         return res
 
 
-@implementer(IPaidTask, IInvoice, IMoneyTask)
+@implementer(IInvoice, IMoneyTask)
 class CancelInvoice(Task, TaskCompute):
     """
         CancelInvoice model

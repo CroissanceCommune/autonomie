@@ -56,7 +56,6 @@ from autonomie.compute.task import (
     EstimationCompute,
 )
 from .interfaces import (
-    IValidatedTask,
     IMoneyTask,
 )
 from .invoice import (
@@ -97,7 +96,7 @@ ESTIMATION_STATES = (
 )
 
 
-@implementer(IValidatedTask, IMoneyTask)
+@implementer(IMoneyTask)
 class Estimation(Task, EstimationCompute):
     """
         Estimation Model

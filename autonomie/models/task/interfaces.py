@@ -29,18 +29,6 @@ from zope.interface import Attribute
 from zope.interface import Interface
 
 
-class ITask(Interface):
-    """
-        Task interface, need to be implemented by all documents
-    """
-
-
-class IValidatedTask(ITask):
-    """
-        Interface for task needing to be validated by the office
-    """
-
-
 class IMoneyTask(Interface):
     """
         Interface for task handling money
@@ -84,12 +72,6 @@ class IMoneyTask(Interface):
         """
             return the TTC expenses
         """
-
-
-class IPaidTask(Interface):
-    """
-        Task interface for task needing to be paid
-    """
 
 
 class IInvoice(Interface):

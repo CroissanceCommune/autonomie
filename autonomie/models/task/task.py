@@ -31,7 +31,6 @@ import colander
 import deform
 import datetime
 
-from zope.interface import implementer
 from sqlalchemy import (
     Column,
     Integer,
@@ -64,7 +63,6 @@ from autonomie import forms
 from autonomie.forms.custom_types import (AmountType, QuantityType,)
 from autonomie.models.user import get_deferred_user_choice
 
-from .interfaces import ITask
 from autonomie.compute.task import (
     LineCompute,
     DiscountLineCompute,
@@ -133,7 +131,6 @@ class TaskService(object):
         return query
 
 
-@implementer(ITask)
 class Task(Node):
     """
         Metadata pour une tâche (estimation, invoice)
@@ -679,15 +676,6 @@ _{s.date:%m%y}"
             request,
             **kw
         )
-
-    def is_invoice(self):
-        return False
-
-    def is_estimation(self):
-        return False
-
-    def is_cancelinvoice(self):
-        return False
 
     @validates('status')
     def change_status(self, key, status):

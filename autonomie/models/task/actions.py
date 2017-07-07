@@ -197,3 +197,55 @@ DEFAULT_ACTION_MANAGER = {
     'invoice': get_status_actions('invoice'),
     'cancelinvoice': get_status_actions('cancelinvoice'),
 }
+
+
+def get_signed_status_actions():
+    """
+    Return actions available for setting the signed_status attribute on
+    Estimation objects
+    """
+    manager = ActionManager()
+    for status, icon, label, title, css in (
+        (
+            'waiting',
+            'time',
+            u"En attente de réponse",
+            u"En attente de réponse du client",
+            "btn btn-default"
+        ),
+        (
+            "sent",
+            "send",
+            u"Envoyé au client",
+            u"A bien été envoyé au client",
+            "btn btn-default",
+        ),
+        (
+            'aborted',
+            'trash',
+            u"Sans suite",
+            u"Marquer sans suite",
+            "btn btn-danger"
+        ),
+        (
+            'signed',
+            'ok',
+            u"Signé par le client",
+            u"Indiquer que le client a passé commande",
+            "btn btn-success btn-primary-action"
+        ),
+    ):
+        action = Action(
+            status,
+            'set_signed_status.estimation',
+            status_attr='signed_status',
+            icon=icon,
+            label=label,
+            title=title,
+            css=css,
+        )
+        manager.add(action)
+    return manager
+
+
+SIGNED_ACTION_MANAGER = get_signed_status_actions()

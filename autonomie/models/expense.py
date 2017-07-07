@@ -451,12 +451,6 @@ class ExpenseSheet(Node, ExpenseCompute):
         """
         return self.company_id
 
-    def is_draft(self):
-        """
-        Return True if this expensesheet has draft status
-        """
-        return self.status in ('draft', 'invalid',)
-
     # Payment stuff
     def record_payment(self, **kw):
         """

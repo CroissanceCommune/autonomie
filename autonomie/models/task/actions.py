@@ -6,6 +6,7 @@
 """
 Action objects
 """
+from autonomie.exception import Forbidden
 
 
 class Action(object):
@@ -58,9 +59,14 @@ class Action(object):
         result.update(self.options)
         return result
 
-    def process(self, request, model, user_id, **kw):
+    def process(self, model, request, user_id, **kw):
         """
-            process the expected actions after status change
+        Process the action
+
+        Set the model's status_attr if needed (status)
+        Set the model's status user_id attribute if needed (status_person_id)
+
+        Fire a callback if needed
         """
         if self.status_attr is not None:
             setattr(model, self.status_attr, self.name)
@@ -101,6 +107,31 @@ class ActionManager(object):
                 result.append(action)
         return result
 
+    def process(self, action_name, context, request, **params):
+        """
+        Process a specific action
+
+        :param str action_name: The name of the action
+        :param obj context: The context to manage
+        :param obj request: The current request object
+        :param dict params: The params to pass to the callback
+        """
+        action = None
+        for action in self.items:
+            if action.name == action_name:
+                break
+        if action is None:
+            raise Exception(u"Unknown action : %s" % action_name)
+
+        elif not action.allowed(context, request):
+            raise Forbidden(
+                u"This action is not allowed for %s : %s" (
+                    request.user_id,
+                    action_name,
+                )
+            )
+        return action.process(context, request, request.user_id, **params)
+
 
 def get_status_actions(data_type):
     """
@@ -136,7 +167,7 @@ def get_status_actions(data_type):
                 status,
                 '%s.%s' % (status, data_type),
                 status_attr='status',
-                userid_attr='statusPerson',
+                userid_attr='status_person_id',
                 icon=icon,
                 label=label,
                 title=title,

@@ -670,12 +670,16 @@ _{s.date:%m%y}"
             ],
         )
 
-    def set_status(self, status, request, user_id, **kw):
+    def set_status(self, status, request, **kw):
         """
-            set the status of a task through the state machine
+        set the status of a task through the state machine
         """
-        print(self.state_machine.transitions.get('draft'))
-        return self.state_machine.process(self, request, user_id, status, **kw)
+        return self.state_manager.process(
+            status,
+            self,
+            request,
+            **kw
+        )
 
     def is_invoice(self):
         return False

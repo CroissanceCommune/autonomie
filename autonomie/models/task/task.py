@@ -706,7 +706,6 @@ _{s.date:%m%y}"
                 status_code=status,
                 status_person_id=self.status_person.id,
                 status_comment=self.status_comment,
-                date=self.status_date,
             )
             self.statuses.append(status_record)
 
@@ -1179,11 +1178,8 @@ def cache_parent_amounts(mapper, connection, target):
     ... options in the invoice list page
     """
     log.info("Caching the parent task amounts")
-    print(target)
     if hasattr(target, 'task'):
-        print("target has a task")
         task = target.task
-        print(task)
         if hasattr(task, 'total_ht'):
             task.ht = task.total_ht()
         if hasattr(task, 'total'):

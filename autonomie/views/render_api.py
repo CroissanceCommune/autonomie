@@ -61,6 +61,7 @@ STATUS_ICON = dict(
 ESTIMATION_STATUS = dict(
     (
         ("aborted", u"Annulé",),
+        ("sent", u"Envoyé",),
         ('signed', u'Signé',),
         ('geninv', u"Factures générées"),
     )
@@ -68,6 +69,7 @@ ESTIMATION_STATUS = dict(
 ESTIMATION_STATUS_ICON = dict(
     (
         ('aborted', 'trash'),
+        ('sent', "send"),
         ('signed', 'ok'),
         ('geninv', 'tasks'),
     )
@@ -141,7 +143,7 @@ def format_estimation_status(estimation, full=True):
     """
     if estimation.geninv:
         return ESTIMATION_STATUS.get('geninv')
-    elif estimation.signed_status in ('aborted', 'signed'):
+    elif estimation.signed_status in ('sent', 'aborted', 'signed'):
         return ESTIMATION_STATUS.get(estimation.signed_status)
     else:
         return format_main_status(estimation, full)
@@ -283,6 +285,7 @@ def cancelinvoice_get_major_status(cinvoice):
     Return the most significant status for the given task
     """
     return cinvoice.status
+
 
 def expense_get_major_status(expense):
     if expense.paid_status != 'waiting':

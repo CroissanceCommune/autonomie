@@ -54,7 +54,7 @@ common_footer_height *= 0.8
 
         <style>
             @page {
-                % if not task.has_been_validated() and not task.is_cancelled():
+                % if not task.status == 'valid':
                     background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
                 % endif
                 @frame content_frame {
@@ -79,7 +79,7 @@ common_footer_height *= 0.8
                     margin-right: 1cm;
                     border: 0pt solid white;
                 }
-                % if task.has_been_validated() or task.is_cancelled():
+                % if task.status == 'valid':
                     @frame paging{
                         -pdf-frame-content: page-number;
                         bottom: 0cm;
@@ -90,7 +90,7 @@ common_footer_height *= 0.8
                 % endif
             }
             @page alternate {
-                % if not task.has_been_validated() and not task.is_cancelled():
+                % if not task.status == 'valid':
                     background-image: url("${request.static_url('autonomie:static/{0}'.format(watermark), _app_url='')}");
                 % endif
                 @frame content_frame {
@@ -115,7 +115,7 @@ common_footer_height *= 0.8
                     margin-right: 1cm;
                     border: 0pt solid white;
                 }
-                % if task.has_been_validated() or task.is_cancelled():
+                % if task.status == 'valid':
                     @frame paging{
                         -pdf-frame-content: page-number;
                         bottom: 0cm;

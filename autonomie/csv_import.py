@@ -387,28 +387,29 @@ class CsvImportAssociator(BaseSqlaInspector):
 
 
 def get_csv_reader(
-        csv_buffer,
-        delimiter=DEFAULT_DELIMITER,
-        quotechar=DEFAULT_QUOTECHAR,
-    ):
+    csv_buffer,
+    delimiter=DEFAULT_DELIMITER,
+    quotechar=DEFAULT_QUOTECHAR,
+):
     return csv.DictReader(
         csv_buffer,
         delimiter=str(delimiter),
         quotechar=str(quotechar),
     )
 
+
 def get_csv_importer(
-        dbsession,
-        model_type,
-        csv_buffer,
-        association_handler,
-        action="insert",
-        id_key="id",
-        force_rel_creation=False,
-        default_values=(),
-        delimiter=DEFAULT_DELIMITER,
-        quotechar=DEFAULT_QUOTECHAR,
-    ):
+    dbsession,
+    model_type,
+    csv_buffer,
+    association_handler,
+    action="insert",
+    id_key="id",
+    force_rel_creation=False,
+    default_values=(),
+    delimiter=DEFAULT_DELIMITER,
+    quotechar=DEFAULT_QUOTECHAR,
+):
 
     factory = MODELS_CONFIGURATION[model_type]['factory']
     return CsvImporter(
@@ -472,18 +473,18 @@ class CsvImporter(object):
     quotechar = '"'
 
     def __init__(
-            self,
-            dbsession,
-            factory,
-            csv_buffer,
-            association_handler,
-            action="only_update",
-            id_key="id",
-            force_rel_creation=False,
-            default_values=None,
-            delimiter=DEFAULT_DELIMITER,
-            quotechar=DEFAULT_QUOTECHAR,
-        ):
+        self,
+        dbsession,
+        factory,
+        csv_buffer,
+        association_handler,
+        action="only_update",
+        id_key="id",
+        force_rel_creation=False,
+        default_values=None,
+        delimiter=DEFAULT_DELIMITER,
+        quotechar=DEFAULT_QUOTECHAR,
+    ):
         self.dbsession = dbsession
         self.factory = factory
         self.association_handler = association_handler
@@ -498,7 +499,8 @@ class CsvImporter(object):
         if action not in ("insert", "update", "override", "only_update",
                           "only_override"):
             raise KeyError(
-u"The action attr should be one of (\"insert\", \"update\", \"override\")"
+                u"The action attr should be one of "
+                "(\"insert\", \"update\", \"override\")"
             )
 
         if action == 'insert':
@@ -553,6 +555,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         :returns: a tuple (model, updated_token) where updated_token is a
         boolean saying if it's an update
         """
+        print("Inserting")
         for key, value in self.default_init_values.items():
             args[key] = value
 
@@ -586,7 +589,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                         self.id_key,
                     )
                 )
-            model, updated = self._insert(args)
+            model, updated = self._insert(args, persist=persist)
 
         else:
             identification_column = getattr(self.factory, self.id_key)
@@ -604,7 +607,6 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                         log.warn(self.default_init_values)
                         log.warn("The model they try to edit : %s" % model.id)
                         raise Exception(u"POSSIBLE BREAK IN ATTEMPT !!!!!!")
-
 
                 for key, value in args.items():
                     if getattr(model, key) in UNFILLED_VALUES or override:
@@ -627,7 +629,7 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
                 # identification key and should be set for new entries)
                 if self.id_key != 'id':
                     args[self.id_key] = identification_value
-                model, updated = self._insert(args)
+                model, updated = self._insert(args, persist=persist)
 
             except sqlalchemy_exc.MultipleResultsFound:
                 raise MultipleInstanceFound(
@@ -672,7 +674,6 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
         :returns: a duple with the newly_created model (or None) and a
             message
         """
-        print(u"Importing a line !!!")
         message = None
         args, unhandled_columns = self.association_handler.collect_args(
             line,
@@ -693,6 +694,8 @@ u"The action attr should be one of (\"insert\", \"update\", \"override\")"
             else:
                 self.new_count += 1
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             log.exception(u"Erreur lors de l'import de données")
             self.in_error_lines.append(line)
             res = None

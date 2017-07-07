@@ -66,7 +66,7 @@ from autonomie.models.project import (
     Phase,
     Project,
 )
-from autonomie.forms.task import (
+from autonomie.forms.tasks.base import (
     get_new_task_schema,
     get_duplicate_schema,
 )
@@ -119,7 +119,6 @@ class EstimationAdd(BaseFormView):
             self.request.user,
         )
         estimation.name = name
-        estimation.address = customer.full_address
         estimation.course = appstruct['course']
         self.dbsession.add(estimation)
         self.dbsession.flush()
@@ -138,7 +137,7 @@ class EstimationEditView(BaseView):
 
     @property
     def title(self):
-        return u"Édition du devis {task.name}".format(task=self.context)
+        return u"Modification du devis {task.name}".format(task=self.context)
 
     def __call__(self):
         populate_actionmenu(self.request)

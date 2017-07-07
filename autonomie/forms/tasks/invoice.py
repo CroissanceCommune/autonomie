@@ -28,23 +28,24 @@
 import colander
 import deform
 import deform_extensions
+from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.security import has_permission
 
 from autonomie.models import company
 from autonomie.models.task import invoice
-from autonomie.models.task import (
-    PaymentConditions,
-
-)
 from autonomie.models.tva import (
     Product,
+    Tva,
 )
 
+from autonomie.models.task import (Invoice, CancelInvoice,)
+
 from autonomie import forms
-from autonomie.forms.task import (
+from autonomie.forms.tasks.lists import (
+    PeriodSchema,
+    AmountRangeSchema,
     TEMPLATES_URL,
 )
-from autonomie.forms import custom_types
 from autonomie.forms.custom_types import (
     AmountType,
 )
@@ -60,6 +61,47 @@ TYPE_OPTIONS = (
     ('cancelinvoice', u"Seulement les avoirs",),
 )
 
+AMOUNT_PRECISION = 5
+
+
+def validate_invoice(invoice_object, request):
+    """
+    Globally validate an invoice_object
+
+    :param obj invoice_object: An instance of Invoice
+    :param obj request: The pyramid request
+    :raises: colander.Invalid
+
+    try:
+        validate_invoice(est, self.request)
+    except colander.Invalid as err:
+        error_messages = err.messages
+    """
+    schema = SQLAlchemySchemaNode(Invoice)
+    schema = schema.bind(request=request)
+    appstruct = invoice_object.__json__(request)
+    cstruct = schema.deserialize(appstruct)
+    return cstruct
+
+
+def validate_cancelinvoice(cancelinvoice_object, request):
+    """
+    Globally validate an cancelinvoice_object
+
+    :param obj cancelinvoice_object: An instance of CancelInvoice
+    :param obj request: The pyramid request
+    :raises: colander.Invalid
+
+    try:
+        validate_cancelinvoice(est, self.request)
+    except colander.Invalid as err:
+        error_messages = err.messages
+    """
+    schema = SQLAlchemySchemaNode(CancelInvoice)
+    schema = schema.bind(request=request)
+    appstruct = cancelinvoice_object.__json__(request)
+    cstruct = schema.deserialize(appstruct)
+    return cstruct
 
 
 def get_product_choices():
@@ -129,111 +171,6 @@ PREFIX = colander.SchemaNode(
 )
 
 
-class InvoicePayments(colander.MappingSchema):
-    """
-    Invoice payment conditions schema
-    """
-    payment_conditions_select = colander.SchemaNode(
-        colander.String(),
-        widget=forms.get_deferred_select(PaymentConditions),
-        title=u"",
-        missing=colander.drop,
-    )
-
-    payment_conditions = forms.textarea_node(
-        title="",
-    )
-
-
-# def get_invoice_schema():
-#     """
-#         Return the schema for invoice add/edit
-#     """
-#     schema = TASKSCHEMA.clone()
-#     schema['lines']['lines'].doctype = "invoice"
-#
-#     # title = u"Phase où insérer la facture"
-#     # schema['common']['phase_id'].title = title
-#     # Ref #689
-#     schema['common'].add_before('description', FINANCIAL_YEAR)
-#     schema['common'].add_before('description', PREFIX)
-#
-#     title = u"Date de la facture"
-#     schema['common']['date'].title = title
-#
-#     title = u"Objet de la facture"
-#     schema['common']['description'].title = title
-#
-#     title = u"Conditions de paiement"
-#     schema.add_before(
-#         "communication",
-#         InvoicePayments(title=title, name='payments')
-#     )
-#
-#     product_id = colander.SchemaNode(
-#
-#         colander.Integer(),
-#         title=u"Code produit",
-#         widget=deferred_product_widget,
-#         validator=deferred_product_validator,
-#         missing="",
-#         css_class="col-md-2",
-#         name='product_id',
-#     )
-#     schema['lines']['lines']['taskline'].add(product_id.clone())
-#     schema['lines']['groups']['groups']['lines']['taskline'].add(
-#         product_id.clone()
-#     )
-#     return schema
-#
-#
-# def get_cancel_invoice_schema():
-#     """
-#         return the cancel invoice form schema
-#     """
-#     schema = TASKSCHEMA.clone()
-#     schema['lines']['lines'].doctype = "taskschema"
-#
-#     # title = u"Phase où insérer l'avoir"
-#     # schema['common']['phase_id'].title = title
-#     # Ref #689
-#     schema['common'].add_before('description', FINANCIAL_YEAR)
-#     schema['common'].add_before('description', PREFIX)
-#
-#     title = u"Date de l'avoir"
-#     schema['common']['date'].title = title
-#
-#     title = u"Objet de l'avoir"
-#     schema['common']['description'].title = title
-#     del schema['common']['course']
-#
-#     title = u"Conditions de remboursement"
-#     del schema['lines']['discounts']
-#
-#     payments = InvoicePayments(title=title, name='payments').clone()
-#     payments['payment_conditions'].title = title
-#     payments['payment_conditions'].description = u""
-#     payments['payment_conditions'].missing = u""
-#
-#     schema['lines']['expenses_ht'].validator = forms.negative_validator
-#
-#     schema.add_before("communication", payments)
-#     product_id = colander.SchemaNode(
-#         colander.Integer(),
-#         title=u"Code produit",
-#         widget=deferred_product_widget,
-#         validator=deferred_product_validator,
-#         missing="",
-#         css_class="col-md-2",
-#         name='product_id',
-#     )
-#     schema['lines']['lines']['taskline'].add(product_id.clone())
-#     schema['lines']['groups']['groups']['lines']['taskline'].add(
-#         product_id.clone()
-#     )
-#     return schema
-
-
 class FinancialYearSchema(colander.MappingSchema):
     """
         colander Schema for financial year setting
@@ -289,42 +226,6 @@ class SetProductsSchema(colander.MappingSchema):
             min_len=1),
         missing="",
         title=u''
-    )
-
-
-class AmountRangeSchema(colander.MappingSchema):
-    """
-    Used to filter on a range of amount
-    """
-    start = colander.SchemaNode(
-        custom_types.AmountType(5),
-        title="",
-        missing=colander.drop,
-        description=u"TTC entre",
-    )
-    end = colander.SchemaNode(
-        custom_types.AmountType(5),
-        title="",
-        missing=colander.drop,
-        description=u"et",
-    )
-
-
-class PeriodSchema(colander.MappingSchema):
-    """
-        A form used to select a period
-    """
-    start = colander.SchemaNode(
-        colander.Date(),
-        title="",
-        description=u"Émises entre le",
-        missing=colander.drop,
-    )
-    end = colander.SchemaNode(
-        colander.Date(),
-        title="",
-        description=u"et le",
-        missing=colander.drop,
     )
 
 
@@ -465,3 +366,195 @@ pdfexportSchema = InvoicesPdfExport(
     title=u"Exporter un ensemble de factures dans un fichier pdf",
     validator=range_validator,
 )
+
+
+
+@colander.deferred
+def deferred_remittance_amount_default(node, kw):
+    """
+        default value for the payment amount
+    """
+    from autonomie.views.render_api import format_amount
+    return format_amount(get_amount_topay(kw), precision=5, grouping=False)
+
+
+@colander.deferred
+def deferred_total_validator(node, kw):
+    """
+        validate the amount to keep the sum under the total
+    """
+    topay = get_amount_topay(kw)
+    max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
+des paiements + montant d'un éventuel avoir)" % (topay / 100.0)
+    min_msg = u"Le montant doit être positif"
+    return colander.Range(
+        min=0, max=topay, min_err=min_msg, max_err=max_msg,
+    )
+
+
+class PaymentSchema(colander.MappingSchema):
+    """
+        colander schema for payment recording
+    """
+    come_from = forms.come_from_node()
+    remittance_amount = colander.SchemaNode(
+        colander.String(),
+        title=u"Identifiant de la remise en banque",
+        description=u"Ce champ est un indicateur permettant de \
+retrouver la remise en banque à laquelle cet encaissement est associé",
+        default=deferred_remittance_amount_default,
+    )
+    amount = colander.SchemaNode(
+        AmountType(5),
+        title=u"Montant de l'encaissement",
+        validator=deferred_total_validator,
+        default=deferred_amount_default,
+    )
+    date = forms.today_node()
+    mode = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode de paiement",
+        widget=deferred_payment_mode_widget,
+        validator=deferred_payment_mode_validator,
+    )
+    bank_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Banque",
+        missing=colander.drop,
+        widget=deferred_bank_widget,
+        default=forms.get_deferred_default(BankAccount),
+    )
+    resulted = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Soldé",
+        description="""Indique que le document est soldé (
+ne recevra plus de paiement), si le montant indiqué correspond au
+montant de la facture celle-ci est soldée automatiquement""",
+        default=False,
+    )
+
+
+class TvaPayment(colander.MappingSchema):
+    amount = colander.SchemaNode(
+        AmountType(5),
+        title=u"Montant de l'encaissement",
+    )
+    tva_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Tva liée à cet encaissement",
+        widget=forms.get_deferred_select(
+            Tva, mandatory=True, keys=('id', 'name')
+        ),
+    )
+
+
+@colander.deferred
+def deferred_amount_by_tva_validation(node, kw):
+    invoice = kw['request'].context
+    tva_parts = invoice.tva_ttc_parts()
+
+    def validate_amount_by_tva(values):
+        tva_id = values.get('tva_id')
+        tva = Tva.get(tva_id)
+        if tva is None:
+            return u"Tva inconnue"
+        amount = values.get('amount')
+        # Fix #433 : encaissement et tva multiples
+        # Add a tolerance for 1 € of difference
+        if amount > tva_parts[tva.value] + 10**AMOUNT_PRECISION:
+            return u"Le montant de l'encaissement doit être inférieur à la \
+part de cette Tva dans la facture"
+        return True
+
+    return colander.Function(validate_amount_by_tva)
+
+
+@colander.deferred
+def deferred_payment_amount_validation(node, kw):
+    """
+    Validate that the remittance amount is equal to the sum of the tva parts
+    """
+    def validate_sum_of_tvapayments(values):
+        """
+        Validate the sum of the tva payments is equal to the remittance_amount
+        """
+        tva_sum = sum([tvap['amount'] for tvap in values['tvas']])
+        remittance_amount = values['payment_amount']
+        if tva_sum != remittance_amount:
+            return u"Le montant du paiement doit correspondre à la somme \
+des encaissements correspondant"
+        return True
+
+    return colander.Function(validate_sum_of_tvapayments)
+
+
+class TvaPaymentSequence(colander.SequenceSchema):
+    tvas = TvaPayment(title=u'', validator=deferred_amount_by_tva_validation)
+
+
+class MultiplePaymentSchema(colander.MappingSchema):
+    """
+        colander schema for payment recording
+    """
+    come_from = forms.come_from_node()
+    remittance_amount = colander.SchemaNode(
+        colander.String(),
+        title=u"Identifiant de la remise en banque",
+        default=deferred_remittance_amount_default,
+    )
+    payment_amount = colander.SchemaNode(
+        AmountType(5),
+        title=u"Montant du paiement",
+        description=u"Ce champ permet de contrôler que la somme des \
+encaissements saisis dans ce formulaire correspondent bien au montant du \
+paiement.",
+        validator=deferred_total_validator,
+        default=deferred_amount_default,
+    )
+    date = forms.today_node(title=u"Date de la remise")
+    mode = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode de paiement",
+        widget=deferred_payment_mode_widget,
+        validator=deferred_payment_mode_validator,
+    )
+    bank_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Banque",
+        missing=colander.drop,
+        widget=deferred_bank_widget,
+        default=forms.get_deferred_default(BankAccount),
+    )
+    tvas = TvaPaymentSequence(title=u'Encaissements par taux de Tva')
+    resulted = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Soldé",
+        description="""Indique que le document est soldé (
+ne recevra plus de paiement), si le montant indiqué correspond au
+montant de la facture celle-ci est soldée automatiquement""",
+        default=False,
+    )
+
+
+def get_payment_schema(request):
+    """
+    Returns the schema for payment registration
+    """
+    invoice = request.context
+    tva_module = request.config.get('receipts_active_tva_module')
+
+    num_tvas = len(invoice.get_tvas().keys())
+
+    # Only one tva
+    if num_tvas == 1 or not tva_module:
+        return PaymentSchema()
+    else:
+        schema = MultiplePaymentSchema(
+            validator=deferred_payment_amount_validation
+        )
+        schema['tvas'].widget = deform.widget.SequenceWidget(
+            min_len=1,
+            max_len=num_tvas,
+            orderable=False,
+        )
+        return schema

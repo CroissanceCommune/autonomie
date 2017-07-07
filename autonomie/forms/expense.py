@@ -39,6 +39,14 @@ from autonomie.models import user
 from autonomie.models.task.invoice import get_invoice_years
 from .custom_types import AmountType
 from autonomie import forms
+from autonomie.forms.payments import (
+    get_amount_topay,
+    deferred_amount_default,
+    deferred_payment_mode_widget,
+    deferred_payment_mode_validator,
+    deferred_bank_widget,
+)
+from autonomie.models.payments import BankAccount
 
 
 STATUS_OPTIONS = (
@@ -181,3 +189,60 @@ def get_list_schema():
     ))
 
     return schema
+
+
+@colander.deferred
+def deferred_expense_total_validator(node, kw):
+    """
+        validate the amount to keep the sum under the total
+    """
+    topay = get_amount_topay(kw)
+    max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
+des paiements)" % (topay / 100.0)
+    min_msg = u"Le montant doit être positif"
+    return colander.Range(
+        min=0, max=topay, min_err=min_msg, max_err=max_msg,
+    )
+
+
+class ExpensePaymentSchema(colander.MappingSchema):
+    """
+    Schéma de saisi des paiements des notes de dépense
+    """
+    come_from = forms.come_from_node()
+    amount = colander.SchemaNode(
+        AmountType(),
+        title=u"Montant du paiement",
+        validator=deferred_expense_total_validator,
+        default=deferred_amount_default,
+    )
+    date = forms.today_node()
+    mode = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode de paiement",
+        widget=deferred_payment_mode_widget,
+        validator=deferred_payment_mode_validator,
+    )
+    bank_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Banque",
+        missing=colander.drop,
+        widget=deferred_bank_widget,
+        default=forms.get_deferred_default(BankAccount),
+    )
+    waiver = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Abandon de créance",
+        description="""Indique que ce paiement correspond à un abandon de
+créance à la hauteur du montant indiqué (le Mode de paiement et la Banque sont
+alors ignorés)""",
+        default=False,
+    )
+    resulted = colander.SchemaNode(
+        colander.Boolean(),
+        title=u"Soldé",
+        description="""Indique que le document est soldé (
+ne recevra plus de paiement), si le montant indiqué correspond au
+montant de feuille de notes de dépense celle-ci est soldée automatiquement""",
+        default=False,
+    )

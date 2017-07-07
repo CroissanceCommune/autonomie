@@ -37,9 +37,6 @@ from pyramid.httpexceptions import (
 )
 
 from autonomie.exception import Forbidden
-from autonomie.forms.payments import (
-    ExpensePaymentSchema,
-)
 from autonomie.forms.expense import (
     ExpenseStatusSchema,
     PeriodSelectSchema,
@@ -48,6 +45,7 @@ from autonomie.forms.expense import (
     ExpenseSheetSchema,
     BookMarkSchema,
     get_list_schema,
+    ExpensePaymentSchema,
 )
 from autonomie.models.expense import (
     ExpenseType,

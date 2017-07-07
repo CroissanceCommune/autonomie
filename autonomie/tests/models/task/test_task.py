@@ -365,6 +365,7 @@ def test_task(tva, unity):
     schema = SQLAlchemySchemaNode(Task)
     schema = schema.bind()
     value = {
+        "name": u"Test task",
         'date': datetime.date.today().isoformat(),
         'address': u"adress",
         "description": u"description",
@@ -388,6 +389,7 @@ def test_task(tva, unity):
         ],
     }
     expected_value = {
+        "name": u"Test task",
         'date': datetime.date.today(),
         'address': u"adress",
         "description": u"description",

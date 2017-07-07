@@ -299,7 +299,7 @@
         ${format_text(config.get('coop_pdffootertext'))}
     % endif
 </div>
-% if task.has_been_validated() or task.is_cancelled():
+% if task.status == 'valid':
 <div id='page-number'>
     Page <pdf:pagenumber/>/<pdf:pagecount/>
 </div>

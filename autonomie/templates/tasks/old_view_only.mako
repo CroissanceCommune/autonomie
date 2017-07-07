@@ -49,18 +49,18 @@
                 % endif
             </p>
             </li>
-        %elif task.is_waiting():
+        %elif task.status == 'wait':
             <li>
             <p>
                 Vous ne pouvez plus modifier ce document car il est en attente de validation.
             </p>
             </li>
         % endif
-        % if task.is_invoice():
+        % if task.type_ == 'invoice':
             % if hasattr(task, 'estimation') and task.estimation:
                 <li>
                 <p>
-                    Cette facture fait référence au devis : <a href="${request.route_path('estimation', id=task.estimation.id)}">${task.estimation.internal_number}</a>
+                    Cette facture fait référence au devis : <a href="${request.route_path('/estimations/{id}.html', id=task.estimation.id)}">${task.estimation.internal_number}</a>
                 </p>
                 </li>
             % endif
@@ -69,7 +69,7 @@
                     <li>
                         <p>
                             L'avoir : \
-                            <a href="${request.route_path('cancelinvoice', id=cancelinvoice.id)}">
+                            <a href="${request.route_path('/cancelinvoices/{id}.html', id=cancelinvoice.id)}">
                                 ${cancelinvoice.internal_number}
                             </a> a été généré depuis cette facture.
                         </p>
@@ -89,7 +89,7 @@
                 </p>
                 </li>
             % endif
-        % elif task.is_estimation():
+        % elif task.type_ == 'estimation':
             % if hasattr(task, 'invoices') and task.invoices:
                 <li>
                 <p>
@@ -97,18 +97,18 @@
                     <ul class='list-unstyled'>
                         % for invoice in task.invoices:
                             <li>
-                            <a href="${request.route_path('invoice', id=invoice.id)}">${invoice.internal_number}</a>
+                            <a href="${request.route_path('/invoices/{id}.html', id=invoice.id)}">${invoice.internal_number}</a>
                             </li>
                         % endfor
                     </ul>
                 </p>
                 </li>
             % endif
-        % elif task.is_cancelinvoice():
+        % elif task.type_ == 'cancelinvoice':
             % if hasattr(task, 'invoice') and task.invoice:
                 <li>
                 <p>
-                    Cet avoir est lié à la facture : <a href="${request.route_path('invoice', id=task.invoice.id)}">
+                    Cet avoir est lié à la facture : <a href="${request.route_path('/invoices/{id}.html', id=task.invoice.id)}">
                         ${task.invoice.prefix}${task.invoice.official_number}
                     </a>
                 </p>
@@ -147,17 +147,11 @@
                 </ul>
             % endif
         % endif
-        % if hasattr(task, 'topay') and not task.is_resulted():
+        % if hasattr(task, 'topay') and not task.paid_status == 'resulted':
             Il reste ${api.format_amount(task.topay(), precision=5)|n}&nbsp;€ à régler.
         % endif
     </div>
-            % if task.is_estimation():
-                <% route = request.route_path('estimation', id=task.id, _query=dict(action='status')) %>
-            % elif task.is_invoice():
-                <% route = request.route_path('invoice', id=task.id, _query=dict(action='status')) %>
-            % else:
-                <% route = request.route_path('cancelinvoice', id=task.id, _query=dict(action='status')) %>
-            % endif
+            <% route = request.route_path('/%ss/{id}/status' % task.type_, id=task.id) %>
             <div class="well">
             <form id="deform" class="deform"
             accept-charset="utf-8"

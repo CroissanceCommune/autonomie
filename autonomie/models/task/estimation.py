@@ -66,8 +66,12 @@ from .task import (
     Task,
     DiscountLine,
     TaskLine,
+    TaskStatus,
 )
-from .actions import DEFAULT_ACTION_MANAGER
+from .actions import (
+    DEFAULT_ACTION_MANAGER,
+    SIGNED_ACTION_MANAGER,
+)
 
 log = logging.getLogger(__name__)
 
@@ -87,6 +91,7 @@ PAYMENTDISPLAYCHOICES = (
 
 ESTIMATION_STATES = (
     ('waiting', u"En attente"),
+    ('send', u"Envoyé au client"),
     ('aborted', u'Annulé'),
     ('signed', u'Signé'),
 )
@@ -221,7 +226,7 @@ class Estimation(Task, EstimationCompute):
     )
 
     state_manager = DEFAULT_ACTION_MANAGER['estimation']
-
+    signed_state_manager = SIGNED_ACTION_MANAGER
     _number_tmpl = u"{s.company.name} {s.date:%Y-%m} D{s.company_index}"
 
     _name_tmpl = u"Devis {0}"
@@ -246,20 +251,24 @@ class Estimation(Task, EstimationCompute):
         """
         return company.get_next_estimation_index()
 
-    def is_draft(self):
-        return self.status in ('draft', 'invalid',)
+    def set_signed_status(self, status, request, **kw):
+        """
+        set the signed status of a task through the state machine
+        """
+        if request.user.id is not None:
+            status_record = TaskStatus(
+                status_code=status,
+                status_person_id=request.user.id,
+                status_comment="",
+            )
+            self.statuses.append(status_record)
 
-    def is_valid(self):
-        return self.status == 'valid'
-
-    def has_been_validated(self):
-        return self.is_valid()
-
-    def is_waiting(self):
-        return self.status == 'wait'
-
-    def is_estimation(self):
-        return True
+        return self.signed_state_manager.process(
+            status,
+            self,
+            request,
+            **kw
+        )
 
     def duplicate(self, user, project, phase, customer):
         """
@@ -484,12 +493,6 @@ class Estimation(Task, EstimationCompute):
 
         invoices.append(invoice)
         return invoices
-
-    def is_cancelled(self):
-        """
-            Return True if the invoice has been cancelled
-        """
-        return self.signed_status == 'aborted'
 
     def add_line(self, line=None, **kwargs):
         """

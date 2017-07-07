@@ -264,33 +264,6 @@ class Invoice(Task, InvoiceCompute):
     def set_sold_label(self):
         self.name = self._sold_name_tmpl.format(self.project_index)
 
-    def is_draft(self):
-        return self.status in ('draft', 'invalid',)
-
-    def is_valid(self):
-        return self.status == 'valid'
-
-    def has_been_validated(self):
-        return self.is_valid()
-
-    def is_waiting(self):
-        return self.status == "wait"
-
-    def is_invoice(self):
-        return True
-
-    def is_paid(self):
-        return self.paid_status == 'paid'
-
-    def is_resulted(self):
-        return self.paid_status == 'resulted'
-
-    def is_cancelled(self):
-        """
-            Return True is the invoice has been cancelled
-        """
-        return False
-
     def set_project(self, project):
         self.project = project
 
@@ -540,30 +513,6 @@ class CancelInvoice(Task, TaskCompute):
         :rtype: int
         """
         return company.get_next_invoice_index()
-
-    def is_draft(self):
-        return self.status in ('draft', 'invalid')
-
-    def is_valid(self):
-        return self.status == 'valid'
-
-    def has_been_validated(self):
-        return self.is_valid()
-
-    def is_paid(self):
-        return False
-
-    def is_resulted(self):
-        return self.has_been_validated()
-
-    def is_cancelled(self):
-        return False
-
-    def is_waiting(self):
-        return self.status == 'wait'
-
-    def is_cancelinvoice(self):
-        return True
 
     def is_tolate(self):
         """

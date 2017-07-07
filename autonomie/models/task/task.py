@@ -56,7 +56,6 @@ from autonomie.models.tva import (
     Tva,
     Product,
 )
-from autonomie_base.models.utils import get_current_timestamp
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
@@ -564,7 +563,7 @@ _{s.date:%m%y}"
         company_index = self._get_company_index(company)
         project_index = self._get_project_index(project)
 
-        self.status = self.state_machine.default_state
+        self.status = 'draft'
         self.company = company
         self.customer = customer
         self.address = customer.full_address
@@ -698,10 +697,7 @@ _{s.date:%m%y}"
         log.debug(u"# Task status change #")
 
         actual_status = self.status
-        if actual_status is None and status == self.state_machine.default_state:
-            return status
-
-        self.status_date = get_current_timestamp()
+        self.status_date = datetime.date.today()
 
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
         if self.status_person is not None:
@@ -710,6 +706,7 @@ _{s.date:%m%y}"
                 status_code=status,
                 status_person_id=self.status_person.id,
                 status_comment=self.status_comment,
+                date=self.status_date,
             )
             self.statuses.append(status_record)
 

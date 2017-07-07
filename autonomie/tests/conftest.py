@@ -213,71 +213,21 @@ def connection(request, settings):
     return _connection
 
 
-def populate_db(session):
-    from autonomie.models.user import User
-    user = User(
-        login='user1_login',
-        firstname='user1_firstname',
-        lastname="user1_lastname",
-        email="user1@test.fr"
-    )
-    user.set_password('o')
-    session.add(user)
-
-    from autonomie.models.project import Project
-    project = Project(
-        name='Projet 1',
-        code='P001',
-        definition="Projet 1"
-    )
-    session.add(project)
-
-    from autonomie.models.customer import Customer
-    cust = Customer(
-        code='C001',
-        name='Client1',
-        lastname=u'Client Lastname',
-        address=u'15 rue Victore Hugo',
-        zip_code='69003',
-        city='Lyon',
-    )
-    cust.projects.append(project)
-    session.add(cust)
-
-    from autonomie.models.project import Phase
-    phase = Phase(name='Phase de test')
-    phase.project = project
-    session.add(phase)
-
-    from autonomie.models.company import Company
-    c = Company(
-        name="company1",
-        goal="Company of user1",
-        phone='0457858585',
-    )
-    c.employees.append(user)
-    c.customers.append(cust)
-    c.projects.append(project)
-    session.add(c)
-    from autonomie.scripts import fake_database
-    fake_database.set_configuration()
-
-
 @fixture(scope='session')
 def content(connection, settings):
     """
     sets up some default content
     """
     from transaction import commit
-    from autonomie_base.models.base import DBBASE, DBSESSION
+    from autonomie_base.models.base import (
+        DBBASE,
+    )
     metadata = DBBASE.metadata
 
     metadata.drop_all(connection.engine)
     from autonomie.models import adjust_for_engine
     adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
-
-    populate_db(DBSESSION())
 
     commit()
 
@@ -367,3 +317,130 @@ def wsgi_app(settings, dbsession):
 def app(wsgi_app):
     from webtest import TestApp
     return TestApp(wsgi_app)
+
+
+# Common Models fixtures
+@fixture
+def tva(dbsession):
+    from autonomie.models.tva import Tva
+    tva = Tva(value=2000, name='20%', default=True)
+    dbsession.add(tva)
+    dbsession.flush()
+    return tva
+
+
+@fixture
+def product(tva, dbsession):
+    from autonomie.models.tva import Product
+    product = Product(name='product', compte_cg='122', tva_id=tva.id)
+    dbsession.add(product)
+    dbsession.flush()
+    return product
+
+
+@fixture
+def unity(dbsession):
+    from autonomie.models.task.unity import WorkUnit
+    print([w.label for w in WorkUnit.query()])
+    unity = WorkUnit(label=u"Mètre")
+    dbsession.add(unity)
+    dbsession.flush()
+    return unity
+
+
+@fixture
+def mention(dbsession):
+    from autonomie.models.task.mentions import TaskMention
+    mention = TaskMention(
+        title=u"TaskMention tet",
+        full_text=u"blabla",
+        label=u"bla",
+    )
+    dbsession.add(mention)
+    dbsession.flush()
+    return mention
+
+
+@fixture
+def mode(dbsession):
+    from autonomie.models.payments import PaymentMode
+    mode = PaymentMode(label=u"Chèque")
+    dbsession.add(mode)
+    dbsession.flush()
+    return mode
+
+
+@fixture
+def bank(dbsession):
+    from autonomie.models.payments import BankAccount
+    bank = BankAccount(label=u"banque", code_journal='bq', compte_cg='123')
+    dbsession.add(bank)
+    dbsession.flush()
+    return bank
+
+
+@fixture
+def user(dbsession):
+    from autonomie.models.user import User
+    user = User(
+        login=u"login",
+        lastname=u"Lastname",
+        firstname=u"Firstname",
+        email="login@c.fr",
+    )
+    user.set_password('password')
+    dbsession.add(user)
+    dbsession.flush()
+    return user
+
+
+@fixture
+def company(dbsession, user):
+    from autonomie.models.company import Company
+    company = Company(
+        name=u"Company",
+        email=u"company@c.fr",
+    )
+    company.employees = [user]
+    dbsession.add(company)
+    dbsession.flush()
+    return company
+
+
+@fixture
+def customer(dbsession, company):
+    from autonomie.models.customer import Customer
+    customer = Customer(
+        name=u"customer",
+        code=u"CUST",
+        lastname=u"Lastname",
+        firstname=u"Firstname",
+        address=u"1th street",
+        zip_code=u"01234",
+        city=u"City",
+    )
+    customer.company = company
+    dbsession.add(customer)
+    dbsession.flush()
+    return customer
+
+
+@fixture
+def project(dbsession, company, customer):
+    from autonomie.models.project import Project
+    project = Project(name=u"Project")
+    project.company = company
+    project.customer = [customer]
+    dbsession.add(project)
+    dbsession.flush()
+    return project
+
+
+@fixture
+def phase(dbsession, project):
+    from autonomie.models.project import Phase
+    phase = Phase(name=u"Phase")
+    phase.project = project
+    dbsession.add(phase)
+    dbsession.flush()
+    return phase

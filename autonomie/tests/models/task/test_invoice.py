@@ -375,15 +375,16 @@ def test_duplicate_invoice_integration(dbsession, invoice):
     assert newest.company_id == invoice.company_id
 
 
-def test_valid_invoice(config, dbsession, invoice, service_request):
+def test_valid_invoice(config, dbsession, invoice, request_with_config, user):
+    request_with_config.user = user
     dbsession.add(invoice)
     dbsession.flush()
     config.testing_securitypolicy(userid='test', permissive=True)
 
-    invoice.set_status('wait', service_request)
+    invoice.set_status('wait', request_with_config)
     dbsession.merge(invoice)
     dbsession.flush()
-    invoice.set_status('valid', service_request)
+    invoice.set_status('valid', request_with_config)
     assert invoice.official_number == 1
 
 

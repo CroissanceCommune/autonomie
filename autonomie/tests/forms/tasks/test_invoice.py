@@ -8,7 +8,17 @@ import pytest
 import datetime
 
 
-def test_paymentform_schema(invoice, request_with_config, mode, bank):
+def test_paymentform_schema(
+    dbsession,
+    invoice,
+    request_with_config,
+    mode,
+    bank,
+    task_line,
+    task_line_group,
+):
+    task_line_group.lines = [task_line]
+    invoice.line_groups = [task_line_group]
     from autonomie.forms.tasks.invoice import PaymentSchema
     request_with_config.context = invoice
     schema = PaymentSchema().bind(request=request_with_config)
@@ -32,7 +42,16 @@ def test_paymentform_schema(invoice, request_with_config, mode, bank):
     schema.deserialize(value) == expected_value
 
 
-def test_deferred_total_validator(invoice, request_with_config, mode, bank):
+def test_deferred_total_validator(
+    invoice,
+    request_with_config,
+    mode,
+    bank,
+    task_line,
+    task_line_group,
+):
+    invoice.line_groups = [task_line_group]
+    task_line_group.lines = [task_line]
     from autonomie.forms.tasks.invoice import PaymentSchema
     request_with_config.context = invoice
     schema = PaymentSchema().bind(request=request_with_config)

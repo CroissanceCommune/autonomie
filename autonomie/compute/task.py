@@ -260,7 +260,7 @@ class InvoiceCompute(TaskCompute):
         """
         result = 0
         for cancelinvoice in self.cancelinvoices:
-            if cancelinvoice.is_valid():
+            if cancelinvoice.status == 'valid':
                 # cancelinvoice total is negative
                 result += -1 * cancelinvoice.total()
         return result
@@ -303,7 +303,7 @@ class InvoiceCompute(TaskCompute):
         """
         result = {}
         for cancelinvoice in self.cancelinvoices:
-            if cancelinvoice.is_valid():
+            if cancelinvoice.status == 'valid':
                 ttc_parts = cancelinvoice.tva_ttc_parts()
                 for key, value in ttc_parts.items():
                     if key in result:

@@ -7,6 +7,7 @@
 Action objects
 """
 from autonomie.exception import Forbidden
+from autonomie import interfaces
 
 
 class Action(object):
@@ -126,11 +127,23 @@ class ActionManager(object):
         elif not action.allowed(context, request):
             raise Forbidden(
                 u"This action is not allowed for %s : %s" (
-                    request.user_id,
+                    request.user.id,
                     action_name,
                 )
             )
-        return action.process(context, request, request.user_id, **params)
+        return action.process(context, request, request.user.id, **params)
+
+
+def invoice_valid_callback(request, task, **kw):
+    """
+    Set a official number on invoices (or cancelinvoices)
+
+    :param obj request: The current pyramid request
+    :param obj context: The current context
+    """
+    invoice_service = request.find_service(interfaces.IInvoiceService)
+    invoice_service.valid_callback(task)
+    return task
 
 
 def get_status_actions(data_type):
@@ -162,18 +175,20 @@ def get_status_actions(data_type):
             u"Valider ce document", "btn btn-success btn-primary-action",
         )
     ):
-        manager.add(
-            Action(
-                status,
-                '%s.%s' % (status, data_type),
-                status_attr='status',
-                userid_attr='status_person_id',
-                icon=icon,
-                label=label,
-                title=title,
-                css=css,
-            )
+        action = Action(
+            status,
+            '%s.%s' % (status, data_type),
+            status_attr='status',
+            userid_attr='status_person_id',
+            icon=icon,
+            label=label,
+            title=title,
+            css=css,
         )
+        if status == 'valid' and data_type in ('invoice', 'cancelinvoice'):
+            action.callback = invoice_valid_callback
+
+        manager.add(action)
     return manager
 
 

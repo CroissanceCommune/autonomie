@@ -111,9 +111,8 @@ class CancelInvoiceEdit(TaskFormView):
         if not self.request.has_permission('edit.cancelinvoice'):
             raise HTTPFound(
                 self.request.route_path(
-                    "cancelinvoice",
+                    "/cancelinvoices/{id}.html",
                     id=self.context.id,
-                    _query=dict(view='html')
                 )
             )
 

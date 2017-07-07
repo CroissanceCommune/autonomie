@@ -50,6 +50,22 @@ from autonomie_base.models.base import (
 )
 
 
+NODE_TYPE_ROUTES = {
+    'estimation': "/estimations/{id}.html",
+    'invoice': "/invoices/{id}.html",
+    'cancelinvoice': "/cancelinvoices/{id}.html",
+}
+
+
+NODE_TYPE_LABEL = {
+    'project': u'projet',
+    'estimation': u'document',
+    'invoice': u'document',
+    'cancelinvoice': u'document',
+    'activity': u'rendez-vous',
+}
+
+
 class Node(DBBASE, PersistentACLMixin):
     """
     A base node providing a parent<->children structure for most of the models

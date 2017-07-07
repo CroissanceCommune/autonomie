@@ -80,9 +80,8 @@ def get_duplicate_form(request, counter=None):
     duplicate_js.need()
     schema = DuplicateSchema().bind(request=request)
     action = request.route_path(
-        request.context.__name__,
+        "/%ss/{id}/duplicate" % request.context.type_,
         id=request.context.id,
-        _query=dict(action='duplicate'),
     )
     valid_btn = Button(
         name='submit',
@@ -106,7 +105,7 @@ def get_edit_metadata_form(request, counter=None):
     """
     schema = EDIT_METADATASCHEMA.bind(request=request)
     action = request.route_path(
-        request.context.__name__,
+        "/%ss/{id}/metadata" % request.context.type_,
         id=request.context.id,
         _query=dict(action='status'),
     )
@@ -130,7 +129,7 @@ def context_is_task(context):
     """
         Return True if given context is a task
     """
-    return context.__name__ in DOCUMENT_TYPES
+    return context.type_ in DOCUMENT_TYPES
 
 
 class TaskFormActions(object):
@@ -208,11 +207,11 @@ class TaskFormActions(object):
         if context_is_task(self.request.context):
             yield ViewLink(u"Voir le PDF",
                            "view_%s" % (self.request.context.__name__),
-                           path=self.request.context.__name__,
+                           path="/%ss/{id}.pdf" % self.request.context.type_,
                            css="btn btn-primary",
                            request=self.request,
                            id=self.request.context.id,
-                           _query=dict(view="pdf"))
+                           )
 
     def _draft_btn(self):
         """
@@ -220,7 +219,7 @@ class TaskFormActions(object):
         """
         label = u"Enregistrer comme brouillon"
         if context_is_task(self.context):
-            if self.context.is_waiting():
+            if self.context.status == 'wait':
                 label = u"Annuler la mise en validation et repasser en \
 brouillon"
         yield Submit(
@@ -235,7 +234,7 @@ brouillon"
         """
         label = u"Enregistrer et demander la validation"
         if context_is_task(self.context):
-            if self.context.is_waiting():
+            if self.context.status == 'wait':
                 label = u"Enregistrer et garder en attente"
         yield Submit(label, value="wait", request=self.request)
 
@@ -312,114 +311,13 @@ brouillon"
         return btns
 
 
-class StatusView(BaseView):
-    """
-        View for status handling
-
-        See the call method for the workflow and the params
-        passed to the methods
-    """
-    valid_msg = u"Le statut a bien été modifié"
-
-    def redirect(self):
-        """
-            Redirect function to be used after status processing
-        """
-        return HTTPNotFound()
-
-    def _get_status(self):
-        """
-            Get the status that has been asked for
-        """
-        return self.request.params['submit']
-
-    def _get_request_params(self):
-        """
-            return the request params as a dict (a non locked one)
-        """
-        return dict(self.request.params.items())
-
-    def pre_status_process(self, item, status, params):
-        """
-            Launch pre process functions
-        """
-        if hasattr(self, "pre_%s_process" % status):
-            func = getattr(self, "pre_%s_process" % status)
-            return func(item, status, params)
-        return params
-
-    def status_process(self, params, status):
-        """
-            Definitively Set the status of the element
-        """
-        return self.request.context.set_status(
-            status,
-            self.request,
-            self.request.user.id,
-            **params
-        )
-
-    def post_status_process(self, item, status, params):
-        """
-            Launch post status process functions
-        """
-        if hasattr(self, "post_%s_process" % status):
-            func = getattr(self, "post_%s_process" % status)
-            func(item, status, params)
-
-    def set_status(self, item, status):
-        """
-            handle the status pre/set/post workflow
-        """
-        pre_params = self.request.params
-        params = self.pre_status_process(item, status, pre_params)
-        post_params = self.status_process(params, status)
-        self.post_status_process(item, status, post_params)
-        return item, status
-
-    def notify(self, item, status):
-        """
-        Notify the change to the registry
-        """
-        self.request.registry.notify(
-            StatusChanged(
-                self.request,
-                item,
-                status,
-            )
-        )
-
-    def __call__(self):
-        """
-            Main entry for this view object
-        """
-        item = self.request.context
-        if "submit" in self.request.params:
-            try:
-                status = self._get_status()
-                logger.debug(u"New status : %s " % status)
-                item, status = self.set_status(item, status)
-                item = self.request.dbsession.merge(item)
-                self.notify(item, status)
-                self.session.flash(self.valid_msg)
-                logger.debug(u" + The status has been set to {0}".format(
-                    status))
-            except Forbidden, e:
-                logger.exception(u" !! Unauthorized action by : {0}".format(
-                    self.request.user.login
-                ))
-                self.session.pop_flash("")
-                self.session.flash(e.message, queue='error')
-        return self.redirect()
-
-
 class TaskStatusView(StatusView):
     """
         View for task status handling, allows to easily process states
         on documents
     """
 
-    def pre_duplicate_process(self, task, status, params):
+    def pre_duplicate_process(self, status, params):
         """
             Common pre process method for document duplication
         """
@@ -441,7 +339,7 @@ class TaskStatusView(StatusView):
         appstruct['user'] = self.request.user
         return appstruct
 
-    def pre_edit_metadata_process(self, task, status, params):
+    def pre_edit_metadata_process(self, status, params):
         """
             pre process method for phase changing
         """

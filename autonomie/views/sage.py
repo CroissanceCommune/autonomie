@@ -297,7 +297,7 @@ class SageInvoiceExportPage(BaseView):
             for line in invoice.all_lines:
                 if not self.check_invoice_line(line):
                     invoice_url = self.request.route_path(
-                        'invoice',
+                        '/invoices/{id}.html',
                         id=invoice.id
                     )
                     message = u"""La facture {0} n'est pas exportable :

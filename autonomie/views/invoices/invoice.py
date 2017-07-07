@@ -91,7 +91,7 @@ def get_paid_form(request, counter=None):
     )
     schema = get_payment_schema(request).bind(request=request)
     action = request.route_path(
-        "invoice",
+        "/invoices/{id}/addpayment",
         id=request.context.id,
         _query=dict(action='payment')
     )
@@ -112,9 +112,8 @@ def get_set_products_form(request, counter=None):
     """
     schema = SetProductsSchema().bind(request=request)
     action = request.route_path(
-        request.context.__name__,
+        "/%ss/{id}/set_products" % request.context.type_,
         id=request.context.id,
-        _query=dict(action='set_products')
     )
     valid_btn = Button(
         name='submit',
@@ -134,9 +133,8 @@ def get_set_financial_year_form(request, counter=None):
     """
     schema = FinancialYearSchema().bind(request=request)
     action = request.route_path(
-        request.context.__name__,
+        "/%ss/{id}/set_financial_year" % request.context.type_,
         id=request.context.id,
-        _query=dict(action='set_financial_year'),
     )
     valid_btn = Button(
         name='submit',
@@ -394,7 +392,9 @@ class CommonInvoiceStatusView(TaskStatusView):
         log.debug(u"Set financial year and prefix of the invoice :{0}".format(
             invoice.id))
         msg = u"Le document a bien été modifié"
-        msg = msg.format(self.request.route_path("invoice", id=invoice.id))
+        msg = msg.format(self.request.route_path(
+            "/invoices/{id}.html", id=invoice.id
+        ))
         self.request.session.flash(msg)
 
 
@@ -446,7 +446,11 @@ class InvoiceStatusView(CommonInvoiceStatusView):
         log.debug(u"Generated cancelinvoice {0}".format(id_))
         msg = u"Un avoir a été généré, vous pouvez le modifier \
 <a href='{0}'>Ici</a>."
-        msg = msg.format(self.request.route_path("cancelinvoice", id=id_))
+        msg = msg.format(
+            self.request.route_path(
+                "/cancelinvoices/{id}.html", id=id_
+            )
+        )
         self.session.flash(msg)
 
     def post_duplicate_process(self, task, status, params):
@@ -457,7 +461,11 @@ class InvoiceStatusView(CommonInvoiceStatusView):
         log.debug(u"Duplicated invoice : {0}".format(id_))
         msg = u"La facture a bien été dupliquée, vous pouvez le modifier \
 <a href='{0}'>Ici</a>."
-        msg = msg.format(self.request.route_path("invoice", id=id_))
+        msg = msg.format(
+            self.request.route_path(
+                "/invoices/{id}.html", id=id_
+            )
+        )
         self.request.session.flash(msg)
 
 

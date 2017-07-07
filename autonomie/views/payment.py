@@ -197,7 +197,10 @@ def payment_delete(context, request):
     if 'come_from' in request.GET:
         redirect = request.GET['come_from']
     elif isinstance(parent, Invoice):
-        redirect = request.route_path("invoice", id=parent.id)
+        redirect = request.route_path(
+            "/invoices/{id}.html",
+            id=parent.id
+        )
     elif isinstance(parent, ExpenseSheet):
         redirect = request.route_path("expensesheet", id=parent.id)
     return HTTPFound(redirect)

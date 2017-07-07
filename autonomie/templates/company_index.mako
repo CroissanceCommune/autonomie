@@ -46,7 +46,7 @@
                     <tbody>
                         % for invoice in elapsed_invoices.limit(5):
                             <tr>
-                                <% url = request.route_path("invoice", id=invoice.id) %>
+                                <% url = request.route_path("/invoices/{id}.html", id=invoice.id) %>
                                 <% onclick = "document.location='{url}'".format(url=url) %>
                                 <td class="rowlink" onclick="${onclick}">
                                     ${format_customer(invoice.customer, False)}
@@ -57,13 +57,13 @@
                                 <td style="text-align:right">
                                     <div class='btn-group'>
                                     ${table_btn(\
-                                    request.route_path("invoice", id=invoice.id), \
+                                    request.route_path("/invoices/{id}.html", id=invoice.id), \
                                     u"", \
                                     u"Voir ce document", \
                                     icon=u"search")\
                                     }
                                     ${table_btn(
-                                    request.route_path("invoice", id=invoice.id, _query=dict(view='pdf')),
+                                    request.route_path("/invoices/{id}.pdf", id=invoice.id),
                                         u"",
                                         u"Télécharger ce document au format pdf",
                                         icon=u"fa fa-file-pdf-o")}

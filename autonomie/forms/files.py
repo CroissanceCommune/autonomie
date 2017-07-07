@@ -35,6 +35,7 @@ from pyramid_deform import SessionFileUploadTempStore
 from autonomie.compute.math_utils import convert_to_int
 from autonomie.views.render_api import human_readable_filesize
 from autonomie import forms
+from autonomie.models.node import NODE_TYPE_ROUTES
 
 
 class CustomFileUploadWidget(deform.widget.FileUploadWidget):
@@ -99,7 +100,10 @@ class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
     def preview_url(self, uid):
         doctype = getattr(self.request.context, 'type_', '')
         if doctype:
-            return self.request.route_path(doctype, id=self.request.context.id)
+            return self.request.route_path(
+                NODE_TYPE_ROUTES.get(doctype, doctype),
+                id=self.request.context.id
+            )
         else:
             return None
 

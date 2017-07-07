@@ -59,7 +59,7 @@ Afficher <select id='number_of_tasks'>
     <tbody>
         % for task in tasks:
             <tr>
-                <% url = request.route_path("/%ss/{id}" % task.type_, id=task.id) %>
+                <% url = request.route_path("/%ss/{id}.html" % task.type_, id=task.id) %>
                 <% onclick = "document.location='{url}'".format(url=url) %>
                 <td class="visible-lg rowlink" onclick="${onclick}">
                     ${task.name}
@@ -78,7 +78,7 @@ Afficher <select id='number_of_tasks'>
                 </td>
                 <td class="visible-lg" style="text-align:right">
                     <div class='btn-group'>
-                    ${table_btn(request.route_path("/%ss/{id}" % task.type_, id=task.id), u"", u"Voir ce document", icon=u"search")}
+                    ${table_btn(request.route_path("/%ss/{id}.html" % task.type_, id=task.id), u"", u"Voir ce document", icon=u"search")}
                     ${table_btn(
                         request.route_path("/%ss/{id}.pdf" % task.type_, id=task.id),
                         u"",

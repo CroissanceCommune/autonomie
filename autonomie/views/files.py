@@ -38,9 +38,15 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils.widgets import ViewLink
 from autonomie_base.models.base import DBSESSION
+from autonomie.models.node import (
+    NODE_TYPE_ROUTES,
+    NODE_TYPE_LABEL,
+)
 from autonomie.models.files import File
 from autonomie import forms
-from autonomie.forms.files import FileUploadSchema
+from autonomie.forms.files import (
+    FileUploadSchema,
+)
 from autonomie.resources import fileupload_js
 from autonomie.views import (
     BaseFormView,
@@ -56,15 +62,6 @@ EDIT_OK_MSG = u"Le fichier a bien été adjoint au document"
 
 
 logger = log = logging.getLogger(__name__)
-
-
-NODE_TYPE_LABEL = {
-    'project': u'projet',
-    'estimation': u'document',
-    'invoice': u'document',
-    'cancelinvoice': u'document',
-    'activity': u'rendez-vous',
-    }
 
 
 def file_dl_view(context, request):
@@ -236,7 +233,10 @@ def populate_actionmenu(context, request):
         ViewLink(
             label,
             perm='view.file',
-            path=context.parent.type_,
+            path=NODE_TYPE_ROUTES.get(
+                context.parent.type_,
+                context.parent.type_
+            ),
             id=context.parent.id
         )
     )

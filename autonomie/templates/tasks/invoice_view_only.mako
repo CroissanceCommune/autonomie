@@ -34,7 +34,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <div class='row'>
 <div class='col-xs-12'>
 <a class='btn btn-primary primary-action'
-    href="${request.route_path(request.context.type_, id=request.context.id, _query={'view': 'pdf'})}"
+    href="${request.route_path('/%ss/{id}/pdf' % request.context.type_, id=request.context.id)}"
     >
     <i class='glyphicon glyphicon-book'></i>&nbsp;Voir le PDF
 </a>

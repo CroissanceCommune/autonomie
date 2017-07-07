@@ -15,10 +15,16 @@ def filelist_tab_panel(context, request, title, add_url=None):
     :returns: dict
     """
     if add_url is None:
+        if context.type_ in ('estimation', 'invoice', 'cancelinvoice'):
+            route_name = "/%ss/{id}/addfile" % context.type_
+            query = {}
+        else:
+            route_name = context.type_
+            query = {'action': 'attach_file'}
         add_url = request.route_path(
-            context.type_,
+            route_name,
             id=context.id,
-            _query={"action": "attach_file"}
+            _query=query,
         )
     return dict(
         title=title,

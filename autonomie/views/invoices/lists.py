@@ -61,7 +61,7 @@ from autonomie.utils.pdf import write_pdf
 
 from autonomie.views.taskaction import html
 
-from autonomie.forms.invoices import (
+from autonomie.forms.tasks.invoice import (
     get_list_schema,
     pdfexportSchema,
 )

@@ -8,7 +8,7 @@ import logging
 import colander
 from sqlalchemy import (distinct, extract)
 
-from autonomie.forms.estimations import (
+from autonomie.forms.tasks.estimation import (
     get_list_schema,
 )
 

@@ -45,6 +45,7 @@ from autonomie.forms.payments import (
     deferred_payment_mode_widget,
     deferred_payment_mode_validator,
     deferred_bank_widget,
+    deferred_bank_validator,
 )
 from autonomie.models.payments import BankAccount
 
@@ -228,6 +229,7 @@ class ExpensePaymentSchema(colander.MappingSchema):
         title=u"Banque",
         missing=colander.drop,
         widget=deferred_bank_widget,
+        validator=deferred_bank_validator,
         default=forms.get_deferred_default(BankAccount),
     )
     waiver = colander.SchemaNode(

@@ -80,7 +80,7 @@ from .task import (
     Task,
     TaskLine,
 )
-from .states import DEFAULT_STATE_MACHINES
+from .actions import DEFAULT_ACTION_MANAGER
 
 log = logging.getLogger(__name__)
 
@@ -224,7 +224,7 @@ class Invoice(Task, InvoiceCompute):
             'export': {'exclude': True},
         },
     )
-    state_machine = DEFAULT_STATE_MACHINES['invoice']
+    state_manager = DEFAULT_ACTION_MANAGER['invoice']
 
     paid_states = ('resulted',)
     not_paid_states = ('valid', 'paid', )
@@ -514,7 +514,7 @@ class CancelInvoice(Task, TaskCompute):
         info={'colanderalchemy': forms.EXCLUDED, }
     )
 
-    state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
+    state_manager = DEFAULT_ACTION_MANAGER['cancelinvoice']
     valid_states = ('valid', )
 
     _number_tmpl = u"{s.company.name} {s.date:%Y-%m} A{s.company_index}"

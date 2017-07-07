@@ -102,9 +102,9 @@ MAIN_INFOS_GRID = (
 
 def get_customers_from_request(request):
     customers = []
-    if request.context.__name__ == 'project':
+    if request.context.type_ == 'project':
         customers = request.context.customers
-    elif request.context.__name__ in ('invoice', 'estimation', 'cancelinvoice'):
+    elif request.context.type_ in ('invoice', 'estimation', 'cancelinvoice'):
         if request.context.project is not None:
             customers = request.context.project.company.customers
     return customers
@@ -118,7 +118,7 @@ def deferred_default_customer(node, kw):
     """
     request = kw['request']
     res = 0
-    if request.context.__name__ == 'project':
+    if request.context.type_ == 'project':
         customers = request.context.customers
         if len(customers) == 1:
             res = customers[0].id
@@ -193,7 +193,7 @@ def deferred_default_name(node, kw):
     tasktype = get_tasktype_from_request(request)
     method = "get_next_{0}_index".format(tasktype)
 
-    if request.context.__name__ == 'project':
+    if request.context.type_ == 'project':
         # e.g : project.get_next_invoice_number()
         number = getattr(request.context, method)()
 
@@ -209,9 +209,9 @@ def get_phases_from_request(request):
     Get the phases from the current project regarding request context
     """
     phases = []
-    if request.context.__name__ == 'project':
+    if request.context.type_ == 'project':
         phases = request.context.phases
-    elif request.context.__name__ in ('invoice', 'cancelinvoice', 'estimation'):
+    elif request.context.type_ in ('invoice', 'cancelinvoice', 'estimation'):
         phases = request.context.project.phases
     return phases
 

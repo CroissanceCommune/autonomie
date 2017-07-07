@@ -47,7 +47,7 @@ from autonomie.compute.sage import (
     SageExpensePaymentMain,
     SageExpensePaymentWaiver,
 )
-from autonomie.test.tools import Dummy
+from autonomie.tests.tools import Dummy
 
 
 class DummyLine(Dummy, LineCompute):

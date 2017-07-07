@@ -34,7 +34,7 @@ from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
 from autonomie.models.customer import Customer
-from autonomie.models.task.invoice import PaymentMode
+from autonomie.models.payments import PaymentMode
 from autonomie.models.tva import Tva
 from autonomie.scripts.utils import command
 from autonomie.models.task.unity import WorkUnit

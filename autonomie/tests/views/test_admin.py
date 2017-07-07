@@ -26,7 +26,7 @@ import pytest
 pytest.mark.usefixtures("config")
 
 from autonomie.models import tva
-from autonomie.models.task.invoice import PaymentMode
+from autonomie.models.payments import PaymentMode
 from autonomie.models.task import WorkUnit
 from autonomie.models.config import (
     get_config,

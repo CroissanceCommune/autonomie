@@ -42,7 +42,7 @@ class CompanyService(object):
         query = query.filter(
             Task.type_.in_(('invoice', 'estimation', 'cancelinvoice'))
         )
-        query = query.order_by(desc(Task.statusDate))
+        query = query.order_by(desc(Task.status_date))
         if offset is not None:
             query = query.offset(offset)
         if limit is not None:

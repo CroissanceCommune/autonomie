@@ -35,6 +35,7 @@
     >>> DBSESSION.add(c)
 
 """
+import datetime
 import logging
 import deform
 
@@ -45,6 +46,7 @@ from sqlalchemy import (
     Text,
     Boolean,
     ForeignKey,
+    Date,
 )
 from sqlalchemy.orm import (
     deferred,
@@ -53,10 +55,8 @@ from sqlalchemy.orm import (
 from autonomie_base.consts import CIVILITE_OPTIONS
 from autonomie import forms
 from autonomie_base.models.types import (
-    CustomDateType,
     PersistentACLMixin,
 )
-from autonomie_base.models.utils import get_current_timestamp
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
@@ -118,9 +118,8 @@ class Customer(DBBASE, PersistentACLMixin):
 
     created_at = deferred(
         Column(
-            "creationDate",
-            CustomDateType,
-            default=get_current_timestamp,
+            Date(),
+            default=datetime.date.today,
             info={
                 'export': {'exclude': True},
                 'colanderalchemy': forms.EXCLUDED,
@@ -132,10 +131,9 @@ class Customer(DBBASE, PersistentACLMixin):
 
     updated_at = deferred(
         Column(
-            "updateDate",
-            CustomDateType,
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp,
+            Date(),
+            default=datetime.date.today,
+            onupdate=datetime.date.today,
             info={
                 'export': {'exclude': True},
                 'colanderalchemy': forms.EXCLUDED,

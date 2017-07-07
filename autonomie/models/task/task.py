@@ -52,9 +52,6 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie_base.models.types import (
-    CustomDateType,
-)
 from autonomie.models.tva import (
     Tva,
     Product,
@@ -69,7 +66,6 @@ from autonomie.forms.custom_types import (AmountType, QuantityType,)
 from autonomie.models.user import get_deferred_user_choice
 
 from .interfaces import ITask
-from .states import DEFAULT_STATE_MACHINES
 from autonomie.compute.task import (
     LineCompute,
     DiscountLineCompute,
@@ -124,7 +120,7 @@ class TaskService(object):
         from autonomie.models.task import Estimation
         query = Estimation.query(*args)
         query = query.filter(Estimation.status == 'wait')
-        query = query.order_by(Estimation.statusDate)
+        query = query.order_by(Estimation.status_date)
         return query
 
     @classmethod
@@ -134,7 +130,7 @@ class TaskService(object):
         query = query.with_polymorphic([Invoice, CancelInvoice])
         query = query.filter(task_cls.type_.in_(('invoice', 'cancelinvoice')))
         query = query.filter(task_cls.status == 'wait')
-        query = query.order_by(task_cls.type_).order_by(task_cls.statusDate)
+        query = query.order_by(task_cls.type_).order_by(task_cls.status_date)
         return query
 
 
@@ -177,7 +173,7 @@ class Task(Node):
             }
         }
     )
-    statusComment = Column(
+    status_comment = Column(
         Text,
         info={
             "colanderalchemy": {
@@ -186,7 +182,7 @@ class Task(Node):
             }
         },
     )
-    statusPerson = Column(
+    status_person_id = Column(
         ForeignKey('accounts.id'),
         info={
             'colanderalchemy': {
@@ -196,13 +192,12 @@ class Task(Node):
             "export": {'exclude': True},
         },
     )
-    statusDate = Column(
-        CustomDateType,
-        default=get_current_timestamp,
+    status_date = Column(
+        Date(),
+        default=datetime.date.today,
         info={
             'colanderalchemy': {
                 "title": u"Date du dernier changement de statut",
-                'typ': colander.Date
             }
         }
     )
@@ -427,9 +422,9 @@ class Task(Node):
     )
 
     # Organisationnal Relationships
-    statusPersonAccount = relationship(
+    status_person = relationship(
         "User",
-        primaryjoin="Task.statusPerson==User.id",
+        primaryjoin="Task.status_person_id==User.id",
         backref=backref(
             "taskStatuses",
             info={
@@ -563,7 +558,7 @@ class Task(Node):
     _number_tmpl = u"{s.project.code}_{s.customer.code}_T{s.project_index}\
 _{s.date:%m%y}"
 
-    state_machine = DEFAULT_STATE_MACHINES['base']
+    state_manager = None
 
     def __init__(self, company, customer, project, phase, user):
         company_index = self._get_company_index(company)
@@ -576,7 +571,7 @@ _{s.date:%m%y}"
         self.project = project
         self.phase = phase
         self.owner = user
-        self.statusPersonAccount = user
+        self.status_person = user
         self.date = datetime.date.today()
         self.set_numbers(company_index, project_index)
 
@@ -635,9 +630,9 @@ _{s.date:%m%y}"
 
             phase_id=self.phase_id,
             status=self.status,
-            statusComment=self.statusComment,
-            statusPerson=self.statusPerson,
-            # statusDate=self.statusDate.isoformat(),
+            status_comment=self.status_comment,
+            status_person_id=self.status_person_id,
+            # status_date=self.status_date.isoformat(),
             date=self.date.isoformat(),
             owner_id=self.owner_id,
             description=self.description,
@@ -702,15 +697,15 @@ _{s.date:%m%y}"
         if actual_status is None and status == self.state_machine.default_state:
             return status
 
-        self.statusDate = get_current_timestamp()
+        self.status_date = get_current_timestamp()
 
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
-        if self.statusPersonAccount is not None:
+        if self.status_person is not None:
             # Can append in old dbs that are inconsistent
             status_record = TaskStatus(
-                statusCode=status,
-                statusPerson=self.statusPersonAccount.id,
-                statusComment=self.statusComment,
+                status_code=status,
+                status_person_id=self.status_person.id,
+                status_comment=self.status_comment,
             )
             self.statuses.append(status_record)
 
@@ -880,16 +875,15 @@ class TaskStatus(DBBASE):
         Integer,
         ForeignKey('task.id', ondelete="cascade"),
     )
-    statusCode = Column(String(10))
-    statusComment = Column(
+    status_code = Column(String(10))
+    status_comment = Column(
         Text,
         info={"colanderalchemy": {'widget': deform.widget.TextAreaWidget()}},
     )
-    statusPerson = Column(Integer, ForeignKey('accounts.id'))
-    statusDate = Column(
-        CustomDateType,
-        default=get_current_timestamp,
-        info={'colanderalchemy': {'typ': colander.Date}}
+    status_person_id = Column(Integer, ForeignKey('accounts.id'))
+    status_date = Column(
+        Date(),
+        default=datetime.date.today,
     )
 
     task = relationship(
@@ -900,7 +894,7 @@ class TaskStatus(DBBASE):
             info={'colanderalchemy': forms.EXCLUDED}
         )
     )
-    statusPersonAccount = relationship(
+    status_person = relationship(
         "User",
         backref=backref(
             "task_statuses",
@@ -912,10 +906,10 @@ class TaskStatus(DBBASE):
     )
 
     def __json__(self, request):
-        result = dict(date=self.statusDate)
-        result['code'] = self.statusCode
-        if self.statusPersonAccount is not None:
-            result['account'] = self.statusPersonAccount.__json__(request)
+        result = dict(date=self.status_date)
+        result['code'] = self.status_code
+        if self.status_person is not None:
+            result['account'] = self.status_person.__json__(request)
         return result
 
 

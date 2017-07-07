@@ -382,7 +382,7 @@ def get_latest_phase(request, phases):
         all_tasks = []
         for phase in phases:
             all_tasks.extend(phase.tasks)
-        all_tasks.sort(key=lambda task: task.statusDate, reverse=True)
+        all_tasks.sort(key=lambda task: task.status_date, reverse=True)
 
         if all_tasks:
             result = all_tasks[0].phase

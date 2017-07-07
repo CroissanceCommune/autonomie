@@ -42,7 +42,7 @@ LINE = {
 
 PAYMENT_LINE = {
     'description': u"Début",
-    "paymentDate": datetime.date(2012, 12, 12),
+    "date": datetime.date(2012, 12, 12),
     "amount": 1000,
     "order": 1
 }
@@ -87,4 +87,4 @@ class TestPaymentLine(unittest.TestCase):
         for i in ('order', 'description', 'amount'):
             self.assertEqual(getattr(line, i), getattr(dline, i))
         today = datetime.date.today()
-        self.assertEqual(dline.paymentDate, today)
+        self.assertEqual(dline.date, today)

@@ -184,7 +184,7 @@ def test_duplicate_invoice(dbsession, invoice):
     assert len(invoice.discounts) == len(newinvoice.discounts)
     assert newinvoice.project == invoice.project
     assert newinvoice.company == invoice.company
-    assert newinvoice.statusPersonAccount == invoice.statusPersonAccount
+    assert newinvoice.status_person == invoice.status_person
     assert newinvoice.phase == invoice.phase
     assert newinvoice.mentions == invoice.mentions
     for key in "customer", "address", "expenses_ht", "workplace":
@@ -213,7 +213,7 @@ def test_duplicate_invoice_integration(dbsession, invoice):
     dbsession.flush()
     assert newest.phase_id == invoice.phase_id
     assert newest.owner_id == invoice.owner_id
-    assert newest.statusPerson == invoice.statusPerson
+    assert newest.status_person_id == invoice.status_person_id
     assert newest.project_id == invoice.project_id
     assert newest.company_id == invoice.company_id
 

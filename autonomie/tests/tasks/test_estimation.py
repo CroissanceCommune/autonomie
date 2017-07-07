@@ -67,14 +67,14 @@ LINES = [{'description':u'text1',
 
 DISCOUNTS = [{'description':u"Remise à 19.6", 'amount':2000, 'tva':1960}]
 PAYMENT_LINES = [{'description':u"Début",
-                  "paymentDate":datetime.date(2012, 12, 12),
+                  "date":datetime.date(2012, 12, 12),
                   "amount":1000,
                   "order":1},
                  {'description':u"Milieu",
-                  "paymentDate":datetime.date(2012, 12, 13),
+                  "date":datetime.date(2012, 12, 13),
                   "amount":1000, "order":2},
                  {'description':u"Fin",
-                  "paymentDate":datetime.date(2012, 12, 14),
+                  "date":datetime.date(2012, 12, 14),
                   "amount":150,
                   "order":3}]
 
@@ -180,7 +180,7 @@ def test_duplicate_estimation(dbsession, estimation):
         assert getattr(newestimation, key) == getattr(estimation, key)
     assert newestimation.status == 'draft'
     assert newestimation.project == estimation.project
-    assert newestimation.statusPersonAccount == estimation.owner
+    assert newestimation.status_person == estimation.owner
     assert newestimation.internal_number.startswith("company1 {0:%Y-%m}".format(
         datetime.date.today()
     ))
@@ -258,8 +258,8 @@ def test_gen_invoice(dbsession, estimation):
         inv = intermediate_invoices[index]
         # Here, the rounding strategy should be reviewed
         assert inv.total() - line['amount'] <= 1
-        assert inv.date == line['paymentDate']
-        assert inv.financial_year == line['paymentDate'].year
+        assert inv.date == line['date']
+        assert inv.financial_year == line['date'].year
         assert inv.mentions == estimation.mentions
 
     total = sum([i.total() for i in invoices])

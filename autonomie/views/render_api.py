@@ -127,8 +127,8 @@ def format_main_status(task, full=True):
     status_str = STATUS.get(status, DEF_STATUS).format(genre=genre)
     if full:
         suffix = u" par {0} le {1}".format(
-            format_account(task.statusPersonAccount),
-            format_date(task.statusDate)
+            format_account(task.status_person),
+            format_date(task.status_date)
         )
         status_str += suffix
 

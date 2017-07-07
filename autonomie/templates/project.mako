@@ -352,11 +352,11 @@
                 %if project.type:
                     <dt>Type de projet :</dt> <dd>${project.type}</dd>
                 % endif
-                % if project.startingDate:
-                    <dt>Début prévu le :</dt><dd>${api.format_date(project.startingDate)}</dd>
+                % if project.starting_date:
+                    <dt>Début prévu le :</dt><dd>${api.format_date(project.starting_date)}</dd>
                 % endif
-                % if project.endingDate:
-                    <dt>Livraison prévue le :</dt><dd>${api.format_date(project.endingDate)}</dd>
+                % if project.ending_date:
+                    <dt>Livraison prévue le :</dt><dd>${api.format_date(project.ending_date)}</dd>
                 % endif
             </dl>
             % if project.definition:

@@ -25,6 +25,7 @@
 """
     Project model
 """
+import datetime
 import colander
 import deform
 
@@ -36,6 +37,7 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Boolean,
+    Date,
 )
 from sqlalchemy.orm import (
     deferred,
@@ -44,9 +46,7 @@ from sqlalchemy.orm import (
 )
 
 from autonomie import forms
-from autonomie_base.models.utils import get_current_timestamp
 from autonomie_base.models.types import (
-    CustomDateType,
     PersistentACLMixin,
 )
 from autonomie_base.models.base import (
@@ -147,8 +147,8 @@ def check_begin_end_date(form, value):
     """
     Check the project beginning date preceeds the end date
     """
-    ending = value.get('endingDate')
-    starting = value.get('startingDate')
+    ending = value.get('ending_date')
+    starting = value.get('starting_date')
 
     if ending is not None and starting is not None:
         if not ending >= starting:
@@ -156,7 +156,7 @@ def check_begin_end_date(form, value):
                 form,
                 u"La date de début doit précéder la date de fin du projet"
             )
-            exc['startingDate'] = u"Doit précéder la date de fin"
+            exc['starting_date'] = u"Doit précéder la date de fin"
             raise exc
 
 
@@ -216,30 +216,28 @@ class Project(Node):
         }
     )
 
-    startingDate = deferred(
+    starting_date = deferred(
         Column(
-            CustomDateType,
+            Date(),
             info={
                 "colanderalchemy": {
                     "title": u"Date de début",
-                    "typ": colander.Date(),
                 }
             },
-            default=get_current_timestamp,
+            default=datetime.date.today,
         ),
         group='edit',
     )
 
-    endingDate = deferred(
+    ending_date = deferred(
         Column(
-            CustomDateType,
+            Date(),
             info={
                 "colanderalchemy": {
                     "title": u"Date de fin",
-                    "typ": colander.Date(),
                 }
             },
-            default=get_current_timestamp,
+            default=datetime.date.today,
         ),
         group='edit',
     )
@@ -398,23 +396,6 @@ class Phase(DBBASE, PersistentACLMixin):
         },
     )
 
-    creationDate = deferred(
-        Column(
-            CustomDateType,
-            info={'colanderalchemy': forms.EXCLUDED},
-            default=get_current_timestamp,
-        )
-    )
-
-    updateDate = deferred(
-        Column(
-            CustomDateType,
-            info={'colanderalchemy': forms.EXCLUDED},
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp,
-        )
-    )
-
     def is_default(self):
         """
             return True if this phase is a default one
@@ -459,8 +440,8 @@ FORM_GRID = (
         ('customers', 8),
     ),
     (
-        ('startingDate', 4),
-        ('endingDate', 4),
+        ('starting_date', 4),
+        ('ending_date', 4),
     ),
     (
         ('definition', 10),

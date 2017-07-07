@@ -32,7 +32,7 @@
     <div class='well'>
         <p>
             <span class="label label-important"><i class='glyphicon glyphicon-white icon-play'></i></span>
-            %if task.statusPersonAccount  is not UNDEFINED and task.statusPersonAccount:
+            %if task.status_person  is not UNDEFINED and task.status_person:
                 <strong>${api.format_status(task)}</strong>
             %else:
                 <strong>Aucune information d'historique ou de statut n'a pu être retrouvée.</strong>
@@ -117,10 +117,10 @@
         %endif
     </ul>
 
-        % if hasattr(task, "statusComment") and task.statusComment:
+        % if hasattr(task, "status_comment") and task.status_comment:
             <b>Communication CAE-Entrepreneur</b>
             <p>
-                ${task.statusComment}
+                ${task.status_comment}
             </p>
         % endif
         % if hasattr(task, "payments"):

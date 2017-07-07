@@ -122,10 +122,10 @@ def _get_items_per_page(request, cookie_name):
 
 def _company_tasks_query(company):
     """
-    Build sqlalchemy query to all tasks of a company, in reverse statusDate
+    Build sqlalchemy query to all tasks of a company, in reverse status_date
     order.
     """
-    return company.get_tasks().order_by(desc(Task.statusDate))
+    return company.get_tasks().order_by(desc(Task.status_date))
 
 
 def recent_tasks_panel(context, request):

@@ -57,7 +57,7 @@
                         ${task.get_company().name}
                     </td>
                     <td>
-                        ${api.format_date(task.statusDate)}
+                        ${api.format_date(task.status_date)}
                     </td>
                 </tr>
             % endfor

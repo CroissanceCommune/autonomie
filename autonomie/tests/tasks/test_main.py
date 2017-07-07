@@ -46,7 +46,7 @@ TASK = dict(
     name=u"Test task",
     status="draft",
     date=datetime.date.today(),
-    statusDate=datetime.date.today(),
+    status_date=datetime.date.today(),
     description=u"Test task description"
 )
 

@@ -46,11 +46,6 @@ from sqlalchemy.orm import (
     relationship,
     deferred,
 )
-from autonomie_base.models.types import (
-    CustomDateType,
-    CustomDateType2,
-)
-from autonomie_base.models.utils import get_current_timestamp
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
@@ -572,20 +567,6 @@ class PaymentLine(DBBASE):
         nullable=False,
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
     )
-    creationDate = deferred(
-        Column(
-            CustomDateType,
-            info={'colanderalchemy': {'exclude': True}},
-            default=get_current_timestamp
-        )
-    )
-    updateDate = deferred(
-        Column(
-            CustomDateType,
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp,
-            info={'colanderalchemy': {'exclude': True}},
-        ))
     task_id = Column(
         Integer,
         ForeignKey('estimation.id', ondelete="cascade"),
@@ -628,13 +609,6 @@ class PaymentLine(DBBASE):
             }
         },
         default=datetime.date.today
-    )
-    # To be removed in version > 3.4
-    paymentDate = Column(
-        CustomDateType2,
-        info={
-            'colanderalchemy': {'exclude': True}
-        },
     )
     task = relationship(
         "Estimation",

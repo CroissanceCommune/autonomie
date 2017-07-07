@@ -28,6 +28,7 @@
 import logging
 import colander
 import deform
+import datetime
 
 from sqlalchemy import (
     Table,
@@ -36,6 +37,7 @@ from sqlalchemy import (
     String,
     Text,
     ForeignKey,
+    Date,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -44,9 +46,7 @@ from sqlalchemy.orm import (
 )
 
 from autonomie import forms
-from autonomie_base.models.utils import get_current_timestamp
 from autonomie_base.models.types import (
-    CustomDateType,
     PersistentACLMixin,
 )
 from autonomie.models.options import (
@@ -131,20 +131,19 @@ class Company(DBBASE, PersistentACLMixin):
         ),
         group='edit'
     )
-    creationDate = deferred(
+
+    created_at = deferred(
         Column(
-            "creationDate",
-            CustomDateType,
-            default=get_current_timestamp,
+            Date(),
+            default=datetime.date.today,
             nullable=False,
         ),
     )
-    updateDate = deferred(
+    updated_at = deferred(
         Column(
-            "updateDate",
-            CustomDateType,
-            default=get_current_timestamp,
-            onupdate=get_current_timestamp,
+            Date(),
+            default=datetime.date.today,
+            onupdate=datetime.date.today,
             nullable=False,
         )
     )

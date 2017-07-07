@@ -10,6 +10,7 @@ Create Date: 2017-06-20 13:21:41.795144
 revision = '55acdcdcc473'
 down_revision = '11219b4e619b'
 
+import logging
 from alembic import op
 import sqlalchemy as sa
 from autonomie.alembic.utils import rename_column
@@ -49,6 +50,7 @@ def change_custom_date_type(
 
 
 def update_database_structure(session):
+    logger = logging.getLogger(__name__)
     op.add_column(
         'customer',
         sa.Column('civilite', sa.String(10), default=''),
@@ -163,7 +165,8 @@ def update_database_structure(session):
         "expense_payment",
         sa.Column("user_id", sa.Integer, sa.ForeignKey('accounts.id'))
     )
-
+    logger.debug("Migrating date columns")
+    logger.debug(" + Projects")
     from autonomie.models.project import Project
     change_custom_date_type(
         session,
@@ -173,6 +176,7 @@ def update_database_structure(session):
         session,
         Project, 'project', 'ending_date', 'endingDate'
     )
+    logger.debug(" + Customers")
 
     from autonomie.models.customer import Customer
     change_custom_date_type(
@@ -184,6 +188,7 @@ def update_database_structure(session):
         Customer, 'customer', 'created_at', 'creationDate'
     )
 
+    logger.debug(" + Companies")
     from autonomie.models.company import Company
     change_custom_date_type(
         session,
@@ -194,6 +199,7 @@ def update_database_structure(session):
         Company, 'company', 'created_at', 'creationDate'
     )
 
+    logger.debug(" + Task and TaskStatus")
     from autonomie.models.task.task import (TaskStatus, Task)
     change_custom_date_type(
         session,
@@ -224,7 +230,7 @@ def _find_status(session, task_id, statusnames):
     if all_items:
         for record in all_items:
             person_id, status_date = record
-            if _user_exists(session, person_id):
+            if _user_exists(session, person_id) and status_date:
                 result.append((person_id, status_date))
 
     return result
@@ -248,9 +254,12 @@ def _update_payments(session, task_id, statuses):
 def _upgrade_invoices(session):
     from autonomie.models.task import Invoice
     for invoice in Invoice.query():
+        status_date = invoice.status_date
         if invoice.status in ('paid', 'resulted'):
             invoice.paid_status = invoice.status
+            # Here the date is enforced in the change_status validate func
             invoice.status = 'valid'
+            invoice.status_date = status_date
             statuses = _find_status(session, invoice.id, ('valid'))
             if statuses:
                 invoice.status_person_id = statuses[-1][0]
@@ -262,6 +271,7 @@ def _upgrade_invoices(session):
         else:
             if invoice.status == 'aboinv':
                 invoice.status = 'valid'
+                invoice.status_date = status_date
 
             invoice.paid_status = 'waiting'
 
@@ -272,9 +282,11 @@ def _upgrade_estimations(session):
     from autonomie.models.task import Estimation
 
     for estimation in Estimation.query():
+        status_date = estimation.status_date
         if estimation.status in ('aboest',):
             estimation.signed_status = 'aborted'
             estimation.status = 'valid'
+            estimation.status_date = status_date
 
             statuses = _find_status(session, estimation.id, ('valid'))
             if statuses:
@@ -285,6 +297,7 @@ def _upgrade_estimations(session):
             if estimation.status == 'geninv':
                 estimation.geninv = True
                 estimation.status = 'valid'
+                estimation.status_date = status_date
             else:
                 estimation.geninv = False
 
@@ -296,6 +309,8 @@ def _upgrade_estimations(session):
 def _upgrade_expenses(session):
     from autonomie.models.expense import ExpenseSheet
     for expense in ExpenseSheet.query():
+        status_date = expense.status_date
+
         if expense.status in ('paid', 'resulted'):
             expense.paid_status = expense.status
             if _user_exists(session, expense.status_user_id):
@@ -303,6 +318,7 @@ def _upgrade_expenses(session):
                     payment.user_id = expense.status_user_id
                     session.merge(payment)
             expense.status = 'valid'
+            expense.status_date = status_date
         else:
             expense.paid_status = 'waiting'
         expense.justified = False

@@ -97,7 +97,7 @@
                 ${api.format_date(date)}
             </td>
             <td>
-                <a href="${request.route_path(document.type_, id=id_, _query={'view':'html'})}"
+                <a href="${request.route_path('/%ss/{id}.html' % type_, id=id_)}"
                     title='Voir le document'>
                     ${internal_number} (<small>${name}</small>)
                 </a>
@@ -146,7 +146,7 @@
             </td>
             <td>
                 <a class='btn btn-default'
-                    href='${request.route_path(document.type_, id=document.id, _query=dict(view="pdf"))}'
+                    href="${request.route_path('/%ss/{id}.pdf' % type_, id=id_)}"
                     title="Télécharger la version PDF">
                     <i class='glyphicon glyphicon-file'></i>
                 </a>
@@ -159,7 +159,7 @@
                     ${format_filelist(document.invoice)}
                   % endif
                   <a class='btn btn-default'
-                      href='${request.route_path(document.type_, id=document.id, _query=dict(action="attach_file"))}'
+                     href="${request.route_path('/%ss/{id}/addfile' % type_, id=id_)}"
                       title="Attacher un fichier">
                       <i class='glyphicon glyphicon-plus'></i>
                   </a>

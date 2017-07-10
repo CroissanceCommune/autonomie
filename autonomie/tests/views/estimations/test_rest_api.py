@@ -25,6 +25,7 @@ def test_status_change_view_invalid_error(
     with pytest.raises(RestError) as invalid_exc:
         view.__call__()
         assert invalid_exc.code == 400
+    assert estimation.status == 'draft'
 
 
 def test_status_change_view_forbidden_error(
@@ -51,6 +52,7 @@ def test_status_change_view_forbidden_error(
     with pytest.raises(RestError) as forbidden_exc:
         view.__call__()
         assert forbidden_exc.code == 403
+    assert full_estimation.status == 'draft'
 
 
 def test_status_change_view(
@@ -75,6 +77,7 @@ def test_status_change_view(
     result = view.__call__()
     from pyramid.httpexceptions import HTTPFound
     assert isinstance(result, HTTPFound)
+    assert full_estimation.status == 'valid'
 
 
 def test_signed_status_change_wrong(

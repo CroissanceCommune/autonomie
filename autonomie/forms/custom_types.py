@@ -48,7 +48,7 @@ class QuantityType(colander.Number):
     num = specialfloat
 
 
-class AmountType(colander.Number):
+class _AmountType(colander.Number):
     """
         preformat an amount before considering it as a float object
         then *100 to store it into database
@@ -66,10 +66,10 @@ class AmountType(colander.Number):
         try:
             return str(integer_to_amount(self.num(appstruct), self.precision))
         except Exception:
-            raise colander.Invalid(node,
-                          u"\"{val}\" n'est pas un montant valide".format(
-                                val=appstruct),
-                          )
+            raise colander.Invalid(
+                node,
+                u"\"{val}\" n'est pas un montant valide".format(val=appstruct),
+            )
 
     def deserialize(self, node, cstruct):
         if cstruct != 0 and not cstruct:
@@ -78,10 +78,10 @@ class AmountType(colander.Number):
         try:
             return amount(self.num(cstruct), self.precision)
         except Exception:
-            raise colander.Invalid(node,
-                          u"\"{val}\" n'est pas un montant valide".format(
-                            val=cstruct)
-                          )
+            raise colander.Invalid(
+                node,
+                u"\"{val}\" n'est pas un montant valide".format(val=cstruct)
+            )
 
 
 class Integer(colander.Number):
@@ -96,5 +96,23 @@ class Integer(colander.Number):
         try:
             return str(self.num(appstruct))
         except Exception:
-            raise colander.Invalid(node,
-                       u"'${val}' n'est pas un nombre".format(val=appstruct))
+            raise colander.Invalid(
+                node,
+                u"'${val}' n'est pas un nombre".format(val=appstruct)
+            )
+
+#AmountType = _AmountType
+
+class AmountType():
+    def __init__(self, precision=2):
+        self.precision = 2
+
+    def __call__(self):
+        @colander.deferred
+        def deferred_amount_type(node, kw):
+            translate = kw.get('translate', True)
+            if translate:
+                return AmountType(self.precision)
+            else:
+                return Integer()
+        return deferred_amount_type

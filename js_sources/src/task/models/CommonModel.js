@@ -8,13 +8,12 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+import _ from 'underscore';
 import Bb from 'backbone';
 
 
 const CommonModel = Bb.Model.extend({
-    defaults: {
-        objet: "Saisissez l'objet de votre visite"
-    },
+    props: ['altdate', 'date', 'description', 'address', 'mention_ids', 'workplace'],
     validation: {
         date: {
             required: true,
@@ -28,6 +27,10 @@ const CommonModel = Bb.Model.extend({
             required: true,
             msg: "Veuillez saisir une adresse",
         }
+    },
+    constructor: function() {
+        arguments[0] = _.pick(arguments[0], this.props);
+        Bb.Model.apply(this, arguments);
     }
 });
 export default CommonModel;

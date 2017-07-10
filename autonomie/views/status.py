@@ -14,6 +14,7 @@ Common to :
 """
 import logging
 import colander
+import datetime
 
 from pyramid.httpexceptions import (
     HTTPNotFound,
@@ -46,11 +47,11 @@ class StatusView(BaseView):
         """
         return HTTPNotFound()
 
-    def _get_status(self):
+    def _get_status(self, params):
         """
         Get the status that has been asked for
         """
-        return self.request.params['submit']
+        return params['submit']
 
     def _get_request_params(self):
         """
@@ -119,10 +120,16 @@ class StatusView(BaseView):
             Main entry for this view object
         """
         logger.debug("# Entering the status view")
-        logger.debug(self.request.params)
-        if "submit" in self.request.params:
+        if self.request.is_xhr:
+            params = self.request.json_body
+        else:
+            params = self.request.POST
+
+        logger.debug(params)
+
+        if "submit" in params:
             try:
-                status = self._get_status()
+                status = self._get_status(params)
                 logger.debug(u"New status : %s " % status)
                 self.set_status(status)
                 self.context = self.request.dbsession.merge(self.context)
@@ -130,18 +137,38 @@ class StatusView(BaseView):
                 self.session.flash(self.valid_msg)
                 logger.debug(u" + The status has been set to {0}".format(
                     status))
+
             except Forbidden, e:
                 logger.exception(u" !! Unauthorized action by : {0}".format(
                     self.request.user.login
                 ))
-                self.session.pop_flash("")
-                self.session.flash(e.message, queue='error')
                 if self.request.is_xhr:
                     raise RestError(e.message, code=403)
+                else:
+                    self.session.pop_flash("")
+                    self.session.flash(e.message, queue='error')
+
             except (colander.Invalid, BadRequest), e:
                 if self.request.is_xhr:
                     raise RestError(e.messages())
-        return self.redirect()
+                else:
+                    for message in e.messages():
+                        self.session.flash(message, 'error')
+
+            return self.redirect()
+
+        if self.request.is_xhr:
+            raise RestError(
+                [
+                    u'Il manque des arguments pour changer le statut '
+                    u'du document'
+                ])
+        else:
+            self.session.flash(
+                u"Il manque des arguments pour changer le statut du document",
+                "error"
+            )
+            return self.redirect()
 
 
 class TaskStatusView(StatusView):
@@ -162,6 +189,10 @@ class TaskStatusView(StatusView):
     def pre_status_process(self, status, params):
         if 'comment' in params:
             self.context.status_comment = params.get('comment')
+
+        if 'change_date' in params and params['change_date'] in ('1', 1):
+            logger.debug("Forcing the document's date !!!")
+            self.context.date = datetime.date.today()
 
         return StatusView.pre_status_process(self, status, params)
 

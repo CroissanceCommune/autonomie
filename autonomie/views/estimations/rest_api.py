@@ -80,12 +80,26 @@ def json_payment_conditions(request):
 
 class RestEstimation(BaseRestView):
 
-    @property
-    def schema(self):
+    def get_schema(self, submitted, edit):
+        if edit:
+            excludes = ()
+            includes = submitted.keys()
+        else:
+            excludes = ('status', 'children', 'parent',)
+            includes = ()
+
+        logger.debug("Building a schema with :")
+        logger.debug("includes :")
+        logger.debug(includes)
+        logger.debug("excludes : %s")
+        logger.debug(excludes)
+
         schema = SQLAlchemySchemaNode(
             Estimation,
-            excludes=('status', 'children', 'parent',)
+            includes=includes,
+            excludes=excludes
         )
+        schema = schema.bind(request=self.request)
         return schema
 
     def form_options(self):
@@ -159,7 +173,7 @@ class RestEstimation(BaseRestView):
             _query={'action': 'signed_status'}
         )
         widget = {
-            'widget': 'toggle_button',
+            'widget': 'toggle',
             "options": {
                 "url": url,
                 "values": [],

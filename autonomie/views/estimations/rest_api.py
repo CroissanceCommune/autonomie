@@ -275,6 +275,15 @@ def add_views(config):
     )
     config.add_view(
         RestEstimation,
+        attr='put',
+        request_method='PATCH',
+        route_name='/api/v1/estimations/{id}',
+        renderer='json',
+        permission='edit.estimation',
+        xhr=True,
+    )
+    config.add_view(
+        RestEstimation,
         attr='form_options',
         route_name='/api/v1/estimations/{id}',
         renderer='json',

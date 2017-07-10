@@ -217,6 +217,9 @@ class EstimationStatusView(TaskStatusView):
 
 
 class EstimationSignedStatusView(StatusView):
+    def check_allowed(self, status, params):
+        self.request.context.check_signed_status_allowed(status, self.request)
+
     def notify(self, status):
         self.request.registry.notify(
             StatusChanged(
@@ -297,6 +300,7 @@ def add_views(config):
         request_param='action=status',
         permission="edit.estimation",
         request_method='POST',
+        renderer="json",
     )
 
 

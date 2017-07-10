@@ -198,7 +198,11 @@ class TaskStatusView(StatusView):
 
     def redirect(self):
         project_id = self.request.context.project.id
-        return HTTPFound(self.request.route_path('project', id=project_id))
+        loc = self.request.route_path('project', id=project_id)
+        if self.request.is_xhr:
+            return dict(redirect=loc)
+        else:
+            return HTTPFound(loc)
 
     def pre_status_process(self, status, params):
         if 'comment' in params:

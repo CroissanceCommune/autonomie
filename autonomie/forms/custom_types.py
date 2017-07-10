@@ -101,18 +101,22 @@ class Integer(colander.Number):
                 u"'${val}' n'est pas un nombre".format(val=appstruct)
             )
 
-#AmountType = _AmountType
 
-class AmountType():
+class AmountType(colander.deferred):
+
     def __init__(self, precision=2):
-        self.precision = 2
 
-    def __call__(self):
-        @colander.deferred
         def deferred_amount_type(node, kw):
             translate = kw.get('translate', True)
             if translate:
-                return AmountType(self.precision)
+                return _AmountType(precision)
             else:
                 return Integer()
-        return deferred_amount_type
+
+        colander.deferred.__init__(self, deferred_amount_type)
+
+    def __call__(self, node=None, kw=None):
+        if node is None:  # Colanderalchemy bug #102
+            return self
+        else:
+            return colander.deferred.__call__(self, node, kw)

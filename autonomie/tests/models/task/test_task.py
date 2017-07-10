@@ -54,8 +54,7 @@ def test_task_line_unity(unity):
     with pytest.raises(colander.Invalid):
         schema.deserialize(value)
     value = {}
-    with pytest.raises(colander.Invalid):
-        schema.deserialize(value)
+    schema.deserialize(value)
 
 
 def test_task_line_tva(tva):
@@ -209,6 +208,7 @@ def test_discount_line_description():
 def test_discount_line_amount():
     from autonomie.models.task.task import DiscountLine
     schema = SQLAlchemySchemaNode(DiscountLine, includes=('amount',))
+    schema = schema.bind()
     value = {'amount': 12.50}
     assert schema.deserialize(value) == {'amount': 1250000}
     value = {'amount': 'a'}

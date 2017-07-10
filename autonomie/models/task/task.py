@@ -1050,7 +1050,7 @@ class TaskLine(DBBASE, LineCompute):
                 'validator': forms.get_deferred_select_validator(
                     WorkUnit, id_key='label',
                 ),
-                'missing': colander.required,
+                'missing': colander.drop,
             }
         },
 

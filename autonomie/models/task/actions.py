@@ -59,7 +59,10 @@ class Action(object):
         return res
 
     def __json__(self, request):
-        result = dict(status=self.name)
+        result = dict(
+            status=self.name,
+            value=self.name,
+        )
         result.update(self.options)
         return result
 

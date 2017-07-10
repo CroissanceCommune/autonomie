@@ -114,6 +114,45 @@ class ActionManager(object):
                 result.append(action)
         return result
 
+    def _get_action(self, action_name):
+        """
+        Retrieve the action called "action_name"
+
+        :param str action_name: The name of the action we're looking for
+        :returns: An instance of Action
+        """
+        action = None
+        for item in self.items:
+            if item.name == action_name:
+                action = item
+                break
+        return action
+
+    def check_allowed(self, action_name, context, request):
+        """
+        Check that the given status could be set on the current context
+
+        :param str action_name: The name of the action
+        :param obj context: The context to manage
+        :param obj request: The current request object
+        :raises: Forbidden if the action isn't allowed
+        :raises: BadRequest if the action doesn't exists
+        """
+        context = context or request.context
+        action = self._get_action(action_name)
+
+        if action is None:
+            raise BadRequest()
+
+        elif not action.allowed(context, request):
+            raise Forbidden(
+                u"This action is not allowed for %s : %s" % (
+                    request.user.id,
+                    action_name,
+                )
+            )
+        return action
+
     def process(self, action_name, context, request, **params):
         """
         Process a specific action
@@ -126,21 +165,7 @@ class ActionManager(object):
         :raises: colander.Invalid if the action is unknown
         :raises: Forbidden if the action is not allowed for the current request
         """
-        action = None
-        for item in self.items:
-            if item.name == action_name:
-                action = item
-                break
-        if action is None:
-            raise BadRequest()
-
-        elif not action.allowed(context, request):
-            raise Forbidden(
-                u"This action is not allowed for %s : %s" % (
-                    request.user.id,
-                    action_name,
-                )
-            )
+        action = self.check_allowed(action_name, context, request)
         return action.process(context, request, request.user.id, **params)
 
 

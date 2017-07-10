@@ -269,6 +269,9 @@ class Estimation(Task, EstimationCompute):
             **kw
         )
 
+    def check_signed_status_allowed(self, status, request, **kw):
+        return self.signed_state_manager.check_allowed(status, self, request)
+
     def duplicate(self, user, project, phase, customer):
         """
             returns a duplicate estimation object

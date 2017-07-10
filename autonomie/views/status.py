@@ -59,10 +59,23 @@ class StatusView(BaseView):
         """
         return dict(self.request.params.items())
 
+    def check_allowed(self, status, params):
+        """
+        Check that the status change is allowed
+
+        :param str status: The new status that should be affected
+        :param dict params: Params currently passed
+        :rtype: bool
+        :raises: Forbidden exception if the action isn't allowed
+        """
+        return True
+
     def pre_status_process(self, status, params):
         """
         Launch pre process functions
         """
+        self.check_allowed(status, params)
+
         if hasattr(self, "pre_%s_process" % status):
             func = getattr(self, "pre_%s_process" % status)
             return func(status, params)
@@ -125,8 +138,6 @@ class StatusView(BaseView):
         else:
             params = self.request.POST
 
-        logger.debug(params)
-
         if "submit" in params:
             try:
                 status = self._get_status(params)
@@ -181,6 +192,9 @@ class TaskStatusView(StatusView):
 
     def validate(self):
         raise NotImplemented()
+
+    def check_allowed(self, status, params):
+        self.request.context.check_status_allowed(status, self.request)
 
     def redirect(self):
         project_id = self.request.context.project.id

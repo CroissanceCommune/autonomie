@@ -674,6 +674,9 @@ _{s.date:%m%y}"
             **kw
         )
 
+    def check_status_allowed(self, status, request, **kw):
+        return self.state_manager.check_allowed(status, self, request)
+
     @validates('status')
     def change_status(self, key, status):
         """

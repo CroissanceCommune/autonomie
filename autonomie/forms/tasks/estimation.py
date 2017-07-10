@@ -33,7 +33,7 @@ def validate_estimation(estimation_object, request):
         error_messages = err.messages
     """
     schema = SQLAlchemySchemaNode(Estimation)
-    schema = schema.bind(request=request)
+    schema = schema.bind(request=request, translate=False)
     appstruct = estimation_object.__json__(request)
     cstruct = schema.deserialize(appstruct)
     return cstruct

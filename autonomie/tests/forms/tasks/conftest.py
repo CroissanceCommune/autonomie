@@ -35,7 +35,7 @@ def task_line(dbsession, unity, tva, product, task_line_group):
         cost=1250000,
         quantity=1,
         unity=unity.label,
-        tva=20.0,
+        tva=2000,
         product_id=product.id,
         group=task_line_group,
     )

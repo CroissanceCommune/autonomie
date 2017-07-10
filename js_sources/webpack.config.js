@@ -35,8 +35,11 @@ const config = {
     filename: PROD ? '[name].min.js': '[name].js'
   },
   plugins: PROD? [
+      // Pre-Provide datas used by other libraries
     new webpack.ProvidePlugin({
       $: 'jquery',
+      jQuery: 'jquery',
+      jquery: 'jquery',
       _: 'underscore'
     }),
     new webpack.optimize.UglifyJsPlugin({
@@ -47,6 +50,8 @@ const config = {
   ]: [
     new webpack.ProvidePlugin({
       $: 'jquery',
+      jQuery: 'jquery',
+      jquery: 'jquery',
       _: 'underscore'
     })
   ],

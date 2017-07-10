@@ -75,7 +75,6 @@ class StatusView(BaseView):
         return self.context.set_status(
             status,
             self.request,
-            self.request.user.id,
             **params
         )
 
@@ -134,9 +133,11 @@ class StatusView(BaseView):
                 ))
                 self.session.pop_flash("")
                 self.session.flash(e.message, queue='error')
+                if self.request.is_xhr:
+                    raise RestError(e.message, code=403)
             except colander.Invalid, e:
                 if self.request.is_xhr:
-                    raise RestError(e.messages)
+                    raise RestError(e.messages())
         return self.redirect()
 
 
@@ -159,13 +160,21 @@ class TaskStatusView(StatusView):
         if 'comment' in params:
             self.context.status_comment = params.get('comment')
 
-        StatusView.pre_status_process(self, status, params)
+        return StatusView.pre_status_process(self, status, params)
 
     def pre_wait_process(self, status, params):
         """
         Launched before the wait status is set
         """
         self.validate()
+        return {}
+
+    def pre_valid_process(self, status, params):
+        """
+        Launched before the wait status is set
+        """
+        self.validate()
+        return {}
 
     def notify(self, status):
         """

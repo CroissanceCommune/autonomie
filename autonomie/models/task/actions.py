@@ -6,6 +6,8 @@
 """
 Action objects
 """
+import colander
+
 from autonomie.exception import Forbidden
 from autonomie import interfaces
 
@@ -116,17 +118,24 @@ class ActionManager(object):
         :param obj context: The context to manage
         :param obj request: The current request object
         :param dict params: The params to pass to the callback
+
+        :raises: colander.Invalid if the action is unknown
+        :raises: Forbidden if the action is not allowed for the current request
         """
         action = None
-        for action in self.items:
-            if action.name == action_name:
+        for item in self.items:
+            if item.name == action_name:
+                action = item
                 break
         if action is None:
-            raise Exception(u"Unknown action : %s" % action_name)
+            raise colander.Invalid(
+                None,
+                msg=u"Unknown action : %s" % action_name
+            )
 
         elif not action.allowed(context, request):
             raise Forbidden(
-                u"This action is not allowed for %s : %s" (
+                u"This action is not allowed for %s : %s" % (
                     request.user.id,
                     action_name,
                 )

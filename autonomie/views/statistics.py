@@ -317,7 +317,7 @@ class RestStatisticCriterion(BaseRestView):
     """
     Api rest pour la gestion des critères statistiques
     """
-    def get_schema(self, submitted):
+    def get_schema(self, submitted, edit):
         model_type = submitted['type']
 
         model = CRITERION_MODELS.get(model_type)

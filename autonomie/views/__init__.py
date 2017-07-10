@@ -758,7 +758,7 @@ class BaseRestView(BaseView):
     """
     schema = None
 
-    def get_schema(self, submitted):
+    def get_schema(self, submitted, edit):
         return self.schema
 
     def filter_edition_schema(self, schema, submitted):
@@ -804,7 +804,7 @@ class BaseRestView(BaseView):
         submitted = self.request.json_body
         self.logger.debug(u"Submitting %s" % submitted)
         submitted = self.pre_format(submitted)
-        schema = self.get_schema(submitted)
+        schema = self.get_schema(submitted, edit)
 
         if edit:
             schema = self.filter_edition_schema(schema, submitted)

@@ -32,14 +32,15 @@ def test_paymentform_schema(
         'resulted': True,
     }
     expected_value = {
+        'come_from': '',
         'remittance_amount': '79.4',
-        'amount': 7940000,
+        'amount': 1253000,
         'date': datetime.date(2015, 8, 7),
-        'bank_id': str(bank.id),
+        'bank_id': bank.id,
         'mode': mode.label,
         'resulted': True,
     }
-    schema.deserialize(value) == expected_value
+    assert schema.deserialize(value) == expected_value
 
 
 def test_deferred_total_validator(
@@ -58,7 +59,7 @@ def test_deferred_total_validator(
 
     value = {
         'remittance_amount': '79.4',
-        'amount': '17.53',
+        'amount': '20.0',
         'date': '2015-08-07',
         'bank_id': str(bank.id),
         'mode': mode.label,
@@ -66,7 +67,7 @@ def test_deferred_total_validator(
     }
     expected_value = {
         'remittance_amount': '79.4',
-        'amount': 7940000,
+        'amount': 15500000,
         'date': datetime.date(2015, 8, 7),
         'bank_id': str(bank.id),
         'mode': mode.label,
@@ -76,11 +77,12 @@ def test_deferred_total_validator(
 
     value = {
         'remittance_amount': '79.4',
-        'amount': '17.54',
+        'amount': '21',
         'date': '2015-08-07',
         'bank_id': str(bank.id),
         'mode': mode.label,
         'resulted': True,
     }
+    print(invoice.topay())
     with pytest.raises(colander.Invalid):
         schema.deserialize(value)

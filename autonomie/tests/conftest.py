@@ -265,6 +265,7 @@ def get_csrf_request(pyramid_request):
             post.update({'csrf_token': def_csrf})
         pyramid_request.params = params
         pyramid_request.POST = post
+        pyramid_request.json_body = post
         pyramid_request.cookies = cookies
         pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
         pyramid_request.config = {}
@@ -294,6 +295,7 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
             post.update({'csrf_token': def_csrf})
         pyramid_request.params = params
         pyramid_request.POST = post
+        pyramid_request.json_body = post
         pyramid_request.cookies = cookies
         pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
         pyramid_request.dbsession = dbsession

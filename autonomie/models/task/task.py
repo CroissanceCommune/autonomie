@@ -657,10 +657,7 @@ _{s.date:%m%y}"
             payments=[
                 payment.__json__(request) for payment in self.payments
             ],
-            mentions=[
-                mention.__json__(request)
-                for mention in self.mentions
-            ],
+            mentions=[mention.id for mention in self.mentions],
             line_groups=[
                 group.__json__(request) for group in self.line_groups
             ],
@@ -832,6 +829,7 @@ class DiscountLine(DBBASE, DiscountLineCompute):
 
     def __json__(self, request):
         return dict(
+            task_id=self.task_id,
             description=self.description,
             amount=self.amount,
             tva=self.tva,

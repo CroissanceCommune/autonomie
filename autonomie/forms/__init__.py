@@ -421,19 +421,7 @@ def get_deferred_select_validator(model, id_key='id'):
         """
         The deferred function that will be fired on schema binding
         """
-        def my_custom_validator(node, value):
-            key_val = value
-            if isinstance(value, dict):
-                key_val = value[id_key]
-            elif isinstance(value, model):
-                key_val = getattr(value, id_key)
-            if key_val not in [getattr(m, id_key) for m in model.query()]:
-                raise colander.Invalid(
-                    node,
-                    u"La valeur soumise ne fait pas partie des valeurs "
-                    u"proposées"
-                )
-        return my_custom_validator
+        return colander.OneOf([getattr(m, id_key) for m in model.query()])
     return deferred_validator
 
 

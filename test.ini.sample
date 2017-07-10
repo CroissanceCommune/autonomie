@@ -3,8 +3,8 @@ use = egg:autonomie
 
 pyramid.default_locale_name = fr
 pyramid.includes =  pyramid_tm
-                    pyramid_services
                     pyramid_mailer
+                    pyramid_services
                     pyramid_layout
                     pyramid_mako
                     pyramid_chameleon
@@ -13,12 +13,20 @@ pyramid.includes =  pyramid_tm
                     deform_extensions
 #### CONFIGURE THOSE LINES TO ALLOW THE TESTS TO SETUP A MYSQL DATABASE ####
 sqlalchemy.url = mysql://testautonomie:password@localhost/testautonomie?charset=utf8
+ sqlalchemy.url = postgresql://testautonomie:password@localhost/testautonomie
+
 sqlalchemy.echo=False
-sqlalchemy.encoding=UTF8
-testdb.user=testautonomie
-testdb.password=password
-testdb.db=testautonomie
-testdb.mysql_cmd=mysql --defaults-file=/etc/mysql/debian.cnf
+
+testdb.connect=echo 'quit' | mysql -uroot
+testdb.adduser=echo "CREATE USER testautonomie" | mysql -uroot
+testdb.adddb=echo "CREATE DATABASE IF NOT EXISTS testautonomie; GRANT ALL PRIVILEGES on testautonomie.* to testautonomie@localhost IDENTIFIED BY 'password';FLUSH PRIVILEGES;" | mysql -uroot
+testdb.drop=echo "DROP DATABASE IF EXISTS testautonomie"|mysql -uroot
+
+# testdb.connect=sudo -u postgres psql -c '\q'
+# testdb.adduser=sudo -u postgres psql -c "CREATE USER testautonomie WITH PASSWORD 'password'"
+# testdb.adddb=sudo -u postgres psql -c "CREATE DATABASE IF NOT EXISTS testautonomie owner testautonomie;
+# testdb.drop=sudo -u postgres psql -c "DROP DATABASE 'testautonomie'
+
 session.longtimeout=3600
 cache.regions = default_term, second, short_term, long_term
 cache.type = memory
@@ -30,7 +38,6 @@ mako.directories = autonomie:templates
 mako.imports = from markupsafe import escape_silent
 mako.default_filters = escape_silent
 autonomie.ftpdir=%(here)s/autonomie/tests/datas/
-autonomie.depot_path=%(here)s/tests/datas/
 
 [pipeline:main]
 pipeline =

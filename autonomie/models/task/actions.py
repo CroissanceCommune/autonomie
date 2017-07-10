@@ -6,9 +6,10 @@
 """
 Action objects
 """
-import colander
-
-from autonomie.exception import Forbidden
+from autonomie.exception import (
+    Forbidden,
+    BadRequest,
+)
 from autonomie import interfaces
 
 
@@ -128,10 +129,7 @@ class ActionManager(object):
                 action = item
                 break
         if action is None:
-            raise colander.Invalid(
-                None,
-                msg=u"Unknown action : %s" % action_name
-            )
+            raise BadRequest()
 
         elif not action.allowed(context, request):
             raise Forbidden(

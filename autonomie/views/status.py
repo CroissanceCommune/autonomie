@@ -20,7 +20,10 @@ from pyramid.httpexceptions import (
     HTTPFound,
 )
 
-from autonomie.exception import Forbidden
+from autonomie.exception import (
+    Forbidden,
+    BadRequest,
+)
 from autonomie.events.tasks import StatusChanged
 from autonomie.utils.rest import RestError
 from autonomie.views import BaseView
@@ -135,7 +138,7 @@ class StatusView(BaseView):
                 self.session.flash(e.message, queue='error')
                 if self.request.is_xhr:
                     raise RestError(e.message, code=403)
-            except colander.Invalid, e:
+            except (colander.Invalid, BadRequest), e:
                 if self.request.is_xhr:
                     raise RestError(e.messages())
         return self.redirect()

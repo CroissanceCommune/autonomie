@@ -25,6 +25,21 @@
 """
     Autonomie specific exception
 """
+
+
+class BadRequest(Exception):
+    """
+    Exception raised when the request is invalid (form invalid datas ...)
+    """
+    message = u"La requête est incorrecte"
+
+    def messages(self):
+        """
+        Used to fit colander's Invalid exception api
+        """
+        return [self.message]
+
+
 class Forbidden(Exception):
     """
         Forbidden exception, used to raise a forbidden action error

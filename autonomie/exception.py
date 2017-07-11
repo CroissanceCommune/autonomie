@@ -39,6 +39,9 @@ class BadRequest(Exception):
         """
         return [self.message]
 
+    def asdict(self):
+        return {'erreur': self.message}
+
 
 class Forbidden(Exception):
     """

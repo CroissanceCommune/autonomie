@@ -526,3 +526,12 @@ $blue_status_label: #5bc0de;
     top: 20vh;
   }
 }
+#js-main-area #rightbar{
+    position: sticky;
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    top: 50px;
+
+}

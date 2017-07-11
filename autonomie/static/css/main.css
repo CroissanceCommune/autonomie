@@ -488,3 +488,11 @@ header .navbar .nav > li > a {
     opacity: 1;
     position: relative;
     top: 20vh; }
+
+#js-main-area #rightbar {
+  position: sticky;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -ms-sticky;
+  position: -o-sticky;
+  top: 50px; }

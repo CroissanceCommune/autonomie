@@ -1,0 +1,8 @@
+<div class='btn-group' data-toggle="buttons-radio">
+{{#each option.values }}
+    <input type="radio" id="{{ this.value }}" name="radio-group" data-toggle="button">
+    <label class="{{ this.css }}" for="{{ this.value }}">
+        <i class='{{ this.icon }}'></i> {{ this.label }}
+    </label>
+{{/each}}
+</div>

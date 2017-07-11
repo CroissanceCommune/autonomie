@@ -10,15 +10,19 @@
  *
  */
 import $ from 'jquery';
+import 'bootstrap/dist/js/bootstrap';
+import Modal from 'bootstrap';
 import _ from 'underscore';
 import Bb from 'backbone';
 import Mn from 'backbone.marionette';
 import App from './components/App.js';
 import Validation from 'backbone-validation';
-import setUpBbValidationCallbacks from '../backbone-tools.js';
+import { setUpBbValidationCallbacks } from '../backbone-tools.js';
 import Router from './components/Router.js';
 import Controller  from './components/Controller.js';
-import { ajax_call } from '../tools.js';
+import { setupJsonRedirect, ajax_call } from '../tools.js';
+
+setupJsonRedirect();
 
 var template = require('../handlebars/job/file_generation.mustache');
 

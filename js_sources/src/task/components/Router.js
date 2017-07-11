@@ -13,7 +13,6 @@ import Mn from 'backbone.marionette';
 
 const Router = Mn.AppRouter.extend({
   appRoutes: {
-    'test': 'test'
   }
 });
 export default Router;

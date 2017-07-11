@@ -17,8 +17,8 @@ const Controller = Mn.Object.extend({
         this.mainView = new MainView({"datas": datas});
         App.showView(this.mainView);
     },
-    test: function(){
-        console.log('test Route is working');
+    status: function(status){
+        this.mainView.showBox(status);
     }
 });
 export default Controller

@@ -12,24 +12,54 @@ import Mn from 'backbone.marionette';
 import CommonView from "./CommonView.js";
 import RightBarView from "./RightBarView.js";
 import CommonModel from "../models/CommonModel.js";
+import StatusView from './StatusView.js';
+import { Modal } from 'bootstrap';
 
 const template = require('./templates/MainView.mustache');
 
 const MainView = Mn.View.extend({
     template: template,
     regions: {
+        modalRegion: '#modalregion',
         common: '#common',
         rightbar: "#rightbar",
         footer: '#footer'
+    },
+    childViewEvents: {
+        'status:change': 'onStatusChange',
     },
     onRender: function() {
         this.commonModel = new CommonModel(
             this.getOption('datas')
         );
         this.commonModel.url = AppOption['context_url'];
-        console.log(this.getOption('datas'));
-        this.showChildView('common', new CommonView({model: this.commonModel}));
-        this.showChildView('rightbar', new RightBarView({actions: AppOption['form_options']['actions']}));
-    }
+
+        if (_.indexOf(AppOption['form_options']['sections'], "common") != -1){
+            this.showChildView(
+                'common',
+                new CommonView({model: this.commonModel})
+            );
+        }
+
+        this.showChildView(
+            'rightbar',
+            new RightBarView({actions: AppOption['form_options']['actions']})
+        );
+    },
+    onStatusChange: function(status, title, label, url){
+        this.showChildView(
+            'modalRegion',
+            new StatusView({
+                status: status,
+                title: title,
+                label: label,
+                model: this.commonModel,
+                url: url
+            })
+        );
+    },
+    onChildviewDestroyModal: function() {
+    	this.getRegion('modalRegion').empty();
+  	}
 });
 export default MainView;

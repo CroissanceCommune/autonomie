@@ -1,9 +1,15 @@
 <div>
 {{#each buttons}}
-    <a class='btn btn-block {{this.css}}' href='{{ this.url }}'>
+    <button
+        class='btn btn-block {{this.css}}'
+        data-url='{{ this.url }}'
+        data-title='{{ this.title }}'
+        data-label='{{ this.label }}'
+        data-status='{{ this.status }}'>
     <i class='glyphicon glyphicon-{{this.icon}}'></i>
     {{this.label}}
-    </a>
+    </button>
     <br />
 {{/each}}
+<div class='child-container'></div>
 </div>

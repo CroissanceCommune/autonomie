@@ -8,12 +8,19 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+import $ from 'jquery';
 import Mn from 'backbone.marionette';
+import ActionCollection from '../models/ActionCollection.js';
+import ActionListView from './ActionListView.js';
+
 var template = require("./templates/RightBarView.mustache");
 
 const RightBarView = Mn.View.extend({
+    regions: {
+        container: ".child-container"
+    },
     ui: {
-        buttons: 'a'
+        buttons: 'button',
     },
     events: {
         'click @ui.buttons': 'onButtonClick'
@@ -21,13 +28,26 @@ const RightBarView = Mn.View.extend({
     template: template,
     templateContext: function(){
         return {
-            buttons: this.getOption('actions')
+            buttons: this.getOption('actions')['status']
         }
     },
     onButtonClick: function(event){
-        console.log("Button clicked");
-        console.log(this);
-        console.log(event);
+        let target = $(event.target);
+        console.log(target);
+        let status = target.data('status');
+        let title = target.data('title');
+        let label = target.data('label');
+        let url = target.data('url');
+        this.triggerMethod('status:change', status, title, label, url);
+    },
+    onRender: function(){
+        const action_collection = new ActionCollection(
+            this.getOption('actions')['others']
+        );
+        this.showChildView(
+            'container',
+            new ActionListView({collection: action_collection})
+        );
     }
 });
 export default RightBarView;

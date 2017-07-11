@@ -10,7 +10,8 @@
  */
 import Mn from 'backbone.marionette';
 import Validation from 'backbone-validation';
-console.log(Validation);
+import { serializeForm } from '../../tools.js';
+import {BootstrapOnInvalidForm, BootstrapOnValidForm, displayServerError, displayServerSuccess} from '../../backbone-tools.js';
 
 var FormBehavior = Mn.Behavior.extend({
 	ui: {
@@ -24,19 +25,7 @@ var FormBehavior = Mn.Behavior.extend({
         errorMessage: "Une erreur est survenue"
     },
     serializeForm: function(){
-        var result = {};
-		var serial = this.ui.form.serializeArray();
-		$.each(serial, function() {
-		if (result[this.name]) {
-                if (!result[this.name].push) {
-                    result[this.name] = [result[this.name]];
-                }
-                result[this.name].push(this.value || '');
-            } else {
-                result[this.name] = this.value || '';
-            }
-        });
-        return result;
+        return serializeForm(this.getUI('form'));
     },
     onRender: function() {
         //Set up any other form related stuff here

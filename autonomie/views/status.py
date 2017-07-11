@@ -21,6 +21,7 @@ from pyramid.httpexceptions import (
     HTTPFound,
 )
 
+from autonomie.models.task import TaskStatus
 from autonomie.exception import (
     Forbidden,
     BadRequest,
@@ -160,8 +161,9 @@ class StatusView(BaseView):
                     self.session.flash(e.message, queue='error')
 
             except (colander.Invalid, BadRequest), e:
+                logger.exception("Invalid datas")
                 if self.request.is_xhr:
-                    raise RestError(e.messages())
+                    raise RestError(e.asdict(translate=colander._))
                 else:
                     for message in e.messages():
                         self.session.flash(message, 'error')
@@ -227,6 +229,25 @@ class TaskStatusView(StatusView):
         """
         self.validate()
         return {}
+
+    def post_status_process(self, status, params):
+        """
+        Launch post status process functions
+
+        :param str status: The new status that should be affected
+        :param dict params: The params that were transmitted by the associated
+        State's callback
+        """
+        # Record a task status change
+        self.context.status_date = datetime.date.today()
+        status_record = TaskStatus(
+            task_id=self.context.id,
+            status_code=status,
+            status_person_id=self.request.user.id,
+            status_comment=self.context.status_comment
+        )
+        self.request.dbsession.add(status_record)
+        StatusView.post_status_process(self, status, params)
 
     def notify(self, status):
         """

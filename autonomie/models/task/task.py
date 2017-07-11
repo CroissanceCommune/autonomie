@@ -684,20 +684,8 @@ _{s.date:%m%y}"
         fired on status change, stores a new taskstatus for each status change
         """
         log.debug(u"# Task status change #")
-
         actual_status = self.status
-        self.status_date = datetime.date.today()
-
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
-        if self.status_person is not None:
-            # Can append in old dbs that are inconsistent
-            status_record = TaskStatus(
-                status_code=status,
-                status_person_id=self.status_person.id,
-                status_comment=self.status_comment,
-            )
-            self.statuses.append(status_record)
-
         return status
 
     def get_next_actions(self):

@@ -19,6 +19,7 @@ from autonomie.models.task import (
     PaymentConditions,
     TaskMention,
     Estimation,
+    TaskStatus
 )
 from autonomie.events.tasks import StatusChanged
 from autonomie.forms.tasks.estimation import validate_estimation
@@ -235,6 +236,16 @@ class EstimationSignedStatusView(StatusView):
             self.request,
             **params
         )
+
+    def post_status_process(self, status, params):
+        status_record = TaskStatus(
+            task_id=self.context.id,
+            status_code=status,
+            status_person_id=self.request.user.id,
+            status_comment="",
+        )
+        self.request.dbsession.add(status_record)
+        StatusView.post_status_process(self, status, params)
 
     def redirect(self):
         return Apiv1Resp(

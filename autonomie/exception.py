@@ -52,38 +52,3 @@ class SignatureError(Forbidden):
         Exception for status modification calls with the wrong signature
     """
     message = u"Des informations manquent pour effectuer cette action"
-
-
-class UndeliveredMail(Exception):
-    """
-    A custom class for undelivered emails
-    """
-    pass
-
-
-class MailAlreadySent(Exception):
-    """
-    A custom class for mail that were already sent
-    """
-    pass
-
-
-class MissingMandatoryArgument(Exception):
-    """
-    Raised when a mandatory argument is missing
-    """
-    pass
-
-
-class InstanceNotFound(Exception):
-    """
-    Raised when no instance could be found
-    """
-    pass
-
-
-class MultipleInstanceFound(Exception):
-    """
-    Raised when no instance could be found
-    """
-    pass

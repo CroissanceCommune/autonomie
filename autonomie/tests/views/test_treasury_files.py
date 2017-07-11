@@ -189,7 +189,7 @@ def test_mail_treasury_files(dbsession, config, get_csrf_request, company_125):
     assert mails[0]['email'] == 'a@a.fr'
 
     sent_file = datas[company_125.id][0]['file']
-    from autonomie.models.files import store_sent_mail
+    from autonomie_celery.models import store_sent_mail
     history = store_sent_mail(sent_file.path, sent_file.datas, company_125.id)
     dbsession.add(history)
 

@@ -41,14 +41,14 @@ from deform import (
     Button,
 )
 
-from autonomie.csv_import import (
+from autonomie_celery.tasks.csv_import import (
     get_csv_reader,
     get_csv_import_associator,
 )
 from autonomie.models.config import Config
 from autonomie_celery.models import CsvImportJob
 from autonomie_base.models.base import DBSESSION
-from autonomie_celery.tasks.task import async_import_datas
+from autonomie_celery.tasks.csv_import import async_import_datas
 from autonomie.forms.csv_import import (
     get_csv_file_upload_schema,
     get_association_schema,
@@ -111,7 +111,7 @@ associer les champs de votre fichier avec les données d'Autonomie."
         """
         The getter for our schema property
         """
-        if self._schema == None:
+        if self._schema is None:
             self._schema = get_csv_file_upload_schema(self.request)
         return self._schema
 
@@ -123,7 +123,6 @@ associer les champs de votre fichier avec les données d'Autonomie."
         is here transformed as a property
         """
         self._schema = value
-
 
     def before(self, form):
         """
@@ -139,7 +138,7 @@ associer les champs de votre fichier avec les données d'Autonomie."
         log.debug(u"A csv file has been uploaded")
         uid = appstruct['csv_file']['uid']
         association = appstruct.get('association')
-        _query=dict(
+        _query = dict(
             uid=uid,
             model_type=appstruct['model_type'],
             delimiter=appstruct['delimiter'],
@@ -182,6 +181,7 @@ def get_current_csv(filepath, delimiter, quotechar):
     # Related to pyramid_deform's way to store temporary datas on disk
     filebuffer = open(filepath, 'r')
     return get_csv_reader(filebuffer, delimiter, quotechar)
+
 
 def count_entries(filepath):
     """
@@ -261,7 +261,7 @@ d'Autonomie correspondant</li>"
     add_template_vars = ("title", "info_message", "help_message", )
     title = u"Import de données, étape 2 : associer les champs"
     _schema = None
-    buttons=(
+    buttons = (
         Button('submit', title=u"Lancer l'import",),
         Button('cancel', title=u"Annuler l'import",),
     )
@@ -281,7 +281,11 @@ d'Autonomie correspondant</li>"
 
         # We build a field - model attr associator
         self.associator = get_csv_import_associator(self.model_type)
-        _csv_obj = get_current_csv(self.filepath, self.delimiter, self.quotechar)
+        _csv_obj = get_current_csv(
+            self.filepath,
+            self.delimiter,
+            self.quotechar
+        )
         self.headers = [header for header in _csv_obj.fieldnames if header]
 
     # Schema is here a property since we need to build it dynamically regarding
@@ -292,7 +296,7 @@ d'Autonomie correspondant</li>"
         """
         The getter for our schema property
         """
-        if self._schema == None:
+        if self._schema is None:
             self._schema = get_association_schema(self.request)
         return self._schema
 
@@ -318,7 +322,7 @@ d'Autonomie correspondant</li>"
         """
         Initialize the datas used in the view process and populate the form
         """
-        if self.request.GET.has_key('association'):
+        if 'association' in self.request.GET:
             preference_name = self.request.GET['association']
             preference = get_preference(preference_name)
             association_dict = self.associator.guess_association_dict(
@@ -330,7 +334,6 @@ d'Autonomie correspondant</li>"
             association_dict = self.associator.guess_association_dict(
                 self.headers
             )
-
 
         log.info(u"We initialize the association form")
         log.info(association_dict)
@@ -373,7 +376,7 @@ d'Autonomie correspondant</li>"
         # l'import
         association_dict = OrderedDict()
         for entry in importation_datas['entries']:
-            if entry.has_key('model_attribute'):
+            if 'model_attribute' in entry:
                 association_dict[entry['csv_field']] = \
                         entry['model_attribute']
         return association_dict
@@ -427,9 +430,13 @@ import")
             self.quotechar,
         )
 
-        log.info(u" * The Celery Task {0} has been delayed, its result \
-should be retrieved from the CsvImportJob : {1}".format(celery_job.id, job.id)
-                )
+        log.info(
+            u" * The Celery Task {0} has been delayed, its result "
+            u"should be retrieved from the CsvImportJob : {1}".format(
+                celery_job.id,
+                job.id,
+            )
+        )
         return HTTPFound(
             self.request.route_path('job', id=job.id)
         )

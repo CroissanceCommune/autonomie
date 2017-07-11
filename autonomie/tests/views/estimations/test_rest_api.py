@@ -75,8 +75,7 @@ def test_status_change_view(
 
     view = EstimationStatusView(request)
     result = view.__call__()
-    from pyramid.httpexceptions import HTTPFound
-    assert isinstance(result, HTTPFound)
+    assert result == {'redirect': '/%s' % full_estimation.project_id}
     assert full_estimation.status == 'valid'
 
 

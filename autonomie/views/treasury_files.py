@@ -40,7 +40,7 @@ from pyramid.httpexceptions import (
     HTTPFound,
 )
 
-from autonomie.models.files import (
+from autonomie_celery.models import (
     MailHistory,
     check_if_mail_sent,
 )
@@ -53,7 +53,7 @@ from autonomie.views import (
 from autonomie.models.company import Company
 from autonomie_celery.models import MailingJob
 from autonomie.views.render_api import month_name
-from autonomie.mail import send_salary_sheet
+from autonomie_celery.mail import send_salary_sheet
 from autonomie_celery.tasks.task import async_mail_salarysheets
 from autonomie_base.utils.ascii import force_ascii
 from autonomie.utils.files import (

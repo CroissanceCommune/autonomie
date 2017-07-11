@@ -29,7 +29,7 @@ import logging
 
 from autonomie.views import render_api
 
-from autonomie.mail import (
+from autonomie_base.mail import (
     send_mail_from_event,
     format_link,
 )

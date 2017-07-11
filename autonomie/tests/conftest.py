@@ -156,19 +156,22 @@ def config(request, pyramid_request, settings, registry):
     """
     os.environ['TZ'] = "Europe/Paris"
     from pyramid_beaker import set_cache_regions_from_settings
+    print(settings)
     config = testing.setUp(
         registry=registry,
         settings=settings,
         request=pyramid_request
     )
-    config.include('pyramid_services')
-    config.include('pyramid_mako')
-    config.include('pyramid_chameleon')
+    for include in settings['pyramid.includes'].split('\n'):
+        include = include.strip()
+        if include:
+            config.include(include)
     set_cache_regions_from_settings(settings)
     request.addfinalizer(testing.tearDown)
 
     from autonomie import setup_services
     setup_services(config, settings)
+    config.include('autonomie.celery')
     from autonomie.utils.renderer import customize_renderers
     customize_renderers(config)
     return config

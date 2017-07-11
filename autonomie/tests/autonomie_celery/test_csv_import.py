@@ -42,8 +42,8 @@ def csv_datas():
 
 
 @pytest.fixture
-def association_handler():
-    from autonomie.csv_import import get_csv_import_associator
+def association_handler(wsgi_app):
+    from autonomie_celery.tasks.csv_import import get_csv_import_associator
     return get_csv_import_associator('userdatas')
 
 
@@ -74,7 +74,7 @@ def test_guess_association_dict(csv_datas, association_handler):
     assert res[u'PRénom'] == 'coordonnees_firstname'
     assert res[u'Nom'] == 'coordonnees_ladiesname'
     # Test field exclusion
-    from autonomie.csv_import import CsvImportAssociator
+    from autonomie_celery.tasks.csv_import import CsvImportAssociator
     from autonomie.models.user import UserDatas
     associator = CsvImportAssociator(
         UserDatas, excludes=('coordonnees_lastname',))
@@ -98,7 +98,7 @@ def test_collect_kwargs(association_handler):
 
 def test_import_line(dbsession, csv_datas, association_handler,
                      cae_situation_option):
-    from autonomie.csv_import import CsvImporter, DEFAULT_ID_LABEL
+    from autonomie_celery.tasks.csv_import import CsvImporter, DEFAULT_ID_LABEL
     from autonomie.models.user import UserDatas
 
     association_dict = {
@@ -131,7 +131,7 @@ def test_import_line(dbsession, csv_datas, association_handler,
     association_dict.pop('Nom')
     association_handler.set_association_dict(association_dict)
 
-    from autonomie.exception import MissingMandatoryArgument
+    from autonomie_celery.exception import MissingMandatoryArgument
 
     with pytest.raises(MissingMandatoryArgument):
         importer = CsvImporter(
@@ -144,7 +144,7 @@ def test_import_line(dbsession, csv_datas, association_handler,
 
 
 def test_update_line(association_handler, userdata, dbsession):
-    from autonomie.csv_import import CsvImporter
+    from autonomie_celery.tasks.csv_import import CsvImporter
     from autonomie.models.user import UserDatas
 
     association_dict = {
@@ -173,7 +173,7 @@ def test_update_line(association_handler, userdata, dbsession):
 
 
 def test_override_line(dbsession, association_handler, userdata):
-    from autonomie.csv_import import CsvImporter
+    from autonomie_celery.tasks.csv_import import CsvImporter
     from autonomie.models.user import UserDatas
 
     association_dict = {
@@ -205,7 +205,7 @@ def test_identification_key(dbsession, association_handler, userdata):
     """
     Test if we use another key than "id" to identify the duplicate entries
     """
-    from autonomie.csv_import import CsvImporter
+    from autonomie_celery.tasks.csv_import import CsvImporter
     from autonomie.models.user import UserDatas
 
     association_dict = {

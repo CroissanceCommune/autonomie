@@ -28,7 +28,7 @@ Events used while handling expenses :
 import datetime
 import logging
 
-from autonomie.mail import (
+from autonomie_base.mail import (
     format_link,
     send_mail_from_event,
 )

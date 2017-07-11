@@ -53,21 +53,40 @@ const hideFieldError = function(control){
    group.find(".error-message").remove();
    return control;
 }
-const BootstrapOnValidForm = function(view, attr, selector){
+export const BootstrapOnValidForm = function(view, attr, selector){
     var control, group;
     control = view.$('[' + selector + '=' + attr + ']');
     hideFieldError(control);
 }
-const BootstrapOnInvalidForm = function(view, attr, error, selector) {
+export const BootstrapOnInvalidForm = function(view, attr, error, selector) {
     var control, group, position, target;
     control = view.$('[' + selector + '=' + attr + ']');
     showError(control, error);
 }
-const setUpBbValidationCallbacks = function(bb_module){
+export const setUpBbValidationCallbacks = function(bb_module){
     _.extend(bb_module, {
         valid: BootstrapOnValidForm,
         invalid: BootstrapOnInvalidForm
     });
 }
-
-export default setUpBbValidationCallbacks;
+const _displayServerMessage = function(options){
+  /*
+   * """ Display a message from the server
+   */
+//   var msgdiv = require('../handlebars/serverMessage.mustache');
+//   $(msgdiv).prependTo("#messageboxes").fadeIn('slow').delay(8000).fadeOut(
+//   'fast', function() { $(this).remove(); });
+   console.log(options);
+}
+export const displayServerError = function(msg){
+  /*
+   *  Show errors in a message box
+   */
+  _displayServerMessage({msg:msg, error:true});
+}
+export const displayServerSuccess = function(msg){
+  /*
+   *  Show errors in a message box
+   */
+  _displayServerMessage({msg:msg});
+}

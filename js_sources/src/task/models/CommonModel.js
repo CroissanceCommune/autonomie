@@ -13,7 +13,7 @@ import Bb from 'backbone';
 
 
 const CommonModel = Bb.Model.extend({
-    props: ['altdate', 'date', 'description', 'address', 'mention_ids', 'workplace'],
+    props: ['id', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace'],
     validation: {
         date: {
             required: true,

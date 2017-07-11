@@ -32,7 +32,7 @@ from autonomie.views import render_api
 from autonomie_base.mail import (
     format_link,
 )
-from autonomie.events import send_mail_from_event
+from autonomie.events.mail import send_mail_from_event
 
 log = logging.getLogger(__name__)
 

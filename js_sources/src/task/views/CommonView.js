@@ -11,7 +11,7 @@
 import jQuery from 'jquery';
 import Mn from 'backbone.marionette';
 import { updateSelectOptions } from '../../tools.js';
-import FormBehavior from "../components/FormBehavior.js";
+import FormBehavior from "../behaviors/FormBehavior.js";
 import CheckboxListView from './CheckboxListView.js';
 import DatePickerView from './DatePickerView.js';
 import TextAreaView from './TextAreaView.js';

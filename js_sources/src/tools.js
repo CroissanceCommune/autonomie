@@ -17,7 +17,6 @@ export const setDatePicker = function(input_tag, altfield_selector, value, kwarg
         altField: altfield_selector
     };
     _.extend(options, kwargs);
-    console.log(options);
     input_tag.datepicker(options);
 
     if ((value !== null) && (! _.isUndefined(value))){
@@ -91,4 +90,37 @@ export const getOpt = function(obj, key, default_val){
         val = default_val
     }
     return val;
+}
+
+export const serializeForm = function(form_object){
+    /*
+     * Return the form datas as an object
+     * :param obj form_object: A jquery instance wrapping the form
+     */
+    var result = {};
+    var serial = form_object.serializeArray();
+    $.each(serial, function() {
+    if (result[this.name]) {
+            if (!result[this.name].push) {
+                result[this.name] = [result[this.name]];
+            }
+            result[this.name].push(this.value || '');
+        } else {
+            result[this.name] = this.value || '';
+        }
+    });
+    return result;
+}
+
+// Important point : handle redirection by json dict for ajax calls
+// Expects a redirect value to be returned with the 302 code
+export const setupJsonRedirect = function() {
+  $(document).ajaxComplete(
+    function( data, xhr, settings ) {
+      let json_resp = jQuery.parseJSON( xhr.responseText );
+      if ( json_resp.redirect ){
+        window.location.href = json_resp.redirect;
+      }
+    }
+  );
 }

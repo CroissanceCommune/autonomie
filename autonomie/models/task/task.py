@@ -177,6 +177,7 @@ class Task(Node):
                 'widget': deform.widget.TextAreaWidget()
             }
         },
+        default="",
     )
     status_person_id = Column(
         ForeignKey('accounts.id'),

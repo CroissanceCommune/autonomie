@@ -41,13 +41,14 @@ const CommonView = Mn.View.extend({
         }
     ],
     childViewEvents: {
-        'change': 'onChildChange'
+        'change': 'onChildChange',
+        'finish': 'onChildFinish'
     },
     onChildChange: function(attribute, value){
-        console.log("Triggering");
-        console.log(attribute);
-        console.log(value);
         this.triggerMethod('data:modified', this, attribute, value);
+    },
+    onChildFinish: function(attribute, value){
+        this.triggerMethod('data:persist', this, attribute, value);
     },
     getMentionOptions: function(){
         var mention_options = AppOption['form_options']['mention_options'];

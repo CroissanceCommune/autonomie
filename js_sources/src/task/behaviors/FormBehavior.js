@@ -28,21 +28,28 @@ var FormBehavior = Mn.Behavior.extend({
         return serializeForm(this.getUI('form'));
     },
     onRender: function() {
-        //Set up any other form related stuff here
-        Validation.unbind(this.view);
-        Validation.bind(this.view);
     },
     onSyncError: function(){
         displayServerError("Une erreur a été rencontrée lors de la " +
                            "sauvegarde de vos données");
+        Validation.unbind(this.view);
     },
     onSyncSuccess: function(){
         displayServerSuccess("Vos données ont bien été sauvegardées");
+        Validation.unbind(this.view);
     },
-    syncServer: function(){
+    syncServer: function(datas, bound){
+        var bound = bound || false;
+        var datas = datas || this.view.model.toJSON();
+
+        if (!bound){
+            Validation.bind(this.view, {
+                attributes: function(view){return _.keys(datas)}
+            });
+        }
         if (this.view.model.isValid()){
             this.view.model.save(
-                this.view.model.toJSON(),
+                datas,
                 {
                     success: this.onSyncSuccess.bind(this),
                     error: this.onSyncError.bind(this),
@@ -54,15 +61,26 @@ var FormBehavior = Mn.Behavior.extend({
         this.view.model.set(this.serializeForm(), {validate: true});
         this.syncServer();
     },
-    onDataModified: function(view, attribute, value){
-        console.log("Data modified");
-        const error = this.view.model.preValidate(attribute, value);
+    onDataPersist: function(view, attribute, value){
+        Validation.unbind(this.view);
+        Validation.bind(this.view, {
+            attributes: function(view){return [attribute];}
+        });
 
-        if (error){
-            BootstrapOnInvalidForm(view, attribute, error, 'name');
-        } else {
-            BootstrapOnValidForm(view, attribute, 'name');
-        }
+        var datas = {};
+        datas[attribute] = value;
+        this.view.model.set(datas);
+        this.syncServer(datas, true);
+    },
+    onDataModified: function(view, attribute, value){
+        Validation.unbind(this.view);
+        Validation.bind(this.view, {
+            attributes: function(view){return [attribute];}
+        });
+        var datas = {};
+        datas[attribute] = value;
+        this.view.model.set(datas);
+        this.view.model.isValid();
     }
 });
 

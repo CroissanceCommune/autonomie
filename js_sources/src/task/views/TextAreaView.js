@@ -21,12 +21,19 @@ const TextAreaView = Mn.View.extend({
         textarea: 'textarea'
     },
     events: {
-        'keyup @ui.textarea': 'onCheckDatas',
-        'blur @ui.textarea': 'onCheckDatas'
+        'keyup @ui.textarea': 'onKeyUp',
+        'blur @ui.textarea': 'onBlur'
     },
-    onCheckDatas: function(){
+    onKeyUp: function(){
         this.triggerMethod(
             'change',
+            this.getOption('field_name'),
+            this.getUI('textarea').val(),
+        );
+    },
+    onBlur: function(){
+        this.triggerMethod(
+            'finish',
             this.getOption('field_name'),
             this.getUI('textarea').val(),
         );

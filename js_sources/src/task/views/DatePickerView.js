@@ -23,7 +23,7 @@ const DatePickerView = Mn.View.extend({
     onDateSelect: function(){
         /* On date select trigger a change event */
         const value = $(this.getSelector()).val();
-        this.triggerMethod('change', this.getOption('field_name'), value);
+        this.triggerMethod('finish', this.getOption('field_name'), value);
     },
     getSelector: function(){
         /* Return the selector for the date input */

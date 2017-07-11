@@ -33,7 +33,7 @@ const CheckboxListView = Mn.View.extend({
     },
     onClick: function(event){
         this.triggerMethod(
-            'data:modified',
+            'finish',
             this.getOption('field_name'),
             this.getCurrentValues(),
         );

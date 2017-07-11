@@ -93,5 +93,13 @@ One page application layout template
       <%block name='content' />
     </div>
     <%block name='footer' />
+    <script type='text/javascript'>
+        var company_menu = document.getElementById('company-select-menu');
+        if (company_menu !== null){
+            company_menu.onchange = function(){
+                window.location = this.value;
+            }
+        }
+    </script>
   </body>
 </html>

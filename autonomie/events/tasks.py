@@ -30,24 +30,27 @@ import logging
 from autonomie.views import render_api
 
 from autonomie_base.mail import (
-    send_mail_from_event,
     format_link,
 )
+from autonomie.events import send_mail_from_event
 
 log = logging.getLogger(__name__)
 
 # Events for which a mail will be sended
-EVENTS = {"valid":u"validé",
-            "invalid": u"invalidé",
-            "paid": u"partiellement payé",
-            "resulted": u"payé"}
+EVENTS = {
+    "valid": u"validé",
+    "invalid": u"invalidé",
+    "paid": u"partiellement payé",
+    "resulted": u"payé"
+}
 
 SUBJECT_TMPL = u"{docname} ({customer}) : {statusstr}"
 
 MAIL_TMPL = u"""
 Bonjour {username},
 
-{docname} {docnumber} du projet {project} avec le client {customer} a été {status_verb}{gender}.
+{docname} {docnumber} du projet {project} avec le client {customer} \
+a été {status_verb}{gender}.
 
 Vous pouvez {determinant} consulter ici :
 {addr}
@@ -70,11 +73,10 @@ class StatusChanged(object):
         # So here, we got the paid status, but in reality, the status has
         # already been set to resulted. This hack avoid to send emails with the
         # wrong message
-        if status == 'paid' and self.document.CAEStatus == 'resulted':
+        if status == 'paid' and self.document.paid_status == 'resulted':
             self.new_status = 'resulted'
 
         self.settings = self.request.registry.settings
-
 
     @property
     def recipients(self):
@@ -126,7 +128,7 @@ class StatusChanged(object):
             query_args = {}
 
         addr = self.request.route_url(
-                    self.document.type_,
+                    "/%ss/{id}.html" % self.document.type_,
                     id=self.document.id,
                     _query=query_args,
                     )
@@ -135,11 +137,11 @@ class StatusChanged(object):
         docnumber = self.document.internal_number.lower()
         customer = self.document.customer.name.capitalize()
         project = self.document.project.name.capitalize()
-        if self.document.is_invoice():
+        if self.document.type_ == 'invoice':
             docname = u"La facture"
             gender = u"e"
             determinant = u"la"
-        elif self.document.is_cancelinvoice():
+        elif self.document.type_ == 'cancelinvoice':
             docname = u"L'avoir"
             gender = u""
             determinant = u"le"
@@ -147,8 +149,8 @@ class StatusChanged(object):
             docname = u"Le devis"
             gender = u""
             determinant = u"le"
-        if self.document.statusComment:
-            comment = self.document.statusComment
+        if self.document.status_comment:
+            comment = self.document.status_comment
         else:
             comment = u"Aucun"
 
@@ -176,7 +178,7 @@ class StatusChanged(object):
             Return True if the new status requires a mail to be sent
         """
         if self.new_status in EVENTS.keys() \
-                and not self.document.is_cancelinvoice():
+                and not self.document.type_ == 'cancelinvoice':
             return True
         else:
             return False
@@ -184,7 +186,7 @@ class StatusChanged(object):
 
 def get_status_verb(status):
     """
-        Return the verb associated to the current status
+    Return the verb associated to the current status
     """
     return EVENTS.get(status, u"")
 

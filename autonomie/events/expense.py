@@ -29,9 +29,9 @@ import datetime
 import logging
 
 from autonomie_base.mail import (
-    format_link,
     send_mail_from_event,
 )
+from autonomie.events.mail import format_link
 from autonomie.views.render_api import (
     format_account,
     format_date,

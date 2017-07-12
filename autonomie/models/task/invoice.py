@@ -704,3 +704,22 @@ def get_invoice_years():
             years.append(current)
         return years
     return taskyears()
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            mode=self.mode,
+            amount=math_utils.integer_to_amount(self.amount),
+            remittance_amount=self.remittance_amount,
+            label=self.remittance_amount,
+            date=self.date,
+            exported=self.exported,
+            task_id=self.task_id,
+            bank_id=self.bank_id,
+            bank=self.bank.label,
+            tva_id=self.tva_id,
+            tva=math_utils.integer_to_amount(self.tva.value, 2),
+            user_id=self.user_id,
+        )

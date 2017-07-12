@@ -68,6 +68,7 @@ from autonomie.compute.task import (
     DiscountLineCompute,
     GroupCompute,
 )
+from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.node import Node
 from autonomie.models.task.mentions import (
     TASK_MENTION,
@@ -347,6 +348,7 @@ class Task(Node):
             BigInteger(),
             info={
                 'colanderalchemy': {
+                    'typ': AmountType(5),
                     'title': u'Frais',
                     'validator': forms.positive_validator
                 }
@@ -633,9 +635,9 @@ _{s.date:%m%y}"
             date=self.date.isoformat(),
             owner_id=self.owner_id,
             description=self.description,
-            ht=self.ht,
-            tva=self.tva,
-            ttc=self.ttc,
+            ht=integer_to_amount(self.ht, 5),
+            tva=integer_to_amount(self.tva, 5),
+            ttc=integer_to_amount(self.ttc, 5),
             company_id=self.company_id,
             project_id=self.project_id,
             customer_id=self.customer_id,
@@ -644,7 +646,7 @@ _{s.date:%m%y}"
             official_number=self.official_number,
             internal_number=self.internal_number,
             display_units=self.display_units,
-            expenses_ht=self.expenses_ht,
+            expenses_ht=integer_to_amount(self.expenses_ht, 5),
             address=self.address,
             workplace=self.workplace,
             payment_conditions=self.payment_conditions,
@@ -823,8 +825,8 @@ class DiscountLine(DBBASE, DiscountLineCompute):
         return dict(
             task_id=self.task_id,
             description=self.description,
-            amount=self.amount,
-            tva=self.tva,
+            amount=integer_to_amount(self.amount, 5),
+            tva=integer_to_amount(self.tva, 2),
         )
 
     def duplicate(self):
@@ -1045,7 +1047,6 @@ class TaskLine(DBBASE, LineCompute):
                 'missing': colander.drop,
             }
         },
-
     )
     tva = Column(
         Integer,
@@ -1060,7 +1061,7 @@ class TaskLine(DBBASE, LineCompute):
             }
         },
         nullable=False,
-        default=196
+        default=2000
     )
     product_id = Column(
         Integer,
@@ -1120,8 +1121,8 @@ class TaskLine(DBBASE, LineCompute):
         result = dict(
             id=self.id,
             order=self.order,
-            cost=self.cost,
-            tva=self.tva,
+            cost=integer_to_amount(self.cost, 5),
+            tva=integer_to_amount(self.tva, 2),
             description=self.description,
             quantity=self.quantity,
             unity=self.unity,

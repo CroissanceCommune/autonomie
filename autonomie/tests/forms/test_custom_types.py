@@ -28,13 +28,10 @@ from autonomie.forms.custom_types import specialfloat
 from autonomie.forms.custom_types import Integer
 
 def test_amount_type():
-    a = AmountType()("node", {})
+    a = AmountType()
     assert a.serialize(None, 15000) == "150.0"
     assert a.deserialize(None, u"79.4") == 7940
     assert a.deserialize(None, u"292,65") == 29265
-
-    a = AmountType()("node", {'translate': False})
-    assert a.serialize(None, 15000) == "15000"
 
 def test_specialfloat():
     a = u"495, 4 5€"

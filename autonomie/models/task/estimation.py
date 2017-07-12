@@ -55,6 +55,7 @@ from autonomie.forms.custom_types import AmountType
 from autonomie.compute.task import (
     EstimationCompute,
 )
+from autonomie.compute.math_utils import integer_to_amount
 from .interfaces import (
     IMoneyTask,
 )
@@ -640,8 +641,8 @@ class PaymentLine(DBBASE):
             order=self.order,
             index=self.order,
             description=self.description,
-            cost=self.amount,
-            amount=self.amount,
+            cost=integer_to_amount(self.amount, 5),
+            amount=integer_to_amount(self.amount, 5),
             date=self.date.isoformat(),
             task_id=self.task_id,
         )

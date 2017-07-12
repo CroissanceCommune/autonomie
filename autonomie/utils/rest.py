@@ -56,9 +56,12 @@ class RestError(HTTPError):
         common http exceptions
     """
     def __init__(self, errors, code=400):
-        body = {'status':"error", "errors":errors}
+        body = {'status': "error", "errors": errors}
         Response.__init__(self, status=code, body=render("json", body))
         self.content_type = 'application/json'
+
+    def __unicode__(self):
+        return u"<RestError status=%s body=%s>" % (self.status, self.body)
 
 
 class Apiv1Resp(dict):
@@ -104,6 +107,7 @@ class Apiv1Resp(dict):
     """
     _id_key = '_'
     _version = "1.0"
+
     def __init__(self, request, datas={}, status='success'):
         dict.__init__(
             self,
@@ -160,6 +164,7 @@ class RestJsonRepr(object):
         __json__ method of our object, so we use request as default bind_param
     """
     schema = None
+
     def __init__(self, model, bind_params=None):
         self.model = model
         self.bind_params = bind_params
@@ -208,14 +213,16 @@ class RestJsonRepr(object):
         # We update the appstruct with the value we had expected from the json
         # repr
         for key, value in appstruct.items():
-            if not result.has_key(key):
+            if key not in result:
                 result[key] = value
         result = self.postformat(result)
         return result
 
 
-def add_rest_views(config, route_name, factory,
-        edit_rights='edit', add_rights='view', view_rights='view'):
+def add_rest_views(
+    config, route_name, factory, edit_rights='edit',
+    add_rights='view', view_rights='view', collection_route_name=None
+):
     """
         Add a rest iface associating the factory's methods to the different
         request methods of the routes based on route_name :
@@ -226,38 +233,48 @@ def add_rest_views(config, route_name, factory,
         get - > route_name, GET
         post - > route_name+"s", POST
     """
+    if collection_route_name is None:
+        collection_route_name = route_name + 's'
     # FIXME : l'api rest est placée à la racine, on a pas de traversal qui nous
     # permet de donner des droits autres que 'view' à nos users, donc tout est
     # autorisé pour les gens qui ont les droits 'view'
-    config.add_view(factory,
-            attr='get',
-            route_name=route_name,
-            renderer="json",
-            request_method='GET',
-            permission=view_rights,
-            xhr=True)
-    config.add_view(factory,
-            attr='post',
-            # C pas beau je sais
-            route_name=route_name + "s",
-            renderer="json",
-            request_method='POST',
-            permission=add_rights,
-            xhr=True)
-    config.add_view(factory,
-            attr='put',
-            route_name=route_name,
-            renderer="json",
-            request_method='PUT',
-            permission=edit_rights,
-            xhr=True)
-    config.add_view(factory,
-            attr='delete',
-            route_name=route_name,
-            renderer="json",
-            request_method='DELETE',
-            permission=edit_rights,
-            xhr=True)
+    config.add_view(
+        factory,
+        attr='get',
+        route_name=route_name,
+        renderer="json",
+        request_method='GET',
+        permission=view_rights,
+        xhr=True,
+    )
+    config.add_view(
+        factory,
+        attr='post',
+        # C pas beau je sais
+        route_name=collection_route_name,
+        renderer="json",
+        request_method='POST',
+        permission=add_rights,
+        xhr=True,
+    )
+    config.add_view(
+        factory,
+        attr='put',
+        route_name=route_name,
+        renderer="json",
+        request_method='PUT',
+        permission=edit_rights,
+        xhr=True
+    )
+    config.add_view(
+        factory,
+        attr='delete',
+        route_name=route_name,
+        renderer="json",
+        request_method='DELETE',
+        permission=edit_rights,
+        xhr=True
+    )
 
 
 def make_redirect_view(route_name, with_id=True):

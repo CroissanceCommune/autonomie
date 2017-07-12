@@ -12,6 +12,8 @@ import Mn from 'backbone.marionette';
 import CommonView from "./CommonView.js";
 import RightBarView from "./RightBarView.js";
 import CommonModel from "../models/CommonModel.js";
+import TaskLineGroupCollection from '../models/TaskLineGroupCollection.js';
+import TaskLineGroupCollectionView from './TaskLineGroupCollectionView.js';
 import StatusView from './StatusView.js';
 import { Modal } from 'bootstrap';
 
@@ -22,6 +24,7 @@ const MainView = Mn.View.extend({
     regions: {
         modalRegion: '#modalregion',
         common: '#common',
+        tasklines: '#tasklines',
         rightbar: "#rightbar",
         footer: '#footer'
     },
@@ -38,6 +41,17 @@ const MainView = Mn.View.extend({
             this.showChildView(
                 'common',
                 new CommonView({model: this.commonModel})
+            );
+        }
+        if (_.indexOf(AppOption['form_options']['sections'], "tasklines") != -1){
+            console.log("We build the tasklines view");
+            console.log(this.getOption('datas')['line_groups']);
+            this.task_line_group_collection = new TaskLineGroupCollection(this.getOption('datas')['line_groups']);
+            console.log("Model built");
+            console.log(this.task_line_group_collection);
+            this.showChildView(
+                'tasklines',
+                new TaskLineGroupCollectionView({collection: this.task_line_group_collection})
             );
         }
 

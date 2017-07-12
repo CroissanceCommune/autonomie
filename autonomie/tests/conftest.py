@@ -156,7 +156,6 @@ def config(request, pyramid_request, settings, registry):
     """
     os.environ['TZ'] = "Europe/Paris"
     from pyramid_beaker import set_cache_regions_from_settings
-    print(settings)
     config = testing.setUp(
         registry=registry,
         settings=settings,

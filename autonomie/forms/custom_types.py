@@ -48,7 +48,7 @@ class QuantityType(colander.Number):
     num = specialfloat
 
 
-class _AmountType(colander.Number):
+class AmountType(colander.Number):
     """
         preformat an amount before considering it as a float object
         then *100 to store it into database
@@ -100,23 +100,3 @@ class Integer(colander.Number):
                 node,
                 u"'${val}' n'est pas un nombre".format(val=appstruct)
             )
-
-
-class AmountType(colander.deferred):
-
-    def __init__(self, precision=2):
-
-        def deferred_amount_type(node, kw):
-            translate = kw.get('translate', True)
-            if translate:
-                return _AmountType(precision)
-            else:
-                return Integer()
-
-        colander.deferred.__init__(self, deferred_amount_type)
-
-    def __call__(self, node=None, kw=None):
-        if node is None:  # Colanderalchemy bug #102
-            return self
-        else:
-            return colander.deferred.__call__(self, node, kw)

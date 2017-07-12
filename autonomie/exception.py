@@ -39,7 +39,7 @@ class BadRequest(Exception):
         """
         return [self.message]
 
-    def asdict(self):
+    def asdict(self, translate=None):
         return {'erreur': self.message}
 
 

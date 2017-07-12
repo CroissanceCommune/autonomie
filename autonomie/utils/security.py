@@ -52,6 +52,14 @@ from autonomie.models.project import (
     Project,
     Phase,
 )
+from autonomie.models.task.task import (
+    TaskLine,
+    TaskLineGroup,
+    DiscountLine,
+)
+from autonomie.models.task.estimation import (
+    PaymentLine,
+)
 from autonomie.models.task.estimation import Estimation
 from autonomie.models.task.invoice import (
     Invoice,
@@ -160,6 +168,8 @@ class RootFactory(dict):
             ('statistic_entries', 'statistic_entry', StatisticEntry,),
             ('statistic_criteria', 'statistic_criterion',
              BaseStatisticCriterion,),
+            ('task_line', 'task_line', TaskLine),
+            ('task_line_group', 'task_line_group', TaskLineGroup),
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
@@ -398,7 +408,6 @@ def _get_admin_status_acl(self):
     ]
 
 
-
 def get_estimation_default_acl(self):
     """
     Return acl for the estimation handling
@@ -427,7 +436,9 @@ def get_estimation_default_acl(self):
 
     # Common estimation access acl
     if self.status != 'valid':
-        acl.append((Allow, "group:estimation_validation", ('valid.estimation',)))
+        acl.append(
+            (Allow, "group:estimation_validation", ('valid.estimation',))
+        )
         acl.append((Deny, "group:estimation_validation", ('wait.estimation',)))
 
     acl.extend(_get_user_status_acl(self))
@@ -460,7 +471,8 @@ def get_invoice_default_acl(self):
     if self.status == 'valid' and self.paid_status != 'resulted':
         admin_perms += ('gencinv.invoice', 'add_payment.invoice',)
 
-    if self.status == 'valid' and self.paid_status == 'waiting' and not self.exported:
+    if self.status == 'valid' and self.paid_status == 'waiting' \
+            and not self.exported:
         admin_perms += ('set_date.invoice',)
 
     if not self.exported:
@@ -506,11 +518,41 @@ def get_cancelinvoice_default_acl(self):
         acl.append((Allow, "group:manager", admin_perms))
 
     if self.status != 'valid':
-        acl.append((Allow, "group:invoice_validation", ('valid.cancelinvoice',)))
+        acl.append(
+            (Allow, "group:invoice_validation", ('valid.cancelinvoice',))
+        )
         acl.append((Deny, "group:invoice_validation", ('wait.cancelinvoice',)))
 
     acl.extend(_get_user_status_acl(self))
     return acl
+
+
+def get_task_line_group_acl(self):
+    """
+    Return the task line acl
+    """
+    return self.task.__acl__()
+
+
+def get_task_line_acl(self):
+    """
+    Return the task line acl
+    """
+    return self.group.__acl__()
+
+
+def get_discount_line_acl(self):
+    """
+    Return the acls for accessing the discount line
+    """
+    return self.task.__acl__()
+
+
+def get_payment_line_acl(self):
+    """
+    Return the acls for accessing a payment line
+    """
+    return self.task.__acl__()
 
 
 def get_expense_sheet_default_acl(self):
@@ -716,6 +758,7 @@ def set_models_acl():
     CompetenceGridSubItem.__acl__ = property(get_competence_acl)
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
     Customer.__default_acl__ = property(get_customer_acl)
+    DiscountLine.__acl__ = property(get_discount_line_acl)
     Estimation.__default_acl__ = property(get_estimation_default_acl)
     ExpenseSheet.__default_acl__ = property(get_expense_sheet_default_acl)
     ExpensePayment.__default_acl__ = property(get_expense_payment_acl)
@@ -723,6 +766,7 @@ def set_models_acl():
     Invoice.__default_acl__ = property(get_invoice_default_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
     Payment.__default_acl__ = property(get_payment_default_acl)
+    PaymentLine.__acl__ = property(get_payment_line_acl)
     Phase.__acl__ = property(get_phase_acl)
     Project.__default_acl__ = property(get_project_acl)
     SaleProductCategory.__acl__ = property(get_product_acl)
@@ -731,6 +775,8 @@ def set_models_acl():
     StatisticSheet.__acl__ = property(get_base_acl)
     StatisticEntry.__acl__ = property(get_base_acl)
     BaseStatisticCriterion.__acl__ = property(get_base_acl)
+    TaskLine.__acl__ = property(get_task_line_acl)
+    TaskLineGroup.__acl__ = property(get_task_line_group_acl)
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)

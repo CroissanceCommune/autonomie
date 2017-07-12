@@ -19,7 +19,11 @@ from autonomie.models.task import (
     PaymentConditions,
     TaskMention,
     Estimation,
-    TaskStatus
+    TaskStatus,
+    TaskLineGroup,
+    TaskLine,
+    DiscountLine,
+    PaymentLine,
 )
 from autonomie.events.tasks import StatusChanged
 from autonomie.forms.tasks.estimation import validate_estimation
@@ -81,23 +85,16 @@ def json_payment_conditions(request):
 
 class RestEstimation(BaseRestView):
 
-    def get_schema(self, submitted, edit):
-        if edit:
-            excludes = ()
-            includes = submitted.keys()
-        else:
-            excludes = ('status', 'children', 'parent',)
-            includes = ()
+    def get_schema(self, submitted):
+        """
+        Return the schema for TaskLineGroup add/edition
 
-        logger.debug("Building a schema with :")
-        logger.debug("includes :")
-        logger.debug(includes)
-        logger.debug("excludes : %s")
-        logger.debug(excludes)
-
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('status', 'children', 'parent',)
         schema = SQLAlchemySchemaNode(
             Estimation,
-            includes=includes,
             excludes=excludes
         )
         schema = schema.bind(request=self.request)
@@ -109,7 +106,7 @@ class RestEstimation(BaseRestView):
         """
         return {
             "sections": [
-                'common', 'prestations', 'payment_conditions', 'payments'
+                'common', 'tasklines', 'payment_conditions', 'payments'
             ],
             'tva_options': json_tvas(self.request),
             "workunit_options": json_workunits(self.request),
@@ -203,6 +200,108 @@ class RestEstimation(BaseRestView):
         return result
 
 
+class TaskLineGroupRestView(BaseRestView):
+    """
+    Rest views handling the task line groups
+    """
+    def get_schema(self, submitted):
+        """
+        Return the schema for TaskLineGroup add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('task_id',)
+        schema = SQLAlchemySchemaNode(TaskLineGroup, excludes=excludes)
+        return schema.bind(request=self.request)
+
+    def collection_get(self):
+        """
+        View returning the task line groups attached to this estimation
+        """
+        return self.context.line_groups
+
+    def post_format(self, entry, edit):
+        """
+        Associate a newly created element to the parent task
+        """
+        if not edit:
+            entry.task = self.context
+        return entry
+
+
+class TaskLineRestView(BaseRestView):
+    """
+    Rest views used to handle the task lines
+    """
+    def get_schema(self, submitted):
+        """
+        Return the schema for TaskLine add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('group_id',)
+        schema = SQLAlchemySchemaNode(TaskLine, excludes=excludes)
+        return schema.bind(request=self.request)
+
+    def post_format(self, entry, edit):
+        """
+        Associate a newly created element to the parent group
+        """
+        if not edit:
+            entry.group = self.context
+        return entry
+
+
+class DiscountLineRestView(BaseRestView):
+    """
+    Rest views used to handle the task lines
+    """
+    def get_schema(self, submitted):
+        """
+        Return the schema for DiscountLine add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('task_id',)
+        schema = SQLAlchemySchemaNode(DiscountLine, excludes=excludes)
+        return schema.bind(request=self.request)
+
+    def post_format(self, entry, edit):
+        """
+        Associate a newly created element to the parent task
+        """
+        if not edit:
+            entry.task = self.context
+        return entry
+
+
+class PaymentLineRestView(BaseRestView):
+    """
+    Rest views used to handle the task lines
+    """
+    def get_schema(self, submitted):
+        """
+        Return the schema for PaymentLine add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('task_id',)
+        schema = SQLAlchemySchemaNode(PaymentLine, excludes=excludes)
+        return schema.bind(request=self.request)
+
+    def post_format(self, entry, edit):
+        """
+        Associate a newly created element to the parent task
+        """
+        if not edit:
+            entry.task = self.context
+        return entry
+
+
 class EstimationStatusView(TaskStatusView):
     def validate(self):
         try:
@@ -263,6 +362,46 @@ def add_routes(config):
         "/api/v1/estimations/{id}",
         "/api/v1/estimations/{id:\d+}",
         traverse='/estimations/{id}'
+    )
+    config.add_route(
+        "/api/v1/estimations/{id}/task_line_groups",
+        "/api/v1/estimations/{id}/task_line_groups",
+        traverse='/estimations/{id}'
+    )
+    config.add_route(
+        "/api/v1/estimations/{id}/discount_lines",
+        "/api/v1/estimations/{id}/discount_lines",
+        traverse='/estimations/{id}'
+    )
+    config.add_route(
+        "/api/v1/estimations/{id}/payment_lines",
+        "/api/v1/estimations/{id}/payment_lines",
+        traverse='/estimations/{id}'
+    )
+    config.add_route(
+        "/api/v1/task_line_groups/{id}",
+        "/api/v1/task_line_groups/{id:\d+}",
+        traverse='/task_line_groups/{id}',
+    )
+    config.add_route(
+        "/api/v1/task_line_groups/{id}/task_lines",
+        "/api/v1/task_line_groups/{id:\d+}/task_lines",
+        traverse='/task_line_groups/{id}',
+    )
+    config.add_route(
+        "/api/v1/task_lines/{id}",
+        "/api/v1/task_lines/{id:\d+}",
+        traverse='/task_lines/{id}',
+    )
+    config.add_route(
+        "/api/v1/discount_lines/{id}",
+        "/api/v1/discount_lines/{id:\d+}",
+        traverse='/discount_line/{id}',
+    )
+    config.add_route(
+        "/api/v1/payment_lines/{id}",
+        "/api/v1/payment_lines/{id:\d+}",
+        traverse='/payment_line/{id}',
     )
 
 

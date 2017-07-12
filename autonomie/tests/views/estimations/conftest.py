@@ -25,6 +25,7 @@ def task_line(dbsession, unity, tva, product, task_line_group):
     from autonomie.models.task.task import TaskLine
     # TTC = 120 €
     line = TaskLine(
+        description=u"Task Line description",
         cost=10000000,
         quantity=1,
         unity=unity.label,

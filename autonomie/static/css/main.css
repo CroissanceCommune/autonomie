@@ -489,10 +489,12 @@ header .navbar .nav > li > a {
     position: relative;
     top: 20vh; }
 
-#js-main-area #rightbar {
+.task-desktop-actions {
   position: sticky;
   position: -webkit-sticky;
   position: -moz-sticky;
   position: -ms-sticky;
   position: -o-sticky;
   top: 50px; }
+  .task-desktop-actions button {
+    margin-bottom: 0.7em; }

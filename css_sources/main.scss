@@ -526,12 +526,14 @@ $blue_status_label: #5bc0de;
     top: 20vh;
   }
 }
-#js-main-area #rightbar{
+.task-desktop-actions{
     position: sticky;
     position: -webkit-sticky;
     position: -moz-sticky;
     position: -ms-sticky;
     position: -o-sticky;
     top: 50px;
-
+    button{
+      margin-bottom: 0.7em;
+    }
 }

@@ -307,8 +307,8 @@ class RestStatisticEntry(BaseRestView):
         """
         return self.context.entries
 
-    def post_format(self, entry):
-        if entry.sheet_id is None:
+    def post_format(self, entry, edit):
+        if not edit:
             entry.sheet = self.context
         return entry
 
@@ -317,7 +317,7 @@ class RestStatisticCriterion(BaseRestView):
     """
     Api rest pour la gestion des critères statistiques
     """
-    def get_schema(self, submitted, edit):
+    def get_schema(self, submitted):
         model_type = submitted['type']
 
         model = CRITERION_MODELS.get(model_type)
@@ -362,11 +362,11 @@ class RestStatisticCriterion(BaseRestView):
                 values['searches'] = [searches]
         return values
 
-    def post_format(self, criterion):
+    def post_format(self, criterion, edit):
         """
         We hard-set the model_type
         """
-        if self.context.__name__ == 'statistic_entry':
+        if not edit:
             criterion.entry = self.context
 
         return criterion

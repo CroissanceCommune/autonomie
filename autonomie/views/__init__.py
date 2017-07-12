@@ -758,7 +758,7 @@ class BaseRestView(BaseView):
     """
     schema = None
 
-    def get_schema(self, submitted, edit):
+    def get_schema(self, submitted):
         return self.schema
 
     def filter_edition_schema(self, schema, submitted):
@@ -788,7 +788,7 @@ class BaseRestView(BaseView):
         """
         return datas
 
-    def post_format(self, entry):
+    def post_format(self, entry, edit):
         """
         Allos to apply post formatting to the model before flushing it
         """
@@ -804,7 +804,7 @@ class BaseRestView(BaseView):
         submitted = self.request.json_body
         self.logger.debug(u"Submitting %s" % submitted)
         submitted = self.pre_format(submitted)
-        schema = self.get_schema(submitted, edit)
+        schema = self.get_schema(submitted)
 
         if edit:
             schema = self.filter_edition_schema(schema, submitted)
@@ -820,11 +820,11 @@ class BaseRestView(BaseView):
         if edit:
             editted = self.get_editted_element(attributes)
             entry = schema.objectify(attributes, editted)
-            entry = self.post_format(entry)
+            entry = self.post_format(entry, edit)
             entry = self.request.dbsession.merge(entry)
         else:
             entry = schema.objectify(attributes)
-            entry = self.post_format(entry)
+            entry = self.post_format(entry, edit)
             self.request.dbsession.add(entry)
             # We need an id => flush
             self.request.dbsession.flush()

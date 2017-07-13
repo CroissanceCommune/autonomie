@@ -8,6 +8,7 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+import _ from 'underscore';
 import Bb from 'backbone';
 import TaskLineCollection from './TaskLineCollection.js';
 
@@ -21,6 +22,13 @@ const TaskLineGroupModel = Bb.Model.extend({
         console.log(this.get('lines'));
         this.lines = new TaskLineCollection(this.get('lines'));
         console.log(this.lines);
+    },
+    ht: function(){
+        var res = 0;
+        _.each(this.lines.models, function(line){
+            res += line.ht()
+        });
+        return res;
     }
 });
 export default TaskLineGroupModel;

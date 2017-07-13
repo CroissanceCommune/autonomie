@@ -8,13 +8,31 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+import _ from 'underscore';
 import Mn from 'backbone.marionette';
+import { formatAmount } from '../../math.js';
 const template = require('./templates/TaskLineView.mustache');
 
 const TaskLineView = Mn.View.extend({
+    tagName: 'tr',
     template: template,
+    getTvaLabel: function(){
+        let res = "";
+        let current_value = this.model.get('tva');
+        console.log(current_value);
+        _.each(AppOption['form_options']['tva_options'], function(tva){
+            if (tva.value == current_value){
+                res = tva.name;
+            }
+        });
+        return res
+    },
     templateContext: function(){
-        return {};
+        console.log(this.getTvaLabel());
+        return {
+            ht: formatAmount(this.model.ht()),
+            tva_label: this.getTvaLabel()
+        };
     }
 });
 export default TaskLineView;

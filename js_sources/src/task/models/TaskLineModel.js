@@ -11,7 +11,6 @@
 import _ from 'underscore';
 import Bb from 'backbone';
 
-
 const TaskLineModel = Bb.Model.extend({
     props: [
         'id',
@@ -46,6 +45,9 @@ const TaskLineModel = Bb.Model.extend({
     constructor: function() {
         arguments[0] = _.pick(arguments[0], this.props);
         Bb.Model.apply(this, arguments);
+    },
+    ht: function(){
+        return this.get('cost') * this.get('quantity');
     }
 });
 

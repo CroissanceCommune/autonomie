@@ -1,5 +1,25 @@
 <div>
-<h1>TITRE</h1>
-<div class='lines'>
-</div>
-</div>
+{{#if title }}
+<h3>{{title}}</h3>
+{{/if}}
+{{#if description}}
+<p>{{description}}</p>
+{{/if}}
+<table class='table table-bordered tasklines'>
+<thead>
+    <th>Intitulé des postes</th>
+    <th>Prix unitaire HT</th>
+    <th>Quantité</th>
+    <th>Unité</th>
+    <th>Tva</th>
+    <th>HT</th>
+</thead>
+<tbody class='lines'>
+</tbody>
+<tfoot>
+<th colspan=5 class='text-right'> Sous total HT</th>
+<th>
+{{{ total_ht }}}
+</th>
+</tfoot>
+</table>

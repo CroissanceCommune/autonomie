@@ -10,16 +10,25 @@
  */
 import Mn from 'backbone.marionette';
 import TaskLineCollectionView from './TaskLineCollectionView.js';
+import { formatAmount } from '../../math.js';
 
 const template = require('./templates/TaskLineGroupView.mustache');
 
 const TaskLineGroupView = Mn.View.extend({
     template: template,
     regions: {
-        lines: '.lines'
+        lines: {el: '.lines', replaceElement: true}
     },
     onRender: function(){
-        this.showChildView('lines', new TaskLineCollectionView({collection: this.model.lines}));
+        this.showChildView(
+            'lines',
+            new TaskLineCollectionView({collection: this.model.lines})
+        );
+    },
+    templateContext: function(){
+        return {
+            total_ht: formatAmount(this.model.ht())
+        }
     }
 });
 export default TaskLineGroupView;

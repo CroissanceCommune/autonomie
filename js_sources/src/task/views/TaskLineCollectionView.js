@@ -12,7 +12,7 @@ import Mn from 'backbone.marionette';
 import TaskLineView from './TaskLineView.js';
 
 const TaskLineCollectionView = Mn.CollectionView.extend({
-    tagName: 'div',
+    tagName: 'tbody',
     childView: TaskLineView
 });
 export default TaskLineCollectionView;

@@ -13,7 +13,10 @@ import logging
 import colander
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.utils.rest import Apiv1Resp
+from autonomie.utils.rest import (
+    Apiv1Resp,
+    add_rest_views,
+)
 from autonomie.models.task import (
     WorkUnit,
     PaymentConditions,
@@ -27,7 +30,10 @@ from autonomie.models.task import (
 )
 from autonomie.events.tasks import StatusChanged
 from autonomie.forms.tasks.estimation import validate_estimation
-from autonomie.models.tva import Tva
+from autonomie.models.tva import (
+    Tva,
+    Product,
+)
 from autonomie.views import BaseRestView
 from autonomie.views.status import (
     TaskStatusView,
@@ -58,6 +64,17 @@ def json_tvas(request):
     :returns: List of Tva objects in their json repr
     """
     query = Tva.query()
+    return [item.__json__(request) for item in query]
+
+
+def json_products(request):
+    """
+    Return the product objects available for this form
+
+    :param obj request: The current request object
+    :returns: List of Product objects in their json repr
+    """
+    query = Product.query()
     return [item.__json__(request) for item in query]
 
 
@@ -110,6 +127,7 @@ class RestEstimation(BaseRestView):
             ],
             'tva_options': json_tvas(self.request),
             "workunit_options": json_workunits(self.request),
+            "product_options": json_products(self.request),
             "mention_options": json_mentions(self.request),
             "payment_conditions": json_payment_conditions(self.request),
             "actions": {
@@ -379,28 +397,28 @@ def add_routes(config):
         traverse='/estimations/{id}'
     )
     config.add_route(
-        "/api/v1/task_line_groups/{id}",
-        "/api/v1/task_line_groups/{id:\d+}",
+        "/api/v1/estimations/{eid}/task_line_groups/{id}",
+        "/api/v1/estimations/{eid}/task_line_groups/{id:\d+}",
         traverse='/task_line_groups/{id}',
     )
     config.add_route(
-        "/api/v1/task_line_groups/{id}/task_lines",
-        "/api/v1/task_line_groups/{id:\d+}/task_lines",
+        "/api/v1/estimations/{eid}/task_line_groups/{id}/task_lines",
+        "/api/v1/estimations/{eid}/task_line_groups/{id:\d+}/task_lines",
         traverse='/task_line_groups/{id}',
     )
     config.add_route(
-        "/api/v1/task_lines/{id}",
-        "/api/v1/task_lines/{id:\d+}",
+        "/api/v1/estimations/{eid}/task_line_groups/{tid}/task_lines/{id}",
+        "/api/v1/estimations/{eid}/task_line_groups/{tid}/task_lines/{id:\d+}",
         traverse='/task_lines/{id}',
     )
     config.add_route(
-        "/api/v1/discount_lines/{id}",
-        "/api/v1/discount_lines/{id:\d+}",
+        "/api/v1/estimations/{eid}/discount_lines/{id}",
+        "/api/v1/estimations/{eid}/discount_lines/{id:\d+}",
         traverse='/discount_line/{id}',
     )
     config.add_route(
-        "/api/v1/payment_lines/{id}",
-        "/api/v1/payment_lines/{id:\d+}",
+        "/api/v1/estimations/{eid}/payment_lines/{id}",
+        "/api/v1/estimations/{eid}/payment_lines/{id:\d+}",
         traverse='/payment_line/{id}',
     )
 
@@ -451,6 +469,28 @@ def add_views(config):
         permission="edit.estimation",
         request_method='POST',
         renderer="json",
+    )
+
+    add_rest_views(
+        config,
+        route_name="/api/v1/estimations/{eid}/task_line_groups/{id}",
+        collection_route_name="/api/v1/estimations/{id}/task_line_groups",
+        factory=TaskLineGroupRestView,
+        view_rights="view.estimation",
+        add_rights="edit.estimation",
+        edit_rights='edit.estimation',
+    )
+
+    add_rest_views(
+        config,
+        route_name="/api/v1/estimations/{eid}/"
+        "task_line_groups/{tid}/task_lines/{id}",
+        collection_route_name="/api/v1/estimations/{eid}/"
+        "task_line_groups/{id}/task_lines",
+        factory=TaskLineRestView,
+        view_rights="view.estimation",
+        add_rights="edit.estimation",
+        edit_rights='edit.estimation',
     )
 
 

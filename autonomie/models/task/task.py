@@ -823,6 +823,7 @@ class DiscountLine(DBBASE, DiscountLineCompute):
 
     def __json__(self, request):
         return dict(
+            id=self.id,
             task_id=self.task_id,
             description=self.description,
             amount=integer_to_amount(self.amount, 5),
@@ -940,6 +941,7 @@ class TaskLineGroup(DBBASE, GroupCompute):
 
     def __json__(self, request):
         return dict(
+            id=self.id,
             title=self.title,
             description=self.description,
             task_id=self.task_id,

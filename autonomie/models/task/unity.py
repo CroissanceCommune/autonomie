@@ -33,7 +33,6 @@ from autonomie_base.models.base import default_table_args
 from autonomie_base.models.base import DBBASE
 from autonomie.forms import (
     get_hidden_field_conf,
-    EXCLUDED,
 )
 
 
@@ -60,4 +59,8 @@ formulaires d'édition des devis/factures",
     )
 
     def __json__(self, request):
-        return dict(id=self.id, label=self.label, value=self.label)
+        return dict(
+            id=self.id,
+            label=self.label,
+            value=self.label
+        )

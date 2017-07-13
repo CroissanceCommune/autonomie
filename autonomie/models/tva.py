@@ -199,6 +199,7 @@ devis/une facture,la mention apparaitra dans la sortie PDF
         return dict(
             id=self.id,
             value=integer_to_amount(self.value, 2),
+            label=self.name,
             name=self.name,
             default=self.default,
             products=[product.__json__(request) for product in self.products],
@@ -267,6 +268,7 @@ class Product(DBBASE):
         return dict(
             id=self.id,
             name=self.name,
+            label=self.name,
             compte_cg=self.compte_cg
         )
 

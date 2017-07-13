@@ -137,6 +137,7 @@ class RootFactory(dict):
             ('competence_subitems', 'competence_subitem',
              CompetenceGridSubItem, ),
             ('customers', 'customer', Customer, ),
+            ('discount_lines', 'discount_line', DiscountLine,),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
             (
@@ -159,6 +160,7 @@ class RootFactory(dict):
             ('invoices', 'invoice', Invoice, ),
             ('jobs', 'job', Job, ),
             ('payments', 'payment', Payment, ),
+            ('payment_lines', 'payment_line', PaymentLine,),
             ('phases', 'phase', Phase, ),
             ('projects', 'project', Project, ),
             ('sale_categories', 'sale_category', SaleProductCategory, ),
@@ -168,8 +170,8 @@ class RootFactory(dict):
             ('statistic_entries', 'statistic_entry', StatisticEntry,),
             ('statistic_criteria', 'statistic_criterion',
              BaseStatisticCriterion,),
-            ('task_line', 'task_line', TaskLine),
-            ('task_line_group', 'task_line_group', TaskLineGroup),
+            ('task_lines', 'task_line', TaskLine),
+            ('task_line_groups', 'task_line_group', TaskLineGroup),
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('timeslots', 'timeslot', Timeslot, ),
@@ -531,28 +533,28 @@ def get_task_line_group_acl(self):
     """
     Return the task line acl
     """
-    return self.task.__acl__()
+    return self.task.__acl__
 
 
 def get_task_line_acl(self):
     """
     Return the task line acl
     """
-    return self.group.__acl__()
+    return self.group.__acl__
 
 
 def get_discount_line_acl(self):
     """
     Return the acls for accessing the discount line
     """
-    return self.task.__acl__()
+    return self.task.__acl__
 
 
 def get_payment_line_acl(self):
     """
     Return the acls for accessing a payment line
     """
-    return self.task.__acl__()
+    return self.task.__acl__
 
 
 def get_expense_sheet_default_acl(self):

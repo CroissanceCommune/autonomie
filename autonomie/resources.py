@@ -80,7 +80,7 @@ def get_opa_group():
     """
     Return the resources used on one page applications pages
     """
-    js_tools = Group([_math, _date])
+    js_tools = Group([_date])
     return Group([main_css, js_tools])
 
 
@@ -289,4 +289,6 @@ competence_radar_js = get_module_resource(
 
 admin_expense_js = get_module_resource("admin_expense")
 
+task_css = get_resource('css/task.css', depends=(main_css,))
 task_js = get_resource('js/build/task.js')
+task_resources = Group([task_js, task_css])

@@ -1,0 +1,57 @@
+$bgcolor: #f8f8f8;
+$form-block-bgcolor: #dfae0c;
+$form-subblock-bgcolor: #fbfbfb;
+.page-content{
+  background-color: $bgcolor;
+  .common-form, .taskline-group {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: $form-block-bgcolor;
+    margin: 10px 5px;
+    padding: 10px 15px;
+  }
+  .taskline-group {
+    .linesblockheader{
+      background-color: $form-subblock-bgcolor;
+      margin: 0px 20px 0px 0px;
+    }
+    .tasklines{
+      background-color: $form-subblock-bgcolor;
+      margin: 0px 20px 0px 0px;
+    }
+    .actions{
+      padding: 15px 0px;
+    }
+    .subtotal{
+      padding: 15px 0px;
+      font-weight: bold;
+    }
+    .taskline{
+      border-bottom:1px solid #dddddd;
+      padding: 5px 0px;
+      .description{
+        font-size: 0.9em;
+      }
+    }
+  }
+}
+.paymentamount{
+  text-align:right;
+}
+.panel-heading{
+  font-weight: bold;
+}
+/* Only checkboxes on leaf nodes */
+.jstree-open > .jstree-anchor > .jstree-checkbox,
+.jstree-closed > .jstree-anchor > .jstree-checkbox { display:none; }
+
+.task-edit{
+  padding-bottom: 20vh;
+  min-height: 100vh;
+}
+.sticky-footer{
+  background-color: #f5f5f5;
+  position: fixed;
+  height: 15vh;
+  width: 100%;
+  bottom: 0px;
+}

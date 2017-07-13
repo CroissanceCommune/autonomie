@@ -8,134 +8,134 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
-html{
-  font-size: 11px;
-}
-.addressblock{
-  position:relative;
-  padding-left: 9.3cm;  /* + margin 1cm */
+html {
+  font-size: 11px; }
+
+.addressblock {
+  position: relative;
+  padding-left: 9.3cm;
+  /* + margin 1cm */
   width: 9cm;
-  padding-top:1cm;
-  font-size: 0.3cm;
-}
-.informationblock{
-  -pdf-keep-with-next:false;
-  padding-top:20px;
-  padding-bottom:20px;
-}
-.keep_with_next{
-  -pdf-keep-with-next: true;
-}
+  padding-top: 1cm;
+  font-size: 0.3cm; }
+
+.informationblock {
+  -pdf-keep-with-next: false;
+  padding-top: 20px;
+  padding-bottom: 20px; }
+
+.keep_with_next {
+  -pdf-keep-with-next: true; }
+
 /* Task line and line groups */
-.lines td, .lines th{
+.lines td, .lines th {
   padding: 2px;
-  vertical-align: middle;
-}
-.lines{
+  vertical-align: middle; }
+
+.lines {
   border: 0.01cm solid #cdcdcd;
-  margin-bottom:33px;
-}
-.lines thead tr{
-  background-color:#f6f6f6;
-  font-size:12px;
-}
-.lines thead tr.group-description{
-  background-color:#fff;
-}
-.lines h3{
+  margin-bottom: 33px; }
+
+.lines thead tr {
+  background-color: #f6f6f6;
+  font-size: 12px; }
+
+.lines thead tr.group-description {
+  background-color: #fff; }
+
+.lines h3 {
   font-size: 13px;
   font-weight: 400;
-  padding: 4px 0px;
-}
-.group-description td{
+  padding: 4px 0px; }
+
+.group-description td {
   font-weight: normal;
   text-align: left;
-  font-size: 11px;
-}
-.lines .price{
-  text-align:right;
-  width:4cm;
-  background-color:#f6f6f6;
-}
-.lines .tva{
-  text-align:right;
-  width: 2cm;
-  font-size: 9px;
-}
-.lines .quantity{
-  text-align:center;
-  width: 3cm;
-}
-.lines .unity{
-  text-align:center;
+  font-size: 11px; }
+
+.lines .price {
+  text-align: right;
   width: 4cm;
-}
-.lines .rightalign{
-  text-align:right;
-  font-weight:bold;
-}
-.title{
-  padding:3px;
-  padding-top:3px;
-  background-color:#f6f6f6;
-  font-weight:bold;
-  font-size:11px;
+  background-color: #f6f6f6; }
+
+.lines .tva {
+  text-align: right;
+  width: 2cm;
+  font-size: 9px; }
+
+.lines .quantity {
+  text-align: center;
+  width: 3cm; }
+
+.lines .unity {
+  text-align: center;
+  width: 4cm; }
+
+.lines .rightalign {
+  text-align: right;
+  font-weight: bold; }
+
+.title {
+  padding: 3px;
+  padding-top: 3px;
+  background-color: #f6f6f6;
+  font-weight: bold;
+  font-size: 11px;
   border: 0.01cm solid #cdcdcd;
-  -pdf-keep-with-next:true;
-}
-.content{
-  font-size:9px;
-  padding:3px;
-  border: 0.01cm solid #cdcdcd;
-  padding-bottom:4px;
-  margin-bottom:12px;
-}
-.pdf_footer{
-  background-color:#efefef;
-  color:#000;
-  text-align:center;
-  padding:5px;
+  -pdf-keep-with-next: true; }
+
+.content {
   font-size: 9px;
-}
-#cgv p{
-  font-size:8px;
-  padding:0px;
-  margin:0px;
-}
-#cgv h1, #cgv h2, #cgv h3, #cgv h4, #cgv h5{
-  margin: 2px;
-}
-.text12{
-font-size: 12px;
-}
-.text9{
-font-size: 9px;
-}
-.text14{
-font-size: 14px;
-}
-.upper{
-text-transform: uppercase;
-}
-.description ul{
-  margin-bottom: 3px;
-}
-.description li, .description p, .description div{
+  padding: 3px;
+  border: 0.01cm solid #cdcdcd;
+  padding-bottom: 4px;
+  margin-bottom: 12px; }
+
+.pdf_footer {
+  background-color: #efefef;
+  color: #000;
+  text-align: center;
+  padding: 5px;
+  font-size: 9px; }
+
+#cgv p {
+  font-size: 8px;
+  padding: 0px;
+  margin: 0px; }
+
+#cgv h1, #cgv h2, #cgv h3, #cgv h4, #cgv h5 {
+  margin: 2px; }
+
+.text12 {
+  font-size: 12px; }
+
+.text9 {
+  font-size: 9px; }
+
+.text14 {
+  font-size: 14px; }
+
+.upper {
+  text-transform: uppercase; }
+
+.description ul {
+  margin-bottom: 3px; }
+
+.description li, .description p, .description div {
   margin: 0px;
   padding: 0px;
   font-size: 11px;
   line-height: 1.2;
-  vertical-align: middle;
-}
-.description p{
-  margin: 2px 0px;
-}
-.activity-title{
+  vertical-align: middle; }
+
+.description p {
+  margin: 2px 0px; }
+
+.activity-title {
   border-bottom: 0.01cm solid #cdcdcd;
   margin: 7px 0px 7px 0px;
   padding-bottom: 3px;
-  font-weight: 500;
-}
-.activity-content{
-  padding-left: 0.5cm;
-}
+  font-weight: 500; }
+
+.activity-content {
+  padding-left: 0.5cm; }

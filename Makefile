@@ -5,8 +5,9 @@ JS_TEMPLATES_SOURCE=$(JS_SOURCES_DIR)src/handlebars
 DIRECTORIES=$(shell cd $(JS_TEMPLATES_SOURCE) && find *  -maxdepth 1 -type d)
 
 SASSC=$(shell which sassc)
-CSS_SOURCES=css_sources/main.scss
-CSS_DEST=autonomie/static/css/main.css
+CSS_SOURCES=css_sources/
+CSS_DEST=autonomie/static/css/
+CSSDIRECTORIES=$(shell cd $(CSS_SOURCES) && find *  -maxdepth 1 -type d)
 
 # Used to build templates used in inline javascript stuff (not webpacked)
 js:
@@ -24,7 +25,9 @@ devjs:
 
 # build css with libsassc
 css:
-	$(SASSC) $(CSS_SOURCES) $(CSS_DEST)
+	for dir in $(CSSDIRECTORIES);do \
+		$(SASSC) $(CSS_SOURCES)/$$dir/*.scss $(CSS_DEST)/$$dir.css; \
+    done
 	
 
 dev_serve:

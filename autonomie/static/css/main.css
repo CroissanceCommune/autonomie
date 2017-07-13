@@ -417,19 +417,6 @@ header .navbar .nav > li > a {
 .nav-tabs-responsive {
   overflow: auto; }
 
-/* Task edition form */
-.task-edit {
-  background-color: #fff;
-  padding-bottom: 20vh;
-  min-height: 100vh; }
-
-.sticky-footer {
-  background-color: #f5f5f5;
-  position: fixed;
-  height: 15vh;
-  width: 100%;
-  bottom: 0px; }
-
 /* Task lists css */
 .status-table td.status-td {
   width: 16px; }

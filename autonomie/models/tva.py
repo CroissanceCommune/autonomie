@@ -42,6 +42,7 @@ from sqlalchemy.orm import (
 )
 
 from autonomie.utils.html import clean_html
+from autonomie.compute.math_utils import integer_to_amount
 from autonomie.forms.custom_types import AmountType
 from autonomie_base.models.base import DBBASE
 from autonomie_base.models.base import default_table_args
@@ -197,7 +198,7 @@ devis/une facture,la mention apparaitra dans la sortie PDF
     def __json__(self, request):
         return dict(
             id=self.id,
-            value=self.value,
+            value=integer_to_amount(self.value, 2),
             name=self.name,
             default=self.default,
             products=[product.__json__(request) for product in self.products],

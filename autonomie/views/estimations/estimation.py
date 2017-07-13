@@ -70,7 +70,10 @@ from autonomie.forms.tasks.base import (
     get_new_task_schema,
     get_duplicate_schema,
 )
-from autonomie.resources import duplicate_js
+from autonomie.resources import (
+    duplicate_js,
+    task_css,
+)
 from autonomie.views import (
     submit_btn,
     BaseEditView,
@@ -140,6 +143,7 @@ class EstimationEditView(BaseView):
         return u"Modification du devis {task.name}".format(task=self.context)
 
     def __call__(self):
+        task_css.need()
         populate_actionmenu(self.request)
         return dict(context=self.context, title=self.title)
 

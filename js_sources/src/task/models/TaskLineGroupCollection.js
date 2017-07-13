@@ -13,6 +13,9 @@ import TaskLineGroupModel from './TaskLineGroupModel.js';
 
 
 const TaskLineGroupCollection = Bb.Collection.extend({
-    model: TaskLineGroupModel
+    model: TaskLineGroupModel,
+    url: function(){
+        return AppOption['context_url'] + '/' + 'task_line_groups';
+    }
 });
 export default TaskLineGroupCollection;

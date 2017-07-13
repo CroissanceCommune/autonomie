@@ -18,10 +18,8 @@ const TaskLineGroupModel = Bb.Model.extend({
         this.populate();
     },
     populate: function(){
-        console.log("Populating the TaskLineGroupModel");
-        console.log(this.get('lines'));
         this.lines = new TaskLineCollection(this.get('lines'));
-        console.log(this.lines);
+        this.lines.url = this.url() + '/task_lines';
     },
     ht: function(){
         var res = 0;

@@ -14,6 +14,7 @@ import Bb from 'backbone';
 const TaskLineModel = Bb.Model.extend({
     props: [
         'id',
+        'order',
         'description',
         'cost',
         'quantity',

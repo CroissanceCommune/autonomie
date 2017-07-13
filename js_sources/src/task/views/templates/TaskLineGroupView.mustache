@@ -1,25 +1,50 @@
-<div>
-{{#if title }}
-<h3>{{title}}</h3>
-{{/if}}
-{{#if description}}
-<p>{{description}}</p>
-{{/if}}
-<table class='table table-bordered tasklines'>
-<thead>
-    <th>Intitulé des postes</th>
-    <th>Prix unitaire HT</th>
-    <th>Quantité</th>
-    <th>Unité</th>
-    <th>Tva</th>
-    <th>HT</th>
-</thead>
-<tbody class='lines'>
-</tbody>
-<tfoot>
-<th colspan=5 class='text-right'> Sous total HT</th>
-<th>
-{{{ total_ht }}}
-</th>
-</tfoot>
-</table>
+<div class='col-xs-12'>
+    <div class='row'>
+        <div class='col-xs-8'>
+            <h4>
+            {{#if title }}
+            {{title}}
+            {{else}}
+            <small>Aucun titre n'a été saisi</small>
+            {{/if}}
+            </h4>
+            <p>
+            {{#if description}}
+            {{description}}
+            {{else}}
+            <i>Aucune description n'a été saisie</i>
+            {{/if}}
+            </p>
+        </div>
+        <div class='col-xs-4'>
+            <button type='button' class='btn btn-default edit-group btn-small'>
+            <i class='glyphicon glyphicon-pencil'></i> Modifier ce groupe
+            </button>
+        </div>
+    </div>
+
+    <div class='row hidden-sm linesblockheader'>
+        <div class='col-md-3'>Intitulé des postes</div>
+        <div class='col-md-1'>Prix unitaire HT</div>
+        <div class='col-md-1'>Quantité</div>
+        <div class='col-md-1'>Unité</div>
+        <div class='col-md-1'>Tva</div>
+        <div class='col-md-1'>HT</div>
+        <div class='col-md-3'>Actions</div>
+    </div>
+    <div class='row tasklines'>
+    </div>
+    <div class='row actions'>
+        <div class='col-xs-11 text-right'>
+            <button type='button' class='btn btn-info btn-add'>
+                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une prestation
+            </button>
+        </div>
+    </div>
+    <div class='row subtotal'>
+        <div class='col-xs-12 text-right'>
+            Sous total HT      {{{ total_ht }}}
+        </div>
+    </div>
+    <div class='modalregion'></div>
+</div>

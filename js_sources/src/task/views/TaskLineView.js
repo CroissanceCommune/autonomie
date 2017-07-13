@@ -14,12 +14,20 @@ import { formatAmount } from '../../math.js';
 const template = require('./templates/TaskLineView.mustache');
 
 const TaskLineView = Mn.View.extend({
-    tagName: 'tr',
+    tagName: 'div',
+    className: 'row taskline',
     template: template,
+    ui:{
+        up_button: 'button.up',
+        down_button: 'button.down',
+    },
+    triggers: {
+        'click @ui.up_button': 'change:order:up',
+        'click @ui.down_button': 'change:order:down',
+    },
     getTvaLabel: function(){
         let res = "";
         let current_value = this.model.get('tva');
-        console.log(current_value);
         _.each(AppOption['form_options']['tva_options'], function(tva){
             if (tva.value == current_value){
                 res = tva.name;
@@ -28,11 +36,16 @@ const TaskLineView = Mn.View.extend({
         return res
     },
     templateContext: function(){
-        console.log(this.getTvaLabel());
+        let min_order = this.model.collection.getMinOrder();
+        let max_order = this.model.collection.getMaxOrder();
+        let order = this.model.get('order');
         return {
             ht: formatAmount(this.model.ht()),
-            tva_label: this.getTvaLabel()
+            tva_label: this.getTvaLabel(),
+            is_not_first: order != min_order,
+            is_not_last: order != max_order
         };
+
     }
 });
 export default TaskLineView;

@@ -12,7 +12,25 @@ import Mn from 'backbone.marionette';
 import TaskLineView from './TaskLineView.js';
 
 const TaskLineCollectionView = Mn.CollectionView.extend({
-    tagName: 'tbody',
-    childView: TaskLineView
+    tagName: 'div',
+    className: 'col-xs-12',
+    childView: TaskLineView,
+    sort: true,
+    collectionEvents: {
+        'change:reorder': 'render'
+    },
+    childViewEvents: {
+        'change:order:up': 'onOrderUp',
+        'change:order:down': 'onOrderDown'
+    },
+    onOrderUp: function(childView){
+        this.collection.moveUp(childView.model);
+    },
+    onOrderDown: function(childView){
+        this.collection.moveDown(childView.model);
+    },
+    onRender: function(){
+        console.log("Rendering");
+    }
 });
 export default TaskLineCollectionView;

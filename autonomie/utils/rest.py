@@ -247,10 +247,20 @@ def add_rest_views(
         permission=view_rights,
         xhr=True,
     )
+    if hasattr(factory, 'collection_get'):
+        config.add_view(
+            factory,
+            attr='collection_get',
+            route_name=collection_route_name,
+            renderer="json",
+            request_method='GET',
+            permission=view_rights,
+            xhr=True,
+        )
+
     config.add_view(
         factory,
         attr='post',
-        # C pas beau je sais
         route_name=collection_route_name,
         renderer="json",
         request_method='POST',
@@ -263,6 +273,15 @@ def add_rest_views(
         route_name=route_name,
         renderer="json",
         request_method='PUT',
+        permission=edit_rights,
+        xhr=True
+    )
+    config.add_view(
+        factory,
+        attr='put',
+        route_name=route_name,
+        renderer="json",
+        request_method='PATCH',
         permission=edit_rights,
         xhr=True
     )

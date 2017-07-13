@@ -33,7 +33,6 @@ const RightBarView = Mn.View.extend({
     },
     onButtonClick: function(event){
         let target = $(event.target);
-        console.log(target);
         let status = target.data('status');
         let title = target.data('title');
         let label = target.data('label');

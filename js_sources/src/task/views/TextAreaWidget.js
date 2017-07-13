@@ -1,5 +1,5 @@
 /*
- * File Name : TextAreaView.js
+ * File Name : TextAreaWidget.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -13,9 +13,11 @@ import Mn from 'backbone.marionette';
 import { getOpt } from "../../tools.js";
 
 
-var template = require('./templates/widgets/TextAreaView.mustache');
+var template = require('./templates/widgets/TextAreaWidget.mustache');
 
-const TextAreaView = Mn.View.extend({
+const TextAreaWidget = Mn.View.extend({
+    tagName: 'div',
+    className: 'form-group',
     template: template,
     ui:{
         textarea: 'textarea'
@@ -49,4 +51,4 @@ const TextAreaView = Mn.View.extend({
         }
     }
 });
-export default TextAreaView;
+export default TextAreaWidget;

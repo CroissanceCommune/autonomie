@@ -32,7 +32,6 @@ const StatusView = Mn.View.extend({
         'click @ui.submit': 'onSubmit'
     },
     submitCallback: function(result){
-        console.log("success");
     },
     submitErroCallback: function(result){
         var message = ""
@@ -47,8 +46,6 @@ const StatusView = Mn.View.extend({
         window.alert(message);
     },
     onSubmit: function(event){
-        console.log("submit");
-        console.log(event);
         event.preventDefault();
         let datas = serializeForm(this.getUI('form'));
         datas['submit'] = this.getOption('status');

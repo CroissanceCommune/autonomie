@@ -67,12 +67,21 @@ export const updateSelectOptions = function(options, val, key){
     if (_.isUndefined(key)){
       key = 'value';
     }
+    var has_selected = false;
     _.each(options, function(option){
       delete option['selected'];
       if (_.contains(val, option[key])){
         option['selected'] = 'true';
+        has_selected = true;
       }
     });
+    if (! has_selected){
+        _.each(options, function(option){
+            if (option['default']){
+                option['selected'] = true;
+            }
+        });
+    }
     return options;
 }
 export const getOpt = function(obj, key, default_val){

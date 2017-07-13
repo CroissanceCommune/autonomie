@@ -14,7 +14,7 @@ import { updateSelectOptions } from '../../tools.js';
 import FormBehavior from "../behaviors/FormBehavior.js";
 import CheckboxListView from './CheckboxListView.js';
 import DatePickerView from './DatePickerView.js';
-import TextAreaView from './TextAreaView.js';
+import TextAreaWidget from './TextAreaWidget.js';
 
 var template = require("./templates/CommonView.mustache");
 
@@ -25,6 +25,8 @@ const CommonView = Mn.View.extend({
      * invoice/estimation form, provide a main layout with regions for each
      * field
      */
+    tagName: 'div',
+    className: 'common-form',
     template: template,
     formname: "common",
     regions: {
@@ -75,21 +77,21 @@ const CommonView = Mn.View.extend({
             field_name: "date"
         }));
 
-        this.showChildView('address', new TextAreaView({
+        this.showChildView('address', new TextAreaWidget({
             title: 'Adresse du client',
             value: this.model.get('address'),
             field_name: 'address',
             rows: 5
         }));
 
-        this.showChildView('description', new TextAreaView({
+        this.showChildView('description', new TextAreaWidget({
             title: 'Objet du document',
             value: this.model.get('description'),
             field_name: 'description',
             rows: 3
         }));
 
-        this.showChildView('workplace', new TextAreaView({
+        this.showChildView('workplace', new TextAreaWidget({
             title: 'Lieu des travaux',
             value: this.model.get('workplace'),
             field_name: 'workplace',

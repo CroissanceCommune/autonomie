@@ -53,8 +53,18 @@ from autonomie.export.utils import write_file_to_request
 from autonomie.utils import rest
 
 
-submit_btn = Button(name="submit", type="submit", title=u"Valider")
-cancel_btn = Button(name="cancel", type="submit", title=u"Annuler")
+submit_btn = Button(
+    name="submit",
+    type="submit",
+    title=u"Valider",
+    css_class='btn btn-success primary-action'
+)
+cancel_btn = Button(
+    name="cancel",
+    type="submit",
+    title=u"Annuler",
+    css_class='btn btn-default'
+)
 
 
 class BaseView(object):

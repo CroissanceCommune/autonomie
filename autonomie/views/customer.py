@@ -62,6 +62,7 @@ from autonomie.views import (
     BaseCsvView,
     BaseFormView,
     submit_btn,
+    cancel_btn,
 )
 from autonomie.views.csv_import import (
     CsvFileUploadView,
@@ -342,7 +343,7 @@ class CustomerAdd(BaseFormView):
     add_template_vars = ('title', 'customers', )
     title = u"Ajouter un client"
     _schema = None
-    buttons = (submit_btn,)
+    buttons = (submit_btn, cancel_btn)
     validation_msg = u"Le client a bien été ajouté"
 
     @property
@@ -417,6 +418,12 @@ class CustomerAdd(BaseFormView):
             )
         )
 
+    def cancel_success(self, appstruct):
+        return HTTPFound(
+            self.request.route_path('company_customers', id=self.context.id)
+        )
+    cancel_failure = cancel_success
+
 
 class CustomerEdit(CustomerAdd):
     """
@@ -461,6 +468,14 @@ class CustomerEdit(CustomerAdd):
             self.request.route_path(
                 'customer',
                 id=model.id
+            )
+        )
+
+    def cancel_success(self, appstruct):
+        return HTTPFound(
+            self.request.route_path(
+                'customer',
+                id=self.context.id
             )
         )
 

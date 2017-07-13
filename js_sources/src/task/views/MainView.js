@@ -44,11 +44,7 @@ const MainView = Mn.View.extend({
             );
         }
         if (_.indexOf(AppOption['form_options']['sections'], "tasklines") != -1){
-            console.log("We build the tasklines view");
-            console.log(this.getOption('datas')['line_groups']);
             this.task_line_group_collection = new TaskLineGroupCollection(this.getOption('datas')['line_groups']);
-            console.log("Model built");
-            console.log(this.task_line_group_collection);
             this.showChildView(
                 'tasklines',
                 new TaskLineGroupCollectionView({collection: this.task_line_group_collection})

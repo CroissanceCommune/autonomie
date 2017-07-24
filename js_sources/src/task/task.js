@@ -17,7 +17,7 @@ import Bb from 'backbone';
 import Mn from 'backbone.marionette';
 import App from './components/App.js';
 import Validation from 'backbone-validation';
-import { setUpBbValidationCallbacks } from '../backbone-tools.js';
+import { setupBbValidationCallbacks, setupBbValidationPatterns } from '../backbone-tools.js';
 import Router from './components/Router.js';
 import Controller  from './components/Controller.js';
 import { setupJsonRedirect, ajax_call } from '../tools.js';
@@ -29,7 +29,8 @@ var template = require('../handlebars/job/file_generation.mustache');
 App.on('start', function (app, options) {
     console.log("=> Starting the app");
     AppOption['form_options'] = options.form_options;
-    setUpBbValidationCallbacks(Validation.callbacks);
+    setupBbValidationCallbacks(Validation.callbacks);
+    setupBbValidationPatterns(Validation);
     var controller = new Controller(options.form_datas);
     var router = new Router({controller:controller});
     Bb.history.start();

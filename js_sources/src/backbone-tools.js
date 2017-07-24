@@ -63,7 +63,7 @@ export const BootstrapOnInvalidForm = function(view, attr, error, selector) {
     control = view.$('[' + selector + '=' + attr + ']');
     showError(control, error);
 }
-export const setUpBbValidationCallbacks = function(bb_module){
+export const setupBbValidationCallbacks = function(bb_module){
     _.extend(bb_module, {
         valid: BootstrapOnValidForm,
         invalid: BootstrapOnInvalidForm
@@ -89,4 +89,13 @@ export const displayServerSuccess = function(msg){
    *  Show errors in a message box
    */
   _displayServerMessage({msg:msg});
+}
+
+export const setupBbValidationPatterns = function(bb_module){
+    _.extend(bb_module.patterns, {
+        amount: /^(\d+(?:[\.\,]\d{1,5})?)$/
+    });
+    _.extend(bb_module.messages, {
+        amount: "Doit être un nombre avec au maximum 5 chiffres après la virgule"
+    });
 }

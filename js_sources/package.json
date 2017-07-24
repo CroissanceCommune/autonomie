@@ -19,7 +19,8 @@
     "backbone.radio": "^2.0.0",
     "bootstrap": "^3.3.7",
     "jquery": "^3.2.1",
-    "jquery-ui": "^1.12.1"
+    "jquery-ui": "^1.12.1",
+    "tinymce": "^4.6.4"
   },
   "devDependencies": {
     "babel-core": "^6.7.6",

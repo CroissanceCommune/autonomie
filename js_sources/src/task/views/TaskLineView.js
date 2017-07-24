@@ -20,10 +20,14 @@ const TaskLineView = Mn.View.extend({
     ui:{
         up_button: 'button.up',
         down_button: 'button.down',
+        edit_button: 'button.edit',
+        delete_button: 'button.delete'
     },
     triggers: {
-        'click @ui.up_button': 'change:order:up',
-        'click @ui.down_button': 'change:order:down',
+        'click @ui.up_button': 'order:up',
+        'click @ui.down_button': 'order:down',
+        'click @ui.edit_button': 'edit',
+        'click @ui.delete_button': 'delete'
     },
     getTvaLabel: function(){
         let res = "";

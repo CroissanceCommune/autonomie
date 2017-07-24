@@ -17,20 +17,22 @@ const TaskLineCollectionView = Mn.CollectionView.extend({
     childView: TaskLineView,
     sort: true,
     collectionEvents: {
-        'change:reorder': 'render'
+        'change:reorder': 'render',
+        'sync': 'render'
     },
-    childViewEvents: {
-        'change:order:up': 'onOrderUp',
-        'change:order:down': 'onOrderDown'
+    // Bubble up child view events
+    childViewTriggers: {
+        'edit': 'line:edit',
+        'delete': 'line:delete'
     },
-    onOrderUp: function(childView){
+    onChildviewOrderUp: function(childView){
         this.collection.moveUp(childView.model);
     },
-    onOrderDown: function(childView){
+    onChildviewOrderDown: function(childView){
         this.collection.moveDown(childView.model);
     },
     onRender: function(){
-        console.log("Rendering");
+        console.log("Rendering TaskLineCollectionView");
     }
 });
 export default TaskLineCollectionView;

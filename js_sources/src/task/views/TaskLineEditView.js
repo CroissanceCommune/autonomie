@@ -13,6 +13,7 @@ import InputWidget from './InputWidget.js';
 import SelectWidget from './SelectWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import ModalBehavior from '../behaviors/ModalBehavior.js';
+import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
 
 var template = require('./templates/TaskLineEditView.mustache');
 
@@ -31,14 +32,15 @@ const TaskLineEditView = Mn.View.extend({
         form: "form",
         submit: 'button[type=submit]',
     },
-    behaviors: {
-        modal: {
-            behaviorClass: ModalBehavior
-        }
+    behaviors: [ModalFormBehavior],
+    triggers: {
+        'click @ui.btn_cancel': 'close:modal'
     },
-    events: {
-        'click @ui.btn_cancel': 'destroy',
-        'click @ui.submit': 'onSubmit'
+    childViewEvents: {
+        'change': 'onChildChange'
+    },
+    onChildChange: function(attribute, value){
+        this.triggerMethod('data:modified', this, attribute, value);
     },
     templateContext: function(){
         return {
@@ -51,7 +53,9 @@ const TaskLineEditView = Mn.View.extend({
             new TextAreaWidget({
                 value: this.model.get('description'),
                 title: "Intitulé des postes",
-                field_name: "description"
+                field_name: "description",
+                tinymce: true,
+                cid: this.model.cid
             })
         );
         this.showChildView(

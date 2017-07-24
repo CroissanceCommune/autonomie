@@ -20,7 +20,6 @@ const ModalBehavior = Mn.Behavior.extend({
   ui: {
     close: '.close-modal'
   },
-
   events: {
     'hidden.bs.modal': 'triggerFinish',
   },

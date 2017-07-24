@@ -34,6 +34,9 @@ const TaskLineCollection = Bb.Collection.extend({
 
     },
     getMinOrder: function(){
+        if (this.models.length == 0){
+            return 0
+        }
         let first_model = _.min(
             this.models,
             function(model){return model.get('order')}
@@ -41,6 +44,9 @@ const TaskLineCollection = Bb.Collection.extend({
         return first_model.get('order');
     },
     getMaxOrder: function(){
+        if (this.models.length == 0){
+            return 0
+        }
         let last_model = _.max(
             this.models,
             function(model){return model.get('order')}

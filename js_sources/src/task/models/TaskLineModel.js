@@ -29,13 +29,13 @@ const TaskLineModel = Bb.Model.extend({
         },
         cost: {
             required: true,
-            pattern: "number",
-            msg: "Veuillez saisir un coup unitaire",
+            pattern: "amount",
+            msg: "Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule",
         },
         quantity: {
             required: true,
-            pattern: "number",
-            msg: "Veuillez saisir une quantité",
+            pattern: "amount",
+            msg: "Veuillez saisir une quantité, dans la limite de 5 chiffres après la virgule",
         },
         tva: {
             required: true,

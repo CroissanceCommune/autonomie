@@ -13,6 +13,7 @@ import TaskLineCollectionView from './TaskLineCollectionView.js';
 import TaskLineEditView from './TaskLineEditView.js';
 import TaskLineModel from "../models/TaskLineModel.js";
 import { formatAmount } from '../../math.js';
+import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
 const template = require('./templates/TaskLineGroupView.mustache');
 
@@ -30,22 +31,53 @@ const TaskLineGroupView = Mn.View.extend({
     events: {
         "click @ui.btn_add": "showAddForm"
     },
+    childViewEvents: {
+        'line:edit': 'onLineEdit',
+        'line:delete': 'onLineDelete',
+    },
     onRender: function(){
         this.showChildView(
             'lines',
             new TaskLineCollectionView({collection: this.model.lines})
         );
     },
+    onLineEdit: function(childView){
+        console.log("Line edit");
+        this.showTaskLineForm(childView.model, "Modifier la prestation");
+    },
     showAddForm: function(){
         var model = new TaskLineModel({
             task_id: this.model.get('id'),
-            order: this.model.lines.getMaxOrder() + 1
+            order: this.model.lines.getMaxOrder() + 1,
         });
-        this.showTaskLineEditForm(model, "Ajouter une prestation");
+        this.showTaskLineForm(model, "Ajouter une prestation");
     },
-    showTaskLineEditForm: function(model, title){
-        var form = new TaskLineEditView({model: model, title: title});
+    showTaskLineForm: function(model, title){
+        var form = new TaskLineEditView(
+            {
+                model: model,
+                title: title,
+                destCollection: this.model.lines
+            });
         this.showChildView('modalRegion', form);
+    },
+    onDeleteSuccess: function(){
+        displayServerSuccess("Vos données ont bien été supprimées");
+    },
+    onDeleteError: function(){
+        displayServerError("Une erreur a été rencontrée lors de la " +
+                           "suppression de cet élément");
+    },
+    onLineDelete: function(childView){
+        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?");
+        if (result){
+            childView.model.destroy(
+                {
+                    success: this.onDeleteSuccess,
+                    error: this.onDeleteError
+                }
+            );
+        }
     },
     onChildviewDestroyModal: function() {
     	this.getRegion('modalRegion').empty();

@@ -8,7 +8,7 @@ mako_compiled_templates
 data
 *.egg
 dist
-build
+./build
 .ropeproject
 tobeignored
 node_modules

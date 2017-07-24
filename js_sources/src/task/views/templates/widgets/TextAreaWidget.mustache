@@ -1,6 +1,6 @@
 {{#if editable }}
     <label for='{{field_name}}'>{{ title }}</label>
-    <textarea name='{{field_name}}' class='form-control' rows='{{ rows }}'>{{ value }}</textarea>
+    <textarea name='{{field_name}}' {{#if tagId }}id="{{tagId}}"{{/if}} class='form-control' rows='{{ rows }}'>{{ value }}</textarea>
 {{else}}
     {{ value }}
 {{/if}}

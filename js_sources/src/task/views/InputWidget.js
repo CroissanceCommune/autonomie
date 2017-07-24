@@ -16,6 +16,19 @@ const InputWidget = Mn.View.extend({
     tagName: 'div',
     className: 'form-group',
     template: require('./templates/widgets/InputWidget.mustache'),
+    ui: {
+        input: 'input'
+    },
+    events: {
+        'keyup @ui.input': 'onKeyUp',
+    },
+    onKeyUp: function(){
+        this.triggerMethod(
+            'change',
+            this.getOption('field_name'),
+            this.getUI('input').val(),
+        );
+    },
     templateContext: function(){
         return {
             value: this.getOption('value'),

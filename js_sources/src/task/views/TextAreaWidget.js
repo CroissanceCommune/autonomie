@@ -12,6 +12,7 @@
 import Mn from 'backbone.marionette';
 import { getOpt } from "../../tools.js";
 
+import setupTinyMce from '../../tinymce.js';
 
 var template = require('./templates/widgets/TextAreaWidget.mustache');
 
@@ -40,6 +41,17 @@ const TextAreaWidget = Mn.View.extend({
             this.getUI('textarea').val(),
         );
     },
+    getTagId: function(){
+        /*
+         * Return an id for the current textarea
+         */
+        var cid = getOpt(this, 'cid', '');
+        if (cid === ''){
+            return false
+        }
+        var field_name = this.getOption('field_name');
+        return field_name + "-" + cid;
+    },
     templateContext: function(){
         return {
             title: this.getOption('title'),
@@ -47,7 +59,27 @@ const TextAreaWidget = Mn.View.extend({
             field_name: this.getOption('field_name'),
             value: getOpt(this, 'value', ''),
             rows: getOpt(this, 'rows', 3),
-            editable: getOpt(this, 'editable', true)
+            editable: getOpt(this, 'editable', true),
+            tagId: this.getTagId()
+        }
+    },
+    onAttach: function(){
+        var tiny = getOpt(this, 'tinymce', false);
+        if (tiny){
+            var onblur = this.onBlur.bind(this);
+            var onkeyup = this.onKeyUp.bind(this);
+            setupTinyMce(
+                {
+                    selector: "#" + this.getTagId(),
+                    init_instance_callback: function (editor) {
+                        editor.on('blur', onblur);
+                        editor.on('keyup', onkeyup);
+                        editor.on('change', function () {
+                            tinymce.triggerSave();
+                        });
+                    }
+                }
+            );
         }
     }
 });

@@ -23,7 +23,8 @@
   padding: 2px 4px; }
 
 body {
-  padding: 0px; }
+  padding: 0px;
+  overflow: auto; }
 
 td.actions, th.actions {
   text-align: right; }

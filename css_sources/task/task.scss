@@ -13,6 +13,8 @@ $form-subblock-bgcolor: #fbfbfb;
     .linesblockheader{
       background-color: $form-subblock-bgcolor;
       margin: 0px 20px 0px 0px;
+      font-weight: bold;
+      border-bottom: 1px solid #000;
     }
     .tasklines{
       background-color: $form-subblock-bgcolor;

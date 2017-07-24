@@ -7,7 +7,9 @@
     padding: 10px 15px; }
   .page-content .taskline-group .linesblockheader {
     background-color: #fbfbfb;
-    margin: 0px 20px 0px 0px; }
+    margin: 0px 20px 0px 0px;
+    font-weight: bold;
+    border-bottom: 1px solid #000; }
   .page-content .taskline-group .tasklines {
     background-color: #fbfbfb;
     margin: 0px 20px 0px 0px; }

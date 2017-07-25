@@ -1,5 +1,5 @@
 /*
- * File Name : TaskLineGroupCollectionView.js
+ * File Name : TaskGroupCollectionView.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -9,11 +9,26 @@
  *
  */
 import Mn from 'backbone.marionette';
-import TaskLineGroupView from './TaskLineGroupView.js';
+import TaskGroupView from './TaskGroupView.js';
 
-const TaskLineGroupCollectionView = Mn.CollectionView.extend({
+const TaskGroupCollectionView = Mn.CollectionView.extend({
     tagName: 'div',
-    childView: TaskLineGroupView
+    childView: TaskGroupView,
+    collectionEvents: {
+        'change:reorder': 'render',
+        'sync': 'render'
+    },
+    // Bubble up child view events
+    childViewTriggers: {
+        'edit': 'group:edit',
+        'delete': 'group:delete'
+    },
+    onChildviewOrderUp: function(childView){
+        this.collection.moveUp(childView.model);
+    },
+    onChildviewOrderDown: function(childView){
+        this.collection.moveDown(childView.model);
+    },
 });
 
-export default TaskLineGroupCollectionView;
+export default TaskGroupCollectionView;

@@ -1,5 +1,5 @@
 /*
- * File Name : TaskLineEditView.js
+ * File Name : TaskLineFormView.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -12,12 +12,11 @@ import Mn from 'backbone.marionette';
 import InputWidget from './InputWidget.js';
 import SelectWidget from './SelectWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
-import ModalBehavior from '../behaviors/ModalBehavior.js';
 import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
 
-var template = require('./templates/TaskLineEditView.mustache');
+var template = require('./templates/TaskLineFormView.mustache');
 
-const TaskLineEditView = Mn.View.extend({
+const TaskLineFormView = Mn.View.extend({
     template: template,
     regions: {
         'description': '.description',
@@ -55,6 +54,7 @@ const TaskLineEditView = Mn.View.extend({
                 title: "Intitulé des postes",
                 field_name: "description",
                 tinymce: true,
+                css_class: 'required',
                 cid: this.model.cid
             })
         );
@@ -63,7 +63,8 @@ const TaskLineEditView = Mn.View.extend({
             new InputWidget(
                 {
                     value: this.model.get('cost'),
-                    title: "Prix unitaire HT",
+                    title: "Prix unitaire HT *",
+                    css_class: 'required',
                     field_name: "cost"
                 }
             )
@@ -73,7 +74,8 @@ const TaskLineEditView = Mn.View.extend({
             new InputWidget(
                 {
                     value: this.model.get('quantity'),
-                    title: "Quantité",
+                    css_class: 'required',
+                    title: "Quantité *",
                     field_name: "quantity"
                 }
             )
@@ -83,7 +85,7 @@ const TaskLineEditView = Mn.View.extend({
             new SelectWidget(
                 {
                     options: AppOption['form_options']['workunit_options'],
-                    title: "Unité",
+                    title: "Unité (optionelle)",
                     value: this.model.get('unity'),
                     field_name: 'unity'
                 }
@@ -95,6 +97,7 @@ const TaskLineEditView = Mn.View.extend({
                 {
                     options: AppOption['form_options']['tva_options'],
                     title: "TVA",
+                    css_class: 'required',
                     value: this.model.get('tva'),
                     field_name: 'tva'
                 }
@@ -114,4 +117,4 @@ const TaskLineEditView = Mn.View.extend({
         );
     }
 });
-export default TaskLineEditView;
+export default TaskLineFormView;

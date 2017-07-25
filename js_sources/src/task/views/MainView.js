@@ -12,8 +12,7 @@ import Mn from 'backbone.marionette';
 import CommonView from "./CommonView.js";
 import RightBarView from "./RightBarView.js";
 import CommonModel from "../models/CommonModel.js";
-import TaskLineGroupCollection from '../models/TaskLineGroupCollection.js';
-import TaskLineGroupCollectionView from './TaskLineGroupCollectionView.js';
+import MainTaskLineView from './MainTaskLineView.js';
 import StatusView from './StatusView.js';
 import { Modal } from 'bootstrap';
 
@@ -44,10 +43,11 @@ const MainView = Mn.View.extend({
             );
         }
         if (_.indexOf(AppOption['form_options']['sections'], "tasklines") != -1){
-            this.task_line_group_collection = new TaskLineGroupCollection(this.getOption('datas')['line_groups']);
             this.showChildView(
                 'tasklines',
-                new TaskLineGroupCollectionView({collection: this.task_line_group_collection})
+                new MainTaskLineView({
+                    datas: this.getOption('datas')['line_groups']
+                })
             );
         }
 

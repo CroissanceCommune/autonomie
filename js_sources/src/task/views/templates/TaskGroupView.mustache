@@ -7,19 +7,42 @@
             {{else}}
             <small>Aucun titre n'a été saisi</small>
             {{/if}}
+            <button
+                type='button'
+                class='btn-nostyle edit btn-small'
+                title="Modifier cet ouvrage">
+                <i class='glyphicon glyphicon-pencil'></i>
+            </button>
             </h4>
             <p>
             {{#if description}}
-            {{description}}
+            {{{description}}}
             {{else}}
             <i>Aucune description n'a été saisie</i>
             {{/if}}
             </p>
         </div>
         <div class='col-xs-4'>
-            <button type='button' class='btn btn-default edit-group btn-small'>
-            <i class='glyphicon glyphicon-pencil'></i> Modifier ce groupe
+        <div class='btn-group pull-right'>
+            <button
+                type='button'
+                class='btn btn-danger delete btn-small'
+                title='Supprimer cet ouvrage'
+                >
+                <i class='glyphicon glyphicon-trash'></i>
             </button>
+            {{#if is_not_first }}
+            <button type='button' class='btn btn-default btn-small up'>
+                <i class='glyphicon glyphicon-arrow-up'></i>
+            </button>
+            <br />
+            {{/if}}
+            {{#if is_not_last }}
+            <button type='button' class='btn btn-default btn-small down'>
+                <i class='glyphicon glyphicon-arrow-down'></i>
+            </button>
+            {{/if}}
+            </div>
         </div>
     </div>
 

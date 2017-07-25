@@ -30,9 +30,6 @@ const TaskLineCollectionView = Mn.CollectionView.extend({
     },
     onChildviewOrderDown: function(childView){
         this.collection.moveDown(childView.model);
-    },
-    onRender: function(){
-        console.log("Rendering TaskLineCollectionView");
     }
 });
 export default TaskLineCollectionView;

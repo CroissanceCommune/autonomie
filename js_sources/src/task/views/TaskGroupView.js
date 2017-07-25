@@ -1,5 +1,5 @@
 /*
- * File Name : TaskLineGroupView.js
+ * File Name : TaskGroupView.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -10,14 +10,14 @@
  */
 import Mn from 'backbone.marionette';
 import TaskLineCollectionView from './TaskLineCollectionView.js';
-import TaskLineEditView from './TaskLineEditView.js';
+import TaskLineFormView from './TaskLineFormView.js';
 import TaskLineModel from "../models/TaskLineModel.js";
 import { formatAmount } from '../../math.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
-const template = require('./templates/TaskLineGroupView.mustache');
+const template = require('./templates/TaskGroupView.mustache');
 
-const TaskLineGroupView = Mn.View.extend({
+const TaskGroupView = Mn.View.extend({
     tagName: 'div',
     className: 'taskline-group row',
     template: template,
@@ -26,7 +26,17 @@ const TaskLineGroupView = Mn.View.extend({
         modalRegion: ".modalregion",
     },
     ui: {
-        btn_add: ".btn-add"
+        btn_add: ".btn-add",
+        up_button: 'button.up',
+        down_button: 'button.down',
+        edit_button: 'button.edit',
+        delete_button: 'button.delete'
+    },
+    triggers: {
+        'click @ui.up_button': 'order:up',
+        'click @ui.down_button': 'order:down',
+        'click @ui.edit_button': 'edit',
+        'click @ui.delete_button': 'delete'
     },
     events: {
         "click @ui.btn_add": "showAddForm"
@@ -42,7 +52,6 @@ const TaskLineGroupView = Mn.View.extend({
         );
     },
     onLineEdit: function(childView){
-        console.log("Line edit");
         this.showTaskLineForm(childView.model, "Modifier la prestation");
     },
     showAddForm: function(){
@@ -53,7 +62,7 @@ const TaskLineGroupView = Mn.View.extend({
         this.showTaskLineForm(model, "Ajouter une prestation");
     },
     showTaskLineForm: function(model, title){
-        var form = new TaskLineEditView(
+        var form = new TaskLineFormView(
             {
                 model: model,
                 title: title,
@@ -69,7 +78,7 @@ const TaskLineGroupView = Mn.View.extend({
                            "suppression de cet élément");
     },
     onLineDelete: function(childView){
-        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?");
+        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cette prestation ?");
         if (result){
             childView.model.destroy(
                 {
@@ -83,9 +92,14 @@ const TaskLineGroupView = Mn.View.extend({
     	this.getRegion('modalRegion').empty();
   	},
     templateContext: function(){
+        let min_order = this.model.collection.getMinOrder();
+        let max_order = this.model.collection.getMaxOrder();
+        let order = this.model.get('order');
         return {
-            total_ht: formatAmount(this.model.ht())
+            total_ht: formatAmount(this.model.ht()),
+            is_not_first: order != min_order,
+            is_not_last: order != max_order
         }
     }
 });
-export default TaskLineGroupView;
+export default TaskGroupView;

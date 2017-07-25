@@ -1,5 +1,5 @@
 /*
- * File Name : CheckboxListView.js
+ * File Name : CheckboxListWidget.js
  *
  * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -11,11 +11,12 @@
 import $ from 'jquery';
 import Mn from 'backbone.marionette';
 import { getOpt } from "../../tools.js";
+import { updateSelectOptions } from '../../tools.js';
 
 
-var template = require('./templates/widgets/CheckboxListView.mustache');
+var template = require('./templates/widgets/CheckboxListWidget.mustache');
 
-const CheckboxListView = Mn.View.extend({
+const CheckboxListWidget = Mn.View.extend({
     template: template,
     ui:{
         checkboxes: 'input[type=checkbox]'
@@ -25,10 +26,13 @@ const CheckboxListView = Mn.View.extend({
     },
     getCurrentValues: function(){
         var checkboxes = this.getUI('checkboxes').find(':checked');
+        console.log(this.getUI('checkboxes'));
         var res = [];
         _.each(checkboxes, function(checkbox){
             res.push($(checkbox).attr('value'));
         });
+        console.log("Checked");
+        console.log(res);
         return res;
     },
     onClick: function(event){
@@ -39,13 +43,18 @@ const CheckboxListView = Mn.View.extend({
         );
     },
     templateContext: function(){
+        var id_key = getOpt(this, 'id_key', 'id');
+        var options = this.getOption('options');
+        var current_values = this.getOption('value');
+        updateSelectOptions(options, current_values,  id_key);
+
         return {
-            options: this.getOption('options'),
             title: this.getOption('title'),
             description: this.getOption('description'),
             field_name: this.getOption('field_name'),
+            options: options,
             editable: getOpt(this, 'editable', true)
         }
     }
 });
-export default CheckboxListView;
+export default CheckboxListWidget;

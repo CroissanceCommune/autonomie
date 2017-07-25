@@ -10,13 +10,13 @@
  */
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
-import AnchorWidgetView from './AnchorWidgetView.js';
+import AnchorWidget from './AnchorWidget.js';
 import ToggleWidgetView from './ToggleWidgetView.js';
 
 
 const ActionListView = Mn.CollectionView.extend({
     childTemplates: {
-        'anchor': AnchorWidgetView,
+        'anchor': AnchorWidget,
         'toggle': ToggleWidgetView
     },
     tagName: 'div',

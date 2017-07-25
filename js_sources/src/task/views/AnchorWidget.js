@@ -1,5 +1,5 @@
 /*
- * File Name : AnchorWidgetView.js
+ * File Name : AnchorWidget.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -11,10 +11,10 @@
 import Mn from 'backbone.marionette';
 
 
-const AnchorWidgetView = Mn.View.extend({
+const AnchorWidget = Mn.View.extend({
     tagName: 'div',
-    template: require('./templates/widgets/AnchorWidgetView.mustache')
+    template: require('./templates/widgets/AnchorWidget.mustache')
 });
 
 
-export default AnchorWidgetView;
+export default AnchorWidget;

@@ -12,8 +12,8 @@ import jQuery from 'jquery';
 import Mn from 'backbone.marionette';
 import { updateSelectOptions } from '../../tools.js';
 import FormBehavior from "../behaviors/FormBehavior.js";
-import CheckboxListView from './CheckboxListView.js';
-import DatePickerView from './DatePickerView.js';
+import CheckboxListWidget from './CheckboxListWidget.js';
+import DatePickerWidget from './DatePickerWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 
 var template = require("./templates/CommonView.mustache");
@@ -52,26 +52,25 @@ const CommonView = Mn.View.extend({
     onChildFinish: function(attribute, value){
         this.triggerMethod('data:persist', this, attribute, value);
     },
-    getMentionOptions: function(){
-        var mention_options = AppOption['form_options']['mention_options'];
+    getMentionIds: function(){
         var mentions = this.model.get('mentions');
         var mention_ids = [];
         _.each(mentions, function(mention){
             mention_ids.push(mention.id);
         });
-        updateSelectOptions(mention_options, mention_ids, 'id');
-        return mention_options;
+        return mention_ids;
     },
     onRender: function(){
-        const mention_list = new CheckboxListView({
-            options: this.getMentionOptions(),
+        const mention_list = new CheckboxListWidget({
+            options: AppOption['form_options']['mention_options'],
+            value: this.getMentionIds(),
             title: "Mentions facultatives",
             description: "Choisissez les mentions à ajouter au document",
             field_name: "mentions"
         });
         this.showChildView('mentions', mention_list);
 
-        this.showChildView('date', new DatePickerView({
+        this.showChildView('date', new DatePickerWidget({
             date: this.model.get('date'),
             title: "Date",
             field_name: "date"

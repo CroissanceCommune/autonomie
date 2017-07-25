@@ -1,5 +1,5 @@
 /*
- * File Name : DatePickerView.js
+ * File Name : DatePickerWidget.js
  *
  * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -13,9 +13,9 @@ import Mn from 'backbone.marionette';
 import { getOpt, setDatePicker } from '../../tools.js';
 
 
-var template = require('./templates/widgets/DatePickerView.mustache');
+var template = require('./templates/widgets/DatePickerWidget.mustache');
 
-const DatePickerView = Mn.View.extend({
+const DatePickerWidget = Mn.View.extend({
     template: template,
     ui: {
         altdate: "input[name=altdate]" ,
@@ -59,4 +59,4 @@ const DatePickerView = Mn.View.extend({
         return ctx;
     }
 });
-export default DatePickerView;
+export default DatePickerWidget;

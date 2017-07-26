@@ -49,6 +49,12 @@ const TaskLineModel = Bb.Model.extend({
     },
     ht: function(){
         return this.get('cost') * this.get('quantity');
+    },
+    loadProduct: function(product_datas){
+        this.set('description', product_datas.label);
+        this.set('cost', product_datas.value);
+        this.set('quantity', 1);
+        this.set('tva', product_datas.tva);
     }
 });
 

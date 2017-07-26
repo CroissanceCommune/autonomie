@@ -49,7 +49,7 @@ $(function(){
             console.log("=> Datas retrieved");
             App.start({
                 form_options: result1[0],
-                form_datas: result2[0]
+                form_datas: result2[0],
             });
         }
     );

@@ -50,6 +50,7 @@ from sqlalchemy.orm import (
     deferred,
     backref,
 )
+from sqlalchemy.ext.orderinglist import ordering_list
 
 from autonomie.models.tva import (
     Tva,
@@ -68,7 +69,10 @@ from autonomie.compute.task import (
     DiscountLineCompute,
     GroupCompute,
 )
-from autonomie.compute.math_utils import integer_to_amount
+from autonomie.compute.math_utils import (
+    integer_to_amount,
+    amount,
+)
 from autonomie.models.node import Node
 from autonomie.models.task.mentions import (
     TASK_MENTION,
@@ -539,6 +543,7 @@ class Task(Node):
         "TaskLineGroup",
         order_by='TaskLineGroup.order',
         cascade="all, delete-orphan",
+        collection_class=ordering_list('order'),
         info={
             'colanderalchemy': {
                 'title': u"Unités d'oeuvre",
@@ -928,6 +933,7 @@ class TaskLineGroup(DBBASE, GroupCompute):
         order_by='TaskLine.order',
         cascade="all, delete-orphan",
         back_populates='group',
+        collection_class=ordering_list('order'),
         info={
             'colanderalchemy': {
                 'title': u"Prestations",
@@ -964,6 +970,21 @@ class TaskLineGroup(DBBASE, GroupCompute):
         for line in res.lines:
             line.cost = -1 * line.cost
         return res
+
+    @classmethod
+    def from_sale_product_group(cls, sale_product_group):
+        """
+        Build an instance based on the given sale_product_group
+
+        :param obj sale_product_group: A SaleProductGroup instance
+        :returns: A TaskLineGroup instance
+        """
+        result = cls()
+        result.title = sale_product_group.title
+        result.description = sale_product_group.label
+        for product in sale_product_group.products:
+            result.lines.append(TaskLine.from_sale_product(product))
+        return result
 
 
 @colander.deferred
@@ -1137,6 +1158,22 @@ class TaskLine(DBBASE, LineCompute):
     @property
     def task(self):
         return self.group.task
+
+    @classmethod
+    def from_sale_product(cls, sale_product):
+        """
+        Build an instance based on the given sale_product
+
+        :param obj sale_product: A SaleProduct instance
+        :returns: A TaskLine instance
+        """
+        result = cls()
+        result.description = sale_product.label
+        result.cost = amount(sale_product.value, 5)
+        result.tva = amount(sale_product.tva, 2)
+        result.unity = sale_product.unity
+        result.quantity = 1
+        return result
 
 
 def cache_amounts(mapper, connection, target):

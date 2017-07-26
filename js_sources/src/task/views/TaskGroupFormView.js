@@ -12,6 +12,10 @@ import Mn from 'backbone.marionette';
 import InputWidget from './InputWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
+import { ajax_call, getOpt } from '../../tools.js';
+import CatalogTreeView from './CatalogTreeView.js';
+import LoadingWidget from './LoadingWidget.js';
+
 var template = require('./templates/TaskGroupFormView.mustache');
 
 const TaskGroupFormView = Mn.View.extend({
@@ -19,28 +23,44 @@ const TaskGroupFormView = Mn.View.extend({
     regions: {
         'title': '.title',
         'description': '.description',
+        'catalog_container': '#catalog-container',
     },
     ui: {
         btn_cancel: "button[type=reset]",
         form: "form",
         submit: 'button[type=submit]',
+        main_tab: 'ul.nav-tabs li:first a',
     },
     behaviors: [ModalFormBehavior],
     triggers: {
-        'click @ui.btn_cancel': 'close:modal'
+        'click @ui.btn_cancel': 'modal:close'
     },
     childViewEvents: {
-        'change': 'onChildChange'
+        'change': 'onChildChange',
+        'catalog:edit': 'onCatalogEdit'
+    },
+    childViewTriggers: {
+        'catalog:insert': 'catalog:insert',
+    },
+    modelEvents: {
+        'change': 'refreshForm'
     },
     onChildChange: function(attribute, value){
         this.triggerMethod('data:modified', this, attribute, value);
     },
+    onCatalogEdit: function(productgroup_datas){
+        this.model.loadProductGroup(productgroup_datas);
+    },
+    isAddView: function(){
+        return !getOpt(this, 'edit', false);
+    },
     templateContext: function(){
         return {
-            title: this.getOption('title')
+            title: this.getOption('title'),
+            add: this.isAddView(),
         };
     },
-    onRender: function(){
+    refreshForm: function(){
         this.showChildView(
             'title',
             new InputWidget(
@@ -61,6 +81,34 @@ const TaskGroupFormView = Mn.View.extend({
                 tinymce: true,
                 cid: this.model.cid
             })
+        );
+        if (this.isAddView()){
+            this.getUI('main_tab').tab('show');
+        }
+    },
+    onRender: function(){
+        this.refreshForm();
+        if (this.isAddView()){
+            this.showChildView(
+                'catalog_container',
+                new LoadingWidget()
+            );
+            var req = ajax_call(
+                AppOption['load_catalog_url'],
+                {type: 'sale_product_group'},
+            );
+            req.done(this.onCatalogLoaded.bind(this))
+        }
+    },
+    onCatalogLoaded: function(result){
+        this.showChildView(
+            'catalog_container',
+            new CatalogTreeView(
+                {
+                    catalog: result,
+                    title: "Catalogue produit",
+                }
+            )
         );
     }
 });

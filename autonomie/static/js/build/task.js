@@ -6224,6 +6224,8 @@ webpackJsonp([0],[
 	        cache: false
 	    };
 	    if (method == 'POST') {
+	        console.log("POST method");
+	        console.log(data);
 	        options.data = JSON.stringify(data);
 	        options.contentType = "application/json; charset=UTF-8";
 	        options.processData = false;
@@ -10166,7 +10168,8 @@ webpackJsonp([0],[
 	    },
 	    childViewEvents: {
 	        'group:edit': 'onGroupEdit',
-	        'group:delete': 'onGroupDelete'
+	        'group:delete': 'onGroupDelete',
+	        'catalog:insert': 'onCatalogInsert'
 	    },
 	    initialize: function initialize(options) {
 	        this.collection = new _TaskGroupCollection2.default(options['datas']);
@@ -10198,6 +10201,10 @@ webpackJsonp([0],[
 	    onEditGroup: function onEditGroup(childView) {
 	        var model = childView.model;
 	        this.showTaskGroupForm(model, "Modifier cet ouvrage");
+	    },
+	    onCatalogInsert: function onCatalogInsert(sale_product_group_ids) {
+	        this.collection.load_from_catalog(sale_product_group_ids);
+	        this.getChildView('modalRegion').triggerMethod('modal:close');
 	    },
 	    showTaskGroupForm: function showTaskGroupForm(model, title) {
 	        var form = new _TaskGroupFormView2.default({
@@ -10238,18 +10245,10 @@ webpackJsonp([0],[
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : TaskGroupCollection.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var TaskGroupCollection = _backbone2.default.Collection.extend({
 	    model: _TaskGroupModel2.default,
 	    url: function url() {
@@ -10302,8 +10301,21 @@ webpackJsonp([0],[
 	            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
 	            this.trigger('change:reorder');
 	        }
+	    },
+	    load_from_catalog: function load_from_catalog(sale_product_group_ids) {
+	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=load_from_catalog', { sale_product_group_ids: sale_product_group_ids }, 'POST');
+	        serverRequest.then(this.fetch.bind(this));
 	    }
-	});
+	}); /*
+	     * File Name : TaskGroupCollection.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = TaskGroupCollection;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
@@ -10332,8 +10344,20 @@ webpackJsonp([0],[
 	
 	var _TaskLineCollection2 = _interopRequireDefault(_TaskLineCollection);
 	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : TaskGroupModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var TaskGroupModel = _backbone2.default.Model.extend({
 	    props: ['id', 'order', 'title', 'description', 'lines', 'task_id'],
 	    constructor: function constructor() {
@@ -10356,17 +10380,19 @@ webpackJsonp([0],[
 	            res += line.ht();
 	        });
 	        return res;
+	    },
+	    updateLines: function updateLines(result) {
+	        this.fetch({ success: this.populate.bind(this) });
+	    },
+	    load_from_catalog: function load_from_catalog(sale_product_ids) {
+	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=load_from_catalog', { sale_product_ids: sale_product_ids }, 'POST');
+	        serverRequest.then(this.updateLines.bind(this));
+	    },
+	    loadProductGroup: function loadProductGroup(sale_product_group_datas) {
+	        this.set('title', sale_product_group_datas.title);
+	        this.set('description', sale_product_group_datas.description);
 	    }
-	}); /*
-	     * File Name : TaskGroupModel.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = TaskGroupModel;
 
 /***/ }),
@@ -10574,7 +10600,8 @@ webpackJsonp([0],[
 	    // Bubble up child view events
 	    childViewTriggers: {
 	        'edit': 'group:edit',
-	        'delete': 'group:delete'
+	        'delete': 'group:delete',
+	        'catalog:insert': 'catalog:insert'
 	    },
 	    onChildviewOrderUp: function onChildviewOrderUp(childView) {
 	        this.collection.moveUp(childView.model);
@@ -10659,7 +10686,8 @@ webpackJsonp([0],[
 	    },
 	    childViewEvents: {
 	        'line:edit': 'onLineEdit',
-	        'line:delete': 'onLineDelete'
+	        'line:delete': 'onLineDelete',
+	        'catalog:insert': 'onCatalogInsert'
 	    },
 	    onRender: function onRender() {
 	        this.showChildView('lines', new _TaskLineCollectionView2.default({ collection: this.model.lines }));
@@ -10697,6 +10725,10 @@ webpackJsonp([0],[
 	                error: this.onDeleteError
 	            });
 	        }
+	    },
+	    onCatalogInsert: function onCatalogInsert(sale_product_ids) {
+	        this.model.load_from_catalog(sale_product_ids);
+	        this.getChildView('modalRegion').triggerMethod('modal:close');
 	    },
 	    onChildviewDestroyModal: function onChildviewDestroyModal() {
 	        this.getRegion('modalRegion').empty();
@@ -11157,11 +11189,16 @@ webpackJsonp([0],[
 	    },
 	    behaviors: [_ModalFormBehavior2.default],
 	    triggers: {
-	        'click @ui.btn_cancel': 'close:modal'
+	        'click @ui.btn_cancel': 'modal:close'
 	    },
 	    childViewEvents: {
 	        'change': 'onChildChange',
-	        'catalog:selected': 'onCatalogInsert'
+	        'catalog:edit': 'onCatalogEdit'
+	    },
+	    // Bubble up child view events
+	    //
+	    childViewTriggers: {
+	        'catalog:insert': 'catalog:insert'
 	    },
 	    modelEvents: {
 	        'change': 'refreshForm'
@@ -11169,7 +11206,7 @@ webpackJsonp([0],[
 	    onChildChange: function onChildChange(attribute, value) {
 	        this.triggerMethod('data:modified', this, attribute, value);
 	    },
-	    onCatalogInsert: function onCatalogInsert(product_datas) {
+	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
 	    },
 	    isAddView: function isAddView() {
@@ -11226,7 +11263,7 @@ webpackJsonp([0],[
 	        this.refreshForm();
 	        if (this.isAddView()) {
 	            this.showChildView('catalog_container', new _LoadingWidget2.default());
-	            var req = (0, _tools.ajax_call)(AppOption['load_catalog_url']);
+	            var req = (0, _tools.ajax_call)(AppOption['load_catalog_url'], { type: 'sale_product' });
 	            req.done(this.onCatalogLoaded.bind(this));
 	        }
 	    },
@@ -11490,7 +11527,7 @@ webpackJsonp([0],[
 	    onSyncSuccess: function onSyncSuccess() {
 	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
 	        _backboneValidation2.default.unbind(this.view);
-	        this.view.triggerMethod('close:modal');
+	        this.view.triggerMethod('modal:close');
 	    },
 	    syncServer: function syncServer(datas, bound) {
 	        var bound = bound || false;
@@ -11603,7 +11640,7 @@ webpackJsonp([0],[
 	  },
 	
 	  triggers: {
-	    'click @ui.close': 'close:modal'
+	    'click @ui.close': 'modal:close'
 	  },
 	  onRender: function onRender() {
 	    this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
@@ -11611,7 +11648,7 @@ webpackJsonp([0],[
 	  onAttach: function onAttach() {
 	    this.view.$el.modal(this.getOption('modalOptions') || {});
 	  },
-	  onCloseModal: function onCloseModal() {
+	  onModalClose: function onModalClose() {
 	    this.view.$el.modal('hide');
 	  },
 	  triggerFinish: function triggerFinish() {
@@ -11683,19 +11720,21 @@ webpackJsonp([0],[
 	            case_insensitive: true
 	        },
 	        core: {
-	            multiple: false
+	            multiple: true
 	        }
 	    },
 	    template: template,
 	    ui: {
 	        tree: '.tree',
 	        search: 'input[name=catalog_search]',
-	        cancel_btn: 'button[type=reset]',
-	        submit_btn: 'button.btn-success'
+	        cancel_btn: 'button.cancel-catalog',
+	        edit_btn: 'button.edit-catalog',
+	        insert_btn: 'button.insert-catalog'
 	    },
 	    events: {
 	        'keyup @ui.search': 'onSearch',
-	        'click @ui.submit_btn': 'onSubmit'
+	        'click @ui.edit_btn': 'onEdit',
+	        'click @ui.insert_btn': 'onInsert'
 	    },
 	    onSearch: function onSearch() {
 	        var searchString = this.getUI('search').val();
@@ -11704,7 +11743,8 @@ webpackJsonp([0],[
 	    onAttach: function onAttach() {
 	        var catalog = this.getOption('catalog');
 	        if (_.has(catalog, "void_message")) {
-	            this.getUI('submit_btn').prop('disabled', true);
+	            this.getUI('edit_btn').prop('disabled', true);
+	            this.getUI('insert_btn').prop('disabled', true);
 	            this.getUI('search').prop('disabled', true);
 	            this.getUI('tree').html(catalog.void_message);
 	        } else {
@@ -11714,17 +11754,36 @@ webpackJsonp([0],[
 	        }
 	    },
 	    productLoadCallback: function productLoadCallback(result) {
-	        this.triggerMethod("catalog:selected", result);
+	        this.triggerMethod("catalog:edit", result);
 	    },
-	    onSubmit: function onSubmit() {
-	        var result = [];
+	    onEdit: function onEdit() {
+	        var url = null;
+	
 	        var selected = this.getUI('tree').jstree('get_selected', true);
-	        if (selected.length > 0) {
-	            var url = selected[0].original.url;
+	        _.each(selected, function (node) {
+	            if (_.has(node.original, 'url')) {
+	                url = node.original.url;
+	            }
+	        });
+	        if (url === null) {
+	            alert("Veuillez sélectionner au moins un élément");
+	        } else {
 	            var serverRequest = (0, _tools.ajax_call)(url);
 	            serverRequest.done(this.productLoadCallback.bind(this));
-	        } else {
+	        }
+	    },
+	    onInsert: function onInsert() {
+	        var result = [];
+	        var selected = this.getUI('tree').jstree('get_selected', true);
+	        _.each(selected, function (node) {
+	            if (_.has(node.original, 'id')) {
+	                result.push(node.original.id);
+	            }
+	        });
+	        if (result.length === 0) {
 	            alert("Veuillez sélectionner au moins un élément");
+	        } else {
+	            this.triggerMethod('catalog:insert', result);
 	        }
 	    }
 	});
@@ -11741,7 +11800,7 @@ webpackJsonp([0],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<input class=\"form-control\" name=\"catalog_search\" placeholder=\"Nom ou référence\" type=\"text\" />\n<div class='tree'>\n</div>\n<div class=\"form-group\">\n    <div class=\"text-right\">\n        <button class=\"btn btn-success primary-action\" type=\"button\">\n            Insérer\n        </button>\n        <button class=\"btn btn-default secondary-action\" type=\"button\">\n            Annuler\n        </button>\n    </div>\n</div>\n";
+	  return "<input class=\"form-control\" name=\"catalog_search\" placeholder=\"Nom ou référence\" type=\"text\" />\n<div class='tree'>\n</div>\n<div class=\"form-group\">\n    <div class=\"text-right\">\n        <button class=\"btn btn-success primary-action edit-catalog\" type=\"button\">\n            Éditer comme un nouvel élément\n        </button>\n        <button class=\"btn btn-success secondary-action insert-catalog\" type=\"button\">\n            Insérer les éléments sélectionnés\n        </button>\n        <button class=\"btn btn-default secondary-action cancel-catalog\" type=\"button\">\n            Annuler\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
@@ -11893,47 +11952,73 @@ webpackJsonp([0],[
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 79);
+	
+	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
+	
+	var _LoadingWidget = __webpack_require__(/*! ./LoadingWidget.js */ 81);
+	
+	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : TaskGroupFormView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 86);
+	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 86); /*
+	                                                                   * File Name : TaskGroupFormView.js
+	                                                                   *
+	                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                                   * Company : Majerti ( http://www.majerti.fr )
+	                                                                   *
+	                                                                   * This software is distributed under GPLV3
+	                                                                   * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                                   *
+	                                                                   */
+	
 	
 	var TaskGroupFormView = _backbone2.default.View.extend({
 	    template: template,
 	    regions: {
 	        'title': '.title',
-	        'description': '.description'
+	        'description': '.description',
+	        'catalog_container': '#catalog-container'
 	    },
 	    ui: {
 	        btn_cancel: "button[type=reset]",
 	        form: "form",
-	        submit: 'button[type=submit]'
+	        submit: 'button[type=submit]',
+	        main_tab: 'ul.nav-tabs li:first a'
 	    },
 	    behaviors: [_ModalFormBehavior2.default],
 	    triggers: {
-	        'click @ui.btn_cancel': 'close:modal'
+	        'click @ui.btn_cancel': 'modal:close'
 	    },
 	    childViewEvents: {
-	        'change': 'onChildChange'
+	        'change': 'onChildChange',
+	        'catalog:edit': 'onCatalogEdit'
+	    },
+	    childViewTriggers: {
+	        'catalog:insert': 'catalog:insert'
+	    },
+	    modelEvents: {
+	        'change': 'refreshForm'
 	    },
 	    onChildChange: function onChildChange(attribute, value) {
 	        this.triggerMethod('data:modified', this, attribute, value);
 	    },
+	    onCatalogEdit: function onCatalogEdit(productgroup_datas) {
+	        this.model.loadProductGroup(productgroup_datas);
+	    },
+	    isAddView: function isAddView() {
+	        return !(0, _tools.getOpt)(this, 'edit', false);
+	    },
 	    templateContext: function templateContext() {
 	        return {
-	            title: this.getOption('title')
+	            title: this.getOption('title'),
+	            add: this.isAddView()
 	        };
 	    },
-	    onRender: function onRender() {
+	    refreshForm: function refreshForm() {
 	        this.showChildView('title', new _InputWidget2.default({
 	            value: this.model.get('title'),
 	            title: "Titre (optionnel)",
@@ -11946,6 +12031,23 @@ webpackJsonp([0],[
 	            field_name: "description",
 	            tinymce: true,
 	            cid: this.model.cid
+	        }));
+	        if (this.isAddView()) {
+	            this.getUI('main_tab').tab('show');
+	        }
+	    },
+	    onRender: function onRender() {
+	        this.refreshForm();
+	        if (this.isAddView()) {
+	            this.showChildView('catalog_container', new _LoadingWidget2.default());
+	            var req = (0, _tools.ajax_call)(AppOption['load_catalog_url'], { type: 'sale_product_group' });
+	            req.done(this.onCatalogLoaded.bind(this));
+	        }
+	    },
+	    onCatalogLoaded: function onCatalogLoaded(result) {
+	        this.showChildView('catalog_container', new _CatalogTreeView2.default({
+	            catalog: result,
+	            title: "Catalogue produit"
 	        }));
 	    }
 	});
@@ -11960,13 +12062,22 @@ webpackJsonp([0],[
 
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n        <form class='form taskgroup-form'>\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
+	  },"3":function(depth0,helpers,partials,data) {
+	  return "                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane\"\n                    id=\"catalog-container\">\n                </div>\n";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n                <div class='title'></div>\n                <div class='description'></div>\n            </form>\n          </div>\n          <div class=\"modal-footer\">\n                <button class='btn btn-success primary-action' type='submit' value='submit'>\n                    "
+	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskgroup-form'>\n                        <div class='title'></div>\n                        <div class='description'></div>\n                        <button class='btn btn-success primary-action' type='submit' value='submit'>\n                            "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "\n                </button>\n                <button class='btn btn-default secondary-action' type='reset' value='submit'>\n                    Annuler\n                </button>\n          </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n\n";
+	    + "\n                        </button>\n                        <button class='btn btn-default secondary-action' type='reset' value='submit'>\n                            Annuler\n                        </button>\n                    </form>\n                </div>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "            </div>\n          </div>\n          <div class=\"modal-footer\">\n          </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n\n";
 	},"useData":true});
 
 /***/ }),

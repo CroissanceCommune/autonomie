@@ -44,6 +44,7 @@ const TaskGroupView = Mn.View.extend({
     childViewEvents: {
         'line:edit': 'onLineEdit',
         'line:delete': 'onLineDelete',
+        'catalog:insert': 'onCatalogInsert'
     },
     onRender: function(){
         this.showChildView(
@@ -88,6 +89,10 @@ const TaskGroupView = Mn.View.extend({
                 }
             );
         }
+    },
+    onCatalogInsert: function(sale_product_ids){
+        this.model.load_from_catalog(sale_product_ids);
+        this.getChildView('modalRegion').triggerMethod('modal:close')
     },
     onChildviewDestroyModal: function() {
     	this.getRegion('modalRegion').empty();

@@ -10,6 +10,7 @@
  */
 import Bb from 'backbone';
 import TaskGroupModel from './TaskGroupModel.js';
+import { ajax_call } from '../../tools.js';
 
 
 const TaskGroupCollection = Bb.Collection.extend({
@@ -69,6 +70,14 @@ const TaskGroupCollection = Bb.Collection.extend({
             this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
             this.trigger('change:reorder');
         }
+    },
+    load_from_catalog: function(sale_product_group_ids){
+        var serverRequest = ajax_call(
+            this.url() + '?action=load_from_catalog',
+            {sale_product_group_ids: sale_product_group_ids},
+            'POST'
+        );
+        serverRequest.then(this.fetch.bind(this));
     }
 });
 export default TaskGroupCollection;

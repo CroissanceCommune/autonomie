@@ -38,11 +38,16 @@ const TaskLineFormView = Mn.View.extend({
     },
     behaviors: [ModalFormBehavior],
     triggers: {
-        'click @ui.btn_cancel': 'close:modal'
+        'click @ui.btn_cancel': 'modal:close'
     },
     childViewEvents: {
         'change': 'onChildChange',
-        'catalog:selected': 'onCatalogInsert'
+        'catalog:edit': 'onCatalogEdit'
+    },
+    // Bubble up child view events
+    //
+    childViewTriggers: {
+        'catalog:insert': 'catalog:insert',
     },
     modelEvents: {
         'change': 'refreshForm'
@@ -50,7 +55,7 @@ const TaskLineFormView = Mn.View.extend({
     onChildChange: function(attribute, value){
         this.triggerMethod('data:modified', this, attribute, value);
     },
-    onCatalogInsert: function(product_datas){
+    onCatalogEdit: function(product_datas){
         this.model.loadProduct(product_datas);
     },
     isAddView: function(){
@@ -138,10 +143,12 @@ const TaskLineFormView = Mn.View.extend({
                 'catalog_container',
                 new LoadingWidget()
             );
-            var req = ajax_call(AppOption['load_catalog_url']);
+            var req = ajax_call(
+                AppOption['load_catalog_url'],
+                {type: 'sale_product'},
+            );
             req.done(this.onCatalogLoaded.bind(this))
         }
-
     },
     onCatalogLoaded: function(result){
         this.showChildView(

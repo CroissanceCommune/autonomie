@@ -11,6 +11,7 @@
 import _ from 'underscore';
 import Bb from 'backbone';
 import TaskLineCollection from './TaskLineCollection.js';
+import {ajax_call} from '../../tools.js';
 
 
 const TaskGroupModel = Bb.Model.extend({
@@ -42,6 +43,21 @@ const TaskGroupModel = Bb.Model.extend({
             res += line.ht()
         });
         return res;
+    },
+    updateLines: function(result){
+        this.fetch({success: this.populate.bind(this)});
+    },
+    load_from_catalog: function(sale_product_ids){
+        var serverRequest = ajax_call(
+            this.url() + '?action=load_from_catalog',
+            {sale_product_ids: sale_product_ids},
+            'POST'
+        );
+        serverRequest.then(this.updateLines.bind(this));
+    },
+    loadProductGroup: function(sale_product_group_datas){
+        this.set('title', sale_product_group_datas.title);
+        this.set('description', sale_product_group_datas.description);
     }
 });
 export default TaskGroupModel;

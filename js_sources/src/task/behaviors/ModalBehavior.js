@@ -25,7 +25,7 @@ const ModalBehavior = Mn.Behavior.extend({
   },
 
   triggers: {
-    'click @ui.close': 'close:modal'
+    'click @ui.close': 'modal:close'
   },
   onRender: function() {
     this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
@@ -33,7 +33,7 @@ const ModalBehavior = Mn.Behavior.extend({
   onAttach: function() {
     this.view.$el.modal(this.getOption('modalOptions') || {});
   },
-  onCloseModal: function() {
+  onModalClose: function() {
     this.view.$el.modal('hide');
   },
   triggerFinish: function() {

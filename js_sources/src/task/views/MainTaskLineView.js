@@ -30,6 +30,7 @@ const MainTaskLineView = Mn.View.extend({
     childViewEvents: {
         'group:edit': 'onGroupEdit',
         'group:delete': 'onGroupDelete',
+        'catalog:insert': 'onCatalogInsert',
     },
     initialize: function(options){
         this.collection = new TaskGroupCollection(options['datas']);
@@ -64,6 +65,10 @@ const MainTaskLineView = Mn.View.extend({
     onEditGroup: function(childView){
         var model = childView.model;
         this.showTaskGroupForm(model, "Modifier cet ouvrage");
+    },
+    onCatalogInsert: function(sale_product_group_ids){
+        this.collection.load_from_catalog(sale_product_group_ids);
+        this.getChildView('modalRegion').triggerMethod('modal:close')
     },
     showTaskGroupForm: function(model, title){
         var form = new TaskGroupFormView(

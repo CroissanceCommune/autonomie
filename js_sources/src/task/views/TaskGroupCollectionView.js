@@ -21,7 +21,8 @@ const TaskGroupCollectionView = Mn.CollectionView.extend({
     // Bubble up child view events
     childViewTriggers: {
         'edit': 'group:edit',
-        'delete': 'group:delete'
+        'delete': 'group:delete',
+        'catalog:insert': 'catalog:insert'
     },
     onChildviewOrderUp: function(childView){
         this.collection.moveUp(childView.model);

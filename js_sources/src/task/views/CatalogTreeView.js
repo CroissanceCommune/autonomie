@@ -34,19 +34,21 @@ const CatalogTreeView = Mn.View.extend({
             case_insensitive: true,
         },
         core: {
-            multiple: false
+            multiple: true
         }
     },
     template: template,
     ui: {
         tree: '.tree',
         search: 'input[name=catalog_search]',
-        cancel_btn: 'button[type=reset]',
-        submit_btn: 'button.btn-success'
+        cancel_btn: 'button.cancel-catalog',
+        edit_btn: 'button.edit-catalog',
+        insert_btn: 'button.insert-catalog'
     },
     events: {
         'keyup @ui.search': 'onSearch',
-        'click @ui.submit_btn': 'onSubmit'
+        'click @ui.edit_btn': 'onEdit',
+        'click @ui.insert_btn': 'onInsert'
     },
     onSearch: function(){
         var searchString = this.getUI('search').val();
@@ -55,7 +57,8 @@ const CatalogTreeView = Mn.View.extend({
     onAttach: function(){
         var catalog = this.getOption('catalog');
         if (_.has(catalog, "void_message")){
-            this.getUI('submit_btn').prop('disabled', true);
+            this.getUI('edit_btn').prop('disabled', true);
+            this.getUI('insert_btn').prop('disabled', true);
             this.getUI('search').prop('disabled', true);
             this.getUI('tree').html(catalog.void_message);
         } else {
@@ -65,17 +68,42 @@ const CatalogTreeView = Mn.View.extend({
         }
     },
     productLoadCallback: function(result){
-        this.triggerMethod("catalog:selected", result);
+        this.triggerMethod("catalog:edit", result);
     },
-    onSubmit: function(){
-        var result = [];
+    onEdit: function(){
+        var url = null;
+
         var selected = this.getUI('tree').jstree('get_selected', true);
-        if (selected.length > 0){
-            var url = selected[0].original.url;
+        _.each(
+            selected,
+            function(node){
+                if (_.has(node.original, 'url')){
+                    url = node.original.url;
+                }
+            }
+        );
+        if (url === null){
+            alert("Veuillez sélectionner au moins un élément");
+        } else {
             var serverRequest = ajax_call(url);
             serverRequest.done(this.productLoadCallback.bind(this));
-        } else {
+        }
+    },
+    onInsert: function(){
+        var result = [];
+        var selected = this.getUI('tree').jstree('get_selected', true);
+        _.each(
+            selected,
+            function(node){
+                if (_.has(node.original, 'id')){
+                    result.push(node.original.id);
+                }
+            }
+        );
+        if (result.length === 0){
             alert("Veuillez sélectionner au moins un élément");
+        } else {
+            this.triggerMethod('catalog:insert', result);
         }
     }
 });

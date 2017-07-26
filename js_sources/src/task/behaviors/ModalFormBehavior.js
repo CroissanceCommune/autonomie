@@ -38,7 +38,7 @@ var ModalFormBehavior = Mn.Behavior.extend({
     onSyncSuccess: function(){
         displayServerSuccess("Vos données ont bien été sauvegardées");
         Validation.unbind(this.view);
-        this.view.triggerMethod('close:modal');
+        this.view.triggerMethod('modal:close');
     },
     syncServer: function(datas, bound){
         var bound = bound || false;

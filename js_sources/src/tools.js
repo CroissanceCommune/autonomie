@@ -43,6 +43,8 @@ export const ajax_call = function(url, data, method, extra_options){
     cache: false
   }
   if (method == 'POST'){
+    console.log("POST method");
+    console.log(data);
     options.data = JSON.stringify(data);
     options.contentType = "application/json; charset=UTF-8";
     options.processData = false;

@@ -39,7 +39,7 @@ const TaskGroupView = Mn.View.extend({
         'click @ui.delete_button': 'delete'
     },
     events: {
-        "click @ui.btn_add": "showAddForm"
+        "click @ui.btn_add": "onLineAdd"
     },
     childViewEvents: {
         'line:edit': 'onLineEdit',
@@ -52,21 +52,22 @@ const TaskGroupView = Mn.View.extend({
         );
     },
     onLineEdit: function(childView){
-        this.showTaskLineForm(childView.model, "Modifier la prestation");
+        this.showTaskLineForm(childView.model, "Modifier la prestation", true);
     },
-    showAddForm: function(){
+    onLineAdd: function(){
         var model = new TaskLineModel({
             task_id: this.model.get('id'),
             order: this.model.lines.getMaxOrder() + 1,
         });
-        this.showTaskLineForm(model, "Ajouter une prestation");
+        this.showTaskLineForm(model, "Ajouter une prestation", false);
     },
-    showTaskLineForm: function(model, title){
+    showTaskLineForm: function(model, title, edit){
         var form = new TaskLineFormView(
             {
                 model: model,
                 title: title,
-                destCollection: this.model.lines
+                destCollection: this.model.lines,
+                edit: edit
             });
         this.showChildView('modalRegion', form);
     },

@@ -9,10 +9,13 @@
  *
  */
 import Mn from 'backbone.marionette';
+import { ajax_call, getOpt } from '../../tools.js';
 import InputWidget from './InputWidget.js';
 import SelectWidget from './SelectWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
+import CatalogTreeView from './CatalogTreeView.js';
+import LoadingWidget from './LoadingWidget.js';
 
 var template = require('./templates/TaskLineFormView.mustache');
 
@@ -25,28 +28,41 @@ const TaskLineFormView = Mn.View.extend({
         'unity': '.unity',
         'tva': '.tva',
         'product_id': '.product_id',
+        'catalog_container': '#catalog-container'
     },
     ui: {
         btn_cancel: "button[type=reset]",
         form: "form",
         submit: 'button[type=submit]',
+        main_tab: 'ul.nav-tabs li:first a'
     },
     behaviors: [ModalFormBehavior],
     triggers: {
         'click @ui.btn_cancel': 'close:modal'
     },
     childViewEvents: {
-        'change': 'onChildChange'
+        'change': 'onChildChange',
+        'catalog:selected': 'onCatalogInsert'
+    },
+    modelEvents: {
+        'change': 'refreshForm'
     },
     onChildChange: function(attribute, value){
         this.triggerMethod('data:modified', this, attribute, value);
     },
+    onCatalogInsert: function(product_datas){
+        this.model.loadProduct(product_datas);
+    },
+    isAddView: function(){
+        return !getOpt(this, 'edit', false);
+    },
     templateContext: function(){
         return {
-            title: this.getOption('title')
+            title: this.getOption('title'),
+            add: this.isAddView()
         };
     },
-    onRender: function(){
+    refreshForm: function(){
         this.showChildView(
             'description',
             new TextAreaWidget({
@@ -54,7 +70,6 @@ const TaskLineFormView = Mn.View.extend({
                 title: "Intitulé des postes",
                 field_name: "description",
                 tinymce: true,
-                css_class: 'required',
                 cid: this.model.cid
             })
         );
@@ -63,8 +78,7 @@ const TaskLineFormView = Mn.View.extend({
             new InputWidget(
                 {
                     value: this.model.get('cost'),
-                    title: "Prix unitaire HT *",
-                    css_class: 'required',
+                    title: "Prix unitaire HT",
                     field_name: "cost"
                 }
             )
@@ -74,8 +88,7 @@ const TaskLineFormView = Mn.View.extend({
             new InputWidget(
                 {
                     value: this.model.get('quantity'),
-                    css_class: 'required',
-                    title: "Quantité *",
+                    title: "Quantité",
                     field_name: "quantity"
                 }
             )
@@ -85,7 +98,7 @@ const TaskLineFormView = Mn.View.extend({
             new SelectWidget(
                 {
                     options: AppOption['form_options']['workunit_options'],
-                    title: "Unité (optionelle)",
+                    title: "Unité",
                     value: this.model.get('unity'),
                     field_name: 'unity'
                 }
@@ -97,7 +110,6 @@ const TaskLineFormView = Mn.View.extend({
                 {
                     options: AppOption['form_options']['tva_options'],
                     title: "TVA",
-                    css_class: 'required',
                     value: this.model.get('tva'),
                     field_name: 'tva'
                 }
@@ -112,6 +124,32 @@ const TaskLineFormView = Mn.View.extend({
                     value: this.model.get('product_id'),
                     field_name: 'product_id',
                     id_key: 'id'
+                }
+            )
+        );
+        if (this.isAddView()){
+            this.getUI('main_tab').tab('show');
+        }
+    },
+    onRender: function(){
+        this.refreshForm();
+        if (this.isAddView()){
+            this.showChildView(
+                'catalog_container',
+                new LoadingWidget()
+            );
+            var req = ajax_call(AppOption['load_catalog_url']);
+            req.done(this.onCatalogLoaded.bind(this))
+        }
+
+    },
+    onCatalogLoaded: function(result){
+        this.showChildView(
+            'catalog_container',
+            new CatalogTreeView(
+                {
+                    catalog: result,
+                    title: "Catalogue produit",
                 }
             )
         );

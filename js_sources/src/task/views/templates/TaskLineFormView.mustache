@@ -1,26 +1,66 @@
 <div class="modal-dialog" role="document">
 	<div class="modal-content">
-        <form class='form taskline-form'>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">{{ title }}</h4>
           </div>
           <div class="modal-body">
-                <div class='description'></div>
-                <div class='cost'></div>
-                <div class='quantity'></div>
-                <div class='unity'></div>
-                <div class='tva'></div>
-                <div class='product_id'></div>
-            </form>
+            {{#if add}}
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#form-container"
+                        aria-controls="form-container"
+                        role="tab"
+                        data-toggle="tab">
+                        Saisie libre
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#catalog-container"
+                        aria-controls="catalog-container"
+                        role="tab"
+                        data-toggle="tab">
+                        Depuis le catalogue
+                    </a>
+                </li>
+            </ul>
+            {{/if}}
+            <div class='tab-content'>
+                <div
+                    role="tabpanel"
+                    class="tab-pane fade in active"
+                    id="form-container">
+                    <form class='form taskline-form'>
+                        <div class='description required'></div>
+                        <div class='cost required'></div>
+                        <div class='quantity required'></div>
+                        <div class='unity'></div>
+                        <div class='tva required'></div>
+                        <div class='product_id'></div>
+                        <button
+                            class='btn btn-success primary-action'
+                            type='submit'
+                            value='submit'>
+                            {{ title }}
+                        </button>
+                        <button
+                            class='btn btn-default secondary-action'
+                            type='reset'
+                            value='submit'>
+                            Annuler
+                        </button>
+                    </form>
+                </div>
+                {{#if add}}
+                <div
+                    role="tabpanel"
+                    class="tab-pane"
+                    id="catalog-container">
+                </div>
+                {{/if}}
+            </div>
           </div>
-          <div class="modal-footer">
-                <button class='btn btn-success primary-action' type='submit' value='submit'>
-                    {{ title }}
-                </button>
-                <button class='btn btn-default secondary-action' type='reset' value='submit'>
-                    Annuler
-                </button>
+            <div class="modal-footer">
           </div>
         </form>
 	</div><!-- /.modal-content -->

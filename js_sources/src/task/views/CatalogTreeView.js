@@ -65,7 +65,6 @@ const CatalogTreeView = Mn.View.extend({
         }
     },
     productLoadCallback: function(result){
-        console.log(result);
         this.triggerMethod("catalog:selected", result);
     },
     onSubmit: function(){

@@ -26,13 +26,10 @@ const CheckboxListWidget = Mn.View.extend({
     },
     getCurrentValues: function(){
         var checkboxes = this.getUI('checkboxes').find(':checked');
-        console.log(this.getUI('checkboxes'));
         var res = [];
         _.each(checkboxes, function(checkbox){
             res.push($(checkbox).attr('value'));
         });
-        console.log("Checked");
-        console.log(res);
         return res;
     },
     onClick: function(event){

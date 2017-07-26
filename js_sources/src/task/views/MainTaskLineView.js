@@ -53,7 +53,6 @@ const MainTaskLineView = Mn.View.extend({
         }
     },
     onGroupEdit: function(childView){
-        console.log("On group edit");
         this.showTaskGroupForm(childView.model, "Modifier cet ouvrage");
     },
     onGroupAdd: function(){
@@ -74,12 +73,9 @@ const MainTaskLineView = Mn.View.extend({
                 destCollection: this.collection
             }
         );
-        console.log("Showing the form");
-        console.log(this.getRegion('modalRegion'));
         this.showChildView('modalRegion', form);
     },
     onChildviewDestroyModal: function() {
-        console.log("onChildviewDestroyModal");
         this.detachChildView('modalRegion');
     	this.getRegion('modalRegion').empty();
   	},

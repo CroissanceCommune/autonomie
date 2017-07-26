@@ -27,7 +27,7 @@ setupJsonRedirect();
 var template = require('../handlebars/job/file_generation.mustache');
 
 App.on('start', function (app, options) {
-    console.log("=> Starting the app");
+    console.log("  => Starting the app");
     AppOption['form_options'] = options.form_options;
     setupBbValidationCallbacks(Validation.callbacks);
     setupBbValidationPatterns(Validation);
@@ -46,7 +46,7 @@ $(function(){
 
     $.when(serverCall1, serverCall2).done(
         function(result1, result2){
-            console.log("=> Datas retrieved");
+            console.log("  => Datas retrieved");
             App.start({
                 form_options: result1[0],
                 form_datas: result2[0],

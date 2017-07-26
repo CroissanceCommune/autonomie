@@ -76,7 +76,6 @@ const _displayServerMessage = function(options){
 //   var msgdiv = require('../handlebars/serverMessage.mustache');
 //   $(msgdiv).prependTo("#messageboxes").fadeIn('slow').delay(8000).fadeOut(
 //   'fast', function() { $(this).remove(); });
-   console.log(options);
 }
 export const displayServerError = function(msg){
   /*

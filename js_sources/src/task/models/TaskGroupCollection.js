@@ -23,7 +23,6 @@ const TaskGroupCollection = Bb.Collection.extend({
         this.updateModelOrder(false);
     },
     updateModelOrder: function(sync){
-        console.log("updateModelOrder");
         var sync = sync || true;
         this.each(function(model, index) {
             model.set('order', index);

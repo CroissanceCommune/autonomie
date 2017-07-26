@@ -149,7 +149,8 @@ def company_products_jstree_ajax_view(context, request):
                         id=context.id,
                         cid=category.id,
                         pid=child.id,
-                    )
+                    ),
+                    "id": child.id,
                 })
         if children_models:
             jstree.append(category_datas)
@@ -193,7 +194,7 @@ class RestCategories(BaseRestView):
         return SQLAlchemySchemaNode(
             SaleProductCategory,
             includes=('parent_id', 'title', 'company_id'),
-        )
+        ).bind(request=self.request)
 
 
 class RestProducts(BaseRestView):
@@ -216,7 +217,7 @@ class RestProducts(BaseRestView):
         return SQLAlchemySchemaNode(
             SaleProduct,
             excludes=('id',),
-        )
+        ).bind(request=self.request)
 
 
 class RestProductGroups(BaseRestView):
@@ -249,7 +250,7 @@ class RestProductGroups(BaseRestView):
             SaleProductGroup,
             # id passe par l'url
             excludes=('id', ),
-        )
+        ).bind(request=self.request)
 
 
 def add_routes(config):

@@ -34,6 +34,10 @@ from autonomie.models.tva import (
     Tva,
     Product,
 )
+from autonomie.models.sale_product import (
+    SaleProductGroup,
+    SaleProduct,
+)
 from autonomie.views import BaseRestView
 from autonomie.views.status import (
     TaskStatusView,
@@ -246,6 +250,46 @@ class TaskLineGroupRestView(BaseRestView):
         if not edit:
             entry.task = self.context
         return entry
+
+    def post_load_groups_from_catalog_view(self):
+        """
+        View handling product group loading
+
+        expects sale_product_group_ids: [id1, id2] as json POST params
+        """
+        logger.debug("post_load_from_catalog_view")
+        sale_product_group_ids = self.request.json_body.get(
+            'sale_product_group_ids', []
+        )
+        logger.debug("sale_product_ids : %s", sale_product_group_ids)
+
+        groups = []
+        for id_ in sale_product_group_ids:
+            sale_product_group = SaleProductGroup.get(id_)
+            group = TaskLineGroup.from_sale_product_group(sale_product_group)
+            self.context.line_groups.append(group)
+            groups.append(group)
+        self.request.dbsession.merge(self.context)
+        return groups
+
+    def post_load_lines_from_catalog_view(self):
+        """
+        View handling product to line loading
+
+        expects sale_product_ids: [id1, id2] as POST params
+        """
+        logger.debug("post_load_from_catalog_view")
+        sale_product_ids = self.request.json_body.get('sale_product_ids', [])
+        logger.debug("sale_product_ids : %s", sale_product_ids)
+
+        lines = []
+        for id_ in sale_product_ids:
+            sale_product = SaleProduct.get(id_)
+            line = TaskLine.from_sale_product(sale_product)
+            self.context.lines.append(line)
+            lines.append(line)
+        self.request.dbsession.merge(self.context)
+        return lines
 
 
 class TaskLineRestView(BaseRestView):
@@ -479,6 +523,26 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+    )
+    config.add_view(
+        TaskLineGroupRestView,
+        route_name="/api/v1/estimations/{eid}/task_line_groups/{id}",
+        attr='post_load_lines_from_catalog_view',
+        request_param="action=load_from_catalog",
+        request_method='POST',
+        renderer='json',
+        permission='edit.estimation',
+        xhr=True,
+    )
+    config.add_view(
+        TaskLineGroupRestView,
+        route_name="/api/v1/estimations/{id}/task_line_groups",
+        attr='post_load_groups_from_catalog_view',
+        request_param="action=load_from_catalog",
+        request_method='POST',
+        renderer='json',
+        permission='edit.estimation',
+        xhr=True,
     )
 
     add_rest_views(

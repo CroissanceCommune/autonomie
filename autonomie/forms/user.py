@@ -221,6 +221,7 @@ def get_list_schema():
         colander.String(),
         name='disabled',
         missing="0",
+        default="0",
         widget=deform.widget.HiddenWidget(),
         validator=colander.OneOf(('0', '1'))
         )

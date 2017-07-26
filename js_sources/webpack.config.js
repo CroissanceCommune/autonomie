@@ -12,7 +12,8 @@ var PROD = (process.env.NODE_ENV === 'production');
 
 const config = {
   entry: {
-    task: path.join(APP_DIR, 'task', 'task.js')
+    task: path.join(APP_DIR, 'task', 'task.js'),
+    vendor: ['jquery', 'backbone', 'underscore', 'backbone.marionette', 'tinymce', 'jstree']
   },
   module: {
     loaders: [
@@ -53,7 +54,8 @@ const config = {
       jQuery: 'jquery',
       jquery: 'jquery',
       _: 'underscore'
-    })
+    }),
+    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
   ],
   resolve: {
     root: path.join(__dirname, './src')

@@ -73,6 +73,7 @@ from autonomie.forms.tasks.base import (
 from autonomie.resources import (
     duplicate_js,
     task_css,
+    jstree_css,
 )
 from autonomie.views import (
     submit_btn,
@@ -138,14 +139,40 @@ class EstimationAdd(BaseFormView):
 
 class EstimationEditView(BaseView):
 
-    @property
     def title(self):
         return u"Modification du devis {task.name}".format(task=self.context)
 
+    def load_catalog_url(self):
+        return self.request.route_path(
+            "sale_categories",
+            id=self.context.company.id,
+            _query=dict(action='jstree')
+        )
+
+    def context_url(self):
+        return self.request.route_path(
+            '/api/v1/' + self.request.context.type_ + 's/{id}',
+            id=self.request.context.id
+        )
+
+    def load_url(self):
+        return self.request.route_path(
+            '/api/v1/' + self.request.context.type_ + 's/{id}',
+            id=self.request.context.id,
+            _query={'form_options': '1'}
+        )
+
     def __call__(self):
         task_css.need()
+        jstree_css.need()
         populate_actionmenu(self.request)
-        return dict(context=self.context, title=self.title)
+        return dict(
+            context=self.context,
+            title=self.title(),
+            context_url=self.context_url(),
+            load_url=self.load_url(),
+            load_catalog_url=self.load_catalog_url(),
+        )
 
 
 class AdminEstimation(BaseEditView):

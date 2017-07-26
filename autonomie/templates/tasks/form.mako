@@ -27,8 +27,10 @@
 <%block name='footer'>
 <script type='text/javascript'>
 var AppOption = {};
-AppOption['context_url'] = "${request.route_path('/api/v1/' + request.context.type_ + 's/{id}', id=request.context.id)}";
-AppOption['load_url'] = "${request.route_path('/api/v1/' + request.context.type_ + 's/{id}', id=request.context.id, _query={'form_options': '1'})}";
+AppOption['context_url'] = "${context_url}";
+AppOption['load_url'] = "${load_url}"
+AppOption['load_catalog_url'] = "${load_catalog_url}";
 </script>
+<script type='text/javascript' src="${request.static_url('autonomie:static/js/build/vendor.bundle.js')}" ></script>
 <script type='text/javascript' src="${request.static_url('autonomie:static/js/build/task.js')}" ></script>
 </%block>

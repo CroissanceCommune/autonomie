@@ -57,7 +57,8 @@ var FormBehavior = Mn.Behavior.extend({
             );
         }
     },
-    onSubmitForm: function(){
+    onSubmitForm: function(event){
+        event.preventDefault();
         this.view.model.set(this.serializeForm(), {validate: true});
         this.syncServer();
     },

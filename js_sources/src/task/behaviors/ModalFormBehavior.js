@@ -21,7 +21,8 @@ var ModalFormBehavior = Mn.Behavior.extend({
         submit: "button[type=submit]"
     },
     events: {
-        'click @ui.submit': 'onSubmitForm'
+        'click @ui.submit': 'onSubmitForm',
+        'submit @ui.form': 'onSubmitForm'
     },
     defaults: {
         errorMessage: "Une erreur est survenue"
@@ -78,7 +79,8 @@ var ModalFormBehavior = Mn.Behavior.extend({
             }
         );
     },
-    onSubmitForm: function(){
+    onSubmitForm: function(event){
+        event.preventDefault();
         this.view.model.set(this.serializeForm(), {validate: true});
         this.syncServer();
     },

@@ -580,7 +580,7 @@ def includeme(config):
     config.add_view(
         InvoiceAdd,
         route_name="project_invoices",
-        renderer='tasks/edit.mako',
+        renderer='base/formpage.mako',
         permission='add_invoice',
     )
 

@@ -29,7 +29,6 @@
 """
 import logging
 
-from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPFound
 
 from deform import Button
@@ -43,7 +42,7 @@ from autonomie.utils.pdf import (
 )
 from autonomie.resources import (
     task,
-    duplicate as duplicate_js,
+    duplicate_js,
 )
 
 from autonomie_base.utils.ascii import force_filename
@@ -59,14 +58,13 @@ from autonomie.models.project import (
 )
 from autonomie.models.tva import Tva
 from autonomie.views import (
-    BaseView,
     BaseFormView,
 )
+from autonomie.views.status import StatusView
 from autonomie.forms.duplicate import (
     DuplicateSchema,
     EDIT_METADATASCHEMA,
 )
-from autonomie.views.files import get_add_file_link
 
 DOCUMENT_TYPES = ('estimation', 'invoice', 'cancelinvoice')
 
@@ -348,10 +346,21 @@ class TaskStatusView(StatusView):
         logger.debug(u" * Form has been validated")
         return appstruct
 
-    def post_edit_metadata_process(self, task, status, params):
-        task = self.request.dbsession.merge(task)
+    def post_edit_metadata_process(self, status, params):
         msg = u"Le document a bien été modifié"
         self.request.session.flash(msg)
+
+    def notify(self, status):
+        """
+        Notify the change to the registry
+        """
+        self.request.registry.notify(
+            StatusChanged(
+                self.request,
+                self.context,
+                status,
+            )
+        )
 
 
 class TaskFormView(BaseFormView):
@@ -455,11 +464,15 @@ def populate_actionmenu(request):
     else:
         project = request.context
     request.actionmenu.add(get_project_redirect_btn(request, project.id))
-    if context_is_task(request.context):
-        edit_perm = "edit.%s" % request.context.__name__
-        request.actionmenu.add(
-            get_add_file_link(request, perm=edit_perm)
-        )
+    # if context_is_task(request.context):
+    #     edit_perm = "edit.%s" % request.context.__name__
+    #     request.actionmenu.add(
+    #         get_add_file_link(
+    #             request,
+    #             perm=edit_perm,
+    #             route="/%ss/{id}/addfile" % request.context.type_
+    #         )
+    #     )
 
 
 def get_task_html_view(form_actions_factory=TaskFormActions):
@@ -476,10 +489,10 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         from autonomie.resources import task_html_pdf_css
         task_html_pdf_css.need()
         # If the task is editable, we go the edit page
-        if request.has_permission('edit.%s' % request.context.__name__):
+        if request.has_permission('edit.%s' % request.context.type_):
             return HTTPFound(
                 request.route_path(
-                    request.context.__name__,
+                    "/%ss/{id}" % request.context.type_,
                     id=request.context.id
                 )
             )
@@ -494,18 +507,18 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         else:
             label = u"Objet"
 
-        title = u"{0} numéro : {1}".format(label, request.context.internal_number)
+        title = u"{0} : {1}".format(label, request.context.internal_number)
         populate_actionmenu(request)
 
         # We use the task's class to retrieve the available actions
-        model = request.context.__class__
-        button_handler = form_actions_factory(request, model)
-        submit_buttons = button_handler.get_buttons()
+        # model = request.context.__class__
+        # button_handler = form_actions_factory(request, model)
+        # submit_buttons = button_handler.get_buttons()
 
         return dict(
             title=title,
             task=request.context,
-            submit_buttons=submit_buttons,
+            submit_buttons=[],
         )
     return task_html_view
 

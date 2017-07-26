@@ -31,13 +31,13 @@ from colanderalchemy import SQLAlchemySchemaNode
 from deform import ValidationFailure
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.forms.invoices import (
-    get_cancel_invoice_schema,
-)
-from autonomie.forms.task import (
-    get_cancel_invoice_appstruct,
-    get_cancel_invoice_dbdatas,
-)
+# from autonomie.forms.invoices import (
+#     get_cancel_invoice_schema,
+# )
+#from autonomie.forms.task import (
+#    get_cancel_invoice_appstruct,
+#    get_cancel_invoice_dbdatas,
+#)
 from autonomie.models.task import (
     CancelInvoice,
     TaskLine,
@@ -91,7 +91,7 @@ class CancelInvoiceEdit(TaskFormView):
         CancelInvoice edition view
         current context is an cancelinvoice
     """
-    schema = get_cancel_invoice_schema()
+#    schema = get_cancel_invoice_schema()
     buttons = (submit_btn,)
     model = CancelInvoice
     edit = True

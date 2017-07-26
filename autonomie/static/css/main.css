@@ -477,12 +477,11 @@ header .navbar .nav > li > a {
     position: relative;
     top: 20vh; }
 
-.task-desktop-actions {
-  position: sticky;
-  position: -webkit-sticky;
-  position: -moz-sticky;
-  position: -ms-sticky;
-  position: -o-sticky;
-  top: 50px; }
-  .task-desktop-actions button {
-    margin-bottom: 0.7em; }
+.btn-nostyle {
+  border: none;
+  border-radius: 2px;
+  background-color: transparent;
+  color: inherit; }
+
+.btn-nostyle:hover {
+  background-color: rgba(255, 255, 255, 0.1); }

@@ -118,7 +118,7 @@ jstree_js = get_resource(
     minified="js/vendors/jstree.min.js",
     depends=[main_group]
 )
-jstree_css = get_resource("css/jstree_themes/default/style.min.css")
+jstree_css = get_resource("css/jstree_themes/default/style.css")
 jstree = Group([jstree_js, jstree_css])
 
 

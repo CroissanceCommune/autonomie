@@ -127,7 +127,11 @@ class RestEstimation(BaseRestView):
         """
         return {
             "sections": [
-                'common', 'tasklines', 'payment_conditions', 'payments'
+                'common',
+                'tasklines',
+                'discounts',
+                'payment_conditions',
+                'payments'
             ],
             'tva_options': json_tvas(self.request),
             "workunit_options": json_workunits(self.request),
@@ -458,12 +462,12 @@ def add_routes(config):
     config.add_route(
         "/api/v1/estimations/{eid}/discount_lines/{id}",
         "/api/v1/estimations/{eid}/discount_lines/{id:\d+}",
-        traverse='/discount_line/{id}',
+        traverse='/discount_lines/{id}',
     )
     config.add_route(
         "/api/v1/estimations/{eid}/payment_lines/{id}",
         "/api/v1/estimations/{eid}/payment_lines/{id:\d+}",
-        traverse='/payment_line/{id}',
+        traverse='/payment_lines/{id}',
     )
 
 
@@ -515,6 +519,7 @@ def add_views(config):
         renderer="json",
     )
 
+    # Task linegroup views
     add_rest_views(
         config,
         route_name="/api/v1/estimations/{eid}/task_line_groups/{id}",
@@ -544,7 +549,7 @@ def add_views(config):
         permission='edit.estimation',
         xhr=True,
     )
-
+    # Task line views
     add_rest_views(
         config,
         route_name="/api/v1/estimations/{eid}/"
@@ -552,6 +557,16 @@ def add_views(config):
         collection_route_name="/api/v1/estimations/{eid}/"
         "task_line_groups/{id}/task_lines",
         factory=TaskLineRestView,
+        view_rights="view.estimation",
+        add_rights="edit.estimation",
+        edit_rights='edit.estimation',
+    )
+    # Discount line views
+    add_rest_views(
+        config,
+        route_name="/api/v1/estimations/{eid}/discount_lines/{id}",
+        collection_route_name="/api/v1/estimations/{id}/discount_lines",
+        factory=DiscountLineRestView,
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',

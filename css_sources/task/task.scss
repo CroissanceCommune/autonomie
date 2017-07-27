@@ -1,28 +1,42 @@
 $bgcolor: #f8f8f8;
-$form-block-bgcolor: #dfae0c;
+$form-block-bgcolor: #fff;
+$form-block-borders: #aaa;
 $form-subblock-bgcolor: #fbfbfb;
+
 .page-content{
   background-color: $bgcolor;
-  .common-form, .taskline-group {
+  .form-section {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     background-color: $form-block-bgcolor;
-    margin: 10px 5px;
-    padding: 10px 15px;
-  }
-  .taskline-group {
-    .linesblockheader{
+    margin-bottom: 3em;
+    h2{
+      border-bottom: 1px solid $form-block-borders;
+      margin: 3px 0px;
+      padding: 15px 0px 8px 10px;
+      color: #666;
+    }
+    .content{
+      margin: 10px 5px;
+      padding: 10px 15px;
+    }
+    .lines-header{
       background-color: $form-subblock-bgcolor;
       margin: 0px 20px 0px 0px;
       font-weight: bold;
       border-bottom: 1px solid #000;
     }
-    .tasklines{
+    .lines{
       background-color: $form-subblock-bgcolor;
       margin: 0px 20px 0px 0px;
     }
     .actions{
       padding: 15px 0px;
     }
+  }
+  .taskline-group {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 20, 0.2), 0 6px 20px 0 rgba(0, 0, 20, 0.19);
+    margin-bottom: 15px;
+    padding: 10px 0px;
     .subtotal{
       padding: 15px 0px;
       font-weight: bold;
@@ -34,6 +48,8 @@ $form-subblock-bgcolor: #fbfbfb;
         font-size: 0.9em;
       }
     }
+  }
+  .discountlines-group{
   }
 }
 .paymentamount{
@@ -71,4 +87,7 @@ $form-subblock-bgcolor: #fbfbfb;
 .required .form-group label:after{
   content: ' *';
   color: #c9302c;
+}
+a[data-toggle=collapse]:hover{
+  cursor: pointer;
 }

@@ -11,9 +11,10 @@
 import Mn from 'backbone.marionette';
 import CommonView from "./CommonView.js";
 import RightBarView from "./RightBarView.js";
-import CommonModel from "../models/CommonModel.js";
-import MainTaskLineView from './MainTaskLineView.js';
+import TaskBlockView from './TaskBlockView.js';
+import DiscountBlockView from './DiscountBlockView.js';
 import StatusView from './StatusView.js';
+import Radio from 'backbone.radio';
 import { Modal } from 'bootstrap';
 
 const template = require('./templates/MainView.mustache');
@@ -24,37 +25,47 @@ const MainView = Mn.View.extend({
         modalRegion: '#modalregion',
         common: '#common',
         tasklines: '#tasklines',
+        discounts: '#discounts',
         rightbar: "#rightbar",
         footer: '#footer'
     },
     childViewEvents: {
         'status:change': 'onStatusChange',
     },
+    initialize: function(options){
+        this.channel = Radio.channel('facade');
+    },
+    showCommonBlock: function(datas){
+        var model = this.channel.request('get:model', 'common');
+        var view = new CommonView({model: model});
+        this.showChildView('common', view);
+    },
+    showTaskGroupBlock: function(datas){
+        var collection = this.channel.request('get:collection', 'task_groups');
+        var view = new TaskBlockView({collection: collection});
+        this.showChildView('tasklines', view);
+    },
+    showDiscountBlock(datas){
+        var collection = this.channel.request('get:collection', 'discounts');
+        var model = this.channel.request('get:model', 'common');
+        var view = new DiscountBlockView({collection: collection, model: model});
+        this.showChildView('discounts', view);
+    },
     onRender: function() {
-        this.commonModel = new CommonModel(
-            this.getOption('datas')
-        );
-        this.commonModel.url = AppOption['context_url'];
-
         if (_.indexOf(AppOption['form_options']['sections'], "common") != -1){
-            this.showChildView(
-                'common',
-                new CommonView({model: this.commonModel})
-            );
+            this.showCommonBlock();
         }
         if (_.indexOf(AppOption['form_options']['sections'], "tasklines") != -1){
-            this.showChildView(
-                'tasklines',
-                new MainTaskLineView({
-                    datas: this.getOption('datas')['line_groups']
-                })
-            );
+            this.showTaskGroupBlock();
+        }
+        if (_.indexOf(AppOption['form_options']['sections'], "discounts") != -1){
+            this.showDiscountBlock();
         }
 
-        this.showChildView(
-            'rightbar',
-            new RightBarView({actions: AppOption['form_options']['actions']})
+        var view = new RightBarView(
+            {actions: AppOption['form_options']['actions']}
         );
+        this.showChildView('rightbar', view);
     },
     onStatusChange: function(status, title, label, url){
         this.showChildView(

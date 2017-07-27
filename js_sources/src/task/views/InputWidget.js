@@ -21,10 +21,18 @@ const InputWidget = Mn.View.extend({
     },
     events: {
         'keyup @ui.input': 'onKeyUp',
+        'blur @ui.input': 'onBlur',
     },
     onKeyUp: function(){
         this.triggerMethod(
             'change',
+            this.getOption('field_name'),
+            this.getUI('input').val(),
+        );
+    },
+    onBlur: function(){
+        this.triggerMethod(
+            'finish',
             this.getOption('field_name'),
             this.getUI('input').val(),
         );
@@ -35,7 +43,8 @@ const InputWidget = Mn.View.extend({
             title: this.getOption('title'),
             field_name: this.getOption('field_name'),
             description: getOpt(this, 'description', false),
-            type: getOpt(this, 'type', 'text')
+            type: getOpt(this, 'type', 'text'),
+            addon: getOpt(this, 'addon', ''),
         }
     }
 });

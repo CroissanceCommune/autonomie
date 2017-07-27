@@ -11,10 +11,13 @@
 import Mn from 'backbone.marionette';
 import MainView from '../views/MainView.js';
 import App from './App.js';
+import Facade from './Facade.js';
 
 const Controller = Mn.Object.extend({
     initialize: function(datas){
-        this.mainView = new MainView({"datas": datas});
+        Facade.loadModels(datas);
+        AppOption.facade = Facade;
+        this.mainView = new MainView();
         App.showView(this.mainView);
     },
     status: function(status){

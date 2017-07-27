@@ -1,5 +1,5 @@
 /*
- * File Name : MainTaskLineView.js
+ * File Name : TaskBlockView.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -9,14 +9,15 @@
  *
  */
 import Mn from 'backbone.marionette';
-import TaskGroupCollection from '../models/TaskGroupCollection.js';
 import TaskGroupModel from '../models/TaskGroupModel.js';
 import TaskGroupCollectionView from './TaskGroupCollectionView.js';
 import TaskGroupFormView from './TaskGroupFormView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
-const MainTaskLineView = Mn.View.extend({
-    template: require('./templates/MainTaskLineView.mustache'),
+const TaskBlockView = Mn.View.extend({
+    template: require('./templates/TaskBlockView.mustache'),
+    tagName: 'div',
+    className: 'form-section',
     regions: {
         container: '.group-container',
         modalRegion: ".group-modalregion",
@@ -33,7 +34,7 @@ const MainTaskLineView = Mn.View.extend({
         'catalog:insert': 'onCatalogInsert',
     },
     initialize: function(options){
-        this.collection = new TaskGroupCollection(options['datas']);
+        this.collection = options['collection'];
     },
     onDeleteSuccess: function(){
         displayServerSuccess("Vos données ont bien été supprimées");
@@ -66,10 +67,6 @@ const MainTaskLineView = Mn.View.extend({
         var model = childView.model;
         this.showTaskGroupForm(model, "Modifier cet ouvrage");
     },
-    onCatalogInsert: function(sale_product_group_ids){
-        this.collection.load_from_catalog(sale_product_group_ids);
-        this.getChildView('modalRegion').triggerMethod('modal:close')
-    },
     showTaskGroupForm: function(model, title){
         var form = new TaskGroupFormView(
             {
@@ -79,6 +76,10 @@ const MainTaskLineView = Mn.View.extend({
             }
         );
         this.showChildView('modalRegion', form);
+    },
+    onCatalogInsert: function(sale_product_group_ids){
+        this.collection.load_from_catalog(sale_product_group_ids);
+        this.getChildView('modalRegion').triggerMethod('modal:close')
     },
     onChildviewDestroyModal: function() {
         this.detachChildView('modalRegion');
@@ -93,4 +94,4 @@ const MainTaskLineView = Mn.View.extend({
         );
     }
 });
-export default MainTaskLineView;
+export default TaskBlockView;

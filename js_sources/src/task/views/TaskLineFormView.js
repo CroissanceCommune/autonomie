@@ -84,7 +84,8 @@ const TaskLineFormView = Mn.View.extend({
                 {
                     value: this.model.get('cost'),
                     title: "Prix unitaire HT",
-                    field_name: "cost"
+                    field_name: "cost",
+                    addon: "€"
                 }
             )
         );

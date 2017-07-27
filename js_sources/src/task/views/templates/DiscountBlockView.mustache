@@ -1,0 +1,33 @@
+<h2>Remises et frais</h2>
+<div class='modalregion'></div>
+<div class='content'>
+    {{# if not_empty}}
+    <div class='row lines-header hidden-xs'>
+        <div class='col-md-3 col-sm-4'>Description</div>
+        <div class='col-md-3 ol-sm-2 col-xs-12'>Montant HT</div>
+        <div class='col-md-6 col-sm-6 col-xs-12 text-right'>Actions</div>
+    </div>
+    {{/if}}
+    <div class='row lines'>
+    </div>
+    <div class='row'>
+        <div class='col-xs-11 text-right'>
+            <button type='button' class='btn btn-default btn-add'>
+                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une remise
+            </button>
+        </div>
+    </div>
+    <a
+        data-target='#discount-more'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="discount-more"
+        >
+        <i class='glyphicon glyphicon-plus-sign'></i> Ajouter des frais forfaitaires
+    </a>
+    <div class='collapse row {{#if is_more_set}}in{{/if}}' id="discount-more">
+        <form class='form-inline'>
+        <div class='col-xs-11 expenses_ht text-right'></div>
+        </form>
+    </div>
+</div>

@@ -22,7 +22,7 @@ const TaskGroupView = Mn.View.extend({
     className: 'taskline-group row',
     template: template,
     regions: {
-        lines: '.tasklines',
+        lines: '.lines',
         modalRegion: ".modalregion",
     },
     ui: {
@@ -46,11 +46,16 @@ const TaskGroupView = Mn.View.extend({
         'line:delete': 'onLineDelete',
         'catalog:insert': 'onCatalogInsert'
     },
+    isEmpty: function(){
+        return this.model.lines.length === 0;
+    },
     onRender: function(){
-        this.showChildView(
-            'lines',
-            new TaskLineCollectionView({collection: this.model.lines})
-        );
+        if (! this.isEmpty()){
+            this.showChildView(
+                'lines',
+                new TaskLineCollectionView({collection: this.model.lines})
+            );
+        }
     },
     onLineEdit: function(childView){
         this.showTaskLineForm(childView.model, "Modifier la prestation", true);
@@ -102,6 +107,7 @@ const TaskGroupView = Mn.View.extend({
         let max_order = this.model.collection.getMaxOrder();
         let order = this.model.get('order');
         return {
+            not_is_empty: !this.isEmpty(),
             total_ht: formatAmount(this.model.ht()),
             is_not_first: order != min_order,
             is_not_last: order != max_order

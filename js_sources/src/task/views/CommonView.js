@@ -26,7 +26,7 @@ const CommonView = Mn.View.extend({
      * field
      */
     tagName: 'div',
-    className: 'common-form',
+    className: 'form-section',
     template: template,
     formname: "common",
     regions: {
@@ -59,6 +59,19 @@ const CommonView = Mn.View.extend({
             mention_ids.push(mention.id);
         });
         return mention_ids;
+    },
+    isMoreSet: function(){
+        var mention_ids = this.getMentionIds();
+        if (mention_ids.length > 0){
+            return true;
+        }
+        if (this.model.get('workplace')){
+            return true;
+        }
+        return false;
+    },
+    templateContext: function(){
+        return {is_more_set: this.isMoreSet()};
     },
     onRender: function(){
         const mention_list = new CheckboxListWidget({

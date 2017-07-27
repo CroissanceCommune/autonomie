@@ -1,16 +1,16 @@
-<div class='col-md-3 description'>{{{ description }}}</div>
-<div class='col-md-1 text-center'>{{ cost }}</div>
-<div class='col-md-1 text-center'>{{ quantity }}</div>
-<div class='col-md-1 text-center'>{{ unity }}</div>
-<div class='col-md-1 text-center'>{{ tva_label }}</div>
-<div class='col-md-1 text-center'>{{{ ht }}}</div>
-<div class='col-md-1 text-center'>{{{ product }}}</div>
-<div class='col-md-3 text-right'>
+<div class='col-md-3 col-sm-4 col-xs-12 description'>{{{ description }}}</div>
+<div class='col-md-1 hidden-sm hidden-xs text-center'>{{ cost }}</div>
+<div class='col-md-1 hidden-sm hidden-xs text-center'>{{ quantity }}</div>
+<div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>{{ unity }}</div>
+<div class='col-md-1 hidden-sm hidden-xs text-center'>{{ tva_label }}</div>
+<div class='col-md-1 col-sm-1 col-xs-12 text-center'><b class='visible-xs text-left'>HT : {{{ht}}}</b><span class='hidden-xs'>{{{ ht }}}</span></div>
+<div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>{{{ product }}}</div>
+<div class='col-md-5 col-lg-3 col-sm-7 text-right'>
     <button type='button' class='btn btn-default edit'>
-        <i class='glyphicon glyphicon-pencil'></i> Modifier
+        <i class='glyphicon glyphicon-pencil'></i> <span class='hidden-xs'>Modifier</span>
     </button>
     <button type='button' class='btn btn-default delete'>
-        <i class='glyphicon glyphicon-trash'></i> Supprimer
+        <i class='glyphicon glyphicon-trash'></i> <span class='hidden-xs'>Supprimer</span>
     </button>
     {{#if is_not_first }}
     <button type='button' class='btn btn-default btn-small up'>

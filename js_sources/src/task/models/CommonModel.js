@@ -13,7 +13,16 @@ import Bb from 'backbone';
 
 
 const CommonModel = Bb.Model.extend({
-    props: ['id', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace'],
+    props: [
+        'id',
+        'altdate',
+        'date',
+        'description',
+        'address',
+        'mention_ids',
+        'workplace',
+        'expenses_ht',
+    ],
     validation: {
         date: {
             required: true,
@@ -26,6 +35,11 @@ const CommonModel = Bb.Model.extend({
         address: {
             required: true,
             msg: "Veuillez saisir une adresse",
+        },
+        expenses_ht: {
+            required: false,
+            pattern: 'amount',
+            msg: "Le montant doit être un nombre",
         }
     },
     constructor: function() {

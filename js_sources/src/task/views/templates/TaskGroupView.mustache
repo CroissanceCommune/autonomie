@@ -1,16 +1,43 @@
 <div class='col-xs-12'>
     <div class='row'>
-        <div class='col-xs-8'>
+        <div class='col-xs-12'>
+            <div class='btn-group pull-right'>
+                <button
+                    type='button'
+                    class='btn btn-danger delete btn-small'
+                    title='Supprimer cet ouvrage'
+                    tabindex='-1'
+                    >
+                    <i class='glyphicon glyphicon-trash'></i>
+                </button>
+                {{#if is_not_first }}
+                <button type='button' class='btn btn-default btn-small up' tabindex='-1'>
+                    <i class='glyphicon glyphicon-arrow-up'></i>
+                </button>
+                <br />
+                {{/if}}
+                {{#if is_not_last }}
+                <button type='button' class='btn btn-default btn-small down' tabindex='-1'>
+                    <i class='glyphicon glyphicon-arrow-down'></i>
+                </button>
+                {{/if}}
+            </div>
+        </div>
+        </div>
+        <div class='row'>
+        <div class='col-xs-12'>
             <h4>
             {{#if title }}
             {{title}}
             {{else}}
-            <small>Aucun titre n'a été saisi</small>
+            <small>Aucun titre n'a été saisi pour ce groupe</small>
             {{/if}}
             <button
                 type='button'
                 class='btn-nostyle edit btn-small'
-                title="Modifier cet ouvrage">
+                title="Modifier cet ouvrage"
+                tabindex='-1'
+                >
                 <i class='glyphicon glyphicon-pencil'></i>
             </button>
             </h4>
@@ -22,40 +49,21 @@
             {{/if}}
             </p>
         </div>
-        <div class='col-xs-4'>
-        <div class='btn-group pull-right'>
-            <button
-                type='button'
-                class='btn btn-danger delete btn-small'
-                title='Supprimer cet ouvrage'
-                >
-                <i class='glyphicon glyphicon-trash'></i>
-            </button>
-            {{#if is_not_first }}
-            <button type='button' class='btn btn-default btn-small up'>
-                <i class='glyphicon glyphicon-arrow-up'></i>
-            </button>
-            <br />
-            {{/if}}
-            {{#if is_not_last }}
-            <button type='button' class='btn btn-default btn-small down'>
-                <i class='glyphicon glyphicon-arrow-down'></i>
-            </button>
-            {{/if}}
-            </div>
-        </div>
     </div>
 
-    <div class='row hidden-sm linesblockheader'>
-        <div class='col-md-3'>Intitulé des postes</div>
-        <div class='col-md-1 text-center'>Prix unitaire HT</div>
-        <div class='col-md-1 text-center'>Quantité</div>
-        <div class='col-md-1 text-center'>Unité</div>
-        <div class='col-md-1 text-center'>Tva</div>
-        <div class='col-md-1 text-center'>HT</div>
-        <div class='col-md-3 text-center'>Actions</div>
+    {{# if not_is_empty}}
+    <div class='row lines-header hidden-xs'>
+        <div class='col-md-3 col-sm-4 '>Intitulé des postes</div>
+        <div class='col-md-1 hidden-sm hidden-xs text-center'>Prix unit. HT</div>
+        <div class='col-md-1 hidden-sm hidden-xs text-center'>Qté</div>
+        <div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>Unité</div>
+        <div class='col-md-1 hidden-sm hidden-xs text-center'>Tva</div>
+        <div class='col-md-1 col-sm-1 text-center'>HT</div>
+        <div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>Produit</div>
+        <div class='col-md-5 col-lg-3 col-sm-7 text-center'>Actions</div>
     </div>
-    <div class='row tasklines'>
+    {{/if}}
+    <div class='row lines'>
     </div>
     <div class='row actions'>
         <div class='col-xs-11 text-right'>

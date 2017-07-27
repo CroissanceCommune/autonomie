@@ -1,29 +1,31 @@
-<form class='form' name='common' action="#" onSubmit="return false;">
-    <div class='row'>
-        <div class='col-md-6 col-xs-12'>
-            <div class='date'></div>
-            <div class='description'></div>
-        </div>
-        <div class='col-md-6 col-xs-12'>
-            <div class='address'></div>
-        </div>
-    </div>
-    <button
-        class='btn btn-default'
-        data-target='#common-more'
-        data-toggle='collapse'
-        aria-expanded="false"
-        aria-controls="common-more"
-        >
-        Plus d'options
-    </button>
-    <div class='collapse row' id="common-more">
-        <div class='col-md-6 col-xs-12'>
-            <div class='workplace'></div>
-        </div>
-        <div class='col-md-6 col-xs-12'>
-            <div class='mentions'>
+<h2>Informations générales</h2>
+<div class='content'>
+    <form class='form' name='common' action="#" onSubmit="return false;">
+        <div class='row'>
+            <div class='col-md-6 col-xs-12'>
+                <div class='date'></div>
+                <div class='description'></div>
+            </div>
+            <div class='col-md-6 col-xs-12'>
+                <div class='address'></div>
             </div>
         </div>
-    </div>
-</form>
+        <a
+            data-target='#common-more'
+            data-toggle='collapse'
+            aria-expanded="false"
+            aria-controls="common-more"
+            >
+            <i class='glyphicon glyphicon-plus-sign'></i> Plus d'options (Lieu des travaux, mentions facultatives ...)
+        </a>
+        <div class='collapse row {{#if is_more_set}}in{{/if}}' id="common-more">
+            <div class='col-md-6 col-xs-12'>
+                <div class='workplace'></div>
+            </div>
+            <div class='col-md-6 col-xs-12'>
+                <div class='mentions'>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

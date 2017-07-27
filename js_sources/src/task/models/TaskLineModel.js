@@ -10,6 +10,7 @@
  */
 import _ from 'underscore';
 import Bb from 'backbone';
+import { getTvaPart } from '../../math.js';
 
 const TaskLineModel = Bb.Model.extend({
     props: [
@@ -50,11 +51,25 @@ const TaskLineModel = Bb.Model.extend({
     ht: function(){
         return this.get('cost') * this.get('quantity');
     },
+    tva_value: function(){
+        var tva = this.get('tva');
+        if (tva < 0){
+            tva = 0;
+        }
+        return tva;
+    },
+    tva: function(){
+        return getTvaPart(this.ht(), this.tva_value());
+    },
+    ttc: function(){
+        return this.ht() + this.tva();
+    },
     loadProduct: function(product_datas){
         this.set('description', product_datas.label);
         this.set('cost', product_datas.value);
         this.set('quantity', 1);
         this.set('tva', product_datas.tva);
+        this.trigger('set:product');
     }
 });
 

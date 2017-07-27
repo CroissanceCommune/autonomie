@@ -9,6 +9,7 @@
  *
  */
 import Bb from 'backbone';
+import { getTvaPart } from '../../math.js';
 
 const DiscountModel = Bb.Model.extend({
     props: [
@@ -40,6 +41,12 @@ const DiscountModel = Bb.Model.extend({
     },
     ht: function(){
         return this.get('amount');
-    }
+    },
+    tva: function(){
+        return getTvaPart(this.ht(), this.get('tva'));
+    },
+    ttc: function(){
+        return this.ht() + this.tva();
+    },
 });
 export default DiscountModel;

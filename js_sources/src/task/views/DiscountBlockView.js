@@ -9,11 +9,10 @@
  *
  */
 import Mn from 'backbone.marionette';
-import FormBehavior from '../behaviors/FormBehavior.js';
 import DiscountModel from '../models/DiscountModel.js';
 import DiscountCollectionView from './DiscountCollectionView.js';
-import DiscountFormView from './DiscountFormView.js';
-import InputWidget from './InputWidget.js';
+import DiscountFormPopupView from './DiscountFormPopupView.js';
+import ExpenseView from './ExpenseView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
 const DiscountBlockView = Mn.View.extend({
@@ -25,12 +24,6 @@ const DiscountBlockView = Mn.View.extend({
         'modalRegion': '.modalregion',
         'expenses_ht': '.expenses_ht',
     },
-    behaviors: [
-        {
-            behaviorClass: FormBehavior,
-            errorMessage: "Vérifiez votre saisie"
-        }
-    ],
     ui: {
         add_button: 'button.btn-add'
     },
@@ -40,8 +33,7 @@ const DiscountBlockView = Mn.View.extend({
     childViewEvents: {
         'line:edit': 'onLineEdit',
         'line:delete': 'onLineDelete',
-        'change': 'onChildChange',
-        'finish': 'onChildFinish'
+        'destroy:modal': 'render',
     },
     initialize: function(options){
         this.collection = options['collection'];
@@ -49,14 +41,6 @@ const DiscountBlockView = Mn.View.extend({
     },
     isEmpty: function(){
         return this.collection.length === 0;
-    },
-    onChildChange: function(attribute, value){
-        console.log("Data modified");
-        this.triggerMethod('data:modified', this, attribute, value);
-    },
-    onChildFinish: function(attribute, value){
-        console.log("Data should be persisted");
-        this.triggerMethod('data:persist', this, attribute, value);
     },
     onLineAdd: function(){
         var model = new DiscountModel();
@@ -66,11 +50,12 @@ const DiscountBlockView = Mn.View.extend({
         this.showDiscountLineForm(childView.model, "Modifier la remise", true);
     },
     showDiscountLineForm: function(model, title, edit){
-        var form = new DiscountFormView(
+        var form = new DiscountFormPopupView(
                 {
                     model: model,
                     title: title,
-                    destCollection: this.collection
+                    destCollection: this.collection,
+                    edit: edit
                 }
             );
         this.showChildView('modalRegion', form);
@@ -97,7 +82,7 @@ const DiscountBlockView = Mn.View.extend({
     },
     isMoreSet: function(){
         var value = this.model.get('expenses_ht');
-        if (value){
+        if (value && (value != '0')){
             return true;
         }
         return false;
@@ -117,13 +102,7 @@ const DiscountBlockView = Mn.View.extend({
         }
         this.showChildView(
             'expenses_ht',
-            new InputWidget(
-                {
-                    title: "Frais forfaitaires (HT)",
-                    value: this.model.get('expenses_ht'),
-                    field_name:'expenses_ht',
-                }
-            )
+            new ExpenseView({model: this.model})
         );
 
     }

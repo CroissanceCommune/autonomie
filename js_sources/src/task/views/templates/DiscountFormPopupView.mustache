@@ -1,0 +1,44 @@
+<div class="modal-dialog" role="document">
+	<div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">{{ title }}</h4>
+          </div>
+          <div class="modal-body">
+            {{#if add}}
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#main-discount-container"
+                        aria-controls="main-discount-container"
+                        role="tab"
+                        data-toggle="tab">
+                        Saisie d'un montant
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#percentage-container"
+                        aria-controls="percentage-container"
+                        role="tab"
+                        data-toggle="tab">
+                        Remise en pourcentage
+                    </a>
+                </li>
+            </ul>
+            {{/if}}
+            <div class='tab-content'>
+                <div
+                    role="tabpanel"
+                    class="tab-pane fade in active simple-form"
+                    id="main-discount-container">
+                </div>
+                <div
+                    role="tabpanel"
+                    class="tab-pane percent-form"
+                    id="percentage-container">
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+          </div>
+	</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

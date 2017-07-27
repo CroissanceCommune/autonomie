@@ -12,42 +12,25 @@ import Mn from 'backbone.marionette';
 import InputWidget from './InputWidget.js';
 import SelectWidget from './SelectWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
-import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
+import FormBehavior from '../behaviors/FormBehavior.js';
 import { getOpt } from '../../tools.js';
 var template = require('./templates/DiscountFormView.mustache');
 
 const DiscountFormView = Mn.View.extend({
+    behaviors: [FormBehavior],
     template: template,
     regions: {
         'description': '.description',
         'amount': '.amount',
         'tva': '.tva',
-        'percentage': '.percentage',
     },
     ui: {
         btn_cancel: "button[type=reset]",
-        form: "form",
-        submit: 'button[type=submit]',
-        main_tab: 'ul.nav-tabs li:first a'
     },
-    behaviors: [ModalFormBehavior],
     triggers: {
-        'click @ui.btn_cancel': 'modal:close'
+        'click @ui.btn_cancel': 'cancel:form',
     },
-    childViewEvents: {
-        'change': 'onChildChange',
-        'catalog:edit': 'onCatalogEdit'
-    },
-    modelEvents: {
-        'change': 'refreshForm'
-    },
-    refreshForm: function(){
-
-    },
-    isAddView: function(){
-        return !getOpt(this, 'edit', false);
-    },
-    refreshForm: function(){
+    onRender: function(){
         this.showChildView(
             'description',
             new TextAreaWidget({
@@ -80,30 +63,11 @@ const DiscountFormView = Mn.View.extend({
                 }
             )
         );
-        if (this.isAddView()){
-            this.getUI('main_tab').tab('show');
-        }
-    },
-    onRender: function(){
-        this.refreshForm();
-        if (this.isAddView()){
-            this.showChildView(
-                'percentage',
-                new InputWidget(
-                    {
-                        title: "Pourcentage",
-                        field_name: 'percentage',
-                        addon: "%"
-                    }
-                )
-            );
-        }
     },
     templateContext: function(){
         return {
             title: this.getOption('title'),
-            add: this.isAddView(),
-        }
+        };
     }
 });
 export default DiscountFormView;

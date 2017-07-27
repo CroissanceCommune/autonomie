@@ -21,6 +21,7 @@ var template = require('./templates/TaskLineFormView.mustache');
 
 const TaskLineFormView = Mn.View.extend({
     template: template,
+    behaviors: [ModalFormBehavior],
     regions: {
         'description': '.description',
         'cost': '.cost',
@@ -36,7 +37,6 @@ const TaskLineFormView = Mn.View.extend({
         submit: 'button[type=submit]',
         main_tab: 'ul.nav-tabs li:first a'
     },
-    behaviors: [ModalFormBehavior],
     triggers: {
         'click @ui.btn_cancel': 'modal:close'
     },
@@ -50,7 +50,10 @@ const TaskLineFormView = Mn.View.extend({
         'catalog:insert': 'catalog:insert',
     },
     modelEvents: {
-        'change': 'refreshForm'
+        'set:product': 'refreshForm'
+    },
+    onSuccessSync: function(){
+        this.trigger('modal:close');
     },
     onChildChange: function(attribute, value){
         this.triggerMethod('data:modified', this, attribute, value);

@@ -66,6 +66,32 @@ const TaskLineCollection = Bb.Collection.extend({
             this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
             this.trigger('change:reorder');
         }
+    },
+    ht: function(){
+        var result = 0;
+        this.each(function(model){
+            result += model.ht();
+        });
+        return result;
+    },
+    tvaParts: function(){
+        var result = {};
+        this.each(function(model){
+            var tva_amount = model.tva();
+            var tva = model.get('tva');
+            if (tva in result){
+                tva_amount += result[tva];
+            }
+            result[tva] = tva_amount;
+        });
+        return result;
+    },
+    ttc: function(){
+        var result = 0;
+        this.each(function(model){
+            result += model.ttc();
+        });
+        return result;
     }
 });
 export default TaskLineCollection;

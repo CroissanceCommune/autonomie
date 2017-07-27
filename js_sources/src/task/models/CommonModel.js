@@ -9,10 +9,11 @@
  *
  */
 import _ from 'underscore';
-import Bb from 'backbone';
+import BaseModel from "./BaseModel.js";
+import { strToFloat } from '../../math.js';
 
 
-const CommonModel = Bb.Model.extend({
+const CommonModel = BaseModel.extend({
     props: [
         'id',
         'altdate',
@@ -42,9 +43,37 @@ const CommonModel = Bb.Model.extend({
             msg: "Le montant doit être un nombre",
         }
     },
-    constructor: function() {
-        arguments[0] = _.pick(arguments[0], this.props);
-        Bb.Model.apply(this, arguments);
+    ht: function(){
+        return this.get('expenses_ht');
+    },
+    tva_key: function(){
+        var result
+        var tva_object = _.find(
+            AppOption['tvas'],
+            function(val){return val['default'];}
+        );
+        if (_.isUndefined(tva_object)){
+            result = 0;
+        } else {
+            var tva = tva_object.value.toString();
+            result =  strToFloat(tva);
+        }
+        if (result < 0){
+            result = 0;
+        }
+        return result;
+    },
+    tva_amount: function(){
+        return getTvaPart(this.ht(), this.tva_key());
+    },
+    tvaParts: function(){
+        var result = {};
+        var tva_amount = this.tva_key();
+        result[tva_amount] = this.tva_amount();
+        return result;
+    },
+    ttc: function(){
+        return this.ht() + this.amount();
     }
 });
 export default CommonModel;

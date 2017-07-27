@@ -44,7 +44,11 @@ const TaskGroupView = Mn.View.extend({
     childViewEvents: {
         'line:edit': 'onLineEdit',
         'line:delete': 'onLineDelete',
-        'catalog:insert': 'onCatalogInsert'
+        'catalog:insert': 'onCatalogInsert',
+        'destroy:modal': 'render'
+    },
+    initialize: function(options){
+        // this.listenTo(this.model.lines, 'sync', this.render);
     },
     isEmpty: function(){
         return this.model.lines.length === 0;

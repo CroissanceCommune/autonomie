@@ -37,13 +37,6 @@ const TaskGroupModel = Bb.Model.extend({
             this.lines.url = this.url() + '/task_lines';
         }
     },
-    ht: function(){
-        var res = 0;
-        _.each(this.lines.models, function(line){
-            res += line.ht()
-        });
-        return res;
-    },
     updateLines: function(result){
         this.fetch({success: this.populate.bind(this)});
     },
@@ -58,6 +51,15 @@ const TaskGroupModel = Bb.Model.extend({
     loadProductGroup: function(sale_product_group_datas){
         this.set('title', sale_product_group_datas.title);
         this.set('description', sale_product_group_datas.description);
+    },
+    ht: function(){
+        return this.lines.ht();
+    },
+    tvaParts: function(){
+        return this.lines.tvaParts();
+    },
+    ttc: function(){
+        return this.lines.ttc();
     }
 });
 export default TaskGroupModel;

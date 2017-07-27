@@ -20,8 +20,5 @@ const DiscountCollectionView = Mn.CollectionView.extend({
         'edit': 'line:edit',
         'delete': 'line:delete'
     },
-    collectionEvents: {
-        'sync': 'render'
-    },
 });
 export default DiscountCollectionView;

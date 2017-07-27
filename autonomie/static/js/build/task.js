@@ -8594,25 +8594,21 @@ webpackJsonp([0],[
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
+	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 110);
+	
+	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : FormBehavior.js
-	 *
-	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var FormBehavior = _backbone2.default.Behavior.extend({
+	    behaviors: [_BaseFormBehavior2.default],
 	    ui: {
 	        form: "form",
 	        submit: "button[type=submit]"
 	    },
 	    events: {
-	        'click @ui.submit': 'onSubmitForm'
+	        'click @ui.submit': 'onSubmitForm',
+	        'submit @ui.form': 'onSubmitForm'
 	    },
 	    defaults: {
 	        errorMessage: "Une erreur est survenue"
@@ -8620,7 +8616,6 @@ webpackJsonp([0],[
 	    serializeForm: function serializeForm() {
 	        return (0, _tools.serializeForm)(this.getUI('form'));
 	    },
-	    onRender: function onRender() {},
 	    onSyncError: function onSyncError() {
 	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "sauvegarde de vos données");
 	        _backboneValidation2.default.unbind(this.view);
@@ -8628,6 +8623,7 @@ webpackJsonp([0],[
 	    onSyncSuccess: function onSyncSuccess() {
 	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
 	        _backboneValidation2.default.unbind(this.view);
+	        this.view.triggerMethod('success:sync');
 	    },
 	    syncServer: function syncServer(datas, bound) {
 	        var bound = bound || false;
@@ -8641,44 +8637,47 @@ webpackJsonp([0],[
 	            });
 	        }
 	        if (this.view.model.isValid()) {
-	            this.view.model.save(datas, {
-	                success: this.onSyncSuccess.bind(this),
-	                error: this.onSyncError.bind(this)
-	            });
+	            if (!this.view.model.get('id')) {
+	                this.addSubmit(datas);
+	            } else {
+	                this.editSubmit(datas);
+	            }
 	        }
+	    },
+	    addSubmit: function addSubmit(datas) {
+	        var destCollection = this.view.getOption('destCollection');
+	        destCollection.create(datas, {
+	            success: this.onSyncSuccess.bind(this),
+	            error: this.onSyncError.bind(this),
+	            wait: true,
+	            sort: true
+	        });
+	    },
+	    editSubmit: function editSubmit(datas) {
+	        this.view.model.save(datas, {
+	            success: this.onSyncSuccess.bind(this),
+	            error: this.onSyncError.bind(this),
+	            wait: true
+	        });
 	    },
 	    onSubmitForm: function onSubmitForm(event) {
 	        event.preventDefault();
 	        this.view.model.set(this.serializeForm(), { validate: true });
 	        this.syncServer();
 	    },
-	    onDataPersist: function onDataPersist(view, attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
+	    onDataPersisted: function onDataPersisted(view, datas) {
 	        this.syncServer(datas, true);
-	    },
-	    onDataModified: function onDataModified(view, attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.view.model.isValid();
 	    }
-	});
-	
+	}); /*
+	     * File Name : FormBehavior.js
+	     *
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = FormBehavior;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
@@ -10117,23 +10116,15 @@ webpackJsonp([0],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone */ 17);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 105);
 	
-	var _backbone2 = _interopRequireDefault(_backbone);
+	var _BaseModel2 = _interopRequireDefault(_BaseModel);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 70);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name :
-	 *
-	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var CommonModel = _backbone2.default.Model.extend({
+	var CommonModel = _BaseModel2.default.extend({
 	    props: ['id', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht'],
 	    validation: {
 	        date: {
@@ -10154,11 +10145,47 @@ webpackJsonp([0],[
 	            msg: "Le montant doit être un nombre"
 	        }
 	    },
-	    constructor: function constructor() {
-	        arguments[0] = _underscore2.default.pick(arguments[0], this.props);
-	        _backbone2.default.Model.apply(this, arguments);
+	    ht: function ht() {
+	        return this.get('expenses_ht');
+	    },
+	    tva_key: function tva_key() {
+	        var result;
+	        var tva_object = _underscore2.default.find(AppOption['tvas'], function (val) {
+	            return val['default'];
+	        });
+	        if (_underscore2.default.isUndefined(tva_object)) {
+	            result = 0;
+	        } else {
+	            var tva = tva_object.value.toString();
+	            result = (0, _math.strToFloat)(tva);
+	        }
+	        if (result < 0) {
+	            result = 0;
+	        }
+	        return result;
+	    },
+	    tva_amount: function tva_amount() {
+	        return getTvaPart(this.ht(), this.tva_key());
+	    },
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        var tva_amount = this.tva_key();
+	        result[tva_amount] = this.tva_amount();
+	        return result;
+	    },
+	    ttc: function ttc() {
+	        return this.ht() + this.amount();
 	    }
-	});
+	}); /*
+	     * File Name :
+	     *
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = CommonModel;
 
 /***/ }),
@@ -10356,6 +10383,33 @@ webpackJsonp([0],[
 	    load_from_catalog: function load_from_catalog(sale_product_group_ids) {
 	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=load_from_catalog', { sale_product_group_ids: sale_product_group_ids }, 'POST');
 	        serverRequest.then(this.fetch.bind(this));
+	    },
+	    ht: function ht() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ht();
+	        });
+	        return result;
+	    },
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        this.each(function (model) {
+	            var tva_parts = model.tvaParts();
+	            _.each(tva_parts, function (key, value) {
+	                if (key in result) {
+	                    value += result[key];
+	                }
+	                result[key] = value;
+	            });
+	        });
+	        return result;
+	    },
+	    ttc: function ttc() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ttc();
+	        });
+	        return result;
 	    }
 	}); /*
 	     * File Name : TaskGroupCollection.js
@@ -10425,13 +10479,6 @@ webpackJsonp([0],[
 	            this.lines.url = this.url() + '/task_lines';
 	        }
 	    },
-	    ht: function ht() {
-	        var res = 0;
-	        _underscore2.default.each(this.lines.models, function (line) {
-	            res += line.ht();
-	        });
-	        return res;
-	    },
 	    updateLines: function updateLines(result) {
 	        this.fetch({ success: this.populate.bind(this) });
 	    },
@@ -10442,6 +10489,15 @@ webpackJsonp([0],[
 	    loadProductGroup: function loadProductGroup(sale_product_group_datas) {
 	        this.set('title', sale_product_group_datas.title);
 	        this.set('description', sale_product_group_datas.description);
+	    },
+	    ht: function ht() {
+	        return this.lines.ht();
+	    },
+	    tvaParts: function tvaParts() {
+	        return this.lines.tvaParts();
+	    },
+	    ttc: function ttc() {
+	        return this.lines.ttc();
 	    }
 	});
 	exports.default = TaskGroupModel;
@@ -10522,6 +10578,32 @@ webpackJsonp([0],[
 	            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
 	            this.trigger('change:reorder');
 	        }
+	    },
+	    ht: function ht() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ht();
+	        });
+	        return result;
+	    },
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        this.each(function (model) {
+	            var tva_amount = model.tva();
+	            var tva = model.get('tva');
+	            if (tva in result) {
+	                tva_amount += result[tva];
+	            }
+	            result[tva] = tva_amount;
+	        });
+	        return result;
+	    },
+	    ttc: function ttc() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ttc();
+	        });
+	        return result;
 	    }
 	}); /*
 	     * File Name : TaskLineCollection.js
@@ -10556,18 +10638,10 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _math = __webpack_require__(/*! ../../math.js */ 70);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : TaskLineModel.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var TaskLineModel = _backbone2.default.Model.extend({
 	    props: ['id', 'order', 'description', 'cost', 'quantity', 'unity', 'tva', 'product_id', 'task_id'],
 	    validation: {
@@ -10598,14 +10672,36 @@ webpackJsonp([0],[
 	    ht: function ht() {
 	        return this.get('cost') * this.get('quantity');
 	    },
+	    tva_value: function tva_value() {
+	        var tva = this.get('tva');
+	        if (tva < 0) {
+	            tva = 0;
+	        }
+	        return tva;
+	    },
+	    tva: function tva() {
+	        return (0, _math.getTvaPart)(this.ht(), this.tva_value());
+	    },
+	    ttc: function ttc() {
+	        return this.ht() + this.tva();
+	    },
 	    loadProduct: function loadProduct(product_datas) {
 	        this.set('description', product_datas.label);
 	        this.set('cost', product_datas.value);
 	        this.set('quantity', 1);
 	        this.set('tva', product_datas.tva);
+	        this.trigger('set:product');
 	    }
-	});
-	
+	}); /*
+	     * File Name : TaskLineModel.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = TaskLineModel;
 
 /***/ }),
@@ -10738,7 +10834,11 @@ webpackJsonp([0],[
 	    childViewEvents: {
 	        'line:edit': 'onLineEdit',
 	        'line:delete': 'onLineDelete',
-	        'catalog:insert': 'onCatalogInsert'
+	        'catalog:insert': 'onCatalogInsert',
+	        'destroy:modal': 'render'
+	    },
+	    initialize: function initialize(options) {
+	        // this.listenTo(this.model.lines, 'sync', this.render);
 	    },
 	    isEmpty: function isEmpty() {
 	        return this.model.lines.length === 0;
@@ -11232,6 +11332,7 @@ webpackJsonp([0],[
 	
 	var TaskLineFormView = _backbone2.default.View.extend({
 	    template: template,
+	    behaviors: [_ModalFormBehavior2.default],
 	    regions: {
 	        'description': '.description',
 	        'cost': '.cost',
@@ -11247,7 +11348,6 @@ webpackJsonp([0],[
 	        submit: 'button[type=submit]',
 	        main_tab: 'ul.nav-tabs li:first a'
 	    },
-	    behaviors: [_ModalFormBehavior2.default],
 	    triggers: {
 	        'click @ui.btn_cancel': 'modal:close'
 	    },
@@ -11261,7 +11361,10 @@ webpackJsonp([0],[
 	        'catalog:insert': 'catalog:insert'
 	    },
 	    modelEvents: {
-	        'change': 'refreshForm'
+	        'set:product': 'refreshForm'
+	    },
+	    onSuccessSync: function onSuccessSync() {
+	        this.trigger('modal:close');
 	    },
 	    onChildChange: function onChildChange(attribute, value) {
 	        this.triggerMethod('data:modified', this, attribute, value);
@@ -11554,7 +11657,7 @@ webpackJsonp([0],[
   \*************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -11564,122 +11667,39 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
-	
-	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
 	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 78);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
+	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 31);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : ModalFormBehavior.js
+	 *
+	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var ModalFormBehavior = _backbone2.default.Behavior.extend({
-	    behaviors: [_ModalBehavior2.default],
-	    ui: {
-	        form: "form",
-	        submit: "button[type=submit]"
-	    },
+	    behaviors: [_ModalBehavior2.default, _FormBehavior2.default],
 	    events: {
-	        'click @ui.submit': 'onSubmitForm',
-	        'submit @ui.form': 'onSubmitForm'
+	        'success:sync': 'onSuccessSync'
 	    },
-	    defaults: {
-	        errorMessage: "Une erreur est survenue"
-	    },
-	    serializeForm: function serializeForm() {
-	        return (0, _tools.serializeForm)(this.getUI('form'));
-	    },
-	    onSyncError: function onSyncError() {
-	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "sauvegarde de vos données");
-	        _backboneValidation2.default.unbind(this.view);
-	    },
-	    onSyncSuccess: function onSyncSuccess() {
-	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
-	        _backboneValidation2.default.unbind(this.view);
+	    onSuccessSync: function onSuccessSync() {
 	        this.view.triggerMethod('modal:close');
-	    },
-	    syncServer: function syncServer(datas, bound) {
-	        var bound = bound || false;
-	        var datas = datas || this.view.model.toJSON();
-	
-	        if (!bound) {
-	            _backboneValidation2.default.bind(this.view, {
-	                attributes: function attributes(view) {
-	                    return _.keys(datas);
-	                }
-	            });
-	        }
-	        if (this.view.model.isValid()) {
-	            if (!this.view.model.get('id')) {
-	                this.addSubmit(datas);
-	            } else {
-	                this.editSubmit(datas);
-	            }
-	        }
-	    },
-	    addSubmit: function addSubmit(datas) {
-	        var destCollection = this.view.getOption('destCollection');
-	        destCollection.create(datas, {
-	            success: this.onSyncSuccess.bind(this),
-	            error: this.onSyncError.bind(this),
-	            wait: true,
-	            sort: true
-	        });
-	    },
-	    editSubmit: function editSubmit(datas) {
-	        this.view.model.save(datas, {
-	            success: this.onSyncSuccess.bind(this),
-	            error: this.onSyncError.bind(this),
-	            wait: true
-	        });
-	    },
-	    onSubmitForm: function onSubmitForm(event) {
-	        event.preventDefault();
-	        this.view.model.set(this.serializeForm(), { validate: true });
-	        this.syncServer();
-	    },
-	    onDataPersist: function onDataPersist(view, attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.syncServer(datas, true);
-	    },
-	    onDataModified: function onDataModified(view, attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.view.model.isValid();
 	    }
-	}); /*
-	     * File Name : ModalFormBehavior.js
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
+	
 	exports.default = ModalFormBehavior;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
 /* 78 */
@@ -12321,10 +12341,6 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
-	
-	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
-	
 	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 91);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
@@ -12333,18 +12349,28 @@ webpackJsonp([0],[
 	
 	var _DiscountCollectionView2 = _interopRequireDefault(_DiscountCollectionView);
 	
-	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 96);
+	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 106);
 	
-	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
+	var _DiscountFormPopupView2 = _interopRequireDefault(_DiscountFormPopupView);
 	
-	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
+	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 103);
 	
-	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	var _ExpenseView2 = _interopRequireDefault(_ExpenseView);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : DiscountBlockView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var DiscountBlockView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-section discount-group',
@@ -12354,10 +12380,6 @@ webpackJsonp([0],[
 	        'modalRegion': '.modalregion',
 	        'expenses_ht': '.expenses_ht'
 	    },
-	    behaviors: [{
-	        behaviorClass: _FormBehavior2.default,
-	        errorMessage: "Vérifiez votre saisie"
-	    }],
 	    ui: {
 	        add_button: 'button.btn-add'
 	    },
@@ -12367,8 +12389,7 @@ webpackJsonp([0],[
 	    childViewEvents: {
 	        'line:edit': 'onLineEdit',
 	        'line:delete': 'onLineDelete',
-	        'change': 'onChildChange',
-	        'finish': 'onChildFinish'
+	        'destroy:modal': 'render'
 	    },
 	    initialize: function initialize(options) {
 	        this.collection = options['collection'];
@@ -12376,14 +12397,6 @@ webpackJsonp([0],[
 	    },
 	    isEmpty: function isEmpty() {
 	        return this.collection.length === 0;
-	    },
-	    onChildChange: function onChildChange(attribute, value) {
-	        console.log("Data modified");
-	        this.triggerMethod('data:modified', this, attribute, value);
-	    },
-	    onChildFinish: function onChildFinish(attribute, value) {
-	        console.log("Data should be persisted");
-	        this.triggerMethod('data:persist', this, attribute, value);
 	    },
 	    onLineAdd: function onLineAdd() {
 	        var model = new _DiscountModel2.default();
@@ -12393,10 +12406,11 @@ webpackJsonp([0],[
 	        this.showDiscountLineForm(childView.model, "Modifier la remise", true);
 	    },
 	    showDiscountLineForm: function showDiscountLineForm(model, title, edit) {
-	        var form = new _DiscountFormView2.default({
+	        var form = new _DiscountFormPopupView2.default({
 	            model: model,
 	            title: title,
-	            destCollection: this.collection
+	            destCollection: this.collection,
+	            edit: edit
 	        });
 	        this.showChildView('modalRegion', form);
 	    },
@@ -12417,7 +12431,7 @@ webpackJsonp([0],[
 	    },
 	    isMoreSet: function isMoreSet() {
 	        var value = this.model.get('expenses_ht');
-	        if (value) {
+	        if (value && value != '0') {
 	            return true;
 	        }
 	        return false;
@@ -12432,22 +12446,9 @@ webpackJsonp([0],[
 	        if (!this.isEmpty()) {
 	            this.showChildView('lines', new _DiscountCollectionView2.default({ collection: this.collection }));
 	        }
-	        this.showChildView('expenses_ht', new _InputWidget2.default({
-	            title: "Frais forfaitaires (HT)",
-	            value: this.model.get('expenses_ht'),
-	            field_name: 'expenses_ht'
-	        }));
+	        this.showChildView('expenses_ht', new _ExpenseView2.default({ model: this.model }));
 	    }
-	}); /*
-	     * File Name : DiscountBlockView.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = DiscountBlockView;
 
 /***/ }),
@@ -12467,8 +12468,20 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _math = __webpack_require__(/*! ../../math.js */ 70);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : DiscountModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var DiscountModel = _backbone2.default.Model.extend({
 	    props: ['id', 'amount', 'tva', 'ht', 'description'],
 	    validation: {
@@ -12493,17 +12506,14 @@ webpackJsonp([0],[
 	    },
 	    ht: function ht() {
 	        return this.get('amount');
+	    },
+	    tva: function tva() {
+	        return (0, _math.getTvaPart)(this.ht(), this.get('tva'));
+	    },
+	    ttc: function ttc() {
+	        return this.ht() + this.tva();
 	    }
-	}); /*
-	     * File Name : DiscountModel.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = DiscountModel;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
@@ -12544,6 +12554,32 @@ webpackJsonp([0],[
 	    model: _DiscountModel2.default,
 	    url: function url() {
 	        return AppOption['context_url'] + '/' + 'discount_lines';
+	    },
+	    ht: function ht() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ht();
+	        });
+	        return -1 * result;
+	    },
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        this.each(function (model) {
+	            var tva_amount = model.tva();
+	            var tva = model.get('tva');
+	            if (tva in result) {
+	                tva_amount += result[tva];
+	            }
+	            result[tva] = tva_amount;
+	        });
+	        return result;
+	    },
+	    ttc: function ttc() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ttc();
+	        });
+	        return result;
 	    }
 	});
 	exports.default = DiscountCollection;
@@ -12589,9 +12625,6 @@ webpackJsonp([0],[
 	    childViewTriggers: {
 	        'edit': 'line:edit',
 	        'delete': 'line:delete'
-	    },
-	    collectionEvents: {
-	        'sync': 'render'
 	    }
 	});
 	exports.default = DiscountCollectionView;
@@ -12698,8 +12731,6 @@ webpackJsonp([0],[
 	    value: true
 	});
 	
-	var _Mn$View$extend;
-	
 	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
@@ -12716,95 +12747,67 @@ webpackJsonp([0],[
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../behaviors/ModalFormBehavior.js */ 77);
+	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
 	
-	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /*
-	                                                                                                                                                                                                                   * File Name : DiscountFormView.js
-	                                                                                                                                                                                                                   *
-	                                                                                                                                                                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                                                                                                                                                                                   * Company : Majerti ( http://www.majerti.fr )
-	                                                                                                                                                                                                                   *
-	                                                                                                                                                                                                                   * This software is distributed under GPLV3
-	                                                                                                                                                                                                                   * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                                                                                                                                                                                   *
-	                                                                                                                                                                                                                   */
-	
-	
+	/*
+	 * File Name : DiscountFormView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 97);
 	
-	var DiscountFormView = _backbone2.default.View.extend((_Mn$View$extend = {
+	var DiscountFormView = _backbone2.default.View.extend({
+	    behaviors: [_FormBehavior2.default],
 	    template: template,
 	    regions: {
 	        'description': '.description',
 	        'amount': '.amount',
-	        'tva': '.tva',
-	        'percentage': '.percentage'
+	        'tva': '.tva'
 	    },
 	    ui: {
-	        btn_cancel: "button[type=reset]",
-	        form: "form",
-	        submit: 'button[type=submit]',
-	        main_tab: 'ul.nav-tabs li:first a'
+	        btn_cancel: "button[type=reset]"
 	    },
-	    behaviors: [_ModalFormBehavior2.default],
 	    triggers: {
-	        'click @ui.btn_cancel': 'modal:close'
+	        'click @ui.btn_cancel': 'cancel:form'
 	    },
-	    childViewEvents: {
-	        'change': 'onChildChange',
-	        'catalog:edit': 'onCatalogEdit'
-	    },
-	    modelEvents: {
-	        'change': 'refreshForm'
-	    },
-	    refreshForm: function refreshForm() {},
-	    isAddView: function isAddView() {
-	        return !(0, _tools.getOpt)(this, 'edit', false);
-	    }
-	}, _defineProperty(_Mn$View$extend, 'refreshForm', function refreshForm() {
-	    this.showChildView('description', new _TextAreaWidget2.default({
-	        value: this.model.get('description'),
-	        title: "Description",
-	        field_name: "description",
-	        tinymce: true,
-	        cid: this.model.cid
-	    }));
-	    this.showChildView('amount', new _InputWidget2.default({
-	        value: this.model.get('amount'),
-	        title: "Montant",
-	        field_name: "amount",
-	        addon: '€'
-	    }));
-	    this.showChildView('tva', new _SelectWidget2.default({
-	        options: AppOption['form_options']['tva_options'],
-	        title: "TVA",
-	        value: this.model.get('tva'),
-	        field_name: 'tva'
-	    }));
-	    if (this.isAddView()) {
-	        this.getUI('main_tab').tab('show');
-	    }
-	}), _defineProperty(_Mn$View$extend, 'onRender', function onRender() {
-	    this.refreshForm();
-	    if (this.isAddView()) {
-	        this.showChildView('percentage', new _InputWidget2.default({
-	            title: "Pourcentage",
-	            field_name: 'percentage',
-	            addon: "%"
+	    onRender: function onRender() {
+	        this.showChildView('description', new _TextAreaWidget2.default({
+	            value: this.model.get('description'),
+	            title: "Description",
+	            field_name: "description",
+	            tinymce: true,
+	            cid: this.model.cid
 	        }));
+	        this.showChildView('amount', new _InputWidget2.default({
+	            value: this.model.get('amount'),
+	            title: "Montant",
+	            field_name: "amount",
+	            addon: '€'
+	        }));
+	        this.showChildView('tva', new _SelectWidget2.default({
+	            options: AppOption['form_options']['tva_options'],
+	            title: "TVA",
+	            value: this.model.get('tva'),
+	            field_name: 'tva'
+	        }));
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            title: this.getOption('title')
+	        };
 	    }
-	}), _defineProperty(_Mn$View$extend, 'templateContext', function templateContext() {
-	    return {
-	        title: this.getOption('title'),
-	        add: this.isAddView()
-	    };
-	}), _Mn$View$extend));
+	});
 	exports.default = DiscountFormView;
 
 /***/ }),
@@ -12816,17 +12819,11 @@ webpackJsonp([0],[
 
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie d'un montant\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#percentage-container\"\n                        aria-controls=\"percentage-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Remise en pourcentage\n                    </a>\n                </li>\n            </ul>\n";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<form class='form'>\n    <div class='description'></div>\n    <div class='amount'></div>\n    <div class='tva'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n        "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskgroup-form'>\n                        <div class='description'></div>\n                        <div class='amount'></div>\n                        <div class='tva'></div>\n                        <button class='btn btn-success primary-action' type='submit' value='submit'>\n                            "
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "\n                        </button>\n                        <button class='btn btn-default secondary-action' type='reset' value='submit'>\n                            Annuler\n                        </button>\n                    </form>\n                </div>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane\"\n                    id=\"percentage-container\">\n                    <div class='percentage'></div>\n                </div>\n            </div>\n          </div>\n          <div class=\"modal-footer\">\n          </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n\n";
+	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n        Annuler\n    </button>\n</form>\n";
 	},"useData":true});
 
 /***/ }),
@@ -12846,10 +12843,10 @@ webpackJsonp([0],[
 	  var stack1, buffer = "<h2>Remises et frais</h2>\n<div class='modalregion'></div>\n<div class='content'>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.not_empty : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "    <div class='row lines'>\n    </div>\n    <div class='row'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-default btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une remise\n            </button>\n        </div>\n    </div>\n    <a\n        data-target='#discount-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"discount-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i> Ajouter des frais forfaitaires\n    </a>\n    <div class='collapse row ";
+	  buffer += "    <div class='row lines'>\n    </div>\n    <div class='row'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-default btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une remise\n            </button>\n        </div>\n    </div>\n    <a\n        data-target='#discount-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"discount-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i> Ajouter des frais forfaitaires\n    </a>\n    <div\n        class='collapse row ";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_more_set : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "' id=\"discount-more\">\n        <form class='form-inline'>\n        <div class='col-xs-11 expenses_ht text-right'></div>\n        </form>\n    </div>\n</div>\n";
+	  return buffer + "'\n        id=\"discount-more\">\n        <hr />\n        <div class='expenses_ht'></div>\n    </div>\n</div>\n";
 	},"useData":true});
 
 /***/ }),
@@ -12930,11 +12927,13 @@ webpackJsonp([0],[
   \***************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	
+	var _Mn$Object$extend;
 	
 	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
 	
@@ -12966,7 +12965,7 @@ webpackJsonp([0],[
 	                                                                                                                                                                                                                   */
 	
 	
-	var FacadeClass = _backbone2.default.Object.extend(_defineProperty({
+	var FacadeClass = _backbone2.default.Object.extend((_Mn$Object$extend = {
 	    channelName: 'facade',
 	    ht: 5,
 	    radioEvents: {
@@ -12999,13 +12998,444 @@ webpackJsonp([0],[
 	    },
 	    onModelUpdated: function onModelUpdated() {
 	        console.log("onModelUpdated");
+	    },
+	    tasklines_ht: function tasklines_ht() {
+	        return this.collections['task_groups'].ht();
 	    }
-	}, 'ht', function ht() {
+	}, _defineProperty(_Mn$Object$extend, 'ht', function ht() {
 	    console.log("Requesting the ht");
-	    return this.ht;
-	}));
+	    var result = 0;
+	    _.each(this.collections, function (collection) {
+	        result += collection.ht();
+	    });
+	    _.each(this.models, function (model) {
+	        result += model.ht();
+	    });
+	    return result;
+	}), _defineProperty(_Mn$Object$extend, 'tvaParts', function tvaParts() {
+	    var result = {};
+	    _.each(this.collections, function (collection) {
+	        var tva_parts = collection.tvaParts();
+	        _.each(tva_parts, function (key, value) {
+	            if (key in result) {
+	                value += result[key];
+	            }
+	            result[key] = value;
+	        });
+	    });
+	    _.each(this.models, function (model) {
+	        var tva_parts = model.tvaParts();
+	        _.each(tva_parts, function (key, value) {
+	            if (key in result) {
+	                value += result[key];
+	            }
+	            result[key] = value;
+	        });
+	    });
+	    return result;
+	}), _defineProperty(_Mn$Object$extend, 'ttc', function ttc() {
+	    var result = 0;
+	    _.each(this.collections, function (collection) {
+	        result += collection.ttc();
+	    });
+	    _.each(this.models, function (model) {
+	        result += model.ttc();
+	    });
+	    return result;
+	}), _Mn$Object$extend));
 	var Facade = new FacadeClass();
 	exports.default = Facade;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
+
+/***/ }),
+/* 103 */
+/*!***************************************!*\
+  !*** ./src/task/views/ExpenseView.js ***!
+  \***************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
+	
+	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ExpenseView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 104),
+	    regions: {
+	        expense_container: '.expense-container'
+	    },
+	    childViewEvents: {
+	        'change': 'onChildChange',
+	        'finish': 'onChildFinish'
+	    },
+	    behaviors: [{
+	        behaviorClass: _FormBehavior2.default,
+	        errorMessage: "Vérifiez votre saisie"
+	    }],
+	    onChildChange: function onChildChange(attribute, value) {
+	        console.log("Data modified");
+	        this.triggerMethod('data:modified', this, attribute, value);
+	    },
+	    onChildFinish: function onChildFinish(attribute, value) {
+	        console.log("Data should be persisted");
+	        this.triggerMethod('data:persist', this, attribute, value);
+	    },
+	    onRender: function onRender() {
+	        this.showChildView('expense_container', new _InputWidget2.default({
+	            title: "Frais forfaitaires (HT)",
+	            value: this.model.get('expenses_ht'),
+	            field_name: 'expenses_ht'
+	        }));
+	    }
+	}); /*
+	     * File Name : ExpenseView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = ExpenseView;
+
+/***/ }),
+/* 104 */
+/*!*******************************************************!*\
+  !*** ./src/task/views/templates/ExpenseView.mustache ***!
+  \*******************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<form class='form-inline'>\n    <div class='col-xs-11 expense-container text-right'></div>\n</form>\n";
+	  },"useData":true});
+
+/***/ }),
+/* 105 */
+/*!**************************************!*\
+  !*** ./src/task/models/BaseModel.js ***!
+  \**************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _underscore = __webpack_require__(/*! underscore */ 16);
+	
+	var _underscore2 = _interopRequireDefault(_underscore);
+	
+	var _backbone = __webpack_require__(/*! backbone */ 17);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : BaseModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var BaseModel = _backbone2.default.Model.extend({
+	    props: null,
+	    constructor: function constructor() {
+	        console.log(this.props);
+	        if (!_underscore2.default.isNull(this.props)) {
+	            arguments[0] = _underscore2.default.pick(arguments[0], this.props);
+	        }
+	        _backbone2.default.Model.apply(this, arguments);
+	    },
+	    toJSON: function toJSON(options) {
+	        var attributes = _underscore2.default.clone(this.attributes);
+	        if (!_underscore2.default.isNull(this.props)) {
+	            attributes = _underscore2.default.pick(attributes, this.props);
+	        }
+	        return attributes;
+	    }
+	});
+	exports.default = BaseModel;
+
+/***/ }),
+/* 106 */
+/*!*************************************************!*\
+  !*** ./src/task/views/DiscountFormPopupView.js ***!
+  \*************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 78);
+	
+	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
+	
+	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 96);
+	
+	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
+	
+	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 107);
+	
+	var _DiscountPercentView2 = _interopRequireDefault(_DiscountPercentView);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 108); /*
+	                                                                       * File Name : DiscountFormPopupView.js
+	                                                                       *
+	                                                                       * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                                       * Company : Majerti ( http://www.majerti.fr )
+	                                                                       *
+	                                                                       * This software is distributed under GPLV3
+	                                                                       * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                                       *
+	                                                                       */
+	
+	
+	var DiscountFormPopupView = _backbone2.default.View.extend({
+	    behaviors: [_ModalBehavior2.default],
+	    template: template,
+	    regions: {
+	        'simple-form': '.simple-form',
+	        'percent-form': '.percent-form'
+	    },
+	    childViewTriggers: {
+	        'cancel:form': 'modal:close',
+	        'success:sync': 'modal:close'
+	    },
+	    isAddView: function isAddView() {
+	        return !(0, _tools.getOpt)(this, 'edit', false);
+	    },
+	    onRender: function onRender() {
+	        this.showChildView('simple-form', new _DiscountFormView2.default({
+	            model: this.model,
+	            title: this.getOption('title'),
+	            destCollection: this.getOption('destCollection')
+	        }));
+	
+	        if (this.isAddView()) {
+	            this.showChildView('percent-form', new _DiscountPercentView2.default({
+	                title: this.getOption('title'),
+	                destCollection: this.getOption('destCollection')
+	            }));
+	        }
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            title: this.getOption('title'),
+	            add: this.isAddView()
+	        };
+	    }
+	});
+	exports.default = DiscountFormPopupView;
+
+/***/ }),
+/* 107 */
+/*!***********************************************!*\
+  !*** ./src/task/views/DiscountPercentView.js ***!
+  \***********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 43);
+	
+	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
+	
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
+	
+	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 91);
+	
+	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : DiscountPercentView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var DiscountPercentView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 109),
+	    regions: {
+	        'description': '.description',
+	        'percentage': '.percentage'
+	    },
+	    ui: {
+	        form: 'form',
+	        submit: "button[type=submit]",
+	        btn_cancel: "button[type=reset]"
+	    },
+	    triggers: {
+	        'click @ui.btn_cancel': 'cancel:form'
+	    },
+	
+	    onRender: function onRender() {
+	        this.showChildView('description', new _TextAreaWidget2.default({
+	            title: "Description",
+	            field_name: "description",
+	            tinymce: true,
+	            cid: '11111'
+	        }));
+	        this.showChildView('percentage', new _InputWidget2.default({
+	            title: "Pourcentage",
+	            field_name: 'percentage',
+	            addon: "%"
+	        }));
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            title: this.getOption('title')
+	        };
+	    }
+	
+	});
+	exports.default = DiscountPercentView;
+
+/***/ }),
+/* 108 */
+/*!*****************************************************************!*\
+  !*** ./src/task/views/templates/DiscountFormPopupView.mustache ***!
+  \*****************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#main-discount-container\"\n                        aria-controls=\"main-discount-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie d'un montant\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#percentage-container\"\n                        aria-controls=\"percentage-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Remise en pourcentage\n                    </a>\n                </li>\n            </ul>\n";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active simple-form\"\n                    id=\"main-discount-container\">\n                </div>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane percent-form\"\n                    id=\"percentage-container\">\n                </div>\n            </div>\n          </div>\n          <div class=\"modal-footer\">\n          </div>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
+	},"useData":true});
+
+/***/ }),
+/* 109 */
+/*!***************************************************************!*\
+  !*** ./src/task/views/templates/DiscountPercentView.mustache ***!
+  \***************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<form>\n    <div class='description'></div>\n    <div class='percentage'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n    "
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n    Annuler\n    </button>\n</form>\n";
+	},"useData":true});
+
+/***/ }),
+/* 110 */
+/*!************************************************!*\
+  !*** ./src/task/behaviors/BaseFormBehavior.js ***!
+  \************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
+	
+	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : FormValidationBehavior.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var BaseFormBehavior = _backbone2.default.Behavior.extend({
+	    onDataPersist: function onDataPersist(view, attribute, value) {
+	        _backboneValidation2.default.unbind(this.view);
+	        _backboneValidation2.default.bind(this.view, {
+	            attributes: function attributes(view) {
+	                return [attribute];
+	            }
+	        });
+	
+	        var datas = {};
+	        datas[attribute] = value;
+	        this.view.model.set(datas);
+	        this.view.triggerMethod('data:persisted', datas, true);
+	    },
+	    onDataModified: function onDataModified(view, attribute, value) {
+	        _backboneValidation2.default.unbind(this.view);
+	        _backboneValidation2.default.bind(this.view, {
+	            attributes: function attributes(view) {
+	                return [attribute];
+	            }
+	        });
+	        var datas = {};
+	        datas[attribute] = value;
+	        this.view.model.set(datas);
+	        this.view.model.isValid();
+	    }
+	});
+	exports.default = BaseFormBehavior;
 
 /***/ })
 ]);

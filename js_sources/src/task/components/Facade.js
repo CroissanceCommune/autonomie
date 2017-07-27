@@ -48,9 +48,51 @@ const FacadeClass = Mn.Object.extend({
     onModelUpdated: function(){
         console.log("onModelUpdated");
     },
+    tasklines_ht: function(){
+        return this.collections['task_groups'].ht();
+    },
     ht: function(){
         console.log("Requesting the ht");
-        return this.ht;
+        var result = 0;
+        _.each(this.collections, function(collection){
+            result += collection.ht();
+        });
+        _.each(this.models, function(model){
+            result += model.ht();
+        });
+        return result;
+    },
+    tvaParts: function(){
+        var result = {};
+        _.each(this.collections, function(collection){
+            var tva_parts = collection.tvaParts();
+            _.each(tva_parts, function(key, value){
+                if (key in result){
+                    value += result[key];
+                }
+                result[key] = value;
+            });
+        });
+        _.each(this.models, function(model){
+            var tva_parts = model.tvaParts();
+            _.each(tva_parts, function(key, value){
+                if (key in result){
+                    value += result[key];
+                }
+                result[key] = value;
+            });
+        });
+        return result;
+    },
+    ttc: function(){
+        var result = 0;
+        _.each(this.collections, function(collection){
+            result += collection.ttc();
+        });
+        _.each(this.models, function(model){
+            result += model.ttc();
+        });
+        return result;
     }
 });
 const Facade = new FacadeClass();

@@ -11,23 +11,24 @@
 import Mn from 'backbone.marionette';
 import Validation from 'backbone-validation';
 import { serializeForm } from '../../tools.js';
-import {BootstrapOnInvalidForm, BootstrapOnValidForm, displayServerError, displayServerSuccess} from '../../backbone-tools.js';
+import {displayServerError, displayServerSuccess} from '../../backbone-tools.js';
+import BaseFormBehavior from './BaseFormBehavior.js';
 
 var FormBehavior = Mn.Behavior.extend({
+    behaviors: [BaseFormBehavior],
 	ui: {
         form: "form",
         submit: "button[type=submit]"
     },
     events: {
-        'click @ui.submit': 'onSubmitForm'
+        'click @ui.submit': 'onSubmitForm',
+        'submit @ui.form': 'onSubmitForm',
     },
     defaults: {
         errorMessage: "Une erreur est survenue"
     },
     serializeForm: function(){
         return serializeForm(this.getUI('form'));
-    },
-    onRender: function() {
     },
     onSyncError: function(){
         displayServerError("Une erreur a été rencontrée lors de la " +
@@ -37,6 +38,7 @@ var FormBehavior = Mn.Behavior.extend({
     onSyncSuccess: function(){
         displayServerSuccess("Vos données ont bien été sauvegardées");
         Validation.unbind(this.view);
+        this.view.triggerMethod('success:sync');
     },
     syncServer: function(datas, bound){
         var bound = bound || false;
@@ -48,40 +50,42 @@ var FormBehavior = Mn.Behavior.extend({
             });
         }
         if (this.view.model.isValid()){
-            this.view.model.save(
-                datas,
-                {
-                    success: this.onSyncSuccess.bind(this),
-                    error: this.onSyncError.bind(this),
-                }
-            );
+            if (! this.view.model.get('id')){
+                this.addSubmit(datas);
+            } else {
+                this.editSubmit(datas);
+            }
         }
+    },
+    addSubmit: function(datas){
+        var destCollection = this.view.getOption('destCollection');
+        destCollection.create(
+            datas,
+            {
+                success: this.onSyncSuccess.bind(this),
+                error: this.onSyncError.bind(this),
+                wait: true,
+                sort: true
+            },
+        )
+    },
+    editSubmit: function(datas){
+        this.view.model.save(
+            datas,
+            {
+                success: this.onSyncSuccess.bind(this),
+                error: this.onSyncError.bind(this),
+                wait: true
+            }
+        );
     },
     onSubmitForm: function(event){
         event.preventDefault();
         this.view.model.set(this.serializeForm(), {validate: true});
         this.syncServer();
     },
-    onDataPersist: function(view, attribute, value){
-        Validation.unbind(this.view);
-        Validation.bind(this.view, {
-            attributes: function(view){return [attribute];}
-        });
-
-        var datas = {};
-        datas[attribute] = value;
-        this.view.model.set(datas);
+    onDataPersisted: function(view, datas){
         this.syncServer(datas, true);
-    },
-    onDataModified: function(view, attribute, value){
-        Validation.unbind(this.view);
-        Validation.bind(this.view, {
-            attributes: function(view){return [attribute];}
-        });
-        var datas = {};
-        datas[attribute] = value;
-        this.view.model.set(datas);
-        this.view.model.isValid();
     }
 });
 

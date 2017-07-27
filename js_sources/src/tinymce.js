@@ -19,7 +19,7 @@ const setupTinyMce = function(kwargs){
      *
      * https://www.tinymce.com/docs/
      */
-    tinymce.remove();
+    tinyMCE.remove(kwargs['selector']);
     let options = {
       body_class: 'form-control',
       theme_advanced_toolbar_location: "top",

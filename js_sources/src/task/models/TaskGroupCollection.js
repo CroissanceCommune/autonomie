@@ -78,6 +78,33 @@ const TaskGroupCollection = Bb.Collection.extend({
             'POST'
         );
         serverRequest.then(this.fetch.bind(this));
+    },
+    ht: function(){
+        var result = 0;
+        this.each(function(model){
+            result += model.ht();
+        });
+        return result;
+    },
+    tvaParts: function(){
+        var result = {};
+        this.each(function(model){
+            var tva_parts = model.tvaParts();
+            _.each(tva_parts, function(key, value){
+                if (key in result){
+                    value += result[key];
+                }
+                result[key] = value;
+            });
+        });
+        return result;
+    },
+    ttc: function(){
+        var result = 0;
+        this.each(function(model){
+            result += model.ttc();
+        });
+        return result;
     }
 });
 export default TaskGroupCollection;

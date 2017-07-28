@@ -5940,7 +5940,7 @@ webpackJsonp([0],[
   \************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(_) {"use strict";
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -5950,13 +5950,13 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 26);
 	
 	var _CommonView2 = _interopRequireDefault(_CommonView);
-	
-	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 52);
-	
-	var _RightBarView2 = _interopRequireDefault(_RightBarView);
 	
 	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 61);
 	
@@ -5966,29 +5966,35 @@ webpackJsonp([0],[
 	
 	var _DiscountBlockView2 = _interopRequireDefault(_DiscountBlockView);
 	
+	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 52);
+	
+	var _RightBarView2 = _interopRequireDefault(_RightBarView);
+	
 	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 101);
 	
 	var _StatusView2 = _interopRequireDefault(_StatusView);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 114);
 	
-	var _backbone4 = _interopRequireDefault(_backbone3);
+	var _HtBeforeDiscountsView2 = _interopRequireDefault(_HtBeforeDiscountsView);
 	
-	var _bootstrap = __webpack_require__(/*! bootstrap */ 3);
+	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 120);
+	
+	var _TotalView2 = _interopRequireDefault(_TotalView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : MainView.js
-	 *
-	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 103);
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 103); /*
+	                                                          * File Name : MainView.js
+	                                                          *
+	                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	                                                          * Company : Majerti ( http://www.majerti.fr )
+	                                                          *
+	                                                          * This software is distributed under GPLV3
+	                                                          * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                          *
+	                                                          */
+	
 	
 	var MainView = _backbone2.default.View.extend({
 	    template: template,
@@ -5998,7 +6004,9 @@ webpackJsonp([0],[
 	        tasklines: '#tasklines',
 	        discounts: '#discounts',
 	        rightbar: "#rightbar",
-	        footer: '#footer'
+	        footer: '#footer',
+	        ht_before_discounts: '.ht_before_discounts',
+	        totals: '.totals'
 	    },
 	    childViewEvents: {
 	        'status:change': 'onStatusChange'
@@ -6036,6 +6044,12 @@ webpackJsonp([0],[
 	
 	        var view = new _RightBarView2.default({ actions: AppOption['form_options']['actions'] });
 	        this.showChildView('rightbar', view);
+	
+	        var model = this.channel.request('get:totalmodel');
+	        view = new _HtBeforeDiscountsView2.default({ model: model });
+	        this.showChildView('ht_before_discounts', view);
+	        view = new _TotalView2.default({ model: model });
+	        this.showChildView('totals', view);
 	    },
 	    onStatusChange: function onStatusChange(status, title, label, url) {
 	        this.showChildView('modalRegion', new _StatusView2.default({
@@ -6127,7 +6141,7 @@ webpackJsonp([0],[
 	        behaviorClass: _FormBehavior2.default,
 	        errorMessage: "Vérifiez votre saisie"
 	    }],
-	    childViewTrigger: {
+	    childViewTriggers: {
 	        'change': 'data:modified',
 	        'finish': 'data:persist'
 	    },
@@ -6260,8 +6274,6 @@ webpackJsonp([0],[
 	        cache: false
 	    };
 	    if (method == 'POST') {
-	        console.log("POST method");
-	        console.log(data);
 	        options.data = JSON.stringify(data);
 	        options.contentType = "application/json; charset=UTF-8";
 	        options.processData = false;
@@ -8596,11 +8608,12 @@ webpackJsonp([0],[
 	    behaviors: [_BaseFormBehavior2.default],
 	    ui: {
 	        form: "form",
-	        submit: "button[type=submit]"
+	        submit: "button[type=submit]",
+	        reset: "button[type=reset]"
 	    },
 	    events: {
-	        'click @ui.submit': 'onSubmitForm',
-	        'submit @ui.form': 'onSubmitForm'
+	        'submit @ui.form': 'onSubmitForm',
+	        'click @ui.reset': 'onCancelForm'
 	    },
 	    defaults: {
 	        errorMessage: "Une erreur est survenue"
@@ -8615,6 +8628,7 @@ webpackJsonp([0],[
 	    onSyncSuccess: function onSyncSuccess() {
 	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
 	        _backboneValidation2.default.unbind(this.view);
+	        console.log("Trigger success:sync from FormBehavior");
 	        this.view.triggerMethod('success:sync');
 	    },
 	    syncServer: function syncServer(datas, bound) {
@@ -8659,6 +8673,13 @@ webpackJsonp([0],[
 	    },
 	    onDataPersisted: function onDataPersisted(datas) {
 	        this.syncServer(datas, true);
+	    },
+	    onCancelForm: function onCancelForm() {
+	        console.log("FormBehavior.onCancelForm");
+	        this.view.model.rollback();
+	    },
+	    onModalClose: function onModalClose() {
+	        console.log("FormBehavior.onModalClose");
 	    }
 	}); /*
 	     * File Name : FormBehavior.js
@@ -10292,20 +10313,8 @@ webpackJsonp([0],[
 	
 	var _TaskLineCollection2 = _interopRequireDefault(_TaskLineCollection);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : TaskGroupModel.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var TaskGroupModel = _backbone2.default.Model.extend({
 	    props: ['id', 'order', 'title', 'description', 'lines', 'task_id'],
 	    constructor: function constructor() {
@@ -10322,13 +10331,6 @@ webpackJsonp([0],[
 	            this.lines.url = this.url() + '/task_lines';
 	        }
 	    },
-	    updateLines: function updateLines(result) {
-	        this.fetch({ success: this.populate.bind(this) });
-	    },
-	    load_from_catalog: function load_from_catalog(sale_product_ids) {
-	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=load_from_catalog', { sale_product_ids: sale_product_ids }, 'POST');
-	        serverRequest.then(this.updateLines.bind(this));
-	    },
 	    loadProductGroup: function loadProductGroup(sale_product_group_datas) {
 	        this.set('title', sale_product_group_datas.title);
 	        this.set('description', sale_product_group_datas.description);
@@ -10342,7 +10344,16 @@ webpackJsonp([0],[
 	    ttc: function ttc() {
 	        return this.lines.ttc();
 	    }
-	});
+	}); /*
+	     * File Name : TaskGroupModel.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = TaskGroupModel;
 
 /***/ }),
@@ -10370,6 +10381,12 @@ webpackJsonp([0],[
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TaskLineCollection = _backbone2.default.Collection.extend({
@@ -10378,6 +10395,13 @@ webpackJsonp([0],[
 	    initialize: function initialize(options) {
 	        this.on('change:reorder', this.updateModelOrder);
 	        this.updateModelOrder(false);
+	        this.on('remove', this.channelCall);
+	        this.on('sync', this.channelCall);
+	        this.on('reset', this.channelCall);
+	    },
+	    channelCall: function channelCall() {
+	        var channel = _backbone4.default.channel('facade');
+	        channel.trigger('changed:task');
 	    },
 	    updateModelOrder: function updateModelOrder(sync) {
 	        var sync = sync || true;
@@ -10421,6 +10445,10 @@ webpackJsonp([0],[
 	            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
 	            this.trigger('change:reorder');
 	        }
+	    },
+	    load_from_catalog: function load_from_catalog(sale_product_ids) {
+	        var serverRequest = (0, _tools.ajax_call)(this.url + '?action=load_from_catalog', { sale_product_ids: sale_product_ids }, 'POST');
+	        serverRequest.then(this.fetch.bind(this));
 	    },
 	    ht: function ht() {
 	        var result = 0;
@@ -10483,9 +10511,23 @@ webpackJsonp([0],[
 	
 	var _math = __webpack_require__(/*! ../../math.js */ 65);
 	
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 106);
+	
+	var _BaseModel2 = _interopRequireDefault(_BaseModel);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var TaskLineModel = _backbone2.default.Model.extend({
+	/*
+	 * File Name : TaskLineModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var TaskLineModel = _BaseModel2.default.extend({
 	    props: ['id', 'order', 'description', 'cost', 'quantity', 'unity', 'tva', 'product_id', 'task_id'],
 	    validation: {
 	        description: {
@@ -10508,12 +10550,8 @@ webpackJsonp([0],[
 	            msg: "Veuillez sélectionner une TVA"
 	        }
 	    },
-	    constructor: function constructor() {
-	        arguments[0] = _underscore2.default.pick(arguments[0], this.props);
-	        _backbone2.default.Model.apply(this, arguments);
-	    },
 	    ht: function ht() {
-	        return this.get('cost') * this.get('quantity');
+	        return (0, _math.strToFloat)(this.get('cost')) * (0, _math.strToFloat)(this.get('quantity'));
 	    },
 	    tva_value: function tva_value() {
 	        var tva = this.get('tva');
@@ -10523,7 +10561,8 @@ webpackJsonp([0],[
 	        return tva;
 	    },
 	    tva: function tva() {
-	        return (0, _math.getTvaPart)(this.ht(), this.tva_value());
+	        var val = (0, _math.getTvaPart)(this.ht(), this.tva_value());
+	        return val;
 	    },
 	    ttc: function ttc() {
 	        return this.ht() + this.tva();
@@ -10535,16 +10574,8 @@ webpackJsonp([0],[
 	        this.set('tva', product_datas.tva);
 	        this.trigger('set:product');
 	    }
-	}); /*
-	     * File Name : TaskLineModel.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
+	
 	exports.default = TaskLineModel;
 
 /***/ }),
@@ -10635,7 +10666,11 @@ webpackJsonp([0],[
 	   */
 	  var result;
 	
-	  if (value === undefined || value === null) {
+	  if (_underscore2.default.isNumber(value)) {
+	    return value;
+	  }
+	
+	  if (_underscore2.default.isUndefined(value) || _underscore2.default.isNull(value)) {
 	    value = "0.00";
 	  }
 	  value = value.replace(",", ".");
@@ -10827,23 +10862,27 @@ webpackJsonp([0],[
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
+	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 119);
+	
+	var _TaskGroupTotalView2 = _interopRequireDefault(_TaskGroupTotalView);
+	
 	var _math = __webpack_require__(/*! ../../math.js */ 65);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : TaskGroupView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 83);
+	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 83); /*
+	                                                               * File Name : TaskGroupView.js
+	                                                               *
+	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                               * Company : Majerti ( http://www.majerti.fr )
+	                                                               *
+	                                                               * This software is distributed under GPLV3
+	                                                               * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                               *
+	                                                               */
+	
 	
 	var TaskGroupView = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -10851,7 +10890,8 @@ webpackJsonp([0],[
 	    template: template,
 	    regions: {
 	        lines: '.lines',
-	        modalRegion: ".modalregion"
+	        modalRegion: ".modalregion",
+	        total: '.subtotal'
 	    },
 	    ui: {
 	        btn_add: ".btn-add",
@@ -10876,14 +10916,16 @@ webpackJsonp([0],[
 	        'destroy:modal': 'render'
 	    },
 	    initialize: function initialize(options) {
-	        // this.listenTo(this.model.lines, 'sync', this.render);
+	        // Collection of task lines
+	        this.collection = this.model.lines;
 	    },
 	    isEmpty: function isEmpty() {
 	        return this.model.lines.length === 0;
 	    },
 	    onRender: function onRender() {
 	        if (!this.isEmpty()) {
-	            this.showChildView('lines', new _TaskLineCollectionView2.default({ collection: this.model.lines }));
+	            this.showChildView('lines', new _TaskLineCollectionView2.default({ collection: this.collection }));
+	            this.showChildView('total', new _TaskGroupTotalView2.default({ collection: this.collection }));
 	        }
 	    },
 	    onLineEdit: function onLineEdit(childView) {
@@ -10892,7 +10934,7 @@ webpackJsonp([0],[
 	    onLineAdd: function onLineAdd() {
 	        var model = new _TaskLineModel2.default({
 	            task_id: this.model.get('id'),
-	            order: this.model.lines.getMaxOrder() + 1
+	            order: this.collection.getMaxOrder() + 1
 	        });
 	        this.showTaskLineForm(model, "Ajouter une prestation", false);
 	    },
@@ -10900,7 +10942,7 @@ webpackJsonp([0],[
 	        var form = new _TaskLineFormView2.default({
 	            model: model,
 	            title: title,
-	            destCollection: this.model.lines,
+	            destCollection: this.collection,
 	            edit: edit
 	        });
 	        this.showChildView('modalRegion', form);
@@ -10921,7 +10963,7 @@ webpackJsonp([0],[
 	        }
 	    },
 	    onCatalogInsert: function onCatalogInsert(sale_product_ids) {
-	        this.model.load_from_catalog(sale_product_ids);
+	        this.collection.load_from_catalog(sale_product_ids);
 	        this.getChildView('modalRegion').triggerMethod('modal:close');
 	    },
 	    onChildviewDestroyModal: function onChildviewDestroyModal() {
@@ -10933,7 +10975,7 @@ webpackJsonp([0],[
 	        var order = this.model.get('order');
 	        return {
 	            not_is_empty: !this.isEmpty(),
-	            total_ht: (0, _math.formatAmount)(this.model.ht()),
+	            total_ht: (0, _math.formatAmount)(this.model.ht(), false),
 	            is_not_first: order != min_order,
 	            is_not_last: order != max_order
 	        };
@@ -10980,8 +11022,7 @@ webpackJsonp([0],[
 	    childView: _TaskLineView2.default,
 	    sort: true,
 	    collectionEvents: {
-	        'change:reorder': 'render',
-	        'sync': 'render'
+	        'change:reorder': 'render'
 	    },
 	    // Bubble up child view events
 	    childViewTriggers: {
@@ -11050,6 +11091,9 @@ webpackJsonp([0],[
 	        'click @ui.edit_button': 'edit',
 	        'click @ui.delete_button': 'delete'
 	    },
+	    modelEvents: {
+	        'change': 'render'
+	    },
 	    getTvaLabel: function getTvaLabel() {
 	        var res = "";
 	        var current_value = this.model.get('tva');
@@ -11065,7 +11109,7 @@ webpackJsonp([0],[
 	        var max_order = this.model.collection.getMaxOrder();
 	        var order = this.model.get('order');
 	        return {
-	            ht: (0, _math.formatAmount)(this.model.ht()),
+	            ht: (0, _math.formatAmount)(this.model.ht(), false),
 	            tva_label: this.getTvaLabel(),
 	            is_not_first: order != min_order,
 	            is_not_last: order != max_order
@@ -11186,13 +11230,7 @@ webpackJsonp([0],[
 	        'catalog_container': '#catalog-container'
 	    },
 	    ui: {
-	        btn_cancel: "button[type=reset]",
-	        form: "form",
-	        submit: 'button[type=submit]',
 	        main_tab: 'ul.nav-tabs li:first a'
-	    },
-	    triggers: {
-	        'click @ui.btn_cancel': 'modal:close'
 	    },
 	    childViewEvents: {
 	        'catalog:edit': 'onCatalogEdit'
@@ -11205,9 +11243,6 @@ webpackJsonp([0],[
 	    },
 	    modelEvents: {
 	        'set:product': 'refreshForm'
-	    },
-	    onSuccessSync: function onSuccessSync() {
-	        this.trigger('modal:close');
 	    },
 	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
@@ -11429,7 +11464,7 @@ webpackJsonp([0],[
 	        'change @ui.select': "onChange"
 	    },
 	    onChange: function onChange(event) {
-	        this.triggerMethod("change:value", this.$el.chidren('option:selected').val());
+	        this.triggerMethod("change:value", this.$el.children('option:selected').val());
 	    },
 	    templateContext: function templateContext() {
 	        var id_key = (0, _tools.getOpt)(this, 'id_key', 'value');
@@ -11531,11 +11566,17 @@ webpackJsonp([0],[
 	 */
 	var ModalFormBehavior = _backbone2.default.Behavior.extend({
 	    behaviors: [_ModalBehavior2.default, _FormBehavior2.default],
-	    events: {
-	        'success:sync': 'onSuccessSync'
-	    },
 	    onSuccessSync: function onSuccessSync() {
+	        console.log("ModalFormBehavior.onSuccessSync");
+	        console.log("Trigger modal:close from ModalFormBehavior");
 	        this.view.triggerMethod('modal:close');
+	    },
+	    onCancelForm: function onCancelForm() {
+	        console.log("Resetting the model modal closed");
+	        this.view.model.rollback();
+	    },
+	    onModalClose: function onModalClose() {
+	        console.log("ModalFormBehavior.onModalClose");
 	    }
 	});
 	
@@ -11563,18 +11604,17 @@ webpackJsonp([0],[
 	var ModalBehavior = _backbone2.default.Behavior.extend({
 	  defaults: {
 	    modalClasses: '',
-	    modalOptions: null
+	    modalOptions: {
+	      'keyboard': 'false',
+	      'backdrop': 'static'
+	    }
 	  },
-	
 	  ui: {
-	    close: '.close-modal'
+	    close: '.close'
 	  },
 	  events: {
-	    'hidden.bs.modal': 'triggerFinish'
-	  },
-	
-	  triggers: {
-	    'click @ui.close': 'modal:close'
+	    'hidden.bs.modal': 'triggerFinish',
+	    'click @ui.close': 'onClose'
 	  },
 	  onRender: function onRender() {
 	    this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
@@ -11582,10 +11622,18 @@ webpackJsonp([0],[
 	  onAttach: function onAttach() {
 	    this.view.$el.modal(this.getOption('modalOptions') || {});
 	  },
+	  onClose: function onClose() {
+	    console.log("Trigger cancel:form from ModalBehavior");
+	    this.view.triggerMethod('cancel:form');
+	    console.log("Trigger modal:close from ModalBehavior");
+	    this.view.triggerMethod('modal:close');
+	  },
 	  onModalClose: function onModalClose() {
+	    console.log("ModalBehavior.onModalClose");
 	    this.view.$el.modal('hide');
 	  },
 	  triggerFinish: function triggerFinish() {
+	    console.log("Trigger destroy:modal");
 	    this.view.triggerMethod('destroy:modal');
 	  }
 	}); /*
@@ -11799,7 +11847,7 @@ webpackJsonp([0],[
 	  },"3":function(depth0,helpers,partials,data) {
 	  return "                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane\"\n                    id=\"catalog-container\">\n                </div>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button tabindex='-1' type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button tabindex='-1' type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
@@ -11842,7 +11890,7 @@ webpackJsonp([0],[
 	  },"13":function(depth0,helpers,partials,data) {
 	  return "    <div class='row lines-header hidden-xs'>\n        <div class='col-md-3 col-sm-4 '>Intitulé des postes</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>Prix unit. HT</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>Qté</div>\n        <div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>Unité</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>Tva</div>\n        <div class='col-md-1 col-sm-1 text-center'>HT</div>\n        <div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>Produit</div>\n        <div class='col-md-5 col-lg-3 col-sm-7 text-center'>Actions</div>\n    </div>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='col-xs-12'>\n    <div class='row'>\n        <div class='col-xs-12'>\n            <div class='btn-group pull-right'>\n                <button\n                    type='button'\n                    class='btn btn-danger delete btn-small'\n                    title='Supprimer cet ouvrage'\n                    tabindex='-1'\n                    >\n                    <i class='glyphicon glyphicon-trash'></i>\n                </button>\n";
+	  var stack1, buffer = "<div class='col-xs-12'>\n    <div class='row'>\n        <div class='col-xs-12'>\n            <div class='btn-group pull-right'>\n                <button\n                    type='button'\n                    class='btn btn-danger delete btn-small'\n                    title='Supprimer cet ouvrage'\n                    tabindex='-1'\n                    >\n                    <i class='glyphicon glyphicon-trash'></i>\n                </button>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_first : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
@@ -11856,10 +11904,7 @@ webpackJsonp([0],[
 	  buffer += "            </p>\n        </div>\n    </div>\n\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.not_is_empty : depth0), {"name":"if","hash":{},"fn":this.program(13, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "    <div class='row lines'>\n    </div>\n    <div class='row actions'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-info btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une prestation\n            </button>\n        </div>\n    </div>\n    <div class='row subtotal'>\n        <div class='col-xs-12 text-right'>\n            Sous total HT      ";
-	  stack1 = ((helper = (helper = helpers.total_ht || (depth0 != null ? depth0.total_ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"total_ht","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "\n        </div>\n    </div>\n    <div class='modalregion'></div>\n</div>\n";
+	  return buffer + "    <div class='row lines'>\n    </div>\n    <div class='row actions'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-info btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une prestation\n            </button>\n        </div>\n    </div>\n    <div class='subtotal'>\n    </div>\n    <div class='modalregion'></div>\n</div>\n";
 	},"useData":true});
 
 /***/ }),
@@ -11923,15 +11968,9 @@ webpackJsonp([0],[
 	        'catalog_container': '#catalog-container'
 	    },
 	    ui: {
-	        btn_cancel: "button[type=reset]",
-	        form: "form",
-	        submit: 'button[type=submit]',
 	        main_tab: 'ul.nav-tabs li:first a'
 	    },
 	    behaviors: [_ModalFormBehavior2.default],
-	    triggers: {
-	        'click @ui.btn_cancel': 'modal:close'
-	    },
 	    childViewEvents: {
 	        'catalog:edit': 'onCatalogEdit'
 	    },
@@ -12168,7 +12207,7 @@ webpackJsonp([0],[
   \******************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -12179,6 +12218,14 @@ webpackJsonp([0],[
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
 	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 106);
+	
+	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -12192,7 +12239,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var DiscountModel = _backbone2.default.Model.extend({
+	var DiscountModel = _BaseModel2.default.extend({
 	    props: ['id', 'amount', 'tva', 'ht', 'description'],
 	    validation: {
 	        description: {
@@ -12210,12 +12257,8 @@ webpackJsonp([0],[
 	            msg: "Veuillez sélectionner une TVA"
 	        }
 	    },
-	    constructor: function constructor() {
-	        arguments[0] = _.pick(arguments[0], this.props);
-	        _backbone2.default.Model.apply(this, arguments);
-	    },
 	    ht: function ht() {
-	        return this.get('amount');
+	        return -1 * (0, _math.strToFloat)(this.get('amount'));
 	    },
 	    tva: function tva() {
 	        return (0, _math.getTvaPart)(this.ht(), this.get('tva'));
@@ -12225,7 +12268,6 @@ webpackJsonp([0],[
 	    }
 	});
 	exports.default = DiscountModel;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
 /* 89 */
@@ -12926,7 +12968,7 @@ webpackJsonp([0],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<div>\n    <div id='modalregion'>\n    </div>\n	<div class='row'>\n		<div class='task-edit col-md-9 col-xs-12'>\n            <div id='common'>\n            </div>\n            <div id='tasklines'>\n            </div>\n            <div id='discounts'>\n            </div>\n		</div>\n\n		<div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n             id='rightbar'>\n		</div>\n	</div>\n\n	<div class='task-desktop-actions sticky-footer hidden-md hidden-lg' id='footer'>\n	</div>\n</div>\n";
+	  return "<div>\n    <div id='modalregion'>\n    </div>\n	<div class='row'>\n		<div class='task-edit col-md-9 col-xs-12'>\n            <div id='common'>\n            </div>\n            <div id='tasklines'>\n            </div>\n            <div class='ht_before_discounts'>\n            </div>\n            <div id='discounts'>\n            </div>\n            <div class='totals'>\n            </div>\n		</div>\n\n		<div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n             id='rightbar'>\n		</div>\n	</div>\n\n	<div class='task-desktop-actions sticky-footer hidden-md hidden-lg' id='footer'>\n	</div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
@@ -12941,8 +12983,6 @@ webpackJsonp([0],[
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	
-	var _Mn$Object$extend;
 	
 	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
 	
@@ -12960,34 +13000,29 @@ webpackJsonp([0],[
 	
 	var _DiscountCollection2 = _interopRequireDefault(_DiscountCollection);
 	
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 113);
+	
+	var _TotalModel2 = _interopRequireDefault(_TotalModel);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /*
-	                                                                                                                                                                                                                   * File Name : Facade.js
-	                                                                                                                                                                                                                   *
-	                                                                                                                                                                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                                                                                                                                                                                   * Company : Majerti ( http://www.majerti.fr )
-	                                                                                                                                                                                                                   *
-	                                                                                                                                                                                                                   * This software is distributed under GPLV3
-	                                                                                                                                                                                                                   * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                                                                                                                                                                                   *
-	                                                                                                                                                                                                                   */
-	
-	
-	var FacadeClass = _backbone2.default.Object.extend((_Mn$Object$extend = {
+	var FacadeClass = _backbone2.default.Object.extend({
 	    channelName: 'facade',
 	    ht: 5,
 	    radioEvents: {
-	        'update:model': 'onModelUpdated'
+	        'changed:task': 'computeTotals',
+	        'changed:discount': 'computeMainTotals',
+	        'changed:expense_ht': 'computeMainTotals'
 	    },
 	    radioRequests: {
-	        'get:total_ht': 'ht',
 	        'get:model': 'getModelRequest',
-	        'get:collection': 'getCollectionRequest'
+	        'get:collection': 'getCollectionRequest',
+	        'get:totalmodel': 'getTotalModelRequest'
 	    },
 	    initialize: function initialize(options) {
 	        this.models = {};
 	        this.collections = {};
+	        this.totalmodel = new _TotalModel2.default();
 	    },
 	    loadModels: function loadModels(datas) {
 	        this.models['common'] = new _CommonModel2.default(datas);
@@ -12998,6 +13033,10 @@ webpackJsonp([0],[
 	
 	        var discounts = datas['discounts'];
 	        this.collections['discounts'] = new _DiscountCollection2.default(discounts);
+	        this.computeTotals();
+	    },
+	    getTotalModelRequest: function getTotalModelRequest() {
+	        return this.totalmodel;
 	    },
 	    getModelRequest: function getModelRequest(label) {
 	        return this.models[label];
@@ -13005,53 +13044,78 @@ webpackJsonp([0],[
 	    getCollectionRequest: function getCollectionRequest(label) {
 	        return this.collections[label];
 	    },
-	    onModelUpdated: function onModelUpdated() {
-	        console.log("onModelUpdated");
+	    computeTotals: function computeTotals() {
+	        this.totalmodel.set({
+	            'ht_before_discounts': this.tasklines_ht(),
+	            'ht': this.HT(),
+	            'tvas': this.TVAParts(),
+	            'ttc': this.TTC()
+	        });
+	    },
+	    computeMainTotals: function computeMainTotals() {
+	        this.totalmodel.set({
+	            'ht_before_discounts': this.tasklines_ht(),
+	            'ht': this.HT(),
+	            'tvas': this.TVAParts(),
+	            'ttc': this.TTC()
+	        });
 	    },
 	    tasklines_ht: function tasklines_ht() {
 	        return this.collections['task_groups'].ht();
+	    },
+	    HT: function HT() {
+	        var result = 0;
+	        _.each(this.collections, function (collection) {
+	            result += collection.ht();
+	        });
+	        _.each(this.models, function (model) {
+	            result += model.ht();
+	        });
+	        return result;
+	    },
+	    TVAParts: function TVAParts() {
+	        var result = {};
+	        _.each(this.collections, function (collection) {
+	            var tva_parts = collection.tvaParts();
+	            _.each(tva_parts, function (value, key) {
+	                if (key in result) {
+	                    value += result[key];
+	                }
+	                result[key] = value;
+	            });
+	        });
+	        _.each(this.models, function (model) {
+	            var tva_parts = model.tvaParts();
+	            _.each(tva_parts, function (value, key) {
+	                if (key in result) {
+	                    value += result[key];
+	                }
+	                result[key] = value;
+	            });
+	        });
+	        return result;
+	    },
+	    TTC: function TTC() {
+	        var result = 0;
+	        _.each(this.collections, function (collection) {
+	            result += collection.ttc();
+	        });
+	        _.each(this.models, function (model) {
+	            result += model.ttc();
+	        });
+	        return result;
 	    }
-	}, _defineProperty(_Mn$Object$extend, 'ht', function ht() {
-	    console.log("Requesting the ht");
-	    var result = 0;
-	    _.each(this.collections, function (collection) {
-	        result += collection.ht();
-	    });
-	    _.each(this.models, function (model) {
-	        result += model.ht();
-	    });
-	    return result;
-	}), _defineProperty(_Mn$Object$extend, 'tvaParts', function tvaParts() {
-	    var result = {};
-	    _.each(this.collections, function (collection) {
-	        var tva_parts = collection.tvaParts();
-	        _.each(tva_parts, function (key, value) {
-	            if (key in result) {
-	                value += result[key];
-	            }
-	            result[key] = value;
-	        });
-	    });
-	    _.each(this.models, function (model) {
-	        var tva_parts = model.tvaParts();
-	        _.each(tva_parts, function (key, value) {
-	            if (key in result) {
-	                value += result[key];
-	            }
-	            result[key] = value;
-	        });
-	    });
-	    return result;
-	}), _defineProperty(_Mn$Object$extend, 'ttc', function ttc() {
-	    var result = 0;
-	    _.each(this.collections, function (collection) {
-	        result += collection.ttc();
-	    });
-	    _.each(this.models, function (model) {
-	        result += model.ttc();
-	    });
-	    return result;
-	}), _Mn$Object$extend));
+	}); /*
+	     * File Name : Facade.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	
 	var Facade = new FacadeClass();
 	exports.default = Facade;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
@@ -13079,8 +13143,22 @@ webpackJsonp([0],[
 	
 	var _math = __webpack_require__(/*! ../../math.js */ 65);
 	
+	var _backbone = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name :
+	 *
+	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var CommonModel = _BaseModel2.default.extend({
 	    props: ['id', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht'],
 	    validation: {
@@ -13102,19 +13180,25 @@ webpackJsonp([0],[
 	            msg: "Le montant doit être un nombre"
 	        }
 	    },
+	    initialize: function initialize() {
+	        CommonModel.__super__.initialize.apply(this, arguments);
+	        var channel = this.channel = _backbone2.default.channel('facade');
+	        this.on('sync', function () {
+	            channel.trigger('changed:discount');
+	        });
+	    },
 	    ht: function ht() {
-	        return this.get('expenses_ht');
+	        return (0, _math.strToFloat)(this.get('expenses_ht'));
 	    },
 	    tva_key: function tva_key() {
 	        var result;
-	        var tva_object = _underscore2.default.find(AppOption['tvas'], function (val) {
+	        var tva_object = _underscore2.default.find(AppOption['form_options']['tva_options'], function (val) {
 	            return val['default'];
 	        });
 	        if (_underscore2.default.isUndefined(tva_object)) {
 	            result = 0;
 	        } else {
-	            var tva = tva_object.value.toString();
-	            result = (0, _math.strToFloat)(tva);
+	            result = (0, _math.strToFloat)(tva_object.value);
 	        }
 	        if (result < 0) {
 	            result = 0;
@@ -13122,27 +13206,22 @@ webpackJsonp([0],[
 	        return result;
 	    },
 	    tva_amount: function tva_amount() {
-	        return getTvaPart(this.ht(), this.tva_key());
+	        return (0, _math.getTvaPart)(this.ht(), this.tva_key());
 	    },
 	    tvaParts: function tvaParts() {
 	        var result = {};
-	        var tva_amount = this.tva_key();
-	        result[tva_amount] = this.tva_amount();
+	        var tva_key = this.tva_key();
+	        var tva_amount = this.tva_amount();
+	        if (tva_amount == 0) {
+	            return result;
+	        }
+	        result[tva_key] = tva_amount;
 	        return result;
 	    },
 	    ttc: function ttc() {
-	        return this.ht() + this.amount();
+	        return this.ht() + this.tva_amount();
 	    }
-	}); /*
-	     * File Name :
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = CommonModel;
 
 /***/ }),
@@ -13181,7 +13260,6 @@ webpackJsonp([0],[
 	var BaseModel = _backbone2.default.Model.extend({
 	    props: null,
 	    constructor: function constructor() {
-	        console.log(this.props);
 	        if (!_underscore2.default.isNull(this.props)) {
 	            arguments[0] = _underscore2.default.pick(arguments[0], this.props);
 	        }
@@ -13193,6 +13271,11 @@ webpackJsonp([0],[
 	            attributes = _underscore2.default.pick(attributes, this.props);
 	        }
 	        return attributes;
+	    },
+	    rollback: function rollback() {
+	        if (this.get('id')) {
+	            this.fetch();
+	        }
 	    }
 	});
 	exports.default = BaseModel;
@@ -13220,8 +13303,22 @@ webpackJsonp([0],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : TaskGroupCollection.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var TaskGroupCollection = _backbone2.default.Collection.extend({
 	    model: _TaskGroupModel2.default,
 	    url: function url() {
@@ -13231,6 +13328,13 @@ webpackJsonp([0],[
 	    initialize: function initialize(options) {
 	        this.on('change:reorder', this.updateModelOrder);
 	        this.updateModelOrder(false);
+	        this.on('remove', this.channelCall);
+	        this.on('sync', this.channelCall);
+	        this.on('reset', this.channelCall);
+	    },
+	    channelCall: function channelCall() {
+	        var channel = _backbone4.default.channel('facade');
+	        channel.trigger('changed:task');
 	    },
 	    updateModelOrder: function updateModelOrder(sync) {
 	        var sync = sync || true;
@@ -13290,7 +13394,7 @@ webpackJsonp([0],[
 	        var result = {};
 	        this.each(function (model) {
 	            var tva_parts = model.tvaParts();
-	            _.each(tva_parts, function (key, value) {
+	            _.each(tva_parts, function (value, key) {
 	                if (key in result) {
 	                    value += result[key];
 	                }
@@ -13306,16 +13410,7 @@ webpackJsonp([0],[
 	        });
 	        return result;
 	    }
-	}); /*
-	     * File Name : TaskGroupCollection.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = TaskGroupCollection;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
@@ -13340,12 +13435,35 @@ webpackJsonp([0],[
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : DiscountCollection.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var DiscountCollection = _backbone2.default.Collection.extend({
 	    model: _DiscountModel2.default,
+	    initialize: function initialize(options) {
+	        this.on('remove', this.channelCall);
+	        this.on('sync', this.channelCall);
+	        this.on('reset', this.channelCall);
+	    },
+	    channelCall: function channelCall() {
+	        var channel = _backbone4.default.channel('facade');
+	        channel.trigger('changed:discount');
+	    },
 	    url: function url() {
 	        return AppOption['context_url'] + '/' + 'discount_lines';
 	    },
@@ -13354,7 +13472,7 @@ webpackJsonp([0],[
 	        this.each(function (model) {
 	            result += model.ht();
 	        });
-	        return -1 * result;
+	        return result;
 	    },
 	    tvaParts: function tvaParts() {
 	        var result = {};
@@ -13383,16 +13501,7 @@ webpackJsonp([0],[
 	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=insert_percent', model.toJSON(), 'POST');
 	        serverRequest.then(this.fetch.bind(this));
 	    }
-	}); /*
-	     * File Name : DiscountCollection.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = DiscountCollection;
 
 /***/ }),
@@ -13446,6 +13555,348 @@ webpackJsonp([0],[
 	     *
 	     */
 	exports.default = DiscountPercentModel;
+
+/***/ }),
+/* 113 */
+/*!***************************************!*\
+  !*** ./src/task/models/TotalModel.js ***!
+  \***************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone */ 17);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TotalModel = _backbone2.default.Model.extend({}); /*
+	                                                       * File Name : TotalModel.js
+	                                                       *
+	                                                       * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                       * Company : Majerti ( http://www.majerti.fr )
+	                                                       *
+	                                                       * This software is distributed under GPLV3
+	                                                       * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                       *
+	                                                       */
+	exports.default = TotalModel;
+
+/***/ }),
+/* 114 */
+/*!*************************************************!*\
+  !*** ./src/task/views/HtBeforeDiscountsView.js ***!
+  \*************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	var _LabelRowWidget = __webpack_require__(/*! ./LabelRowWidget.js */ 116);
+	
+	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var HtBeforeDiscountsView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 118),
+	    regions: {
+	        line: {
+	            el: '.line',
+	            replaceElement: true
+	        }
+	    },
+	    modelEvents: {
+	        'change': 'render'
+	    },
+	    onRender: function onRender() {
+	        var values = (0, _math.formatAmount)(this.model.get('ht_before_discounts'), false);
+	        var view = new _LabelRowWidget2.default({
+	            label: 'Total HT avant remise',
+	            values: values
+	        });
+	        this.showChildView('line', view);
+	    }
+	}); /*
+	     * File Name : HtBeforeDiscountsView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = HtBeforeDiscountsView;
+
+/***/ }),
+/* 115 */,
+/* 116 */
+/*!******************************************!*\
+  !*** ./src/task/views/LabelRowWidget.js ***!
+  \******************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : LabelRowWidget.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var LabelRowWidget = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    template: __webpack_require__(/*! ./templates/widgets/LabelRowWidget.mustache */ 117),
+	    templateContext: function templateContext() {
+	        var values = this.getOption('values');
+	        var label = (0, _tools.getOpt)(this, 'label', '');
+	
+	        if (!Array.isArray(values)) {
+	            values = [{ 'label': label, 'value': values }];
+	        }
+	        return {
+	            values: values
+	        };
+	    }
+	});
+	exports.default = LabelRowWidget;
+
+/***/ }),
+/* 117 */
+/*!******************************************************************!*\
+  !*** ./src/task/views/templates/widgets/LabelRowWidget.mustache ***!
+  \******************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='row'>\n<div class='col-md-10 col-xs-8 text-right'>\n    <b>";
+	  stack1 = ((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</b>\n</div>\n<div class='col-md-2 col-xs-4 text-right'>\n    ";
+	  stack1 = ((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "\n</div>\n</div>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.values : depth0), {"name":"each","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
+
+/***/ }),
+/* 118 */
+/*!*************************************************************!*\
+  !*** ./src/task/views/templates/LineContainerView.mustache ***!
+  \*************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<div class='line'></div>\n";
+	  },"useData":true});
+
+/***/ }),
+/* 119 */
+/*!**********************************************!*\
+  !*** ./src/task/views/TaskGroupTotalView.js ***!
+  \**********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	var _LabelRowWidget = __webpack_require__(/*! ./LabelRowWidget.js */ 116);
+	
+	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TaskGroupTotalView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 118),
+	    regions: {
+	        line: {
+	            el: '.line',
+	            replaceElement: true
+	        }
+	    },
+	    collectionEvents: {
+	        'change': 'render',
+	        'remove': 'render',
+	        'add': 'render'
+	    },
+	    onRender: function onRender() {
+	        var values = (0, _math.formatAmount)(this.collection.ht(), false);
+	        var view = new _LabelRowWidget2.default({
+	            label: 'Sous total HT',
+	            values: values
+	        });
+	        this.showChildView('line', view);
+	    }
+	}); /*
+	     * File Name : TaskGroupTotalView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = TaskGroupTotalView;
+
+/***/ }),
+/* 120 */
+/*!*************************************!*\
+  !*** ./src/task/views/TotalView.js ***!
+  \*************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	var _LabelRowWidget = __webpack_require__(/*! ./LabelRowWidget.js */ 116);
+	
+	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TotalView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 121),
+	    regions: {
+	        ht: {
+	            el: '.ht',
+	            replaceElement: true
+	        },
+	        tvas: {
+	            el: '.tvas',
+	            replaceElement: true
+	        },
+	        ttc: {
+	            el: '.ttc',
+	            replaceElement: true
+	        }
+	    },
+	    modelEvents: {
+	        'change': 'render'
+	    },
+	    getTvaLabel: function getTvaLabel(tva_value, tva_key) {
+	        var res = { 'value': (0, _math.formatAmount)(tva_value, true), 'label': 'Tva Inconnue' };
+	        _.each(AppOption['form_options']['tva_options'], function (tva) {
+	            if (tva.value == tva_key) {
+	                res['label'] = tva.name;
+	            }
+	        });
+	        return res;
+	    },
+	    showHt: function showHt() {
+	        var values = (0, _math.formatAmount)(this.model.get('ht'), true);
+	        var view = new _LabelRowWidget2.default({
+	            label: 'Total HT',
+	            values: values
+	        });
+	        this.showChildView('ht', view);
+	    },
+	    showTvas: function showTvas() {
+	        var values = [];
+	        var this_ = this;
+	        _.each(this.model.get('tvas'), function (item, key) {
+	            values.push(this_.getTvaLabel(item, key));
+	        });
+	        var view = new _LabelRowWidget2.default({
+	            values: values
+	        });
+	        this.showChildView('tvas', view);
+	    },
+	    showTtc: function showTtc() {
+	        var values = (0, _math.formatAmount)(this.model.get('ttc'), true);
+	        var view = new _LabelRowWidget2.default({
+	            label: 'Total TTC',
+	            values: values
+	        });
+	        this.showChildView('ttc', view);
+	    },
+	    onRender: function onRender() {
+	        this.showHt();
+	        this.showTvas();
+	        this.showTtc();
+	    }
+	}); /*
+	     * File Name : TotalView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = TotalView;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
+
+/***/ }),
+/* 121 */
+/*!*****************************************************!*\
+  !*** ./src/task/views/templates/TotalView.mustache ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<div class='ht'></div>\n<div class='tvas'></div>\n<div class='ttc'></div>\n";
+	  },"useData":true});
 
 /***/ })
 ]);

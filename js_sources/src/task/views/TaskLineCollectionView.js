@@ -18,7 +18,6 @@ const TaskLineCollectionView = Mn.CollectionView.extend({
     sort: true,
     collectionEvents: {
         'change:reorder': 'render',
-        'sync': 'render'
     },
     // Bubble up child view events
     childViewTriggers: {

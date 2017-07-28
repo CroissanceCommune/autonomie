@@ -14,7 +14,6 @@ import Bb from 'backbone';
 const BaseModel = Bb.Model.extend({
     props: null,
     constructor: function() {
-        console.log(this.props);
         if (!_.isNull(this.props)){
             arguments[0] = _.pick(arguments[0], this.props);
         }
@@ -27,5 +26,10 @@ const BaseModel = Bb.Model.extend({
         }
         return attributes;
     },
+    rollback: function(){
+        if (this.get('id')){
+            this.fetch();
+        }
+    }
 });
 export default BaseModel;

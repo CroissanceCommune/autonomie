@@ -12,6 +12,7 @@ import Mn from 'backbone.marionette';
 import TaskLineCollectionView from './TaskLineCollectionView.js';
 import TaskLineFormView from './TaskLineFormView.js';
 import TaskLineModel from "../models/TaskLineModel.js";
+import TaskGroupTotalView from './TaskGroupTotalView.js';
 import { formatAmount } from '../../math.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
@@ -24,6 +25,7 @@ const TaskGroupView = Mn.View.extend({
     regions: {
         lines: '.lines',
         modalRegion: ".modalregion",
+        total: '.subtotal'
     },
     ui: {
         btn_add: ".btn-add",
@@ -48,7 +50,8 @@ const TaskGroupView = Mn.View.extend({
         'destroy:modal': 'render'
     },
     initialize: function(options){
-        // this.listenTo(this.model.lines, 'sync', this.render);
+        // Collection of task lines
+        this.collection = this.model.lines;
     },
     isEmpty: function(){
         return this.model.lines.length === 0;
@@ -57,7 +60,11 @@ const TaskGroupView = Mn.View.extend({
         if (! this.isEmpty()){
             this.showChildView(
                 'lines',
-                new TaskLineCollectionView({collection: this.model.lines})
+                new TaskLineCollectionView({collection: this.collection})
+            );
+            this.showChildView(
+                'total',
+                new TaskGroupTotalView({collection: this.collection})
             );
         }
     },
@@ -67,7 +74,7 @@ const TaskGroupView = Mn.View.extend({
     onLineAdd: function(){
         var model = new TaskLineModel({
             task_id: this.model.get('id'),
-            order: this.model.lines.getMaxOrder() + 1,
+            order: this.collection.getMaxOrder() + 1,
         });
         this.showTaskLineForm(model, "Ajouter une prestation", false);
     },
@@ -76,7 +83,7 @@ const TaskGroupView = Mn.View.extend({
             {
                 model: model,
                 title: title,
-                destCollection: this.model.lines,
+                destCollection: this.collection,
                 edit: edit
             });
         this.showChildView('modalRegion', form);
@@ -100,7 +107,7 @@ const TaskGroupView = Mn.View.extend({
         }
     },
     onCatalogInsert: function(sale_product_ids){
-        this.model.load_from_catalog(sale_product_ids);
+        this.collection.load_from_catalog(sale_product_ids);
         this.getChildView('modalRegion').triggerMethod('modal:close')
     },
     onChildviewDestroyModal: function() {
@@ -112,7 +119,7 @@ const TaskGroupView = Mn.View.extend({
         let order = this.model.get('order');
         return {
             not_is_empty: !this.isEmpty(),
-            total_ht: formatAmount(this.model.ht()),
+            total_ht: formatAmount(this.model.ht(), false),
             is_not_first: order != min_order,
             is_not_last: order != max_order
         }

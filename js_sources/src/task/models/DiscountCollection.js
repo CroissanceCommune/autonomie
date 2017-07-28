@@ -10,11 +10,21 @@
  */
 import Bb from 'backbone';
 import DiscountModel from './DiscountModel.js';
+import Radio from 'backbone.radio';
 import { ajax_call } from '../../tools.js';
 
 
 const DiscountCollection = Bb.Collection.extend({
     model: DiscountModel,
+    initialize: function(options) {
+        this.on('remove', this.channelCall);
+        this.on('sync', this.channelCall);
+        this.on('reset', this.channelCall);
+    },
+    channelCall: function(){
+        var channel = Radio.channel('facade');
+        channel.trigger('changed:discount');
+    },
     url: function(){
         return AppOption['context_url'] + '/' + 'discount_lines';
     },
@@ -23,7 +33,7 @@ const DiscountCollection = Bb.Collection.extend({
         this.each(function(model){
             result += model.ht();
         });
-        return -1 * result;
+        return result;
     },
     tvaParts: function(){
         var result = {};

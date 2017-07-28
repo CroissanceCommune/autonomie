@@ -10,7 +10,8 @@
  */
 import _ from 'underscore';
 import BaseModel from "./BaseModel.js";
-import { strToFloat } from '../../math.js';
+import { getTvaPart, strToFloat } from '../../math.js';
+import Radio from 'backbone.radio';
 
 
 const CommonModel = BaseModel.extend({
@@ -43,20 +44,24 @@ const CommonModel = BaseModel.extend({
             msg: "Le montant doit être un nombre",
         }
     },
+    initialize: function(){
+        CommonModel.__super__.initialize.apply(this, arguments);
+        var channel = this.channel = Radio.channel('facade');
+        this.on('sync', function(){channel.trigger('changed:discount')});
+    },
     ht: function(){
-        return this.get('expenses_ht');
+        return strToFloat(this.get('expenses_ht'));
     },
     tva_key: function(){
         var result
         var tva_object = _.find(
-            AppOption['tvas'],
+            AppOption['form_options']['tva_options'],
             function(val){return val['default'];}
         );
         if (_.isUndefined(tva_object)){
             result = 0;
         } else {
-            var tva = tva_object.value.toString();
-            result =  strToFloat(tva);
+            result = strToFloat(tva_object.value);
         }
         if (result < 0){
             result = 0;
@@ -68,12 +73,16 @@ const CommonModel = BaseModel.extend({
     },
     tvaParts: function(){
         var result = {};
-        var tva_amount = this.tva_key();
-        result[tva_amount] = this.tva_amount();
+        var tva_key = this.tva_key();
+        var tva_amount = this.tva_amount();
+        if (tva_amount == 0){
+            return result;
+        }
+        result[tva_key] = tva_amount;
         return result;
     },
     ttc: function(){
-        return this.ht() + this.amount();
+        return this.ht() + this.tva_amount();
     }
 });
 export default CommonModel;

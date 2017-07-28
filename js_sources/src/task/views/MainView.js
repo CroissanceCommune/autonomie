@@ -9,13 +9,16 @@
  *
  */
 import Mn from 'backbone.marionette';
+import Radio from 'backbone.radio';
+
 import CommonView from "./CommonView.js";
-import RightBarView from "./RightBarView.js";
 import TaskBlockView from './TaskBlockView.js';
 import DiscountBlockView from './DiscountBlockView.js';
+
+import RightBarView from "./RightBarView.js";
 import StatusView from './StatusView.js';
-import Radio from 'backbone.radio';
-import { Modal } from 'bootstrap';
+import HtBeforeDiscountsView from './HtBeforeDiscountsView.js';
+import TotalView from './TotalView.js';
 
 const template = require('./templates/MainView.mustache');
 
@@ -27,7 +30,9 @@ const MainView = Mn.View.extend({
         tasklines: '#tasklines',
         discounts: '#discounts',
         rightbar: "#rightbar",
-        footer: '#footer'
+        footer: '#footer',
+        ht_before_discounts: '.ht_before_discounts',
+        totals: '.totals'
     },
     childViewEvents: {
         'status:change': 'onStatusChange',
@@ -66,6 +71,12 @@ const MainView = Mn.View.extend({
             {actions: AppOption['form_options']['actions']}
         );
         this.showChildView('rightbar', view);
+
+        var model = this.channel.request('get:totalmodel');
+        view = new HtBeforeDiscountsView({model: model});
+        this.showChildView('ht_before_discounts', view);
+        view = new TotalView({model:model});
+        this.showChildView('totals', view);
     },
     onStatusChange: function(status, title, label, url){
         this.showChildView(

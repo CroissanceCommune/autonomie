@@ -11,6 +11,7 @@
 import Bb from 'backbone';
 import TaskGroupModel from './TaskGroupModel.js';
 import { ajax_call } from '../../tools.js';
+import Radio from 'backbone.radio';
 
 
 const TaskGroupCollection = Bb.Collection.extend({
@@ -22,6 +23,13 @@ const TaskGroupCollection = Bb.Collection.extend({
     initialize: function(options) {
         this.on('change:reorder', this.updateModelOrder);
         this.updateModelOrder(false);
+        this.on('remove', this.channelCall);
+        this.on('sync', this.channelCall);
+        this.on('reset', this.channelCall);
+    },
+    channelCall: function(){
+        var channel = Radio.channel('facade');
+        channel.trigger('changed:task');
     },
     updateModelOrder: function(sync){
         var sync = sync || true;
@@ -90,7 +98,7 @@ const TaskGroupCollection = Bb.Collection.extend({
         var result = {};
         this.each(function(model){
             var tva_parts = model.tvaParts();
-            _.each(tva_parts, function(key, value){
+            _.each(tva_parts, function(value, key){
                 if (key in result){
                     value += result[key];
                 }

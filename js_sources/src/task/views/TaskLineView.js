@@ -29,6 +29,9 @@ const TaskLineView = Mn.View.extend({
         'click @ui.edit_button': 'edit',
         'click @ui.delete_button': 'delete'
     },
+    modelEvents: {
+        'change': 'render'
+    },
     getTvaLabel: function(){
         let res = "";
         let current_value = this.model.get('tva');
@@ -44,7 +47,7 @@ const TaskLineView = Mn.View.extend({
         let max_order = this.model.collection.getMaxOrder();
         let order = this.model.get('order');
         return {
-            ht: formatAmount(this.model.ht()),
+            ht: formatAmount(this.model.ht(), false),
             tva_label: this.getTvaLabel(),
             is_not_first: order != min_order,
             is_not_last: order != max_order

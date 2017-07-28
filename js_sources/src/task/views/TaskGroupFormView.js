@@ -26,15 +26,9 @@ const TaskGroupFormView = Mn.View.extend({
         'catalog_container': '#catalog-container',
     },
     ui: {
-        btn_cancel: "button[type=reset]",
-        form: "form",
-        submit: 'button[type=submit]',
         main_tab: 'ul.nav-tabs li:first a',
     },
     behaviors: [ModalFormBehavior],
-    triggers: {
-        'click @ui.btn_cancel': 'modal:close'
-    },
     childViewEvents: {
         'catalog:edit': 'onCatalogEdit'
     },

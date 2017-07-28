@@ -9,9 +9,11 @@
  *
  */
 import Bb from 'backbone';
-import { getTvaPart } from '../../math.js';
+import { strToFloat, getTvaPart } from '../../math.js';
+import Radio from 'backbone.radio';
+import BaseModel from './BaseModel.js';
 
-const DiscountModel = Bb.Model.extend({
+const DiscountModel = BaseModel.extend({
     props: [
         'id',
         'amount',
@@ -35,12 +37,8 @@ const DiscountModel = Bb.Model.extend({
             msg: "Veuillez sélectionner une TVA"
         },
     },
-    constructor: function() {
-        arguments[0] = _.pick(arguments[0], this.props);
-        Bb.Model.apply(this, arguments);
-    },
     ht: function(){
-        return this.get('amount');
+        return -1 * strToFloat(this.get('amount'));
     },
     tva: function(){
         return getTvaPart(this.ht(), this.get('tva'));

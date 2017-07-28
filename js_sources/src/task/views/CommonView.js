@@ -42,7 +42,7 @@ const CommonView = Mn.View.extend({
             errorMessage: "Vérifiez votre saisie"
         }
     ],
-    childViewTrigger: {
+    childViewTriggers: {
         'change': 'data:modified',
         'finish': 'data:persist'
     },

@@ -28,7 +28,7 @@ const SelectWidget = Mn.View.extend({
     onChange: function(event){
         this.triggerMethod(
             "change:value",
-            this.$el.chidren('option:selected').val()
+            this.$el.children('option:selected').val()
         );
     },
     templateContext: function(){

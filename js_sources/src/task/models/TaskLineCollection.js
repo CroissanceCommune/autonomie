@@ -11,6 +11,8 @@
 import _ from 'underscore';
 import Bb from 'backbone';
 import TaskLineModel from './TaskLineModel.js';
+import Radio from 'backbone.radio';
+import {ajax_call} from '../../tools.js';
 
 const TaskLineCollection = Bb.Collection.extend({
     model: TaskLineModel,
@@ -18,6 +20,13 @@ const TaskLineCollection = Bb.Collection.extend({
     initialize: function(options) {
         this.on('change:reorder', this.updateModelOrder);
         this.updateModelOrder(false);
+        this.on('remove', this.channelCall);
+        this.on('sync', this.channelCall);
+        this.on('reset', this.channelCall);
+    },
+    channelCall: function(){
+        var channel = Radio.channel('facade');
+        channel.trigger('changed:task');
     },
     updateModelOrder: function(sync){
         var sync = sync || true;
@@ -66,6 +75,14 @@ const TaskLineCollection = Bb.Collection.extend({
             this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
             this.trigger('change:reorder');
         }
+    },
+    load_from_catalog: function(sale_product_ids){
+        var serverRequest = ajax_call(
+            this.url + '?action=load_from_catalog',
+            {sale_product_ids: sale_product_ids},
+            'POST'
+        );
+        serverRequest.then(this.fetch.bind(this));
     },
     ht: function(){
         var result = 0;

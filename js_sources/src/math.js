@@ -69,7 +69,11 @@ export const strToFloat = function(value) {
    */
   var result;
 
-  if ((value === undefined)||(value === null)){
+  if (_.isNumber(value)){
+      return value
+  }
+
+  if (_.isUndefined(value) || _.isNull(value)){
     value = "0.00";
   }
   value = value.replace(",", ".");

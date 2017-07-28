@@ -36,17 +36,14 @@ const TaskGroupFormView = Mn.View.extend({
         'click @ui.btn_cancel': 'modal:close'
     },
     childViewEvents: {
-        'change': 'onChildChange',
         'catalog:edit': 'onCatalogEdit'
     },
     childViewTriggers: {
         'catalog:insert': 'catalog:insert',
+        'change': 'data:modified',
     },
     modelEvents: {
         'change': 'refreshForm'
-    },
-    onChildChange: function(attribute, value){
-        this.triggerMethod('data:modified', this, attribute, value);
     },
     onCatalogEdit: function(productgroup_datas){
         this.model.loadProductGroup(productgroup_datas);

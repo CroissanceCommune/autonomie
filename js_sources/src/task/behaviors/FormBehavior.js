@@ -84,7 +84,7 @@ var FormBehavior = Mn.Behavior.extend({
         this.view.model.set(this.serializeForm(), {validate: true});
         this.syncServer();
     },
-    onDataPersisted: function(view, datas){
+    onDataPersisted: function(datas){
         this.syncServer(datas, true);
     }
 });

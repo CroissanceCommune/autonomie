@@ -30,6 +30,9 @@ const DiscountFormView = Mn.View.extend({
     triggers: {
         'click @ui.btn_cancel': 'cancel:form',
     },
+    childViewTriggers: {
+        'change': 'data:modified',
+    },
     onRender: function(){
         this.showChildView(
             'description',

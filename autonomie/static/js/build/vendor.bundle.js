@@ -108,8 +108,8 @@
 	__webpack_require__(/*! backbone */17);
 	__webpack_require__(/*! underscore */16);
 	__webpack_require__(/*! backbone.marionette */18);
-	__webpack_require__(/*! tinymce */44);
-	module.exports = __webpack_require__(/*! jstree */101);
+	__webpack_require__(/*! tinymce */45);
+	module.exports = __webpack_require__(/*! jstree */110);
 
 
 /***/ }),
@@ -18680,7 +18680,7 @@
 
 /***/ }),
 
-/***/ 44:
+/***/ 45:
 /*!************************!*\
   !*** ./src/tinymce.js ***!
   \************************/
@@ -18702,7 +18702,7 @@
 	 *
 	 */
 	
-	var tinymce = __webpack_require__(/*! tinymce/tinymce */ 45);
+	var tinymce = __webpack_require__(/*! tinymce/tinymce */ 46);
 	var setupTinyMce = function setupTinyMce(kwargs) {
 	  /*
 	   * Setup a tinymce editor
@@ -18738,7 +18738,7 @@
 
 /***/ }),
 
-/***/ 45:
+/***/ 46:
 /*!******************************!*\
   !*** ./~/tinymce/tinymce.js ***!
   \******************************/
@@ -74561,11 +74561,11 @@
 	dem('tinymce.core.api.Main')();
 	})();
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../timers-browserify/main.js */ 46).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../timers-browserify/main.js */ 47).setImmediate))
 
 /***/ }),
 
-/***/ 46:
+/***/ 47:
 /*!*************************************!*\
   !*** ./~/timers-browserify/main.js ***!
   \*************************************/
@@ -74621,14 +74621,14 @@
 	};
 	
 	// setimmediate attaches itself to the global object
-	__webpack_require__(/*! setimmediate */ 47);
+	__webpack_require__(/*! setimmediate */ 48);
 	exports.setImmediate = setImmediate;
 	exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
 
-/***/ 47:
+/***/ 48:
 /*!****************************************!*\
   !*** ./~/setimmediate/setImmediate.js ***!
   \****************************************/
@@ -74821,11 +74821,11 @@
 	    attachTo.clearImmediate = clearImmediate;
 	}(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../process/browser.js */ 48)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../process/browser.js */ 49)))
 
 /***/ }),
 
-/***/ 48:
+/***/ 49:
 /*!******************************!*\
   !*** ./~/process/browser.js ***!
   \******************************/
@@ -75019,7 +75019,7 @@
 
 /***/ }),
 
-/***/ 101:
+/***/ 110:
 /*!*********************************!*\
   !*** ./~/jstree/dist/jstree.js ***!
   \*********************************/

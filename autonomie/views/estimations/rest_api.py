@@ -17,6 +17,7 @@ from autonomie.utils.rest import (
     Apiv1Resp,
     add_rest_views,
 )
+from autonomie.compute.math_utils import percentage
 from autonomie.models.task import (
     WorkUnit,
     PaymentConditions,
@@ -335,6 +336,12 @@ class DiscountLineRestView(BaseRestView):
         schema = SQLAlchemySchemaNode(DiscountLine, excludes=excludes)
         return schema.bind(request=self.request)
 
+    def collection_get(self):
+        """
+        View returning the task line groups attached to this estimation
+        """
+        return self.context.discounts
+
     def post_format(self, entry, edit):
         """
         Associate a newly created element to the parent task
@@ -342,6 +349,30 @@ class DiscountLineRestView(BaseRestView):
         if not edit:
             entry.task = self.context
         return entry
+
+    def post_percent_discount_view(self):
+        """
+        View handling percent discount configuration
+
+        Generates discounts for each tva used in this document
+
+        current context : Invoice/Estimation/CancelInvoice
+        """
+        percent = self.request.json_body.get('percentage')
+        description = self.request.json_body.get('description')
+        lines = []
+        if percent is not None and description is not None:
+            tva_parts = self.context.tva_ht_parts()
+            for tva, ht in tva_parts.items():
+                amount = percentage(ht, percent)
+                line = DiscountLine(
+                    description=description,
+                    amount=amount,
+                    tva=tva
+                )
+                self.context.discounts.append(line)
+            self.request.dbsession.merge(self.context)
+        return lines
 
 
 class PaymentLineRestView(BaseRestView):
@@ -570,6 +601,16 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+    )
+    config.add_view(
+        DiscountLineRestView,
+        route_name="/api/v1/estimations/{id}/discount_lines",
+        attr='post_percent_discount_view',
+        request_param="action=insert_percent",
+        request_method='POST',
+        renderer='json',
+        permission='edit.estimation',
+        xhr=True,
     )
 
 

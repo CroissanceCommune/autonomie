@@ -41,22 +41,19 @@ const TaskLineFormView = Mn.View.extend({
         'click @ui.btn_cancel': 'modal:close'
     },
     childViewEvents: {
-        'change': 'onChildChange',
         'catalog:edit': 'onCatalogEdit'
     },
     // Bubble up child view events
     //
     childViewTriggers: {
         'catalog:insert': 'catalog:insert',
+        'change': 'data:modified'
     },
     modelEvents: {
         'set:product': 'refreshForm'
     },
     onSuccessSync: function(){
         this.trigger('modal:close');
-    },
-    onChildChange: function(attribute, value){
-        this.triggerMethod('data:modified', this, attribute, value);
     },
     onCatalogEdit: function(product_datas){
         this.model.loadProduct(product_datas);

@@ -13,7 +13,7 @@ import Validation from 'backbone-validation';
 
 
 const BaseFormBehavior = Mn.Behavior.extend({
-    onDataPersist: function(view, attribute, value){
+    onDataPersist: function(attribute, value){
         Validation.unbind(this.view);
         Validation.bind(this.view, {
             attributes: function(view){return [attribute];}
@@ -22,9 +22,9 @@ const BaseFormBehavior = Mn.Behavior.extend({
         var datas = {};
         datas[attribute] = value;
         this.view.model.set(datas);
-        this.view.triggerMethod('data:persisted', datas, true);
+        this.view.triggerMethod('data:persisted', datas);
     },
-    onDataModified: function(view, attribute, value){
+    onDataModified: function(attribute, value){
         Validation.unbind(this.view);
         Validation.bind(this.view, {
             attributes: function(view){return [attribute];}

@@ -64,7 +64,7 @@ webpackJsonp([0],[
 	 */
 	(0, _tools.setupJsonRedirect)();
 	
-	var template = __webpack_require__(/*! ../handlebars/job/file_generation.mustache */ 100);
+	var template = __webpack_require__(/*! ../handlebars/job/file_generation.mustache */ 109);
 	
 	_App2.default.on('start', function (app, options) {
 	    console.log("  => Starting the app");
@@ -5906,7 +5906,7 @@ webpackJsonp([0],[
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 102);
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 104);
 	
 	var _Facade2 = _interopRequireDefault(_Facade);
 	
@@ -5956,7 +5956,7 @@ webpackJsonp([0],[
 	
 	var _CommonView2 = _interopRequireDefault(_CommonView);
 	
-	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 51);
+	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 52);
 	
 	var _RightBarView2 = _interopRequireDefault(_RightBarView);
 	
@@ -5964,11 +5964,11 @@ webpackJsonp([0],[
 	
 	var _TaskBlockView2 = _interopRequireDefault(_TaskBlockView);
 	
-	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 90);
+	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 87);
 	
 	var _DiscountBlockView2 = _interopRequireDefault(_DiscountBlockView);
 	
-	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 88);
+	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 101);
 	
 	var _StatusView2 = _interopRequireDefault(_StatusView);
 	
@@ -5990,7 +5990,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 99);
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 103);
 	
 	var MainView = _backbone2.default.View.extend({
 	    template: template,
@@ -6082,21 +6082,21 @@ webpackJsonp([0],[
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _CheckboxListWidget = __webpack_require__(/*! ./CheckboxListWidget.js */ 32);
+	var _CheckboxListWidget = __webpack_require__(/*! ./CheckboxListWidget.js */ 33);
 	
 	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ./DatePickerWidget.js */ 41);
+	var _DatePickerWidget = __webpack_require__(/*! ./DatePickerWidget.js */ 42);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 43);
+	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 44);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 50); /*
+	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 51); /*
 	                                                            * File Name : CommonView.js
 	                                                            *
 	                                                            * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
@@ -6129,15 +6129,9 @@ webpackJsonp([0],[
 	        behaviorClass: _FormBehavior2.default,
 	        errorMessage: "Vérifiez votre saisie"
 	    }],
-	    childViewEvents: {
-	        'change': 'onChildChange',
-	        'finish': 'onChildFinish'
-	    },
-	    onChildChange: function onChildChange(attribute, value) {
-	        this.triggerMethod('data:modified', this, attribute, value);
-	    },
-	    onChildFinish: function onChildFinish(attribute, value) {
-	        this.triggerMethod('data:persist', this, attribute, value);
+	    childViewTrigger: {
+	        'change': 'data:modified',
+	        'finish': 'data:persist'
 	    },
 	    getMentionIds: function getMentionIds() {
 	        var mentions = this.model.get('mentions');
@@ -8594,7 +8588,7 @@ webpackJsonp([0],[
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 110);
+	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 32);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
 	
@@ -8665,7 +8659,7 @@ webpackJsonp([0],[
 	        this.view.model.set(this.serializeForm(), { validate: true });
 	        this.syncServer();
 	    },
-	    onDataPersisted: function onDataPersisted(view, datas) {
+	    onDataPersisted: function onDataPersisted(datas) {
 	        this.syncServer(datas, true);
 	    }
 	}); /*
@@ -8683,6 +8677,68 @@ webpackJsonp([0],[
 
 /***/ }),
 /* 32 */
+/*!************************************************!*\
+  !*** ./src/task/behaviors/BaseFormBehavior.js ***!
+  \************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
+	
+	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : FormValidationBehavior.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var BaseFormBehavior = _backbone2.default.Behavior.extend({
+	    onDataPersist: function onDataPersist(attribute, value) {
+	        _backboneValidation2.default.unbind(this.view);
+	        _backboneValidation2.default.bind(this.view, {
+	            attributes: function attributes(view) {
+	                return [attribute];
+	            }
+	        });
+	
+	        var datas = {};
+	        datas[attribute] = value;
+	        this.view.model.set(datas);
+	        this.view.triggerMethod('data:persisted', datas);
+	    },
+	    onDataModified: function onDataModified(attribute, value) {
+	        _backboneValidation2.default.unbind(this.view);
+	        _backboneValidation2.default.bind(this.view, {
+	            attributes: function attributes(view) {
+	                return [attribute];
+	            }
+	        });
+	        var datas = {};
+	        datas[attribute] = value;
+	        this.view.model.set(datas);
+	        this.view.model.isValid();
+	    }
+	});
+	exports.default = BaseFormBehavior;
+
+/***/ }),
+/* 33 */
 /*!**********************************************!*\
   !*** ./src/task/views/CheckboxListWidget.js ***!
   \**********************************************/
@@ -8716,7 +8772,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/widgets/CheckboxListWidget.mustache */ 33);
+	var template = __webpack_require__(/*! ./templates/widgets/CheckboxListWidget.mustache */ 34);
 	
 	var CheckboxListWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -8756,13 +8812,13 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
-/* 33 */
+/* 34 */
 /*!**********************************************************************!*\
   !*** ./src/task/views/templates/widgets/CheckboxListWidget.mustache ***!
   \**********************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -8822,7 +8878,7 @@ webpackJsonp([0],[
 	},"useData":true,"useDepths":true});
 
 /***/ }),
-/* 34 */
+/* 35 */
 /*!*********************************!*\
   !*** ./~/handlebars/runtime.js ***!
   \*********************************/
@@ -8830,11 +8886,11 @@ webpackJsonp([0],[
 
 	// Create a simple path alias to allow browserify to resolve
 	// the runtime on a supported path.
-	module.exports = __webpack_require__(/*! ./dist/cjs/handlebars.runtime */ 35);
+	module.exports = __webpack_require__(/*! ./dist/cjs/handlebars.runtime */ 36);
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /*!*****************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars.runtime.js ***!
   \*****************************************************/
@@ -8842,14 +8898,14 @@ webpackJsonp([0],[
 
 	"use strict";
 	/*globals Handlebars: true */
-	var base = __webpack_require__(/*! ./handlebars/base */ 36);
+	var base = __webpack_require__(/*! ./handlebars/base */ 37);
 	
 	// Each of these augment the Handlebars object. No need to setup here.
 	// (This is done to easily share code between commonjs and browse envs)
-	var SafeString = __webpack_require__(/*! ./handlebars/safe-string */ 38)["default"];
-	var Exception = __webpack_require__(/*! ./handlebars/exception */ 39)["default"];
-	var Utils = __webpack_require__(/*! ./handlebars/utils */ 37);
-	var runtime = __webpack_require__(/*! ./handlebars/runtime */ 40);
+	var SafeString = __webpack_require__(/*! ./handlebars/safe-string */ 39)["default"];
+	var Exception = __webpack_require__(/*! ./handlebars/exception */ 40)["default"];
+	var Utils = __webpack_require__(/*! ./handlebars/utils */ 38);
+	var runtime = __webpack_require__(/*! ./handlebars/runtime */ 41);
 	
 	// For compatibility and usage outside of module systems, make the Handlebars object a namespace
 	var create = function() {
@@ -8877,15 +8933,15 @@ webpackJsonp([0],[
 	exports["default"] = Handlebars;
 
 /***/ }),
-/* 36 */
+/* 37 */
 /*!**************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/base.js ***!
   \**************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Utils = __webpack_require__(/*! ./utils */ 37);
-	var Exception = __webpack_require__(/*! ./exception */ 39)["default"];
+	var Utils = __webpack_require__(/*! ./utils */ 38);
+	var Exception = __webpack_require__(/*! ./exception */ 40)["default"];
 	
 	var VERSION = "2.0.0";
 	exports.VERSION = VERSION;var COMPILER_REVISION = 6;
@@ -9116,7 +9172,7 @@ webpackJsonp([0],[
 	exports.createFrame = createFrame;
 
 /***/ }),
-/* 37 */
+/* 38 */
 /*!***************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/utils.js ***!
   \***************************************************/
@@ -9124,7 +9180,7 @@ webpackJsonp([0],[
 
 	"use strict";
 	/*jshint -W004 */
-	var SafeString = __webpack_require__(/*! ./safe-string */ 38)["default"];
+	var SafeString = __webpack_require__(/*! ./safe-string */ 39)["default"];
 	
 	var escape = {
 	  "&": "&amp;",
@@ -9212,7 +9268,7 @@ webpackJsonp([0],[
 	exports.appendContextPath = appendContextPath;
 
 /***/ }),
-/* 38 */
+/* 39 */
 /*!*********************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/safe-string.js ***!
   \*********************************************************/
@@ -9231,7 +9287,7 @@ webpackJsonp([0],[
 	exports["default"] = SafeString;
 
 /***/ }),
-/* 39 */
+/* 40 */
 /*!*******************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/exception.js ***!
   \*******************************************************/
@@ -9267,18 +9323,18 @@ webpackJsonp([0],[
 	exports["default"] = Exception;
 
 /***/ }),
-/* 40 */
+/* 41 */
 /*!*****************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/runtime.js ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Utils = __webpack_require__(/*! ./utils */ 37);
-	var Exception = __webpack_require__(/*! ./exception */ 39)["default"];
-	var COMPILER_REVISION = __webpack_require__(/*! ./base */ 36).COMPILER_REVISION;
-	var REVISION_CHANGES = __webpack_require__(/*! ./base */ 36).REVISION_CHANGES;
-	var createFrame = __webpack_require__(/*! ./base */ 36).createFrame;
+	var Utils = __webpack_require__(/*! ./utils */ 38);
+	var Exception = __webpack_require__(/*! ./exception */ 40)["default"];
+	var COMPILER_REVISION = __webpack_require__(/*! ./base */ 37).COMPILER_REVISION;
+	var REVISION_CHANGES = __webpack_require__(/*! ./base */ 37).REVISION_CHANGES;
+	var createFrame = __webpack_require__(/*! ./base */ 37).createFrame;
 	
 	function checkRevision(compilerInfo) {
 	  var compilerRevision = compilerInfo && compilerInfo[0] || 1,
@@ -9468,7 +9524,7 @@ webpackJsonp([0],[
 	}
 
 /***/ }),
-/* 41 */
+/* 42 */
 /*!********************************************!*\
   !*** ./src/task/views/DatePickerWidget.js ***!
   \********************************************/
@@ -9492,7 +9548,7 @@ webpackJsonp([0],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/widgets/DatePickerWidget.mustache */ 42); /*
+	var template = __webpack_require__(/*! ./templates/widgets/DatePickerWidget.mustache */ 43); /*
 	                                                                          * File Name : DatePickerWidget.js
 	                                                                          *
 	                                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
@@ -9548,13 +9604,13 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 1)))
 
 /***/ }),
-/* 42 */
+/* 43 */
 /*!********************************************************************!*\
   !*** ./src/task/views/templates/widgets/DatePickerWidget.mustache ***!
   \********************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='form-group date'>\n        <label for='altdate'>"
@@ -9583,7 +9639,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 43 */
+/* 44 */
 /*!******************************************!*\
   !*** ./src/task/views/TextAreaWidget.js ***!
   \******************************************/
@@ -9601,13 +9657,13 @@ webpackJsonp([0],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
-	var _tinymce = __webpack_require__(/*! ../../tinymce.js */ 44);
+	var _tinymce = __webpack_require__(/*! ../../tinymce.js */ 45);
 	
 	var _tinymce2 = _interopRequireDefault(_tinymce);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/widgets/TextAreaWidget.mustache */ 49); /*
+	var template = __webpack_require__(/*! ./templates/widgets/TextAreaWidget.mustache */ 50); /*
 	                                                                        * File Name : TextAreaWidget.js
 	                                                                        *
 	                                                                        * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9678,18 +9734,18 @@ webpackJsonp([0],[
 	exports.default = TextAreaWidget;
 
 /***/ }),
-/* 44 */,
 /* 45 */,
 /* 46 */,
 /* 47 */,
 /* 48 */,
-/* 49 */
+/* 49 */,
+/* 50 */
 /*!******************************************************************!*\
   !*** ./src/task/views/templates/widgets/TextAreaWidget.mustache ***!
   \******************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <label for='"
@@ -9724,13 +9780,13 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 50 */
+/* 51 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/CommonView.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "in";
@@ -9742,7 +9798,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 51 */
+/* 52 */
 /*!****************************************!*\
   !*** ./src/task/views/RightBarView.js ***!
   \****************************************/
@@ -9762,11 +9818,11 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 52);
+	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 53);
 	
 	var _ActionCollection2 = _interopRequireDefault(_ActionCollection);
 	
-	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 54);
+	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 55);
 	
 	var _ActionListView2 = _interopRequireDefault(_ActionListView);
 	
@@ -9782,7 +9838,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 59);
+	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 60);
 	
 	var RightBarView = _backbone2.default.View.extend({
 	    regions: {
@@ -9816,7 +9872,7 @@ webpackJsonp([0],[
 	exports.default = RightBarView;
 
 /***/ }),
-/* 52 */
+/* 53 */
 /*!*********************************************!*\
   !*** ./src/task/models/ActionCollection.js ***!
   \*********************************************/
@@ -9832,7 +9888,7 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 53);
+	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 54);
 	
 	var _ActionModel2 = _interopRequireDefault(_ActionModel);
 	
@@ -9854,7 +9910,7 @@ webpackJsonp([0],[
 	exports.default = ActionCollection;
 
 /***/ }),
-/* 53 */
+/* 54 */
 /*!****************************************!*\
   !*** ./src/task/models/ActionModel.js ***!
   \****************************************/
@@ -9885,7 +9941,7 @@ webpackJsonp([0],[
 	exports.default = ActionModel;
 
 /***/ }),
-/* 54 */
+/* 55 */
 /*!******************************************!*\
   !*** ./src/task/views/ActionListView.js ***!
   \******************************************/
@@ -9905,11 +9961,11 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _AnchorWidget = __webpack_require__(/*! ./AnchorWidget.js */ 55);
+	var _AnchorWidget = __webpack_require__(/*! ./AnchorWidget.js */ 56);
 	
 	var _AnchorWidget2 = _interopRequireDefault(_AnchorWidget);
 	
-	var _ToggleWidgetView = __webpack_require__(/*! ./ToggleWidgetView.js */ 57);
+	var _ToggleWidgetView = __webpack_require__(/*! ./ToggleWidgetView.js */ 58);
 	
 	var _ToggleWidgetView2 = _interopRequireDefault(_ToggleWidgetView);
 	
@@ -9942,7 +9998,7 @@ webpackJsonp([0],[
 	exports.default = ActionListView;
 
 /***/ }),
-/* 55 */
+/* 56 */
 /*!****************************************!*\
   !*** ./src/task/views/AnchorWidget.js ***!
   \****************************************/
@@ -9962,7 +10018,7 @@ webpackJsonp([0],[
 	
 	var AnchorWidget = _backbone2.default.View.extend({
 	  tagName: 'div',
-	  template: __webpack_require__(/*! ./templates/widgets/AnchorWidget.mustache */ 56)
+	  template: __webpack_require__(/*! ./templates/widgets/AnchorWidget.mustache */ 57)
 	}); /*
 	     * File Name : AnchorWidget.js
 	     *
@@ -9976,13 +10032,13 @@ webpackJsonp([0],[
 	exports.default = AnchorWidget;
 
 /***/ }),
-/* 56 */
+/* 57 */
 /*!****************************************************************!*\
   !*** ./src/task/views/templates/widgets/AnchorWidget.mustache ***!
   \****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -10000,7 +10056,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 57 */
+/* 58 */
 /*!********************************************!*\
   !*** ./src/task/views/ToggleWidgetView.js ***!
   \********************************************/
@@ -10018,7 +10074,7 @@ webpackJsonp([0],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/widgets/ToggleWidgetView.mustache */ 58); /*
+	var template = __webpack_require__(/*! ./templates/widgets/ToggleWidgetView.mustache */ 59); /*
 	                                                                          * File Name : ToggleWidgetView.js
 	                                                                          *
 	                                                                          * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -10038,13 +10094,13 @@ webpackJsonp([0],[
 	exports.default = ToggleWidgetView;
 
 /***/ }),
-/* 58 */
+/* 59 */
 /*!********************************************************************!*\
   !*** ./src/task/views/templates/widgets/ToggleWidgetView.mustache ***!
   \********************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -10067,13 +10123,13 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 59 */
+/* 60 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/RightBarView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -10100,95 +10156,6 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 60 */
-/*!****************************************!*\
-  !*** ./src/task/models/CommonModel.js ***!
-  \****************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _underscore = __webpack_require__(/*! underscore */ 16);
-	
-	var _underscore2 = _interopRequireDefault(_underscore);
-	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 105);
-	
-	var _BaseModel2 = _interopRequireDefault(_BaseModel);
-	
-	var _math = __webpack_require__(/*! ../../math.js */ 70);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var CommonModel = _BaseModel2.default.extend({
-	    props: ['id', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht'],
-	    validation: {
-	        date: {
-	            required: true,
-	            msg: "Veuillez saisir une date"
-	        },
-	        description: {
-	            required: true,
-	            msg: "Veuillez saisir un objet"
-	        },
-	        address: {
-	            required: true,
-	            msg: "Veuillez saisir une adresse"
-	        },
-	        expenses_ht: {
-	            required: false,
-	            pattern: 'amount',
-	            msg: "Le montant doit être un nombre"
-	        }
-	    },
-	    ht: function ht() {
-	        return this.get('expenses_ht');
-	    },
-	    tva_key: function tva_key() {
-	        var result;
-	        var tva_object = _underscore2.default.find(AppOption['tvas'], function (val) {
-	            return val['default'];
-	        });
-	        if (_underscore2.default.isUndefined(tva_object)) {
-	            result = 0;
-	        } else {
-	            var tva = tva_object.value.toString();
-	            result = (0, _math.strToFloat)(tva);
-	        }
-	        if (result < 0) {
-	            result = 0;
-	        }
-	        return result;
-	    },
-	    tva_amount: function tva_amount() {
-	        return getTvaPart(this.ht(), this.tva_key());
-	    },
-	    tvaParts: function tvaParts() {
-	        var result = {};
-	        var tva_amount = this.tva_key();
-	        result[tva_amount] = this.tva_amount();
-	        return result;
-	    },
-	    ttc: function ttc() {
-	        return this.ht() + this.amount();
-	    }
-	}); /*
-	     * File Name :
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
-	exports.default = CommonModel;
-
-/***/ }),
 /* 61 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskBlockView.js ***!
@@ -10205,7 +10172,7 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 63);
+	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 62);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
@@ -10213,7 +10180,7 @@ webpackJsonp([0],[
 	
 	var _TaskGroupCollectionView2 = _interopRequireDefault(_TaskGroupCollectionView);
 	
-	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 85);
+	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 84);
 	
 	var _TaskGroupFormView2 = _interopRequireDefault(_TaskGroupFormView);
 	
@@ -10222,7 +10189,7 @@ webpackJsonp([0],[
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TaskBlockView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 87),
+	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 86),
 	    tagName: 'div',
 	    className: 'form-section',
 	    regions: {
@@ -10304,128 +10271,6 @@ webpackJsonp([0],[
 
 /***/ }),
 /* 62 */
-/*!************************************************!*\
-  !*** ./src/task/models/TaskGroupCollection.js ***!
-  \************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone */ 17);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 63);
-	
-	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var TaskGroupCollection = _backbone2.default.Collection.extend({
-	    model: _TaskGroupModel2.default,
-	    url: function url() {
-	        return AppOption['context_url'] + '/' + 'task_line_groups';
-	    },
-	    comparator: 'order',
-	    initialize: function initialize(options) {
-	        this.on('change:reorder', this.updateModelOrder);
-	        this.updateModelOrder(false);
-	    },
-	    updateModelOrder: function updateModelOrder(sync) {
-	        var sync = sync || true;
-	        this.each(function (model, index) {
-	            model.set('order', index);
-	            if (sync) {
-	                model.save({ 'order': index }, { patch: true });
-	            }
-	        });
-	    },
-	    getMinOrder: function getMinOrder() {
-	        if (this.models.length == 0) {
-	            return 0;
-	        }
-	        var first_model = _.min(this.models, function (model) {
-	            return model.get('order');
-	        });
-	        return first_model.get('order');
-	    },
-	    getMaxOrder: function getMaxOrder() {
-	        if (this.models.length == 0) {
-	            return 0;
-	        }
-	        var last_model = _.max(this.models, function (model) {
-	            return model.get('order');
-	        });
-	        return last_model.get('order');
-	    },
-	    moveUp: function moveUp(model) {
-	        // I see move up as the -1
-	        var index = this.indexOf(model);
-	        if (index > 0) {
-	            this.models.splice(index - 1, 0, this.models.splice(index, 1)[0]);
-	            this.trigger('change:reorder');
-	        }
-	    },
-	    moveDown: function moveDown(model) {
-	        // I see move up as the -1
-	        var index = this.indexOf(model);
-	        if (index < this.models.length) {
-	            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
-	            this.trigger('change:reorder');
-	        }
-	    },
-	    load_from_catalog: function load_from_catalog(sale_product_group_ids) {
-	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=load_from_catalog', { sale_product_group_ids: sale_product_group_ids }, 'POST');
-	        serverRequest.then(this.fetch.bind(this));
-	    },
-	    ht: function ht() {
-	        var result = 0;
-	        this.each(function (model) {
-	            result += model.ht();
-	        });
-	        return result;
-	    },
-	    tvaParts: function tvaParts() {
-	        var result = {};
-	        this.each(function (model) {
-	            var tva_parts = model.tvaParts();
-	            _.each(tva_parts, function (key, value) {
-	                if (key in result) {
-	                    value += result[key];
-	                }
-	                result[key] = value;
-	            });
-	        });
-	        return result;
-	    },
-	    ttc: function ttc() {
-	        var result = 0;
-	        this.each(function (model) {
-	            result += model.ttc();
-	        });
-	        return result;
-	    }
-	}); /*
-	     * File Name : TaskGroupCollection.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
-	exports.default = TaskGroupCollection;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
-
-/***/ }),
-/* 63 */
 /*!*******************************************!*\
   !*** ./src/task/models/TaskGroupModel.js ***!
   \*******************************************/
@@ -10445,7 +10290,7 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 64);
+	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 63);
 	
 	var _TaskLineCollection2 = _interopRequireDefault(_TaskLineCollection);
 	
@@ -10503,7 +10348,7 @@ webpackJsonp([0],[
 	exports.default = TaskGroupModel;
 
 /***/ }),
-/* 64 */
+/* 63 */
 /*!***********************************************!*\
   !*** ./src/task/models/TaskLineCollection.js ***!
   \***********************************************/
@@ -10523,7 +10368,7 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 65);
+	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 64);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
@@ -10618,7 +10463,7 @@ webpackJsonp([0],[
 	exports.default = TaskLineCollection;
 
 /***/ }),
-/* 65 */
+/* 64 */
 /*!******************************************!*\
   !*** ./src/task/models/TaskLineModel.js ***!
   \******************************************/
@@ -10638,7 +10483,7 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 70);
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -10705,339 +10550,7 @@ webpackJsonp([0],[
 	exports.default = TaskLineModel;
 
 /***/ }),
-/* 66 */
-/*!***************************************************!*\
-  !*** ./src/task/views/TaskGroupCollectionView.js ***!
-  \***************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 67);
-	
-	var _TaskGroupView2 = _interopRequireDefault(_TaskGroupView);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : TaskGroupCollectionView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var TaskGroupCollectionView = _backbone2.default.CollectionView.extend({
-	    tagName: 'div',
-	    childView: _TaskGroupView2.default,
-	    collectionEvents: {
-	        'change:reorder': 'render',
-	        'sync': 'render'
-	    },
-	    // Bubble up child view events
-	    childViewTriggers: {
-	        'edit': 'group:edit',
-	        'delete': 'group:delete',
-	        'catalog:insert': 'catalog:insert'
-	    },
-	    onChildviewOrderUp: function onChildviewOrderUp(childView) {
-	        this.collection.moveUp(childView.model);
-	    },
-	    onChildviewOrderDown: function onChildviewOrderDown(childView) {
-	        this.collection.moveDown(childView.model);
-	    }
-	});
-	
-	exports.default = TaskGroupCollectionView;
-
-/***/ }),
-/* 67 */
-/*!*****************************************!*\
-  !*** ./src/task/views/TaskGroupView.js ***!
-  \*****************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 68);
-	
-	var _TaskLineCollectionView2 = _interopRequireDefault(_TaskLineCollectionView);
-	
-	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 72);
-	
-	var _TaskLineFormView2 = _interopRequireDefault(_TaskLineFormView);
-	
-	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 65);
-	
-	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
-	
-	var _math = __webpack_require__(/*! ../../math.js */ 70);
-	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : TaskGroupView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 84);
-	
-	var TaskGroupView = _backbone2.default.View.extend({
-	    tagName: 'div',
-	    className: 'taskline-group row',
-	    template: template,
-	    regions: {
-	        lines: '.lines',
-	        modalRegion: ".modalregion"
-	    },
-	    ui: {
-	        btn_add: ".btn-add",
-	        up_button: 'button.up',
-	        down_button: 'button.down',
-	        edit_button: 'button.edit',
-	        delete_button: 'button.delete'
-	    },
-	    triggers: {
-	        'click @ui.up_button': 'order:up',
-	        'click @ui.down_button': 'order:down',
-	        'click @ui.edit_button': 'edit',
-	        'click @ui.delete_button': 'delete'
-	    },
-	    events: {
-	        "click @ui.btn_add": "onLineAdd"
-	    },
-	    childViewEvents: {
-	        'line:edit': 'onLineEdit',
-	        'line:delete': 'onLineDelete',
-	        'catalog:insert': 'onCatalogInsert',
-	        'destroy:modal': 'render'
-	    },
-	    initialize: function initialize(options) {
-	        // this.listenTo(this.model.lines, 'sync', this.render);
-	    },
-	    isEmpty: function isEmpty() {
-	        return this.model.lines.length === 0;
-	    },
-	    onRender: function onRender() {
-	        if (!this.isEmpty()) {
-	            this.showChildView('lines', new _TaskLineCollectionView2.default({ collection: this.model.lines }));
-	        }
-	    },
-	    onLineEdit: function onLineEdit(childView) {
-	        this.showTaskLineForm(childView.model, "Modifier la prestation", true);
-	    },
-	    onLineAdd: function onLineAdd() {
-	        var model = new _TaskLineModel2.default({
-	            task_id: this.model.get('id'),
-	            order: this.model.lines.getMaxOrder() + 1
-	        });
-	        this.showTaskLineForm(model, "Ajouter une prestation", false);
-	    },
-	    showTaskLineForm: function showTaskLineForm(model, title, edit) {
-	        var form = new _TaskLineFormView2.default({
-	            model: model,
-	            title: title,
-	            destCollection: this.model.lines,
-	            edit: edit
-	        });
-	        this.showChildView('modalRegion', form);
-	    },
-	    onDeleteSuccess: function onDeleteSuccess() {
-	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été supprimées");
-	    },
-	    onDeleteError: function onDeleteError() {
-	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "suppression de cet élément");
-	    },
-	    onLineDelete: function onLineDelete(childView) {
-	        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cette prestation ?");
-	        if (result) {
-	            childView.model.destroy({
-	                success: this.onDeleteSuccess,
-	                error: this.onDeleteError
-	            });
-	        }
-	    },
-	    onCatalogInsert: function onCatalogInsert(sale_product_ids) {
-	        this.model.load_from_catalog(sale_product_ids);
-	        this.getChildView('modalRegion').triggerMethod('modal:close');
-	    },
-	    onChildviewDestroyModal: function onChildviewDestroyModal() {
-	        this.getRegion('modalRegion').empty();
-	    },
-	    templateContext: function templateContext() {
-	        var min_order = this.model.collection.getMinOrder();
-	        var max_order = this.model.collection.getMaxOrder();
-	        var order = this.model.get('order');
-	        return {
-	            not_is_empty: !this.isEmpty(),
-	            total_ht: (0, _math.formatAmount)(this.model.ht()),
-	            is_not_first: order != min_order,
-	            is_not_last: order != max_order
-	        };
-	    }
-	});
-	exports.default = TaskGroupView;
-
-/***/ }),
-/* 68 */
-/*!**************************************************!*\
-  !*** ./src/task/views/TaskLineCollectionView.js ***!
-  \**************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 69);
-	
-	var _TaskLineView2 = _interopRequireDefault(_TaskLineView);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : TaskLineCollectionView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var TaskLineCollectionView = _backbone2.default.CollectionView.extend({
-	    tagName: 'div',
-	    className: 'col-xs-12',
-	    childView: _TaskLineView2.default,
-	    sort: true,
-	    collectionEvents: {
-	        'change:reorder': 'render',
-	        'sync': 'render'
-	    },
-	    // Bubble up child view events
-	    childViewTriggers: {
-	        'edit': 'line:edit',
-	        'delete': 'line:delete'
-	    },
-	    onChildviewOrderUp: function onChildviewOrderUp(childView) {
-	        this.collection.moveUp(childView.model);
-	    },
-	    onChildviewOrderDown: function onChildviewOrderDown(childView) {
-	        this.collection.moveDown(childView.model);
-	    }
-	});
-	exports.default = TaskLineCollectionView;
-
-/***/ }),
-/* 69 */
-/*!****************************************!*\
-  !*** ./src/task/views/TaskLineView.js ***!
-  \****************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _underscore = __webpack_require__(/*! underscore */ 16);
-	
-	var _underscore2 = _interopRequireDefault(_underscore);
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _math = __webpack_require__(/*! ../../math.js */ 70);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 71); /*
-	                                                              * File Name : TaskLineView.js
-	                                                              *
-	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                              * Company : Majerti ( http://www.majerti.fr )
-	                                                              *
-	                                                              * This software is distributed under GPLV3
-	                                                              * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                              *
-	                                                              */
-	
-	
-	var TaskLineView = _backbone2.default.View.extend({
-	    tagName: 'div',
-	    className: 'row taskline',
-	    template: template,
-	    ui: {
-	        up_button: 'button.up',
-	        down_button: 'button.down',
-	        edit_button: 'button.edit',
-	        delete_button: 'button.delete'
-	    },
-	    triggers: {
-	        'click @ui.up_button': 'order:up',
-	        'click @ui.down_button': 'order:down',
-	        'click @ui.edit_button': 'edit',
-	        'click @ui.delete_button': 'delete'
-	    },
-	    getTvaLabel: function getTvaLabel() {
-	        var res = "";
-	        var current_value = this.model.get('tva');
-	        _underscore2.default.each(AppOption['form_options']['tva_options'], function (tva) {
-	            if (tva.value == current_value) {
-	                res = tva.name;
-	            }
-	        });
-	        return res;
-	    },
-	    templateContext: function templateContext() {
-	        var min_order = this.model.collection.getMinOrder();
-	        var max_order = this.model.collection.getMaxOrder();
-	        var order = this.model.get('order');
-	        return {
-	            ht: (0, _math.formatAmount)(this.model.ht()),
-	            tva_label: this.getTvaLabel(),
-	            is_not_first: order != min_order,
-	            is_not_last: order != max_order
-	        };
-	    }
-	});
-	exports.default = TaskLineView;
-
-/***/ }),
-/* 70 */
+/* 65 */
 /*!*********************!*\
   !*** ./src/math.js ***!
   \*********************/
@@ -11232,13 +10745,345 @@ webpackJsonp([0],[
 	};
 
 /***/ }),
-/* 71 */
+/* 66 */
+/*!***************************************************!*\
+  !*** ./src/task/views/TaskGroupCollectionView.js ***!
+  \***************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 67);
+	
+	var _TaskGroupView2 = _interopRequireDefault(_TaskGroupView);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : TaskGroupCollectionView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var TaskGroupCollectionView = _backbone2.default.CollectionView.extend({
+	    tagName: 'div',
+	    childView: _TaskGroupView2.default,
+	    collectionEvents: {
+	        'change:reorder': 'render',
+	        'sync': 'render'
+	    },
+	    // Bubble up child view events
+	    childViewTriggers: {
+	        'edit': 'group:edit',
+	        'delete': 'group:delete',
+	        'catalog:insert': 'catalog:insert'
+	    },
+	    onChildviewOrderUp: function onChildviewOrderUp(childView) {
+	        this.collection.moveUp(childView.model);
+	    },
+	    onChildviewOrderDown: function onChildviewOrderDown(childView) {
+	        this.collection.moveDown(childView.model);
+	    }
+	});
+	
+	exports.default = TaskGroupCollectionView;
+
+/***/ }),
+/* 67 */
+/*!*****************************************!*\
+  !*** ./src/task/views/TaskGroupView.js ***!
+  \*****************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 68);
+	
+	var _TaskLineCollectionView2 = _interopRequireDefault(_TaskLineCollectionView);
+	
+	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 71);
+	
+	var _TaskLineFormView2 = _interopRequireDefault(_TaskLineFormView);
+	
+	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 64);
+	
+	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : TaskGroupView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 83);
+	
+	var TaskGroupView = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    className: 'taskline-group row',
+	    template: template,
+	    regions: {
+	        lines: '.lines',
+	        modalRegion: ".modalregion"
+	    },
+	    ui: {
+	        btn_add: ".btn-add",
+	        up_button: 'button.up',
+	        down_button: 'button.down',
+	        edit_button: 'button.edit',
+	        delete_button: 'button.delete'
+	    },
+	    triggers: {
+	        'click @ui.up_button': 'order:up',
+	        'click @ui.down_button': 'order:down',
+	        'click @ui.edit_button': 'edit',
+	        'click @ui.delete_button': 'delete'
+	    },
+	    events: {
+	        "click @ui.btn_add": "onLineAdd"
+	    },
+	    childViewEvents: {
+	        'line:edit': 'onLineEdit',
+	        'line:delete': 'onLineDelete',
+	        'catalog:insert': 'onCatalogInsert',
+	        'destroy:modal': 'render'
+	    },
+	    initialize: function initialize(options) {
+	        // this.listenTo(this.model.lines, 'sync', this.render);
+	    },
+	    isEmpty: function isEmpty() {
+	        return this.model.lines.length === 0;
+	    },
+	    onRender: function onRender() {
+	        if (!this.isEmpty()) {
+	            this.showChildView('lines', new _TaskLineCollectionView2.default({ collection: this.model.lines }));
+	        }
+	    },
+	    onLineEdit: function onLineEdit(childView) {
+	        this.showTaskLineForm(childView.model, "Modifier la prestation", true);
+	    },
+	    onLineAdd: function onLineAdd() {
+	        var model = new _TaskLineModel2.default({
+	            task_id: this.model.get('id'),
+	            order: this.model.lines.getMaxOrder() + 1
+	        });
+	        this.showTaskLineForm(model, "Ajouter une prestation", false);
+	    },
+	    showTaskLineForm: function showTaskLineForm(model, title, edit) {
+	        var form = new _TaskLineFormView2.default({
+	            model: model,
+	            title: title,
+	            destCollection: this.model.lines,
+	            edit: edit
+	        });
+	        this.showChildView('modalRegion', form);
+	    },
+	    onDeleteSuccess: function onDeleteSuccess() {
+	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été supprimées");
+	    },
+	    onDeleteError: function onDeleteError() {
+	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "suppression de cet élément");
+	    },
+	    onLineDelete: function onLineDelete(childView) {
+	        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cette prestation ?");
+	        if (result) {
+	            childView.model.destroy({
+	                success: this.onDeleteSuccess,
+	                error: this.onDeleteError
+	            });
+	        }
+	    },
+	    onCatalogInsert: function onCatalogInsert(sale_product_ids) {
+	        this.model.load_from_catalog(sale_product_ids);
+	        this.getChildView('modalRegion').triggerMethod('modal:close');
+	    },
+	    onChildviewDestroyModal: function onChildviewDestroyModal() {
+	        this.getRegion('modalRegion').empty();
+	    },
+	    templateContext: function templateContext() {
+	        var min_order = this.model.collection.getMinOrder();
+	        var max_order = this.model.collection.getMaxOrder();
+	        var order = this.model.get('order');
+	        return {
+	            not_is_empty: !this.isEmpty(),
+	            total_ht: (0, _math.formatAmount)(this.model.ht()),
+	            is_not_first: order != min_order,
+	            is_not_last: order != max_order
+	        };
+	    }
+	});
+	exports.default = TaskGroupView;
+
+/***/ }),
+/* 68 */
+/*!**************************************************!*\
+  !*** ./src/task/views/TaskLineCollectionView.js ***!
+  \**************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 69);
+	
+	var _TaskLineView2 = _interopRequireDefault(_TaskLineView);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : TaskLineCollectionView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var TaskLineCollectionView = _backbone2.default.CollectionView.extend({
+	    tagName: 'div',
+	    className: 'col-xs-12',
+	    childView: _TaskLineView2.default,
+	    sort: true,
+	    collectionEvents: {
+	        'change:reorder': 'render',
+	        'sync': 'render'
+	    },
+	    // Bubble up child view events
+	    childViewTriggers: {
+	        'edit': 'line:edit',
+	        'delete': 'line:delete'
+	    },
+	    onChildviewOrderUp: function onChildviewOrderUp(childView) {
+	        this.collection.moveUp(childView.model);
+	    },
+	    onChildviewOrderDown: function onChildviewOrderDown(childView) {
+	        this.collection.moveDown(childView.model);
+	    }
+	});
+	exports.default = TaskLineCollectionView;
+
+/***/ }),
+/* 69 */
+/*!****************************************!*\
+  !*** ./src/task/views/TaskLineView.js ***!
+  \****************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _underscore = __webpack_require__(/*! underscore */ 16);
+	
+	var _underscore2 = _interopRequireDefault(_underscore);
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 70); /*
+	                                                              * File Name : TaskLineView.js
+	                                                              *
+	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                              * Company : Majerti ( http://www.majerti.fr )
+	                                                              *
+	                                                              * This software is distributed under GPLV3
+	                                                              * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                              *
+	                                                              */
+	
+	
+	var TaskLineView = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    className: 'row taskline',
+	    template: template,
+	    ui: {
+	        up_button: 'button.up',
+	        down_button: 'button.down',
+	        edit_button: 'button.edit',
+	        delete_button: 'button.delete'
+	    },
+	    triggers: {
+	        'click @ui.up_button': 'order:up',
+	        'click @ui.down_button': 'order:down',
+	        'click @ui.edit_button': 'edit',
+	        'click @ui.delete_button': 'delete'
+	    },
+	    getTvaLabel: function getTvaLabel() {
+	        var res = "";
+	        var current_value = this.model.get('tva');
+	        _underscore2.default.each(AppOption['form_options']['tva_options'], function (tva) {
+	            if (tva.value == current_value) {
+	                res = tva.name;
+	            }
+	        });
+	        return res;
+	    },
+	    templateContext: function templateContext() {
+	        var min_order = this.model.collection.getMinOrder();
+	        var max_order = this.model.collection.getMaxOrder();
+	        var order = this.model.get('order');
+	        return {
+	            ht: (0, _math.formatAmount)(this.model.ht()),
+	            tva_label: this.getTvaLabel(),
+	            is_not_first: order != min_order,
+	            is_not_last: order != max_order
+	        };
+	    }
+	});
+	exports.default = TaskLineView;
+
+/***/ }),
+/* 70 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/TaskLineView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "    <button type='button' class='btn btn-default btn-small up'>\n        <i class='glyphicon glyphicon-arrow-up'></i>\n    </button>\n    <br />\n";
@@ -11274,7 +11119,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 72 */
+/* 71 */
 /*!********************************************!*\
   !*** ./src/task/views/TaskLineFormView.js ***!
   \********************************************/
@@ -11292,27 +11137,27 @@ webpackJsonp([0],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
-	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 72);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ./SelectWidget.js */ 75);
+	var _SelectWidget = __webpack_require__(/*! ./SelectWidget.js */ 74);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 43);
+	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 44);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../behaviors/ModalFormBehavior.js */ 77);
+	var _ModalFormBehavior = __webpack_require__(/*! ../behaviors/ModalFormBehavior.js */ 76);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 79);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 78);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ./LoadingWidget.js */ 81);
+	var _LoadingWidget = __webpack_require__(/*! ./LoadingWidget.js */ 80);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
@@ -11328,7 +11173,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 83);
+	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 82);
 	
 	var TaskLineFormView = _backbone2.default.View.extend({
 	    template: template,
@@ -11352,22 +11197,19 @@ webpackJsonp([0],[
 	        'click @ui.btn_cancel': 'modal:close'
 	    },
 	    childViewEvents: {
-	        'change': 'onChildChange',
 	        'catalog:edit': 'onCatalogEdit'
 	    },
 	    // Bubble up child view events
 	    //
 	    childViewTriggers: {
-	        'catalog:insert': 'catalog:insert'
+	        'catalog:insert': 'catalog:insert',
+	        'change': 'data:modified'
 	    },
 	    modelEvents: {
 	        'set:product': 'refreshForm'
 	    },
 	    onSuccessSync: function onSuccessSync() {
 	        this.trigger('modal:close');
-	    },
-	    onChildChange: function onChildChange(attribute, value) {
-	        this.triggerMethod('data:modified', this, attribute, value);
 	    },
 	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
@@ -11441,7 +11283,7 @@ webpackJsonp([0],[
 	exports.default = TaskLineFormView;
 
 /***/ }),
-/* 73 */
+/* 72 */
 /*!***************************************!*\
   !*** ./src/task/views/InputWidget.js ***!
   \***************************************/
@@ -11474,7 +11316,7 @@ webpackJsonp([0],[
 	var InputWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-group',
-	    template: __webpack_require__(/*! ./templates/widgets/InputWidget.mustache */ 74),
+	    template: __webpack_require__(/*! ./templates/widgets/InputWidget.mustache */ 73),
 	    ui: {
 	        input: 'input'
 	    },
@@ -11503,13 +11345,13 @@ webpackJsonp([0],[
 	exports.default = InputWidget;
 
 /***/ }),
-/* 74 */
+/* 73 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/widgets/InputWidget.mustache ***!
   \***************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class=\"input-group-addon\">";
@@ -11542,7 +11384,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 75 */
+/* 74 */
 /*!****************************************!*\
   !*** ./src/task/views/SelectWidget.js ***!
   \****************************************/
@@ -11576,7 +11418,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/widgets/SelectWidget.mustache */ 76);
+	var template = __webpack_require__(/*! ./templates/widgets/SelectWidget.mustache */ 75);
 	
 	var SelectWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -11613,13 +11455,13 @@ webpackJsonp([0],[
 	exports.default = SelectWidget;
 
 /***/ }),
-/* 76 */
+/* 75 */
 /*!****************************************************************!*\
   !*** ./src/task/views/templates/widgets/SelectWidget.mustache ***!
   \****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "multiple";
@@ -11651,7 +11493,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 77 */
+/* 76 */
 /*!*************************************************!*\
   !*** ./src/task/behaviors/ModalFormBehavior.js ***!
   \*************************************************/
@@ -11669,7 +11511,7 @@ webpackJsonp([0],[
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 78);
+	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 77);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
@@ -11702,7 +11544,7 @@ webpackJsonp([0],[
 	exports.default = ModalFormBehavior;
 
 /***/ }),
-/* 78 */
+/* 77 */
 /*!*********************************************!*\
   !*** ./src/task/behaviors/ModalBehavior.js ***!
   \*********************************************/
@@ -11761,7 +11603,7 @@ webpackJsonp([0],[
 	exports.default = ModalBehavior;
 
 /***/ }),
-/* 79 */
+/* 78 */
 /*!*******************************************!*\
   !*** ./src/task/views/CatalogTreeView.js ***!
   \*******************************************/
@@ -11791,7 +11633,7 @@ webpackJsonp([0],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 80);
+	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 79);
 	
 	var CatalogTreeView = _backbone2.default.View.extend({
 	    /*
@@ -11885,20 +11727,20 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
-/* 80 */
+/* 79 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/CatalogTreeView.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<input class=\"form-control\" name=\"catalog_search\" placeholder=\"Nom ou référence\" type=\"text\" />\n<div class='tree'>\n</div>\n<div class=\"form-group\">\n    <div class=\"text-right\">\n        <button class=\"btn btn-success primary-action edit-catalog\" type=\"button\">\n            Éditer comme un nouvel élément\n        </button>\n        <button class=\"btn btn-success secondary-action insert-catalog\" type=\"button\">\n            Insérer les éléments sélectionnés\n        </button>\n        <button class=\"btn btn-default secondary-action cancel-catalog\" type=\"button\">\n            Annuler\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 81 */
+/* 80 */
 /*!*****************************************!*\
   !*** ./src/task/views/LoadingWidget.js ***!
   \*****************************************/
@@ -11916,7 +11758,7 @@ webpackJsonp([0],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/widgets/LoadingWidget.mustache */ 82); /*
+	var template = __webpack_require__(/*! ./templates/widgets/LoadingWidget.mustache */ 81); /*
 	                                                                       * File Name : LoadingWidget.js
 	                                                                       *
 	                                                                       * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -11933,26 +11775,26 @@ webpackJsonp([0],[
 	exports.default = LoadingWidget;
 
 /***/ }),
-/* 82 */
+/* 81 */
 /*!*****************************************************************!*\
   !*** ./src/task/views/templates/widgets/LoadingWidget.mustache ***!
   \*****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='loader'>\n<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\" aria-hidden=\"true\"></i>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 83 */
+/* 82 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/TaskLineFormView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\"\n                        tabindex='-1'\n                        >\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        tabindex='-1'\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
@@ -11973,13 +11815,13 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 84 */
+/* 83 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskGroupView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "                <button type='button' class='btn btn-default btn-small up' tabindex='-1'>\n                    <i class='glyphicon glyphicon-arrow-up'></i>\n                </button>\n                <br />\n";
@@ -12023,7 +11865,7 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 85 */
+/* 84 */
 /*!*********************************************!*\
   !*** ./src/task/views/TaskGroupFormView.js ***!
   \*********************************************/
@@ -12039,31 +11881,31 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 72);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 43);
+	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 44);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../behaviors/ModalFormBehavior.js */ 77);
+	var _ModalFormBehavior = __webpack_require__(/*! ../behaviors/ModalFormBehavior.js */ 76);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 79);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 78);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ./LoadingWidget.js */ 81);
+	var _LoadingWidget = __webpack_require__(/*! ./LoadingWidget.js */ 80);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 86); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 85); /*
 	                                                                   * File Name : TaskGroupFormView.js
 	                                                                   *
 	                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -12093,17 +11935,14 @@ webpackJsonp([0],[
 	        'click @ui.btn_cancel': 'modal:close'
 	    },
 	    childViewEvents: {
-	        'change': 'onChildChange',
 	        'catalog:edit': 'onCatalogEdit'
 	    },
 	    childViewTriggers: {
-	        'catalog:insert': 'catalog:insert'
+	        'catalog:insert': 'catalog:insert',
+	        'change': 'data:modified'
 	    },
 	    modelEvents: {
 	        'change': 'refreshForm'
-	    },
-	    onChildChange: function onChildChange(attribute, value) {
-	        this.triggerMethod('data:modified', this, attribute, value);
 	    },
 	    onCatalogEdit: function onCatalogEdit(productgroup_datas) {
 	        this.model.loadProductGroup(productgroup_datas);
@@ -12153,13 +11992,13 @@ webpackJsonp([0],[
 	exports.default = TaskGroupFormView;
 
 /***/ }),
-/* 86 */
+/* 85 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/TaskGroupFormView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
@@ -12180,20 +12019,775 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 87 */
+/* 86 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskBlockView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Description des prestations</h2>\n<div class='content'>\n    <div class='group-container'></div>\n    <div class='group-modalregion'></div>\n    <div class='actions text-right'>\n        <button class='btn btn-default add' type='button'>\n            <i class='glyphicon glyphicon-plus-sign'></i> Ajouter un ouvrage\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
+/* 87 */
+/*!*********************************************!*\
+  !*** ./src/task/views/DiscountBlockView.js ***!
+  \*********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 88);
+	
+	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
+	
+	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 89);
+	
+	var _DiscountCollectionView2 = _interopRequireDefault(_DiscountCollectionView);
+	
+	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 92);
+	
+	var _DiscountFormPopupView2 = _interopRequireDefault(_DiscountFormPopupView);
+	
+	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 98);
+	
+	var _ExpenseView2 = _interopRequireDefault(_ExpenseView);
+	
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : DiscountBlockView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var DiscountBlockView = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    className: 'form-section discount-group',
+	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 100),
+	    regions: {
+	        'lines': '.lines',
+	        'modalRegion': '.modalregion',
+	        'expenses_ht': '.expenses_ht'
+	    },
+	    ui: {
+	        add_button: 'button.btn-add'
+	    },
+	    triggers: {
+	        "click @ui.add_button": "line:add"
+	    },
+	    childViewEvents: {
+	        'line:edit': 'onLineEdit',
+	        'line:delete': 'onLineDelete',
+	        'destroy:modal': 'render',
+	        'insert:percent': 'onInsertPercent'
+	    },
+	    initialize: function initialize(options) {
+	        this.collection = options['collection'];
+	        this.model = options['model'];
+	    },
+	    isEmpty: function isEmpty() {
+	        return this.collection.length === 0;
+	    },
+	    onLineAdd: function onLineAdd() {
+	        var model = new _DiscountModel2.default();
+	        this.showDiscountLineForm(model, "Ajouter la remise", false);
+	    },
+	    onLineEdit: function onLineEdit(childView) {
+	        this.showDiscountLineForm(childView.model, "Modifier la remise", true);
+	    },
+	    showDiscountLineForm: function showDiscountLineForm(model, title, edit) {
+	        var form = new _DiscountFormPopupView2.default({
+	            model: model,
+	            title: title,
+	            destCollection: this.collection,
+	            edit: edit
+	        });
+	        this.showChildView('modalRegion', form);
+	    },
+	    onDeleteSuccess: function onDeleteSuccess() {
+	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été supprimées");
+	    },
+	    onDeleteError: function onDeleteError() {
+	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "suppression de cet élément");
+	    },
+	    onLineDelete: function onLineDelete(childView) {
+	        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cette remise ?");
+	        if (result) {
+	            childView.model.destroy({
+	                success: this.onDeleteSuccess,
+	                error: this.onDeleteError
+	            });
+	        }
+	    },
+	    onInsertPercent: function onInsertPercent(model) {
+	        this.collection.insert_percent(model);
+	        this.getChildView('modalRegion').triggerMethod('modal:close');
+	    },
+	    isMoreSet: function isMoreSet() {
+	        var value = this.model.get('expenses_ht');
+	        if (value && value != '0') {
+	            return true;
+	        }
+	        return false;
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            not_empty: !this.isEmpty(),
+	            is_more_set: this.isMoreSet()
+	        };
+	    },
+	    onRender: function onRender() {
+	        if (!this.isEmpty()) {
+	            this.showChildView('lines', new _DiscountCollectionView2.default({ collection: this.collection }));
+	        }
+	        this.showChildView('expenses_ht', new _ExpenseView2.default({ model: this.model }));
+	    }
+	});
+	exports.default = DiscountBlockView;
+
+/***/ }),
 /* 88 */
+/*!******************************************!*\
+  !*** ./src/task/models/DiscountModel.js ***!
+  \******************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone */ 17);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : DiscountModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var DiscountModel = _backbone2.default.Model.extend({
+	    props: ['id', 'amount', 'tva', 'ht', 'description'],
+	    validation: {
+	        description: {
+	            required: true,
+	            msg: "Veuillez saisir un objet"
+	        },
+	        amount: {
+	            required: true,
+	            pattern: "amount",
+	            msg: "Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule"
+	        },
+	        tva: {
+	            required: true,
+	            pattern: "number",
+	            msg: "Veuillez sélectionner une TVA"
+	        }
+	    },
+	    constructor: function constructor() {
+	        arguments[0] = _.pick(arguments[0], this.props);
+	        _backbone2.default.Model.apply(this, arguments);
+	    },
+	    ht: function ht() {
+	        return this.get('amount');
+	    },
+	    tva: function tva() {
+	        return (0, _math.getTvaPart)(this.ht(), this.get('tva'));
+	    },
+	    ttc: function ttc() {
+	        return this.ht() + this.tva();
+	    }
+	});
+	exports.default = DiscountModel;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
+
+/***/ }),
+/* 89 */
+/*!**************************************************!*\
+  !*** ./src/task/views/DiscountCollectionView.js ***!
+  \**************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 90);
+	
+	var _DiscountView2 = _interopRequireDefault(_DiscountView);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : DiscountCollectionView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var DiscountCollectionView = _backbone2.default.CollectionView.extend({
+	    tagName: 'div',
+	    className: 'col-xs-12',
+	    childView: _DiscountView2.default,
+	    // Bubble up child view events
+	    childViewTriggers: {
+	        'edit': 'line:edit',
+	        'delete': 'line:delete'
+	    }
+	});
+	exports.default = DiscountCollectionView;
+
+/***/ }),
+/* 90 */
+/*!****************************************!*\
+  !*** ./src/task/views/DiscountView.js ***!
+  \****************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _underscore = __webpack_require__(/*! underscore */ 16);
+	
+	var _underscore2 = _interopRequireDefault(_underscore);
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 91); /*
+	                                                              * File Name : DiscountView.js
+	                                                              *
+	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                              * Company : Majerti ( http://www.majerti.fr )
+	                                                              *
+	                                                              * This software is distributed under GPLV3
+	                                                              * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                              *
+	                                                              */
+	
+	
+	var DiscountView = _backbone2.default.View.extend({
+	    template: template,
+	    ui: {
+	        edit_button: 'button.edit',
+	        delete_button: 'button.delete'
+	    },
+	    // Trigger to the parent
+	    triggers: {
+	        'click @ui.edit_button': 'edit',
+	        'click @ui.delete_button': 'delete'
+	    },
+	    getTvaLabel: function getTvaLabel() {
+	        var res = "";
+	        var current_value = this.model.get('tva');
+	        _underscore2.default.each(AppOption['form_options']['tva_options'], function (tva) {
+	            if (tva.value == current_value) {
+	                res = tva.name;
+	            }
+	        });
+	        return res;
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            ht: (0, _math.formatAmount)(this.model.ht()),
+	            tva_label: this.getTvaLabel()
+	        };
+	    }
+	});
+	exports.default = DiscountView;
+
+/***/ }),
+/* 91 */
+/*!********************************************************!*\
+  !*** ./src/task/views/templates/DiscountView.mustache ***!
+  \********************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class='col-md-3 col-sm-4 col-xs-12 description'>";
+	  stack1 = ((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</div>\n<div class='col-md-3 col-sm-2 col-xs-12 amount'><b class='visible-xs text-left'>HT : ";
+	  stack1 = ((helper = (helper = helpers.ht || (depth0 != null ? depth0.ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ht","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</b><span class='hidden-xs'>";
+	  stack1 = ((helper = (helper = helpers.ht || (depth0 != null ? depth0.ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ht","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</span></div>\n<div class='col-md-1 hidden-sm hidden-xs text-center'>"
+	    + escapeExpression(((helper = (helper = helpers.tva_label || (depth0 != null ? depth0.tva_label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"tva_label","hash":{},"data":data}) : helper)))
+	    + "</div>\n<div class='col-md-5 col-sm-6 col-xs-12 text-right actions'>\n    <button type='button' class='btn btn-default edit'>\n        <i class='glyphicon glyphicon-pencil'></i> <span class='hidden-xs'>Modifier</span>\n    </button>\n    <button type='button' class='btn btn-default delete'>\n        <i class='glyphicon glyphicon-trash'></i> <span class='hidden-xs'>Supprimer</span>\n    </button>\n</div>\n";
+	},"useData":true});
+
+/***/ }),
+/* 92 */
+/*!*************************************************!*\
+  !*** ./src/task/views/DiscountFormPopupView.js ***!
+  \*************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 77);
+	
+	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
+	
+	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 93);
+	
+	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
+	
+	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 112);
+	
+	var _DiscountPercentModel2 = _interopRequireDefault(_DiscountPercentModel);
+	
+	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 95);
+	
+	var _DiscountPercentView2 = _interopRequireDefault(_DiscountPercentView);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : DiscountFormPopupView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 97);
+	
+	var DiscountFormPopupView = _backbone2.default.View.extend({
+	    behaviors: [_ModalBehavior2.default],
+	    template: template,
+	    regions: {
+	        'simple-form': '.simple-form',
+	        'percent-form': '.percent-form'
+	    },
+	    childViewTriggers: {
+	        'cancel:form': 'modal:close',
+	        'success:sync': 'modal:close',
+	        'insert:percent': 'insert:percent'
+	    },
+	    isAddView: function isAddView() {
+	        return !(0, _tools.getOpt)(this, 'edit', false);
+	    },
+	    onRender: function onRender() {
+	        this.showChildView('simple-form', new _DiscountFormView2.default({
+	            model: this.model,
+	            title: this.getOption('title'),
+	            destCollection: this.getOption('destCollection')
+	        }));
+	
+	        if (this.isAddView()) {
+	            this.showChildView('percent-form', new _DiscountPercentView2.default({
+	                title: this.getOption('title'),
+	                model: new _DiscountPercentModel2.default(),
+	                destCollection: this.getOption('destCollection')
+	            }));
+	        }
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            title: this.getOption('title'),
+	            add: this.isAddView()
+	        };
+	    }
+	});
+	exports.default = DiscountFormPopupView;
+
+/***/ }),
+/* 93 */
+/*!********************************************!*\
+  !*** ./src/task/views/DiscountFormView.js ***!
+  \********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 72);
+	
+	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	
+	var _SelectWidget = __webpack_require__(/*! ./SelectWidget.js */ 74);
+	
+	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
+	
+	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 44);
+	
+	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
+	
+	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : DiscountFormView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 94);
+	
+	var DiscountFormView = _backbone2.default.View.extend({
+	    behaviors: [_FormBehavior2.default],
+	    template: template,
+	    regions: {
+	        'description': '.description',
+	        'amount': '.amount',
+	        'tva': '.tva'
+	    },
+	    ui: {
+	        btn_cancel: "button[type=reset]"
+	    },
+	    triggers: {
+	        'click @ui.btn_cancel': 'cancel:form'
+	    },
+	    childViewTriggers: {
+	        'change': 'data:modified'
+	    },
+	    onRender: function onRender() {
+	        this.showChildView('description', new _TextAreaWidget2.default({
+	            value: this.model.get('description'),
+	            title: "Description",
+	            field_name: "description",
+	            tinymce: true,
+	            cid: this.model.cid
+	        }));
+	        this.showChildView('amount', new _InputWidget2.default({
+	            value: this.model.get('amount'),
+	            title: "Montant",
+	            field_name: "amount",
+	            addon: '€'
+	        }));
+	        this.showChildView('tva', new _SelectWidget2.default({
+	            options: AppOption['form_options']['tva_options'],
+	            title: "TVA",
+	            value: this.model.get('tva'),
+	            field_name: 'tva'
+	        }));
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            title: this.getOption('title')
+	        };
+	    }
+	});
+	exports.default = DiscountFormView;
+
+/***/ }),
+/* 94 */
+/*!************************************************************!*\
+  !*** ./src/task/views/templates/DiscountFormView.mustache ***!
+  \************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<form class='form'>\n    <div class='description'></div>\n    <div class='amount'></div>\n    <div class='tva'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n        "
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n        Annuler\n    </button>\n</form>\n";
+	},"useData":true});
+
+/***/ }),
+/* 95 */
+/*!***********************************************!*\
+  !*** ./src/task/views/DiscountPercentView.js ***!
+  \***********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 44);
+	
+	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
+	
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 72);
+	
+	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 88);
+	
+	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
+	
+	var _BaseFormBehavior = __webpack_require__(/*! ../behaviors/BaseFormBehavior.js */ 32);
+	
+	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var DiscountPercentView = _backbone2.default.View.extend({
+	    behaviors: [_BaseFormBehavior2.default],
+	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 96),
+	    regions: {
+	        'description': '.description',
+	        'percentage': '.percentage'
+	    },
+	    ui: {
+	        form: 'form',
+	        submit: "button[type=submit]",
+	        btn_cancel: "button[type=reset]"
+	    },
+	    triggers: {
+	        'click @ui.btn_cancel': 'cancel:form'
+	    },
+	    childViewTriggers: {
+	        'change': 'data:modified'
+	    },
+	    events: {
+	        'submit @ui.form': "onSubmit"
+	    },
+	    onSubmit: function onSubmit(event) {
+	        event.preventDefault();
+	        this.triggerMethod('insert:percent', this.model);
+	    },
+	    onRender: function onRender() {
+	        this.showChildView('description', new _TextAreaWidget2.default({
+	            title: "Description",
+	            field_name: "description",
+	            tinymce: true,
+	            cid: '11111'
+	        }));
+	        this.showChildView('percentage', new _InputWidget2.default({
+	            title: "Pourcentage",
+	            field_name: 'percentage',
+	            addon: "%"
+	        }));
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            title: this.getOption('title')
+	        };
+	    }
+	
+	}); /*
+	     * File Name : DiscountPercentView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = DiscountPercentView;
+
+/***/ }),
+/* 96 */
+/*!***************************************************************!*\
+  !*** ./src/task/views/templates/DiscountPercentView.mustache ***!
+  \***************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<form>\n    <div class='description'></div>\n    <div class='percentage'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n    "
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n    Annuler\n    </button>\n</form>\n";
+	},"useData":true});
+
+/***/ }),
+/* 97 */
+/*!*****************************************************************!*\
+  !*** ./src/task/views/templates/DiscountFormPopupView.mustache ***!
+  \*****************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#main-discount-container\"\n                        aria-controls=\"main-discount-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie d'un montant\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#percentage-container\"\n                        aria-controls=\"percentage-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Remise en pourcentage\n                    </a>\n                </li>\n            </ul>\n";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active simple-form\"\n                    id=\"main-discount-container\">\n                </div>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane percent-form\"\n                    id=\"percentage-container\">\n                </div>\n            </div>\n          </div>\n          <div class=\"modal-footer\">\n          </div>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
+	},"useData":true});
+
+/***/ }),
+/* 98 */
+/*!***************************************!*\
+  !*** ./src/task/views/ExpenseView.js ***!
+  \***************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
+	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 72);
+	
+	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ExpenseView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 99),
+	    regions: {
+	        expense_container: '.expense-container'
+	    },
+	    childViewTriggers: {
+	        'change': 'data:modified',
+	        'finish': 'data:persist'
+	    },
+	    behaviors: [{
+	        behaviorClass: _FormBehavior2.default,
+	        errorMessage: "Vérifiez votre saisie"
+	    }],
+	    onRender: function onRender() {
+	        this.showChildView('expense_container', new _InputWidget2.default({
+	            title: "Frais forfaitaires (HT)",
+	            value: this.model.get('expenses_ht'),
+	            field_name: 'expenses_ht'
+	        }));
+	    }
+	}); /*
+	     * File Name : ExpenseView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = ExpenseView;
+
+/***/ }),
+/* 99 */
+/*!*******************************************************!*\
+  !*** ./src/task/views/templates/ExpenseView.mustache ***!
+  \*******************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<form class='form-inline'>\n    <div class='col-xs-11 expense-container text-right'></div>\n</form>\n";
+	  },"useData":true});
+
+/***/ }),
+/* 100 */
+/*!*************************************************************!*\
+  !*** ./src/task/views/templates/DiscountBlockView.mustache ***!
+  \*************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  return "    <div class='row lines-header hidden-xs'>\n        <div class='col-md-3 col-sm-4'>Description</div>\n        <div class='col-md-3 ol-sm-2 col-xs-12'>Montant HT</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>TVA</div>\n        <div class='col-md-5 col-sm-6 col-xs-12 text-right'>Actions</div>\n    </div>\n";
+	  },"3":function(depth0,helpers,partials,data) {
+	  return "in";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "<h2>Remises et frais</h2>\n<div class='modalregion'></div>\n<div class='content'>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.not_empty : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "    <div class='row lines'>\n    </div>\n    <div class='row'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-default btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une remise\n            </button>\n        </div>\n    </div>\n    <a\n        data-target='#discount-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"discount-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i> Ajouter des frais forfaitaires\n    </a>\n    <div\n        class='collapse row ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_more_set : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "'\n        id=\"discount-more\">\n        <hr />\n        <div class='expenses_ht'></div>\n    </div>\n</div>\n";
+	},"useData":true});
+
+/***/ }),
+/* 101 */
 /*!**************************************!*\
   !*** ./src/task/views/StatusView.js ***!
   \**************************************/
@@ -12209,7 +12803,7 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 78);
+	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 77);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
@@ -12217,7 +12811,7 @@ webpackJsonp([0],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 89); /*
+	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 102); /*
 	                                                            * File Name : StatusView.js
 	                                                            *
 	                                                            * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -12294,13 +12888,13 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
-/* 89 */
+/* 102 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/StatusView.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -12325,603 +12919,20 @@ webpackJsonp([0],[
 	},"useData":true});
 
 /***/ }),
-/* 90 */
-/*!*********************************************!*\
-  !*** ./src/task/views/DiscountBlockView.js ***!
-  \*********************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 91);
-	
-	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
-	
-	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 93);
-	
-	var _DiscountCollectionView2 = _interopRequireDefault(_DiscountCollectionView);
-	
-	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 106);
-	
-	var _DiscountFormPopupView2 = _interopRequireDefault(_DiscountFormPopupView);
-	
-	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 103);
-	
-	var _ExpenseView2 = _interopRequireDefault(_ExpenseView);
-	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : DiscountBlockView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var DiscountBlockView = _backbone2.default.View.extend({
-	    tagName: 'div',
-	    className: 'form-section discount-group',
-	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 98),
-	    regions: {
-	        'lines': '.lines',
-	        'modalRegion': '.modalregion',
-	        'expenses_ht': '.expenses_ht'
-	    },
-	    ui: {
-	        add_button: 'button.btn-add'
-	    },
-	    triggers: {
-	        "click @ui.add_button": "line:add"
-	    },
-	    childViewEvents: {
-	        'line:edit': 'onLineEdit',
-	        'line:delete': 'onLineDelete',
-	        'destroy:modal': 'render'
-	    },
-	    initialize: function initialize(options) {
-	        this.collection = options['collection'];
-	        this.model = options['model'];
-	    },
-	    isEmpty: function isEmpty() {
-	        return this.collection.length === 0;
-	    },
-	    onLineAdd: function onLineAdd() {
-	        var model = new _DiscountModel2.default();
-	        this.showDiscountLineForm(model, "Ajouter la remise", false);
-	    },
-	    onLineEdit: function onLineEdit(childView) {
-	        this.showDiscountLineForm(childView.model, "Modifier la remise", true);
-	    },
-	    showDiscountLineForm: function showDiscountLineForm(model, title, edit) {
-	        var form = new _DiscountFormPopupView2.default({
-	            model: model,
-	            title: title,
-	            destCollection: this.collection,
-	            edit: edit
-	        });
-	        this.showChildView('modalRegion', form);
-	    },
-	    onDeleteSuccess: function onDeleteSuccess() {
-	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été supprimées");
-	    },
-	    onDeleteError: function onDeleteError() {
-	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "suppression de cet élément");
-	    },
-	    onLineDelete: function onLineDelete(childView) {
-	        var result = window.confirm("Êtes-vous sûr de vouloir supprimer cette remise ?");
-	        if (result) {
-	            childView.model.destroy({
-	                success: this.onDeleteSuccess,
-	                error: this.onDeleteError
-	            });
-	        }
-	    },
-	    isMoreSet: function isMoreSet() {
-	        var value = this.model.get('expenses_ht');
-	        if (value && value != '0') {
-	            return true;
-	        }
-	        return false;
-	    },
-	    templateContext: function templateContext() {
-	        return {
-	            not_empty: !this.isEmpty(),
-	            is_more_set: this.isMoreSet()
-	        };
-	    },
-	    onRender: function onRender() {
-	        if (!this.isEmpty()) {
-	            this.showChildView('lines', new _DiscountCollectionView2.default({ collection: this.collection }));
-	        }
-	        this.showChildView('expenses_ht', new _ExpenseView2.default({ model: this.model }));
-	    }
-	});
-	exports.default = DiscountBlockView;
-
-/***/ }),
-/* 91 */
-/*!******************************************!*\
-  !*** ./src/task/models/DiscountModel.js ***!
-  \******************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone */ 17);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _math = __webpack_require__(/*! ../../math.js */ 70);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : DiscountModel.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var DiscountModel = _backbone2.default.Model.extend({
-	    props: ['id', 'amount', 'tva', 'ht', 'description'],
-	    validation: {
-	        description: {
-	            required: true,
-	            msg: "Veuillez saisir un objet"
-	        },
-	        amount: {
-	            required: true,
-	            pattern: "amount",
-	            msg: "Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule"
-	        },
-	        tva: {
-	            required: true,
-	            pattern: "number",
-	            msg: "Veuillez sélectionner une TVA"
-	        }
-	    },
-	    constructor: function constructor() {
-	        arguments[0] = _.pick(arguments[0], this.props);
-	        _backbone2.default.Model.apply(this, arguments);
-	    },
-	    ht: function ht() {
-	        return this.get('amount');
-	    },
-	    tva: function tva() {
-	        return (0, _math.getTvaPart)(this.ht(), this.get('tva'));
-	    },
-	    ttc: function ttc() {
-	        return this.ht() + this.tva();
-	    }
-	});
-	exports.default = DiscountModel;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
-
-/***/ }),
-/* 92 */
-/*!***********************************************!*\
-  !*** ./src/task/models/DiscountCollection.js ***!
-  \***********************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone */ 17);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 91);
-	
-	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : DiscountCollection.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var DiscountCollection = _backbone2.default.Collection.extend({
-	    model: _DiscountModel2.default,
-	    url: function url() {
-	        return AppOption['context_url'] + '/' + 'discount_lines';
-	    },
-	    ht: function ht() {
-	        var result = 0;
-	        this.each(function (model) {
-	            result += model.ht();
-	        });
-	        return -1 * result;
-	    },
-	    tvaParts: function tvaParts() {
-	        var result = {};
-	        this.each(function (model) {
-	            var tva_amount = model.tva();
-	            var tva = model.get('tva');
-	            if (tva in result) {
-	                tva_amount += result[tva];
-	            }
-	            result[tva] = tva_amount;
-	        });
-	        return result;
-	    },
-	    ttc: function ttc() {
-	        var result = 0;
-	        this.each(function (model) {
-	            result += model.ttc();
-	        });
-	        return result;
-	    }
-	});
-	exports.default = DiscountCollection;
-
-/***/ }),
-/* 93 */
-/*!**************************************************!*\
-  !*** ./src/task/views/DiscountCollectionView.js ***!
-  \**************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 94);
-	
-	var _DiscountView2 = _interopRequireDefault(_DiscountView);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : DiscountCollectionView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var DiscountCollectionView = _backbone2.default.CollectionView.extend({
-	    tagName: 'div',
-	    className: 'col-xs-12',
-	    childView: _DiscountView2.default,
-	    // Bubble up child view events
-	    childViewTriggers: {
-	        'edit': 'line:edit',
-	        'delete': 'line:delete'
-	    }
-	});
-	exports.default = DiscountCollectionView;
-
-/***/ }),
-/* 94 */
-/*!****************************************!*\
-  !*** ./src/task/views/DiscountView.js ***!
-  \****************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _underscore = __webpack_require__(/*! underscore */ 16);
-	
-	var _underscore2 = _interopRequireDefault(_underscore);
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _math = __webpack_require__(/*! ../../math.js */ 70);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 95); /*
-	                                                              * File Name : DiscountView.js
-	                                                              *
-	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                              * Company : Majerti ( http://www.majerti.fr )
-	                                                              *
-	                                                              * This software is distributed under GPLV3
-	                                                              * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                              *
-	                                                              */
-	
-	
-	var DiscountView = _backbone2.default.View.extend({
-	    template: template,
-	    ui: {
-	        edit_button: 'button.edit',
-	        delete_button: 'button.delete'
-	    },
-	    // Trigger to the parent
-	    triggers: {
-	        'click @ui.edit_button': 'edit',
-	        'click @ui.delete_button': 'delete'
-	    },
-	    getTvaLabel: function getTvaLabel() {
-	        var res = "";
-	        var current_value = this.model.get('tva');
-	        _underscore2.default.each(AppOption['form_options']['tva_options'], function (tva) {
-	            if (tva.value == current_value) {
-	                res = tva.name;
-	            }
-	        });
-	        return res;
-	    },
-	    templateContext: function templateContext() {
-	        return {
-	            ht: (0, _math.formatAmount)(this.model.ht()),
-	            tva_label: this.getTvaLabel()
-	        };
-	    }
-	});
-	exports.default = DiscountView;
-
-/***/ }),
-/* 95 */
-/*!********************************************************!*\
-  !*** ./src/task/views/templates/DiscountView.mustache ***!
-  \********************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='col-md-3 col-sm-4 col-xs-12 description'>";
-	  stack1 = ((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "</div>\n<div class='col-md-3 col-sm-2 col-xs-12 amount'><b class='visible-xs text-left'>HT : ";
-	  stack1 = ((helper = (helper = helpers.ht || (depth0 != null ? depth0.ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ht","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "</b><span class='hidden-xs'>";
-	  stack1 = ((helper = (helper = helpers.ht || (depth0 != null ? depth0.ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ht","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</span></div>\n<div class='col-md-6 col-sm-6 col-xs-12 text-right actions'>\n    <button type='button' class='btn btn-default edit'>\n        <i class='glyphicon glyphicon-pencil'></i> <span class='hidden-xs'>Modifier</span>\n    </button>\n    <button type='button' class='btn btn-default delete'>\n        <i class='glyphicon glyphicon-trash'></i> <span class='hidden-xs'>Supprimer</span>\n    </button>\n</div>\n";
-	},"useData":true});
-
-/***/ }),
-/* 96 */
-/*!********************************************!*\
-  !*** ./src/task/views/DiscountFormView.js ***!
-  \********************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
-	
-	var _InputWidget2 = _interopRequireDefault(_InputWidget);
-	
-	var _SelectWidget = __webpack_require__(/*! ./SelectWidget.js */ 75);
-	
-	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
-	
-	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 43);
-	
-	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
-	
-	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
-	
-	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : DiscountFormView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 97);
-	
-	var DiscountFormView = _backbone2.default.View.extend({
-	    behaviors: [_FormBehavior2.default],
-	    template: template,
-	    regions: {
-	        'description': '.description',
-	        'amount': '.amount',
-	        'tva': '.tva'
-	    },
-	    ui: {
-	        btn_cancel: "button[type=reset]"
-	    },
-	    triggers: {
-	        'click @ui.btn_cancel': 'cancel:form'
-	    },
-	    onRender: function onRender() {
-	        this.showChildView('description', new _TextAreaWidget2.default({
-	            value: this.model.get('description'),
-	            title: "Description",
-	            field_name: "description",
-	            tinymce: true,
-	            cid: this.model.cid
-	        }));
-	        this.showChildView('amount', new _InputWidget2.default({
-	            value: this.model.get('amount'),
-	            title: "Montant",
-	            field_name: "amount",
-	            addon: '€'
-	        }));
-	        this.showChildView('tva', new _SelectWidget2.default({
-	            options: AppOption['form_options']['tva_options'],
-	            title: "TVA",
-	            value: this.model.get('tva'),
-	            field_name: 'tva'
-	        }));
-	    },
-	    templateContext: function templateContext() {
-	        return {
-	            title: this.getOption('title')
-	        };
-	    }
-	});
-	exports.default = DiscountFormView;
-
-/***/ }),
-/* 97 */
-/*!************************************************************!*\
-  !*** ./src/task/views/templates/DiscountFormView.mustache ***!
-  \************************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<form class='form'>\n    <div class='description'></div>\n    <div class='amount'></div>\n    <div class='tva'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n        "
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n        Annuler\n    </button>\n</form>\n";
-	},"useData":true});
-
-/***/ }),
-/* 98 */
-/*!*************************************************************!*\
-  !*** ./src/task/views/templates/DiscountBlockView.mustache ***!
-  \*************************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "    <div class='row lines-header hidden-xs'>\n        <div class='col-md-3 col-sm-4'>Description</div>\n        <div class='col-md-3 ol-sm-2 col-xs-12'>Montant HT</div>\n        <div class='col-md-6 col-sm-6 col-xs-12 text-right'>Actions</div>\n    </div>\n";
-	  },"3":function(depth0,helpers,partials,data) {
-	  return "in";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<h2>Remises et frais</h2>\n<div class='modalregion'></div>\n<div class='content'>\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.not_empty : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "    <div class='row lines'>\n    </div>\n    <div class='row'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-default btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une remise\n            </button>\n        </div>\n    </div>\n    <a\n        data-target='#discount-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"discount-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i> Ajouter des frais forfaitaires\n    </a>\n    <div\n        class='collapse row ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_more_set : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "'\n        id=\"discount-more\">\n        <hr />\n        <div class='expenses_ht'></div>\n    </div>\n</div>\n";
-	},"useData":true});
-
-/***/ }),
-/* 99 */
+/* 103 */
 /*!****************************************************!*\
   !*** ./src/task/views/templates/MainView.mustache ***!
   \****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div>\n    <div id='modalregion'>\n    </div>\n	<div class='row'>\n		<div class='task-edit col-md-9 col-xs-12'>\n            <div id='common'>\n            </div>\n            <div id='tasklines'>\n            </div>\n            <div id='discounts'>\n            </div>\n		</div>\n\n		<div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n             id='rightbar'>\n		</div>\n	</div>\n\n	<div class='task-desktop-actions sticky-footer hidden-md hidden-lg' id='footer'>\n	</div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 100 */
-/*!*****************************************************!*\
-  !*** ./src/handlebars/job/file_generation.mustache ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "<div class=\"text-center btn btn-warning\">\n<i class=\"fa fa-cog fa-spin fa-4x\"></i>\n<br />\n<b>La génération de fichier est en cours</b>\n</div>\n";
-	  },"3":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.failed : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.program(6, data),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"4":function(depth0,helpers,partials,data) {
-	  return "    <div class=\"text-center btn btn-danger\">\n        <i class=\"fa fa-warning fa-4x\"></i>\n        <br />\n        <b>La génération de fichier a échoué</b>\n    </div>\n";
-	  },"6":function(depth0,helpers,partials,data) {
-	  return "    <div class=\"text-center btn btn-success\">\n        <i class=\"fa fa-check fa-4x\"></i>\n        <br />\n        <b>L'import s'est déroulé avec succès</b>\n    </div>\n";
-	  },"8":function(depth0,helpers,partials,data) {
-	  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n    <div class='col-md-6'>\n        <h4>Télécharger votre fichier</h4>\n        <a href=\"/cooked/"
-	    + escapeExpression(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"filename","hash":{},"data":data}) : helper)))
-	    + "\" target=\"_blank\" class=\"btn btn-success btn-large\">\n        <i class='glyphicon glyphicon-download'></i> Télécharger\n        </a>\n    </div>\n    <div class='col-md-6'>\n    <h4>Messages</h4>\n    "
-	    + escapeExpression(((helper = (helper = helpers.message || (depth0 != null ? depth0.message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"message","hash":{},"data":data}) : helper)))
-	    + "\n";
-	  stack1 = ((helper = (helper = helpers.has_message || (depth0 != null ? depth0.has_message : depth0)) != null ? helper : helperMissing),(options={"name":"has_message","hash":{},"fn":this.noop,"inverse":this.program(9, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
-	  if (!helpers.has_message) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "    <h4>Erreurs</h4>\n    "
-	    + escapeExpression(((helper = (helper = helpers.err_message || (depth0 != null ? depth0.err_message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"err_message","hash":{},"data":data}) : helper)))
-	    + "\n";
-	  stack1 = ((helper = (helper = helpers.has_err_message || (depth0 != null ? depth0.has_err_message : depth0)) != null ? helper : helperMissing),(options={"name":"has_err_message","hash":{},"fn":this.noop,"inverse":this.program(11, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
-	  if (!helpers.has_err_message) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "    </div>\n</div>\n";
-	},"9":function(depth0,helpers,partials,data) {
-	  return "    Aucun message n'a été retourné\n";
-	  },"11":function(depth0,helpers,partials,data) {
-	  return "    Aucune erreur n'a été retournée\n";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n<div class='col-md-6'>\n<h2>Génération de fichier</h2>\n<ul>\n<li>Identifiant de la tâche : "
-	    + escapeExpression(((helper = (helper = helpers.jobid || (depth0 != null ? depth0.jobid : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"jobid","hash":{},"data":data}) : helper)))
-	    + " </li>\n<li>Initialisée le : "
-	    + escapeExpression(((helper = (helper = helpers.created_at || (depth0 != null ? depth0.created_at : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"created_at","hash":{},"data":data}) : helper)))
-	    + " </li>\n<li>Mise à jour le : "
-	    + escapeExpression(((helper = (helper = helpers.updated_at || (depth0 != null ? depth0.updated_at : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"updated_at","hash":{},"data":data}) : helper)))
-	    + " </li>\n</ul>\n</div>\n<div class=\"col-md-3 col-md-offset-3\">\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.running : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "    </div>\n</div>\n<hr />\n";
-	  stack1 = ((helper = (helper = helpers.running || (depth0 != null ? depth0.running : depth0)) != null ? helper : helperMissing),(options={"name":"running","hash":{},"fn":this.noop,"inverse":this.program(8, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
-	  if (!helpers.running) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "\n";
-	},"useData":true});
-
-/***/ }),
-/* 101 */,
-/* 102 */
+/* 104 */
 /*!***************************************!*\
   !*** ./src/task/components/Facade.js ***!
   \***************************************/
@@ -12939,15 +12950,15 @@ webpackJsonp([0],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 60);
+	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 105);
 	
 	var _CommonModel2 = _interopRequireDefault(_CommonModel);
 	
-	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 62);
+	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 107);
 	
 	var _TaskGroupCollection2 = _interopRequireDefault(_TaskGroupCollection);
 	
-	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 92);
+	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 108);
 	
 	var _DiscountCollection2 = _interopRequireDefault(_DiscountCollection);
 	
@@ -13048,10 +13059,10 @@ webpackJsonp([0],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
-/* 103 */
-/*!***************************************!*\
-  !*** ./src/task/views/ExpenseView.js ***!
-  \***************************************/
+/* 105 */
+/*!****************************************!*\
+  !*** ./src/task/models/CommonModel.js ***!
+  \****************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13060,75 +13071,84 @@ webpackJsonp([0],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	var _underscore = __webpack_require__(/*! underscore */ 16);
 	
-	var _backbone2 = _interopRequireDefault(_backbone);
+	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _FormBehavior = __webpack_require__(/*! ../behaviors/FormBehavior.js */ 31);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 106);
 	
-	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
-	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
-	
-	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	var _math = __webpack_require__(/*! ../../math.js */ 65);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var ExpenseView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 104),
-	    regions: {
-	        expense_container: '.expense-container'
+	var CommonModel = _BaseModel2.default.extend({
+	    props: ['id', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht'],
+	    validation: {
+	        date: {
+	            required: true,
+	            msg: "Veuillez saisir une date"
+	        },
+	        description: {
+	            required: true,
+	            msg: "Veuillez saisir un objet"
+	        },
+	        address: {
+	            required: true,
+	            msg: "Veuillez saisir une adresse"
+	        },
+	        expenses_ht: {
+	            required: false,
+	            pattern: 'amount',
+	            msg: "Le montant doit être un nombre"
+	        }
 	    },
-	    childViewEvents: {
-	        'change': 'onChildChange',
-	        'finish': 'onChildFinish'
+	    ht: function ht() {
+	        return this.get('expenses_ht');
 	    },
-	    behaviors: [{
-	        behaviorClass: _FormBehavior2.default,
-	        errorMessage: "Vérifiez votre saisie"
-	    }],
-	    onChildChange: function onChildChange(attribute, value) {
-	        console.log("Data modified");
-	        this.triggerMethod('data:modified', this, attribute, value);
+	    tva_key: function tva_key() {
+	        var result;
+	        var tva_object = _underscore2.default.find(AppOption['tvas'], function (val) {
+	            return val['default'];
+	        });
+	        if (_underscore2.default.isUndefined(tva_object)) {
+	            result = 0;
+	        } else {
+	            var tva = tva_object.value.toString();
+	            result = (0, _math.strToFloat)(tva);
+	        }
+	        if (result < 0) {
+	            result = 0;
+	        }
+	        return result;
 	    },
-	    onChildFinish: function onChildFinish(attribute, value) {
-	        console.log("Data should be persisted");
-	        this.triggerMethod('data:persist', this, attribute, value);
+	    tva_amount: function tva_amount() {
+	        return getTvaPart(this.ht(), this.tva_key());
 	    },
-	    onRender: function onRender() {
-	        this.showChildView('expense_container', new _InputWidget2.default({
-	            title: "Frais forfaitaires (HT)",
-	            value: this.model.get('expenses_ht'),
-	            field_name: 'expenses_ht'
-	        }));
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        var tva_amount = this.tva_key();
+	        result[tva_amount] = this.tva_amount();
+	        return result;
+	    },
+	    ttc: function ttc() {
+	        return this.ht() + this.amount();
 	    }
 	}); /*
-	     * File Name : ExpenseView.js
+	     * File Name :
 	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
 	     * Company : Majerti ( http://www.majerti.fr )
 	     *
 	     * This software is distributed under GPLV3
 	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	     *
 	     */
-	exports.default = ExpenseView;
+	exports.default = CommonModel;
 
 /***/ }),
-/* 104 */
-/*!*******************************************************!*\
-  !*** ./src/task/views/templates/ExpenseView.mustache ***!
-  \*******************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<form class='form-inline'>\n    <div class='col-xs-11 expense-container text-right'></div>\n</form>\n";
-	  },"useData":true});
-
-/***/ }),
-/* 105 */
+/* 106 */
 /*!**************************************!*\
   !*** ./src/task/models/BaseModel.js ***!
   \**************************************/
@@ -13180,91 +13200,131 @@ webpackJsonp([0],[
 	exports.default = BaseModel;
 
 /***/ }),
-/* 106 */
-/*!*************************************************!*\
-  !*** ./src/task/views/DiscountFormPopupView.js ***!
-  \*************************************************/
+/* 107 */
+/*!************************************************!*\
+  !*** ./src/task/models/TaskGroupCollection.js ***!
+  \************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	var _backbone = __webpack_require__(/*! backbone */ 17);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 78);
+	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 62);
 	
-	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
-	
-	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 96);
-	
-	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
-	
-	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 107);
-	
-	var _DiscountPercentView2 = _interopRequireDefault(_DiscountPercentView);
+	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 108); /*
-	                                                                       * File Name : DiscountFormPopupView.js
-	                                                                       *
-	                                                                       * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                                       * Company : Majerti ( http://www.majerti.fr )
-	                                                                       *
-	                                                                       * This software is distributed under GPLV3
-	                                                                       * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                                       *
-	                                                                       */
-	
-	
-	var DiscountFormPopupView = _backbone2.default.View.extend({
-	    behaviors: [_ModalBehavior2.default],
-	    template: template,
-	    regions: {
-	        'simple-form': '.simple-form',
-	        'percent-form': '.percent-form'
+	var TaskGroupCollection = _backbone2.default.Collection.extend({
+	    model: _TaskGroupModel2.default,
+	    url: function url() {
+	        return AppOption['context_url'] + '/' + 'task_line_groups';
 	    },
-	    childViewTriggers: {
-	        'cancel:form': 'modal:close',
-	        'success:sync': 'modal:close'
+	    comparator: 'order',
+	    initialize: function initialize(options) {
+	        this.on('change:reorder', this.updateModelOrder);
+	        this.updateModelOrder(false);
 	    },
-	    isAddView: function isAddView() {
-	        return !(0, _tools.getOpt)(this, 'edit', false);
+	    updateModelOrder: function updateModelOrder(sync) {
+	        var sync = sync || true;
+	        this.each(function (model, index) {
+	            model.set('order', index);
+	            if (sync) {
+	                model.save({ 'order': index }, { patch: true });
+	            }
+	        });
 	    },
-	    onRender: function onRender() {
-	        this.showChildView('simple-form', new _DiscountFormView2.default({
-	            model: this.model,
-	            title: this.getOption('title'),
-	            destCollection: this.getOption('destCollection')
-	        }));
-	
-	        if (this.isAddView()) {
-	            this.showChildView('percent-form', new _DiscountPercentView2.default({
-	                title: this.getOption('title'),
-	                destCollection: this.getOption('destCollection')
-	            }));
+	    getMinOrder: function getMinOrder() {
+	        if (this.models.length == 0) {
+	            return 0;
+	        }
+	        var first_model = _.min(this.models, function (model) {
+	            return model.get('order');
+	        });
+	        return first_model.get('order');
+	    },
+	    getMaxOrder: function getMaxOrder() {
+	        if (this.models.length == 0) {
+	            return 0;
+	        }
+	        var last_model = _.max(this.models, function (model) {
+	            return model.get('order');
+	        });
+	        return last_model.get('order');
+	    },
+	    moveUp: function moveUp(model) {
+	        // I see move up as the -1
+	        var index = this.indexOf(model);
+	        if (index > 0) {
+	            this.models.splice(index - 1, 0, this.models.splice(index, 1)[0]);
+	            this.trigger('change:reorder');
 	        }
 	    },
-	    templateContext: function templateContext() {
-	        return {
-	            title: this.getOption('title'),
-	            add: this.isAddView()
-	        };
+	    moveDown: function moveDown(model) {
+	        // I see move up as the -1
+	        var index = this.indexOf(model);
+	        if (index < this.models.length) {
+	            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
+	            this.trigger('change:reorder');
+	        }
+	    },
+	    load_from_catalog: function load_from_catalog(sale_product_group_ids) {
+	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=load_from_catalog', { sale_product_group_ids: sale_product_group_ids }, 'POST');
+	        serverRequest.then(this.fetch.bind(this));
+	    },
+	    ht: function ht() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ht();
+	        });
+	        return result;
+	    },
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        this.each(function (model) {
+	            var tva_parts = model.tvaParts();
+	            _.each(tva_parts, function (key, value) {
+	                if (key in result) {
+	                    value += result[key];
+	                }
+	                result[key] = value;
+	            });
+	        });
+	        return result;
+	    },
+	    ttc: function ttc() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ttc();
+	        });
+	        return result;
 	    }
-	});
-	exports.default = DiscountFormPopupView;
+	}); /*
+	     * File Name : TaskGroupCollection.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = TaskGroupCollection;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 16)))
 
 /***/ }),
-/* 107 */
+/* 108 */
 /*!***********************************************!*\
-  !*** ./src/task/views/DiscountPercentView.js ***!
+  !*** ./src/task/models/DiscountCollection.js ***!
   \***********************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13274,168 +13334,176 @@ webpackJsonp([0],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	var _backbone = __webpack_require__(/*! backbone */ 17);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ./TextAreaWidget.js */ 43);
-	
-	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
-	
-	var _InputWidget = __webpack_require__(/*! ./InputWidget.js */ 73);
-	
-	var _InputWidget2 = _interopRequireDefault(_InputWidget);
-	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 91);
+	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 88);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : DiscountPercentView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var DiscountPercentView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 109),
-	    regions: {
-	        'description': '.description',
-	        'percentage': '.percentage'
+	var DiscountCollection = _backbone2.default.Collection.extend({
+	    model: _DiscountModel2.default,
+	    url: function url() {
+	        return AppOption['context_url'] + '/' + 'discount_lines';
 	    },
-	    ui: {
-	        form: 'form',
-	        submit: "button[type=submit]",
-	        btn_cancel: "button[type=reset]"
+	    ht: function ht() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ht();
+	        });
+	        return -1 * result;
 	    },
-	    triggers: {
-	        'click @ui.btn_cancel': 'cancel:form'
+	    tvaParts: function tvaParts() {
+	        var result = {};
+	        this.each(function (model) {
+	            var tva_amount = model.tva();
+	            var tva = model.get('tva');
+	            if (tva in result) {
+	                tva_amount += result[tva];
+	            }
+	            result[tva] = tva_amount;
+	        });
+	        return result;
 	    },
-	
-	    onRender: function onRender() {
-	        this.showChildView('description', new _TextAreaWidget2.default({
-	            title: "Description",
-	            field_name: "description",
-	            tinymce: true,
-	            cid: '11111'
-	        }));
-	        this.showChildView('percentage', new _InputWidget2.default({
-	            title: "Pourcentage",
-	            field_name: 'percentage',
-	            addon: "%"
-	        }));
+	    ttc: function ttc() {
+	        var result = 0;
+	        this.each(function (model) {
+	            result += model.ttc();
+	        });
+	        return result;
 	    },
-	    templateContext: function templateContext() {
-	        return {
-	            title: this.getOption('title')
-	        };
+	    insert_percent: function insert_percent(model) {
+	        /*
+	         * Call the server to generate percent based Discounts
+	         * :param obj model: A DiscountPercentModel instance
+	         */
+	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=insert_percent', model.toJSON(), 'POST');
+	        serverRequest.then(this.fetch.bind(this));
 	    }
-	
-	});
-	exports.default = DiscountPercentView;
-
-/***/ }),
-/* 108 */
-/*!*****************************************************************!*\
-  !*** ./src/task/views/templates/DiscountFormPopupView.mustache ***!
-  \*****************************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#main-discount-container\"\n                        aria-controls=\"main-discount-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie d'un montant\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#percentage-container\"\n                        aria-controls=\"percentage-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Remise en pourcentage\n                    </a>\n                </li>\n            </ul>\n";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active simple-form\"\n                    id=\"main-discount-container\">\n                </div>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane percent-form\"\n                    id=\"percentage-container\">\n                </div>\n            </div>\n          </div>\n          <div class=\"modal-footer\">\n          </div>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
-	},"useData":true});
+	}); /*
+	     * File Name : DiscountCollection.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = DiscountCollection;
 
 /***/ }),
 /* 109 */
-/*!***************************************************************!*\
-  !*** ./src/task/views/templates/DiscountPercentView.mustache ***!
-  \***************************************************************/
+/*!*****************************************************!*\
+  !*** ./src/handlebars/job/file_generation.mustache ***!
+  \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 34);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<form>\n    <div class='description'></div>\n    <div class='percentage'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n    "
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n    Annuler\n    </button>\n</form>\n";
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  return "<div class=\"text-center btn btn-warning\">\n<i class=\"fa fa-cog fa-spin fa-4x\"></i>\n<br />\n<b>La génération de fichier est en cours</b>\n</div>\n";
+	  },"3":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.failed : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.program(6, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"4":function(depth0,helpers,partials,data) {
+	  return "    <div class=\"text-center btn btn-danger\">\n        <i class=\"fa fa-warning fa-4x\"></i>\n        <br />\n        <b>La génération de fichier a échoué</b>\n    </div>\n";
+	  },"6":function(depth0,helpers,partials,data) {
+	  return "    <div class=\"text-center btn btn-success\">\n        <i class=\"fa fa-check fa-4x\"></i>\n        <br />\n        <b>L'import s'est déroulé avec succès</b>\n    </div>\n";
+	  },"8":function(depth0,helpers,partials,data) {
+	  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n    <div class='col-md-6'>\n        <h4>Télécharger votre fichier</h4>\n        <a href=\"/cooked/"
+	    + escapeExpression(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"filename","hash":{},"data":data}) : helper)))
+	    + "\" target=\"_blank\" class=\"btn btn-success btn-large\">\n        <i class='glyphicon glyphicon-download'></i> Télécharger\n        </a>\n    </div>\n    <div class='col-md-6'>\n    <h4>Messages</h4>\n    "
+	    + escapeExpression(((helper = (helper = helpers.message || (depth0 != null ? depth0.message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"message","hash":{},"data":data}) : helper)))
+	    + "\n";
+	  stack1 = ((helper = (helper = helpers.has_message || (depth0 != null ? depth0.has_message : depth0)) != null ? helper : helperMissing),(options={"name":"has_message","hash":{},"fn":this.noop,"inverse":this.program(9, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
+	  if (!helpers.has_message) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "    <h4>Erreurs</h4>\n    "
+	    + escapeExpression(((helper = (helper = helpers.err_message || (depth0 != null ? depth0.err_message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"err_message","hash":{},"data":data}) : helper)))
+	    + "\n";
+	  stack1 = ((helper = (helper = helpers.has_err_message || (depth0 != null ? depth0.has_err_message : depth0)) != null ? helper : helperMissing),(options={"name":"has_err_message","hash":{},"fn":this.noop,"inverse":this.program(11, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
+	  if (!helpers.has_err_message) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "    </div>\n</div>\n";
+	},"9":function(depth0,helpers,partials,data) {
+	  return "    Aucun message n'a été retourné\n";
+	  },"11":function(depth0,helpers,partials,data) {
+	  return "    Aucune erreur n'a été retournée\n";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n<div class='col-md-6'>\n<h2>Génération de fichier</h2>\n<ul>\n<li>Identifiant de la tâche : "
+	    + escapeExpression(((helper = (helper = helpers.jobid || (depth0 != null ? depth0.jobid : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"jobid","hash":{},"data":data}) : helper)))
+	    + " </li>\n<li>Initialisée le : "
+	    + escapeExpression(((helper = (helper = helpers.created_at || (depth0 != null ? depth0.created_at : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"created_at","hash":{},"data":data}) : helper)))
+	    + " </li>\n<li>Mise à jour le : "
+	    + escapeExpression(((helper = (helper = helpers.updated_at || (depth0 != null ? depth0.updated_at : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"updated_at","hash":{},"data":data}) : helper)))
+	    + " </li>\n</ul>\n</div>\n<div class=\"col-md-3 col-md-offset-3\">\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.running : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "    </div>\n</div>\n<hr />\n";
+	  stack1 = ((helper = (helper = helpers.running || (depth0 != null ? depth0.running : depth0)) != null ? helper : helperMissing),(options={"name":"running","hash":{},"fn":this.noop,"inverse":this.program(8, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
+	  if (!helpers.running) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "\n";
 	},"useData":true});
 
 /***/ }),
-/* 110 */
-/*!************************************************!*\
-  !*** ./src/task/behaviors/BaseFormBehavior.js ***!
-  \************************************************/
+/* 110 */,
+/* 111 */,
+/* 112 */
+/*!*************************************************!*\
+  !*** ./src/task/models/DiscountPercentModel.js ***!
+  \*************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	var _backbone = __webpack_require__(/*! backbone */ 17);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
-	
-	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : FormValidationBehavior.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var BaseFormBehavior = _backbone2.default.Behavior.extend({
-	    onDataPersist: function onDataPersist(view, attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.view.triggerMethod('data:persisted', datas, true);
-	    },
-	    onDataModified: function onDataModified(view, attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.view.model.isValid();
+	var DiscountPercentModel = _backbone2.default.Model.extend({
+	    validation: {
+	        description: {
+	            required: true,
+	            msg: "Veuillez saisir un objet"
+	        },
+	        percentage: {
+	            required: true,
+	            range: [1, 99],
+	            msg: "Veuillez saisir un pourcentage"
+	        },
+	        tva: {
+	            required: true,
+	            pattern: "number",
+	            msg: "Veuillez sélectionner une TVA"
+	        }
 	    }
-	});
-	exports.default = BaseFormBehavior;
+	
+	}); /*
+	     * File Name : DiscountPercentModel.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = DiscountPercentModel;
 
 /***/ })
 ]);

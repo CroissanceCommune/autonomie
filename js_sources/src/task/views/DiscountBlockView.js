@@ -34,6 +34,7 @@ const DiscountBlockView = Mn.View.extend({
         'line:edit': 'onLineEdit',
         'line:delete': 'onLineDelete',
         'destroy:modal': 'render',
+        'insert:percent': 'onInsertPercent',
     },
     initialize: function(options){
         this.collection = options['collection'];
@@ -79,6 +80,10 @@ const DiscountBlockView = Mn.View.extend({
                 }
             );
         }
+    },
+    onInsertPercent: function(model){
+        this.collection.insert_percent(model);
+        this.getChildView('modalRegion').triggerMethod('modal:close')
     },
     isMoreSet: function(){
         var value = this.model.get('expenses_ht');

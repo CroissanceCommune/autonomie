@@ -17,9 +17,9 @@ const ExpenseView = Mn.View.extend({
     regions: {
         expense_container: '.expense-container'
     },
-    childViewEvents: {
-        'change': 'onChildChange',
-        'finish': 'onChildFinish'
+    childViewTriggers: {
+        'change': 'data:modified',
+        'finish': 'data:persist'
     },
     behaviors: [
         {
@@ -27,14 +27,6 @@ const ExpenseView = Mn.View.extend({
             errorMessage: "Vérifiez votre saisie"
         }
     ],
-    onChildChange: function(attribute, value){
-        console.log("Data modified");
-        this.triggerMethod('data:modified', this, attribute, value);
-    },
-    onChildFinish: function(attribute, value){
-        console.log("Data should be persisted");
-        this.triggerMethod('data:persist', this, attribute, value);
-    },
     onRender: function(){
         this.showChildView(
             'expense_container',

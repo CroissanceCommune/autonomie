@@ -42,15 +42,9 @@ const CommonView = Mn.View.extend({
             errorMessage: "Vérifiez votre saisie"
         }
     ],
-    childViewEvents: {
-        'change': 'onChildChange',
-        'finish': 'onChildFinish'
-    },
-    onChildChange: function(attribute, value){
-        this.triggerMethod('data:modified', this, attribute, value);
-    },
-    onChildFinish: function(attribute, value){
-        this.triggerMethod('data:persist', this, attribute, value);
+    childViewTrigger: {
+        'change': 'data:modified',
+        'finish': 'data:persist'
     },
     getMentionIds: function(){
         var mentions = this.model.get('mentions');

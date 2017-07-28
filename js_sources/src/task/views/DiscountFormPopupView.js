@@ -11,6 +11,7 @@
 import Mn from 'backbone.marionette';
 import ModalBehavior from '../behaviors/ModalBehavior.js';
 import DiscountFormView from './DiscountFormView.js';
+import DiscountPercentModel from '../models/DiscountPercentModel.js';
 import DiscountPercentView from './DiscountPercentView.js';
 import { getOpt } from '../../tools.js';
 
@@ -25,7 +26,8 @@ const DiscountFormPopupView = Mn.View.extend({
     },
     childViewTriggers: {
         'cancel:form': 'modal:close',
-        'success:sync': 'modal:close'
+        'success:sync': 'modal:close',
+        'insert:percent': 'insert:percent'
     },
     isAddView: function(){
         return !getOpt(this, 'edit', false);
@@ -46,7 +48,8 @@ const DiscountFormPopupView = Mn.View.extend({
                 new DiscountPercentView(
                     {
                         title: this.getOption('title'),
-                        destCollection: this.getOption('destCollection'),
+                        model: new DiscountPercentModel(),
+                        destCollection: this.getOption('destCollection')
                     }
                 )
             );

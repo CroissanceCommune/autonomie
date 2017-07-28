@@ -12,8 +12,10 @@ import Mn from 'backbone.marionette';
 import TextAreaWidget from './TextAreaWidget.js';
 import InputWidget from './InputWidget.js';
 import DiscountModel from '../models/DiscountModel.js';
+import BaseFormBehavior from "../behaviors/BaseFormBehavior.js";
 
 const DiscountPercentView = Mn.View.extend({
+    behaviors: [BaseFormBehavior],
     template: require('./templates/DiscountPercentView.mustache'),
     regions: {
         'description': '.description',
@@ -27,7 +29,16 @@ const DiscountPercentView = Mn.View.extend({
     triggers: {
         'click @ui.btn_cancel': 'cancel:form',
     },
-
+    childViewTriggers: {
+        'change': 'data:modified',
+    },
+    events: {
+        'submit @ui.form': "onSubmit"
+    },
+    onSubmit: function(event){
+        event.preventDefault();
+        this.triggerMethod('insert:percent', this.model);
+    },
     onRender: function(){
         this.showChildView(
             'description',

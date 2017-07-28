@@ -10,6 +10,8 @@
  */
 import Bb from 'backbone';
 import DiscountModel from './DiscountModel.js';
+import { ajax_call } from '../../tools.js';
+
 
 const DiscountCollection = Bb.Collection.extend({
     model: DiscountModel,
@@ -41,6 +43,18 @@ const DiscountCollection = Bb.Collection.extend({
             result += model.ttc();
         });
         return result;
+    },
+    insert_percent: function(model){
+        /*
+         * Call the server to generate percent based Discounts
+         * :param obj model: A DiscountPercentModel instance
+         */
+        var serverRequest = ajax_call(
+            this.url() + '?action=insert_percent',
+            model.toJSON(),
+            'POST'
+        );
+        serverRequest.then(this.fetch.bind(this));
     }
 });
 export default DiscountCollection;

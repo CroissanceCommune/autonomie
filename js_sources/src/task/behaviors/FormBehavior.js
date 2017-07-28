@@ -18,11 +18,12 @@ var FormBehavior = Mn.Behavior.extend({
     behaviors: [BaseFormBehavior],
 	ui: {
         form: "form",
-        submit: "button[type=submit]"
+        submit: "button[type=submit]",
+        reset: "button[type=reset]"
     },
     events: {
-        'click @ui.submit': 'onSubmitForm',
         'submit @ui.form': 'onSubmitForm',
+        'click @ui.reset': 'onCancelForm',
     },
     defaults: {
         errorMessage: "Une erreur est survenue"
@@ -38,6 +39,7 @@ var FormBehavior = Mn.Behavior.extend({
     onSyncSuccess: function(){
         displayServerSuccess("Vos données ont bien été sauvegardées");
         Validation.unbind(this.view);
+        console.log("Trigger success:sync from FormBehavior");
         this.view.triggerMethod('success:sync');
     },
     syncServer: function(datas, bound){
@@ -86,6 +88,13 @@ var FormBehavior = Mn.Behavior.extend({
     },
     onDataPersisted: function(datas){
         this.syncServer(datas, true);
+    },
+    onCancelForm: function(){
+        console.log("FormBehavior.onCancelForm");
+        this.view.model.rollback();
+    },
+    onModalClose: function(){
+        console.log("FormBehavior.onModalClose");
     }
 });
 

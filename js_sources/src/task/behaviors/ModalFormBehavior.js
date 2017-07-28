@@ -15,11 +15,17 @@ import FormBehavior from './FormBehavior.js';
 
 var ModalFormBehavior = Mn.Behavior.extend({
     behaviors: [ModalBehavior, FormBehavior],
-    events: {
-        'success:sync': 'onSuccessSync'
-    },
     onSuccessSync: function(){
+        console.log("ModalFormBehavior.onSuccessSync");
+        console.log("Trigger modal:close from ModalFormBehavior");
         this.view.triggerMethod('modal:close');
+    },
+    onCancelForm: function(){
+        console.log("Resetting the model modal closed");
+        this.view.model.rollback();
+    },
+    onModalClose: function(){
+        console.log("ModalFormBehavior.onModalClose");
     }
 });
 

@@ -14,18 +14,17 @@ import Mn from 'backbone.marionette';
 const ModalBehavior = Mn.Behavior.extend({
   defaults: {
     modalClasses: '',
-    modalOptions: null
+    modalOptions: {
+        'keyboard': 'false',
+        'backdrop': 'static'
+    }
   },
-
   ui: {
-    close: '.close-modal'
+    close: '.close'
   },
   events: {
     'hidden.bs.modal': 'triggerFinish',
-  },
-
-  triggers: {
-    'click @ui.close': 'modal:close'
+    'click @ui.close': 'onClose',
   },
   onRender: function() {
     this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
@@ -33,10 +32,18 @@ const ModalBehavior = Mn.Behavior.extend({
   onAttach: function() {
     this.view.$el.modal(this.getOption('modalOptions') || {});
   },
+  onClose: function(){
+      console.log("Trigger cancel:form from ModalBehavior");
+      this.view.triggerMethod('cancel:form');
+      console.log("Trigger modal:close from ModalBehavior");
+      this.view.triggerMethod('modal:close');
+  },
   onModalClose: function() {
+      console.log("ModalBehavior.onModalClose");
     this.view.$el.modal('hide');
   },
   triggerFinish: function() {
+      console.log("Trigger destroy:modal");
     this.view.triggerMethod('destroy:modal');
   }
 });

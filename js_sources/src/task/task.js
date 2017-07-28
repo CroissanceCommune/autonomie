@@ -24,8 +24,6 @@ import { setupJsonRedirect, ajax_call } from '../tools.js';
 
 setupJsonRedirect();
 
-var template = require('../handlebars/job/file_generation.mustache');
-
 App.on('start', function (app, options) {
     console.log("  => Starting the app");
     AppOption['form_options'] = options.form_options;

@@ -277,6 +277,33 @@ class TaskLineGroupRestView(BaseRestView):
         self.request.dbsession.merge(self.context)
         return groups
 
+
+class TaskLineRestView(BaseRestView):
+    """
+    Rest views used to handle the task lines
+    """
+    def get_schema(self, submitted):
+        """
+        Return the schema for TaskLine add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('group_id',)
+        schema = SQLAlchemySchemaNode(TaskLine, excludes=excludes)
+        return schema.bind(request=self.request)
+
+    def collection_get(self):
+        return self.context.lines
+
+    def post_format(self, entry, edit):
+        """
+        Associate a newly created element to the parent group
+        """
+        if not edit:
+            entry.group = self.context
+        return entry
+
     def post_load_lines_from_catalog_view(self):
         """
         View handling product to line loading
@@ -295,30 +322,6 @@ class TaskLineGroupRestView(BaseRestView):
             lines.append(line)
         self.request.dbsession.merge(self.context)
         return lines
-
-
-class TaskLineRestView(BaseRestView):
-    """
-    Rest views used to handle the task lines
-    """
-    def get_schema(self, submitted):
-        """
-        Return the schema for TaskLine add/edition
-
-        :param dict submitted: The submitted datas
-        :returns: A colander.Schema
-        """
-        excludes = ('group_id',)
-        schema = SQLAlchemySchemaNode(TaskLine, excludes=excludes)
-        return schema.bind(request=self.request)
-
-    def post_format(self, entry, edit):
-        """
-        Associate a newly created element to the parent group
-        """
-        if not edit:
-            entry.group = self.context
-        return entry
 
 
 class DiscountLineRestView(BaseRestView):
@@ -363,6 +366,7 @@ class DiscountLineRestView(BaseRestView):
         lines = []
         if percent is not None and description is not None:
             tva_parts = self.context.tva_ht_parts()
+            print(tva_parts)
             for tva, ht in tva_parts.items():
                 amount = percentage(ht, percent)
                 line = DiscountLine(
@@ -370,6 +374,7 @@ class DiscountLineRestView(BaseRestView):
                     amount=amount,
                     tva=tva
                 )
+                lines.append(line)
                 self.context.discounts.append(line)
             self.request.dbsession.merge(self.context)
         return lines
@@ -562,16 +567,6 @@ def add_views(config):
     )
     config.add_view(
         TaskLineGroupRestView,
-        route_name="/api/v1/estimations/{eid}/task_line_groups/{id}",
-        attr='post_load_lines_from_catalog_view',
-        request_param="action=load_from_catalog",
-        request_method='POST',
-        renderer='json',
-        permission='edit.estimation',
-        xhr=True,
-    )
-    config.add_view(
-        TaskLineGroupRestView,
         route_name="/api/v1/estimations/{id}/task_line_groups",
         attr='post_load_groups_from_catalog_view',
         request_param="action=load_from_catalog",
@@ -591,6 +586,16 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+    )
+    config.add_view(
+        TaskLineRestView,
+        route_name="/api/v1/estimations/{eid}/task_line_groups/{id}/task_lines",
+        attr='post_load_lines_from_catalog_view',
+        request_param="action=load_from_catalog",
+        request_method='POST',
+        renderer='json',
+        permission='edit.estimation',
+        xhr=True,
     )
     # Discount line views
     add_rest_views(

@@ -307,6 +307,35 @@ def test_add_discount_line(
     assert result.tva == tva.value
 
 
+def test_add_discount_percent_line(
+    dbsession, config, get_csrf_request_with_db, full_estimation, user,
+    unity, tva
+):
+    config.testing_securitypolicy(
+        userid="test",
+        groupids=('admin',),
+        permissive=True
+    )
+    from autonomie.views.estimations.rest_api import DiscountLineRestView
+
+    request = get_csrf_request_with_db(
+        post={
+            'description': u"Description",
+            "percentage": 10,
+        }
+    )
+    request.context = full_estimation
+    request.user = user
+    request.is_xhr = True
+
+    view = DiscountLineRestView(request)
+    result = view.post_percent_discount_view()
+    assert len(result) == 1
+    assert result[0].task_id == full_estimation.id
+    assert result[0].description == u"Description"
+    assert result[0].amount == 1000000
+
+
 def test_edit_discount_line(
     dbsession, config, get_csrf_request_with_db, user, discount_line,
     unity, product,

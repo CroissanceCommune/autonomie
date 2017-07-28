@@ -131,6 +131,7 @@ class RestEstimation(BaseRestView):
                 'common',
                 'tasklines',
                 'discounts',
+                'notes',
                 'payment_conditions',
                 'payments'
             ],

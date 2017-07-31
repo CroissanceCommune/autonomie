@@ -798,7 +798,7 @@ class BaseRestView(BaseView):
         """
         return datas
 
-    def post_format(self, entry, edit):
+    def post_format(self, entry, edit, attributes):
         """
         Allos to apply post formatting to the model before flushing it
         """
@@ -830,11 +830,11 @@ class BaseRestView(BaseView):
         if edit:
             editted = self.get_editted_element(attributes)
             entry = schema.objectify(attributes, editted)
-            entry = self.post_format(entry, edit)
+            entry = self.post_format(entry, edit, attributes)
             entry = self.request.dbsession.merge(entry)
         else:
             entry = schema.objectify(attributes)
-            entry = self.post_format(entry, edit)
+            entry = self.post_format(entry, edit, attributes)
             self.request.dbsession.add(entry)
             # We need an id => flush
             self.request.dbsession.flush()

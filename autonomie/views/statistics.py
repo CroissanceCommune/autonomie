@@ -307,7 +307,7 @@ class RestStatisticEntry(BaseRestView):
         """
         return self.context.entries
 
-    def post_format(self, entry, edit):
+    def post_format(self, entry, edit, attributes):
         if not edit:
             entry.sheet = self.context
         return entry
@@ -362,7 +362,7 @@ class RestStatisticCriterion(BaseRestView):
                 values['searches'] = [searches]
         return values
 
-    def post_format(self, criterion, edit):
+    def post_format(self, criterion, edit, attributes):
         """
         We hard-set the model_type
         """

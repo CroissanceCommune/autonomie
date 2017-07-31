@@ -56,7 +56,7 @@ One page application layout template
       </h2>
     </div>
     </%block>
-    <div class="container-fluid page-content">
+    <div class="container-fluid">
         <div class='subnav hidden-print'>
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():
@@ -90,8 +90,8 @@ One page application layout template
       % endfor
       </%block>
       <%block name='beforecontent' />
-      <%block name='content' />
     </div>
+    <%block name='content' />
     <%block name='footer' />
     <script type='text/javascript'>
         var company_menu = document.getElementById('company-select-menu');

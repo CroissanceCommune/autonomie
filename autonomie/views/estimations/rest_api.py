@@ -17,7 +17,10 @@ from autonomie.utils.rest import (
     Apiv1Resp,
     add_rest_views,
 )
-from autonomie.compute.math_utils import percentage
+from autonomie.compute.math_utils import (
+    percentage,
+    convert_to_int,
+)
 from autonomie.models.task import (
     WorkUnit,
     PaymentConditions,
@@ -46,6 +49,60 @@ from autonomie.views.status import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+PAYMENT_DISPLAY_OPTIONS = (
+    {
+        'value': 'NONE',
+        'label': u"Les paiments ne sont pas affichés dans le PDF",
+    },
+    {
+        'value': 'SUMMARY',
+        'label': u"Le résumé des paiements apparaît dans le PDF",
+    },
+    {
+        'value': 'ALL',
+        'label': u"Le détail des paiements apparaît dans le PDF",
+    },
+    {
+        'value': 'ALL_NO_DATE',
+        'label': (u"Le détail des paiements, "
+                  u"sans les dates, apparaît dans le PDF",)
+    },
+)
+
+
+DEPOSIT_OPTIONS = (
+    {'value': 0, 'label':  'Aucun', 'default': True},
+    {'value': 5, 'label':  '5%'},
+    {'value': 10, 'label':  '10 %'},
+    {'value': 20, 'label':  '20 %'},
+    {'value': 30, 'label':  '30 %'},
+    {'value': 40, 'label':  '40 %'},
+    {'value': 50, 'label':  '50 %'},
+    {'value': 60, 'label':  '60 %'},
+    {'value': 70, 'label':  '70 %'},
+    {'value': 80, 'label':  '80 %'},
+    {'value': 90, 'label':  '90 %'},
+    {'value': 100, 'label':  '100 %'},
+)
+
+
+PAYMENT_TIMES_OPTIONS = (
+    {'value': -1, 'label':  u'Configuration manuelle'},
+    {'value': 1, 'label':  '1 fois', 'default': True},
+    {'value': 2, 'label':  '2 fois'},
+    {'value': 3, 'label':  '3 fois'},
+    {'value': 4, 'label':  '4 fois'},
+    {'value': 5, 'label':  '5 fois'},
+    {'value': 6, 'label':  '6 fois'},
+    {'value': 7, 'label':  '7 fois'},
+    {'value': 8, 'label':  '8 fois'},
+    {'value': 9, 'label':  '9 fois'},
+    {'value': 10, 'label':  '10 fois'},
+    {'value': 11, 'label':  '11 fois'},
+    {'value': 12, 'label':  '12 fois'},
+)
 
 
 def json_mentions(request):
@@ -140,6 +197,9 @@ class RestEstimation(BaseRestView):
             "product_options": json_products(self.request),
             "mention_options": json_mentions(self.request),
             "payment_conditions": json_payment_conditions(self.request),
+            'deposit_options': DEPOSIT_OPTIONS,
+            "payment_times_options": PAYMENT_TIMES_OPTIONS,
+            "payment_display_options": PAYMENT_DISPLAY_OPTIONS,
             "actions": {
                 'status': self._get_status_actions(),
                 'others': self._get_other_actions(),
@@ -155,6 +215,7 @@ class RestEstimation(BaseRestView):
         if action_dict['status'] == 'draft' and self.context.status == 'wait':
             action_dict['label'] = u"Repasser en brouillon"
             action_dict['title'] = u"Repasser ce document en brouillon"
+            action_dict['icon'] = 'remove'
         return action_dict
 
     def _get_status_actions(self):
@@ -227,6 +288,17 @@ class RestEstimation(BaseRestView):
             result.append(self._get_signed_status_button())
         return result
 
+    def pre_format(self, appstruct):
+        """
+        Pre format the posted appstruct to handle Estimation specific mechanisms
+        """
+        payment_times = appstruct.pop('payment_times')
+        if payment_times is not None:
+            if convert_to_int(payment_times, 1) == -1:
+                appstruct['manualDeliverables'] = 1
+            else:
+                appstruct['manualDeliverables'] = 0
+
 
 class TaskLineGroupRestView(BaseRestView):
     """
@@ -249,7 +321,7 @@ class TaskLineGroupRestView(BaseRestView):
         """
         return self.context.line_groups
 
-    def post_format(self, entry, edit):
+    def post_format(self, entry, edit, attributes):
         """
         Associate a newly created element to the parent task
         """
@@ -297,7 +369,7 @@ class TaskLineRestView(BaseRestView):
     def collection_get(self):
         return self.context.lines
 
-    def post_format(self, entry, edit):
+    def post_format(self, entry, edit, attributes):
         """
         Associate a newly created element to the parent group
         """
@@ -346,7 +418,7 @@ class DiscountLineRestView(BaseRestView):
         """
         return self.context.discounts
 
-    def post_format(self, entry, edit):
+    def post_format(self, entry, edit, attributes):
         """
         Associate a newly created element to the parent task
         """
@@ -383,7 +455,9 @@ class DiscountLineRestView(BaseRestView):
 
 class PaymentLineRestView(BaseRestView):
     """
-    Rest views used to handle the task lines
+    Rest views used to handle the estimation payment lines
+
+    context is en Estimation (collection level) or PaymentLine (item level)
     """
     def get_schema(self, submitted):
         """
@@ -396,7 +470,13 @@ class PaymentLineRestView(BaseRestView):
         schema = SQLAlchemySchemaNode(PaymentLine, excludes=excludes)
         return schema.bind(request=self.request)
 
-    def post_format(self, entry, edit):
+    def collection_get(self):
+        """
+        View returning the task line groups attached to this estimation
+        """
+        return self.context.payment_lines
+
+    def post_format(self, entry, edit, attributes):
         """
         Associate a newly created element to the parent task
         """
@@ -617,6 +697,16 @@ def add_views(config):
         renderer='json',
         permission='edit.estimation',
         xhr=True,
+    )
+    # Payment lines views
+    add_rest_views(
+        config,
+        route_name="/api/v1/estimations/{eid}/payment_lines/{id}",
+        collection_route_name="/api/v1/estimations/{id}/payment_lines",
+        factory=PaymentLineRestView,
+        view_rights="view.estimation",
+        add_rights="edit.estimation",
+        edit_rights='edit.estimation',
     )
 
 

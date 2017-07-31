@@ -1,5 +1,7 @@
 .page-content {
-  background-color: #f8f8f8; }
+  background-color: #f8f8f8;
+  padding-bottom: 15vh;
+  min-height: 100vh; }
   .page-content .form-section {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     background-color: #fff;
@@ -35,6 +37,24 @@
       .page-content .taskline-group .taskline .description {
         font-size: 0.9em; }
 
+.sticky-footer {
+  background-color: #000;
+  color: #f5f5f5;
+  position: fixed;
+  height: 15vh;
+  min-height: 80px;
+  width: 100vw;
+  bottom: 0px;
+  border-top: 1px solid #555;
+  padding: 10px 5px; }
+  .sticky-footer .btn {
+    height: 80%;
+    border-radius: 0;
+    padding: 12 12; }
+
+.sticky-footer:hover {
+  color: #fff; }
+
 .paymentamount {
   text-align: right; }
 
@@ -46,9 +66,12 @@
 .jstree-closed > .jstree-anchor > .jstree-checkbox {
   display: none; }
 
-.task-edit {
-  padding-bottom: 20vh;
-  min-height: 100vh; }
+.required .form-group label:after {
+  content: ' *';
+  color: #c9302c; }
+
+a[data-toggle=collapse]:hover {
+  cursor: pointer; }
 
 .task-desktop-actions {
   position: sticky;
@@ -59,17 +82,10 @@
   top: 50px; }
   .task-desktop-actions button {
     margin-bottom: 0.7em; }
+  .task-desktop-actions .totals {
+    margin-top: 10px; }
+    .task-desktop-actions .totals hr {
+      margin: 8px 0px; }
 
-.sticky-footer {
-  background-color: #f5f5f5;
-  position: fixed;
-  height: 15vh;
-  width: 100%;
-  bottom: 0px; }
-
-.required .form-group label:after {
-  content: ' *';
-  color: #c9302c; }
-
-a[data-toggle=collapse]:hover {
-  cursor: pointer; }
+.page-content {
+  margin: 0px; }

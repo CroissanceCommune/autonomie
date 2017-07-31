@@ -193,7 +193,7 @@ def get_status_actions(data_type):
     manager = ActionManager()
     for status, icon, label, title, css in (
         (
-            'draft', '', u'Enregistrer en brouillon',
+            'draft', 'save', u'Enregistrer en brouillon',
             'Enregistrer ce document comme brouillon', 'btn btn-default'
         ),
         (

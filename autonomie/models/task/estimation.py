@@ -64,7 +64,6 @@ from .invoice import (
 )
 from .task import (
     Task,
-    DiscountLine,
     TaskLine,
     TaskStatus,
 )
@@ -497,52 +496,15 @@ class Estimation(Task, EstimationCompute):
         invoices.append(invoice)
         return invoices
 
-    def add_line(self, line=None, **kwargs):
-        """
-            Add a line to the current task
-        """
-        if line is None:
-            line = TaskLine(**kwargs)
-        self.default_line_group.lines.append(line)
-
-    def add_discount(self, line=None, **kwargs):
-        """
-            Add a discount line to the current task
-        """
-        if line is None:
-            line = DiscountLine(**kwargs)
-        self.discounts.append(line)
-
-    def add_payment(self, line=None, **kwargs):
-        """
-            Add a payment line to the current task
-        """
-        if line is None:
-            line = PaymentLine(**kwargs)
-        self.payments.append(line)
-
-    def set_lines(self, lines):
-        """
-            Set the lines
-        """
-        self.default_line_group.lines = lines
-
-    def set_discounts(self, lines):
-        """
-            Set the discounts
-        """
-        self.discounts = lines
-
-    def set_payments(self, lines):
-        """
-            set the payment lines
-        """
-        self.payments = lines
-
     def __repr__(self):
         return u"<Estimation id:{s.id} ({s.status}>".format(s=self)
 
     def __json__(self, request):
+        if self.manualDeliverables == 1:
+            payment_times = -1
+        else:
+            payment_times = len(self.payment_lines)
+
         result = Task.__json__(self, request)
         result.update(
             dict(
@@ -552,6 +514,7 @@ class Estimation(Task, EstimationCompute):
                 manualDeliverables=self.manualDeliverables,
                 course=self.course,
                 paymentDisplay=self.paymentDisplay,
+                payment_times=payment_times,
                 payment_lines=[
                     line.__json__(request)
                     for line in self.payment_lines
@@ -638,6 +601,7 @@ class PaymentLine(DBBASE):
 
     def __json__(self, request):
         return dict(
+            id=self.id,
             order=self.order,
             index=self.order,
             description=self.description,

@@ -72,9 +72,6 @@ export const updateSelectOptions = function(options, val, key){
     var has_selected = false;
     _.each(options, function(option){
       delete option['selected'];
-          console.log(val);
-          console.log(key);
-          console.log(option);
       if (_.contains(val, option[key])){
         option['selected'] = 'true';
         has_selected = true;

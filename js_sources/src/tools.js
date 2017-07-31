@@ -60,6 +60,8 @@ export const updateSelectOptions = function(options, val, key){
      * :param list options: list of js objects
      * :param list val: list of values or single value
      * :param str key: the key used to identifiy items ('value' by default)
+     * :returns: True if a default or an existing value has been found
+     * :rtype: bool
      */
     if (!_.isArray(val)){
       val = [val];
@@ -70,19 +72,48 @@ export const updateSelectOptions = function(options, val, key){
     var has_selected = false;
     _.each(options, function(option){
       delete option['selected'];
+          console.log(val);
+          console.log(key);
+          console.log(option);
       if (_.contains(val, option[key])){
         option['selected'] = 'true';
         has_selected = true;
       }
     });
     if (! has_selected){
-        _.each(options, function(option){
-            if (option['default']){
-                option['selected'] = true;
-            }
-        });
+        var option = getDefaultItem(options);
+        if (!_.isUndefined(option)){
+            option['selected'] = true;
+            has_selected = true;
+        }
     }
-    return options;
+    return has_selected;
+}
+export const getDefaultItem = function(items){
+    /*
+     * Get The default item from an array of items looking for a default key
+     *
+     * :param list items: list of objects
+     * :rtype: obj or undefined
+     */
+    var result = _.find(items, function(item){ return item.default==true});
+    return result;
+}
+export const findCurrentSelected = function(options, current_value, key){
+    /*
+     * Return the full object definition from options matching the current value
+     *
+     * :param list options: List of objects
+     * :param str current_value: The current value in int or str
+     * :param str key: The key used to identify objects (value by default)
+     * :returns: The object matching the current_value
+     */
+    return _.find(
+        options,
+        function(item){
+            return item[key] == current_value
+        }
+    );
 }
 export const getOpt = function(obj, key, default_val){
     /*

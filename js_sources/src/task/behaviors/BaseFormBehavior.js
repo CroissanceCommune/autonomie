@@ -14,6 +14,7 @@ import Validation from 'backbone-validation';
 
 const BaseFormBehavior = Mn.Behavior.extend({
     onDataPersist: function(attribute, value){
+        console.log("BaseFormBehavior.onDataPersist");
         Validation.unbind(this.view);
         Validation.bind(this.view, {
             attributes: function(view){return [attribute];}

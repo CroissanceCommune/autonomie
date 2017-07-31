@@ -87,6 +87,7 @@ var FormBehavior = Mn.Behavior.extend({
         this.syncServer();
     },
     onDataPersisted: function(datas){
+        console.log("FormBehavior.onDataPersisted");
         this.syncServer(datas, true);
     },
     onCancelForm: function(){

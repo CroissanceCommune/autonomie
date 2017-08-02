@@ -20,9 +20,9 @@ import Validation from 'backbone-validation';
 import { setupBbValidationCallbacks, setupBbValidationPatterns } from '../backbone-tools.js';
 import Router from './components/Router.js';
 import Controller  from './components/Controller.js';
-import { setupJsonRedirect, ajax_call } from '../tools.js';
+import { setupAjaxCallbacks, ajax_call } from '../tools.js';
 
-setupJsonRedirect();
+setupAjaxCallbacks();
 
 App.on('start', function (app, options) {
     console.log("  => Starting the app");

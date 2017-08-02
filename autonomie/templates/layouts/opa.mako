@@ -93,13 +93,6 @@ One page application layout template
     </div>
     <%block name='content' />
     <%block name='footer' />
-    <script type='text/javascript'>
-        var company_menu = document.getElementById('company-select-menu');
-        if (company_menu !== null){
-            company_menu.onchange = function(){
-                window.location = this.value;
-            }
-        }
-    </script>
+    <script type='text/javascript' src="${request.static_url('autonomie:static/js/build/base_setup.js')}"></script>
   </body>
 </html>

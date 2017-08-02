@@ -32,5 +32,6 @@ def test_validate_full_estimation(
     task_line_group.task_id = estimation.id
     payment_line.task_id = estimation.id
     estimation.line_groups = [task_line_group]
+    estimation.payment_conditions = "Test"
     estimation.payment_lines = [payment_line]
     validate_estimation(estimation, request_with_config)

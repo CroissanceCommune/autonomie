@@ -186,6 +186,7 @@ def test_cancelinvoice(tva, unity):
         'date': datetime.date.today().isoformat(),
         'address': u"adress",
         "description": u"description",
+        "payment_conditions": u"Test",
         'invoice_id': 5,
         'financial_year': 2017,
         'line_groups': [
@@ -212,6 +213,7 @@ def test_cancelinvoice(tva, unity):
         'date': datetime.date.today(),
         'address': u"adress",
         "description": u"description",
+        "payment_conditions": u"Test",
         'invoice_id': 5,
         'financial_year': 2017,
         'line_groups': [
@@ -249,6 +251,7 @@ def test_invoice(tva, unity):
         'date': datetime.date.today().isoformat(),
         'address': u"adress",
         "description": u"description",
+        "payment_conditions": u"Test",
         'estimation_id': 5,
         'financial_year': 2017,
         'line_groups': [
@@ -275,6 +278,7 @@ def test_invoice(tva, unity):
         'date': datetime.date.today(),
         'address': u"adress",
         "description": u"description",
+        "payment_conditions": u"Test",
         'estimation_id': 5,
         'financial_year': 2017,
         'line_groups': [

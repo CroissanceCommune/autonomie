@@ -172,6 +172,7 @@ def test_estimation(unity, tva):
         'address': u"adress",
         "description": u"description",
         "paymentDisplay": u"SUMMARY",
+        "payment_conditions": u"Réception de facture",
         "deposit": 5,
         "signed_status": "signed",
         'line_groups': [

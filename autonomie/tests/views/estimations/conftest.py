@@ -108,6 +108,7 @@ def full_estimation(
     estimation.deposit = 10
     estimation.description = u"Description"
     estimation.paymentDisplay = u"SUMMARY"
+    estimation.payment_conditions = u"Test"
     estimation.signed_status = "signed"
 
     task_line_group.lines = [task_line]

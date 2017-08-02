@@ -359,6 +359,19 @@ def test_task_line_groups(tva, unity):
     assert schema.deserialize(value) == expected_value
 
 
+def test_task_payment_conditions():
+    from autonomie.models.task.estimation import Task
+    schema = SQLAlchemySchemaNode(Task, includes=('payment_conditions',))
+    schema = schema.bind()
+
+    value = {'payment_conditions': u"À réception de facture"}
+    assert schema.deserialize(value) == value
+
+    value = {}
+    with pytest.raises(colander.Invalid):
+        schema.deserialize(value)
+
+
 def test_task(tva, unity):
     import datetime
     from autonomie.models.task.task import Task
@@ -369,6 +382,7 @@ def test_task(tva, unity):
         'date': datetime.date.today().isoformat(),
         'address': u"adress",
         "description": u"description",
+        'payment_conditions': u"Test",
         'line_groups': [
             {
                 'task_id': 5,
@@ -393,6 +407,7 @@ def test_task(tva, unity):
         'date': datetime.date.today(),
         'address': u"adress",
         "description": u"description",
+        'payment_conditions': u"Test",
         'line_groups': [
             {
                 'task_id': 5,

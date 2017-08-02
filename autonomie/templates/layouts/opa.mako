@@ -49,6 +49,9 @@ One page application layout template
       >
     ${request.layout_manager.render_panel('menu')}
     ${request.layout_manager.render_panel('submenu')}
+    <div id='loading-box'>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+    </div>
     <%block name="headtitle">
     <div class='pagetitle visible-lg hidden-sm hidden-print'>
       <h2 >
@@ -56,7 +59,7 @@ One page application layout template
       </h2>
     </div>
     </%block>
-    <div class="container-fluid">
+    <div class='beforeContent'>
         <div class='subnav hidden-print'>
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():

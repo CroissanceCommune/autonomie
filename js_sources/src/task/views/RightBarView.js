@@ -12,6 +12,7 @@ import $ from 'jquery';
 import Mn from 'backbone.marionette';
 import ActionCollection from '../models/ActionCollection.js';
 import ActionListView from './ActionListView.js';
+import { formatAmount } from '../../math.js';
 
 var template = require("./templates/RightBarView.mustache");
 
@@ -25,10 +26,17 @@ const RightBarView = Mn.View.extend({
     events: {
         'click @ui.buttons': 'onButtonClick'
     },
+    modelEvents: {
+        'change': 'render'
+    },
     template: template,
     templateContext: function(){
         return {
-            buttons: this.getOption('actions')['status']
+            buttons: this.getOption('actions')['status'],
+            ttc: formatAmount(this.model.get('ttc'), true),
+            ht: formatAmount(this.model.get('ht', true)),
+            ht_before: formatAmount(this.model.get('ht_before_discounts'), false),
+            tvas: this.model.tva_labels(),
         }
     },
     onButtonClick: function(event){

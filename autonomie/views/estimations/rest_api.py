@@ -176,7 +176,6 @@ class RestEstimation(BaseRestView):
             Estimation,
             excludes=excludes
         )
-        schema = schema.bind(request=self.request)
         return schema
 
     def form_options(self):
@@ -299,6 +298,8 @@ class RestEstimation(BaseRestView):
             else:
                 appstruct['manualDeliverables'] = 0
 
+        return appstruct
+
 
 class TaskLineGroupRestView(BaseRestView):
     """
@@ -313,7 +314,7 @@ class TaskLineGroupRestView(BaseRestView):
         """
         excludes = ('task_id',)
         schema = SQLAlchemySchemaNode(TaskLineGroup, excludes=excludes)
-        return schema.bind(request=self.request)
+        return schema
 
     def collection_get(self):
         """
@@ -364,7 +365,7 @@ class TaskLineRestView(BaseRestView):
         """
         excludes = ('group_id',)
         schema = SQLAlchemySchemaNode(TaskLine, excludes=excludes)
-        return schema.bind(request=self.request)
+        return schema
 
     def collection_get(self):
         return self.context.lines
@@ -410,7 +411,7 @@ class DiscountLineRestView(BaseRestView):
         """
         excludes = ('task_id',)
         schema = SQLAlchemySchemaNode(DiscountLine, excludes=excludes)
-        return schema.bind(request=self.request)
+        return schema
 
     def collection_get(self):
         """
@@ -439,7 +440,6 @@ class DiscountLineRestView(BaseRestView):
         lines = []
         if percent is not None and description is not None:
             tva_parts = self.context.tva_ht_parts()
-            print(tva_parts)
             for tva, ht in tva_parts.items():
                 amount = percentage(ht, percent)
                 line = DiscountLine(
@@ -468,7 +468,7 @@ class PaymentLineRestView(BaseRestView):
         """
         excludes = ('task_id',)
         schema = SQLAlchemySchemaNode(PaymentLine, excludes=excludes)
-        return schema.bind(request=self.request)
+        return schema
 
     def collection_get(self):
         """

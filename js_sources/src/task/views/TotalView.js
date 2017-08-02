@@ -32,15 +32,6 @@ const TotalView = Mn.View.extend({
     modelEvents: {
         'change': 'render',
     },
-    getTvaLabel: function(tva_value, tva_key){
-        let res = {'value': formatAmount(tva_value, true), 'label': 'Tva Inconnue'};
-        _.each(AppOption['form_options']['tva_options'], function(tva){
-            if (tva.value == tva_key){
-                res['label'] = tva.name;
-            }
-        });
-        return res
-    },
     showHt: function(){
         var values = formatAmount(this.model.get('ht'), true);
         var view = new LabelRowWidget(
@@ -52,16 +43,7 @@ const TotalView = Mn.View.extend({
         this.showChildView('ht', view);
     },
     showTvas: function(){
-        var values = [];
-        var this_ = this;
-        _.each(this.model.get('tvas'), function(item, key){
-            values.push(this_.getTvaLabel(item, key));
-        });
-        var view = new LabelRowWidget(
-            {
-                values: values,
-            }
-        );
+        var view = new LabelRowWidget({values: this.model.tva_labels()});
         this.showChildView('tvas', view);
     },
     showTtc: function(){

@@ -60,6 +60,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.task import (
     Estimation,
+    PaymentLine,
 )
 from autonomie.models.customer import Customer
 from autonomie.models.project import (
@@ -124,6 +125,7 @@ class EstimationAdd(BaseFormView):
         )
         estimation.name = name
         estimation.course = appstruct['course']
+        estimation.payment_lines = [PaymentLine(description='Solde', amount=0)]
         self.dbsession.add(estimation)
         self.dbsession.flush()
         logger.debug(

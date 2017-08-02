@@ -395,7 +395,8 @@ class Task(Node):
                 'colanderalchemy': {
                     "title": u"Conditions de paiement",
                     'widget': deform.widget.TextAreaWidget(),
-                    'validator': forms.textarea_node_validator
+                    'validator': forms.textarea_node_validator,
+                    'missing': colander.required,
                 }
             },
         ),

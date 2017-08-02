@@ -12,3 +12,30 @@
 {{/each}}
 <div class='child-container'></div>
 </div>
+<div class='totals'>
+    <div>
+        <div class='text-center'>
+            Total HT avant remise : {{{ ht_before }}}
+        </div>
+    </div>
+    <hr />
+    <div>
+        <div class='text-center'>
+            Total HT : {{{ ht }}}
+        </div>
+    </div>
+    <hr />
+    {{#each tvas}}
+    <div>
+        <div class='text-center'>
+            {{{this.label}}} : {{{this.value}}}
+        </div>
+    </div>
+    <hr />
+    {{/each}}
+    <div>
+        <div class='text-center'>
+            Total TTC : {{{ ttc }}}
+        </div>
+    </div>
+</div>

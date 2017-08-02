@@ -12,8 +12,10 @@ var PROD = (process.env.NODE_ENV === 'production');
 
 const config = {
   entry: {
-    task: path.join(APP_DIR, 'task', 'task.js'),
-    vendor: ['jquery', 'backbone', 'underscore', 'backbone.marionette', 'tinymce', 'jstree']
+      base_setup: path.join(APP_DIR, 'base_setup.js'),
+      task: path.join(APP_DIR, 'task', 'task.js'),
+      vendor: ['jquery', 'backbone', 'underscore', 'backbone.marionette',
+                'tinymce', 'jstree', 'bootstrap']
   },
   module: {
     loaders: [

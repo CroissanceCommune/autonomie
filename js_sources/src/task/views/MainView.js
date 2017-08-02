@@ -19,6 +19,11 @@ import RightBarView from "./RightBarView.js";
 import StatusView from './StatusView.js';
 import HtBeforeDiscountsView from './HtBeforeDiscountsView.js';
 import TotalView from './TotalView.js';
+import NotesBlockView from './NotesBlockView.js';
+import BootomActionView from './BootomActionView.js';
+import PaymentConditionBlockView from './PaymentConditionBlockView.js';
+import PaymentBlockView from './PaymentBlockView.js';
+import LoginView from './LoginView.js';
 
 const template = require('./templates/MainView.mustache');
 
@@ -30,9 +35,15 @@ const MainView = Mn.View.extend({
         tasklines: '#tasklines',
         discounts: '#discounts',
         rightbar: "#rightbar",
-        footer: '#footer',
         ht_before_discounts: '.ht_before_discounts',
-        totals: '.totals'
+        totals: '.totals',
+        notes: '.notes',
+        payment_conditions: '.payment-conditions',
+        payments: '.payments',
+        footer: {
+            el: 'footer',
+            replaceElement: true
+        },
     },
     childViewEvents: {
         'status:change': 'onStatusChange',
@@ -40,21 +51,41 @@ const MainView = Mn.View.extend({
     initialize: function(options){
         this.channel = Radio.channel('facade');
     },
-    showCommonBlock: function(datas){
+    showCommonBlock: function(){
         var model = this.channel.request('get:model', 'common');
         var view = new CommonView({model: model});
         this.showChildView('common', view);
     },
-    showTaskGroupBlock: function(datas){
+    showTaskGroupBlock: function(){
         var collection = this.channel.request('get:collection', 'task_groups');
         var view = new TaskBlockView({collection: collection});
         this.showChildView('tasklines', view);
     },
-    showDiscountBlock(datas){
+    showDiscountBlock: function(){
         var collection = this.channel.request('get:collection', 'discounts');
         var model = this.channel.request('get:model', 'common');
         var view = new DiscountBlockView({collection: collection, model: model});
         this.showChildView('discounts', view);
+    },
+    showNotesBlock: function(){
+        var model = this.channel.request('get:model', 'common');
+        var view = new NotesBlockView({model: model});
+        this.showChildView('notes', view);
+    },
+    showPaymentConditionsBlock: function(){
+        var model = this.channel.request('get:model', 'common');
+        var view = new PaymentConditionBlockView({model:model});
+        this.showChildView('payment_conditions', view);
+    },
+    showPaymentBlock: function(){
+        var model = this.channel.request('get:model', 'common');
+        var collection = this.channel.request('get:paymentcollection');
+        var view = new PaymentBlockView({model: model, collection: collection});
+        this.showChildView('payments', view);
+    },
+    showLogin: function(){
+        var view = new LoginView({});
+        this.showChildView('modalRegion', view);
     },
     onRender: function() {
         if (_.indexOf(AppOption['form_options']['sections'], "common") != -1){
@@ -66,19 +97,36 @@ const MainView = Mn.View.extend({
         if (_.indexOf(AppOption['form_options']['sections'], "discounts") != -1){
             this.showDiscountBlock();
         }
+        if (_.indexOf(AppOption['form_options']['sections'], "notes") != -1){
+            this.showNotesBlock();
+        }
+        if (_.indexOf(AppOption['form_options']['sections'], "payment_conditions") != -1){
+            this.showPaymentConditionsBlock();
+        }
+        if (_.indexOf(AppOption['form_options']['sections'], "payments") != -1){
+            this.showPaymentBlock();
+        }
 
+        var totalmodel = this.channel.request('get:totalmodel');
         var view = new RightBarView(
-            {actions: AppOption['form_options']['actions']}
+            {
+                actions: AppOption['form_options']['actions'],
+                model: totalmodel
+            }
         );
         this.showChildView('rightbar', view);
+        view = new BootomActionView(
+            {actions: AppOption['form_options']['actions']}
+        );
+        this.showChildView('footer', view);
 
-        var model = this.channel.request('get:totalmodel');
-        view = new HtBeforeDiscountsView({model: model});
+        view = new HtBeforeDiscountsView({model: totalmodel});
         this.showChildView('ht_before_discounts', view);
-        view = new TotalView({model:model});
+        view = new TotalView({model: totalmodel});
         this.showChildView('totals', view);
     },
-    onStatusChange: function(status, title, label, url){
+    showStatusView(status, title, label, url){
+        console.log("Showing the status view");
         this.showChildView(
             'modalRegion',
             new StatusView({
@@ -88,6 +136,20 @@ const MainView = Mn.View.extend({
                 model: this.commonModel,
                 url: url
             })
+        );
+    },
+    onStatusChange: function(status, title, label, url){
+        var common_model = this.channel.request('get:model', 'common');
+        var this_ = this;
+        // We ensure the common_model get saved before changing the status
+        common_model.save(
+            null,
+            {
+                patch:true,
+                success: function(){
+                    this_.showStatusView(status, title, label, url)
+                }
+            }
         );
     },
     onChildviewDestroyModal: function() {

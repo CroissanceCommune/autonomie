@@ -78,8 +78,11 @@ def forbidden_view(request):
 
     if login:
         log.warn(u"An access has been forbidden to '{0}'".format(login))
-        bootstrap.need()
-        return_datas = {"title": u"Accès refusé", }
+        if request.is_xhr:
+            return_datas = HTTPForbidden()
+        else:
+            bootstrap.need()
+            return_datas = {"title": u"Accès refusé", }
 
     else:
         log.debug(u"An access has been forbidden to an unauthenticated user")

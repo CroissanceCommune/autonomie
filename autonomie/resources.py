@@ -69,6 +69,7 @@ main_css = get_resource(
         font_awesome_css,
     ]
 )
+opa_css = get_resource("css/opa.css", depends=[main_css])
 
 # Js static resources
 _date = get_resource("js/date.js")
@@ -81,7 +82,7 @@ def get_opa_group():
     Return the resources used on one page applications pages
     """
     js_tools = Group([_date])
-    return Group([main_css, js_tools])
+    return Group([main_css, opa_css, js_tools])
 
 
 def get_main_group():

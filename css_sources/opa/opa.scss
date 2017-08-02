@@ -1,0 +1,10 @@
+$bgcolor: #f0e9e0;
+.beforeContent{
+  background-color: $bgcolor;
+}
+.page-content{
+  background-color: $bgcolor;
+  padding-bottom: 15vh;
+  min-height: 100vh;
+  margin: 0px;
+}

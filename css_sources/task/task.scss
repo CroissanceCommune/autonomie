@@ -11,7 +11,7 @@ $form-subblock-bgcolor: #fbfbfb;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     background-color: $form-block-bgcolor;
     margin-bottom: 3em;
-    h2{
+    h2, h3, h4{
       border-bottom: 1px solid $form-block-borders;
       margin: 3px 0px;
       padding: 15px 0px 8px 10px;

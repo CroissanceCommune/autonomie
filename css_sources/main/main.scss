@@ -522,3 +522,20 @@ $blue_status_label: #5bc0de;
 .btn-nostyle:hover{
   background-color: rgba(255,255,255, 0.1);
 }
+.modal-content{
+  border-radius: 0px;
+}
+.login-dialog{
+  .modal-header{
+  }
+  .modal-body{
+    .icon{
+      font-size: 100px;
+      color: #999;
+      text-align: center;
+    }
+  }
+}
+.modal-overlay{
+  background-color: rgba(5,5,5, 0.7);
+}

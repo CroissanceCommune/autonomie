@@ -25,10 +25,15 @@ const CommonView = Mn.View.extend({
      * invoice/estimation form, provide a main layout with regions for each
      * field
      */
+    behaviors: [
+        {
+            behaviorClass: FormBehavior,
+            errorMessage: "Vérifiez votre saisie"
+        }
+    ],
     tagName: 'div',
     className: 'form-section',
     template: template,
-    formname: "common",
     regions: {
         mentions: '.mentions',
         date: '.date',
@@ -36,12 +41,6 @@ const CommonView = Mn.View.extend({
         address: '.address',
         workplace: '.workplace',
     },
-    behaviors: [
-        {
-            behaviorClass: FormBehavior,
-            errorMessage: "Vérifiez votre saisie"
-        }
-    ],
     childViewTriggers: {
         'change': 'data:modified',
         'finish': 'data:persist'

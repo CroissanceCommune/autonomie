@@ -1,0 +1,24 @@
+<h3>
+    <a
+        data-target='#exclusions-more'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="exclusions-more"
+        >
+        <i class='glyphicon glyphicon-plus-sign'></i>
+    </a>
+    {{#if is_more_set}}<i>
+Note complémentaire
+</i>
+{{else}}
+Note complémentaire
+{{/if}}
+</h3>
+<div class='content'>
+    <div
+        class='collapse row {{#if is_more_set}}in{{/if}}'
+        id="exclusions-more">
+        <hr />
+        <div class='exclusions'></div>
+    </div>
+</div>

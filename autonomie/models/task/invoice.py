@@ -322,6 +322,7 @@ class Invoice(Task, InvoiceCompute):
             order += 1
             cancelinvoice.default_line_group.lines.append(paid_line)
         cancelinvoice.mentions = self.mentions
+        cancelinvoice.payment_conditions = u"Réglé"
         return cancelinvoice
 
     def get_next_row_index(self):

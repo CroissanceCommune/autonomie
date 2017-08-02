@@ -163,6 +163,9 @@ class EstimationEditView(BaseView):
         )
 
     def __call__(self):
+        if not self.request.has_permission('edit.%s' % self.context.type_):
+            return HTTPFound(self.request.current_route_path() + '.html')
+
         task_css.need()
         jstree_css.need()
         populate_actionmenu(self.request)
@@ -311,6 +314,6 @@ def includeme(config):
         EstimationEditView,
         route_name='/estimations/{id}',
         renderer='tasks/form.mako',
-        permission='edit.estimation',
+        permission='view.estimation',
         layout='opa',
     )

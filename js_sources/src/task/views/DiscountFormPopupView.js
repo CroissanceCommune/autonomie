@@ -24,10 +24,16 @@ const DiscountFormPopupView = Mn.View.extend({
         'simple-form': '.simple-form',
         'percent-form': '.percent-form',
     },
+    // Here we bind the child FormBehavior with our ModalBehavior
+    // Like it's done in the ModalFormBehavior
     childViewTriggers: {
         'cancel:form': 'modal:close',
         'success:sync': 'modal:close',
         'insert:percent': 'insert:percent'
+    },
+    onModalBeforeClose(){
+        console.log("Before close");
+        this.model.rollback();
     },
     isAddView: function(){
         return !getOpt(this, 'edit', false);

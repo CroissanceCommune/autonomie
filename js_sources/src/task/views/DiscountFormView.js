@@ -24,12 +24,6 @@ const DiscountFormView = Mn.View.extend({
         'amount': '.amount',
         'tva': '.tva',
     },
-    ui: {
-        btn_cancel: "button[type=reset]",
-    },
-    triggers: {
-        'click @ui.btn_cancel': 'cancel:form',
-    },
     childViewTriggers: {
         'change': 'data:modified',
     },
@@ -62,6 +56,7 @@ const DiscountFormView = Mn.View.extend({
                     options: AppOption['form_options']['tva_options'],
                     title: "TVA",
                     value: this.model.get('tva'),
+                    id_key: 'value',
                     field_name: 'tva'
                 }
             )

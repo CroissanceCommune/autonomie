@@ -1,0 +1,30 @@
+<div class="modal-dialog" role="document">
+	<div class="modal-content">
+        <form class='form taskline-form'>
+            <div class="modal-header">
+              <button tabindex='-1' type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">{{ title }}</h4>
+            </div>
+            <div class="modal-body">
+                <div class='description required'></div>
+                <div class='date required'></div>
+                <div class='amount required'></div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    class='btn btn-success primary-action'
+                    type='submit'
+                    value='submit'>
+                    {{ title }}
+                </button>
+                <button
+                    class='btn btn-default secondary-action'
+                    type='reset'
+                    value='submit'>
+                    Annuler
+                </button>
+            </div>
+        </form>
+	</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+

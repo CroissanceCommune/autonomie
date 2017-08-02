@@ -24,6 +24,9 @@ const DiscountView = Mn.View.extend({
         'click @ui.edit_button': 'edit',
         'click @ui.delete_button': 'delete'
     },
+    modelEvents: {
+        'change': 'render'
+    },
     getTvaLabel: function(){
         let res = "";
         let current_value = this.model.get('tva');

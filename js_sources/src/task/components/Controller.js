@@ -12,16 +12,28 @@ import Mn from 'backbone.marionette';
 import MainView from '../views/MainView.js';
 import App from './App.js';
 import Facade from './Facade.js';
+import AuthBus from './AuthBus.js';
+import MessageBus from './MessageBus.js';
 
 const Controller = Mn.Object.extend({
     initialize: function(datas){
         Facade.loadModels(datas);
+
+        AuthBus.setAuthCallbacks([Facade.syncModel]);
+
         AppOption.facade = Facade;
         this.mainView = new MainView();
         App.showView(this.mainView);
     },
     status: function(status){
         this.mainView.showBox(status);
-    }
+    },
+
+    login: function(){
+        /*
+         * Login view : show the login form
+         */
+        this.mainView.showLogin();
+    },
 });
 export default Controller

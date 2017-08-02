@@ -13,7 +13,9 @@ import Mn from 'backbone.marionette';
 import CommonModel from "../models/CommonModel.js";
 import TaskGroupCollection from '../models/TaskGroupCollection.js';
 import DiscountCollection from '../models/DiscountCollection.js';
+import PaymentLineCollection from '../models/PaymentLineCollection.js';
 import TotalModel from '../models/TotalModel.js';
+import Radio from 'backbone.radio';
 
 const FacadeClass = Mn.Object.extend({
     channelName: 'facade',
@@ -22,18 +24,22 @@ const FacadeClass = Mn.Object.extend({
         'changed:task': 'computeTotals',
         'changed:discount': 'computeMainTotals',
         'changed:expense_ht': 'computeMainTotals',
+        'changed:payment_lines': "updatePaymentLines",
+        'sync:model': 'syncModel',
     },
     radioRequests: {
         'get:model': 'getModelRequest',
         'get:collection': 'getCollectionRequest',
+        'get:paymentcollection': 'getPaymentCollectionRequest',
         'get:totalmodel': 'getTotalModelRequest',
     },
-    initialize: function(options){
+    initialize(options){
         this.models = {};
         this.collections = {};
         this.totalmodel = new TotalModel();
+        this.syncModel = this.syncModel.bind(this);
     },
-    loadModels: function(datas){
+    loadModels(datas){
         this.models['common'] = new CommonModel(datas);
         this.models['common'].url = AppOption['context_url'];
 
@@ -43,17 +49,37 @@ const FacadeClass = Mn.Object.extend({
         var discounts = datas['discounts'];
         this.collections['discounts'] = new DiscountCollection(discounts);
         this.computeTotals();
+
+        if (_.has(datas, 'payment_lines')){
+            var payment_lines = datas['payment_lines'];
+            this.payment_lines_collection = new PaymentLineCollection(
+                payment_lines
+            );
+        }
     },
-    getTotalModelRequest: function(){
+    syncModel(modelName){
+        var modelName = modelName || 'common';
+        console.log(modelName);
+        console.log(this.models);
+        this.models[modelName].save(null, {wait:true, sync: true, patch:true});
+    },
+    getPaymentCollectionRequest(){
+        return this.payment_lines_collection;
+    },
+    getTotalModelRequest(){
         return this.totalmodel;
     },
-    getModelRequest: function(label){
+    getModelRequest(label){
         return this.models[label];
     },
-    getCollectionRequest: function(label){
+    getCollectionRequest(label){
         return this.collections[label];
     },
-    computeTotals: function(){
+    updatePaymentLines(){
+        var channel = Radio.channel('facade');
+        channel.trigger('update:payment_lines', this.totalmodel);
+    },
+    computeTotals(){
         this.totalmodel.set({
             'ht_before_discounts': this.tasklines_ht(),
             'ht': this.HT(),
@@ -61,7 +87,7 @@ const FacadeClass = Mn.Object.extend({
             'ttc': this.TTC()
         });
     },
-    computeMainTotals: function(){
+    computeMainTotals(){
         this.totalmodel.set({
             'ht_before_discounts': this.tasklines_ht(),
             'ht': this.HT(),
@@ -69,10 +95,10 @@ const FacadeClass = Mn.Object.extend({
             'ttc': this.TTC()
         });
     },
-    tasklines_ht: function(){
+    tasklines_ht(){
         return this.collections['task_groups'].ht();
     },
-    HT: function(){
+    HT(){
         var result = 0;
         _.each(this.collections, function(collection){
             result += collection.ht();
@@ -82,7 +108,7 @@ const FacadeClass = Mn.Object.extend({
         });
         return result;
     },
-    TVAParts: function(){
+    TVAParts(){
         var result = {};
         _.each(this.collections, function(collection){
             var tva_parts = collection.tvaParts();
@@ -104,7 +130,7 @@ const FacadeClass = Mn.Object.extend({
         });
         return result;
     },
-    TTC: function(){
+    TTC(){
         var result = 0;
         _.each(this.collections, function(collection){
             result += collection.ttc();

@@ -784,6 +784,7 @@ class BaseRestView(BaseView):
         toremove = [
             node for node in schema if node.name not in submitted_keys
         ]
+        self.logger.debug(u"Removing %s from the schema" % toremove)
         for node in toremove:
             del schema[node.name]
 
@@ -812,12 +813,15 @@ class BaseRestView(BaseView):
 
     def _submit_datas(self, edit=False):
         submitted = self.request.json_body
-        self.logger.debug(u"Submitting %s" % submitted)
+        self.logger.debug(u" + Submitting %s" % submitted)
         submitted = self.pre_format(submitted)
+        self.logger.debug(u" + After pre format %s" % submitted)
         schema = self.get_schema(submitted)
 
         if edit:
             schema = self.filter_edition_schema(schema, submitted)
+
+        schema = schema.bind(request=self.request)
 
         try:
             attributes = schema.deserialize(submitted)
@@ -826,7 +830,7 @@ class BaseRestView(BaseView):
             self.logger.exception(submitted)
             raise rest.RestError(err.asdict(), 400)
 
-        self.logger.debug(attributes)
+        self.logger.debug(u" + After deserialize : %s" % attributes)
         if edit:
             editted = self.get_editted_element(attributes)
             entry = schema.objectify(attributes, editted)
@@ -838,7 +842,7 @@ class BaseRestView(BaseView):
             self.request.dbsession.add(entry)
             # We need an id => flush
             self.request.dbsession.flush()
-        self.logger.debug(entry)
+        self.logger.debug("Finished")
         return entry
 
     def post(self):

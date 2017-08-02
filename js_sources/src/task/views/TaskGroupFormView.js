@@ -37,7 +37,7 @@ const TaskGroupFormView = Mn.View.extend({
         'change': 'data:modified',
     },
     modelEvents: {
-        'change': 'refreshForm'
+        'set:product_group': 'refreshForm'
     },
     onCatalogEdit: function(productgroup_datas){
         this.model.loadProductGroup(productgroup_datas);

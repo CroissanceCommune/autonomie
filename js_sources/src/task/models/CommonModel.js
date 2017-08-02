@@ -24,6 +24,11 @@ const CommonModel = BaseModel.extend({
         'mention_ids',
         'workplace',
         'expenses_ht',
+        'exclusions',
+        'payment_conditions',
+        'deposit',
+        'payment_times',
+        'paymentDisplay',
     ],
     validation: {
         date: {

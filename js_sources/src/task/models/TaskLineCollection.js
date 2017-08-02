@@ -9,17 +9,15 @@
  *
  */
 import _ from 'underscore';
-import Bb from 'backbone';
 import TaskLineModel from './TaskLineModel.js';
 import Radio from 'backbone.radio';
 import {ajax_call} from '../../tools.js';
+import OrderableCollection from "./OrderableCollection.js";
 
-const TaskLineCollection = Bb.Collection.extend({
+const TaskLineCollection = OrderableCollection.extend({
     model: TaskLineModel,
-    comparator: 'order',
     initialize: function(options) {
-        this.on('change:reorder', this.updateModelOrder);
-        this.updateModelOrder(false);
+        TaskLineCollection.__super__.initialize.apply(this, options);
         this.on('remove', this.channelCall);
         this.on('sync', this.channelCall);
         this.on('reset', this.channelCall);
@@ -27,54 +25,6 @@ const TaskLineCollection = Bb.Collection.extend({
     channelCall: function(){
         var channel = Radio.channel('facade');
         channel.trigger('changed:task');
-    },
-    updateModelOrder: function(sync){
-        var sync = sync || true;
-        this.each(function(model, index) {
-            model.set('order', index);
-            if (sync){
-                model.save(
-                    {'order': index},
-                    {patch: true},
-                );
-            }
-        });
-
-    },
-    getMinOrder: function(){
-        if (this.models.length == 0){
-            return 0
-        }
-        let first_model = _.min(
-            this.models,
-            function(model){return model.get('order')}
-        );
-        return first_model.get('order');
-    },
-    getMaxOrder: function(){
-        if (this.models.length == 0){
-            return 0
-        }
-        let last_model = _.max(
-            this.models,
-            function(model){return model.get('order')}
-        );
-        return last_model.get('order');
-    },
-    moveUp: function(model) { // I see move up as the -1
-        var index = this.indexOf(model);
-        if (index > 0) {
-            this.models.splice(index - 1, 0, this.models.splice(index, 1)[0]);
-            this.trigger('change:reorder');
-        }
-    },
-    moveDown: function(model) {
-        // I see move up as the -1
-        var index = this.indexOf(model);
-        if (index < this.models.length) {
-            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
-            this.trigger('change:reorder');
-        }
     },
     load_from_catalog: function(sale_product_ids){
         var serverRequest = ajax_call(

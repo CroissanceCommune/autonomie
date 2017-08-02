@@ -9,11 +9,11 @@
  *
  */
 import _ from 'underscore';
-import Bb from 'backbone';
 import TaskLineCollection from './TaskLineCollection.js';
+import BaseModel from "./BaseModel.js";
 
 
-const TaskGroupModel = Bb.Model.extend({
+const TaskGroupModel = BaseModel.extend({
     props: [
         'id',
         'order',
@@ -22,10 +22,6 @@ const TaskGroupModel = Bb.Model.extend({
         'lines',
         'task_id',
     ],
-    constructor: function() {
-        arguments[0] = _.pick(arguments[0], this.props);
-        Bb.Model.apply(this, arguments);
-    },
     initialize: function(){
         this.populate();
         this.on('change:id', this.populate.bind(this));
@@ -39,6 +35,7 @@ const TaskGroupModel = Bb.Model.extend({
     loadProductGroup: function(sale_product_group_datas){
         this.set('title', sale_product_group_datas.title);
         this.set('description', sale_product_group_datas.description);
+        this.trigger('set:product_group');
     },
     ht: function(){
         return this.lines.ht();

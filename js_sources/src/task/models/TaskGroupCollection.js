@@ -8,21 +8,19 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
-import Bb from 'backbone';
+import OrderableCollection from "./OrderableCollection.js";
 import TaskGroupModel from './TaskGroupModel.js';
 import { ajax_call } from '../../tools.js';
 import Radio from 'backbone.radio';
 
 
-const TaskGroupCollection = Bb.Collection.extend({
+const TaskGroupCollection = OrderableCollection.extend({
     model: TaskGroupModel,
     url: function(){
         return AppOption['context_url'] + '/' + 'task_line_groups';
     },
-    comparator: 'order',
     initialize: function(options) {
-        this.on('change:reorder', this.updateModelOrder);
-        this.updateModelOrder(false);
+        TaskGroupCollection.__super__.initialize.apply(this, options);
         this.on('remove', this.channelCall);
         this.on('sync', this.channelCall);
         this.on('reset', this.channelCall);
@@ -30,54 +28,6 @@ const TaskGroupCollection = Bb.Collection.extend({
     channelCall: function(){
         var channel = Radio.channel('facade');
         channel.trigger('changed:task');
-    },
-    updateModelOrder: function(sync){
-        var sync = sync || true;
-        this.each(function(model, index) {
-            model.set('order', index);
-            if (sync){
-                model.save(
-                    {'order': index},
-                    {patch: true},
-                );
-            }
-        });
-
-    },
-    getMinOrder: function(){
-        if (this.models.length == 0){
-            return 0
-        }
-        let first_model = _.min(
-            this.models,
-            function(model){return model.get('order')}
-        );
-        return first_model.get('order');
-    },
-    getMaxOrder: function(){
-        if (this.models.length == 0){
-            return 0
-        }
-        let last_model = _.max(
-            this.models,
-            function(model){return model.get('order')}
-        );
-        return last_model.get('order');
-    },
-    moveUp: function(model) { // I see move up as the -1
-        var index = this.indexOf(model);
-        if (index > 0) {
-            this.models.splice(index - 1, 0, this.models.splice(index, 1)[0]);
-            this.trigger('change:reorder');
-        }
-    },
-    moveDown: function(model) {
-        // I see move up as the -1
-        var index = this.indexOf(model);
-        if (index < this.models.length) {
-            this.models.splice(index + 1, 0, this.models.splice(index, 1)[0]);
-            this.trigger('change:reorder');
-        }
     },
     load_from_catalog: function(sale_product_group_ids){
         var serverRequest = ajax_call(

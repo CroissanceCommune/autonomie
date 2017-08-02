@@ -18,7 +18,14 @@ const OrderableCollection = Bb.Collection.extend({
         this.updateModelOrder(false);
     },
     updateModelOrder: function(sync){
-        var sync = sync || true;
+        /*
+         * Update the model's order
+         *
+         * :param bool sync: Should we synchronize the change ?
+         */
+        if (_.isUndefined(sync)){
+            sync = true;
+        }
         this.each(function(model, index) {
             model.set('order', index);
             if (sync){

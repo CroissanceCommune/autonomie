@@ -97,7 +97,8 @@ const TaskLineFormView = Mn.View.extend({
                     options: AppOption['form_options']['workunit_options'],
                     title: "Unité",
                     value: this.model.get('unity'),
-                    field_name: 'unity'
+                    field_name: 'unity',
+                    id_key: 'value'
                 }
             )
         );
@@ -108,7 +109,8 @@ const TaskLineFormView = Mn.View.extend({
                     options: AppOption['form_options']['tva_options'],
                     title: "TVA",
                     value: this.model.get('tva'),
-                    field_name: 'tva'
+                    field_name: 'tva',
+                    id_key: 'value'
                 }
             )
         );

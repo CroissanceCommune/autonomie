@@ -26,24 +26,24 @@ const ModalBehavior = Mn.Behavior.extend({
     'hidden.bs.modal': 'triggerFinish',
     'click @ui.close': 'onClose',
   },
-  onRender: function() {
+  onRender() {
     this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
   },
-  onAttach: function() {
+  onAttach() {
     this.view.$el.modal(this.getOption('modalOptions') || {});
   },
-  onClose: function(){
-      console.log("Trigger cancel:form from ModalBehavior");
-      this.view.triggerMethod('cancel:form');
+  onClose(){
+      console.log("Trigger modal:beforeClose from ModalBehavior");
+      this.view.triggerMethod('modal:beforeClose');
       console.log("Trigger modal:close from ModalBehavior");
       this.view.triggerMethod('modal:close');
   },
-  onModalClose: function() {
-      console.log("ModalBehavior.onModalClose");
+  onModalClose() {
+    console.log("ModalBehavior.onModalClose");
     this.view.$el.modal('hide');
   },
-  triggerFinish: function() {
-      console.log("Trigger destroy:modal");
+  triggerFinish() {
+      console.log("Trigger destroy:modal from ModalBehavior");
     this.view.triggerMethod('destroy:modal');
   }
 });

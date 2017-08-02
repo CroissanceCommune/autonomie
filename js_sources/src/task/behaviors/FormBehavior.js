@@ -23,32 +23,32 @@ var FormBehavior = Mn.Behavior.extend({
     },
     events: {
         'submit @ui.form': 'onSubmitForm',
-        'click @ui.reset': 'onCancelForm',
+        'click @ui.reset': 'onCancelClick',
     },
     defaults: {
         errorMessage: "Une erreur est survenue"
     },
-    serializeForm: function(){
+    serializeForm(){
         return serializeForm(this.getUI('form'));
     },
-    onSyncError: function(){
+    onSyncError(){
         displayServerError("Une erreur a été rencontrée lors de la " +
                            "sauvegarde de vos données");
         Validation.unbind(this.view);
     },
-    onSyncSuccess: function(){
+    onSyncSuccess(){
         displayServerSuccess("Vos données ont bien été sauvegardées");
         Validation.unbind(this.view);
         console.log("Trigger success:sync from FormBehavior");
         this.view.triggerMethod('success:sync');
     },
-    syncServer: function(datas, bound){
+    syncServer(datas, bound){
         var bound = bound || false;
         var datas = datas || this.view.model.toJSON();
 
         if (!bound){
             Validation.bind(this.view, {
-                attributes: function(view){return _.keys(datas)}
+                attributes(view){return _.keys(datas)}
             });
         }
         if (this.view.model.isValid()){
@@ -59,7 +59,7 @@ var FormBehavior = Mn.Behavior.extend({
             }
         }
     },
-    addSubmit: function(datas){
+    addSubmit(datas){
         var destCollection = this.view.getOption('destCollection');
         destCollection.create(
             datas,
@@ -71,7 +71,7 @@ var FormBehavior = Mn.Behavior.extend({
             },
         )
     },
-    editSubmit: function(datas){
+    editSubmit(datas){
         this.view.model.save(
             datas,
             {
@@ -81,22 +81,26 @@ var FormBehavior = Mn.Behavior.extend({
             }
         );
     },
-    onSubmitForm: function(event){
+    onSubmitForm(event){
         event.preventDefault();
         this.view.model.set(this.serializeForm(), {validate: true});
         this.syncServer();
     },
-    onDataPersisted: function(datas){
+    onDataPersisted(datas){
         console.log("FormBehavior.onDataPersisted");
         this.syncServer(datas, true);
     },
-    onCancelForm: function(){
-        console.log("FormBehavior.onCancelForm");
+    onCancelClick(){
+        console.log("FormBehavior.onCancelClick");
+        console.log("Trigger reset:model from FormBehavior");
+        this.view.triggerMethod('reset:model');
+        console.log("Trigger cancel:form from FormBehavior");
+        this.view.triggerMethod('cancel:form');
+    },
+    onResetModel(){
+        console.log("FormBehavior.onResetModel");
         this.view.model.rollback();
     },
-    onModalClose: function(){
-        console.log("FormBehavior.onModalClose");
-    }
 });
 
 export default FormBehavior;

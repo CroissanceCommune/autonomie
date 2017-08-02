@@ -46,6 +46,7 @@ from sqlalchemy.orm import (
     relationship,
     deferred,
 )
+from sqlalchemy.ext.orderinglist import ordering_list
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
@@ -177,9 +178,14 @@ class Estimation(Task, EstimationCompute):
     manualDeliverables = deferred(
         Column(
             Integer,
-            info={'colanderalchemy': {'exclude': True}}
+            info={
+                'colanderalchemy': {
+                    'title': u"Configuration manuelle des paiements"
+                }
+            },
+            default=0,
         ),
-        group='edit'
+        group='edit',
     )
     paymentDisplay = deferred(
         Column(
@@ -203,6 +209,7 @@ class Estimation(Task, EstimationCompute):
         order_by='PaymentLine.order',
         cascade="all, delete-orphan",
         back_populates='task',
+        collection_class=ordering_list('order'),
         info={
             'colanderalchemy': {
                 'title': u"Échéances de paiement",

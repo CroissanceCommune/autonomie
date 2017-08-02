@@ -28,8 +28,11 @@
 import colander
 import logging
 
-from pyramid.httpexceptions import HTTPFound
-from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import (
+    HTTPFound,
+    HTTPForbidden,
+    HTTPUnauthorized,
+)
 
 from pyramid.security import authenticated_userid
 from pyramid.security import forget
@@ -81,11 +84,17 @@ def forbidden_view(request):
     else:
         log.debug(u"An access has been forbidden to an unauthenticated user")
         # redirecting to the login page with the current path as param
-        loc = request.route_url('login', _query=(('nextpage', request.path),))
-        if request.is_xhr:
-            return_datas = dict(redirect=loc)
+        nextpage = request.path
+
+        # If it's an api call, we raise HTTPUnauthorized
+        if nextpage.startswith('/api'):
+            return_datas = HTTPUnauthorized()
         else:
-            return_datas = HTTPFound(location=loc)
+            loc = request.route_url('login', _query=(('nextpage', nextpage),))
+            if request.is_xhr:
+                return_datas = dict(redirect=loc)
+            else:
+                return_datas = HTTPFound(location=loc)
 
     return return_datas
 

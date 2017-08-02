@@ -98,7 +98,7 @@
       % endif
     </div>
     <div id='loading-box'>
-        <i class="fa fa-spinner fa-spin"></i>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
     </div>
     <div id='login_form' style='display:none'></div>
     <script type='text/javascript'>

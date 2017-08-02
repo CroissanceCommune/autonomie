@@ -1,6 +1,8 @@
+{{#if title}}
 <label for='{{field_name}}'>{{title}}</label>
+{{/if}}
 <select class='form-control' {{#if multiple}}multiple{{/if}} name='{{field_name}}'>
 {{#each options}}
-    <option value='{{this.value}}' {{#if selected}}selected{{/if}}>{{this.label}}</option>
+    <option value='{{lookup this ../id_key }}' {{#if selected}}selected{{/if}}>{{this.label}}</option>
 {{/each}}
 </select>

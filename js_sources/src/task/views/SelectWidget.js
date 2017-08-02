@@ -27,15 +27,31 @@ const SelectWidget = Mn.View.extend({
     },
     onChange: function(event){
         this.triggerMethod(
-            "change:value",
-            this.$el.children('option:selected').val()
+            "finish",
+            this.getOption('field_name'),
+            this.getUI('select').val()
+        );
+    },
+    hasVoid(options){
+        return !_.isUndefined(
+            _.find(
+                options,
+                function(option){return option.label == '';}
+            )
         );
     },
     templateContext: function(){
         var id_key = getOpt(this, 'id_key', 'value');
         var options = this.getOption('options');
         var current_value = this.getOption('value');
-        updateSelectOptions(options, current_value, id_key);
+        var add_default = getOpt(this, 'add_default', false);
+        var found_one = updateSelectOptions(options, current_value, id_key);
+        if (!found_one && add_default && !this.hasVoid(options)){
+            var void_option = {};
+            void_option['value'] = '';
+            void_option['label'] = '';
+            options.unshift(void_option);
+        }
 
         var title = this.getOption('title');
         var field_name = this.getOption('field_name');
@@ -47,7 +63,6 @@ const SelectWidget = Mn.View.extend({
             id_key: id_key,
             multiple: multiple
         }
-    }
-
+    },
 });
 export default SelectWidget;

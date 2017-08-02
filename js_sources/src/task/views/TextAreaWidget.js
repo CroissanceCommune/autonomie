@@ -60,7 +60,8 @@ const TextAreaWidget = Mn.View.extend({
             value: getOpt(this, 'value', ''),
             rows: getOpt(this, 'rows', 3),
             editable: getOpt(this, 'editable', true),
-            tagId: this.getTagId()
+            tagId: this.getTagId(),
+            placeholder: getOpt(this, "placeholder", false),
         }
     },
     onAttach: function(){

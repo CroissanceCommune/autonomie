@@ -149,15 +149,24 @@ export const serializeForm = function(form_object){
     return result;
 }
 
-// Important point : handle redirection by json dict for ajax calls
-// Expects a redirect value to be returned with the 302 code
-export const setupJsonRedirect = function() {
-  $(document).ajaxComplete(
-    function( data, xhr, settings ) {
-      let json_resp = jQuery.parseJSON( xhr.responseText );
-      if ( json_resp.redirect ){
-        window.location.href = json_resp.redirect;
-      }
-    }
-  );
+export const setupAjaxCallbacks = function() {
+    /*
+     * Setup ajax calls callbacks
+     *
+     * if 'redirect' is found in the json resp, we go there
+     *
+     * if status code is 401 : we redirect to #login
+     */
+    $(document).ajaxComplete(
+        function( event, xhr, settings ) {
+            if (xhr.status  == 401){
+                window.location.replace('#login');
+            } else {
+                let json_resp = xhr.responseJSON;
+                if (!_.isUndefined(json_resp) && ( json_resp.redirect )){
+                  window.location.href = json_resp.redirect;
+                }
+            }
+        }
+    );
 }

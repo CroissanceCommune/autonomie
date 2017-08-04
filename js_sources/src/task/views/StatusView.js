@@ -10,7 +10,7 @@
  */
 import Mn from 'backbone.marionette';
 import ModalBehavior from '../behaviors/ModalBehavior.js';
-import { serializeForm, ajax_call } from '../../tools.js';
+import { serializeForm, ajax_call, showLoader, hideLoader } from '../../tools.js';
 
 var template = require("./templates/StatusView.mustache");
 
@@ -34,6 +34,7 @@ const StatusView = Mn.View.extend({
     submitCallback: function(result){
     },
     submitErroCallback: function(result){
+        hideLoader();
         var message = ""
         if (result.responseJSON.errors){
             _.each(result.responseJSON.errors, function(error, key){
@@ -50,7 +51,7 @@ const StatusView = Mn.View.extend({
         let datas = serializeForm(this.getUI('form'));
         datas['submit'] = this.getOption('status');
         const url = this.getOption('url');
-
+        showLoader();
         this.serverRequest = ajax_call(url, datas, "POST");
         this.serverRequest.then(
             this.submitCallback.bind(this), this.submitErroCallback.bind(this)

@@ -27,6 +27,7 @@ const FacadeClass = Mn.Object.extend({
         'changed:expense_ht': 'computeMainTotals',
         'changed:payment_lines': "updatePaymentLines",
         'sync:model': 'syncModel',
+        'save:model': 'saveModel',
     },
     radioRequests: {
         'get:model': 'getModelRequest',
@@ -38,6 +39,7 @@ const FacadeClass = Mn.Object.extend({
         'get:form_actions': 'getFormActions',
         'is:estimation_form': 'isEstimationForm',
         'get:status_history_collection': 'getStatusHistory',
+        'is:valid': "isDataValid",
     },
     initialize(options){
         this.syncModel = this.syncModel.bind(this);
@@ -108,9 +110,27 @@ const FacadeClass = Mn.Object.extend({
     },
     syncModel(modelName){
         var modelName = modelName || 'common';
-        console.log(modelName);
-        console.log(this.models);
         this.models[modelName].save(null, {wait:true, sync: true, patch:true});
+    },
+    saveModel(view, model, datas, extra_options, success, error){
+        /*
+         * Save a model
+         *
+         * :param obj model: The model to save
+         * :param obj datas: The datas to transmit to the save call
+         * :param obj extra_options: The options to pass to the save call
+         * :param func success: The success callback
+         * :param func error: The error callback
+         */
+        var options = {
+            wait: true,
+            patch: true
+        };
+        _.extend(options, extra_options);
+        options['success'] = success;
+        options['error'] = error;
+
+        model.save(datas, options);
     },
     getPaymentCollectionRequest(){
         return this.payment_lines_collection;
@@ -187,6 +207,28 @@ const FacadeClass = Mn.Object.extend({
         _.each(this.models, function(model){
             result += model.ttc();
         });
+        return result;
+    },
+    isDataValid(){
+        var channel = Radio.channel('facade');
+        channel.trigger('bind:validation');
+        var result = {};
+        _.each(this.models, function(model){
+            var res = model.validate();
+            if (res){
+                _.extend(result, res);
+            }
+        });
+        _.each(
+            this.collections,
+            function(collection){
+                var res = collection.validate();
+                if (res){
+                    _.extend(result, res);
+                }
+            }
+        );
+        channel.trigger('unbind:validation');
         return result;
     }
 });

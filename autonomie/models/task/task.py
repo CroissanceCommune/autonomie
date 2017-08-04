@@ -559,6 +559,14 @@ class Task(Node):
         back_populates='task',
     )
 
+    statuses = relationship(
+        "TaskStatus",
+        order_by="TaskStatus.status_date",
+        cascade="all, delete-orphan",
+        back_populates='task',
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+
     _name_tmpl = u"Task {}"
     _number_tmpl = u"{s.project.code}_{s.customer.code}_T{s.project_index}\
 _{s.date:%m%y}"
@@ -696,12 +704,6 @@ _{s.date:%m%y}"
         log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
         return status
 
-    def get_next_actions(self):
-        """
-            Return the next available actions regarding the current status
-        """
-        return self.state_machine.get_next_states(self.status)
-
     def get_company(self):
         """
             Return the company owning this task
@@ -719,16 +721,6 @@ _{s.date:%m%y}"
             Return the id of the company owning this task
         """
         return self.company.id
-
-    def is_deletable(self, request):
-        """
-            Return True if the task is deletable
-        """
-        for action in self.get_next_actions():
-            if action.name == 'delete':
-                if action.allowed(self, request):
-                    return True
-        return False
 
     def __repr__(self):
         return u"<Task status:{s.status} id:{s.id}>".format(s=self)
@@ -873,14 +865,7 @@ class TaskStatus(DBBASE):
         default=datetime.date.today,
     )
 
-    task = relationship(
-        "Task",
-        backref=backref(
-            "statuses",
-            cascade="all, delete-orphan",
-            info={'colanderalchemy': forms.EXCLUDED}
-        )
-    )
+    task = relationship("Task")
     status_person = relationship(
         "User",
         backref=backref(
@@ -893,10 +878,13 @@ class TaskStatus(DBBASE):
     )
 
     def __json__(self, request):
-        result = dict(date=self.status_date)
-        result['code'] = self.status_code
+        result = {
+            "date": self.status_date,
+            'code': self.status_code,
+            "comment": self.status_comment,
+        }
         if self.status_person is not None:
-            result['account'] = self.status_person.__json__(request)
+            result['account'] = self.status_person.label
         return result
 
 

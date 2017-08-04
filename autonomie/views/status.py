@@ -54,12 +54,6 @@ class StatusView(BaseView):
         """
         return params['submit']
 
-    def _get_request_params(self):
-        """
-        return the request params as a dict (a non locked one)
-        """
-        return dict(self.request.params.items())
-
     def check_allowed(self, status, params):
         """
         Check that the status change is allowed
@@ -108,14 +102,15 @@ class StatusView(BaseView):
             func = getattr(self, "post_%s_process" % status)
             func(status, params)
 
-    def set_status(self, status):
+    def set_status(self, status, params):
         """
         Set the new status to the given item
         handle pre_status and post_status processing
 
         :param str status: The new status that should be affected
+        :param str params: The params retrieved from the request
         """
-        pre_params = self.request.params
+        pre_params = params
         params = self.pre_status_process(status, pre_params)
         post_params = self.status_process(status, params)
         self.post_status_process(status, post_params)
@@ -143,7 +138,7 @@ class StatusView(BaseView):
             try:
                 status = self._get_status(params)
                 logger.debug(u"New status : %s " % status)
-                self.set_status(status)
+                self.set_status(status, params)
                 self.context = self.request.dbsession.merge(self.context)
                 self.notify(status)
                 self.session.flash(self.valid_msg)
@@ -209,6 +204,7 @@ class TaskStatusView(StatusView):
     def pre_status_process(self, status, params):
         if 'comment' in params:
             self.context.status_comment = params.get('comment')
+            logger.debug(self.context.status_comment)
 
         if 'change_date' in params and params['change_date'] in ('1', 1):
             logger.debug("Forcing the document's date !!!")
@@ -238,6 +234,8 @@ class TaskStatusView(StatusView):
         :param dict params: The params that were transmitted by the associated
         State's callback
         """
+        logger.debug("post_status_process")
+        logger.debug(self.context.status_comment)
         # Record a task status change
         self.context.status_date = datetime.date.today()
         status_record = TaskStatus(
@@ -246,7 +244,8 @@ class TaskStatusView(StatusView):
             status_person_id=self.request.user.id,
             status_comment=self.context.status_comment
         )
-        self.request.dbsession.add(status_record)
+        self.context.statuses.append(status_record)
+        self.request.dbsession.add(self.context)
         StatusView.post_status_process(self, status, params)
 
     def notify(self, status):

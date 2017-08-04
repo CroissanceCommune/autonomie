@@ -18,31 +18,23 @@ from autonomie.utils.rest import (
     add_rest_views,
 )
 from autonomie.compute.math_utils import (
-    percentage,
     convert_to_int,
 )
 from autonomie.models.task import (
-    WorkUnit,
-    PaymentConditions,
-    TaskMention,
     Estimation,
     TaskStatus,
-    TaskLineGroup,
-    TaskLine,
-    DiscountLine,
     PaymentLine,
 )
 from autonomie.events.tasks import StatusChanged
 from autonomie.forms.tasks.estimation import validate_estimation
-from autonomie.models.tva import (
-    Tva,
-    Product,
-)
-from autonomie.models.sale_product import (
-    SaleProductGroup,
-    SaleProduct,
-)
 from autonomie.views import BaseRestView
+from autonomie.views.task.rest_api import (
+    TaskRestView,
+    TaskLineGroupRestView,
+    TaskLineRestView,
+    DiscountLineRestView,
+)
+from autonomie.views.task.utils import json_payment_conditions
 from autonomie.views.status import (
     TaskStatusView,
     StatusView,
@@ -105,151 +97,55 @@ PAYMENT_TIMES_OPTIONS = (
 )
 
 
-def json_mentions(request):
-    """
-    Return the taskmentions available for the task related forms
+class EstimationRestView(TaskRestView):
+    factory = Estimation
 
-    :param obj request: The current request object
-    :returns: List of TaskMenion in their json repr
-    """
-    query = TaskMention.query()
-    query = query.filter_by(active=True)
-    query = query.order_by(TaskMention.order)
-    return [item.__json__(request) for item in query]
-
-
-def json_tvas(request):
-    """
-    Return the tva objects available for this form
-
-    :param obj request: The current request object
-    :returns: List of Tva objects in their json repr
-    """
-    query = Tva.query()
-    return [item.__json__(request) for item in query]
-
-
-def json_products(request):
-    """
-    Return the product objects available for this form
-
-    :param obj request: The current request object
-    :returns: List of Product objects in their json repr
-    """
-    query = Product.query()
-    return [item.__json__(request) for item in query]
-
-
-def json_workunits(request):
-    """
-    Return the workunit objects available for the given form
-
-    :param obj request: The current request object
-    :returns: List of Workunits in their json repr
-    """
-    query = WorkUnit.query()
-    return [item.__json__(request) for item in query]
-
-
-def json_payment_conditions(request):
-    """
-    Return The PaymentConditions objects available for the given form
-
-    :param obj request: The current request object
-    :returns: List of PaymentConditions in their json repr
-    """
-    query = PaymentConditions.query()
-    return [item.__json__(request) for item in query]
-
-
-class RestEstimation(BaseRestView):
-
-    def get_schema(self, submitted):
+    def pre_format(self, appstruct):
         """
-        Return the schema for TaskLineGroup add/edition
+        Pre format the posted appstruct to handle Estimation specific mechanisms
+        """
+        payment_times = appstruct.pop('payment_times')
+        if payment_times is not None:
+            if convert_to_int(payment_times, 1) == -1:
+                appstruct['manualDeliverables'] = 1
+            else:
+                appstruct['manualDeliverables'] = 0
 
-        :param dict submitted: The submitted datas
-        :returns: A colander.Schema
-        """
-        excludes = ('status', 'children', 'parent',)
-        schema = SQLAlchemySchemaNode(
-            Estimation,
-            excludes=excludes
-        )
-        return schema
+        return appstruct
 
-    def form_options(self):
+    def is_estimation(self):
+        return True
+
+    def _more_form_sections(self, sections):
         """
-        Return datas used to display an estimation form
+        Add estimation specific form sections to the sections returned to the
+        end user
+
+        :param list sections: The sections to return
+        :returns: The sections
         """
-        return {
-            "sections": [
-                'common',
-                'tasklines',
-                'discounts',
-                'notes',
-                'payment_conditions',
-                'payments'
-            ],
-            'tva_options': json_tvas(self.request),
-            "workunit_options": json_workunits(self.request),
-            "product_options": json_products(self.request),
-            "mention_options": json_mentions(self.request),
+        sections.extend([
+            'discounts',
+            'payment_conditions',
+            'payments',
+        ])
+        return sections
+
+    def _more_form_options(self, form_options):
+        """
+        Add estimation specific form options to the options returned to the end
+        user
+
+        :param dict form_options: The options returned to the end user
+        :returns: The form_options with new elements
+        """
+        form_options.update({
             "payment_conditions": json_payment_conditions(self.request),
-            'deposit_options': DEPOSIT_OPTIONS,
-            "payment_times_options": PAYMENT_TIMES_OPTIONS,
-            "payment_display_options": PAYMENT_DISPLAY_OPTIONS,
-            "actions": {
-                'status': self._get_status_actions(),
-                'others': self._get_other_actions(),
-            }
-        }
-
-    def _format_status_action(self, action_dict):
-        """
-        Alter the status description regarding the current context
-
-        Hack to allow better label handling
-        """
-        if action_dict['status'] == 'draft' and self.context.status == 'wait':
-            action_dict['label'] = u"Repasser en brouillon"
-            action_dict['title'] = u"Repasser ce document en brouillon"
-            action_dict['icon'] = 'remove'
-        return action_dict
-
-    def _get_status_actions(self):
-        """
-        Returned datas describing available actions on the current item
-        """
-        actions = []
-        url = self.request.current_route_path(_query={'action': 'status'})
-        for action in self.context.state_manager.get_allowed_actions(
-            self.request
-        ):
-            json_resp = action.__json__(self.request)
-            json_resp['url'] = url
-            self._format_status_action(json_resp)
-            actions.append(json_resp)
-        return actions
-
-    def _get_duplicate_button(self):
-        """
-        Return the description for the duplicate link
-        """
-        url = self.request.route_path(
-            "/estimations/{id}/duplicate",
-            id=self.context.id,
-        )
-        return {
-            "widget": "anchor",
-            "option": {
-                "url": url,
-                "label": u"Dupliquer ce document",
-                "title": u"Créer un nouveau document à partir de celui-ci",
-                "css": "btn btn-default",
-                "icon": "fa fa-copy",
-            }
-        }
+            'deposits': DEPOSIT_OPTIONS,
+            "payment_times": PAYMENT_TIMES_OPTIONS,
+            "payment_displays": PAYMENT_DISPLAY_OPTIONS,
+        })
+        return form_options
 
     def _get_signed_status_button(self):
         """
@@ -287,170 +183,24 @@ class RestEstimation(BaseRestView):
             result.append(self._get_signed_status_button())
         return result
 
-    def pre_format(self, appstruct):
+    def _get_duplicate_button(self):
         """
-        Pre format the posted appstruct to handle Estimation specific mechanisms
+        Return the description for the duplicate link
         """
-        payment_times = appstruct.pop('payment_times')
-        if payment_times is not None:
-            if convert_to_int(payment_times, 1) == -1:
-                appstruct['manualDeliverables'] = 1
-            else:
-                appstruct['manualDeliverables'] = 0
-
-        return appstruct
-
-
-class TaskLineGroupRestView(BaseRestView):
-    """
-    Rest views handling the task line groups
-    """
-    def get_schema(self, submitted):
-        """
-        Return the schema for TaskLineGroup add/edition
-
-        :param dict submitted: The submitted datas
-        :returns: A colander.Schema
-        """
-        excludes = ('task_id',)
-        schema = SQLAlchemySchemaNode(TaskLineGroup, excludes=excludes)
-        return schema
-
-    def collection_get(self):
-        """
-        View returning the task line groups attached to this estimation
-        """
-        return self.context.line_groups
-
-    def post_format(self, entry, edit, attributes):
-        """
-        Associate a newly created element to the parent task
-        """
-        if not edit:
-            entry.task = self.context
-        return entry
-
-    def post_load_groups_from_catalog_view(self):
-        """
-        View handling product group loading
-
-        expects sale_product_group_ids: [id1, id2] as json POST params
-        """
-        logger.debug("post_load_from_catalog_view")
-        sale_product_group_ids = self.request.json_body.get(
-            'sale_product_group_ids', []
+        url = self.request.route_path(
+            "/estimations/{id}/duplicate",
+            id=self.context.id,
         )
-        logger.debug("sale_product_ids : %s", sale_product_group_ids)
-
-        groups = []
-        for id_ in sale_product_group_ids:
-            sale_product_group = SaleProductGroup.get(id_)
-            group = TaskLineGroup.from_sale_product_group(sale_product_group)
-            self.context.line_groups.append(group)
-            groups.append(group)
-        self.request.dbsession.merge(self.context)
-        return groups
-
-
-class TaskLineRestView(BaseRestView):
-    """
-    Rest views used to handle the task lines
-    """
-    def get_schema(self, submitted):
-        """
-        Return the schema for TaskLine add/edition
-
-        :param dict submitted: The submitted datas
-        :returns: A colander.Schema
-        """
-        excludes = ('group_id',)
-        schema = SQLAlchemySchemaNode(TaskLine, excludes=excludes)
-        return schema
-
-    def collection_get(self):
-        return self.context.lines
-
-    def post_format(self, entry, edit, attributes):
-        """
-        Associate a newly created element to the parent group
-        """
-        if not edit:
-            entry.group = self.context
-        return entry
-
-    def post_load_lines_from_catalog_view(self):
-        """
-        View handling product to line loading
-
-        expects sale_product_ids: [id1, id2] as POST params
-        """
-        logger.debug("post_load_from_catalog_view")
-        sale_product_ids = self.request.json_body.get('sale_product_ids', [])
-        logger.debug("sale_product_ids : %s", sale_product_ids)
-
-        lines = []
-        for id_ in sale_product_ids:
-            sale_product = SaleProduct.get(id_)
-            line = TaskLine.from_sale_product(sale_product)
-            self.context.lines.append(line)
-            lines.append(line)
-        self.request.dbsession.merge(self.context)
-        return lines
-
-
-class DiscountLineRestView(BaseRestView):
-    """
-    Rest views used to handle the task lines
-    """
-    def get_schema(self, submitted):
-        """
-        Return the schema for DiscountLine add/edition
-
-        :param dict submitted: The submitted datas
-        :returns: A colander.Schema
-        """
-        excludes = ('task_id',)
-        schema = SQLAlchemySchemaNode(DiscountLine, excludes=excludes)
-        return schema
-
-    def collection_get(self):
-        """
-        View returning the task line groups attached to this estimation
-        """
-        return self.context.discounts
-
-    def post_format(self, entry, edit, attributes):
-        """
-        Associate a newly created element to the parent task
-        """
-        if not edit:
-            entry.task = self.context
-        return entry
-
-    def post_percent_discount_view(self):
-        """
-        View handling percent discount configuration
-
-        Generates discounts for each tva used in this document
-
-        current context : Invoice/Estimation/CancelInvoice
-        """
-        percent = self.request.json_body.get('percentage')
-        description = self.request.json_body.get('description')
-        lines = []
-        if percent is not None and description is not None:
-            tva_parts = self.context.tva_ht_parts()
-            for tva, ht in tva_parts.items():
-                amount = percentage(ht, percent)
-                line = DiscountLine(
-                    description=description,
-                    amount=amount,
-                    tva=tva
-                )
-                lines.append(line)
-                self.context.discounts.append(line)
-            self.request.dbsession.merge(self.context)
-        return lines
+        return {
+            "widget": "anchor",
+            "option": {
+                "url": url,
+                "label": u"Dupliquer ce devis",
+                "title": u"Créer un nouveau devis à partir de celui-ci",
+                "css": "btn btn-default",
+                "icon": "fa fa-copy",
+            }
+        }
 
 
 class PaymentLineRestView(BaseRestView):
@@ -458,6 +208,30 @@ class PaymentLineRestView(BaseRestView):
     Rest views used to handle the estimation payment lines
 
     context is en Estimation (collection level) or PaymentLine (item level)
+
+    Collection views
+
+        GET
+
+            Return all the items belonging to the parent task
+
+        POST
+
+            Add a new item
+
+    Item views
+
+        GET
+
+            Return the Item
+
+        PUT/PATCH
+
+            Edit the item
+
+        DELETE
+
+            Delete the item
     """
     def get_schema(self, submitted):
         """
@@ -485,7 +259,7 @@ class PaymentLineRestView(BaseRestView):
         return entry
 
 
-class EstimationStatusView(TaskStatusView):
+class EstimationStatusRestView(TaskStatusView):
     def validate(self):
         try:
             validate_estimation(self.context, self.request)
@@ -499,7 +273,7 @@ class EstimationStatusView(TaskStatusView):
         return {}
 
 
-class EstimationSignedStatusView(StatusView):
+class EstimationSignedStatusRestView(StatusView):
     def check_allowed(self, status, params):
         self.request.context.check_signed_status_allowed(status, self.request)
 
@@ -541,6 +315,10 @@ def add_routes(config):
 
     :param obj config: Pyramid config object
     """
+    config.add_route(
+        "/api/v1/estimations",
+        "/api/v1/estimations",
+    )
     config.add_route(
         "/api/v1/estimations/{id}",
         "/api/v1/estimations/{id:\d+}",
@@ -592,43 +370,30 @@ def add_views(config):
     """
     Add views to the current configuration
     """
-    config.add_view(
-        RestEstimation,
-        attr='get',
+    add_rest_views(
+        config,
+        factory=EstimationRestView,
         route_name='/api/v1/estimations/{id}',
-        renderer='json',
-        permission='view.estimation',
-        xhr=True,
+        collection_route_name='/api/v1/estimations',
+        edit_rights='edit.estimation',
+        view_rights='view.estimation',
+        delete_rights='delete.estimation',
     )
+
+    # Form configuration view
     config.add_view(
-        RestEstimation,
-        attr='put',
-        request_method='PUT',
+        EstimationRestView,
+        attr='form_config',
         route_name='/api/v1/estimations/{id}',
         renderer='json',
+        request_param="form_config",
         permission='edit.estimation',
         xhr=True,
     )
+
+    # Status View
     config.add_view(
-        RestEstimation,
-        attr='put',
-        request_method='PATCH',
-        route_name='/api/v1/estimations/{id}',
-        renderer='json',
-        permission='edit.estimation',
-        xhr=True,
-    )
-    config.add_view(
-        RestEstimation,
-        attr='form_options',
-        route_name='/api/v1/estimations/{id}',
-        renderer='json',
-        request_param="form_options",
-        permission='edit.estimation',
-        xhr=True,
-    )
-    config.add_view(
-        EstimationStatusView,
+        EstimationStatusRestView,
         route_name="/api/v1/estimations/{id}",
         request_param='action=status',
         permission="edit.estimation",
@@ -645,6 +410,7 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+        delete_rights='edit.estimation',
     )
     config.add_view(
         TaskLineGroupRestView,
@@ -667,6 +433,7 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+        delete_rights='edit.estimation',
     )
     config.add_view(
         TaskLineRestView,
@@ -687,6 +454,7 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+        delete_rights='edit.estimation',
     )
     config.add_view(
         DiscountLineRestView,
@@ -707,6 +475,7 @@ def add_views(config):
         view_rights="view.estimation",
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
+        delete_rights='edit.estimation',
     )
 
 

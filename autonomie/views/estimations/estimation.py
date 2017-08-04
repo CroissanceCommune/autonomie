@@ -54,183 +54,89 @@ Estimation payment edition
 """
 import logging
 
-from pyramid.httpexceptions import HTTPFound
-
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.task import (
     Estimation,
     PaymentLine,
 )
-from autonomie.models.customer import Customer
-from autonomie.models.project import (
-    Phase,
-    Project,
-)
-from autonomie.forms.tasks.base import (
-    get_new_task_schema,
-    get_duplicate_schema,
-)
-from autonomie.resources import (
-    duplicate_js,
-    task_css,
-    jstree_css,
-)
 from autonomie.views import (
-    submit_btn,
     BaseEditView,
-    BaseFormView,
-    BaseView,
 )
 from autonomie.views.files import FileUploadView
-from autonomie.views.taskaction import (
-    populate_actionmenu,
-    task_pdf_view,
-    get_task_html_view,
-    make_task_delete_view,
+from autonomie.views.task.views import (
+    TaskAddView,
+    TaskEditView,
+    TaskDeleteView,
+    TaskHtmlView,
+    TaskPdfView,
+    TaskDuplicateView,
 )
 
 log = logger = logging.getLogger(__name__)
 
 
-class EstimationAdd(BaseFormView):
+class EstimationAddView(TaskAddView):
     """
     Estimation add view
     context is a project
     """
     title = "Nouveau devis"
-    schema = get_new_task_schema()
-    buttons = (submit_btn,)
+    factory = Estimation
 
-    def before(self, form):
-        super(EstimationAdd, self).before(form)
-        populate_actionmenu(self.request)
-
-    def submit_success(self, appstruct):
-        log.debug("# Adding a new estimation")
-        name = appstruct['name']
-        phase_id = appstruct['phase_id']
-        phase = Phase.get(phase_id)
-        project_id = appstruct['project_id']
-        project = Project.get(project_id)
-        customer_id = appstruct['customer_id']
-        customer = Customer.get(customer_id)
-
-        estimation = Estimation(
-            self.context.company,
-            customer,
-            project,
-            phase,
-            self.request.user,
-        )
-        estimation.name = name
+    def _more_init_attributes(self, estimation, appstruct):
+        """
+        Add Estimation's specific attribute while adding this task
+        """
         estimation.course = appstruct['course']
         estimation.payment_lines = [PaymentLine(description='Solde', amount=0)]
-        self.dbsession.add(estimation)
-        self.dbsession.flush()
+        return estimation
+
+    def _after_flush(self, estimation):
+        """
+        Launch after the new estimation has been flushed
+        """
         logger.debug(
             "  + Estimation successfully added : {0}".format(estimation.id)
         )
-        return HTTPFound(
-            self.request.route_path(
-                "/estimations/{id}",
-                id=estimation.id
-            )
-        )
 
 
-class EstimationEditView(BaseView):
+class EstimationEditView(TaskEditView):
 
     def title(self):
         return u"Modification du devis {task.name}".format(task=self.context)
 
-    def load_catalog_url(self):
-        return self.request.route_path(
-            "sale_categories",
-            id=self.context.company.id,
-            _query=dict(action='jstree')
-        )
-
-    def context_url(self):
-        return self.request.route_path(
-            '/api/v1/' + self.request.context.type_ + 's/{id}',
-            id=self.request.context.id
-        )
-
-    def load_url(self):
-        return self.request.route_path(
-            '/api/v1/' + self.request.context.type_ + 's/{id}',
-            id=self.request.context.id,
-            _query={'form_options': '1'}
-        )
-
-    def __call__(self):
-        if not self.request.has_permission('edit.%s' % self.context.type_):
-            return HTTPFound(self.request.current_route_path() + '.html')
-
-        task_css.need()
-        jstree_css.need()
-        populate_actionmenu(self.request)
-        return dict(
-            context=self.context,
-            title=self.title(),
-            context_url=self.context_url(),
-            load_url=self.load_url(),
-            load_catalog_url=self.load_catalog_url(),
-        )
+    def _before(self):
+        """
+        Ensure some stuff on the current context
+        """
+        if not self.context.payment_lines:
+            self.context.payment_lines = [
+                PaymentLine(description='Solde', amount=self.context.ttc)
+            ]
+            self.request.dbsession.merge(self.context)
+            self.request.dbsession.flush()
 
 
-class AdminEstimation(BaseEditView):
+class EstimationDeleteView(TaskDeleteView):
+    msg = u"Le devis {context.name} a bien été supprimé."
+
+
+class EstimationAdminView(BaseEditView):
     factory = Estimation
     schema = SQLAlchemySchemaNode(Estimation)
 
 
-class TaskDuplicate(BaseFormView):
-    """
-    Task duplication view
-    """
-    form_options = (('formid', 'duplicate_form'),)
-    schema = get_duplicate_schema()
+class EstimationHtmlView(TaskHtmlView):
+    label = u"Devis"
 
-    @property
-    def title(self):
-        if self.context.type_ == 'estimation':
-            label = u'le devis'
-        elif self.context.type_ == 'invoice':
-            label = u'la facture'
-        return u"Dupliquer {0} {1}".format(label, self.context.name)
 
-    def before(self, form):
-        BaseFormView.before(self, form)
-        duplicate_js.need()
+class EstimationPdfView(TaskPdfView):
+    pass
 
-    def submit_success(self, appstruct):
-        logger.debug("# Duplicating a document #")
 
-        name = appstruct['name']
-        phase_id = appstruct['phase_id']
-        phase = Phase.get(phase_id)
-        project_id = appstruct['project_id']
-        project = Project.get(project_id)
-        customer_id = appstruct['customer_id']
-        customer = Customer.get(customer_id)
-
-        task = self.context.duplicate(
-            self.request.user,
-            project,
-            phase,
-            customer,
-        )
-        task.name = name
-        task.course = appstruct['course']
-        self.dbsession.add(task)
-        self.dbsession.flush()
-        return HTTPFound(
-            self.request.route_path(
-                '/%ss/{id}' % self.context.type_,
-                id=task.id
-            )
-        )
+class EstimationDuplicateView(TaskDuplicateView):
+    label = u"le devis"
 
 
 def add_routes(config):
@@ -266,41 +172,48 @@ def includeme(config):
     add_routes(config)
 
     config.add_view(
-        EstimationAdd,
+        EstimationAddView,
         route_name="project_estimations",
         renderer='base/formpage.mako',
         permission='add_estimation',
     )
-    # Estimation related views
+
     config.add_view(
-        AdminEstimation,
-        route_name='/estimations/{id}/admin',
-        renderer="base/formpage.mako",
-        permission="admin",
+        EstimationEditView,
+        route_name='/estimations/{id}',
+        renderer='tasks/form.mako',
+        permission='view.estimation',
+        layout='opa',
     )
 
-    delete_msg = u"Le devis {task.name} a bien été supprimé."
     config.add_view(
-        make_task_delete_view(delete_msg),
+        EstimationDeleteView,
         route_name='/estimations/{id}/delete',
         permission='delete.estimation',
     )
 
     config.add_view(
-        TaskDuplicate,
+        EstimationAdminView,
+        route_name='/estimations/{id}/admin',
+        renderer="base/formpage.mako",
+        permission="admin",
+    )
+
+    config.add_view(
+        EstimationDuplicateView,
         route_name="/estimations/{id}/duplicate",
         permission="view.estimation",
         renderer='base/formpage.mako',
     )
     config.add_view(
-        get_task_html_view(),
+        EstimationHtmlView,
         route_name="/estimations/{id}.html",
         renderer='tasks/view_only.mako',
         permission='view.estimation',
     )
 
     config.add_view(
-        task_pdf_view,
+        EstimationPdfView,
         route_name='/estimations/{id}.pdf',
         permission='view.estimation',
     )
@@ -310,12 +223,4 @@ def includeme(config):
         route_name="/estimations/{id}/addfile",
         renderer='base/formpage.mako',
         permission='add.file',
-    )
-
-    config.add_view(
-        EstimationEditView,
-        route_name='/estimations/{id}',
-        renderer='tasks/form.mako',
-        permission='view.estimation',
-        layout='opa',
     )

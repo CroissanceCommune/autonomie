@@ -104,7 +104,7 @@ class EstimationRestView(TaskRestView):
         """
         Pre format the posted appstruct to handle Estimation specific mechanisms
         """
-        payment_times = appstruct.pop('payment_times')
+        payment_times = appstruct.pop('payment_times', None)
         if payment_times is not None:
             if convert_to_int(payment_times, 1) == -1:
                 appstruct['manualDeliverables'] = 1

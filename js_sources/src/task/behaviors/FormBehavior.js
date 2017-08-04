@@ -51,7 +51,8 @@ var FormBehavior = Mn.Behavior.extend({
                 attributes(view){return _.keys(datas)}
             });
         }
-        if (this.view.model.isValid()){
+
+        if (this.view.model.isValid(_.keys(datas))){
             if (! this.view.model.get('id')){
                 this.addSubmit(datas);
             } else {
@@ -60,6 +61,7 @@ var FormBehavior = Mn.Behavior.extend({
         }
     },
     addSubmit(datas){
+        console.log("FormBehavior.addSubmit");
         var destCollection = this.view.getOption('destCollection');
         destCollection.create(
             datas,
@@ -83,6 +85,7 @@ var FormBehavior = Mn.Behavior.extend({
         );
     },
     onSubmitForm(event){
+        console.log("FormBehavior.onSubmitForm");
         event.preventDefault();
         var datas = this.serializeForm();
         this.view.model.set(datas, {validate: true});

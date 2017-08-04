@@ -170,3 +170,15 @@ export const setupAjaxCallbacks = function() {
         }
     );
 }
+export const showLoader = function(){
+    /*
+     * Show a loading box
+     */
+    $('#loading-box').show();
+}
+export const hideLoader = function(){
+    /*
+     * Show a loading box
+     */
+    $('#loading-box').hide();
+}

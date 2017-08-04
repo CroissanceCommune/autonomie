@@ -59,7 +59,7 @@ from autonomie.utils.widgets import (
 )
 from autonomie.utils.pdf import write_pdf
 
-from autonomie.views.taskaction import html
+from autonomie.views.task.views import html
 
 from autonomie.forms.tasks.invoice import (
     get_list_schema,

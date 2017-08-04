@@ -16,6 +16,9 @@ const BaseModel = Bb.Model.extend({
     constructor: function() {
         if (!_.isNull(this.props)){
             arguments[0] = _.pick(arguments[0], this.props);
+            arguments[0] = _.omit(arguments[0], function(value){
+                return _.isNull(value) || _.isUndefined(value);
+            });
         }
         Bb.Model.apply(this, arguments);
     },
@@ -23,6 +26,9 @@ const BaseModel = Bb.Model.extend({
         var attributes = _.clone(this.attributes);
         if (!_.isNull(this.props)){
             attributes = _.pick(attributes, this.props);
+            attributes = _.omit(attributes, function(value){
+                return _.isNull(value) || _.isUndefined(value);
+            });
         }
         return attributes;
     },

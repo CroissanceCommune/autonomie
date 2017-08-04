@@ -221,7 +221,8 @@ class RestJsonRepr(object):
 
 def add_rest_views(
     config, route_name, factory, edit_rights='edit',
-    add_rights='view', view_rights='view', collection_route_name=None
+    add_rights='view', view_rights='view', delete_rights='edit',
+    collection_route_name=None
 ):
     """
         Add a rest iface associating the factory's methods to the different
@@ -235,9 +236,7 @@ def add_rest_views(
     """
     if collection_route_name is None:
         collection_route_name = route_name + 's'
-    # FIXME : l'api rest est placée à la racine, on a pas de traversal qui nous
-    # permet de donner des droits autres que 'view' à nos users, donc tout est
-    # autorisé pour les gens qui ont les droits 'view'
+
     config.add_view(
         factory,
         attr='get',
@@ -291,7 +290,7 @@ def add_rest_views(
         route_name=route_name,
         renderer="json",
         request_method='DELETE',
-        permission=edit_rights,
+        permission=delete_rights,
         xhr=True
     )
 

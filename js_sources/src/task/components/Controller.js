@@ -16,8 +16,10 @@ import AuthBus from './AuthBus.js';
 import MessageBus from './MessageBus.js';
 
 const Controller = Mn.Object.extend({
-    initialize: function(datas){
-        Facade.loadModels(datas);
+    initialize: function(options){
+        Facade.setFormConfig(options.form_config);
+        Facade.loadModels(options.form_datas);
+        AppOption.facade = Facade;
 
         AuthBus.setAuthCallbacks([Facade.syncModel]);
 

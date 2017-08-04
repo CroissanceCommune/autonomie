@@ -14,6 +14,7 @@ import CommonModel from "../models/CommonModel.js";
 import TaskGroupCollection from '../models/TaskGroupCollection.js';
 import DiscountCollection from '../models/DiscountCollection.js';
 import PaymentLineCollection from '../models/PaymentLineCollection.js';
+import StatusHistoryCollection from '../models/StatusHistoryCollection.js';
 import TotalModel from '../models/TotalModel.js';
 import Radio from 'backbone.radio';
 
@@ -32,30 +33,78 @@ const FacadeClass = Mn.Object.extend({
         'get:collection': 'getCollectionRequest',
         'get:paymentcollection': 'getPaymentCollectionRequest',
         'get:totalmodel': 'getTotalModelRequest',
+        'get:form_options': 'getFormOptions',
+        'has:form_section': 'hasFormSection',
+        'get:form_actions': 'getFormActions',
+        'is:estimation_form': 'isEstimationForm',
+        'get:status_history_collection': 'getStatusHistory',
     },
     initialize(options){
-        this.models = {};
-        this.collections = {};
-        this.totalmodel = new TotalModel();
         this.syncModel = this.syncModel.bind(this);
     },
-    loadModels(datas){
-        this.models['common'] = new CommonModel(datas);
+    setFormConfig(form_config){
+        this.form_config = form_config;
+    },
+    loadModels(form_datas){
+        this.models = {};
+        this.collections = {};
+        if (_.isUndefined(this.form_config)){
+            throw "setFormConfig shoud be fired before loadModels";
+        }
+        this.totalmodel = new TotalModel();
+        this.models['common'] = new CommonModel(form_datas);
         this.models['common'].url = AppOption['context_url'];
 
-        var lines = datas['line_groups'];
+        var lines = form_datas['line_groups'];
         this.collections['task_groups'] = new TaskGroupCollection(lines);
 
-        var discounts = datas['discounts'];
+        var discounts = form_datas['discounts'];
         this.collections['discounts'] = new DiscountCollection(discounts);
         this.computeTotals();
 
-        if (_.has(datas, 'payment_lines')){
-            var payment_lines = datas['payment_lines'];
+        if (_.has(form_datas, 'payment_lines')){
+            var payment_lines = form_datas['payment_lines'];
             this.payment_lines_collection = new PaymentLineCollection(
                 payment_lines
             );
         }
+
+        if (_.has(form_datas, 'status_history')){
+            var history = form_datas['status_history'];
+            this.status_history_collection = new StatusHistoryCollection(
+                history
+            );
+        }
+    },
+    getFormOptions(option_name){
+        /*
+         * Return the form options for option_name
+         *
+         * :param str option_name: The name of the option
+         * :returns: A list of dict with options (for building selects)
+         */
+        console.log("FacadeClass.getFormOptions");
+        return this.form_config['options'][option_name];
+    },
+    hasFormSection(section_name){
+        /*
+         * Check if the given section should be part of the current form
+         *
+         * :param str section_name: The name of the section
+         */
+        return _.indexOf(this.form_config['sections'], section_name) >= 0;
+    },
+    getFormActions(){
+        /*
+         * Return available form action config
+         */
+        return this.form_config['actions'];
+    },
+    getStatusHistory(){
+        return this.status_history_collection;
+    },
+    isEstimationForm(){
+        return this.form_config['is_estimation'];
     },
     syncModel(modelName){
         var modelName = modelName || 'common';

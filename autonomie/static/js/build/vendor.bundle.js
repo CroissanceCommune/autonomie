@@ -109,7 +109,7 @@
 	__webpack_require__(/*! underscore */1);
 	__webpack_require__(/*! backbone.marionette */18);
 	__webpack_require__(/*! tinymce */45);
-	__webpack_require__(/*! jstree */139);
+	__webpack_require__(/*! jstree */140);
 	module.exports = __webpack_require__(/*! bootstrap */4);
 
 
@@ -77522,7 +77522,7 @@
 
 /***/ }),
 
-/***/ 139:
+/***/ 140:
 /*!*********************************!*\
   !*** ./~/jstree/dist/jstree.js ***!
   \*********************************/

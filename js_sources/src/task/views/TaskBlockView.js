@@ -13,12 +13,14 @@ import TaskGroupModel from '../models/TaskGroupModel.js';
 import TaskGroupCollectionView from './TaskGroupCollectionView.js';
 import TaskGroupFormView from './TaskGroupFormView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
+import ErrorView from './ErrorView.js';
 
 const TaskBlockView = Mn.View.extend({
     template: require('./templates/TaskBlockView.mustache'),
     tagName: 'div',
     className: 'form-section',
     regions: {
+        errors: '.group-errors',
         container: '.group-container',
         modalRegion: ".group-modalregion",
     },
@@ -33,8 +35,22 @@ const TaskBlockView = Mn.View.extend({
         'group:delete': 'onGroupDelete',
         'catalog:insert': 'onCatalogInsert',
     },
+    collectionEvents: {
+        'change': 'hideErrors'
+    },
     initialize: function(options){
         this.collection = options['collection'];
+        this.listenTo(this.collection, 'validated:invalid', this.showErrors);
+        this.listenTo(this.collection, 'validated:valid', this.hideErrors.bind(this));
+    },
+    showErrors(model, errors){
+        this.detachChildView('errors');
+        this.showChildView('errors', new ErrorView({errors: errors}));
+        this.$el.addClass('error');
+    },
+    hideErrors(model){
+        this.detachChildView('errors');
+        this.$el.removeClass('error');
     },
     onDeleteSuccess: function(){
         displayServerSuccess("Vos données ont bien été supprimées");

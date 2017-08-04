@@ -14,6 +14,7 @@ import TextAreaWidget from './TextAreaWidget.js';
 import {getDefaultItem} from '../../tools.js';
 import FormBehavior from '../behaviors/FormBehavior.js';
 import Radio from 'backbone.radio';
+import Validation from 'backbone-validation';
 
 var template = require("./templates/PaymentConditionBlockView.mustache");
 
@@ -23,21 +24,38 @@ const PaymentConditionBlockView = Mn.View.extend({
     className: 'form-section',
     template: template,
     regions: {
+        errors: ".errors",
         predefined_conditions: '.predefined-conditions',
         conditions: '.conditions',
     },
     modelEvents: {
-        'change:payment_conditions': 'render'
+        'change:payment_conditions': 'render',
+        'validated:invalid': 'showErrors',
+        'validated:valid': 'hideErrors',
     },
     childViewEvents: {
         'finish': 'onFinish',
     },
     initialize: function(){
-        var facade = Radio.channel('facade');
-        this.payment_conditions_options = facade.request(
+        var channel = Radio.channel('facade');
+        this.payment_conditions_options = channel.request(
             'get:form_options', 'payment_conditions'
         );
         this.lookupDefault();
+        this.listenTo(channel, 'bind:validation', this.bindValidation);
+        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+    },
+    bindValidation(){
+        Validation.bind(this, {attributes: ['payment_conditions']});
+    },
+    unbindValidation(){
+        Validation.unbind(this);
+    },
+    showErrors(model, errors){
+        this.$el.addClass('error');
+    },
+    hideErrors(model){
+        this.$el.removeClass('error');
     },
     onFinish(field_name, value){
         if (field_name == 'predefined_conditions'){

@@ -15,6 +15,8 @@ import TaskLineModel from "../models/TaskLineModel.js";
 import TaskGroupTotalView from './TaskGroupTotalView.js';
 import { formatAmount } from '../../math.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
+import Validation from 'backbone-validation';
+import Radio from 'backbone.radio';
 
 const template = require('./templates/TaskGroupView.mustache');
 
@@ -23,6 +25,7 @@ const TaskGroupView = Mn.View.extend({
     className: 'taskline-group row',
     template: template,
     regions: {
+        errors: '.errors',
         lines: '.lines',
         modalRegion: ".modalregion",
         total: '.subtotal'
@@ -53,17 +56,25 @@ const TaskGroupView = Mn.View.extend({
         // Collection of task lines
         this.collection = this.model.lines;
         this.listenTo(this.collection, 'sync', this.showLines.bind(this));
+
+        var channel = Radio.channel('facade');
+        this.listenTo(channel, 'bind:validation', this.bindValidation);
+        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
     },
     isEmpty: function(){
         return this.model.lines.length === 0;
+    },
+    bindValidation(){
+        Validation.bind(this);
+    },
+    unbindValidation(){
+        Validation.unbind(this);
     },
     showLines(){
         /*
          * Show lines if it's not done yet
          */
-        console.log("TaskGroupView.showLines");
         if (!_.isNull(this.getChildView('lines'))){
-            console.log("  + Doing it")
             this.showChildView(
                 'lines',
                 new TaskLineCollectionView({collection: this.collection})

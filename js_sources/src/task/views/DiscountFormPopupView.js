@@ -32,7 +32,6 @@ const DiscountFormPopupView = Mn.View.extend({
         'insert:percent': 'insert:percent'
     },
     onModalBeforeClose(){
-        console.log("Before close");
         this.model.rollback();
     },
     isAddView: function(){

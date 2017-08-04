@@ -17,6 +17,7 @@ import DatePickerWidget from './DatePickerWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import InputWidget from './InputWidget.js';
 import Radio from 'backbone.radio';
+import Validation from 'backbone-validation';
 
 var template = require("./templates/CommonView.mustache");
 
@@ -36,7 +37,15 @@ const CommonView = Mn.View.extend({
     tagName: 'div',
     className: 'form-section',
     template: template,
+    fields: [
+        'date',
+        'address',
+        'description',
+        'workplace',
+        'mentions'
+    ],
     regions: {
+        errors: '.errors',
         date: '.date',
         description: '.description',
         address: '.address',
@@ -47,9 +56,27 @@ const CommonView = Mn.View.extend({
         'change': 'data:modified',
         'finish': 'data:persist'
     },
+    modelEvents: {
+        'validated:invalid': 'showErrors',
+        'validated:valid': 'hideErrors',
+    },
     initialize(){
         var channel = Radio.channel('facade');
+        this.listenTo(channel, 'bind:validation', this.bindValidation);
+        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
         this.mentions_options = channel.request('get:form_options', 'mentions');
+    },
+    showErrors(model, errors){
+        this.$el.addClass('error');
+    },
+    hideErrors(model){
+        this.$el.removeClass('error');
+    },
+    bindValidation(){
+        Validation.bind(this, {attributes: this.fields});
+    },
+    unbindValidation(){
+        Validation.unbind(this);
     },
     getMentionIds(){
         var mentions = this.model.get('mentions');

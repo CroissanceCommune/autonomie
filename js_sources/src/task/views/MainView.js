@@ -26,12 +26,15 @@ import RightBarView from "./RightBarView.js";
 import StatusView from './StatusView.js';
 import BootomActionView from './BootomActionView.js';
 import LoginView from './LoginView.js';
+import ErrorView from './ErrorView.js';
+import { showLoader, hideLoader } from '../../tools.js';
 
 const template = require('./templates/MainView.mustache');
 
 const MainView = Mn.View.extend({
     template: template,
     regions: {
+        errors: '.errors',
         status_history: '.status_history',
         modalRegion: '#modalregion',
         general: '#general',
@@ -161,7 +164,30 @@ const MainView = Mn.View.extend({
         });
         this.showChildView('modalRegion', view);
     },
+    formOk(){
+        var result = true;
+        var errors = this.channel.request('is:valid');
+        if (!_.isEmpty(errors)){
+            this.showChildView(
+                'errors',
+                new ErrorView({errors:errors})
+            );
+            result = false;
+        } else {
+            this.detachChildView('errors');
+        }
+        return result;
+
+    },
     onStatusChange: function(status, title, label, url){
+        showLoader();
+        if (status != 'draft'){
+            if (! this.formOk()){
+                hideLoader();
+                return;
+            }
+        }
+        hideLoader();
         var common_model = this.channel.request('get:model', 'common');
         var this_ = this;
         // We ensure the common_model get saved before changing the status
@@ -171,6 +197,9 @@ const MainView = Mn.View.extend({
                 patch:true,
                 success: function(){
                     this_.showStatusView(status, title, label, url)
+                },
+                error: function(){
+                    hideLoader();
                 }
             }
         );

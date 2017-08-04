@@ -15,6 +15,7 @@ import {findCurrentSelected} from '../../tools.js';
 import FormBehavior from '../behaviors/FormBehavior.js';
 import PaymentLineTableView from './PaymentLineTableView.js';
 import Radio from 'backbone.radio';
+import Validation from 'backbone-validation';
 
 var template = require("./templates/PaymentBlockView.mustache");
 
@@ -50,6 +51,14 @@ const PaymentBlockView = Mn.View.extend({
             'get:form_options',
             'payment_times'
         );
+        this.listenTo(channel, 'bind:validation', this.bindValidation);
+        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+    },
+    bindValidation(){
+        Validation.bind(this);
+    },
+    unbindValidation(){
+        Validation.unbind(this);
     },
     onFinish(field_name, value){
         /*

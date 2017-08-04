@@ -14,6 +14,8 @@ import DiscountCollectionView from './DiscountCollectionView.js';
 import DiscountFormPopupView from './DiscountFormPopupView.js';
 import ExpenseView from './ExpenseView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
+import Radio from 'backbone.radio';
+import Validation from 'backbone-validation';
 
 const DiscountBlockView = Mn.View.extend({
     tagName: 'div',
@@ -39,6 +41,15 @@ const DiscountBlockView = Mn.View.extend({
     initialize: function(options){
         this.collection = options['collection'];
         this.model = options['model'];
+        var channel = Radio.channel('facade');
+        this.listenTo(channel, 'bind:validation', this.bindValidation);
+        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+    },
+    bindValidation(){
+        Validation.bind(this);
+    },
+    unbindValidation(){
+        Validation.unbind(this);
     },
     isEmpty: function(){
         return this.collection.length === 0;

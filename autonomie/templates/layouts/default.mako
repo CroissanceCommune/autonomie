@@ -97,7 +97,7 @@
         % endfor
       % endif
     </div>
-    <div id='loading-box'>
+    <div id='loading-box' style='display:none'>
         <i class="fa fa-circle-o-notch fa-spin"></i>
     </div>
     <div id='login_form' style='display:none'></div>

@@ -24,6 +24,7 @@ const TaskLineFormView = Mn.View.extend({
     template: template,
     behaviors: [ModalFormBehavior],
     regions: {
+        'order': '.order',
         'description': '.description',
         'cost': '.cost',
         'quantity': '.quantity',
@@ -75,6 +76,14 @@ const TaskLineFormView = Mn.View.extend({
         };
     },
     refreshForm: function(){
+        this.showChildView(
+            'order',
+            new InputWidget({
+                value: this.model.get('order'),
+                field_name:'order',
+                type: 'hidden',
+            })
+        );
         this.showChildView(
             'description',
             new TextAreaWidget({

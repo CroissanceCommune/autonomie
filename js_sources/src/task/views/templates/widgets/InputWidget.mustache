@@ -1,4 +1,4 @@
-<label for={{field_name}}>{{title}}</label>
+{{#if title}}<label for={{field_name}}>{{title}}</label>{{/if}}
 {{#if addon}}<div class='input-group'>{{/if}}<input class='form-control {{css_class}}' type='{{type}}' value='{{value}}' name="{{field_name}}"></input>{{#if addon}}<div class="input-group-addon">{{{addon}}}</div>{{/if}}{{#if addon}}</div>{{/if}}
 {{#if description}}
 <span class='help-block'><small>{{description}}</small></span>

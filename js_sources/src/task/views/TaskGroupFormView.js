@@ -21,6 +21,7 @@ var template = require('./templates/TaskGroupFormView.mustache');
 const TaskGroupFormView = Mn.View.extend({
     template: template,
     regions: {
+        'order': '.order',
         'title': '.title',
         'description': '.description',
         'catalog_container': '#catalog-container',
@@ -52,6 +53,14 @@ const TaskGroupFormView = Mn.View.extend({
         };
     },
     refreshForm: function(){
+        this.showChildView(
+            'order',
+            new InputWidget({
+                value: this.model.get('order'),
+                field_name:'order',
+                type: 'hidden',
+            })
+        );
         this.showChildView(
             'title',
             new InputWidget(

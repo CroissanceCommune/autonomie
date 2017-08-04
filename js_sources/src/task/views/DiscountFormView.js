@@ -21,6 +21,7 @@ const DiscountFormView = Mn.View.extend({
     behaviors: [FormBehavior],
     template: template,
     regions: {
+        'order': '.order',
         'description': '.description',
         'amount': '.amount',
         'tva': '.tva',
@@ -33,6 +34,14 @@ const DiscountFormView = Mn.View.extend({
         this.tva_options = channel.request('get:form_options', 'tvas');
     },
     onRender: function(){
+        this.showChildView(
+            'order',
+            new InputWidget({
+                value: this.model.get('order'),
+                field_name:'order',
+                type: 'hidden',
+            })
+        );
         this.showChildView(
             'description',
             new TextAreaWidget({

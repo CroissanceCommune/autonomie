@@ -6346,7 +6346,6 @@ webpackJsonp([1],[
 	    },
 	    onDataPersisted: function onDataPersisted(datas) {
 	        console.log("FormBehavior.onDataPersisted");
-	        console.log(datas);
 	        this.syncServer(datas, true);
 	    },
 	    onCancelClick: function onCancelClick() {
@@ -7544,7 +7543,7 @@ webpackJsonp([1],[
 	    templateContext: function templateContext() {
 	        return {
 	            value: this.getOption('value'),
-	            title: this.getOption('title'),
+	            title: (0, _tools.getOpt)(this, 'title', ''),
 	            field_name: this.getOption('field_name'),
 	            description: (0, _tools.getOpt)(this, 'description', false),
 	            type: (0, _tools.getOpt)(this, 'type', 'text'),
@@ -7566,26 +7565,32 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<label for="
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + ">"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</label>";
+	},"3":function(depth0,helpers,partials,data) {
 	  return "<div class='input-group'>";
-	  },"3":function(depth0,helpers,partials,data) {
+	  },"5":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class=\"input-group-addon\">";
 	  stack1 = ((helper = (helper = helpers.addon || (depth0 != null ? depth0.addon : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"addon","hash":{},"data":data}) : helper));
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "</div>";
-	},"5":function(depth0,helpers,partials,data) {
+	},"7":function(depth0,helpers,partials,data) {
 	  return "</div>";
-	  },"7":function(depth0,helpers,partials,data) {
+	  },"9":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 	  return "<span class='help-block'><small>"
 	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
 	    + "</small></span>\n";
 	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<label for="
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + ">"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</label>\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  buffer += "<input class='form-control "
 	    + escapeExpression(((helper = (helper = helpers.css_class || (depth0 != null ? depth0.css_class : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"css_class","hash":{},"data":data}) : helper)))
@@ -7596,12 +7601,12 @@ webpackJsonp([1],[
 	    + "' name=\""
 	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
 	    + "\"></input>";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
 	  buffer += "\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer;
 	},"useData":true});
@@ -8965,6 +8970,7 @@ webpackJsonp([1],[
 	    template: template,
 	    behaviors: [_ModalFormBehavior2.default],
 	    regions: {
+	        'order': '.order',
 	        'description': '.description',
 	        'cost': '.cost',
 	        'quantity': '.quantity',
@@ -9008,6 +9014,11 @@ webpackJsonp([1],[
 	        };
 	    },
 	    refreshForm: function refreshForm() {
+	        this.showChildView('order', new _InputWidget2.default({
+	            value: this.model.get('order'),
+	            field_name: 'order',
+	            type: 'hidden'
+	        }));
 	        this.showChildView('description', new _TextAreaWidget2.default({
 	            value: this.model.get('description'),
 	            title: "Intitulé des postes",
@@ -9527,7 +9538,7 @@ webpackJsonp([1],[
 	    + "</h4>\n        </div>\n        <div class=\"modal-body\">\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskline-form'>\n                        <div class='description required'></div>\n                        <div class='cost required'></div>\n                        <div class='quantity required'></div>\n                        <div class='unity'></div>\n                        <div class='tva required'></div>\n                        <div class='product_id'></div>\n                        <button\n                            class='btn btn-success primary-action'\n                            type='submit'\n                            value='submit'>\n                            "
+	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskline-form'>\n                        <div class='order'></div>\n                        <div class='description required'></div>\n                        <div class='cost required'></div>\n                        <div class='quantity required'></div>\n                        <div class='unity'></div>\n                        <div class='tva required'></div>\n                        <div class='product_id'></div>\n                        <button\n                            class='btn btn-success primary-action'\n                            type='submit'\n                            value='submit'>\n                            "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "\n                        </button>\n                        <button\n                            class='btn btn-default secondary-action'\n                            type='reset'\n                            value='submit'>\n                            Annuler\n                        </button>\n                    </form>\n                </div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
@@ -9781,6 +9792,7 @@ webpackJsonp([1],[
 	var TaskGroupFormView = _backbone2.default.View.extend({
 	    template: template,
 	    regions: {
+	        'order': '.order',
 	        'title': '.title',
 	        'description': '.description',
 	        'catalog_container': '#catalog-container'
@@ -9812,6 +9824,11 @@ webpackJsonp([1],[
 	        };
 	    },
 	    refreshForm: function refreshForm() {
+	        this.showChildView('order', new _InputWidget2.default({
+	            value: this.model.get('order'),
+	            field_name: 'order',
+	            type: 'hidden'
+	        }));
 	        this.showChildView('title', new _InputWidget2.default({
 	            value: this.model.get('title'),
 	            title: "Titre (optionnel)",
@@ -9865,7 +9882,7 @@ webpackJsonp([1],[
 	    + "</h4>\n          </div>\n          <div class=\"modal-body\">\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskgroup-form'>\n                        <div class='title'></div>\n                        <div class='description'></div>\n                        <button class='btn btn-success primary-action' type='submit' value='submit'>\n                            "
+	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskgroup-form'>\n                        <div class='order'></div>\n                        <div class='title'></div>\n                        <div class='description'></div>\n                        <button class='btn btn-success primary-action' type='submit' value='submit'>\n                            "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "\n                        </button>\n                        <button class='btn btn-default secondary-action' type='reset' value='submit'>\n                            Annuler\n                        </button>\n                    </form>\n                </div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
@@ -10381,6 +10398,7 @@ webpackJsonp([1],[
 	    behaviors: [_FormBehavior2.default],
 	    template: template,
 	    regions: {
+	        'order': '.order',
 	        'description': '.description',
 	        'amount': '.amount',
 	        'tva': '.tva'
@@ -10394,6 +10412,11 @@ webpackJsonp([1],[
 	    },
 	
 	    onRender: function onRender() {
+	        this.showChildView('order', new _InputWidget2.default({
+	            value: this.model.get('order'),
+	            field_name: 'order',
+	            type: 'hidden'
+	        }));
 	        this.showChildView('description', new _TextAreaWidget2.default({
 	            value: this.model.get('description'),
 	            title: "Description",
@@ -10434,7 +10457,7 @@ webpackJsonp([1],[
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<form class='form'>\n    <div class='description'></div>\n    <div class='amount'></div>\n    <div class='tva'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n        "
+	  return "<form class='form'>\n    <div class='order'></div>\n    <div class='description'></div>\n    <div class='amount'></div>\n    <div class='tva'></div>\n    <button class='btn btn-success primary-action' type='submit' value='submit'>\n        "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "\n    </button>\n    <button class='btn btn-default secondary-action' type='reset' value='submit'>\n        Annuler\n    </button>\n</form>\n";
 	},"useData":true});
@@ -12450,11 +12473,17 @@ webpackJsonp([1],[
 	    behaviors: [_ModalFormBehavior2.default],
 	    template: template,
 	    regions: {
+	        'order': '.order',
 	        'description': ".description",
 	        "date": ".date",
 	        "amount": ".amount"
 	    },
 	    onRender: function onRender() {
+	        this.showChildView('order', new _InputWidget2.default({
+	            value: this.model.get('order'),
+	            field_name: 'order',
+	            type: 'hidden'
+	        }));
 	        var view = new _TextAreaWidget2.default({
 	            field_name: "description",
 	            value: this.model.get('description'),
@@ -12501,7 +12530,7 @@ webpackJsonp([1],[
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 	  return "<div class=\"modal-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n        <form class='form taskline-form'>\n            <div class=\"modal-header\">\n              <button tabindex='-1' type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n              <h4 class=\"modal-title\">"
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</h4>\n            </div>\n            <div class=\"modal-body\">\n                <div class='description required'></div>\n                <div class='date required'></div>\n                <div class='amount required'></div>\n            </div>\n            <div class=\"modal-footer\">\n                <button\n                    class='btn btn-success primary-action'\n                    type='submit'\n                    value='submit'>\n                    "
+	    + "</h4>\n            </div>\n            <div class=\"modal-body\">\n                <div class='order'></div>\n                <div class='description required'></div>\n                <div class='date required'></div>\n                <div class='amount required'></div>\n            </div>\n            <div class=\"modal-footer\">\n                <button\n                    class='btn btn-success primary-action'\n                    type='submit'\n                    value='submit'>\n                    "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "\n                </button>\n                <button\n                    class='btn btn-default secondary-action'\n                    type='reset'\n                    value='submit'>\n                    Annuler\n                </button>\n            </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n\n";
 	},"useData":true});

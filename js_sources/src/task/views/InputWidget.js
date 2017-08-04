@@ -40,7 +40,7 @@ const InputWidget = Mn.View.extend({
     templateContext: function(){
         return {
             value: this.getOption('value'),
-            title: this.getOption('title'),
+            title: getOpt(this, 'title', ''),
             field_name: this.getOption('field_name'),
             description: getOpt(this, 'description', false),
             type: getOpt(this, 'type', 'text'),

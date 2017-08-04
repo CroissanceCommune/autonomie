@@ -36,16 +36,12 @@ from deform import Form
 
 from autonomie.events.tasks import StatusChanged
 from autonomie.exception import Forbidden
-from autonomie.utils.pdf import (
-    write_pdf,
-    render_html,
-)
+
 from autonomie.resources import (
     task,
     duplicate_js,
 )
 
-from autonomie_base.utils.ascii import force_filename
 from autonomie.utils.widgets import (
     Submit,
     ViewLink,
@@ -426,55 +422,6 @@ class TaskFormView(BaseFormView):
         return result
 
 
-def html(request, tasks=None, bulk=False):
-    """
-        return the html output of a given task
-    """
-    template = "autonomie:templates/tasks/task.mako"
-
-    if tasks is None:
-        tasks = [request.context]
-
-    datas = dict(
-        tasks=tasks,
-        config=request.config,
-        bulk=bulk,
-    )
-
-    return render_html(request, template, datas)
-
-
-def get_project_redirect_btn(request, id_):
-    """
-        Button for "go back to project" link
-    """
-    return ViewLink(
-        u"Revenir au projet",
-        path="project",
-        id=id_
-    )
-
-
-def populate_actionmenu(request):
-    """
-        Add buttons in the request actionmenu attribute
-    """
-    if context_is_task(request.context):
-        project = request.context.project
-    else:
-        project = request.context
-    request.actionmenu.add(get_project_redirect_btn(request, project.id))
-    # if context_is_task(request.context):
-    #     edit_perm = "edit.%s" % request.context.__name__
-    #     request.actionmenu.add(
-    #         get_add_file_link(
-    #             request,
-    #             perm=edit_perm,
-    #             route="/%ss/{id}/addfile" % request.context.type_
-    #         )
-    #     )
-
-
 def get_task_html_view(form_actions_factory=TaskFormActions):
     """
     Returns a view for the html display of a task
@@ -486,59 +433,7 @@ def get_task_html_view(form_actions_factory=TaskFormActions):
         """
         The task html view
         """
-        from autonomie.resources import task_html_pdf_css
-        task_html_pdf_css.need()
-        # If the task is editable, we go the edit page
-        if request.has_permission('edit.%s' % request.context.type_):
-            return HTTPFound(
-                request.route_path(
-                    "/%ss/{id}" % request.context.type_,
-                    id=request.context.id
-                )
-            )
-
-        # Get the label for the given task
-        if request.context.__name__ == 'invoice':
-            label = u"Facture"
-        elif request.context.__name__ == 'estimation':
-            label = u"Devis"
-        elif request.context.__name__ == 'cancelinvoice':
-            label = u"Avoir"
-        else:
-            label = u"Objet"
-
-        title = u"{0} : {1}".format(label, request.context.internal_number)
-        populate_actionmenu(request)
-
-        # We use the task's class to retrieve the available actions
-        # model = request.context.__class__
-        # button_handler = form_actions_factory(request, model)
-        # submit_buttons = button_handler.get_buttons()
-
-        return dict(
-            title=title,
-            task=request.context,
-            submit_buttons=[],
-        )
     return task_html_view
-
-
-def task_pdf_view(request):
-    """
-        Returns a pdf rendering of the current task
-    """
-    from autonomie.resources import pdf_css
-    pdf_css.need()
-
-    number = request.context.internal_number
-    label = force_filename(number)
-
-    filename = u"{0}.pdf".format(label)
-
-    html_string = html(request)
-    write_pdf(request, filename, html_string)
-
-    return request.response
 
 
 def make_task_delete_view(valid_msg):

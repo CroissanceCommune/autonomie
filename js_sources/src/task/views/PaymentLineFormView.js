@@ -21,11 +21,20 @@ const PaymentLineFormView = Mn.View.extend({
     behaviors: [ModalFormBehavior],
     template: template,
     regions: {
+        'order': '.order',
         'description': ".description",
         "date": ".date",
         "amount": ".amount",
     },
     onRender: function(){
+        this.showChildView(
+            'order',
+            new InputWidget({
+                value: this.model.get('order'),
+                field_name:'order',
+                type: 'hidden',
+            })
+        );
         var view = new TextAreaWidget(
             {
                 field_name: "description",

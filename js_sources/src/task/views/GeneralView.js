@@ -64,8 +64,7 @@ const GeneralView = Mn.View.extend({
             this.showChildView(
                 'prefix',
                 new InputWidget({
-                    title: "Préfixe",
-                    description: "N'est pas présenté dans le pdf",
+                    title: "Préfixe du numéro de facture",
                     value: this.model.get('prefix'),
                     field_name: 'prefix',
                 })
@@ -74,7 +73,6 @@ const GeneralView = Mn.View.extend({
                 'financial_year',
                 new InputWidget({
                     title: "Année comptable de référence",
-                    description: "N'est pas présenté dans le pdf",
                     value: this.model.get('financial_year'),
                     field_name: 'financial_year',
                 })

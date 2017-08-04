@@ -1,4 +1,4 @@
-/* global AppOptions; */
+/* global AppOption; */
 /*
  * File Name :
  *
@@ -21,24 +21,27 @@ import { setupBbValidationCallbacks, setupBbValidationPatterns } from '../backbo
 import Router from './components/Router.js';
 import Controller  from './components/Controller.js';
 import { setupAjaxCallbacks, ajax_call } from '../tools.js';
+import { showLoader, hideLoader } from '../tools.js';
 
 setupAjaxCallbacks();
 
 App.on('start', function (app, options) {
     console.log("  => Starting the app");
-    AppOption['form_options'] = options.form_options;
+    AppOption['form_config'] = options.form_config;
     setupBbValidationCallbacks(Validation.callbacks);
     setupBbValidationPatterns(Validation);
-    var controller = new Controller(options.form_datas);
+    var controller = new Controller(options);
     var router = new Router({controller:controller});
     Bb.history.start();
+    hideLoader();
 });
 
 
 $(function(){
+    showLoader();
     console.log("# Retrieving datas from the server");
-    console.log(AppOption['load_url']);
-    let serverCall1 = ajax_call(AppOption['load_url']);
+    console.log(AppOption['form_config_url']);
+    let serverCall1 = ajax_call(AppOption['form_config_url']);
     console.log(AppOption['context_url']);
     let serverCall2 = ajax_call(AppOption['context_url']);
 
@@ -46,7 +49,7 @@ $(function(){
         function(result1, result2){
             console.log("  => Datas retrieved");
             App.start({
-                form_options: result1[0],
+                form_config: result1[0],
                 form_datas: result2[0],
             });
         }

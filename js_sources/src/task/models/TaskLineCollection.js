@@ -59,6 +59,16 @@ const TaskLineCollection = OrderableCollection.extend({
             result += model.ttc();
         });
         return result;
+    },
+    validate: function(){
+        var result = {};
+        this.each(function(model){
+            var res = model.validate();
+            if (res){
+                _.extend(result, res);
+            }
+        });
+        return result;
     }
 });
 export default TaskLineCollection;

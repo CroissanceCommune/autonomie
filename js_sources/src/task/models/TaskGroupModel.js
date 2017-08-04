@@ -22,6 +22,13 @@ const TaskGroupModel = BaseModel.extend({
         'lines',
         'task_id',
     ],
+    validation:{
+        lines: function(value){
+            if (value.length === 0){
+                return "Veuillez saisir au moins une prestation";
+            }
+        }
+    },
     initialize: function(){
         this.populate();
         this.on('change:id', this.populate.bind(this));

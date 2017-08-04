@@ -48,7 +48,15 @@ const CommonModel = BaseModel.extend({
             required: false,
             pattern: 'amount',
             msg: "Le montant doit être un nombre",
-        }
+        },
+        payment_conditions: function(value){
+            var facade = Radio.channel('facade');
+            if (facade.request('has:form_section', 'payment_conditions')){
+                if (!value){
+                    return "Veuillez saisir des conditions de paiements";
+                }
+            }
+        },
     },
     initialize: function(){
         CommonModel.__super__.initialize.apply(this, arguments);

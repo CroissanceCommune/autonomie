@@ -65,6 +65,16 @@ const DiscountCollection = Bb.Collection.extend({
             'POST'
         );
         serverRequest.then(this.fetch.bind(this));
+    },
+    validate: function(){
+        var result = {};
+        this.each(function(model){
+            var res = model.validate();
+            if (res){
+                _.extend(result, res);
+            }
+        });
+        return result;
     }
 });
 export default DiscountCollection;

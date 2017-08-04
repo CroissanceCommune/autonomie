@@ -128,6 +128,16 @@ const PaymentLineCollection = OrderableCollection.extend({
         var value = this.getSoldAmount();
         this.models[this.models.length - 1].set({'amount': value});
         this.models[this.models.length - 1].save();
+    },
+    validate: function(){
+        var result = {};
+        this.each(function(model){
+            var res = model.validate();
+            if (res){
+                _.extend(result, res);
+            }
+        });
+        return result;
     }
 });
 export default PaymentLineCollection;

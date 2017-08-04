@@ -10,15 +10,27 @@
  */
 import Bb from 'backbone';
 import { formatAmount } from '../../math.js';
+import Radio from 'backbone.radio';
 
 const TotalModel = Bb.Model.extend({
+    initialize: function(){
+        TotalModel.__super__.initialize.apply(this, arguments);
+        var channel = this.channel = Radio.channel('facade');
+        this.tva_options = channel.request('get:form_options', 'tvas');
+    },
     getTvaLabel: function(tva_value, tva_key){
-        let res = {'value': formatAmount(tva_value, true), 'label': 'Tva Inconnue'};
-        _.each(AppOption['form_options']['tva_options'], function(tva){
-            if (tva.value == tva_key){
-                res['label'] = tva.name;
+        let res = {
+            'value': formatAmount(tva_value, true),
+            'label': 'Tva Inconnue'
+        };
+        _.each(
+            this.tva_options,
+            function(tva){
+                if (tva.value == tva_key){
+                    res['label'] = tva.name;
+                }
             }
-        });
+        );
         return res
     },
     tva_labels: function(){

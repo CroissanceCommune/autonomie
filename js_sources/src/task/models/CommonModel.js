@@ -17,6 +17,7 @@ import Radio from 'backbone.radio';
 const CommonModel = BaseModel.extend({
     props: [
         'id',
+        'name',
         'altdate',
         'date',
         'description',
@@ -53,6 +54,7 @@ const CommonModel = BaseModel.extend({
         CommonModel.__super__.initialize.apply(this, arguments);
         var channel = this.channel = Radio.channel('facade');
         this.on('sync', function(){channel.trigger('changed:discount')});
+        this.tva_options = channel.request('get:form_options', 'tvas');
     },
     ht: function(){
         return strToFloat(this.get('expenses_ht'));
@@ -60,7 +62,7 @@ const CommonModel = BaseModel.extend({
     tva_key: function(){
         var result
         var tva_object = _.find(
-            AppOption['form_options']['tva_options'],
+            this.tva_options,
             function(val){return val['default'];}
         );
         if (_.isUndefined(tva_object)){

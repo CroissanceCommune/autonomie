@@ -10,7 +10,6 @@
  */
 import Bb from 'backbone';
 import { strToFloat, getTvaPart } from '../../math.js';
-import Radio from 'backbone.radio';
 import BaseModel from './BaseModel.js';
 
 const DiscountModel = BaseModel.extend({

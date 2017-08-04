@@ -25,7 +25,7 @@
 """
 Sage exports tools
 """
-from autonomie.views.render_api import format_amount
+from autonomie.utils.strings import format_amount
 from sqla_inspect.csv import CsvExporter
 
 

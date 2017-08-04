@@ -52,10 +52,6 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from autonomie.models.tva import (
-    Tva,
-    Product,
-)
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
@@ -64,6 +60,9 @@ from autonomie import forms
 from autonomie.forms.custom_types import (AmountType, QuantityType,)
 from autonomie.models.user import get_deferred_user_choice
 
+from autonomie.utils.strings import (
+    SINGLE_STATUS_LABELS
+)
 from autonomie.compute.task import (
     LineCompute,
     DiscountLineCompute,
@@ -79,6 +78,10 @@ from autonomie.models.task.mentions import (
     TaskMention,
 )
 from autonomie.models.task.unity import WorkUnit
+from autonomie.models.tva import (
+    Tva,
+    Product,
+)
 
 
 log = logging.getLogger(__name__)
@@ -561,7 +564,7 @@ class Task(Node):
 
     statuses = relationship(
         "TaskStatus",
-        order_by="TaskStatus.status_date",
+        order_by="desc(TaskStatus.status_date)",
         cascade="all, delete-orphan",
         back_populates='task',
         info={'colanderalchemy': forms.EXCLUDED}
@@ -881,6 +884,7 @@ class TaskStatus(DBBASE):
         result = {
             "date": self.status_date,
             'code': self.status_code,
+            "label": SINGLE_STATUS_LABELS.get(self.status_code, ''),
             "comment": self.status_comment,
         }
         if self.status_person is not None:

@@ -41,6 +41,7 @@ from autonomie.models.tva import (
 from autonomie.models.task import (Invoice, CancelInvoice,)
 from autonomie.models.payments import BankAccount
 
+from autonomie.utils.strings import format_amount
 from autonomie import forms
 from autonomie.forms.tasks.lists import (
     PeriodSchema,
@@ -384,7 +385,6 @@ def deferred_remittance_amount_default(node, kw):
     """
         default value for the payment amount
     """
-    from autonomie.views.render_api import format_amount
     return format_amount(
         get_amount_topay(kw),
         precision=AMOUNT_PRECISION,
@@ -397,7 +397,6 @@ def deferred_total_validator(node, kw):
     """
         validate the amount to keep the sum under the total
     """
-    from autonomie.views.render_api import format_amount
     topay = get_amount_topay(kw)
     max_msg = u"Le montant ne doit pas dépasser %s (total ttc - somme \
 des paiements + montant d'un éventuel avoir)" % (

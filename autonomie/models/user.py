@@ -62,7 +62,10 @@ from autonomie_base.models.base import (
     DBSESSION,
     default_table_args,
 )
-from autonomie.views import render_api
+from autonomie.utils.strings import (
+    format_account,
+    format_name,
+)
 
 from autonomie.models.node import Node
 from autonomie.models.company import CompanyActivity
@@ -438,7 +441,7 @@ class User(DBBASE, PersistentACLMixin):
 
     @property
     def label(self):
-        return u"{0} {1}".format(self.lastname, self.firstname)
+        return format_name(self.firstname, self.lastname)
 
 
 def get_user_by_roles(roles):
@@ -471,7 +474,7 @@ def get_users_options(roles=None):
         query = get_user_by_roles(roles)
     else:
         query = User.query()
-    return [(unicode(u.id), render_api.format_account(u)) for u in query]
+    return [(unicode(u.id), format_account(u)) for u in query]
 
 
 def get_deferred_user_choice(roles=None, widget_options=None):

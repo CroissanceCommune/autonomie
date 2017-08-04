@@ -27,7 +27,10 @@ Handle task (invoice/estimation) related events
 """
 import logging
 
-from autonomie.views import render_api
+from autonomie.utils.strings import (
+    format_status,
+    format_account,
+)
 
 from autonomie_base.mail import (
     format_link,
@@ -110,7 +113,7 @@ class StatusChanged(object):
         return SUBJECT_TMPL.format(
                 docname=self.document.name,
                 customer=self.document.customer.name,
-                statusstr=render_api.format_status(self.document),
+                statusstr=format_status(self.document),
                 )
 
     @property
@@ -154,7 +157,7 @@ class StatusChanged(object):
         else:
             comment = u"Aucun"
 
-        username = render_api.format_account(self.document.owner, reverse=False)
+        username = format_account(self.document.owner, reverse=False)
         return MAIL_TMPL.format(
                 determinant=determinant,
                 username=username,

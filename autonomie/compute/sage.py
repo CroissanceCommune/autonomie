@@ -48,7 +48,10 @@ from autonomie.compute.math_utils import (
     reverse_tva,
     compute_tva,
 )
-from autonomie.views import render_api
+from autonomie.utils.strings import (
+    format_account,
+    month_name,
+)
 
 log = logging.getLogger(__name__)
 
@@ -1150,7 +1153,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return u"{0}/frais {1} {2}".format(
-            render_api.format_account(self.expense.user, reverse=False),
+            format_account(self.expense.user, reverse=False),
             self.expense.month,
             self.expense.year
         )
@@ -1563,7 +1566,7 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
         self.mode = self.payment.mode
         self.libelle = u"{nom} / REMB FRAIS {mois}/{annee}".format(
             nom=self.user.lastname.upper(),
-            mois=render_api.month_name(self.expense.month),
+            mois=month_name(self.expense.month),
             annee=self.expense.year,
         )
         self.num_analytique = self.company.code_compta
@@ -1606,7 +1609,7 @@ class SageExpensePaymentWaiver(SageExpensePaymentMain):
         self.code_taxe = ""
         self.libelle = u"Abandon de créance {name} {month}/{year}".format(
             name=self.user.lastname.upper(),
-            month=render_api.month_name(self.expense.month),
+            month=month_name(self.expense.month),
             year=self.expense.year,
         )
 

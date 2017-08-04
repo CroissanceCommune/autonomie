@@ -26,6 +26,8 @@
     Panels used for task rendering
 
 """
+from autonomie.utils.strings import major_status
+from autonomie.views.render_api import status_icon
 
 
 def task_panel(context, request, task, bulk=False):
@@ -67,13 +69,12 @@ def task_title_panel(context, request, title):
     """
     Panel returning a label for the given context's status
     """
-    from autonomie.views import render_api
-    status = render_api.major_status(context)
+    status = major_status(context)
     status_label = STATUS_LABELS.get(status)
     if isinstance(status_label, dict):
         status_label = status_label[context.type_]
 
-    icon = render_api.status_icon(context)
+    icon = status_icon(context)
 
     css = u'status status-%s' % context.status
     if hasattr(context, 'paid_status'):

@@ -23,57 +23,57 @@
 #
 import unittest
 import locale
-from autonomie.views import render_api
+from autonomie.utils import strings
 
 class TestIt(unittest.TestCase):
     def test_format_amount(self):
         a = 1525
         b = 1525.3
         locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
-        self.assertEqual(render_api.format_amount(a), "15,25")
-        self.assertEqual(render_api.format_amount(a, trim=False), "15,25")
+        self.assertEqual(strings.format_amount(a), "15,25")
+        self.assertEqual(strings.format_amount(a, trim=False), "15,25")
 
-        self.assertEqual(render_api.format_amount(b), "15,25")
-        self.assertEqual(render_api.format_amount(b, trim=False), "15,25")
+        self.assertEqual(strings.format_amount(b), "15,25")
+        self.assertEqual(strings.format_amount(b, trim=False), "15,25")
 
         c = 210000
         self.assertEqual(
-            render_api.format_amount(c, grouping=False),
+            strings.format_amount(c, grouping=False),
             "2100,00"
         )
         self.assertEqual(
-            render_api.format_amount(c, grouping=True),
+            strings.format_amount(c, grouping=True),
             "2&nbsp;100,00"
         )
 
         c = 21000000.0
         self.assertEqual(
-            render_api.format_amount(c, trim=False, precision=5),
+            strings.format_amount(c, trim=False, precision=5),
             "210,00"
         )
         c = 21000004.0
         self.assertEqual(
-            render_api.format_amount(c, trim=False,precision=5),
+            strings.format_amount(c, trim=False,precision=5),
             "210,00004"
         )
         c = 21000040.0
         self.assertEqual(
-            render_api.format_amount(c, trim=False,precision=5),
+            strings.format_amount(c, trim=False,precision=5),
             "210,0004"
         )
 
         self.assertEqual(
-            render_api.format_amount(c, trim=True, precision=5),
+            strings.format_amount(c, trim=True, precision=5),
             "210,00"
         )
         c = 21012000.0
         self.assertEqual(
-            render_api.format_amount(c, trim=False, precision=5),
+            strings.format_amount(c, trim=False, precision=5),
             "210,12"
         )
 
     def test_format_name(self):
-        self.assertEqual(render_api.format_name(None, u"LastName"),
+        self.assertEqual(strings.format_name(None, u"LastName"),
                                                          u"LASTNAME ")
-        self.assertEqual(render_api.format_name(u"Firstname", None),
+        self.assertEqual(strings.format_name(u"Firstname", None),
                                                         u" Firstname")

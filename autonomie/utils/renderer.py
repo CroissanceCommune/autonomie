@@ -117,18 +117,24 @@ def set_export_formatters():
     Globally set export formatters in the sqla_inspect registry
     """
     from sqla_inspect.export import FORMATTERS_REGISTRY
-    from autonomie.views import render_api
+    from autonomie_base.utils.date import (
+        format_date,
+        format_datetime,
+    )
+    from autonomie.utils.strings import (
+        format_quantity,
+    )
     from autonomie.export.utils import format_boolean
 
     FORMATTERS_REGISTRY.add_formatter(
-        Date, render_api.format_date, 'py3o'
+        Date, format_date, 'py3o'
     )
     FORMATTERS_REGISTRY.add_formatter(
-        DateTime, render_api.format_datetime, 'py3o'
+        DateTime, format_datetime, 'py3o'
     )
     FORMATTERS_REGISTRY.add_formatter(Boolean, format_boolean)
-    FORMATTERS_REGISTRY.add_formatter(Float, render_api.format_quantity)
-    FORMATTERS_REGISTRY.add_formatter(Integer, render_api.format_quantity)
+    FORMATTERS_REGISTRY.add_formatter(Float, format_quantity)
+    FORMATTERS_REGISTRY.add_formatter(Integer, format_quantity)
 
 
 def set_export_blacklist():

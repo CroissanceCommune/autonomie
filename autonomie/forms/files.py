@@ -33,7 +33,7 @@ from pyramid.threadlocal import get_current_registry
 from pyramid_deform import SessionFileUploadTempStore
 
 from autonomie.compute.math_utils import convert_to_int
-from autonomie.views.render_api import human_readable_filesize
+from autonomie.utils.strings import human_readable_filesize
 from autonomie import forms
 from autonomie.models.node import NODE_TYPE_ROUTES
 

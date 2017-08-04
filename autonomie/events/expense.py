@@ -29,10 +29,12 @@ import datetime
 import logging
 
 from autonomie_base.mail import format_link
-from autonomie.events.mail import send_mail_from_event
-from autonomie.views.render_api import (
-    format_account,
+from autonomie_base.utils.date import (
     format_date,
+)
+from autonomie.events.mail import send_mail_from_event
+from autonomie.utils.strings import (
+    format_account,
 )
 
 log = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ def test_status_change_view_invalid_error(
 ):
     config.add_route('project', '/{id}')
     from autonomie.utils.rest import RestError
-    from autonomie.views.estimations.rest_api import EstimationStatusView
+    from autonomie.views.estimations.rest_api import EstimationStatusRestView
 
     request = get_csrf_request_with_db(
         post={'submit': 'valid'}
@@ -21,7 +21,7 @@ def test_status_change_view_invalid_error(
     request.user = user
     request.is_xhr = True
 
-    view = EstimationStatusView(request)
+    view = EstimationStatusRestView(request)
 
     with pytest.raises(RestError) as invalid_exc:
         view.__call__()
@@ -39,7 +39,7 @@ def test_status_change_view_forbidden_error(
         permissive=False
     )
     from autonomie.utils.rest import RestError
-    from autonomie.views.estimations.rest_api import EstimationStatusView
+    from autonomie.views.estimations.rest_api import EstimationStatusRestView
 
     request = get_csrf_request_with_db(
         post={'submit': 'valid'}
@@ -48,7 +48,7 @@ def test_status_change_view_forbidden_error(
     request.user = user
     request.is_xhr = True
 
-    view = EstimationStatusView(request)
+    view = EstimationStatusRestView(request)
 
     with pytest.raises(RestError) as forbidden_exc:
         view.__call__()
@@ -65,19 +65,21 @@ def test_status_change_view(
         groupids=('admin',),
         permissive=True
     )
-    from autonomie.views.estimations.rest_api import EstimationStatusView
+    from autonomie.views.estimations.rest_api import EstimationStatusRestView
 
     request = get_csrf_request_with_db(
-        post={'submit': 'valid'}
+        post={'submit': 'valid', 'comment': u"Test comment"}
     )
     request.context = full_estimation
     request.user = user
     request.is_xhr = True
 
-    view = EstimationStatusView(request)
+    view = EstimationStatusRestView(request)
     result = view.__call__()
     assert result == {'redirect': '/%s' % full_estimation.project_id}
     assert full_estimation.status == 'valid'
+    assert full_estimation.statuses[-1].status_comment == u"Test comment"
+    assert full_estimation.statuses[-1].status_code == 'valid'
 
 
 def test_signed_status_change_wrong(
@@ -89,7 +91,9 @@ def test_signed_status_change_wrong(
         permissive=True
     )
     from autonomie.utils.rest import RestError
-    from autonomie.views.estimations.rest_api import EstimationSignedStatusView
+    from autonomie.views.estimations.rest_api import (
+        EstimationSignedStatusRestView,
+    )
 
     request = get_csrf_request_with_db(
         post={'submit': 'wrong'}
@@ -98,7 +102,7 @@ def test_signed_status_change_wrong(
     request.user = user
     request.is_xhr = True
 
-    view = EstimationSignedStatusView(request)
+    view = EstimationSignedStatusRestView(request)
     with pytest.raises(RestError) as invalid_exc:
         view.__call__()
         assert invalid_exc.code == 400
@@ -113,7 +117,9 @@ def test_signed_status_change_forbidden(
         permissive=False
     )
     from autonomie.utils.rest import RestError
-    from autonomie.views.estimations.rest_api import EstimationSignedStatusView
+    from autonomie.views.estimations.rest_api import (
+        EstimationSignedStatusRestView,
+    )
 
     request = get_csrf_request_with_db(
         post={'submit': 'signed'}
@@ -122,7 +128,7 @@ def test_signed_status_change_forbidden(
     request.user = user
     request.is_xhr = True
 
-    view = EstimationSignedStatusView(request)
+    view = EstimationSignedStatusRestView(request)
     with pytest.raises(RestError) as forbidden_exc:
         view.__call__()
         assert forbidden_exc.code == 403
@@ -136,7 +142,9 @@ def test_signed_status_change(
         groupids=('admin',),
         permissive=True
     )
-    from autonomie.views.estimations.rest_api import EstimationSignedStatusView
+    from autonomie.views.estimations.rest_api import (
+        EstimationSignedStatusRestView,
+    )
 
     request = get_csrf_request_with_db(
         post={'submit': 'aborted'}
@@ -145,7 +153,7 @@ def test_signed_status_change(
     request.user = user
     request.is_xhr = True
 
-    view = EstimationSignedStatusView(request)
+    view = EstimationSignedStatusRestView(request)
     result = view.__call__()
     assert result['datas'] == {'signed_status': 'aborted'}
 

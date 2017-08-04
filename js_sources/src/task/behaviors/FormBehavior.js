@@ -77,14 +77,16 @@ var FormBehavior = Mn.Behavior.extend({
             {
                 success: this.onSyncSuccess.bind(this),
                 error: this.onSyncError.bind(this),
-                wait: true
+                wait: true,
+                patch: true
             }
         );
     },
     onSubmitForm(event){
         event.preventDefault();
-        this.view.model.set(this.serializeForm(), {validate: true});
-        this.syncServer();
+        var datas = this.serializeForm();
+        this.view.model.set(datas, {validate: true});
+        this.syncServer(datas);
     },
     onDataPersisted(datas){
         console.log("FormBehavior.onDataPersisted");

@@ -101,3 +101,11 @@ a[data-toggle=collapse]:hover{
       }
     }
 }
+blockquote.status_history_item{
+  border-left: 5px solid #aaa;
+  font-size: 15px;
+  margin: 5px 8px;
+  p{
+    margin: 0, 0, 5px;
+  }
+}

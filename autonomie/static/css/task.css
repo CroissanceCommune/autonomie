@@ -83,3 +83,10 @@ a[data-toggle=collapse]:hover {
     margin-top: 10px; }
     .task-desktop-actions .totals hr {
       margin: 8px 0px; }
+
+blockquote.status_history_item {
+  border-left: 5px solid #aaa;
+  font-size: 15px;
+  margin: 5px 8px; }
+  blockquote.status_history_item p {
+    margin: 0, 0, 5px; }

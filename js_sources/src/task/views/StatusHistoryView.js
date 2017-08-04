@@ -20,6 +20,7 @@ const StatusHistoryView = Mn.View.extend({
     },
     onRender(){
         var collection = this.getOption('collection');
+        console.log(collection);
         this.showChildView(
             "comments",
             new StatusHistoryCollectionView({collection: collection})

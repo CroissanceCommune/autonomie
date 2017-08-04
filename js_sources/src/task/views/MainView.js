@@ -11,19 +11,20 @@
 import Mn from 'backbone.marionette';
 import Radio from 'backbone.radio';
 
+import StatusHistoryView from './StatusHistoryView.js';
 import GeneralView from "./GeneralView.js";
 import CommonView from "./CommonView.js";
 import TaskBlockView from './TaskBlockView.js';
+import HtBeforeDiscountsView from './HtBeforeDiscountsView.js';
 import DiscountBlockView from './DiscountBlockView.js';
+import TotalView from './TotalView.js';
+import NotesBlockView from './NotesBlockView.js';
+import PaymentConditionBlockView from './PaymentConditionBlockView.js';
+import PaymentBlockView from './PaymentBlockView.js';
 
 import RightBarView from "./RightBarView.js";
 import StatusView from './StatusView.js';
-import HtBeforeDiscountsView from './HtBeforeDiscountsView.js';
-import TotalView from './TotalView.js';
-import NotesBlockView from './NotesBlockView.js';
 import BootomActionView from './BootomActionView.js';
-import PaymentConditionBlockView from './PaymentConditionBlockView.js';
-import PaymentBlockView from './PaymentBlockView.js';
 import LoginView from './LoginView.js';
 
 const template = require('./templates/MainView.mustache');
@@ -31,6 +32,7 @@ const template = require('./templates/MainView.mustache');
 const MainView = Mn.View.extend({
     template: template,
     regions: {
+        status_history: '.status_history',
         modalRegion: '#modalregion',
         general: '#general',
         common: '#common',
@@ -43,7 +45,7 @@ const MainView = Mn.View.extend({
         payment_conditions: '.payment-conditions',
         payments: '.payments',
         footer: {
-            el: 'footer',
+            el: '.footer-actions',
             replaceElement: true
         },
     },
@@ -52,6 +54,15 @@ const MainView = Mn.View.extend({
     },
     initialize: function(options){
         this.channel = Radio.channel('facade');
+    },
+    showStatusHistory(){
+        var collection = Radio.channel('facade').request(
+            'get:status_history_collection'
+        );
+        if (collection.models.length > 0){
+            var view = new StatusHistoryView({collection: collection});
+            this.showChildView('status_history', view);
+        }
     },
     showGeneralBlock: function(){
         var model = this.channel.request('get:model', 'common');
@@ -95,6 +106,7 @@ const MainView = Mn.View.extend({
         this.showChildView('modalRegion', view);
     },
     onRender: function() {
+        this.showStatusHistory();
         var totalmodel = this.channel.request('get:totalmodel');
         var view;
 

@@ -11,6 +11,8 @@
 import Mn from 'backbone.marionette';
 
 const StatusHistoryItemView = Mn.View.extend({
+    tagName: 'div',
+    className: 'row',
     template: require('./templates/StatusHistoryItemView.mustache'),
     templateContext(){
         return {
@@ -21,6 +23,7 @@ const StatusHistoryItemView = Mn.View.extend({
 
 const StatusHistoryCollectionView = Mn.CollectionView.extend({
     tagName: 'div',
+    className: 'col-xs-12',
     childView: StatusHistoryItemView
 });
 export default StatusHistoryCollectionView;

@@ -11,6 +11,8 @@
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
 import { formatAmount } from '../../math.js';
+import Radio from 'backbone.radio';
+
 const template = require('./templates/DiscountView.mustache');
 
 const DiscountView = Mn.View.extend({
@@ -27,17 +29,24 @@ const DiscountView = Mn.View.extend({
     modelEvents: {
         'change': 'render'
     },
-    getTvaLabel: function(){
+    initialize(){
+        var channel = Radio.channel('facade');
+        this.tva_options = channel.request('get:options', 'tvas');
+    },
+    getTvaLabel(){
         let res = "";
         let current_value = this.model.get('tva');
-        _.each(AppOption['form_options']['tva_options'], function(tva){
-            if (tva.value == current_value){
-                res = tva.name;
+        _.each(
+            this.tva_options,
+            function(tva){
+                if (tva.value == current_value){
+                    res = tva.name;
+                }
             }
-        });
+        );
         return res
     },
-    templateContext: function(){
+    templateContext(){
         return {
             ht: formatAmount(this.model.ht()),
             tva_label: this.getTvaLabel(),

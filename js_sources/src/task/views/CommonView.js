@@ -15,6 +15,8 @@ import FormBehavior from "../behaviors/FormBehavior.js";
 import CheckboxListWidget from './CheckboxListWidget.js';
 import DatePickerWidget from './DatePickerWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
+import InputWidget from './InputWidget.js';
+import Radio from 'backbone.radio';
 
 var template = require("./templates/CommonView.mustache");
 
@@ -35,17 +37,21 @@ const CommonView = Mn.View.extend({
     className: 'form-section',
     template: template,
     regions: {
-        mentions: '.mentions',
         date: '.date',
         description: '.description',
         address: '.address',
         workplace: '.workplace',
+        mentions: '.mentions',
     },
     childViewTriggers: {
         'change': 'data:modified',
         'finish': 'data:persist'
     },
-    getMentionIds: function(){
+    initialize(){
+        var channel = Radio.channel('facade');
+        this.mentions_options = channel.request('get:form_options', 'mentions');
+    },
+    getMentionIds(){
         var mentions = this.model.get('mentions');
         var mention_ids = [];
         _.each(mentions, function(mention){
@@ -53,7 +59,7 @@ const CommonView = Mn.View.extend({
         });
         return mention_ids;
     },
-    isMoreSet: function(){
+    isMoreSet(){
         var mention_ids = this.getMentionIds();
         if (mention_ids.length > 0){
             return true;
@@ -63,19 +69,10 @@ const CommonView = Mn.View.extend({
         }
         return false;
     },
-    templateContext: function(){
+    templateContext(){
         return {is_more_set: this.isMoreSet()};
     },
-    onRender: function(){
-        const mention_list = new CheckboxListWidget({
-            options: AppOption['form_options']['mention_options'],
-            value: this.getMentionIds(),
-            title: "Mentions facultatives",
-            description: "Choisissez les mentions à ajouter au document",
-            field_name: "mentions"
-        });
-        this.showChildView('mentions', mention_list);
-
+    onRender(){
         this.showChildView('date', new DatePickerWidget({
             date: this.model.get('date'),
             title: "Date",
@@ -102,6 +99,14 @@ const CommonView = Mn.View.extend({
             field_name: 'workplace',
             rows: 3
         }));
+        const mention_list = new CheckboxListWidget({
+            options: this.mentions_options,
+            value: this.getMentionIds(),
+            title: "Mentions facultatives",
+            description: "Choisissez les mentions à ajouter au document",
+            field_name: "mentions"
+        });
+        this.showChildView('mentions', mention_list);
     }
 });
 export default CommonView;

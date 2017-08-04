@@ -14,6 +14,7 @@ import TextAreaWidget from './TextAreaWidget.js';
 import {findCurrentSelected} from '../../tools.js';
 import FormBehavior from '../behaviors/FormBehavior.js';
 import PaymentLineTableView from './PaymentLineTableView.js';
+import Radio from 'backbone.radio';
 
 var template = require("./templates/PaymentBlockView.mustache");
 
@@ -36,6 +37,19 @@ const PaymentBlockView = Mn.View.extend({
     },
     initialize: function(options){
         this.collection = options['collection'];
+        var channel = Radio.channel('facade');
+        this.payment_display_options = channel.request(
+            'get:form_options',
+            'payment_displays'
+        );
+        this.deposit_options = channel.request(
+            'get:form_options',
+            'deposits',
+        );
+        this.payment_times_options = channel.request(
+            'get:form_options',
+            'payment_times'
+        );
     },
     onFinish(field_name, value){
         /*
@@ -109,7 +123,7 @@ const PaymentBlockView = Mn.View.extend({
             'payment_display',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['payment_display_options'],
+                    options: this.payment_display_options,
                     title: "Affichage des paiements",
                     field_name: 'paymentDisplay',
                     id_key: 'value',
@@ -121,7 +135,7 @@ const PaymentBlockView = Mn.View.extend({
             'deposit',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['deposit_options'],
+                    options: this.deposit_options,
                     title: "Acompte à la commande",
                     field_name: 'deposit',
                     id_key: 'value',
@@ -133,7 +147,7 @@ const PaymentBlockView = Mn.View.extend({
             'payment_times',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['payment_times_options'],
+                    options: this.payment_times_options,
                     title: "Paiement en",
                     field_name: 'payment_times',
                     id_key: 'value',

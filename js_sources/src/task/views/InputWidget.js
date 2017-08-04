@@ -45,6 +45,7 @@ const InputWidget = Mn.View.extend({
             description: getOpt(this, 'description', false),
             type: getOpt(this, 'type', 'text'),
             addon: getOpt(this, 'addon', ''),
+            css_class: getOpt(this, 'css', ''),
         }
     }
 });

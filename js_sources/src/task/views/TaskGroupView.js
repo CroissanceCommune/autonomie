@@ -52,16 +52,27 @@ const TaskGroupView = Mn.View.extend({
     initialize: function(options){
         // Collection of task lines
         this.collection = this.model.lines;
+        this.listenTo(this.collection, 'sync', this.showLines.bind(this));
     },
     isEmpty: function(){
         return this.model.lines.length === 0;
     },
-    onRender: function(){
-        if (! this.isEmpty()){
+    showLines(){
+        /*
+         * Show lines if it's not done yet
+         */
+        console.log("TaskGroupView.showLines");
+        if (!_.isNull(this.getChildView('lines'))){
+            console.log("  + Doing it")
             this.showChildView(
                 'lines',
                 new TaskLineCollectionView({collection: this.collection})
             );
+        }
+    },
+    onRender: function(){
+        if (! this.isEmpty()){
+            this.showLines();
             this.showChildView(
                 'total',
                 new TaskGroupTotalView({collection: this.collection})

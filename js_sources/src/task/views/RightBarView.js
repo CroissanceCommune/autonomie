@@ -13,12 +13,15 @@ import Mn from 'backbone.marionette';
 import ActionCollection from '../models/ActionCollection.js';
 import ActionListView from './ActionListView.js';
 import { formatAmount } from '../../math.js';
+import Radio from 'backbone.radio';
+import StatusHistoryView from './StatusHistoryView.js';
 
 var template = require("./templates/RightBarView.mustache");
 
 const RightBarView = Mn.View.extend({
     regions: {
-        container: ".child-container"
+        container: ".child-container",
+        status_history: '.status_history',
     },
     ui: {
         buttons: 'button',
@@ -55,6 +58,15 @@ const RightBarView = Mn.View.extend({
             'container',
             new ActionListView({collection: action_collection})
         );
+        var collection = Radio.channel('facade').request(
+            'get:status_history_collection'
+        );
+        if (collection.models.length > 0){
+            this.showChildView(
+                'status_history',
+                new StatusHistoryView({collection: this.collection})
+            );
+        }
     }
 });
 export default RightBarView;

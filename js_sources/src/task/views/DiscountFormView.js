@@ -14,6 +14,7 @@ import SelectWidget from './SelectWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import FormBehavior from '../behaviors/FormBehavior.js';
 import { getOpt } from '../../tools.js';
+import Radio from 'backbone.radio';
 var template = require('./templates/DiscountFormView.mustache');
 
 const DiscountFormView = Mn.View.extend({
@@ -26,6 +27,10 @@ const DiscountFormView = Mn.View.extend({
     },
     childViewTriggers: {
         'change': 'data:modified',
+    },
+    initialize(){
+        var channel = Radio.channel('facade');
+        this.tva_options = channel.request('get:form_options', 'tvas');
     },
     onRender: function(){
         this.showChildView(
@@ -53,7 +58,7 @@ const DiscountFormView = Mn.View.extend({
             'tva',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['tva_options'],
+                    options: this.tva_options,
                     title: "TVA",
                     value: this.model.get('tva'),
                     id_key: 'value',

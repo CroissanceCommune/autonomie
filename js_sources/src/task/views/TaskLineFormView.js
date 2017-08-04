@@ -16,6 +16,7 @@ import TextAreaWidget from './TextAreaWidget.js';
 import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
 import CatalogTreeView from './CatalogTreeView.js';
 import LoadingWidget from './LoadingWidget.js';
+import Radio from 'backbone.radio';
 
 var template = require('./templates/TaskLineFormView.mustache');
 
@@ -45,6 +46,21 @@ const TaskLineFormView = Mn.View.extend({
     },
     modelEvents: {
         'set:product': 'refreshForm'
+    },
+    initialize(){
+        var channel = Radio.channel('facade');
+        this.workunit_options = channel.request(
+            'get:form_options',
+            'workunits'
+        );
+        this.tva_options = channel.request(
+            'get:form_options',
+            'tvas'
+        );
+        this.product_options = channel.request(
+            'get:form_options',
+            'products',
+        );
     },
     onCatalogEdit: function(product_datas){
         this.model.loadProduct(product_datas);
@@ -94,7 +110,7 @@ const TaskLineFormView = Mn.View.extend({
             'unity',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['workunit_options'],
+                    options: this.workunit_options,
                     title: "Unité",
                     value: this.model.get('unity'),
                     field_name: 'unity',
@@ -106,7 +122,7 @@ const TaskLineFormView = Mn.View.extend({
             'tva',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['tva_options'],
+                    options: this.tva_options,
                     title: "TVA",
                     value: this.model.get('tva'),
                     field_name: 'tva',
@@ -118,7 +134,7 @@ const TaskLineFormView = Mn.View.extend({
             'product_id',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['product_options'],
+                    options: this.product_options,
                     title: "Code produit",
                     value: this.model.get('product_id'),
                     field_name: 'product_id',

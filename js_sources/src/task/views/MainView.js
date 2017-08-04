@@ -11,6 +11,7 @@
 import Mn from 'backbone.marionette';
 import Radio from 'backbone.radio';
 
+import GeneralView from "./GeneralView.js";
 import CommonView from "./CommonView.js";
 import TaskBlockView from './TaskBlockView.js';
 import DiscountBlockView from './DiscountBlockView.js';
@@ -31,6 +32,7 @@ const MainView = Mn.View.extend({
     template: template,
     regions: {
         modalRegion: '#modalregion',
+        general: '#general',
         common: '#common',
         tasklines: '#tasklines',
         discounts: '#discounts',
@@ -50,6 +52,11 @@ const MainView = Mn.View.extend({
     },
     initialize: function(options){
         this.channel = Radio.channel('facade');
+    },
+    showGeneralBlock: function(){
+        var model = this.channel.request('get:model', 'common');
+        var view = new GeneralView({model: model});
+        this.showChildView('general', view);
     },
     showCommonBlock: function(){
         var model = this.channel.request('get:model', 'common');
@@ -88,55 +95,59 @@ const MainView = Mn.View.extend({
         this.showChildView('modalRegion', view);
     },
     onRender: function() {
-        if (_.indexOf(AppOption['form_options']['sections'], "common") != -1){
+        var totalmodel = this.channel.request('get:totalmodel');
+        var view;
+
+        if (this.channel.request('has:form_section', 'general')){
+            this.showGeneralBlock();
+        }
+        if (this.channel.request('has:form_section', 'common')){
             this.showCommonBlock();
         }
-        if (_.indexOf(AppOption['form_options']['sections'], "tasklines") != -1){
+        if (this.channel.request('has:form_section', "tasklines")){
             this.showTaskGroupBlock();
         }
-        if (_.indexOf(AppOption['form_options']['sections'], "discounts") != -1){
+        if (this.channel.request('has:form_section', "discounts")){
+            view = new HtBeforeDiscountsView({model: totalmodel});
+            this.showChildView('ht_before_discounts', view);
             this.showDiscountBlock();
         }
-        if (_.indexOf(AppOption['form_options']['sections'], "notes") != -1){
+
+        view = new TotalView({model: totalmodel});
+        this.showChildView('totals', view);
+
+        if (this.channel.request('has:form_section', "notes")){
             this.showNotesBlock();
         }
-        if (_.indexOf(AppOption['form_options']['sections'], "payment_conditions") != -1){
+        if (this.channel.request('has:form_section', "payment_conditions")){
             this.showPaymentConditionsBlock();
         }
-        if (_.indexOf(AppOption['form_options']['sections'], "payments") != -1){
+        if (this.channel.request('has:form_section', "payments")){
             this.showPaymentBlock();
         }
 
-        var totalmodel = this.channel.request('get:totalmodel');
-        var view = new RightBarView(
+        view = new RightBarView(
             {
-                actions: AppOption['form_options']['actions'],
+                actions: this.channel.request('get:form_actions'),
                 model: totalmodel
             }
         );
         this.showChildView('rightbar', view);
         view = new BootomActionView(
-            {actions: AppOption['form_options']['actions']}
+            {actions: this.channel.request('get:form_actions')}
         );
         this.showChildView('footer', view);
-
-        view = new HtBeforeDiscountsView({model: totalmodel});
-        this.showChildView('ht_before_discounts', view);
-        view = new TotalView({model: totalmodel});
-        this.showChildView('totals', view);
     },
     showStatusView(status, title, label, url){
-        console.log("Showing the status view");
-        this.showChildView(
-            'modalRegion',
-            new StatusView({
-                status: status,
-                title: title,
-                label: label,
-                model: this.commonModel,
-                url: url
-            })
-        );
+        var model = this.channel.request('get:model', 'common');
+        var view = new StatusView({
+            status: status,
+            title: title,
+            label: label,
+            model: model,
+            url: url
+        });
+        this.showChildView('modalRegion', view);
     },
     onStatusChange: function(status, title, label, url){
         var common_model = this.channel.request('get:model', 'common');

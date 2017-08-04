@@ -13,6 +13,7 @@ import SelectWidget from './SelectWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import {getDefaultItem} from '../../tools.js';
 import FormBehavior from '../behaviors/FormBehavior.js';
+import Radio from 'backbone.radio';
 
 var template = require("./templates/PaymentConditionBlockView.mustache");
 
@@ -32,6 +33,10 @@ const PaymentConditionBlockView = Mn.View.extend({
         'finish': 'onFinish',
     },
     initialize: function(){
+        var facade = Radio.channel('facade');
+        this.payment_conditions_options = facade.request(
+            'get:form_options', 'payment_conditions'
+        );
         this.lookupDefault();
     },
     onFinish(field_name, value){
@@ -48,7 +53,7 @@ const PaymentConditionBlockView = Mn.View.extend({
     },
     getCondition(id){
         return _.find(
-            AppOption['form_options']['payment_conditions'],
+            this.payment_conditions_options,
             function(item){ return item.id == id;}
         );
     },
@@ -56,9 +61,7 @@ const PaymentConditionBlockView = Mn.View.extend({
         /*
          * Setup the default payment condition if none is set
          */
-        var option = getDefaultItem(
-            AppOption['form_options']['payment_conditions']
-        );
+        var option = getDefaultItem(this.payment_conditions_options);
         if (!_.isUndefined(option)){
             if (!this.model.get('payment_conditions')){
                 this.model.set('payment_conditions', option.label);
@@ -72,7 +75,7 @@ const PaymentConditionBlockView = Mn.View.extend({
             'predefined_conditions',
             new SelectWidget(
                 {
-                    options: AppOption['form_options']['payment_conditions'],
+                    options: this.payment_conditions_options,
                     title: "",
                     field_name: 'predefined_conditions',
                     id_key: 'id',

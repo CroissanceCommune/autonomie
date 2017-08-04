@@ -11,6 +11,8 @@
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
 import { formatAmount } from '../../math.js';
+import Radio from 'backbone.radio';
+
 const template = require('./templates/TaskLineView.mustache');
 
 const TaskLineView = Mn.View.extend({
@@ -32,17 +34,21 @@ const TaskLineView = Mn.View.extend({
     modelEvents: {
         'change': 'render'
     },
-    getTvaLabel: function(){
+    initialize(){
+        var channel = Radio.channel('facade');
+        this.tva_options = channel.request('get:options', 'tvas');
+    },
+    getTvaLabel(){
         let res = "";
         let current_value = this.model.get('tva');
-        _.each(AppOption['form_options']['tva_options'], function(tva){
+        _.each(this.tva_options, function(tva){
             if (tva.value == current_value){
                 res = tva.name;
             }
         });
         return res
     },
-    templateContext: function(){
+    templateContext(){
         let min_order = this.model.collection.getMinOrder();
         let max_order = this.model.collection.getMaxOrder();
         let order = this.model.get('order');

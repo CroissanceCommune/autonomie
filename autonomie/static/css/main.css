@@ -359,7 +359,6 @@ header .navbar .nav > li > a {
   position: fixed;
   top: 0px;
   left: 0px;
-  display: none;
   z-index: 1500;
   opacity: 0.7;
   background-color: #000;

@@ -58,6 +58,11 @@ from autonomie_base.models.base import (
 )
 from autonomie import forms
 from autonomie.forms.custom_types import (AmountType, QuantityType,)
+from autonomie.forms.tasks.base import (
+    taskline_after_bind,
+    task_after_bind,
+)
+
 from autonomie.models.user import get_deferred_user_choice
 
 from autonomie.utils.strings import (
@@ -150,6 +155,7 @@ class Task(Node):
     __colanderalchemy_config__ = {
         'title': u"Formulaire d'édition forcée de devis/factures/avoirs",
         'help_msg': u"Les montants sont *10^5   10 000==1€",
+        'after_bind': task_after_bind,
     }
 
     id = Column(
@@ -1002,7 +1008,8 @@ class TaskLine(DBBASE, LineCompute):
         Estimation/Invoice/CancelInvoice lines
     """
     __colanderalchemy_config__ = {
-        'validator': deferred_tva_product_validator
+        'validator': deferred_tva_product_validator,
+        'after_bind': taskline_after_bind,
     }
     __table_args__ = default_table_args
     id = Column(

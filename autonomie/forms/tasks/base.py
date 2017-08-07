@@ -356,6 +356,55 @@ def get_duplicate_schema():
     return DuplicateSchema()
 
 
+def get_task_from_context(context):
+    """
+    Return the current task from the given context
+
+    :param obj context: Instance of Task/TaskLine/TaskLineGroup
+    :returns: The associated Task object
+    """
+    from autonomie.models.task.task import (
+        TaskLine,
+        TaskLineGroup,
+    )
+    result = context
+    if isinstance(context, (TaskLine, TaskLineGroup)):
+        result = context.task
+    return result
+
+
+def taskline_after_bind(node, kw):
+    """
+    After bind method to pass to The tasklines fields
+
+    Remove fields not allowed for edition
+    """
+    print("In the taskline_after_bind method")
+    request = kw['request']
+    task = get_task_from_context(request.context)
+    perm = 'set_treasury.%s' % task.type_
+
+    if not request.has_permission(perm):
+        if 'product_id' in node:
+            del node['product_id']
+
+
+def task_after_bind(node, kw):
+    """
+    After bind methods passed to the task schema
+
+    Remove fields not allowed for edition
+    """
+    request = kw['request']
+    task = get_task_from_context(request.context)
+    perm = 'set_treasury.%s' % task.type_
+    if not request.has_permission(perm):
+        if 'prefix' in node:
+            del node['prefix']
+        if 'financial_year' in node:
+            del node['financial_year']
+
+
 #  Dans le formulaire de création de devis par exemple, on trouve
 #  aussi bien des TaskLine que des Estimation ou des DiscountLine et leur
 #  configuration est imbriquée. On a donc besoin de faire un mapping d'un

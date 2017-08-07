@@ -37,7 +37,12 @@ const TaskGroupModel = BaseModel.extend({
         if (this.get('id')){
             this.lines = new TaskLineCollection(this.get('lines'));
             this.lines.url = this.url() + '/task_lines';
+            this.listenTo(this.lines, 'sync', this.updateLines);
+            this.listenTo(this.lines, 'remove', this.updateLines);
         }
+    },
+    updateLines(){
+        this.set('lines', this.lines.toJSON());
     },
     loadProductGroup: function(sale_product_group_datas){
         this.set('title', sale_product_group_datas.title);

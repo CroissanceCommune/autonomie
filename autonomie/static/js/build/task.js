@@ -3730,6 +3730,7 @@ webpackJsonp([1],[
 	        (0, _tools.showLoader)();
 	        if (status != 'draft') {
 	            if (!this.formOk()) {
+	                document.body.scrollTop = document.documentElement.scrollTop = 0;
 	                (0, _tools.hideLoader)();
 	                return;
 	            }
@@ -8168,8 +8169,14 @@ webpackJsonp([1],[
 	        if (this.get('id')) {
 	            this.lines = new _TaskLineCollection2.default(this.get('lines'));
 	            this.lines.url = this.url() + '/task_lines';
+	            this.listenTo(this.lines, 'sync', this.updateLines);
+	            this.listenTo(this.lines, 'remove', this.updateLines);
 	        }
 	    },
+	    updateLines: function updateLines() {
+	        this.set('lines', this.lines.toJSON());
+	    },
+	
 	    loadProductGroup: function loadProductGroup(sale_product_group_datas) {
 	        this.set('title', sale_product_group_datas.title);
 	        this.set('description', sale_product_group_datas.description);

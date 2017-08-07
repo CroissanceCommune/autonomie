@@ -201,6 +201,7 @@ const MainView = Mn.View.extend({
         showLoader();
         if (status != 'draft'){
             if (! this.formOk()){
+                document.body.scrollTop = document.documentElement.scrollTop = 0;
                 hideLoader();
                 return;
             }

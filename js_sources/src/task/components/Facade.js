@@ -36,6 +36,7 @@ const FacadeClass = Mn.Object.extend({
         'get:totalmodel': 'getTotalModelRequest',
         'get:form_options': 'getFormOptions',
         'has:form_section': 'hasFormSection',
+        'get:form_section': 'getFormSection',
         'get:form_actions': 'getFormActions',
         'is:estimation_form': 'isEstimationForm',
         'get:status_history_collection': 'getStatusHistory',
@@ -89,12 +90,22 @@ const FacadeClass = Mn.Object.extend({
         return this.form_config['options'][option_name];
     },
     hasFormSection(section_name){
+         /*
+          *
+          * :param str section_name: The name of the section
+          * :rtype: bool
+          */
+        return _.has(this.form_config['sections'], section_name);
+    },
+    getFormSection(section_name){
         /*
-         * Check if the given section should be part of the current form
          *
+         * Return the form section description
          * :param str section_name: The name of the section
+         * :returns: The section definition
+         * :rtype: Object
          */
-        return _.indexOf(this.form_config['sections'], section_name) >= 0;
+        return this.form_config['sections'][section_name];
     },
     getFormActions(){
         /*

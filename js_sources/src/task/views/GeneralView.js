@@ -16,7 +16,6 @@ import CheckboxListWidget from './CheckboxListWidget.js';
 import DatePickerWidget from './DatePickerWidget.js';
 import TextAreaWidget from './TextAreaWidget.js';
 import InputWidget from './InputWidget.js';
-import Radio from 'backbone.radio';
 
 var template = require("./templates/GeneralView.mustache");
 
@@ -45,8 +44,8 @@ const GeneralView = Mn.View.extend({
         'change': 'data:modified',
         'finish': 'data:persist'
     },
-    initialize(){
-        this.channel = Radio.channel('facade');
+    initialize(options){
+        this.section = options['section'];
     },
     templateContext: function(){
         return {};
@@ -60,7 +59,7 @@ const GeneralView = Mn.View.extend({
                 field_name: 'name',
             })
         );
-        if (! this.channel.request('is:estimation_form')){
+        if (_.has(this.section, 'prefix')){
             this.showChildView(
                 'prefix',
                 new InputWidget({
@@ -69,6 +68,8 @@ const GeneralView = Mn.View.extend({
                     field_name: 'prefix',
                 })
             );
+        }
+        if (_.has(this.section, 'financial_year')){
             this.showChildView(
                 'financial_year',
                 new InputWidget({

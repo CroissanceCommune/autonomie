@@ -68,40 +68,59 @@ const MainView = Mn.View.extend({
         }
     },
     showGeneralBlock: function(){
+        var section = this.channel.request('get:form_section', 'general');
         var model = this.channel.request('get:model', 'common');
-        var view = new GeneralView({model: model});
+        var view = new GeneralView({model: model, section: section});
         this.showChildView('general', view);
     },
     showCommonBlock: function(){
+        var section = this.channel.request('get:form_section', 'common');
         var model = this.channel.request('get:model', 'common');
-        var view = new CommonView({model: model});
+        var view = new CommonView({model: model, section: section});
         this.showChildView('common', view);
     },
     showTaskGroupBlock: function(){
-        var collection = this.channel.request('get:collection', 'task_groups');
-        var view = new TaskBlockView({collection: collection});
+        var section = this.channel.request('get:form_section', 'tasklines');
+        var collection = this.channel.request(
+            'get:collection',
+            'task_groups'
+        );
+        var view = new TaskBlockView(
+            {collection: collection, section:section}
+        );
         this.showChildView('tasklines', view);
     },
     showDiscountBlock: function(){
-        var collection = this.channel.request('get:collection', 'discounts');
+        var section = this.channel.request('get:form_section', 'discounts');
+        var collection = this.channel.request(
+            'get:collection',
+            'discounts'
+        );
         var model = this.channel.request('get:model', 'common');
-        var view = new DiscountBlockView({collection: collection, model: model});
+        var view = new DiscountBlockView(
+            {collection: collection, model: model, section: section}
+        );
         this.showChildView('discounts', view);
     },
     showNotesBlock: function(){
+        var section = this.channel.request('get:form_section', 'notes');
         var model = this.channel.request('get:model', 'common');
-        var view = new NotesBlockView({model: model});
+        var view = new NotesBlockView({model: model, section: section});
         this.showChildView('notes', view);
     },
     showPaymentConditionsBlock: function(){
+        var section = this.channel.request('get:form_section', 'payment_conditions');
         var model = this.channel.request('get:model', 'common');
         var view = new PaymentConditionBlockView({model:model});
         this.showChildView('payment_conditions', view);
     },
     showPaymentBlock: function(){
+        var section = this.channel.request('get:form_section', 'payments');
         var model = this.channel.request('get:model', 'common');
         var collection = this.channel.request('get:paymentcollection');
-        var view = new PaymentBlockView({model: model, collection: collection});
+        var view = new PaymentBlockView(
+            {model: model, collection: collection, section: section}
+        );
         this.showChildView('payments', view);
     },
     showLogin: function(){
@@ -112,7 +131,6 @@ const MainView = Mn.View.extend({
         this.showStatusHistory();
         var totalmodel = this.channel.request('get:totalmodel');
         var view;
-
         if (this.channel.request('has:form_section', 'general')){
             this.showGeneralBlock();
         }

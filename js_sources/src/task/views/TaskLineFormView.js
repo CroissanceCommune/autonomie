@@ -62,6 +62,10 @@ const TaskLineFormView = Mn.View.extend({
             'get:form_options',
             'products',
         );
+        this.section = channel.request(
+            'get:form_section',
+            'tasklines'
+        )
     },
     onCatalogEdit: function(product_datas){
         this.model.loadProduct(product_datas);
@@ -139,18 +143,20 @@ const TaskLineFormView = Mn.View.extend({
                 }
             )
         );
-        this.showChildView(
-            'product_id',
-            new SelectWidget(
-                {
-                    options: this.product_options,
-                    title: "Code produit",
-                    value: this.model.get('product_id'),
-                    field_name: 'product_id',
-                    id_key: 'id'
-                }
-            )
-        );
+        if (_.has(this.section, 'product')){
+            this.showChildView(
+                'product_id',
+                new SelectWidget(
+                    {
+                        options: this.product_options,
+                        title: "Code produit",
+                        value: this.model.get('product_id'),
+                        field_name: 'product_id',
+                        id_key: 'id'
+                    }
+                )
+            );
+        }
         if (this.isAddView()){
             this.getUI('main_tab').tab('show');
         }

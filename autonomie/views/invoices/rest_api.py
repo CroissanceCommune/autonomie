@@ -15,9 +15,13 @@ from autonomie.utils.rest import (
 )
 from autonomie.models.task import (
     Invoice,
+    CancelInvoice,
     TaskStatus,
 )
-from autonomie.forms.tasks.invoice import validate_invoice
+from autonomie.forms.tasks.invoice import (
+    validate_invoice,
+    validate_cancelinvoice,
+)
 from autonomie.views.task.rest_api import (
     TaskRestView,
     TaskLineGroupRestView,
@@ -42,19 +46,16 @@ class InvoiceRestView(TaskRestView):
         Add invoice specific form sections to the sections returned to the
         end user
 
-        :param list sections: The sections to return
+        :param dict sections: The sections to return
         :returns: The sections
         """
         sections['discounts'] = {'edit': True}
         sections['payment_conditions'] = {'edit': True}
 
         if self.request.has_permission('set_treasury.invoice'):
-            logger.debug("We've got set_treasury.invoice Perms on this document")
             sections['general']['financial_year'] = True
             sections['general']['prefix'] = True
             sections['tasklines']['product'] = True
-        else:
-            logger.debug("We don't have set_treasury.invoice Perms on this document")
 
         return sections
 
@@ -102,6 +103,33 @@ class InvoiceRestView(TaskRestView):
         }
 
 
+class CancelInvoiceRestView(TaskRestView):
+    factory = CancelInvoice
+
+    def _more_form_sections(self, sections):
+        """
+        Update form sections to set cancelinvoice specific rights
+
+        :param dict sections: The sections to return
+        :returns: The sections
+        """
+        if self.request.has_permission('set_treasury.invoice'):
+            sections['general']['financial_year'] = True
+            sections['general']['prefix'] = True
+            sections['tasklines']['product'] = True
+        return sections
+
+    def _get_other_actions(self):
+        """
+        Return the description of other available actions :
+            signed_status
+            duplicate
+            ...
+        """
+        result = []
+        return result
+
+
 class InvoiceStatusRestView(TaskStatusView):
     def validate(self):
         try:
@@ -116,9 +144,24 @@ class InvoiceStatusRestView(TaskStatusView):
         return {}
 
 
-def add_routes(config):
+class CancelInvoiceStatusRestView(TaskStatusView):
+    def validate(self):
+        try:
+            validate_cancelinvoice(self.context, self.request)
+        except colander.Invalid as err:
+            logger.exception(
+                u"An error occured when validating this CancelInvoice "
+                u"(id:%s)" % (
+                    self.request.context.id
+                )
+            )
+            raise err
+        return {}
+
+
+def add_invoice_routes(config):
     """
-    Add routes to the current configuration
+    Add invoice rest related routes to the current configuration
 
     :param obj config: Pyramid config object
     """
@@ -139,11 +182,6 @@ def add_routes(config):
     config.add_route(
         "/api/v1/invoices/{id}/discount_lines",
         "/api/v1/invoices/{id}/discount_lines",
-        traverse='/invoices/{id}'
-    )
-    config.add_route(
-        "/api/v1/invoices/{id}/payment_lines",
-        "/api/v1/invoices/{id}/payment_lines",
         traverse='/invoices/{id}'
     )
     config.add_route(
@@ -168,9 +206,47 @@ def add_routes(config):
     )
 
 
-def add_views(config):
+def add_cancelinvoice_routes(config):
     """
-    Add views to the current configuration
+    Add routes specific to cancelinvoices edition
+
+    :param obj config: Pyramid config object
+    """
+    config.add_route(
+        "/api/v1/cancelinvoices",
+        "/api/v1/cancelinvoices",
+    )
+    config.add_route(
+        "/api/v1/cancelinvoices/{id}",
+        "/api/v1/cancelinvoices/{id:\d+}",
+        traverse='/cancelinvoices/{id}'
+    )
+    config.add_route(
+        "/api/v1/cancelinvoices/{id}/task_line_groups",
+        "/api/v1/cancelinvoices/{id}/task_line_groups",
+        traverse='/cancelinvoices/{id}'
+    )
+    config.add_route(
+        "/api/v1/cancelinvoices/{eid}/task_line_groups/{id}",
+        "/api/v1/cancelinvoices/{eid}/task_line_groups/{id:\d+}",
+        traverse='/task_line_groups/{id}',
+    )
+    config.add_route(
+        "/api/v1/cancelinvoices/{eid}/task_line_groups/{id}/task_lines",
+        "/api/v1/cancelinvoices/{eid}/task_line_groups/{id:\d+}/task_lines",
+        traverse='/task_line_groups/{id}',
+    )
+    config.add_route(
+        "/api/v1/cancelinvoices/{eid}/task_line_groups/{tid}/task_lines/{id}",
+        "/api/v1/cancelinvoices/{eid}/task_line_groups/"
+        "{tid}/task_lines/{id:\d+}",
+        traverse='/task_lines/{id}',
+    )
+
+
+def add_invoice_views(config):
+    """
+    Add Invoice related views to the current configuration
     """
     add_rest_views(
         config,
@@ -270,6 +346,92 @@ def add_views(config):
     )
 
 
+def add_cancelinvoice_views(config):
+    """
+    Add cancelinvoice related views to the current configuration
+
+    :param obj config: The current Pyramid configuration
+    """
+    add_rest_views(
+        config,
+        factory=CancelInvoiceRestView,
+        route_name='/api/v1/cancelinvoices/{id}',
+        collection_route_name='/api/v1/cancelinvoices',
+        edit_rights='edit.cancelinvoice',
+        view_rights='view.cancelinvoice',
+        delete_rights='delete.cancelinvoice',
+    )
+
+    # Form configuration view
+    config.add_view(
+        CancelInvoiceRestView,
+        attr='form_config',
+        route_name='/api/v1/cancelinvoices/{id}',
+        renderer='json',
+        request_param="form_config",
+        permission='edit.cancelinvoice',
+        xhr=True,
+    )
+
+    # Status View
+    config.add_view(
+        CancelInvoiceStatusRestView,
+        route_name="/api/v1/cancelinvoices/{id}",
+        request_param='action=status',
+        permission="edit.cancelinvoice",
+        request_method='POST',
+        renderer="json",
+    )
+
+    # Task linegroup views
+    add_rest_views(
+        config,
+        route_name="/api/v1/cancelinvoices/{eid}/task_line_groups/{id}",
+        collection_route_name="/api/v1/cancelinvoices/{id}/task_line_groups",
+        factory=TaskLineGroupRestView,
+        view_rights="view.cancelinvoice",
+        add_rights="edit.cancelinvoice",
+        edit_rights='edit.cancelinvoice',
+        delete_rights='edit.cancelinvoice',
+    )
+    config.add_view(
+        TaskLineGroupRestView,
+        route_name="/api/v1/cancelinvoices/{id}/task_line_groups",
+        attr='post_load_groups_from_catalog_view',
+        request_param="action=load_from_catalog",
+        request_method='POST',
+        renderer='json',
+        permission='edit.cancelinvoice',
+        xhr=True,
+    )
+    # Task line views
+    add_rest_views(
+        config,
+        route_name="/api/v1/cancelinvoices/{eid}/"
+        "task_line_groups/{tid}/task_lines/{id}",
+        collection_route_name="/api/v1/cancelinvoices/{eid}/"
+        "task_line_groups/{id}/task_lines",
+        factory=TaskLineRestView,
+        view_rights="view.cancelinvoice",
+        add_rights="edit.cancelinvoice",
+        edit_rights='edit.cancelinvoice',
+        delete_rights='edit.cancelinvoice',
+    )
+    config.add_view(
+        TaskLineRestView,
+        route_name="/api/v1/cancelinvoices/{eid}/task_line_groups/{id}/"
+        "task_lines",
+        attr='post_load_lines_from_catalog_view',
+        request_param="action=load_from_catalog",
+        request_method='POST',
+        renderer='json',
+        permission='edit.cancelinvoice',
+        xhr=True,
+    )
+
+
 def includeme(config):
-    add_routes(config)
-    add_views(config)
+    add_invoice_routes(config)
+    add_cancelinvoice_routes(config)
+    add_invoice_views(config)
+    add_cancelinvoice_views(config)

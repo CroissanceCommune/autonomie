@@ -45,10 +45,17 @@ class InvoiceRestView(TaskRestView):
         :param list sections: The sections to return
         :returns: The sections
         """
-        sections.extend([
-            'discounts',
-            'payment_conditions',
-        ])
+        sections['discounts'] = {'edit': True}
+        sections['payment_conditions'] = {'edit': True}
+
+        if self.request.has_permission('set_treasury.invoice'):
+            logger.debug("We've got set_treasury.invoice Perms on this document")
+            sections['general']['financial_year'] = True
+            sections['general']['prefix'] = True
+            sections['tasklines']['product'] = True
+        else:
+            logger.debug("We don't have set_treasury.invoice Perms on this document")
+
         return sections
 
     def _more_form_options(self, form_options):

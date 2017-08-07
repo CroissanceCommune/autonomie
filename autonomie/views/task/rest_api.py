@@ -92,9 +92,22 @@ class TaskRestView(BaseRestView):
                 'others': self._get_other_actions(),
             }
         }
+        result = self._add_form_config(result)
         result = self._add_form_options(result)
         result = self._add_form_sections(result)
         return result
+
+    def _add_form_config(self, form_config):
+        """
+        Add more form master configuration parameters
+
+        :param dict form_config: The form configuration dict
+        :returns: The dict with new options
+        """
+        form_config['is_estimation'] = self.is_estimation()
+        if hasattr(self, '_more_form_config'):
+            form_config = self._more_form_config(form_config)
+        return form_config
 
     def is_estimation(self):
         """
@@ -127,12 +140,12 @@ class TaskRestView(BaseRestView):
 
         :param dict form_config: The current form_config
         """
-        sections = [
-            'general',
-            'common',
-            'tasklines',
-            'notes',
-        ]
+        sections = {
+            'general': {'edit': True},
+            'common': {'edit': True},
+            'tasklines': {'edit': True},
+            'notes': {'edit': True},
+        }
         if hasattr(self, '_more_form_sections'):
             sections = self._more_form_sections(sections)
 
@@ -281,6 +294,7 @@ class TaskLineRestView(BaseRestView):
 
             Delete the item
     """
+
     def get_schema(self, submitted):
         """
         Return the schema for TaskLine add/edition

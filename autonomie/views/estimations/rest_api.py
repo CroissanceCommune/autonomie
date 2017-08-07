@@ -121,14 +121,13 @@ class EstimationRestView(TaskRestView):
         Add estimation specific form sections to the sections returned to the
         end user
 
-        :param list sections: The sections to return
+        :param dict sections: The sections to return
         :returns: The sections
         """
-        sections.extend([
-            'discounts',
-            'payment_conditions',
-            'payments',
-        ])
+        sections['discounts'] = {'edit': True}
+        sections['payment_conditions'] = {'edit': True}
+        sections['payments'] = {'edit': True}
+
         return sections
 
     def _more_form_options(self, form_options):

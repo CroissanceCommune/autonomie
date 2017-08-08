@@ -25,150 +25,181 @@
 <%doc>
     Base template for task readonly display
 </%doc>
-<%inherit file="${context['main_template'].uri}" />
+<%inherit file="/tasks/view_only.mako" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
-<%block name="headtitle">
-${request.layout_manager.render_panel('task_title_panel', title=title)}
-</%block>
-<%block name='content'>
-<div class='row'>
-<div class='col-xs-12'>
-<a class='btn btn-primary primary-action'
-    href="${request.route_path('/%ss/{id}/pdf' % request.context.type_, id=request.context.id)}"
-    >
-    <i class='glyphicon glyphicon-book'></i>&nbsp;Voir le PDF
+
+
+<%block name='moreactions'>
+<a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/duplicate', id=request.context.id)}">
+    <i class='fa fa-copy'></i> Dupliquer
 </a>
-<br />
-<br />
+% if api.has_permission('gencinv.invoice'):
+    <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/gencinv', id=request.context.id)}">
+        <i class='fa fa-files-o'></i> Générer un avoir
+    </a>
+% endif
+% if api.has_permission('add_payment.invoice'):
+    <a class='btn btn-success btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=request.context.id)}">
+        <i class='fa fa-bank'></i> Enregistrer un encaissement
+    </a>
+% endif
+<a class='btn btn-default btn-block'
+    href="${request.route_path('/invoices/{id}/set_metadatas', id=request.context.id)}"
+    >
+    <i class='glyphicon glyphicon-pencil'></i> Modifier
+</a>
+
+</%block>
+
+<%block name='before_tabs'>
+    <p class='lead'>
+    Cette facture porte le numéro <b>${request.context.prefix}${request.context.official_number}</b>
+    </p>
+</%block>
+<%block name='moretabs'>
+    <li role="presentation">
+        <a href="#treasury" aria-control="treasury" role='tab' data-toggle='tab'>Comptabilité</a>
+    </li>
+
+    <li role="presentation">
+        <a href="#payment" aria-control="payment" role='tab' data-toggle='tab'>Encaissements</a>
+    </li>
+</%block>
+<%block name='before_summary'>
+<h3>Rattachement</h3>
+<ul>
+<li>
+% if request.context.estimation:
+    Cette facture est rattachée au devis \
+    <a
+    href="${request.route_path('/estimations/{id}.html', id=request.context.estimation.id)}"
+    >
+    ${request.context.estimation.internal_number}
+    </a>
+% else:
+<div>Aucun devis n'est rattaché à cette facture
+<a href='#' class='btn btn-primary btn-xs'><i class='glyphicon glyphicon-link'></i> Rattacher cette facture à un devis</a>
 </div>
-</div>
-<div class="nav-tabs-responsive">
-    <ul class="nav nav-tabs" role="tablist">
-        % if request.context.status == 'valid':
-            <li role="presentation"
-                class="active"
-                >
-                <a href="#summary" aria-control="summary" role='tab' data-toggle='tab'>
-                Résumé
-                </a>
+% endif
+    </li>
+<br />
+% if request.context.cancelinvoices:
+    % for  cancelinvoice in request.context.cancelinvoices:
+            <li>
+                <p>
+                    L'avoir (${api.format_cancelinvoice_status(cancelinvoice, full=False)}): \
+                    <a href="${request.route_path('/cancelinvoices/{id}.html', id=cancelinvoice.id)}">
+                        ${cancelinvoice.internal_number}
+                        % if cancelinvoice.official_number:
+                        (${cancelinvoice.prefix}${cancelinvoice.official_number})
+                        % endif
+                    </a> a été généré depuis cette facture.
+                </p>
             </li>
-        % endif
-        <li role="presentation"
-            % if request.context.status != 'valid':
-            class="active"
-            % endif
+    % endfor
+% else:
+<li>
+    Aucun avoir n'a été généré
+    </li>
+% endif
+        </ul>
+</%block>
+
+<%block name='moretabs_datas'>
+    <div role="tabpanel" class="tab-pane row" id="treasury">
+        <div class='col-xs-12 col-md-10 col-md-offset-1'>
+        <div class='alert'>
+        Cette facture est rattachée à l'année fiscale ${request.context.financial_year}.
+        <a class='btn btn-default'
+            href="${request.route_path('/invoices/{id}/set_treasury', id=request.context.id)}"
             >
-            <a href="#documents" aria-control="documents" role='tab' data-toggle='tab'>
-                Prévisualisation
-            </a>
-        </li>
-        <li role="presentation">
-            <a href="#general_information" aria-control="general_information" role='tab' data-toggle='tab'>Informations générales</a>
-        </li>
-        % if api.has_permission('set_treasury.invoice'):
-        <li role="presentation">
-            <a href="#treasury" aria-control="treasury" role='tab' data-toggle='tab'>Informations comptables</a>
-        </li>
-        % endif
-        % if api.has_permission('view.payment'):
-        <li role="presentation">
-            <a href="#payment" aria-control="payment" role='tab' data-toggle='tab'>Encaissements</a>
-        </li>
-        % endif
-        % if api.has_permission('view.file'):
-        <li role="presentation">
-            <a href="#attached_files" aria-control="attached_files" role='tab' data-toggle='tab'>
-                Fichiers attachés
-                % if request.context.children:
-                    <span class="badge">${len(request.context.children)}</span>
+            <i class='glyphicon glyphicon-pencil'></i> Modifier
+        </a>
+        <br />
+        Elle porte le numéro ${request.context.prefix}${request.context.official_number}.
+        </div>
+            % if request.context.exported:
+                <div class='lead'>
+                    <i class='glyphicon glyphicon-ok-sign'></i> Cette facture a été exportée vers la comptabilité
+                </div>
+                    <a
+                    href="${request.route_path('/invoices/{id}.txt', id=request.context.id, _query={'force': True})}"
+                    class='btn btn-default primary-action'
+                    >
+                    <i class='glyphicon glyphicon-export'></i>
+                        Forcer la génération d'écritures pour cette facture
+                    </a>
+            % else:
+                <div class='lead'>
+                    <i class='glyphicon glyphicon-time'></i> Cette facture n'a pas encore été exportée vers la comptabilité
+                </div>
+                % if api.has_permission('admin_treasury'):
+                    <a
+                    href="${request.route_path('/invoices/{id}.txt', id=request.context.id)}"
+                    class='btn btn-primary primary-action'
+                    >
+                    <i class='glyphicon glyphicon-export'></i>
+                        Générer les écritures pour cette facture
+                    </a>
                 % endif
+            % endif
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane row" id="payment">
+        <div class="col-xs-12 col-md-10 col-md-offset-1">
+        % if api.has_permission('add_payment.invoice'):
+            <a href="#" class='btn btn-primary primary-action'>
+            <i class='glyphicon glyphicon-plus-sign'></i> Enregistrer un encaissement
             </a>
-        </li>
         % endif
-    </ul>
-</div>
-<div class='tab-content'>
-    % if request.context.status == 'valid':
-        <div role="tabpanel" class="tab-pane active row" id="summary">
-        <h2>Résumé</h2>
-        <h3>Contenu</h3>
-            <dl class='dl-horizontal'>
-            <dt>Date</dt>
-            <dd>${api.format_date(request.context.date)}</dd>
-            <dt>Client</dt>
-            <dd>${request.context.customer.get_label()} <a href="${request.route_path('customer', id=request.context.customer.id)}">Voir le compte client</a></dd>
-                <dt>Montant HT</dt>
-                <dd>${api.format_amount(request.context.ht, precision=5)|n}&nbsp;€</dd>
-                <dt>TVA</dt>
-                <dd>${api.format_amount(request.context.tva, precision=5)|n}&nbsp;€ </dd>
-                <dt>TTC</dt>
-                <dd>${api.format_amount(request.context.ttc, precision=5)|n}&nbsp;€</dd>
-            </dl>
-        <h3>Historique</h3>
+        <h3>Liste des encaissements</h3>
+        % if request.context.payments:
             % for payment in request.context.payments:
-                % if loop.first:
-                    <ul>
-                % endif
+                    % if loop.first:
+                        <ul>
+                    % endif
                         <% url = request.route_path('payment', id=payment.id) %>
                         <li>
                         <a href="${url}">
-                            Par ${api.format_account(payment.user)} :&nbsp;
-                            ${api.format_amount(payment.amount)|n}&nbsp;€
+                            Enregistré par ${api.format_account(payment.user)} :&nbsp;
+                            ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
                             le ${api.format_date(payment.date)}
                             (${api.format_paymentmode(payment.mode)})
                         </a>
                         </li>
-                % if loop.last:
-                    </ul>
-                % endif
-
+                    % if loop.last:
+                        </ul>
+                    % endif
             % endfor
-            ${api.format_status(request.context)}
-        </div>
-    % endif
-    <div role="tabpanel" class="tab-pane
-    % if request.context.status != 'valid':
-    active
-    % endif
-    row" id="documents">
-        <div class='col-md-12'>
-            <div class="container-fluid task_view" style="border: 1px solid #dedede; background-color: #fdfdfd; margin:15px;">
-                ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
-            </div>
-        </div>
-    </div>
-
-    <!-- General information tab -->
-    <div role="tabpanel" class="tab-pane row" id="general_information">
-        <div class="col-md-10 col-md-offset-1 col-xs-12">
-        </div>
-    </div>
-
-    <!-- treasury tab -->
-    % if api.has_permission('set_treasury.invoice'):
-    <div role="tabpanel" class="tab-pane row" id="treasury">
-        <div class="col-md-10 col-md-offset-1 col-xs-12">
-        </div>
-    </div>
-    % endif
-    % if api.has_permission('view.payment'):
-    <div role="tabpanel" class="tab-pane row" id="payment">
-        <div class="col-md-10 col-md-offset-1 col-xs-12">
+        % else:
+            Aucun encaissement n'a été saisi
+        % endif
+        <h3>Avoir(s)</h3>
+        % if request.context.cancelinvoices:
+            <% hasone = False %>
+            <ul>
+            % for  cancelinvoice in request.context.cancelinvoices:
+                % if cancelinvoice.status == 'valid':
+                    <% hasone = True %>
+                    <li>
+                        <p>
+                            L'avoir : \
+                            <a href="${request.route_path('/cancelinvoices/{id}.html', id=cancelinvoice.id)}">
+                                ${cancelinvoice.internal_number}
+                                (numéro ${cancelinvoice.prefix}${cancelinvoice.official_number})
+                                d'un montant TTC de ${api.format_amount(cancelinvoice.ttc, precision=5)} €
+                            </a> a été généré depuis cette facture.
+                        </p>
+                    </li>
+                 % endif
+            % endfor
+            </ul>
+            % if not hasone:
+                Aucun avoir validé n'est associé à ce document
+            % endif
+        % else:
+        Aucun avoir validé n'est associé à ce document
+        % endif
         </div>
     </div>
-    % endif
-
-    <!-- attached files tab -->
-    % if api.has_permission('view.file'):
-        <% title = u"Liste des fichiers attachés à cette facture" %>
-       ${request.layout_manager.render_panel('filelist_tab', title=title)}
-    % endif
-
-</div>
-
-<div class='' id='forms_container'>
-</div>
-<div class='col-md-3' id='rightbar'>
-</div>
-</div>
 </%block>

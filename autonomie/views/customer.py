@@ -28,6 +28,7 @@
 import logging
 import colander
 
+from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import (
     or_,
     not_,
@@ -49,8 +50,8 @@ from autonomie.models.customer import (
 from autonomie.utils.widgets import (
     ViewLink,
     StaticWidget,
-    ItemActionLink,
 )
+from autonomie.utils.rest import add_rest_views
 from autonomie.forms.customer import (
     get_list_schema,
     get_company_customer_schema,
@@ -63,6 +64,7 @@ from autonomie.views import (
     BaseFormView,
     submit_btn,
     cancel_btn,
+    BaseRestView,
 )
 from autonomie.views.csv_import import (
     CsvFileUploadView,
@@ -79,7 +81,7 @@ def get_company_customer_form(request, counter=None):
     :param obj counter: An iterator for field number generation
     :returns: a deform.Form instance
     """
-    schema = get_company_customer_schema(request)
+    schema = get_company_customer_schema()
     schema = schema.bind(request=request)
     form = Form(
         schema,
@@ -98,7 +100,7 @@ def get_individual_customer_form(request, counter=None):
     :param obj counter: An iterator for field number generation
     :returns: a deform.Form instance
     """
-    schema = get_individual_customer_schema(request)
+    schema = get_individual_customer_schema()
 
     schema = schema.bind(request=request)
     form = Form(
@@ -162,7 +164,7 @@ class CustomersListView(CustomersListTools, BaseListView):
     Customer listing view
     """
     add_template_vars = (
-        'item_actions',
+        'stream_actions',
         'title',
         'forms',
     )
@@ -211,71 +213,65 @@ class CustomersListView(CustomersListTools, BaseListView):
 
         return StaticWidget(link)
 
-    @property
-    def item_actions(self):
-        """
-            return action buttons builder
-        """
-        return self._get_actions()
-
-    def _get_actions(self):
+    def stream_actions(self, customer):
         """
             Return action buttons with permission handling
         """
-        btns = []
-        btns.append(
-            ItemActionLink(
-                u"Voir",
-                "view_customer",
-                css='btn btn-default btn-sm',
-                path="customer",
-                icon="search"
-            )
+        yield (
+            self.request.route_path("customer", id=customer.id),
+            u"Voir",
+            u"Voir/Modifier ce client",
+            u"pencil",
+            {}
         )
-        if self.request.params.get('archived', '0') in ('0', 'false'):
-            btns.append(
-                ItemActionLink(
-                    u"Archiver",
-                    "edit_customer",
-                    css="btn btn-default btn-sm",
-                    confirm=u'Êtes-vous sûr de vouloir archiver ce client ?',
-                    path="customer",
-                    title=u"Archiver le projet",
-                    _query=dict(action="archive"),
-                    icon="book",
-                )
-            )
-        else:
-            btns.append(
-                ItemActionLink(
-                    u"Désarchiver",
-                    "edit_customer",
-                    css="btn btn-default btn-sm",
-                    path="customer",
-                    title=u"Désarchiver le client",
-                    _query=dict(action="archive"),
-                    icon="book",
-                )
-            )
-            del_link = ItemActionLink(
-                u"Supprimer",
-                "edit_customer",
-                css="btn btn-danger",
-                confirm=u'Êtes-vous sûr de vouloir supprimer ce client ?',
-                path="customer",
-                title=u"Supprimer le client",
-                _query=dict(action="delete"),
-                icon="trash"
-            )
 
-            def is_deletable_perm(context, req):
-                """
-                    Return True if the current item (context) is deletable
-                """
-                return context.is_deletable()
-            del_link.set_special_perm_func(is_deletable_perm)
-            btns.append(del_link)
-        return btns
+        yield (
+            self.request.route_path(
+                "company_projects",
+                id=customer.company.id,
+                _query=dict(action="add", customer=customer.id)
+            ),
+            u"Ajouter un projet",
+            u"Ajouter un projet pour ce client",
+            u"plus-sign",
+            {}
+        )
+
+        if customer.archived:
+            label = u"Désarchiver"
+        else:
+            label = u"Archiver"
+
+        yield (
+            self.request.route_path(
+                "customer",
+                id=customer.id,
+                _query=dict(action="archive"),
+            ),
+            label,
+            label,
+            "book",
+            {}
+        )
+
+        if self.request.has_permission('delete_customer', customer):
+            yield (
+                self.request.route_path(
+                    "customer",
+                    id=customer.id,
+                    _query=dict(action="archive"),
+                ),
+                u"Supprimer",
+                u"Supprimer définitivement ce client",
+                "trash",
+                {
+                    "onclick": (
+                        u"return confirm('Êtes-vous sûr de "
+                        "vouloir supprimer ce client ?')"
+                    )
+                }
+
+            )
 
 
 class CustomersCsv(CustomersListTools, BaseCsvView):
@@ -303,9 +299,6 @@ def customer_archive(request):
         customer.archived = True
     else:
         customer.archived = False
-        request.session.flash(
-            u"Le client '{0}' a été désarchivé".format(customer.name)
-        )
     request.dbsession.merge(customer)
     return HTTPFound(request.referer)
 
@@ -377,9 +370,9 @@ class CustomerAdd(BaseFormView):
         """
         if self._schema is None:
             if self.is_company_form():
-                self._schema = get_company_customer_schema(self.request)
+                self._schema = get_company_customer_schema()
             else:
-                self._schema = get_individual_customer_schema(self.request)
+                self._schema = get_individual_customer_schema()
         return self._schema
 
     @schema.setter
@@ -544,10 +537,35 @@ class CustomerImportStep2(ConfigFieldAssociationView):
         return dict(company_id=self.context.id)
 
 
+class CustomerRestView(BaseRestView):
+    """
+    Customer rest view
+
+    collection : context Root
+
+        GET : return list of customers (company_id should be provided)
+    """
+    def get_schema(self, submitted):
+        return SQLAlchemySchemaNode(Customer)
+
+    def collection_get(self):
+        return self.context.customers
+
+
 def add_routes(config):
     config.add_route(
         'customer',
         '/customers/{id}',
+        traverse='/customers/{id}',
+    )
+    config.add_route(
+        "/api/v1/companies/{id}/customers",
+        "/api/v1/companies/{id}/customers",
+        traverse="/companies/{id}",
+    )
+    config.add_route(
+        "/api/v1/customers/{id}",
+        "/api/v1/customers/{id}",
         traverse='/customers/{id}',
     )
 
@@ -626,7 +644,7 @@ def includeme(config):
         customer_delete,
         route_name="customer",
         request_param="action=delete",
-        permission='edit_customer',
+        permission='delete_customer',
     )
     config.add_view(
         customer_archive,
@@ -647,4 +665,15 @@ def includeme(config):
         route_name="company_customers_import_step2",
         permission="add_customer",
         renderer="base/formpage.mako",
+    )
+
+    add_rest_views(
+        config,
+        factory=CustomerRestView,
+        route_name="/api/v1/customers/{id}",
+        collection_route_name="/api/v1/companies/{id}/customers",
+        view_rights="view_customer",
+        edit_rights="edit_customer",
+        add_rights="add_customer",
+        delete_rights="edit_customer",
     )

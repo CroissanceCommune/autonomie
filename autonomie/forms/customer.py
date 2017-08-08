@@ -28,7 +28,6 @@
 import colander
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.models.customer import Customer
 from autonomie.forms.lists import BaseListsSchema
 
 
@@ -65,44 +64,38 @@ def get_list_schema():
     return schema
 
 
-def get_contractor_customer_schema(excludes=()):
+def customer_after_bind(node, kw):
     """
-    Rerturn the contractor customer form
+    After bind method for the customer model schema
+
+    removes nodes if the user have no rights to edit them
+
+    :param obj node: SchemaNode corresponding to the Customer
+    :param dict kw: The bind parameters
     """
-    return SQLAlchemySchemaNode(
-        Customer,
-        excludes=('compte_tiers', 'compte_cg') + excludes,
-    )
+    request = kw['request']
+    if not request.has_permission('admin_treasury', request.context):
+        del node['compte_tiers']
+        del node['compte_cg']
 
 
-def get_manager_customer_schema(excludes=()):
-    """
-    Return the manager customer form
-    """
-    return SQLAlchemySchemaNode(Customer, excludes=excludes)
-
-
-def get_company_customer_schema(request):
+def get_company_customer_schema():
     """
     return the schema for user add/edit regarding the current user's role
     """
-    if not request.has_permission('admin_treasury', request.context):
-        schema = get_contractor_customer_schema()
-    else:
-        schema = get_manager_customer_schema()
+    from autonomie.models.customer import Customer
+    schema = SQLAlchemySchemaNode(Customer)
     schema['name'].missing = colander.required
     return schema
 
 
-def get_individual_customer_schema(request):
+def get_individual_customer_schema():
     """
     return the schema for user add/edit regarding the current user's role
     """
+    from autonomie.models.customer import Customer
     excludes = ('name', 'tva_intracomm', 'function',)
-    if not request.has_permission('admin_treasury', request.context):
-        schema = get_contractor_customer_schema(excludes)
-    else:
-        schema = get_manager_customer_schema(excludes)
+    schema = SQLAlchemySchemaNode(Customer, excludes=excludes)
 
     schema['firstname'].title = u"Prénom"
     schema['firstname'].missing = colander.required

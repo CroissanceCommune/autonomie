@@ -23,9 +23,9 @@
 </%doc>
 
 <%inherit file="${context['main_template'].uri}" />
+<%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
 <%
 ## We build the link with the current search arguments
@@ -143,9 +143,21 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                         % endif
                     </td>
                     <td class="actions">
-                        % for btn in item_actions:
-                            ${btn.render(request, customer)|n}
-                        % endfor
+		                <div class='btn-group'>
+		                    <button
+                                type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                Actions <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                % for url, label, title, icon, options in stream_actions(customer):
+                                    ${dropdown_item(url, label, title, icon=icon, **options)}
+                                % endfor
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             % endfor

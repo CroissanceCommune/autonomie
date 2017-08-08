@@ -42,7 +42,7 @@
         u"PDF", \
         u"Télécharger la version PDF", \
         u"glyphicon glyphicon-file")}
-        % if api.has_permission('delete', task):
+        % if api.has_permission('delete.%s' % task.type_, task):
             ${table_btn(\
             del_url,\
             u"Supprimer", \

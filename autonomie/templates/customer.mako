@@ -166,7 +166,7 @@
                                             ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"plus")}
                                             ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"plus")}
                                             ${table_btn(request.route_path("project", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"book")}
-                                        %elif project.is_deletable():
+                                        %elif api.has_permission('delete_project', project):
                                             <% del_url = request.route_path("project", id=project.id, _query=dict(action="delete")) %>
                                             ${table_btn(del_url,\
                                             u"Supprimer", \

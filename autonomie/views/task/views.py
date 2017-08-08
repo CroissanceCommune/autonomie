@@ -18,6 +18,7 @@ from autonomie.models.project import (
 from autonomie.forms.tasks.base import (
     get_duplicate_schema,
     get_new_task_schema,
+    get_task_metadatas_edit_schema,
 )
 from autonomie.utils.pdf import (
     write_pdf,
@@ -29,6 +30,7 @@ from autonomie.resources import (
     jstree_css,
     task_html_pdf_css,
     pdf_css,
+    task_add_js,
 )
 from autonomie.views import (
     BaseView,
@@ -76,6 +78,7 @@ class TaskAddView(BaseFormView):
     def before(self, form):
         BaseFormView.before(self, form)
         populate_actionmenu(self.request)
+        task_add_js.need()
 
     def submit_success(self, appstruct):
         if self.factory is None:
@@ -249,6 +252,22 @@ class TaskHtmlView(BaseView):
     """
     label = u"Objet"
 
+    @property
+    def title(self):
+        return u"{0} : {1}".format(
+            self.label,
+            self.context.internal_number
+        )
+
+    def actions(self):
+        """
+        Return the description of the action buttons
+
+        :returns: A list of dict (url, icon, label)
+        :rtype: list
+        """
+        return []
+
     def __call__(self):
         task_html_pdf_css.need()
         # If the task is editable, we go the edit page
@@ -260,16 +279,12 @@ class TaskHtmlView(BaseView):
                 )
             )
 
-        title = u"{0} : {1}".format(
-            self.label,
-            self.context.internal_number
-        )
         populate_actionmenu(self.request)
 
         return dict(
-            title=title,
+            title=self.title,
             task=self.context,
-            submit_buttons=[],
+            actions=self.actions(),
         )
 
 
@@ -304,3 +319,42 @@ class TaskPdfView(BaseView):
         html_string = html(self.request)
         write_pdf(self.request, filename, html_string)
         return self.request.response
+
+
+class TaskMetadatasEditView(BaseFormView):
+    schema = get_task_metadatas_edit_schema()
+
+    @property
+    def title(self):
+        return u"Modification du document {task.name}".format(
+            task=self.context
+        )
+
+    def before(self, form):
+        task_add_js.need()
+        self.request.actionmenu.add(
+            ViewLink(
+                u"Revenir au document",
+                path='/%ss/{id}.html' % self.context.type_,
+                id=self.context.id,
+            ),
+        )
+        form.set_appstruct(
+            {
+                "name": self.context.name,
+                "customer_id": self.context.customer_id,
+                "project_id": self.context.customer_id,
+                "phase_id": self.context.customer_id,
+            }
+        )
+
+    def submit_success(self, appstruct):
+        appstruct.pop('customer_id')
+        for key, value in appstruct.items():
+            setattr(self.context, key, value)
+        self.request.dbsession.merge(self.context)
+        url = self.request.route_path(
+            "/%ss/{id}" % self.context.type_,
+            id=self.context.id
+        )
+        return HTTPFound(url)

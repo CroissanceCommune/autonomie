@@ -9,7 +9,7 @@
  *
  */
 import Mn from 'backbone.marionette';
-import ModalBehavior from '../behaviors/ModalBehavior.js';
+import ModalBehavior from '../../base/behaviors/ModalBehavior.js';
 import DiscountFormView from './DiscountFormView.js';
 import DiscountPercentModel from '../models/DiscountPercentModel.js';
 import DiscountPercentView from './DiscountPercentView.js';

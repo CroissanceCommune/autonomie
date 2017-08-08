@@ -11,11 +11,11 @@
 import jQuery from 'jquery';
 import Mn from 'backbone.marionette';
 import { updateSelectOptions } from '../../tools.js';
-import FormBehavior from "../behaviors/FormBehavior.js";
-import CheckboxListWidget from './CheckboxListWidget.js';
-import DatePickerWidget from './DatePickerWidget.js';
-import TextAreaWidget from './TextAreaWidget.js';
-import InputWidget from './InputWidget.js';
+import FormBehavior from "../../base/behaviors/FormBehavior.js";
+import CheckboxListWidget from '../../widgets/CheckboxListWidget.js';
+import DatePickerWidget from '../../widgets/DatePickerWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
+import InputWidget from '../../widgets/InputWidget.js';
 import Radio from 'backbone.radio';
 import Validation from 'backbone-validation';
 
@@ -64,7 +64,9 @@ const CommonView = Mn.View.extend({
         var channel = Radio.channel('facade');
         this.listenTo(channel, 'bind:validation', this.bindValidation);
         this.listenTo(channel, 'unbind:validation', this.unbindValidation);
-        this.mentions_options = channel.request('get:form_options', 'mentions');
+        this.mentions_options = Radio.channel('config').request(
+            'get:form_options', 'mentions'
+        );
     },
     showErrors(model, errors){
         this.$el.addClass('error');

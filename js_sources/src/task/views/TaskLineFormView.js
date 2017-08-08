@@ -10,12 +10,12 @@
  */
 import Mn from 'backbone.marionette';
 import { ajax_call, getOpt } from '../../tools.js';
-import InputWidget from './InputWidget.js';
-import SelectWidget from './SelectWidget.js';
-import TextAreaWidget from './TextAreaWidget.js';
-import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
+import InputWidget from '../../widgets/InputWidget.js';
+import SelectWidget from '../../widgets/SelectWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
+import ModalFormBehavior from '../../base/behaviors/ModalFormBehavior.js';
 import CatalogTreeView from './CatalogTreeView.js';
-import LoadingWidget from './LoadingWidget.js';
+import LoadingWidget from '../../widgets/LoadingWidget.js';
 import Radio from 'backbone.radio';
 
 var template = require('./templates/TaskLineFormView.mustache');
@@ -49,7 +49,7 @@ const TaskLineFormView = Mn.View.extend({
         'set:product': 'refreshForm'
     },
     initialize(){
-        var channel = Radio.channel('facade');
+        var channel = Radio.channel('config');
         this.workunit_options = channel.request(
             'get:form_options',
             'workunits'

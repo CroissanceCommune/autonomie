@@ -9,10 +9,10 @@
  *
  */
 import Mn from 'backbone.marionette';
-import InputWidget from './InputWidget.js';
-import SelectWidget from './SelectWidget.js';
-import TextAreaWidget from './TextAreaWidget.js';
-import FormBehavior from '../behaviors/FormBehavior.js';
+import InputWidget from '../../widgets/InputWidget.js';
+import SelectWidget from '../../widgets/SelectWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
+import FormBehavior from '../../base/behaviors/FormBehavior.js';
 import { getOpt } from '../../tools.js';
 import Radio from 'backbone.radio';
 var template = require('./templates/DiscountFormView.mustache');
@@ -30,7 +30,7 @@ const DiscountFormView = Mn.View.extend({
         'change': 'data:modified',
     },
     initialize(){
-        var channel = Radio.channel('facade');
+        var channel = Radio.channel('config');
         this.tva_options = channel.request('get:form_options', 'tvas');
     },
     onRender: function(){

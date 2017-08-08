@@ -10,7 +10,7 @@
  */
 import Mn from 'backbone.marionette';
 import { formatAmount } from "../../math.js";
-import LabelRowWidget from './LabelRowWidget.js';
+import LabelRowWidget from '../../widgets/LabelRowWidget.js';
 
 const HtBeforeDiscountsView = Mn.View.extend({
     template: require('./templates/LineContainerView.mustache'),

@@ -9,10 +9,10 @@
  *
  */
 import Mn from 'backbone.marionette';
-import SelectWidget from './SelectWidget.js';
-import TextAreaWidget from './TextAreaWidget.js';
+import SelectWidget from '../../widgets/SelectWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
 import {getDefaultItem} from '../../tools.js';
-import FormBehavior from '../behaviors/FormBehavior.js';
+import FormBehavior from '../../base/behaviors/FormBehavior.js';
 import Radio from 'backbone.radio';
 import Validation from 'backbone-validation';
 
@@ -37,11 +37,12 @@ const PaymentConditionBlockView = Mn.View.extend({
         'finish': 'onFinish',
     },
     initialize: function(){
-        var channel = Radio.channel('facade');
-        this.payment_conditions_options = channel.request(
+        this.payment_conditions_options = Radio.channel('config').request(
             'get:form_options', 'payment_conditions'
         );
         this.lookupDefault();
+
+        var channel = Radio.channel('facade');
         this.listenTo(channel, 'bind:validation', this.bindValidation);
         this.listenTo(channel, 'unbind:validation', this.unbindValidation);
     },

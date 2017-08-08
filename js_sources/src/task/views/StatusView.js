@@ -9,7 +9,7 @@
  *
  */
 import Mn from 'backbone.marionette';
-import ModalBehavior from '../behaviors/ModalBehavior.js';
+import ModalBehavior from '../../base/behaviors/ModalBehavior.js';
 import { serializeForm, ajax_call, showLoader, hideLoader } from '../../tools.js';
 import Radio from 'backbone.radio';
 

@@ -15,7 +15,7 @@ import Radio from 'backbone.radio';
 const TotalModel = Bb.Model.extend({
     initialize: function(){
         TotalModel.__super__.initialize.apply(this, arguments);
-        var channel = this.channel = Radio.channel('facade');
+        var channel = Radio.channel('config');
         this.tva_options = channel.request('get:form_options', 'tvas');
     },
     getTvaLabel: function(tva_value, tva_key){

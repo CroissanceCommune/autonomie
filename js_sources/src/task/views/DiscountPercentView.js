@@ -9,10 +9,10 @@
  *
  */
 import Mn from 'backbone.marionette';
-import TextAreaWidget from './TextAreaWidget.js';
-import InputWidget from './InputWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
+import InputWidget from '../../widgets/InputWidget.js';
 import DiscountModel from '../models/DiscountModel.js';
-import BaseFormBehavior from "../behaviors/BaseFormBehavior.js";
+import BaseFormBehavior from "../../base/behaviors/BaseFormBehavior.js";
 
 const DiscountPercentView = Mn.View.extend({
     behaviors: [BaseFormBehavior],

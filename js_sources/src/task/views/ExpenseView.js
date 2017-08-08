@@ -9,8 +9,8 @@
  *
  */
 import Mn from 'backbone.marionette';
-import FormBehavior from '../behaviors/FormBehavior.js';
-import InputWidget from './InputWidget.js';
+import FormBehavior from '../../base/behaviors/FormBehavior.js';
+import InputWidget from '../../widgets/InputWidget.js';
 
 const ExpenseView = Mn.View.extend({
     template: require('./templates/ExpenseView.mustache'),

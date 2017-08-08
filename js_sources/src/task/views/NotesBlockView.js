@@ -9,8 +9,8 @@
  *
  */
 import Mn from 'backbone.marionette';
-import FormBehavior from '../behaviors/FormBehavior.js';
-import TextAreaWidget from './TextAreaWidget.js';
+import FormBehavior from '../../base/behaviors/FormBehavior.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
 
 var template = require("./templates/NotesBlockView.mustache");
 

@@ -30,6 +30,8 @@ const CommonModel = BaseModel.extend({
         'deposit',
         'payment_times',
         'paymentDisplay',
+        'financial_year',
+        'prefix',
     ],
     validation: {
         date: {
@@ -50,13 +52,18 @@ const CommonModel = BaseModel.extend({
             msg: "Le montant doit être un nombre",
         },
         payment_conditions: function(value){
-            var facade = Radio.channel('facade');
-            if (facade.request('has:form_section', 'payment_conditions')){
+            var channel = Radio.channel('config');
+            if (channel.request('has:form_section', 'payment_conditions')){
                 if (!value){
                     return "Veuillez saisir des conditions de paiements";
                 }
             }
         },
+        financial_year: {
+            required: false,
+            pattern: 'digits',
+            msg: "L'année fiscale de référence doit être un nombre entier"
+        }
     },
     initialize: function(){
         CommonModel.__super__.initialize.apply(this, arguments);

@@ -12,12 +12,13 @@ import Mn from 'backbone.marionette';
 import MainView from '../views/MainView.js';
 import App from './App.js';
 import Facade from './Facade.js';
-import AuthBus from './AuthBus.js';
-import MessageBus from './MessageBus.js';
+import AuthBus from '../../base/components/AuthBus.js';
+import MessageBus from '../../base/components/MessageBus.js';
+import ConfigBus from '../../base/components/ConfigBus.js';
 
 const Controller = Mn.Object.extend({
     initialize: function(options){
-        Facade.setFormConfig(options.form_config);
+        ConfigBus.setFormConfig(options.form_config);
         Facade.loadModels(options.form_datas);
         AppOption.facade = Facade;
 

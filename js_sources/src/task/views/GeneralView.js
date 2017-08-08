@@ -11,11 +11,11 @@
 import jQuery from 'jquery';
 import Mn from 'backbone.marionette';
 import { updateSelectOptions } from '../../tools.js';
-import FormBehavior from "../behaviors/FormBehavior.js";
-import CheckboxListWidget from './CheckboxListWidget.js';
-import DatePickerWidget from './DatePickerWidget.js';
-import TextAreaWidget from './TextAreaWidget.js';
-import InputWidget from './InputWidget.js';
+import FormBehavior from "../../base/behaviors/FormBehavior.js";
+import CheckboxListWidget from '../../widgets/CheckboxListWidget.js';
+import DatePickerWidget from '../../widgets/DatePickerWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
+import InputWidget from '../../widgets/InputWidget.js';
 
 var template = require("./templates/GeneralView.mustache");
 

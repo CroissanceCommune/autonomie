@@ -11,7 +11,7 @@
 import Mn from 'backbone.marionette';
 
 import { formatAmount } from "../../math.js";
-import LabelRowWidget from './LabelRowWidget.js';
+import LabelRowWidget from '../../widgets/LabelRowWidget.js';
 
 const TotalView = Mn.View.extend({
     template: require('./templates/TotalView.mustache'),

@@ -9,11 +9,11 @@
  *
  */
 import Mn from 'backbone.marionette';
-import InputWidget from './InputWidget.js';
-import TextAreaWidget from './TextAreaWidget.js';
-import ModalFormBehavior from '../behaviors/ModalFormBehavior.js';
+import InputWidget from '../../widgets/InputWidget.js';
+import TextAreaWidget from '../../widgets/TextAreaWidget.js';
+import ModalFormBehavior from '../../base/behaviors/ModalFormBehavior.js';
 import { ajax_call, getOpt } from '../../tools.js';
-import DatePickerWidget from './DatePickerWidget.js';
+import DatePickerWidget from '../../widgets/DatePickerWidget.js';
 
 var template = require('./templates/PaymentLineFormView.mustache');
 

@@ -102,11 +102,16 @@ MAIN_INFOS_GRID = (
 
 def get_customers_from_request(request):
     customers = []
-    if request.context.type_ == 'project':
-        customers = request.context.customers
-    elif request.context.type_ in ('invoice', 'estimation', 'cancelinvoice'):
-        if request.context.project is not None:
-            customers = request.context.project.company.customers
+    context = request.context
+    if context.type_ == 'project':
+        customers = context.customers
+    elif hasattr(context, 'project') and context.project is not None:
+        customers = context.project.customers
+    else:
+        company_id = request.current_company
+        from autonomie.models.customer import Customer
+        customers = Customer.query().filter_by(company_id=company_id).all()
+
     return customers
 
 
@@ -133,7 +138,7 @@ def deferred_customer_list(node, kw):
     request = kw['request']
     customers = get_customers_from_request(request)
     return deform.widget.SelectWidget(
-        values=build_customer_values(customers),
+        values=build_customer_values(customers, default=False),
         placeholder=u"Sélectionner un client",
     )
 
@@ -278,6 +283,16 @@ def deferred_project_widget(node, kw):
 
 
 @colander.deferred
+def deferred_customer_project_widget(node, kw):
+    request = kw['request']
+    projects = request.context.customer.projects
+    logger.debug("### Getting the projects")
+    choices = get_project_choices(projects)
+    wid = deform.widget.SelectWidget(values=choices)
+    return wid
+
+
+@colander.deferred
 def deferred_default_project(node, kw):
     """
     Return the default project
@@ -338,6 +353,21 @@ def get_new_task_schema():
     :returns: The schema
     """
     return NewTaskSchema()
+
+
+def get_task_metadatas_edit_schema():
+    """
+    Return the schema for editing tasks metadatas
+
+    :returns: The schema
+    """
+    schema = NewTaskSchema().clone()
+    del schema['course']
+    schema['customer_id'].widget = deform.widget.HiddenWidget()
+    schema['project_id'].widget = deferred_customer_project_widget
+    schema['project_id'].title = u"Projet vers lequel déplacer ce document"
+    schema['phase_id'].title = u"Dossier dans lequel déplacer ce document"
+    return schema
 
 
 class DuplicateSchema(NewTaskSchema):

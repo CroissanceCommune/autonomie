@@ -47,6 +47,7 @@ from autonomie.export.sage import (
     SageExpensePaymentCsvWriter
 )
 from autonomie.export.utils import write_file_to_request
+from autonomie.utils.widgets import ViewLink
 from autonomie.models.expense import (
     ExpenseSheet,
     ExpenseType,
@@ -69,7 +70,7 @@ from autonomie.forms.sage import (
 from autonomie.views import BaseView
 from autonomie.views.render_api import format_account
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 EXPENSE_CONFIG_ERROR_MSG = u"Veuillez vous assurer que tous les éléments de \
@@ -181,7 +182,187 @@ configurer les informations comptables nécessaires à l'export des documents,
 <a href="{0}" target='_blank'>Ici</a>"""
 
 
-class SageInvoiceExportPage(BaseView):
+class SageSingleInvoiceExportPage(BaseView):
+    """
+    Single invoice export page
+    """
+
+    @property
+    def title(self):
+        return "Export de la facture {0}{1} au format CSV".format(
+            self.context.prefix,
+            self.context.official_number,
+        )
+
+    def check_invoice_line(self, line):
+        """
+        Check the invoice line is ok for export
+
+        :param obj line: A TaskLine instance
+        """
+        return line.product is not None
+
+    def check_company(self, company):
+        """
+            Check the invoice's company is configured for exports
+        """
+        if not company.code_compta:
+            return False
+        return True
+
+    def check_customer(self, customer):
+        """
+            Check the invoice's customer is configured for exports
+
+        """
+        if not customer.compte_cg:
+            return False
+        if self.request.config.get('sage_rgcustomer'):
+            if not customer.compte_tiers:
+                return False
+        return True
+
+    def check_num_invoices(self, invoices):
+        return 1
+
+    def check(self, invoices):
+        """
+            Check that the given invoices are 'exportable'
+        """
+        count = self.check_num_invoices(invoices)
+        if count == 0:
+            title = u"Il n'y a aucune facture à exporter"
+            res = {
+                'title': title,
+                'errors': [""],
+            }
+            return res
+        title = u"Vous vous apprêtez à exporter {0} factures".format(
+                count)
+        res = {'title': title, 'errors': []}
+
+        prefix = self.request.config.get('invoiceprefix', '')
+        for invoice in invoices:
+            official_number = "%s%s" % (prefix, invoice.official_number)
+            for line in invoice.all_lines:
+                if not self.check_invoice_line(line):
+                    invoice_url = self.request.route_path(
+                        '/invoices/{id}.html',
+                        id=invoice.id
+                    )
+                    message = u"""Le document {0} n'est pas exportable :
+ des comptes produits sont manquants <a href='{1}' target='_blank'>
+ Voir le document</a>"""
+                    message = message.format(official_number, invoice_url)
+                    res['errors'].append(message)
+                    break
+
+            if not self.check_company(invoice.company):
+                company_url = self.request.route_path(
+                    'company',
+                    id=invoice.company.id,
+                    _query={'action': 'edit'}
+                )
+                message = u"""Le document {0} n'est pas exportable :
+Des informations sur l'entreprise {1} sont manquantes <a href='{2}'
+target='_blank'>Voir l'entreprise</a>"""
+                message = message.format(
+                    official_number,
+                    invoice.company.name,
+                    company_url)
+                res['errors'].append(message)
+                continue
+
+            if not self.check_customer(invoice.customer):
+                customer_url = self.request.route_path(
+                    'customer',
+                    id=invoice.customer.id,
+                    _query={'action': 'edit'})
+                message = u"""Le document {0} n'est pas exportable :
+ Des informations sur le client {1} sont manquantes <a href='{2}'
+ target='_blank'>Voir l'entreprise</a>"""
+                message = message.format(
+                    official_number,
+                    invoice.customer.name,
+                    customer_url)
+                res['errors'].append(message)
+                continue
+
+        return res
+
+    def record_exported(self, invoices):
+        for invoice in invoices:
+            log.info(
+                "The {0.type_} number {0.official_number} (id : {0.id})"
+                "has been exported".format(invoice)
+            )
+            invoice.exported = True
+            self.request.dbsession.merge(invoice)
+
+    def write_csv(self, invoices):
+        """
+            Write the exported csv file to the request
+        """
+        from autonomie.interfaces import ITreasuryInvoiceProducer
+        exporter = self.request.find_service(ITreasuryInvoiceProducer)
+        from autonomie.interfaces import ITreasuryInvoiceWriter
+        writer = self.request.find_service(ITreasuryInvoiceWriter)
+
+        logger.debug(writer.headers)
+        logger.debug(getattr(writer, 'extra_headers', ()))
+        writer.set_datas(exporter.get_book_entries(invoices))
+        write_file_to_request(
+            self.request,
+            get_filename(u"export_facture", writer.extension),
+            writer.render(),
+            headers="application/csv")
+        self.record_exported(invoices)
+        return self.request.response
+
+    def populate_action_menu(self):
+        """
+        Add a back button to the action menu
+        """
+        self.request.actionmenu.add(
+            ViewLink(
+                label=u"Retour au document",
+                path='/%ss/{id}.html' % self.context.type_,
+                id=self.context.id,
+                _anchor='treasury'
+            )
+        )
+
+    def __call__(self):
+        force = self.request.params.get('force', False)
+        self.populate_action_menu()
+        check_messages = None
+        if self.context.exported and not force:
+            check_messages = {
+                'title': u"Impossible d'exporter ce document",
+                'errors': [u"Ce document a déjà été exporté"]
+            }
+        else:
+            invoices = [self.context]
+            check_messages = self.check(invoices)
+            if not check_messages.get('errors'):
+                try:
+                    # Let's process and return successfully the csvfile
+                    return self.write_csv(invoices)
+                except (MissingData, KeyError):
+                    log.exception("Exception occured while writing CSV \
+    file")
+                    config_help_msg = _HELPMSG_CONFIG.format(
+                        self.request.route_url("admin_vente")
+                    )
+                    check_messages['errors'] = [config_help_msg]
+
+        return {
+            'title': self.title,
+            'check_messages': check_messages,
+        }
+
+
+class SageInvoiceExportPage(SageSingleInvoiceExportPage):
     """
         Provide a sage export view compound of :
             * a form for date to date invoice exports
@@ -249,124 +430,6 @@ class SageInvoiceExportPage(BaseView):
             )
         return query
 
-    def check_invoice_line(self, line):
-        """
-            Check the invoice line is ok for export
-        """
-        return line.product is not None
-
-    def check_company(self, company):
-        """
-            Check the invoice's company is configured for exports
-        """
-        if not company.code_compta:
-            return False
-        return True
-
-    def check_customer(self, customer):
-        """
-            Check the invoice's customer is configured for exports
-
-        """
-        if not customer.compte_cg:
-            return False
-        if self.request.config.get('sage_rgcustomer'):
-            if not customer.compte_tiers:
-                return False
-        return True
-
-    def check(self, invoices):
-        """
-            Check that the given invoices are 'exportable'
-        """
-        count = invoices.count()
-        if count == 0:
-            title = u"Il n'y a aucune facture à exporter"
-            res = {
-                'title': title,
-                'errors': [""],
-            }
-            return res
-        title = u"Vous vous apprêtez à exporter {0} factures".format(
-                count)
-        res = {'title': title, 'errors': []}
-
-        prefix = self.request.config.get('invoiceprefix', '')
-        for invoice in invoices:
-            official_number = "%s%s" % (prefix, invoice.official_number)
-            for line in invoice.all_lines:
-                if not self.check_invoice_line(line):
-                    invoice_url = self.request.route_path(
-                        '/invoices/{id}.html',
-                        id=invoice.id
-                    )
-                    message = u"""La facture {0} n'est pas exportable :
- des comptes produits sont manquants <a href='{1}' target='_blank'>
- Voir le document</a>"""
-                    message = message.format(official_number, invoice_url)
-                    res['errors'].append(message)
-                    break
-
-            if not self.check_company(invoice.company):
-                company_url = self.request.route_path(
-                    'company',
-                    id=invoice.company.id,
-                    _query={'action': 'edit'}
-                )
-                message = u"""La facture {0} n'est pas exportable :
-Des informations sur l'entreprise {1} sont manquantes <a href='{2}'
-target='_blank'>Voir l'entreprise</a>"""
-                message = message.format(
-                    official_number,
-                    invoice.company.name,
-                    company_url)
-                res['errors'].append(message)
-                continue
-
-            if not self.check_customer(invoice.customer):
-                customer_url = self.request.route_path(
-                    'customer',
-                    id=invoice.customer.id,
-                    _query={'action': 'edit'})
-                message = u"""La facture {0} n'est pas exportable :
- Des informations sur le client {1} sont manquantes <a href='{2}'
- target='_blank'>Voir l'entreprise</a>"""
-                message = message.format(
-                    official_number,
-                    invoice.customer.name,
-                    customer_url)
-                res['errors'].append(message)
-                continue
-
-        return res
-
-    def record_exported(self, invoices):
-        for invoice in invoices:
-            log.info(
-                "The invoice number {1} (id : {0}) has been exported"
-                .format(invoice.id, invoice.official_number)
-            )
-            invoice.exported = True
-            self.request.dbsession.merge(invoice)
-
-    def write_csv(self, invoices):
-        """
-            Write the exported csv file to the request
-        """
-        from autonomie.interfaces import ITreasuryInvoiceProducer
-        exporter = self.request.find_service(ITreasuryInvoiceProducer)
-        from autonomie.interfaces import ITreasuryInvoiceWriter
-        writer = self.request.find_service(ITreasuryInvoiceWriter)
-
-        writer.set_datas(exporter.get_book_entries(invoices))
-        write_file_to_request(
-            self.request,
-            get_filename(u"export_facture", writer.extension),
-            writer.render(),
-            headers="application/csv")
-        self.record_exported(invoices)
-        return self.request.response
-
     def _forms_dict(self):
         """
             Return the different invoice search forms
@@ -379,6 +442,9 @@ target='_blank'>Voir l'entreprise</a>"""
 
             'period_form': _period_form,
             }
+
+    def check_num_invoices(self, invoices):
+        return invoices.count()
 
     def __call__(self):
         """

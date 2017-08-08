@@ -28,15 +28,27 @@
 import logging
 import datetime
 
+from pyramid.httpexceptions import HTTPFound
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.task import (
     Invoice,
 )
+from autonomie_base.utils.date import format_date
+from autonomie.utils.strings import format_amount
+
+from autonomie.utils.widgets import ViewLink
+from autonomie.forms.tasks.invoice import (
+    get_payment_schema,
+)
 from autonomie.views import (
     BaseEditView,
+    BaseFormView,
+    submit_btn,
+    cancel_btn,
 )
 from autonomie.views.files import FileUploadView
+from autonomie.views.sage import SageSingleInvoiceExportPage
 
 from autonomie.views.task.views import (
     TaskAddView,
@@ -111,6 +123,70 @@ class InvoicePdfView(TaskPdfView):
     pass
 
 
+def gencinv_view(context, request):
+    """
+    Cancelinvoice generation view
+    """
+    try:
+        cancelinvoice = context.gen_cancelinvoice(request.user)
+        request.dbsession.add(cancelinvoice)
+        request.dbsession.flush()
+    except:
+        logger.exception(
+            u"Error while generating a cancelinvoice for {0}".format(
+                context.id
+            )
+        )
+        request.session.flash(
+            u"Erreur à la génération de votre avoir, "
+            u"contactez votre administrateur",
+            'error'
+        )
+        return HTTPFound(request.route_path("/invoices/{id}", id=context.id))
+    return HTTPFound(
+        request.route_path("/cancelinvoices/{id}", id=cancelinvoice.id)
+    )
+
+
+class InvoiceSetTreasuryiew(BaseEditView):
+    """
+    View used to set treasury related informations
+
+    context
+
+        An invoice
+
+    perms
+
+        set_treasury.invoice
+    """
+    factory = Invoice
+    schema = SQLAlchemySchemaNode(
+        Invoice,
+        includes=('prefix', 'financial_year',),
+        title=u"Modifier l'année fiscale de référence et le préfixe "
+        u"du numéro de facture",
+    )
+
+    def before(self, form):
+        BaseEditView.before(self, form)
+        self.request.actionmenu.add(
+            ViewLink(
+                label=u"Retour à la facture",
+                path="/invoices/{id}.html",
+                id=self.context.id,
+                _anchor="treasury",
+            )
+        )
+
+    @property
+    def title(self):
+        return u"Facture numéro {0} en date du {1}".format(
+            self.context.official_number,
+            format_date(self.context.date),
+        )
+
+
 # def get_paid_form(request, counter=None):
 #     """
 #         Return a payment form
@@ -155,31 +231,6 @@ class InvoicePdfView(TaskPdfView):
 #     )
 #     form = Form(schema=schema, buttons=(valid_btn,), action=action,
 #                 counter=counter)
-#     return form
-#
-#
-# def get_set_financial_year_form(request, counter=None):
-#     """
-#         Return the form to set the financial year of an
-#         invoice or a cancelinvoice
-#     """
-#     schema = FinancialYearSchema().bind(request=request)
-#     action = request.route_path(
-#         "/%ss/{id}/set_financial_year" % request.context.type_,
-#         id=request.context.id,
-#     )
-#     valid_btn = Button(
-#         name='submit',
-#         value="set_financial_year",
-#         type='submit',
-#         title=u"Valider",
-#     )
-#     form = Form(
-#         schema=schema,
-#         buttons=(valid_btn,),
-#         action=action,
-#         counter=counter,
-#     )
 #     return form
 #
 #
@@ -449,33 +500,72 @@ class InvoicePdfView(TaskPdfView):
 #         self.request.session.flash(msg)
 #
 #
-# def register_payment(request):
-#     """
-#         register_payment view
-#     """
-#     log.info(u"'{0}' is registering a payment".format(request.user.login))
-#     try:
-#         ret_dict = InvoiceStatusView(request)()
-#     except ValidationFailure, err:
-#         log.exception(u"An error has been detected")
-#         log.error(err.error)
-#         ret_dict = dict(form=err.render(),
-#                         title=u"Enregistrement d'un paiement")
-#     return ret_dict
-#
-#
-# def duplicate(request):
-#     """
-#         duplicate an invoice
-#     """
-#     try:
-#         ret_dict = InvoiceStatusView(request)()
-#     except ValidationFailure, err:
-#         log.exception(u"Duplication error")
-#         log.error(err.error)
-#         ret_dict = dict(form=err.render(),
-#                         title=u"Duplication d'un document")
-#     return ret_dict
+
+class InvoicePaymentView(BaseFormView):
+    buttons = (submit_btn, cancel_btn)
+    add_template_vars = ('help_message',)
+
+    @property
+    def help_message(self):
+        return (
+            u"Enregistrer un paiement pour la facture {0} dont le montant "
+            u"ttc restant à payer est de {1} €".format(
+                self.context.official_number,
+                format_amount(self.context.topay(), precision=5)
+            )
+        )
+
+    @property
+    def schema(self):
+        return get_payment_schema(self.request).bind(request=self.request)
+
+    @schema.setter
+    def schema(self, value):
+        """
+        A setter for the schema property
+        The BaseClass in pyramid_deform gets and sets the schema attribute that
+        is here transformed as a property
+        """
+        self._schema = value
+
+    @property
+    def title(self):
+        return (
+            u"Enregistrer un encaissement pour la facture "
+            u"{0.official_number}".format(self.context)
+        )
+
+    def before(self, form):
+        BaseFormView.before(self, form)
+        self.request.actionmenu.add(
+            ViewLink(
+                label=u"Retour à la facture",
+                path="/invoices/{id}.html",
+                id=self.context.id,
+                _anchor="payment",
+            )
+        )
+
+    def submit_success(self, appstruct):
+        self.context.record_payment(user=self.request.user, **appstruct)
+        self.request.dbsession.merge(self.context)
+        return HTTPFound(
+            self.request.route_path(
+                '/invoices/{id}.html',
+                id=self.context.id,
+                _anchor='payment',
+            )
+        )
+
+    def cancel_success(self, appstruct):
+        return HTTPFound(
+            self.request.route_path(
+                '/invoices/{id}.html',
+                id=self.context.id,
+                _anchor='payment',
+            )
+        )
+    cancel_failure = cancel_success
 #
 #
 # def set_financial_year(request):
@@ -517,7 +607,11 @@ class InvoiceAdminView(BaseEditView):
     Vue accessible aux utilisateurs admin
     """
     factory = Invoice
-    schema = SQLAlchemySchemaNode(Invoice)
+    schema = SQLAlchemySchemaNode(
+        Invoice,
+        title=u"Formulaire d'édition forcée de devis/factures/avoirs",
+        help_msg=u"Les montants sont *10^5   10 000==1€",
+    )
 
 
 def add_routes(config):
@@ -535,17 +629,22 @@ def add_routes(config):
         '/invoices/{id:\d+}',
         traverse='/invoices/{id}',
     )
-    for extension in ('html', 'pdf'):
+    for extension in ('html', 'pdf', 'txt'):
         config.add_route(
             '/invoices/{id}.%s' % extension,
             '/invoices/{id:\d+}.%s' % extension,
             traverse='/invoices/{id}'
         )
     for action in (
-        'addfile', 'delete', 'duplicate', 'admin',
-        'set_financial_year',
+        'addfile',
+        'delete',
+        'duplicate',
+        'admin',
+        'set_treasury',
         'set_products',
         'addpayment',
+        'gencinv',
+        'metadatas',
     ):
         config.add_route(
             '/invoices/{id}/%s' % action,
@@ -595,7 +694,7 @@ def includeme(config):
     config.add_view(
         InvoiceHtmlView,
         route_name='/invoices/{id}.html',
-        renderer='tasks/view_only.mako',
+        renderer='tasks/invoice_view_only.mako',
         permission='view.invoice',
     )
 
@@ -612,24 +711,35 @@ def includeme(config):
         permission='add.file',
     )
 
+    config.add_view(
+        gencinv_view,
+        route_name="/invoices/{id}/gencinv",
+        permission="gencinv.invoice",
+    )
 
-#     config.add_view(
-#         set_financial_year,
-#         route_name="/invoices/{id}/set_financial_year",
-#         permission="admin_treasury",
-#         renderer='base/formpage.mako',
-#     )
-#
-#     config.add_view(
+    config.add_view(
+        SageSingleInvoiceExportPage,
+        route_name="/invoices/{id}.txt",
+        renderer='/treasury/sage_single_export.mako',
+        permission='admin_treasury'
+    )
+    config.add_view(
+        InvoicePaymentView,
+        route_name="/invoices/{id}/addpayment",
+        permission="add_payment.invoice",
+        renderer='base/formpage.mako',
+    )
+    config.add_view(
+        InvoiceSetTreasuryiew,
+        route_name="/invoices/{id}/set_treasury",
+        permission="set_treasury.invoice",
+        renderer='base/formpage.mako',
+    )
+
+#    config.add_view(
 #         set_products,
 #         route_name="/invoices/{id}/set_products",
 #         permission="admin_treasury",
 #         renderer='base/formpage.mako',
 #     )
 #
-#     config.add_view(
-#         register_payment,
-#         route_name="/invoices/{id}/addpayment",
-#         permission="add_payment.invoice",
-#         renderer='base/formpage.mako',
-#     )

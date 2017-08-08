@@ -44,7 +44,7 @@ def populate_invoice_payment_actionmenu(context, request):
     """
     link = ViewLink(
         u"Voir la facture",
-        path="invoice",
+        path="/%ss/{id}.html" % context.parent.type_,
         id=context.parent.id,
     )
     request.actionmenu.add(link)

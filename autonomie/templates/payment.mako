@@ -23,6 +23,13 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%block name="content">
+<div class='alert'>
+% if request.context.exported:
+    <i class='glyphicon glyphicon-ok-sign'></i> Cet encaissement a été exporté vers la comptabilité
+% else:
+    <i class='glyphicon glyphicon-time'></i> Cet encaissement n'a pas encore été exporté vers la comptabilité
+% endif
+</div>
 <dl class="dl-horizontal">
     <dt>Enregistré par </dt><dd>${api.format_account(request.context.user)}</dd>
     <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>

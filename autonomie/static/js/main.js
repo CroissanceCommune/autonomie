@@ -228,7 +228,7 @@ function highlight(jquery_tag, color, callback){
   );
 }
 
-function ajax_request(url, data, options){
+function ajax_request(url, data, method, extra_options){
   /*
    * Returns a deferred ajax request
    *
@@ -242,20 +242,24 @@ function ajax_request(url, data, options){
    *      custom code
    *    });
    */
-  var default_options = {
-    url: url,
-    data: data,
-    dataType: 'json',
-    mimeType: "textPlain",
-    cache: false,
-    type: 'POST',
-    error: function(){
-      alert("Une erreur a été rencontrée, contactez votre administrateur.");
+   var data = data || {};
+   var method = method || 'POST';
+    var options = {
+        url: url,
+        data: data,
+        method: method,
+        dataType: 'json',
+        cache: false
     }
-  };
-  var args = options || {};
-  var ajax_args = _.extend(default_options, args);
-  return $.ajax(ajax_args);
+    if ((method == 'POST') || (method=='PUT') || (method='PASTE')){
+        options.data = JSON.stringify(data);
+        options.contentType = "application/json; charset=UTF-8";
+        options.processData = false;
+    }
+
+    _.extend(options, extra_options);
+
+    return $.ajax(options);
 }
 function loadUI(ui_object){
   /*

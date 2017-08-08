@@ -228,6 +228,7 @@ task = get_module_resource(
     ]
 )
 task_list_js = get_module_resource("task_list")
+task_add_js = get_module_resource("task_add")
 event_list_js = get_module_resource('event_list')
 
 job_js = get_module_resource("job", tmpl=True)

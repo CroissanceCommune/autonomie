@@ -179,25 +179,6 @@ class ViewLink(Widget, PermWidget):
         return cmp_urls(btn_path, cur_path)
 
 
-class ItemActionLink(ViewLink):
-    """
-        Action button used in item list
-    """
-    template = "base/itemactionlink.mako"
-
-    def url(self, context, request):
-        """
-            Returns the url associated with current btn
-        """
-        return request.route_path(self.path,
-                                  id=context.id,
-                                  **self.url_kw)
-
-    def render(self, request, item):
-        return render_html(request, self.template, {'elem': self,
-                                                    'item': item})
-
-
 class Submit(Widget):
     """
         Submit Link used to be included in a form

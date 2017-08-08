@@ -647,7 +647,7 @@ def get_customer_acl(self):
     acl = DEFAULT_PERM[:]
     perms = ('view_customer', 'edit_customer',)
 
-    if self.archived and not self.has_tasks():
+    if not self.has_tasks():
         perms += ('delete_customer',)
     else:
         acl.insert(0, (Deny, Everyone, ('delete_customer',)))
@@ -686,7 +686,7 @@ def get_project_acl(self):
         'edit.file',
     )
 
-    if self.archived and not self.has_tasks():
+    if not self.has_tasks():
         perms += ('delete_project',)
     else:
         acl.insert(0, (Deny, Everyone, ('delete_project',)))

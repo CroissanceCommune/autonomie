@@ -124,7 +124,11 @@ class EstimationDeleteView(TaskDeleteView):
 
 class EstimationAdminView(BaseEditView):
     factory = Estimation
-    schema = SQLAlchemySchemaNode(Estimation)
+    schema = SQLAlchemySchemaNode(
+        Estimation,
+        title=u"Formulaire d'édition forcée de devis/factures/avoirs",
+        help_msg=u"Les montants sont *10^5   10 000==1€",
+    )
 
 
 class EstimationHtmlView(TaskHtmlView):

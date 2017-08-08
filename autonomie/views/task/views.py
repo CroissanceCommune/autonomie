@@ -15,10 +15,14 @@ from autonomie.models.project import (
     Phase,
     Project,
 )
+from autonomie.models.task.task import TaskLine
 from autonomie.forms.tasks.base import (
     get_duplicate_schema,
     get_new_task_schema,
     get_task_metadatas_edit_schema,
+)
+from autonomie.forms.tasks.invoice import (
+    SetProductsSchema,
 )
 from autonomie.utils.pdf import (
     write_pdf,
@@ -36,6 +40,7 @@ from autonomie.views import (
     BaseView,
     BaseFormView,
     submit_btn,
+    cancel_btn,
 )
 
 
@@ -323,6 +328,7 @@ class TaskPdfView(BaseView):
 
 class TaskMetadatasEditView(BaseFormView):
     schema = get_task_metadatas_edit_schema()
+    buttons = (submit_btn, cancel_btn)
 
     @property
     def title(self):
@@ -348,13 +354,69 @@ class TaskMetadatasEditView(BaseFormView):
             }
         )
 
-    def submit_success(self, appstruct):
-        appstruct.pop('customer_id')
-        for key, value in appstruct.items():
-            setattr(self.context, key, value)
-        self.request.dbsession.merge(self.context)
+    def redirect(self):
         url = self.request.route_path(
             "/%ss/{id}" % self.context.type_,
             id=self.context.id
         )
         return HTTPFound(url)
+
+    def submit_success(self, appstruct):
+        appstruct.pop('customer_id')
+        for key, value in appstruct.items():
+            setattr(self.context, key, value)
+        self.request.dbsession.merge(self.context)
+        return self.redirect()
+
+    def cancel_success(self, appstruct):
+        return self.redirect()
+
+    cancel_failure = cancel_success
+
+
+class TaskSetProductsView(BaseFormView):
+    """
+    Base view for setting product codes (on invoices and cancelinvoices)
+
+    context
+
+        invoice or cancelinvoice
+    """
+    schema = SetProductsSchema()
+
+    def before(self, form):
+        form.set_appstruct(
+            {
+                'lines': [
+                    line.appstruct() for line in self.context.all_lines
+                ]
+            }
+        )
+        self.request.actionmenu.add(
+            ViewLink(
+                u"Revenir au document",
+                path="/%ss/{id}.html" % self.context.type_,
+                id=self.context.id
+            )
+        )
+
+    def submit_success(self, appstruct):
+        for line in appstruct['lines']:
+            line_id = line.get('id')
+            product_id = line.get('product_id')
+            if line_id is not None and product_id is not None:
+                taskline = TaskLine.get(line_id)
+                if taskline.task == self.context:
+                    taskline.product_id = product_id
+                    self.request.dbsession.merge(taskline)
+                else:
+                    logger.error(
+                        u"Possible break in attempt: trying to set product id "
+                        u"on the wrong task line (not belonging to this task)"
+                    )
+        return HTTPFound(
+            self.request.route_path(
+                '/%ss/{id}' % self.context.type_,
+                id=self.context.id,
+            )
+        )

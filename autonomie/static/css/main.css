@@ -142,6 +142,9 @@ input[type=password] {
 .deform .errorMsgLbl {
   background-color: transparent; }
 
+.deform .deform-fixed-seq label {
+  font-weight: bold; }
+
 /* Class used to set a max width to forms */
 .medium-form-container {
   max-width: 600px;
@@ -431,8 +434,7 @@ header .navbar .nav > li > a {
 
 .status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed {
   background-color: #f9aaaa !important; }
-  .status-table .signed-status-aborted a, .status-table .tolate-True a, .status-table .status-wait a, .status-table .job-failed a {
-    color: #fff;
+  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait a:not(.btn), .status-table .job-failed a:not(.btn) {
     text-transform: uppercase;
     text-decoration: underline; }
   .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait .status-td, .status-table .job-failed .status-td {

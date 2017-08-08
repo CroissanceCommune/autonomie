@@ -1,4 +1,4 @@
-<div class="deform-seq"
+<div class="deform-seq deform-fixed-seq"
      id="${field.oid}"
      tal:define="item_tmpl item_template|field.widget.item_template;
 		 oid oid|field.oid;

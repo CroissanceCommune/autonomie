@@ -27,7 +27,6 @@
 """
 import colander
 import deform
-import deform_extensions
 from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.security import has_permission
 
@@ -120,7 +119,8 @@ def get_product_choices():
     """
         Return data structure for product code select widget options
     """
-    return [(p.id, u"{0} ({1})".format(p.name, p.compte_cg),)
+    return [(p.id, u"{0} ({1} - {2})".format(
+        p.name, p.compte_cg, p.tva.name),)
             for p in Product.query()]
 
 
@@ -138,6 +138,17 @@ def deferred_product_widget(node, kw):
     products = get_product_choices()
     wid = deform.widget.SelectWidget(values=products)
     return wid
+
+
+def product_match_tva_validator(form, line_value):
+    product_id = line_value.get('product_id')
+    product = Product.get(product_id)
+    if product.tva.value != line_value['tva']:
+        exc = colander.Invalid(
+            form,
+            u"Le code produit doit correspondre à la TVA associée",
+        )
+        raise exc
 
 
 @colander.deferred
@@ -203,13 +214,13 @@ class ProductTaskLine(colander.MappingSchema):
     )
     description = colander.SchemaNode(
         colander.String(),
-        widget=deform_extensions.DisabledInput(),
+        widget=deform.widget.TextInputWidget(readonly=True),
         missing=u'',
         css_class='col-md-3',
     )
     tva = colander.SchemaNode(
         AmountType(),
-        widget=deform_extensions.DisabledInput(),
+        widget=deform.widget.TextInputWidget(readonly=True),
         css_class='col-md-1',
         title=u'TVA',
     )
@@ -224,7 +235,14 @@ class ProductTaskLine(colander.MappingSchema):
 
 
 class ProductTaskLines(colander.SequenceSchema):
-    taskline = ProductTaskLine(missing="", title=u"")
+    taskline = ProductTaskLine(
+        missing="",
+        title=u"",
+        validator=product_match_tva_validator,
+        widget=deform.widget.MappingWidget(
+            template=TEMPLATES_URL + 'clean_mapping.pt',
+        )
+    )
 
 
 class SetProductsSchema(colander.MappingSchema):
@@ -233,12 +251,22 @@ class SetProductsSchema(colander.MappingSchema):
     """
     lines = ProductTaskLines(
         widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + 'product_tasklines.pt',
-            item_template=TEMPLATES_URL + 'product_tasklines_item.pt',
+            template=TEMPLATES_URL + 'fixed_len_sequence.pt',
+            item_template=TEMPLATES_URL + 'fixed_len_sequence_item.pt',
             min_len=1),
         missing="",
         title=u''
     )
+
+
+def get_set_product_schema(lines):
+    """
+    Return a product schema matching the number of lines
+    """
+    schema = SetProductsSchema()
+    schema['lines'].widget.min_len = len(lines)
+    schema['lines'].widget.max_len = len(lines)
+    return schema
 
 
 # INVOICE LIST RELATED SCHEMAS

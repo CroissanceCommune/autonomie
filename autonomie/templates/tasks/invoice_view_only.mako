@@ -28,35 +28,43 @@
 <%inherit file="/tasks/view_only.mako" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 
-
 <%block name='moreactions'>
-<a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/duplicate', id=request.context.id)}">
+<% invoice = request.context %>
+<a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/duplicate', id=invoice.id)}">
     <i class='fa fa-copy'></i> Dupliquer
 </a>
 % if api.has_permission('gencinv.invoice'):
-    <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/gencinv', id=request.context.id)}">
+    <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/gencinv', id=invoice.id)}">
         <i class='fa fa-files-o'></i> Générer un avoir
     </a>
 % endif
 % if api.has_permission('add_payment.invoice'):
-    <a class='btn btn-success btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=request.context.id)}">
+    <a class='btn btn-success btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}">
         <i class='fa fa-bank'></i> Enregistrer un encaissement
     </a>
 % endif
 <a class='btn btn-default btn-block'
-    href="${request.route_path('/invoices/{id}/set_metadatas', id=request.context.id)}"
+    href="${request.route_path('/invoices/{id}/set_metadatas', id=invoice.id)}"
     >
     <i class='glyphicon glyphicon-pencil'></i> Modifier
 </a>
 
+% if not invoice.exported:
+    <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/set_products', id=invoice.id)}">
+        <i class='fa fa-cog'></i> Configurer les codes produits
+    </a>
+% endif
+
 </%block>
 
 <%block name='before_tabs'>
+    <% invoice = request.context %>
     <p class='lead'>
-    Cette facture porte le numéro <b>${request.context.prefix}${request.context.official_number}</b>
+    Cette facture porte le numéro <b>${invoice.prefix}${invoice.official_number}</b>
     </p>
 </%block>
 <%block name='moretabs'>
+    <% invoice = request.context %>
     <li role="presentation">
         <a href="#treasury" aria-control="treasury" role='tab' data-toggle='tab'>Comptabilité</a>
     </li>
@@ -66,15 +74,16 @@
     </li>
 </%block>
 <%block name='before_summary'>
+    <% invoice = request.context %>
 <h3>Rattachement</h3>
 <ul>
 <li>
-% if request.context.estimation:
+% if invoice.estimation:
     Cette facture est rattachée au devis \
     <a
-    href="${request.route_path('/estimations/{id}.html', id=request.context.estimation.id)}"
+    href="${request.route_path('/estimations/{id}.html', id=invoice.estimation.id)}"
     >
-    ${request.context.estimation.internal_number}
+    ${invoice.estimation.internal_number}
     </a>
 % else:
 <div>Aucun devis n'est rattaché à cette facture
@@ -83,8 +92,8 @@
 % endif
     </li>
 <br />
-% if request.context.cancelinvoices:
-    % for  cancelinvoice in request.context.cancelinvoices:
+% if invoice.cancelinvoices:
+    % for  cancelinvoice in invoice.cancelinvoices:
             <li>
                 <p>
                     L'avoir (${api.format_cancelinvoice_status(cancelinvoice, full=False)}): \
@@ -106,24 +115,25 @@
 </%block>
 
 <%block name='moretabs_datas'>
+    <% invoice = request.context %>
     <div role="tabpanel" class="tab-pane row" id="treasury">
         <div class='col-xs-12 col-md-10 col-md-offset-1'>
         <div class='alert'>
-        Cette facture est rattachée à l'année fiscale ${request.context.financial_year}.
+        Cette facture est rattachée à l'année fiscale ${invoice.financial_year}.
         <a class='btn btn-default'
-            href="${request.route_path('/invoices/{id}/set_treasury', id=request.context.id)}"
+            href="${request.route_path('/invoices/{id}/set_treasury', id=invoice.id)}"
             >
             <i class='glyphicon glyphicon-pencil'></i> Modifier
         </a>
         <br />
-        Elle porte le numéro ${request.context.prefix}${request.context.official_number}.
+        Elle porte le numéro ${invoice.prefix}${invoice.official_number}.
         </div>
-            % if request.context.exported:
+            % if invoice.exported:
                 <div class='lead'>
                     <i class='glyphicon glyphicon-ok-sign'></i> Cette facture a été exportée vers la comptabilité
                 </div>
                     <a
-                    href="${request.route_path('/invoices/{id}.txt', id=request.context.id, _query={'force': True})}"
+                    href="${request.route_path('/invoices/{id}.txt', id=invoice.id, _query={'force': True})}"
                     class='btn btn-default primary-action'
                     >
                     <i class='glyphicon glyphicon-export'></i>
@@ -135,7 +145,7 @@
                 </div>
                 % if api.has_permission('admin_treasury'):
                     <a
-                    href="${request.route_path('/invoices/{id}.txt', id=request.context.id)}"
+                    href="${request.route_path('/invoices/{id}.txt', id=invoice.id)}"
                     class='btn btn-primary primary-action'
                     >
                     <i class='glyphicon glyphicon-export'></i>
@@ -153,8 +163,8 @@
             </a>
         % endif
         <h3>Liste des encaissements</h3>
-        % if request.context.payments:
-            % for payment in request.context.payments:
+        % if invoice.payments:
+            % for payment in invoice.payments:
                     % if loop.first:
                         <ul>
                     % endif
@@ -175,10 +185,10 @@
             Aucun encaissement n'a été saisi
         % endif
         <h3>Avoir(s)</h3>
-        % if request.context.cancelinvoices:
+        % if invoice.cancelinvoices:
             <% hasone = False %>
             <ul>
-            % for  cancelinvoice in request.context.cancelinvoices:
+            % for  cancelinvoice in invoice.cancelinvoices:
                 % if cancelinvoice.status == 'valid':
                     <% hasone = True %>
                     <li>

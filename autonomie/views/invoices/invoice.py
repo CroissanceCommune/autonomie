@@ -58,6 +58,7 @@ from autonomie.views.task.views import (
     TaskPdfView,
     TaskDuplicateView,
     TaskMetadatasEditView,
+    TaskSetProductsView,
 )
 
 
@@ -182,7 +183,7 @@ class InvoiceSetTreasuryiew(BaseEditView):
         BaseEditView.before(self, form)
         self.request.actionmenu.add(
             ViewLink(
-                label=u"Retour à la facture",
+                label=u"Revenir à la facture",
                 path="/invoices/{id}.html",
                 id=self.context.id,
                 _anchor="treasury",
@@ -209,319 +210,15 @@ class InvoiceMetadatasSetView(TaskMetadatasEditView):
         )
 
 
-# def get_paid_form(request, counter=None):
-#     """
-#         Return a payment form
-#     """
-#     valid_btn = Button(
-#         name='submit',
-#         value="paid",
-#         type='submit',
-#         title=u"Valider",
-#     )
-#     schema = get_payment_schema(request).bind(request=request)
-#     action = request.route_path(
-#         "/invoices/{id}/addpayment",
-#         id=request.context.id,
-#         _query=dict(action='payment')
-#     )
-#     form = Form(
-#         schema=schema,
-#         buttons=(valid_btn,),
-#         action=action,
-#         counter=counter,
-#     )
-#     return form
-#
-#
-# def get_set_products_form(request, counter=None):
-#     """
-#         Return a form used to set products reference to :
-#             * invoice lines
-#             * cancelinvoice lines
-#     """
-#     schema = SetProductsSchema().bind(request=request)
-#     action = request.route_path(
-#         "/%ss/{id}/set_products" % request.context.type_,
-#         id=request.context.id,
-#     )
-#     valid_btn = Button(
-#         name='submit',
-#         value="set_products",
-#         type='submit',
-#         title=u"Valider"
-#     )
-#     form = Form(schema=schema, buttons=(valid_btn,), action=action,
-#                 counter=counter)
-#     return form
-#
-#
-# def add_lines_to_invoice(task, appstruct):
-#     """
-#         Add the lines to the current invoice
-#     """
-#     # Needed for edition only
-#     task.default_line_group.lines = []
-#     task.line_groups = [task.default_line_group]
-#     task.discounts = []
-#
-#     for group in appstruct['groups']:
-#         lines = group.pop('lines', [])
-#         group = TaskLineGroup(**group)
-#         for line in lines:
-#             group.lines.append(TaskLine(**line))
-#         task.line_groups.append(group)
-#     for line in appstruct['lines']:
-#         task.default_line_group.lines.append(TaskLine(**line))
-#
-#     for line in appstruct.get('discounts', []):
-#         task.discounts.append(DiscountLine(**line))
-#
-#     return task
-#
-#
-# class InvoiceFormActions(TaskFormActions):
-#     """
-#     The form actions class specific to invoices
-#     """
-#
-#     def _set_financial_year_form(self):
-#         """
-#             Return the form for setting the financial year of a document
-#         """
-#         form = get_set_financial_year_form(self.request, self.formcounter)
-#         form.set_appstruct(
-#             {
-#                 'financial_year': self.context.financial_year,
-#                 'prefix': self.context.prefix,
-#             }
-#         )
-#         self.formcounter = form.counter
-#         return form
-#
-#     def _set_financial_year_btn(self):
-#         """
-#             Return the button for the popup with the financial year set form
-#             of the current document
-#         """
-#         if context_is_task(self.context):
-#             title = u"Année comptable de référence"
-#             form = self._set_financial_year_form()
-#             popup = PopUp(
-#                 "set_financial_year_form_container",
-#                 title,
-#                 form.render(),
-#             )
-#             self.request.popups[popup.name] = popup
-#             yield popup.open_btn(css='btn btn-primary')
-#
-#     def _set_products_form(self):
-#         """
-#             Return the form for configuring the products for each lines
-#         """
-#         form = get_set_products_form(self.request, self.formcounter)
-#         form.set_appstruct(
-#             {
-#                 'lines': [
-#                     line.appstruct() for line in self.context.all_lines
-#                 ]
-#             }
-#         )
-#         self.formcounter = form.counter
-#         return form
-#
-#     def _set_products_btn(self):
-#         """
-#             Popup fire button
-#         """
-#         title = u"Configuration des produits"
-#         form = self._set_products_form()
-#         popup = PopUp("set_products_form", title, form.render())
-#         self.request.popups[popup.name] = popup
-#         yield popup.open_btn(css='btn btn-primary')
-#
-#     def _paid_form(self):
-#         """
-#             return the form for payment registration
-#         """
-#         form = get_paid_form(self.request, self.formcounter)
-#         appstruct = []
-#         for tva_value, value in self.context.topay_by_tvas().items():
-#             tva = Tva.by_value(tva_value)
-#             appstruct.append({'tva_id': tva.id, 'amount': value})
-#             form.set_appstruct({'tvas': appstruct})
-#
-#         self.formcounter = form.counter
-#         return form
-#
-#     def _paid_btn(self):
-#         """
-#             Return a button to set a paid btn and a select to choose
-#             the payment mode
-#         """
-#
-#         if self.request.has_permission("add_payment.invoice"):
-#             form = self._paid_form()
-#             title = u"Notifier un paiement"
-#             popup = PopUp("paidform", title, form.render())
-#             self.request.popups[popup.name] = popup
-#             yield popup.open_btn(css='btn btn-primary')
-#
-#     def _aboinv_btn(self):
-#         """
-#             Return a button to abort an invoice
-#         """
-#         yield Submit(
-#             u"Annuler cette facture",
-#             value="aboinv",
-#             request=self.request,
-#             confirm=u"Êtes-vous sûr de vouloir annuler cette facture ?"
-#         )
-#
-#     def _gencinv_btn(self):
-#         """
-#             Return a button for generating a cancelinvoice
-#         """
-#         if self.request.context.topay() != 0:
-#             yield Submit(
-#                 u"Générer un avoir",
-#                 value="gencinv",
-#                 request=self.request,
-#             )
-#
-#
-# class CommonInvoiceStatusView(TaskStatusView):
-#     """
-#         Handle the invoice status processing
-#         Is called when the status btn from the html view or
-#         the edit view are pressed
-#
-#         context is an invoice
-#     """
-#
-#     def redirect(self):
-#         project_id = self.request.context.project.id
-#         return HTTPFound(self.request.route_path('project', id=project_id))
-#
-#     def pre_set_products_process(self, task, status, params):
-#         """
-#             Pre processed method for product configuration
-#         """
-#         log.debug(u"+ Setting products for an invoice (pre-step)")
-#         form = get_set_products_form(self.request)
-#         appstruct = form.validate(params.items())
-#         log.debug(appstruct)
-#         return appstruct
-#
-#     def post_set_products_process(self, task, status, invoice):
-#         log.debug(u"+ Setting products for an invoice (post-step)")
-#         invoice = self.request.dbsession.merge(invoice)
-#         log.debug(
-#             u"Configuring products for {context.__name__} :{context.id}".
-#             format(context=invoice)
-#         )
-#         msg = u"Les codes produits ont bien été configurés"
-#         self.request.session.flash(msg)
-#
-#     def pre_gencinv_process(self, task, status, params):
-#         params = dict(params.items())
-#         params['user'] = self.request.user
-#         return params
-#
-#     def pre_set_financial_year_process(self, task, status, params):
-#         """
-#             Handle form validation before setting the financial year of
-#             the current task
-#         """
-#         form = get_set_financial_year_form(self.request)
-#         # if an error is raised here, it will be cached a level higher
-#         appstruct = form.validate(params.items())
-#         log.debug(u" * Form has been validated")
-#         return appstruct
-#
-#     def post_set_financial_year_process(self, task, status, params):
-#         invoice = params
-#         invoice = self.request.dbsession.merge(invoice)
-#         log.debug(u"Set financial year and prefix of the invoice :{0}".format(
-#             invoice.id))
-#         msg = u"Le document a bien été modifié"
-#         msg = msg.format(self.request.route_path(
-#             "/invoices/{id}.html", id=invoice.id
-#         ))
-#         self.request.session.flash(msg)
-#
-#
-# class InvoiceStatusView(CommonInvoiceStatusView):
-#     def pre_paid_process(self, task, status, params):
-#         """
-#             Validate a payment form's data
-#         """
-#         form = get_paid_form(self.request)
-#         # We don't try except on the data validation, since this is done in the
-#         # original wrapping call (see taskaction set_status)
-#         appstruct = form.validate(params.items())
-#
-#         if 'amount' in appstruct:
-#             # Les lignes de facture ne conservent pas le lien avec les objets
-#             # Tva, ici on en a une seule, on récupère l'objet et on le set sur
-#             # le amount
-#             appstruct['tva_id'] = Tva.by_value(
-#                 self.context.get_tvas().keys()[0]
-#             ).id
-#
-#         elif 'tvas' in appstruct:
-#             # Ce champ ne servait que pour tester las somme des valeurs saisies
-#             appstruct.pop('payment_amount')
-#             # si on a plusieurs tva :
-#             for tva_payment in appstruct['tvas']:
-#                 remittance_amount = appstruct['remittance_amount']
-#                 tva_payment['remittance_amount'] = remittance_amount
-#                 tva_payment['date'] = appstruct['date']
-#                 tva_payment['mode'] = appstruct['mode']
-#                 tva_payment['bank_id'] = appstruct.get('bank_id')
-#                 tva_payment['resulted'] = appstruct.get('resulted', False)
-#         else:
-#             raise Exception(u"On a rien à faire ici")
-#
-#         logger.debug(u"In pre paid process")
-#         logger.debug(u"Returning : {0}".format(appstruct))
-#         return appstruct
-#
-#     def post_valid_process(self, task, status, params):
-#         msg = u"La facture porte le numéro <b>{0}</b>"
-#         self.session.flash(msg.format(task.official_number))
-#
-#     def post_gencinv_process(self, task, status, params):
-#         cancelinvoice = params
-#         cancelinvoice = self.request.dbsession.merge(cancelinvoice)
-#         self.request.dbsession.flush()
-#         id_ = cancelinvoice.id
-#         log.debug(u"Generated cancelinvoice {0}".format(id_))
-#         msg = u"Un avoir a été généré, vous pouvez le modifier \
-# <a href='{0}'>Ici</a>."
-#         msg = msg.format(
-#             self.request.route_path(
-#                 "/cancelinvoices/{id}.html", id=id_
-#             )
-#         )
-#         self.session.flash(msg)
-#
-#     def post_duplicate_process(self, task, status, params):
-#         invoice = params
-#         invoice = self.request.dbsession.merge(invoice)
-#         self.request.dbsession.flush()
-#         id_ = invoice.id
-#         log.debug(u"Duplicated invoice : {0}".format(id_))
-#         msg = u"La facture a bien été dupliquée, vous pouvez le modifier \
-# <a href='{0}'>Ici</a>."
-#         msg = msg.format(
-#             self.request.route_path(
-#                 "/invoices/{id}.html", id=id_
-#             )
-#         )
-#         self.request.session.flash(msg)
-#
-#
+class InvoiceSetProductsView(TaskSetProductsView):
+    @property
+    def title(self):
+        return (
+            u"Configuration des codes produits pour la facture {0.name}".format(
+                self.context
+            )
+        )
+
 
 class InvoicePaymentView(BaseFormView):
     buttons = (submit_btn, cancel_btn)
@@ -561,7 +258,7 @@ class InvoicePaymentView(BaseFormView):
         BaseFormView.before(self, form)
         self.request.actionmenu.add(
             ViewLink(
-                label=u"Retour à la facture",
+                label=u"Revenir à la facture",
                 path="/invoices/{id}.html",
                 id=self.context.id,
                 _anchor="payment",
@@ -588,38 +285,6 @@ class InvoicePaymentView(BaseFormView):
             )
         )
     cancel_failure = cancel_success
-#
-#
-# def set_financial_year(request):
-#     """
-#         Set the financial year of a document
-#     """
-#     try:
-#         ret_dict = InvoiceStatusView(request)()
-#     except ValidationFailure, err:
-#         log.exception(u"Financial year set error")
-#         log.error(err.error)
-#         ret_dict = dict(
-#             form=err.render(),
-#             title=u"Année comptable de référence",
-#         )
-#     return ret_dict
-#
-#
-# def set_products(request):
-#     """
-#         Set products in a document
-#     """
-#     try:
-#         ret_dict = InvoiceStatusView(request)()
-#     except ValidationFailure, err:
-#         log.exception(u"Error setting products")
-#         log.error(err.error)
-#         ret_dict = dict(
-#             form=err.render(),
-#             title=u"Année comptable de référence",
-#         )
-#     return ret_dict
 
 
 class InvoiceAdminView(BaseEditView):
@@ -763,11 +428,9 @@ def includeme(config):
         permission="view.invoice",
         renderer='tasks/add.mako',
     )
-
-#    config.add_view(
-#         set_products,
-#         route_name="/invoices/{id}/set_products",
-#         permission="admin_treasury",
-#         renderer='base/formpage.mako',
-#     )
-#
+    config.add_view(
+        InvoiceSetProductsView,
+        route_name="/invoices/{id}/set_products",
+        permission="admin_treasury",
+        renderer='base/formpage.mako',
+    )

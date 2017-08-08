@@ -199,7 +199,12 @@ class Invoice(Task, InvoiceCompute):
     financial_year = deferred(
         Column(
             Integer,
-            info={'colanderalchemy': {'title': u"Année fiscale de référence"}},
+            info={
+                'colanderalchemy': {
+                    'title': u"Année fiscale de référence",
+                    'widget': deform.widget.TextInputWidget(mask='9999'),
+                }
+            },
             default=0
         ),
         group='edit'
@@ -458,6 +463,7 @@ class CancelInvoice(Task, TaskCompute):
             info={
                 'colanderalchemy': {
                     'title': u"Année fiscale de référence",
+                    'widget': deform.widget.TextInputWidget(mask='9999'),
                 }
             },
             default=0

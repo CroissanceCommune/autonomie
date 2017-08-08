@@ -546,7 +546,7 @@ class BaseFormView(FormView):
 
 class BaseEditView(BaseFormView):
     """
-    Admin view that should be subclassed adding a colanderalchemy schema
+    ColanderAlchemy schema based view
 
     class AdminModel(BaseEditView):
         schema = SQLAlchemySchemaNode(MyModel)
@@ -574,6 +574,8 @@ class BaseEditView(BaseFormView):
         self.request.session.flash(self.msg)
         if self.redirect_route is not None:
             return HTTPFound(self.request.route_path(self.redirect_route))
+        elif hasattr(self, 'redirect'):
+            return self.redirect()
 
 
 class BaseAddView(BaseFormView):

@@ -34,7 +34,6 @@ from sqlalchemy import (
     not_,
 )
 from sqlalchemy.orm import undefer_group
-from webhelpers.html.builder import HTML
 
 from deform import Form
 
@@ -49,7 +48,6 @@ from autonomie.models.customer import (
 )
 from autonomie.utils.widgets import (
     ViewLink,
-    StaticWidget,
 )
 from autonomie.utils.rest import add_rest_views
 from autonomie.forms.customer import (
@@ -192,26 +190,6 @@ class CustomersListView(CustomersListTools, BaseListView):
         form = get_individual_customer_form(self.request, field_counter)
         res.append((form_title, form))
         return res
-
-    def _get_archived_btn(self, appstruct):
-        """
-            return the show archived button
-        """
-        archived = appstruct['archived']
-        args = self.request.GET.copy()
-
-        args.pop('archived', None)
-
-        if not archived:
-            msg = u"Afficher les clients archivés"
-            args['archived'] = 'true'
-        else:
-            msg = u"Afficher les clients actifs"
-
-        url = self.request.current_route_path(_query=args)
-        link = HTML.a(msg, href=url)
-
-        return StaticWidget(link)
 
     def stream_actions(self, customer):
         """
@@ -546,10 +524,26 @@ class CustomerRestView(BaseRestView):
         GET : return list of customers (company_id should be provided)
     """
     def get_schema(self, submitted):
-        return SQLAlchemySchemaNode(Customer)
+        if 'formid' in submitted:
+            if submitted['formid'] == 'company':
+                schema = get_company_customer_schema()
+            else:
+                schema = get_individual_customer_schema()
+        else:
+            excludes = ('company_id',)
+            schema = SQLAlchemySchemaNode(Customer, excludes=excludes)
+        return schema
 
     def collection_get(self):
         return self.context.customers
+
+    def post_format(self, entry, edit, attributes):
+        """
+        Associate a newly created element to the parent company
+        """
+        if not edit:
+            entry.company = self.context
+        return entry
 
 
 def add_routes(config):
@@ -675,5 +669,5 @@ def includeme(config):
         view_rights="view_customer",
         edit_rights="edit_customer",
         add_rights="add_customer",
-        delete_rights="edit_customer",
+        delete_rights="delete_customer",
     )

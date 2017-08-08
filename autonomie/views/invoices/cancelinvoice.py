@@ -68,7 +68,11 @@ class CancelInvoicePdfView(TaskPdfView):
 
 class CancelInvoiceAdminView(BaseEditView):
     factory = CancelInvoice
-    schema = SQLAlchemySchemaNode(CancelInvoice)
+    schema = SQLAlchemySchemaNode(
+        CancelInvoice,
+        title=u"Formulaire d'édition forcée de devis/factures/avoirs",
+        help_msg=u"Les montants sont *10^5   10 000==1€",
+    )
 
 
 # class CancelInvoiceStatusView(CommonInvoiceStatusView):
@@ -151,7 +155,7 @@ def includeme(config):
     config.add_view(
         CancelInvoiceEditView,
         route_name='/cancelinvoices/{id}',
-        renderer="tasks/edit.mako",
+        renderer="tasks/form.mako",
         permission='edit.cancelinvoice',
     )
 

@@ -37,8 +37,7 @@
 """
 
 import logging
-
-from webhelpers.html.builder import HTML
+import colander
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
@@ -50,7 +49,6 @@ from autonomie.models.company import (
 from autonomie.models.user import User
 from autonomie.utils.widgets import (
     ViewLink,
-    StaticWidget,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -214,12 +212,19 @@ class CompanyList(BaseListView):
     default_sort = 'name'
     default_direction = 'asc'
 
+    add_template_vars = (
+        'title',
+        'stream_actions',
+    )
+
     def query(self):
         return Company.query(active=False)
 
     def filter_active(self, query, appstruct):
-        active = appstruct['active']
-        return query.filter(Company.active == active)
+        active = appstruct.get('active', False)
+        if active in (False, colander.null):
+            query = query.filter_by(active='Y')
+        return query
 
     def filter_search(self, query, appstruct):
         search = appstruct.get('search')
@@ -227,21 +232,38 @@ class CompanyList(BaseListView):
             query = query.filter(Company.name.like('%' + search + '%'))
         return query
 
-    def populate_actionmenu(self, appstruct):
-        self.request.actionmenu.add(self._get_active_btn(appstruct))
-
-    def _get_active_btn(self, appstruct):
-        """
-            return the show active button
-        """
-        active = appstruct['active']
-        if active == 'N':
-            url = self.request.current_route_path(_query=dict(active="Y"))
-            link = HTML.a(u"Afficher les entreprises actives",  href=url)
+    def stream_actions(self, company):
+        yield (
+            self.request.route_path('company', id=company.id),
+            u"Voir/Modifier",
+            u"Voir/Modifier l'entreprise",
+            'pencil',
+            {}
+        )
+        if not company.archived:
+            yield (
+                self.request.route_path(
+                    'company',
+                    id=company.id,
+                    _query=dict(action="disable")
+                ),
+                u"Archiver",
+                u"Archiver l'entreprise",
+                'book',
+                {}
+            )
         else:
-            url = self.request.current_route_path(_query=dict(active="N"))
-            link = HTML.a(u"Afficher les entreprises désactivées", href=url)
-        return StaticWidget(link)
+            yield (
+                self.request.route_path(
+                    'company',
+                    id=company.id,
+                    _query=dict(action="enable")
+                ),
+                u"Désarchiver",
+                u"Désarchiver l'entreprise",
+                'book',
+                {}
+            )
 
 
 def fetch_activities_objects(appstruct):
@@ -362,7 +384,7 @@ def populate_actionmenu(request, company=None):
         request.actionmenu.add(get_view_btn(company.id))
         if request.has_permission('edit_company'):
             request.actionmenu.add(get_edit_btn(company.id))
-            if not company.enabled():
+            if company.archived:
                 request.actionmenu.add(get_enable_btn(company.id))
             else:
                 request.actionmenu.add(get_disable_btn(company.id))
@@ -400,7 +422,7 @@ def get_enable_btn(company_id):
         Return a link to enable a company
     """
     return ViewLink(
-        u"Activer",
+        u"Désarchiver",
         "admin_company",
         path="company",
         id=company_id,
@@ -413,11 +435,11 @@ def get_disable_btn(company_id):
         Return a link to disable a company
     """
     return ViewLink(
-        u"Désactiver",
+        u"Archiver",
         "admin_company",
         path="company",
         id=company_id,
-        confirm=u'Êtes-vous sûr de vouloir désactiver cette entreprise \
+        confirm=u'Êtes-vous sûr de vouloir archiver cette entreprise \
 (les comptes des employés resteront actifs) ?',
         _query=dict(action="disable")
     )

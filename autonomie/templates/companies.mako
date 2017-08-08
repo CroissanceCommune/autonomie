@@ -21,9 +21,9 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
-<%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
+<%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%block name='actionmenu'>
 ## We place the search form in the actionmenu since there are a few fields
     <% request.actionmenu.add(form) %>
@@ -44,6 +44,9 @@
             <tr>
                 <td onclick="${onclick}" class="rowlink">
                     ${company.name}
+                    % if company.archived:
+                    <span class='label label-warning'>Cette entreprise a été archivée</span>
+                    % endif
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     ${company.email}
@@ -56,14 +59,21 @@
                     </ul>
                 </td>
                 <td class="actions">
-                    ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='pencil')}
-                    % if company.enabled():
-                        <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
-                        ${table_btn(url, u"Désactiver", u"désactiver l'entreprise", icon='book')}
-                    % else:
-                        <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
-                        ${table_btn(url, u"Activer", u"Activer l'entreprise", icon='book')}
-                    % endif
+		                <div class='btn-group'>
+		                    <button
+                                type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                Actions <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                % for url, label, title, icon, options in stream_actions(company):
+                                    ${dropdown_item(url, label, title, icon=icon, **options)}
+                                % endfor
+                            </ul>
+                        </div>
                 </td>
             </tr>
         % endfor

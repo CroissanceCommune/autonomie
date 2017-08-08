@@ -9,11 +9,11 @@
  *
  */
 import Mn from 'backbone.marionette';
-import { getOpt } from '../../tools.js';
+import { getOpt } from '../tools.js';
 
 const LabelRowWidget = Mn.View.extend({
     tagName: 'div',
-    template: require('./templates/widgets/LabelRowWidget.mustache'),
+    template: require('./templates/LabelRowWidget.mustache'),
     templateContext: function(){
         var values = this.getOption('values');
         var label = getOpt(this, 'label', '');

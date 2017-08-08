@@ -10,11 +10,11 @@
  */
 import $ from 'jquery';
 import Mn from 'backbone.marionette';
-import { getOpt } from "../../tools.js";
-import { updateSelectOptions } from '../../tools.js';
+import { getOpt } from "../tools.js";
+import { updateSelectOptions } from '../tools.js';
 
 
-var template = require('./templates/widgets/CheckboxListWidget.mustache');
+var template = require('./templates/CheckboxListWidget.mustache');
 
 const CheckboxListWidget = Mn.View.extend({
     template: template,

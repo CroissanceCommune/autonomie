@@ -1,5 +1,5 @@
 /*
- * File Name : ToggleWidgetView.js
+ * File Name : ToggleWidget.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -10,12 +10,12 @@
  */
 import Mn from 'backbone.marionette';
 
-var template = require('./templates/widgets/ToggleWidgetView.mustache');
+var template = require('./templates/ToggleWidget.mustache');
 
-const ToggleWidgetView = Mn.View.extend({
+const ToggleWidget = Mn.View.extend({
    template:template,
    ui: {
    }
 });
 
-export default ToggleWidgetView;
+export default ToggleWidget;

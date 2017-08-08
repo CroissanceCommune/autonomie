@@ -10,10 +10,10 @@
  */
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
-import { getOpt, setDatePicker } from '../../tools.js';
+import { getOpt, setDatePicker } from '../tools.js';
 
 
-var template = require('./templates/widgets/DatePickerWidget.mustache');
+var template = require('./templates/DatePickerWidget.mustache');
 
 const DatePickerWidget = Mn.View.extend({
     template: template,

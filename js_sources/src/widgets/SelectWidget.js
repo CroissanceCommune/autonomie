@@ -10,10 +10,10 @@
  */
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
-import { getOpt } from "../../tools.js";
-import { updateSelectOptions } from '../../tools.js';
+import { getOpt } from "../tools.js";
+import { updateSelectOptions } from '../tools.js';
 
-var template = require('./templates/widgets/SelectWidget.mustache');
+var template = require('./templates/SelectWidget.mustache');
 
 const SelectWidget = Mn.View.extend({
     tagName: 'div',

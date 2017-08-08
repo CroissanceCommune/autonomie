@@ -9,13 +9,13 @@
  *
  */
 import Mn from 'backbone.marionette';
-import { getOpt } from "../../tools.js";
+import { getOpt } from "../tools.js";
 
 
 const InputWidget = Mn.View.extend({
     tagName: 'div',
     className: 'form-group',
-    template: require('./templates/widgets/InputWidget.mustache'),
+    template: require('./templates/InputWidget.mustache'),
     ui: {
         input: 'input'
     },

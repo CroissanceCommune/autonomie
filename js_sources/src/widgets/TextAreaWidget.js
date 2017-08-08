@@ -10,11 +10,11 @@
  */
 
 import Mn from 'backbone.marionette';
-import { getOpt } from "../../tools.js";
+import { getOpt } from "../tools.js";
 
-import setupTinyMce from '../../tinymce.js';
+import setupTinyMce from '../tinymce.js';
 
-var template = require('./templates/widgets/TextAreaWidget.mustache');
+var template = require('./templates/TextAreaWidget.mustache');
 
 const TextAreaWidget = Mn.View.extend({
     tagName: 'div',

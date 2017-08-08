@@ -57,7 +57,7 @@ from autonomie.views.task.views import (
     TaskHtmlView,
     TaskPdfView,
     TaskDuplicateView,
-    TaskMetadatasEditView,
+    TaskSetMetadatasView,
     TaskSetProductsView,
 )
 
@@ -198,7 +198,7 @@ class InvoiceSetTreasuryiew(BaseEditView):
         )
 
 
-class InvoiceMetadatasSetView(TaskMetadatasEditView):
+class InvoiceSetMetadatasView(TaskSetMetadatasView):
     """
     View used for editing invoice metadatas
     """
@@ -423,7 +423,7 @@ def includeme(config):
         renderer='base/formpage.mako',
     )
     config.add_view(
-        InvoiceMetadatasSetView,
+        InvoiceSetMetadatasView,
         route_name="/invoices/{id}/set_metadatas",
         permission="view.invoice",
         renderer='tasks/add.mako',

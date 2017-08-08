@@ -410,7 +410,11 @@ class Estimation(Task, EstimationCompute):
 
     def gen_invoices(self, user):
         """
-            Return the invoices based on the current estimation
+        Generate invoices based on the current estimation and its payments
+        configuration
+
+        :returns: The list of Invoice instances
+        :rtype: list
         """
         invoices = []
         # Used to store the amount of the intermediary invoices

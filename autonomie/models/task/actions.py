@@ -260,14 +260,14 @@ def get_signed_status_actions():
             'trash',
             u"Sans suite",
             u"Marquer sans suite",
-            "btn btn-danger"
+            "btn btn-default",
         ),
         (
             'signed',
             'ok',
             u"Signé par le client",
             u"Indiquer que le client a passé commande",
-            "btn btn-success btn-primary-action"
+            "btn btn-default",
         ),
     ):
         action = Action(

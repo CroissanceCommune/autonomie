@@ -188,7 +188,25 @@ class TaskRestView(BaseRestView):
             duplicate
             ...
         """
-        return []
+        result = []
+        if self.request.has_permission('delete.%s' % self.context.type_):
+            url = self.request.route_path(
+                "/%ss/{id}/delete" % self.context.type_,
+                id=self.context.id
+            )
+            result.append({
+                'widget': 'anchor',
+                'option': {
+                    "url": url,
+                    "label": u"Supprimer",
+                    "title": u"Supprimer définitivement ce document",
+                    "css": "btn btn-danger",
+                    "icon": "glyphicon glypĥicon-trash",
+                    "onclick": u"return confirm('Êtes-vous sûr de vouloir"
+                    u"supprimer cet élément ?');"
+                }
+            })
+        return result
 
 
 class TaskLineGroupRestView(BaseRestView):

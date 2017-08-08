@@ -16,7 +16,7 @@ import _ from 'underscore';
 import $ from 'jquery';
 
 $(function(){
-    var company_menu = $('company-select-menu');
+    var company_menu = $('#company-select-menu');
     if (!_.isNull(company_menu)){
         company_menu.on('change', function(){
             window.location = this.value;

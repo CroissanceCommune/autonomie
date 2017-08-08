@@ -57,6 +57,7 @@ STATUS_LABELS = {
         "expensesheet": u"Validée",
     },
     "aborted": u"Annulé",
+    'sent': u"Envoyé",
     "signed": u"Signé par le client",
     "geninv": u"Factures générées",
     "paid": u"Payée partiellement",

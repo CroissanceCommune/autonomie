@@ -59,6 +59,7 @@
 
 <%block name='before_tabs'>
     <% invoice = request.context %>
+    ${invoice.name}
     <p class='lead'>
     Cette facture porte le numéro <b>${invoice.prefix}${invoice.official_number}</b>
     </p>

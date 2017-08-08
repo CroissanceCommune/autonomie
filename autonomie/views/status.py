@@ -141,7 +141,9 @@ class StatusView(BaseView):
                 self.set_status(status, params)
                 self.context = self.request.dbsession.merge(self.context)
                 self.notify(status)
-                self.session.flash(self.valid_msg)
+                if not self.request.is_xhr:
+                    self.session.flash(self.valid_msg)
+
                 logger.debug(u" + The status has been set to {0}".format(
                     status))
 

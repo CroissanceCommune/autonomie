@@ -80,7 +80,7 @@ a[data-toggle=collapse]:hover {
   position: -ms-sticky;
   position: -o-sticky;
   top: 50px; }
-  .task-desktop-actions button {
+  .task-desktop-actions button, .task-desktop-actions a {
     margin-bottom: 0.7em; }
   .task-desktop-actions .totals {
     margin-top: 10px; }

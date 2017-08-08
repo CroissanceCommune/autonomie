@@ -56,10 +56,12 @@ import logging
 
 from colanderalchemy import SQLAlchemySchemaNode
 
+from pyramid.httpexceptions import HTTPFound
 from autonomie.models.task import (
     Estimation,
     PaymentLine,
 )
+from autonomie.resources import estimation_signed_status_js
 from autonomie.views import (
     BaseEditView,
 )
@@ -71,6 +73,7 @@ from autonomie.views.task.views import (
     TaskHtmlView,
     TaskPdfView,
     TaskDuplicateView,
+    TaskSetMetadatasView,
 )
 
 log = logger = logging.getLogger(__name__)
@@ -134,6 +137,15 @@ class EstimationAdminView(BaseEditView):
 class EstimationHtmlView(TaskHtmlView):
     label = u"Devis"
 
+    def actions(self):
+        estimation_signed_status_js.need()
+        actions = []
+        for action in self.context.signed_state_manager.get_allowed_actions(
+            self.request
+        ):
+            actions.append(action)
+        return actions
+
 
 class EstimationPdfView(TaskPdfView):
     pass
@@ -141,6 +153,35 @@ class EstimationPdfView(TaskPdfView):
 
 class EstimationDuplicateView(TaskDuplicateView):
     label = u"le devis"
+
+
+class EstimationSetMetadatasView(TaskSetMetadatasView):
+    @property
+    def title(self):
+        return u"Modification du devis {task.name}".format(
+            task=self.context
+        )
+
+
+def estimation_geninv_view(context, request):
+    """
+    Invoice generation view
+
+    :param obj context: The current context (estimation)
+    """
+    invoices = context.gen_invoices(request.user)
+    for invoice in invoices:
+        request.dbsession.add(invoice)
+
+    if len(invoices) > 1:
+        msg = u"{0} factures ont été générées"
+    else:
+        msg = u"Une facture a été générée"
+    request.session.flash(msg)
+    request.dbsession.flush()
+    return HTTPFound(
+        request.route_path('/invoices/{id}', id=invoices[0].id)
+    )
 
 
 def add_routes(config):
@@ -164,7 +205,14 @@ def add_routes(config):
             '/estimations/{id:\d+}.%s' % extension,
             traverse='/estimations/{id}'
         )
-    for action in ('addfile', 'delete', 'duplicate', 'admin'):
+    for action in (
+        'addfile',
+        'delete',
+        'duplicate',
+        'admin',
+        'geninv',
+        'set_metadatas',
+    ):
         config.add_route(
             '/estimations/{id}/%s' % action,
             '/estimations/{id:\d+}/%s' % action,
@@ -212,7 +260,7 @@ def includeme(config):
     config.add_view(
         EstimationHtmlView,
         route_name="/estimations/{id}.html",
-        renderer='tasks/view_only.mako',
+        renderer='tasks/estimation_view_only.mako',
         permission='view.estimation',
     )
 
@@ -227,4 +275,17 @@ def includeme(config):
         route_name="/estimations/{id}/addfile",
         renderer='base/formpage.mako',
         permission='add.file',
+    )
+
+    config.add_view(
+        estimation_geninv_view,
+        route_name="/estimations/{id}/geninv",
+        permission='geninv.estimation',
+    )
+
+    config.add_view(
+        EstimationSetMetadatasView,
+        route_name="/estimations/{id}/set_metadatas",
+        permission='view.estimation',
+        renderer='tasks/add.mako',
     )

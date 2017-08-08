@@ -76,7 +76,7 @@ class InvoiceRestView(TaskRestView):
             duplicate
             ...
         """
-        result = []
+        result = TaskRestView._get_other_actions(self)
         result.append(self._get_duplicate_button())
         return result
 
@@ -115,16 +115,6 @@ class CancelInvoiceRestView(TaskRestView):
             sections['general']['prefix'] = True
             sections['tasklines']['product'] = True
         return sections
-
-    def _get_other_actions(self):
-        """
-        Return the description of other available actions :
-            signed_status
-            duplicate
-            ...
-        """
-        result = []
-        return result
 
 
 class InvoiceStatusRestView(TaskStatusView):

@@ -32,7 +32,7 @@ webpackJsonp([0],[
 	 * Setup the main ui elements
 	 */
 	(0, _jquery2.default)(function () {
-	    var company_menu = (0, _jquery2.default)('company-select-menu');
+	    var company_menu = (0, _jquery2.default)('#company-select-menu');
 	    if (!_underscore2.default.isNull(company_menu)) {
 	        company_menu.on('change', function () {
 	            window.location = this.value;

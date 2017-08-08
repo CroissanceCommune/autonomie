@@ -326,7 +326,7 @@ class TaskPdfView(BaseView):
         return self.request.response
 
 
-class TaskMetadatasEditView(BaseFormView):
+class TaskSetMetadatasView(BaseFormView):
     schema = get_task_metadatas_edit_schema()
     buttons = (submit_btn, cancel_btn)
 

@@ -176,7 +176,7 @@ class EstimationRestView(TaskRestView):
             duplicate
             ...
         """
-        result = []
+        result = TaskRestView._get_other_actions(self)
         result.append(self._get_duplicate_button())
         if self.request.has_permission('set_signed_status.estimation'):
             result.append(self._get_signed_status_button())
@@ -396,6 +396,14 @@ def add_views(config):
         route_name="/api/v1/estimations/{id}",
         request_param='action=status',
         permission="edit.estimation",
+        request_method='POST',
+        renderer="json",
+    )
+    config.add_view(
+        EstimationSignedStatusRestView,
+        route_name="/api/v1/estimations/{id}",
+        request_param='action=signed_status',
+        permission="set_signed_status.estimation",
         request_method='POST',
         renderer="json",
     )

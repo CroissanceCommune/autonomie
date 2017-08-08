@@ -13892,15 +13892,22 @@ webpackJsonp([1],[
 
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return "<a class='"
+	  return "onclick=\""
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), depth0))
+	    + "\"";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a class='"
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.css : stack1), depth0))
 	    + " btn-block' href='"
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.url : stack1), depth0))
 	    + "' title=\""
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.title : stack1), depth0))
-	    + "\">\n    <i class='"
+	    + "\" ";
+	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + ">\n    <i class='"
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.icon : stack1), depth0))
 	    + "'></i> "
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.label : stack1), depth0))

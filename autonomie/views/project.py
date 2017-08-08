@@ -479,6 +479,10 @@ class ProjectEdit(ProjectAdd):
         query = self.context.company.get_project_codes_and_names()
         return query.filter(Project.id != self.context.id)
 
+    def before(self, form):
+        populate_actionmenu(self.request)
+        form.widget = GridFormWidget(named_grid=FORM_GRID)
+
     def submit_success(self, appstruct):
         # It's an edition one
         model = self.schema.objectify(appstruct, self.context)

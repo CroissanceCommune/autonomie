@@ -9,14 +9,12 @@ Rest views for invoices and cancelinvoices
 import logging
 import colander
 
-from autonomie.events.tasks import StatusChanged
 from autonomie.utils.rest import (
     add_rest_views,
 )
 from autonomie.models.task import (
     Invoice,
     CancelInvoice,
-    TaskStatus,
 )
 from autonomie.forms.tasks.invoice import (
     validate_invoice,
@@ -32,7 +30,6 @@ from autonomie.views.task.utils import json_payment_conditions
 
 from autonomie.views.status import (
     TaskStatusView,
-    StatusView,
 )
 
 logger = logging.getLogger(__name__)
@@ -95,8 +92,8 @@ class InvoiceRestView(TaskRestView):
             "widget": "anchor",
             "option": {
                 "url": url,
-                "label": u"Dupliquer ce devis",
-                "title": u"Créer un nouveau devis à partir de celui-ci",
+                "label": u"Dupliquer cette facture",
+                "title": u"Créer une nouvelle facture à partir de celle-ci",
                 "css": "btn btn-default",
                 "icon": "fa fa-copy",
             }

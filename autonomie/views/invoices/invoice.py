@@ -57,6 +57,7 @@ from autonomie.views.task.views import (
     TaskHtmlView,
     TaskPdfView,
     TaskDuplicateView,
+    TaskMetadatasEditView,
 )
 
 
@@ -168,6 +169,15 @@ class InvoiceSetTreasuryiew(BaseEditView):
         u"du numéro de facture",
     )
 
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                "/invoices/{id}.html",
+                id=self.context.id,
+                _anchor="treasury"
+            )
+        )
+
     def before(self, form):
         BaseEditView.before(self, form)
         self.request.actionmenu.add(
@@ -184,6 +194,18 @@ class InvoiceSetTreasuryiew(BaseEditView):
         return u"Facture numéro {0} en date du {1}".format(
             self.context.official_number,
             format_date(self.context.date),
+        )
+
+
+class InvoiceMetadatasSetView(TaskMetadatasEditView):
+    """
+    View used for editing invoice metadatas
+    """
+
+    @property
+    def title(self):
+        return u"Modification de la facture {task.name}".format(
+            task=self.context
         )
 
 
@@ -644,7 +666,7 @@ def add_routes(config):
         'set_products',
         'addpayment',
         'gencinv',
-        'metadatas',
+        'set_metadatas',
     ):
         config.add_route(
             '/invoices/{id}/%s' % action,
@@ -659,7 +681,7 @@ def includeme(config):
     config.add_view(
         InvoiceAddView,
         route_name="project_invoices",
-        renderer='base/formpage.mako',
+        renderer='tasks/add.mako',
         permission='add_invoice',
     )
 
@@ -734,6 +756,12 @@ def includeme(config):
         route_name="/invoices/{id}/set_treasury",
         permission="set_treasury.invoice",
         renderer='base/formpage.mako',
+    )
+    config.add_view(
+        InvoiceMetadatasSetView,
+        route_name="/invoices/{id}/set_metadatas",
+        permission="view.invoice",
+        renderer='tasks/add.mako',
     )
 
 #    config.add_view(

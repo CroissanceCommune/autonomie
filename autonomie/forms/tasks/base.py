@@ -378,8 +378,10 @@ def taskline_after_bind(node, kw):
     After bind method to pass to The tasklines fields
 
     Remove fields not allowed for edition
+
+    :param obj node: The SchemaNode concerning the TaskLine
+    :param dict kw: The bind arguments
     """
-    print("In the taskline_after_bind method")
     request = kw['request']
     task = get_task_from_context(request.context)
     perm = 'set_treasury.%s' % task.type_
@@ -394,6 +396,9 @@ def task_after_bind(node, kw):
     After bind methods passed to the task schema
 
     Remove fields not allowed for edition
+
+    :param obj node: The SchemaNode concerning the Task
+    :param dict kw: The bind arguments
     """
     request = kw['request']
     task = get_task_from_context(request.context)
@@ -403,227 +408,3 @@ def task_after_bind(node, kw):
             del node['prefix']
         if 'financial_year' in node:
             del node['financial_year']
-
-
-#  Dans le formulaire de création de devis par exemple, on trouve
-#  aussi bien des TaskLine que des Estimation ou des DiscountLine et leur
-#  configuration est imbriquée. On a donc besoin de faire un mapping d'un
-#  dictionnaire contenant les modèles {'estimation':..., 'tasklines':...}
-#  vers un dictionnaire correspondant au formulaire en place.
-# TASK_MATCHING_MAP = (
-#     # ('name', 'common'),
-#     # ('phase_id', 'common'),
-#     ('date', 'common'),
-#     ('financial_year', 'common'),
-#     ('prefix', 'common'),
-#     ('description', 'common'),
-#     # ('customer_id', 'common'),
-#     ('address', 'common'),
-#     ('workplace', 'common'),
-#     ('course', 'common'),
-#     ('display_units', 'common'),
-#     ('expenses_ht', 'lines'),
-#     ('exclusions', 'notes'),
-#     ('payment_conditions', 'payments'),
-#     ('status_comment', 'communication'),
-#     ('paymentDisplay', 'payments'),
-# )
-#
-#
-# def dbdatas_to_appstruct(dbdatas, matching_map=TASK_MATCHING_MAP):
-#     """
-#     convert db dict fashionned datas to the appropriate sections
-#     to fit the form schema
-#     """
-#     appstruct = {}
-#     for field, section in matching_map:
-#         value = dbdatas.get(field)
-#         if value is not None:
-#             appstruct.setdefault(section, {})[field] = value
-#
-#     appstruct.setdefault('common', {})['mention_ids'] = [
-#         str(a['id']) for a in dbdatas.get('mentions', [])
-#     ]
-#     return appstruct
-#
-#
-# def appstruct_to_dbdatas(appstruct, matching_map=TASK_MATCHING_MAP):
-#     """
-#     convert colander deserialized datas to database dbdatas
-#     """
-#     dbdatas = {'task': {}}
-#     task_datas = dbdatas['task']
-#     for field, section in matching_map:
-#         value = appstruct.get(section, {}).get(field, None)
-#         if value not in (None, colander.null):
-#             task_datas[field] = value
-#
-#     task_datas['mentions'] = [
-#         TaskMention.get(id) for id in appstruct['common'].get('mention_ids', [])
-#     ]
-#     return dbdatas
-#
-#
-# def get_lines_block_appstruct(appstruct, dbdatas):
-#     """
-#     Return the appstruct relatd to the task lines block of the the Task Schema
-#
-#     the task lines block groups :
-#         task lines
-#         task lines groups
-#         discount lines
-#
-#     :param dbdatas: Datas coming from the database in dict format
-#     """
-#     appstruct.setdefault('lines', {})
-#
-#     for key in ('lines', 'groups', "discounts"):
-#         if key in dbdatas:
-#             appstruct['lines'][key] = dbdatas[key]
-#
-#     return appstruct
-#
-#
-# def add_order_to_lines(appstruct):
-#     """
-#     add the order of the different lines coming from a submitted form
-#     """
-#     tasklines = appstruct.get('lines', {})
-#
-#     lines = tasklines.get('lines', [])
-#     for index, line in enumerate(lines):
-#         line['order'] = index + 1
-#
-#     groups = tasklines.get('groups', [])
-#     for index, group in enumerate(groups):
-#         group['order'] = index + 1
-#         for jindex, line in enumerate(group.get('lines', [])):
-#             line['order'] = jindex + 1
-#
-#     payment_lines = appstruct.get('payments', {}).get('payment_lines', [])
-#     for index, line in enumerate(payment_lines):
-#         line['order'] = index + 1
-#
-#     return appstruct
-#
-#
-# def get_estimation_appstruct(dbdatas):
-#     """
-#         return EstimationSchema-compatible appstruct
-#     """
-#     appstruct = dbdatas_to_appstruct(dbdatas)
-#
-#     if "payment_lines" in dbdatas:
-#         appstruct.setdefault('payments', {})['payment_lines'] = \
-#             dbdatas['payment_lines']
-#     appstruct = get_lines_block_appstruct(appstruct, dbdatas)
-#     appstruct = add_payment_block_appstruct(appstruct, dbdatas)
-#     appstruct = add_notes_block_appstruct(appstruct, dbdatas)
-#     return appstruct
-#
-#
-# def get_estimation_dbdatas(appstruct):
-#     """
-#         return dict with db compatible datas
-#     """
-#     dbdatas = appstruct_to_dbdatas(appstruct)
-#
-#     # Estimation specific keys
-#     for key in ('paymentDisplay', 'deposit', ):
-#         dbdatas['task'][key] = appstruct['payments'][key]
-#     dbdatas.update(appstruct['notes'])
-#
-#     add_order_to_lines(appstruct)
-#     dbdatas['lines'] = appstruct['lines']['lines']
-#     dbdatas['groups'] = appstruct['lines']['groups']
-#     dbdatas['discounts'] = appstruct['lines']['discounts']
-#     dbdatas['payment_lines'] = appstruct['payments']['payment_lines']
-#     dbdatas = set_manualDeliverables(appstruct, dbdatas)
-#     return dbdatas
-#
-#
-# def get_invoice_appstruct(dbdatas):
-#     """
-#         return InvoiceSchema compatible appstruct
-#     """
-#     appstruct = dbdatas_to_appstruct(dbdatas)
-#     appstruct = get_lines_block_appstruct(appstruct, dbdatas)
-#     return appstruct
-#
-#
-# def get_invoice_dbdatas(appstruct):
-#     """
-#         return dict with db compatible datas
-#     """
-#     dbdatas = appstruct_to_dbdatas(appstruct)
-#
-#     add_order_to_lines(appstruct)
-#     dbdatas['lines'] = appstruct['lines']['lines']
-#     dbdatas['groups'] = appstruct['lines']['groups']
-#     dbdatas['discounts'] = appstruct['lines']['discounts']
-#     return dbdatas
-#
-#
-# def get_cancel_invoice_appstruct(dbdatas):
-#     """
-#         return cancel invoice schema compatible appstruct
-#     """
-#     appstruct = dbdatas_to_appstruct(dbdatas)
-#     appstruct = get_lines_block_appstruct(appstruct, dbdatas)
-#     return appstruct
-#
-#
-# def get_cancel_invoice_dbdatas(appstruct):
-#     """
-#         return dict with db compatible datas
-#     """
-#     dbdatas = appstruct_to_dbdatas(appstruct)
-#
-#     add_order_to_lines(appstruct)
-#     dbdatas['lines'] = appstruct['lines']['lines']
-#     dbdatas['groups'] = appstruct['lines']['groups']
-#     return dbdatas
-#
-#
-# def set_manualDeliverables(appstruct, dbdatas):
-#     """
-#         Hack the dbdatas to set the manualDeliverables value
-#     """
-#     # On s'assure que la clé task existe et on set le manualDeliverables par
-#     # défaut
-#     dbdatas.setdefault('task', {})['manualDeliverables'] = 0
-#
-#     # dans l'interface payment_times == -1 correspond à Configuration Manuelle
-#     # des paiements
-#     payment_times = appstruct.get('payments', {}).get('payment_times')
-#     if payment_times == -1:
-#         dbdatas['task']['manualDeliverables'] = 1
-#     return dbdatas
-#
-#
-# def add_payment_block_appstruct(appstruct, dbdatas):
-#     """
-#         Hack the appstruct to set the payment informations values
-#     """
-#     if dbdatas.get('manualDeliverables') == 1:
-#         # dans l'interface payment_times == -1 correspond à Configuration
-#         # Manuelle des paiements
-#         appstruct.setdefault('payments', {})['payment_times'] = -1
-#     else:
-#         appstruct.setdefault(
-#             'payments', {}
-#         )['payment_times'] = max(1, len(dbdatas.get('payment_lines')))
-#
-#     appstruct['payments']['paymentDisplay'] = dbdatas['paymentDisplay']
-#     appstruct['payments']['deposit'] = dbdatas['deposit']
-#     return appstruct
-#
-#
-# def add_notes_block_appstruct(appstruct, dbdatas):
-#     """
-#     Fill the notes block
-#     """
-#     appstruct.setdefault(
-#         'notes', {
-#         })['exclusions'] = dbdatas.get('exclusions', '')
-#     return appstruct

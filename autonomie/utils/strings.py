@@ -80,13 +80,17 @@ def format_main_status(task, full=True):
     else:
         genre = u""
 
-    status_str = STATUS.get(status, DEF_STATUS).format(genre=genre)
     if full:
+        status_str = STATUS.get(status, DEF_STATUS).format(genre=genre)
         suffix = u" par {0} le {1}".format(
             format_account(task.status_person),
             format_date(task.status_date)
         )
         status_str += suffix
+    else:
+        status_str = SINGLE_STATUS_LABELS.get(status, DEF_STATUS).format(
+            genre=genre
+        )
 
     return status_str
 

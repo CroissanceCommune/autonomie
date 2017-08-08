@@ -31,14 +31,108 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 </%block>
 <%block name='content'>
 <div class='row'>
-<div class='col-xs-12'>
-<a class='btn btn-primary primary-action'
-    href="${request.route_path('/%ss/{id}.pdf' % request.context.type_, id=request.context.id)}"
-    >
-    <i class='glyphicon glyphicon-book'></i>&nbsp;Voir le PDF
-</a>
-<br />
-<br />
-</div>
+    <div class='col-xs-12 col-md-3'>
+        <a class='btn btn-primary primary-action btn-block'
+            href="${request.route_path('/%ss/{id}.pdf' % request.context.type_, id=request.context.id)}"
+            >
+            <i class='glyphicon glyphicon-book'></i>&nbsp;Voir le PDF
+        </a>
+        <hr />
+        <div class='actions'>
+
+        % if hasattr(next, 'moreactions'):
+        ${next.moreactions()}
+        % endif
+        </div>
+    </div>
+    <div class='col-xs-12 col-md-9'>
+        % if hasattr(next, 'before_tabs'):
+        ${next.before_tabs()}
+        % endif
+
+        <div class="nav-tabs-responsive">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation"
+                    class="active"
+                    >
+                    <a href="#summary" aria-control="summary" role='tab' data-toggle='tab'>
+                    Général
+                    </a>
+                </li>
+                <li role="presentation"
+                    >
+                    <a href="#documents" aria-control="documents" role='tab' data-toggle='tab'>
+                        Prévisualisation
+                    </a>
+                </li>
+                % if hasattr(next, 'moretabs'):
+                ${next.moretabs()}
+                % endif
+                % if api.has_permission('view.file'):
+                <li role="presentation">
+                    <a href="#attached_files" aria-control="attached_files" role='tab' data-toggle='tab'>
+                        Fichiers attachés
+                        % if request.context.children:
+                            <span class="badge">${len(request.context.children)}</span>
+                        % endif
+                    </a>
+                </li>
+                % endif
+            </ul>
+        </div>
+        <div class='tab-content'>
+            <div role='tabpanel' class="tab-pane active row" id="summary">
+                <div class='col-xs-12 col-md-6'>
+                    <i class='glyphicon glyphicon-${api.status_icon(request.context)}'></i> ${api.format_status(request.context)}
+                    % if hasattr(next, 'before_summary'):
+                        ${next.before_summary()}
+                    % endif
+                    <h3>Informations générales</h3>
+                    <dl class='dl-horizontal'>
+                        <dt>Nom du document</dt>
+                        <dd>${request.context.name}</dd>
+                        <dt>Date</dt>
+                        <dd>${api.format_date(request.context.date)}</dd>
+                        <dt>Client</dt>
+                        <dd>
+                            ${request.context.customer.get_label()}
+                            <a href="${request.route_path('customer', id=request.context.customer.id)}">
+                                Voir le compte client
+                            </a>
+                        </dd>
+                        <dt>Montant HT</dt>
+                        <dd>${api.format_amount(request.context.ht, precision=5)|n}&nbsp;€</dd>
+                        <dt>TVA</dt>
+                        <dd>${api.format_amount(request.context.tva, precision=5)|n}&nbsp;€ </dd>
+                        <dt>TTC</dt>
+                        <dd>${api.format_amount(request.context.ttc, precision=5)|n}&nbsp;€</dd>
+                    </dl>
+                    % if hasattr(next, 'after_summary'):
+                        ${next.after_summary()}
+                    % endif
+                </div>
+            </div>
+
+
+            <div role="tabpanel" class="tab-pane row" id="documents">
+                <div class='col-xs-12 col-md-10 col-md-offset-1'>
+                    <div class="container-fluid task_view" style="border: 1px solid #dedede; background-color: #fdfdfd; margin:15px;">
+                        ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
+                    </div>
+                </div>
+            </div>
+
+            % if hasattr(next, 'moretabs_datas'):
+                ${next.moretabs_datas()}
+            % endif
+
+            <!-- attached files tab -->
+            % if api.has_permission('view.file'):
+                <% title = u"Liste des fichiers attachés à cette facture" %>
+               ${request.layout_manager.render_panel('filelist_tab', title=title)}
+            % endif
+
+        </div>
+    </div>
 </div>
 </%block>

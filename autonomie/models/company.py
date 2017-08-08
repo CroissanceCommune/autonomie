@@ -316,6 +316,10 @@ class Company(DBBASE, PersistentACLMixin):
     def enabled(self):
         return self.active == 'Y'
 
+    @property
+    def archived(self):
+        return self.active != 'Y'
+
     def todict(self):
         """
             return a dict representation

@@ -153,7 +153,6 @@ class Task(Node):
     __mapper_args__ = {'polymorphic_identity': 'task'}
     _autonomie_service = TaskService
     __colanderalchemy_config__ = {
-        'title': u"Formulaire d'édition forcée de devis/factures/avoirs",
         'help_msg': u"Les montants sont *10^5   10 000==1€",
         'after_bind': task_after_bind,
     }
@@ -429,7 +428,7 @@ class Task(Node):
         default='',
         info={
             "colanderalchemy": {
-                'title': u"Préfixe du numéro de document",
+                'title': u"Préfixe du numéro de facture",
             }
         }
     )

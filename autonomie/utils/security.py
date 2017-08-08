@@ -645,10 +645,16 @@ def get_customer_acl(self):
     Compute the customer's acl
     """
     acl = DEFAULT_PERM[:]
+    perms = ('view_customer', 'edit_customer',)
+
+    if self.archived and not self.has_tasks():
+        perms += ('delete_customer',)
+    else:
+        acl.insert(0, (Deny, Everyone, ('delete_customer',)))
+
     for user in self.company.employees:
-        acl.append(
-            (Allow, user.login, ('view_customer', 'edit_customer',))
-        )
+        acl.append((Allow, user.login, perms))
+
     return acl
 
 
@@ -664,27 +670,29 @@ def get_project_acl(self):
     Return acl for a project
     """
     acl = DEFAULT_PERM[:]
+
+    perms = (
+        'view_project',
+        'edit_project',
+        'add_project',
+        'edit_phase',
+        'add_phase',
+        'add_estimation',
+        'add_invoice',
+        'list_estimations',
+        'list_invoices',
+        'view.file',
+        'add.file',
+        'edit.file',
+    )
+
+    if self.archived and not self.has_tasks():
+        perms += ('delete_project',)
+    else:
+        acl.insert(0, (Deny, Everyone, ('delete_project',)))
+
     for user in self.company.employees:
-        acl.append(
-            (
-                Allow,
-                user.login,
-                (
-                    'view_project',
-                    'edit_project',
-                    'add_project',
-                    'edit_phase',
-                    'add_phase',
-                    'add_estimation',
-                    'add_invoice',
-                    'list_estimations',
-                    'list_invoices',
-                    'view.file',
-                    'add.file',
-                    'edit.file',
-                )
-            )
-        )
+        acl.append((Allow, user.login, perms))
 
     return acl
 

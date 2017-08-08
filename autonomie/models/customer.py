@@ -54,6 +54,7 @@ from sqlalchemy.orm import (
 )
 from autonomie_base.consts import CIVILITE_OPTIONS
 from autonomie import forms
+from autonomie.forms.customer import customer_after_bind
 from autonomie_base.models.types import (
     PersistentACLMixin,
 )
@@ -95,6 +96,9 @@ class Customer(DBBASE, PersistentACLMixin):
     """
     __tablename__ = 'customer'
     __table_args__ = default_table_args
+    __colanderalchemy_config__ = {
+        'after_bind': customer_after_bind,
+    }
     id = Column(
         'id',
         Integer,
@@ -474,6 +478,7 @@ class Customer(DBBASE, PersistentACLMixin):
             projects=projects,
             full_address=self.full_address,
             archived=self.archived,
+            company_id=self.company_id,
         )
 
     def __json__(self, request):

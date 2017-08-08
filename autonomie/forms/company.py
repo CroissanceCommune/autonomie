@@ -187,7 +187,9 @@ comptabilité",
                 input_append="%",
                 css_class="col-md-1"
                 ),
-            validator=colander.Range(min=0, max=100,
+            validator=colander.Range(
+                min=0,
+                max=100,
                 min_err=u"Veuillez fournir un nombre supérieur à 0",
                 max_err=u"Veuillez fournir un nombre inférieur à 100"),
             title=u"Contribution à la CAE",
@@ -222,10 +224,9 @@ def get_list_schema(company=False):
     schema = lists.BaseListsSchema().clone()
     schema.add(
         colander.SchemaNode(
-        colander.String(),
-        name='active',
-        missing="Y",
-        validator=colander.OneOf(('N', 'Y')),
-        widget=deform.widget.HiddenWidget())
+            colander.Boolean(),
+            name='active',
+            label=u"Inclure les entreprises désactivées",
+        )
     )
     return schema

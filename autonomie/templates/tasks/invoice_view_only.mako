@@ -170,7 +170,10 @@
     <div role="tabpanel" class="tab-pane row" id="payment">
         <div class="col-xs-12 col-md-10 col-md-offset-1">
         % if api.has_permission('add_payment.invoice'):
-            <a href="#" class='btn btn-primary primary-action'>
+            <a
+                href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}"
+                class='btn btn-primary primary-action'
+                >
             <i class='glyphicon glyphicon-plus-sign'></i> Enregistrer un encaissement
             </a>
         % endif

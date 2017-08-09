@@ -11,7 +11,6 @@
 import Mn from 'backbone.marionette';
 import Radio from 'backbone.radio';
 
-import StatusHistoryView from './StatusHistoryView.js';
 import GeneralView from "./GeneralView.js";
 import CommonView from "./CommonView.js";
 import TaskBlockView from './TaskBlockView.js';
@@ -35,7 +34,6 @@ const MainView = Mn.View.extend({
     template: template,
     regions: {
         errors: '.errors',
-        status_history: '.status_history',
         modalRegion: '#modalregion',
         general: '#general',
         common: '#common',
@@ -58,15 +56,6 @@ const MainView = Mn.View.extend({
     initialize: function(options){
         this.config = Radio.channel('config');
         this.facade = Radio.channel('facade');
-    },
-    showStatusHistory(){
-        var collection = Radio.channel('facade').request(
-            'get:status_history_collection'
-        );
-        if (collection.models.length > 0){
-            var view = new StatusHistoryView({collection: collection});
-            this.showChildView('status_history', view);
-        }
     },
     showGeneralBlock: function(){
         var section = this.config.request('get:form_section', 'general');
@@ -129,7 +118,6 @@ const MainView = Mn.View.extend({
         this.showChildView('modalRegion', view);
     },
     onRender: function() {
-        this.showStatusHistory();
         var totalmodel = this.facade.request('get:totalmodel');
         var view;
         if (this.config.request('has:form_section', 'general')){

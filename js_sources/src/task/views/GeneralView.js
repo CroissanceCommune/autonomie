@@ -16,6 +16,8 @@ import CheckboxListWidget from '../../widgets/CheckboxListWidget.js';
 import DatePickerWidget from '../../widgets/DatePickerWidget.js';
 import TextAreaWidget from '../../widgets/TextAreaWidget.js';
 import InputWidget from '../../widgets/InputWidget.js';
+import StatusHistoryView from './StatusHistoryView.js';
+import Radio from 'backbone.radio';
 
 var template = require("./templates/GeneralView.mustache");
 
@@ -36,6 +38,7 @@ const GeneralView = Mn.View.extend({
     className: 'form-section',
     template: template,
     regions: {
+        status_history: '.status_history',
         name: '.name',
         prefix: '.prefix',
         financial_year: '.financial_year',
@@ -50,7 +53,17 @@ const GeneralView = Mn.View.extend({
     templateContext: function(){
         return {};
     },
+    showStatusHistory(){
+        var collection = Radio.channel('facade').request(
+            'get:status_history_collection'
+        );
+        if (collection.models.length > 0){
+            var view = new StatusHistoryView({collection: collection});
+            this.showChildView('status_history', view);
+        }
+    },
     onRender: function(){
+        this.showStatusHistory();
         this.showChildView(
             'name',
             new InputWidget({

@@ -3507,10 +3507,6 @@ webpackJsonp([1],[
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 26);
-	
-	var _StatusHistoryView2 = _interopRequireDefault(_StatusHistoryView);
-	
 	var _GeneralView = __webpack_require__(/*! ./GeneralView.js */ 37);
 	
 	var _GeneralView2 = _interopRequireDefault(_GeneralView);
@@ -3571,23 +3567,22 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : MainView.js
-	 *
-	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 139);
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 139); /*
+	                                                          * File Name : MainView.js
+	                                                          *
+	                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	                                                          * Company : Majerti ( http://www.majerti.fr )
+	                                                          *
+	                                                          * This software is distributed under GPLV3
+	                                                          * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                          *
+	                                                          */
+	
 	
 	var MainView = _backbone2.default.View.extend({
 	    template: template,
 	    regions: {
 	        errors: '.errors',
-	        status_history: '.status_history',
 	        modalRegion: '#modalregion',
 	        general: '#general',
 	        common: '#common',
@@ -3611,14 +3606,6 @@ webpackJsonp([1],[
 	        this.config = _backbone4.default.channel('config');
 	        this.facade = _backbone4.default.channel('facade');
 	    },
-	    showStatusHistory: function showStatusHistory() {
-	        var collection = _backbone4.default.channel('facade').request('get:status_history_collection');
-	        if (collection.models.length > 0) {
-	            var view = new _StatusHistoryView2.default({ collection: collection });
-	            this.showChildView('status_history', view);
-	        }
-	    },
-	
 	    showGeneralBlock: function showGeneralBlock() {
 	        var section = this.config.request('get:form_section', 'general');
 	        var model = this.facade.request('get:model', 'common');
@@ -3668,7 +3655,6 @@ webpackJsonp([1],[
 	        this.showChildView('modalRegion', view);
 	    },
 	    onRender: function onRender() {
-	        this.showStatusHistory();
 	        var totalmodel = this.facade.request('get:totalmodel');
 	        var view;
 	        if (this.config.request('has:form_section', 'general')) {
@@ -4538,7 +4524,7 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<h4>\n    <a\n        data-target='#comments-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"comments-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i>\n    </a>\nHistorique des commentaires et changement de statuts\n</h4>\n<div id='comments-more' class='collapse row comments'>\n</div>\n";
+	  return "<h4>\n    <a\n        data-target='#comments-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"comments-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i>\n    </a>\nHistorique des commentaires et changements de statut\n</h4>\n<div id='comments-more' class='collapse row comments'>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
@@ -4584,6 +4570,14 @@ webpackJsonp([1],[
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
+	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 26);
+	
+	var _StatusHistoryView2 = _interopRequireDefault(_StatusHistoryView);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	/*
@@ -4612,6 +4606,7 @@ webpackJsonp([1],[
 	    className: 'form-section',
 	    template: template,
 	    regions: {
+	        status_history: '.status_history',
 	        name: '.name',
 	        prefix: '.prefix',
 	        financial_year: '.financial_year'
@@ -4627,7 +4622,16 @@ webpackJsonp([1],[
 	    templateContext: function templateContext() {
 	        return {};
 	    },
+	    showStatusHistory: function showStatusHistory() {
+	        var collection = _backbone4.default.channel('facade').request('get:status_history_collection');
+	        if (collection.models.length > 0) {
+	            var view = new _StatusHistoryView2.default({ collection: collection });
+	            this.showChildView('status_history', view);
+	        }
+	    },
+	
 	    onRender: function onRender() {
+	        this.showStatusHistory();
 	        this.showChildView('name', new _InputWidget2.default({
 	            title: "Nom du document",
 	            value: this.model.get('name'),
@@ -7799,7 +7803,7 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='prefix'></div>\n            </div>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n</div>\n";
+	  return "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='prefix'></div>\n            </div>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
@@ -12936,7 +12940,7 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<div id='modalregion'>\n</div>\n<div class='container-fluid page-content'>\n    <div class='task-edit col-md-9 col-xs-12'>\n        <div class='errors'>\n        </div>\n        <div class='status_history'>\n        </div>\n        <div id='general'>\n        </div>\n        <div id='common'>\n        </div>\n        <div id='tasklines'>\n        </div>\n        <div class='ht_before_discounts'>\n        </div>\n        <div id='discounts'>\n        </div>\n        <div class='totals'>\n        </div>\n        <div class='notes'>\n        </div>\n        <div class='payment-conditions'>\n        </div>\n        <div class='payments'>\n        </div>\n    </div>\n\n    <div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n         id='rightbar'>\n    </div>\n</div>\n<footer class='footer-actions'></footer>\n";
+	  return "<div id='modalregion'>\n</div>\n<div class='container-fluid page-content'>\n    <div class='task-edit col-md-9 col-xs-12'>\n        <div class='errors'>\n        </div>\n        <div id='general'>\n        </div>\n        <div id='common'>\n        </div>\n        <div id='tasklines'>\n        </div>\n        <div class='ht_before_discounts'>\n        </div>\n        <div id='discounts'>\n        </div>\n        <div class='totals'>\n        </div>\n        <div class='notes'>\n        </div>\n        <div class='payment-conditions'>\n        </div>\n        <div class='payments'>\n        </div>\n    </div>\n\n    <div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n         id='rightbar'>\n    </div>\n</div>\n<footer class='footer-actions'></footer>\n";
 	  },"useData":true});
 
 /***/ }),

@@ -195,7 +195,7 @@ def get_status_actions(data_type):
         (
             'draft',
             'save',
-            'Enregistrer ce document comme brouillon',
+            'Enregistrer en brouillon',
             u'Enregistrer en brouillon afin de le modifier ultérieurement',
             'btn btn-default'
         ),

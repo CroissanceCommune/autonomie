@@ -47,7 +47,7 @@ const PaymentConditionBlockView = Mn.View.extend({
         this.listenTo(channel, 'unbind:validation', this.unbindValidation);
     },
     bindValidation(){
-        Validation.bind(this, {attributes: ['payment_conditions']});
+        Validation.bind(this);
     },
     unbindValidation(){
         Validation.unbind(this);

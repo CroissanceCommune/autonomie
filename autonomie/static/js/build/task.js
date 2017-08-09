@@ -3434,15 +3434,15 @@ webpackJsonp([1],[
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 126);
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 140);
 	
 	var _Facade2 = _interopRequireDefault(_Facade);
 	
-	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 143);
+	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 147);
 	
 	var _AuthBus2 = _interopRequireDefault(_AuthBus);
 	
-	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 144);
+	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 148);
 	
 	var _MessageBus2 = _interopRequireDefault(_MessageBus);
 	
@@ -3515,55 +3515,55 @@ webpackJsonp([1],[
 	
 	var _GeneralView2 = _interopRequireDefault(_GeneralView);
 	
-	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 49);
+	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 58);
 	
 	var _CommonView2 = _interopRequireDefault(_CommonView);
 	
-	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 51);
+	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 60);
 	
 	var _TaskBlockView2 = _interopRequireDefault(_TaskBlockView);
 	
-	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 80);
+	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 92);
 	
 	var _HtBeforeDiscountsView2 = _interopRequireDefault(_HtBeforeDiscountsView);
 	
-	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 81);
+	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 93);
 	
 	var _DiscountBlockView2 = _interopRequireDefault(_DiscountBlockView);
 	
-	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 96);
+	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 108);
 	
 	var _TotalView2 = _interopRequireDefault(_TotalView);
 	
-	var _NotesBlockView = __webpack_require__(/*! ./NotesBlockView.js */ 98);
+	var _NotesBlockView = __webpack_require__(/*! ./NotesBlockView.js */ 110);
 	
 	var _NotesBlockView2 = _interopRequireDefault(_NotesBlockView);
 	
-	var _PaymentConditionBlockView = __webpack_require__(/*! ./PaymentConditionBlockView.js */ 100);
+	var _PaymentConditionBlockView = __webpack_require__(/*! ./PaymentConditionBlockView.js */ 112);
 	
 	var _PaymentConditionBlockView2 = _interopRequireDefault(_PaymentConditionBlockView);
 	
-	var _PaymentBlockView = __webpack_require__(/*! ./PaymentBlockView.js */ 102);
+	var _PaymentBlockView = __webpack_require__(/*! ./PaymentBlockView.js */ 114);
 	
 	var _PaymentBlockView2 = _interopRequireDefault(_PaymentBlockView);
 	
-	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 112);
+	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 124);
 	
 	var _RightBarView2 = _interopRequireDefault(_RightBarView);
 	
-	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 119);
+	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 133);
 	
 	var _StatusView2 = _interopRequireDefault(_StatusView);
 	
-	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 121);
+	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 135);
 	
 	var _BootomActionView2 = _interopRequireDefault(_BootomActionView);
 	
-	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 141);
+	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 137);
 	
 	var _LoginView2 = _interopRequireDefault(_LoginView);
 	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 77);
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 89);
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
@@ -3581,7 +3581,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 125);
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 139);
 	
 	var MainView = _backbone2.default.View.extend({
 	    template: template,
@@ -4564,7 +4564,7 @@ webpackJsonp([1],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -4572,15 +4572,15 @@ webpackJsonp([1],[
 	
 	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 45);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 46);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
@@ -4596,7 +4596,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 48);
+	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 57);
 	
 	var GeneralView = _backbone2.default.View.extend({
 	    /*
@@ -7066,8 +7066,200 @@ webpackJsonp([1],[
 
 
 /***/ }),
-/* 42 */,
-/* 43 */,
+/* 42 */
+/*!********************************************!*\
+  !*** ./src/base/behaviors/FormBehavior.js ***!
+  \********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
+	
+	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
+	
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
+	
+	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 43);
+	
+	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var FormBehavior = _backbone2.default.Behavior.extend({
+	    behaviors: [_BaseFormBehavior2.default],
+	    ui: {
+	        form: "form",
+	        submit: "button[type=submit]",
+	        reset: "button[type=reset]"
+	    },
+	    events: {
+	        'submit @ui.form': 'onSubmitForm',
+	        'click @ui.reset': 'onCancelClick'
+	    },
+	    defaults: {
+	        errorMessage: "Une erreur est survenue"
+	    },
+	    serializeForm: function serializeForm() {
+	        return (0, _tools.serializeForm)(this.getUI('form'));
+	    },
+	    onSyncError: function onSyncError() {
+	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "sauvegarde de vos données");
+	        _backboneValidation2.default.unbind(this.view);
+	    },
+	    onSyncSuccess: function onSyncSuccess() {
+	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
+	        _backboneValidation2.default.unbind(this.view);
+	        console.log("Trigger success:sync from FormBehavior");
+	        this.view.triggerMethod('success:sync');
+	    },
+	    syncServer: function syncServer(datas, bound) {
+	        var bound = bound || false;
+	        var datas = datas || this.view.model.toJSON();
+	
+	        if (!bound) {
+	            _backboneValidation2.default.bind(this.view, {
+	                attributes: function attributes(view) {
+	                    return _.keys(datas);
+	                }
+	            });
+	        }
+	
+	        if (this.view.model.isValid(_.keys(datas))) {
+	            if (!this.view.model.get('id')) {
+	                this.addSubmit(datas);
+	            } else {
+	                this.editSubmit(datas);
+	            }
+	        }
+	    },
+	    addSubmit: function addSubmit(datas) {
+	        console.log("FormBehavior.addSubmit");
+	        var destCollection = this.view.getOption('destCollection');
+	        destCollection.create(datas, {
+	            success: this.onSyncSuccess.bind(this),
+	            error: this.onSyncError.bind(this),
+	            wait: true,
+	            sort: true
+	        });
+	    },
+	    editSubmit: function editSubmit(datas) {
+	        this.view.model.save(datas, {
+	            success: this.onSyncSuccess.bind(this),
+	            error: this.onSyncError.bind(this),
+	            wait: true,
+	            patch: true
+	        });
+	    },
+	    onSubmitForm: function onSubmitForm(event) {
+	        console.log("FormBehavior.onSubmitForm");
+	        event.preventDefault();
+	        var datas = this.serializeForm();
+	        this.view.model.set(datas, { validate: true });
+	        this.syncServer(datas);
+	    },
+	    onDataPersisted: function onDataPersisted(datas) {
+	        console.log("FormBehavior.onDataPersisted");
+	        this.syncServer(datas, true);
+	    },
+	    onCancelClick: function onCancelClick() {
+	        console.log("FormBehavior.onCancelClick");
+	        console.log("Trigger reset:model from FormBehavior");
+	        this.view.triggerMethod('reset:model');
+	        console.log("Trigger cancel:form from FormBehavior");
+	        this.view.triggerMethod('cancel:form');
+	    },
+	    onResetModel: function onResetModel() {
+	        console.log("FormBehavior.onResetModel");
+	        this.view.model.rollback();
+	    }
+	}); /*
+	     * File Name : FormBehavior.js
+	     *
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = FormBehavior;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
+
+/***/ }),
+/* 43 */
+/*!************************************************!*\
+  !*** ./src/base/behaviors/BaseFormBehavior.js ***!
+  \************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
+	
+	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : FormValidationBehavior.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var BaseFormBehavior = _backbone2.default.Behavior.extend({
+	    onDataPersist: function onDataPersist(attribute, value) {
+	        console.log("BaseFormBehavior.onDataPersist");
+	        _backboneValidation2.default.unbind(this.view);
+	        _backboneValidation2.default.bind(this.view, {
+	            attributes: function attributes(view) {
+	                return [attribute];
+	            }
+	        });
+	
+	        var datas = {};
+	        datas[attribute] = value;
+	        this.view.model.set(datas);
+	        this.view.triggerMethod('data:persisted', datas);
+	    },
+	    onDataModified: function onDataModified(attribute, value) {
+	        _backboneValidation2.default.unbind(this.view);
+	        _backboneValidation2.default.bind(this.view, {
+	            attributes: function attributes(view) {
+	                return [attribute];
+	            }
+	        });
+	        var datas = {};
+	        datas[attribute] = value;
+	        this.view.model.set(datas);
+	        this.view.model.isValid();
+	    }
+	});
+	exports.default = BaseFormBehavior;
+
+/***/ }),
 /* 44 */
 /*!*******************************************!*\
   !*** ./src/widgets/CheckboxListWidget.js ***!
@@ -7102,7 +7294,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CheckboxListWidget.mustache */ 150);
+	var template = __webpack_require__(/*! ./templates/CheckboxListWidget.mustache */ 45);
 	
 	var CheckboxListWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -7143,6 +7335,72 @@ webpackJsonp([1],[
 
 /***/ }),
 /* 45 */
+/*!***********************************************************!*\
+  !*** ./src/widgets/templates/CheckboxListWidget.mustache ***!
+  \***********************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "    <label>"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</label>\n";
+	},"3":function(depth0,helpers,partials,data,depths) {
+	  var stack1, buffer = "";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(4, data, depths),"inverse":this.program(9, data, depths),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"4":function(depth0,helpers,partials,data,depths) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "        <div class='checkbox'>\n            <label>\n            <input type='checkbox'\n                name='"
+	    + escapeExpression(lambda((depths[1] != null ? depths[1].field_name : depths[1]), depth0))
+	    + "'\n                value='"
+	    + escapeExpression(lambda((depth0 != null ? depth0.id : depth0), depth0))
+	    + "'\n                ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += " /> "
+	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
+	    + "\n            </label>\n        </div>\n";
+	  stack1 = helpers['if'].call(depth0, (depths[1] != null ? depths[1].description : depths[1]), {"name":"if","hash":{},"fn":this.program(7, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"5":function(depth0,helpers,partials,data) {
+	  return "checked";
+	  },"7":function(depth0,helpers,partials,data,depths) {
+	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return "        <span class='help-block'>"
+	    + escapeExpression(lambda((depths[1] != null ? depths[1].description : depths[1]), depth0))
+	    + "</span>\n";
+	},"9":function(depth0,helpers,partials,data) {
+	  return "        <div></div>\n";
+	  },"11":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "        <ul>\n";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(12, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "        </ul>\n";
+	},"12":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(13, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"13":function(depth0,helpers,partials,data) {
+	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return "            <li>"
+	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
+	    + "</li>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
+	  var stack1, buffer = "<div class='form-group'>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"if","hash":{},"fn":this.program(3, data, depths),"inverse":this.program(11, data, depths),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n";
+	},"useData":true,"useDepths":true});
+
+/***/ }),
+/* 46 */
 /*!*****************************************!*\
   !*** ./src/widgets/DatePickerWidget.js ***!
   \*****************************************/
@@ -7166,7 +7424,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/DatePickerWidget.mustache */ 151); /*
+	var template = __webpack_require__(/*! ./templates/DatePickerWidget.mustache */ 47); /*
 	                                                                  * File Name : DatePickerWidget.js
 	                                                                  *
 	                                                                  * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
@@ -7222,7 +7480,42 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 46 */
+/* 47 */
+/*!*********************************************************!*\
+  !*** ./src/widgets/templates/DatePickerWidget.mustache ***!
+  \*********************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='form-group date'>\n        <label for='altdate'>"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</label>\n        <input class=\"form-control\" name=\"altdate\" type=\"text\" autocomplete=\"off\" />\n        <input class=\"form-control\" name=\""
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + "\" type=\"hidden\" />\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "    </div>\n";
+	},"2":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "        <span class='help-block'>"
+	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
+	    + "</span>\n";
+	},"4":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "    <div class='form-group date'>\n        <label>Date</label>\n        <div class='form-control'>\n            "
+	    + escapeExpression(((helper = (helper = helpers.date || (depth0 != null ? depth0.date : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"date","hash":{},"data":data}) : helper)))
+	    + "\n        </div>\n    </div>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(4, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
+
+/***/ }),
+/* 48 */
 /*!***************************************!*\
   !*** ./src/widgets/TextAreaWidget.js ***!
   \***************************************/
@@ -7240,13 +7533,13 @@ webpackJsonp([1],[
 	
 	var _tools = __webpack_require__(/*! ../tools.js */ 38);
 	
-	var _tinymce = __webpack_require__(/*! ../tinymce.js */ 135);
+	var _tinymce = __webpack_require__(/*! ../tinymce.js */ 49);
 	
 	var _tinymce2 = _interopRequireDefault(_tinymce);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TextAreaWidget.mustache */ 152); /*
+	var template = __webpack_require__(/*! ./templates/TextAreaWidget.mustache */ 54); /*
 	                                                                * File Name : TextAreaWidget.js
 	                                                                *
 	                                                                * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -7318,7 +7611,67 @@ webpackJsonp([1],[
 	exports.default = TextAreaWidget;
 
 /***/ }),
-/* 47 */
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */
+/*!*******************************************************!*\
+  !*** ./src/widgets/templates/TextAreaWidget.mustache ***!
+  \*******************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "    <textarea name='"
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + "' ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.tagId : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += " class='form-control' rows='"
+	    + escapeExpression(((helper = (helper = helpers.rows || (depth0 != null ? depth0.rows : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"rows","hash":{},"data":data}) : helper)))
+	    + "' ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.placeholder : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + ">"
+	    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
+	    + "</textarea>\n";
+	},"2":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "    <label for='"
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + "'>"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</label>\n";
+	},"4":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "id=\""
+	    + escapeExpression(((helper = (helper = helpers.tagId || (depth0 != null ? depth0.tagId : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"tagId","hash":{},"data":data}) : helper)))
+	    + "\"";
+	},"6":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "placeholde=\""
+	    + escapeExpression(((helper = (helper = helpers.placeholder || (depth0 != null ? depth0.placeholder : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"placeholder","hash":{},"data":data}) : helper)))
+	    + "\"";
+	},"8":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "    "
+	    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
+	    + "\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(8, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
+
+/***/ }),
+/* 55 */
 /*!************************************!*\
   !*** ./src/widgets/InputWidget.js ***!
   \************************************/
@@ -7351,7 +7704,7 @@ webpackJsonp([1],[
 	var InputWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-group',
-	    template: __webpack_require__(/*! ./templates/InputWidget.mustache */ 153),
+	    template: __webpack_require__(/*! ./templates/InputWidget.mustache */ 56),
 	    ui: {
 	        input: 'input'
 	    },
@@ -7381,7 +7734,63 @@ webpackJsonp([1],[
 	exports.default = InputWidget;
 
 /***/ }),
-/* 48 */
+/* 56 */
+/*!****************************************************!*\
+  !*** ./src/widgets/templates/InputWidget.mustache ***!
+  \****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<label for="
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + ">"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</label>";
+	},"3":function(depth0,helpers,partials,data) {
+	  return "<div class='input-group'>";
+	  },"5":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class=\"input-group-addon\">";
+	  stack1 = ((helper = (helper = helpers.addon || (depth0 != null ? depth0.addon : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"addon","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>";
+	},"7":function(depth0,helpers,partials,data) {
+	  return "</div>";
+	  },"9":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<span class='help-block'><small>"
+	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
+	    + "</small></span>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "<input class='form-control "
+	    + escapeExpression(((helper = (helper = helpers.css_class || (depth0 != null ? depth0.css_class : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"css_class","hash":{},"data":data}) : helper)))
+	    + "' type='"
+	    + escapeExpression(((helper = (helper = helpers.type || (depth0 != null ? depth0.type : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"type","hash":{},"data":data}) : helper)))
+	    + "' value='"
+	    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
+	    + "' name=\""
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + "\"></input>";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
+
+/***/ }),
+/* 57 */
 /*!*******************************************************!*\
   !*** ./src/task/views/templates/GeneralView.mustache ***!
   \*******************************************************/
@@ -7394,7 +7803,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 49 */
+/* 58 */
 /*!**************************************!*\
   !*** ./src/task/views/CommonView.js ***!
   \**************************************/
@@ -7416,7 +7825,7 @@ webpackJsonp([1],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -7424,15 +7833,15 @@ webpackJsonp([1],[
 	
 	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 45);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 46);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
@@ -7456,7 +7865,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 50);
+	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 59);
 	
 	var CommonView = _backbone2.default.View.extend({
 	    /*
@@ -7501,7 +7910,7 @@ webpackJsonp([1],[
 	        this.$el.removeClass('error');
 	    },
 	    bindValidation: function bindValidation() {
-	        _backboneValidation2.default.bind(this, { attributes: this.fields });
+	        _backboneValidation2.default.bind(this);
 	    },
 	    unbindValidation: function unbindValidation() {
 	        _backboneValidation2.default.unbind(this);
@@ -7568,7 +7977,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 50 */
+/* 59 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/CommonView.mustache ***!
   \******************************************************/
@@ -7586,7 +7995,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 51 */
+/* 60 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskBlockView.js ***!
   \*****************************************/
@@ -7602,21 +8011,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 52);
+	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 61);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
-	var _TaskGroupCollectionView = __webpack_require__(/*! ./TaskGroupCollectionView.js */ 58);
+	var _TaskGroupCollectionView = __webpack_require__(/*! ./TaskGroupCollectionView.js */ 67);
 	
 	var _TaskGroupCollectionView2 = _interopRequireDefault(_TaskGroupCollectionView);
 	
-	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 75);
+	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 87);
 	
 	var _TaskGroupFormView2 = _interopRequireDefault(_TaskGroupFormView);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 77);
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 89);
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
@@ -7633,7 +8042,7 @@ webpackJsonp([1],[
 	 *
 	 */
 	var TaskBlockView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 79),
+	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 91),
 	    tagName: 'div',
 	    className: 'form-section',
 	    regions: {
@@ -7721,7 +8130,7 @@ webpackJsonp([1],[
 	exports.default = TaskBlockView;
 
 /***/ }),
-/* 52 */
+/* 61 */
 /*!*******************************************!*\
   !*** ./src/task/models/TaskGroupModel.js ***!
   \*******************************************/
@@ -7737,11 +8146,11 @@ webpackJsonp([1],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 53);
+	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 62);
 	
 	var _TaskLineCollection2 = _interopRequireDefault(_TaskLineCollection);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 56);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 65);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -7799,7 +8208,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupModel;
 
 /***/ }),
-/* 53 */
+/* 62 */
 /*!***********************************************!*\
   !*** ./src/task/models/TaskLineCollection.js ***!
   \***********************************************/
@@ -7815,7 +8224,7 @@ webpackJsonp([1],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 54);
+	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 63);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
@@ -7825,7 +8234,7 @@ webpackJsonp([1],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 57);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 66);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
@@ -7896,7 +8305,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineCollection;
 
 /***/ }),
-/* 54 */
+/* 63 */
 /*!******************************************!*\
   !*** ./src/task/models/TaskLineModel.js ***!
   \******************************************/
@@ -7916,9 +8325,9 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 56);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 65);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -7986,7 +8395,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineModel;
 
 /***/ }),
-/* 55 */
+/* 64 */
 /*!*********************!*\
   !*** ./src/math.js ***!
   \*********************/
@@ -8185,7 +8594,7 @@ webpackJsonp([1],[
 	};
 
 /***/ }),
-/* 56 */
+/* 65 */
 /*!**************************************!*\
   !*** ./src/task/models/BaseModel.js ***!
   \**************************************/
@@ -8247,7 +8656,7 @@ webpackJsonp([1],[
 	exports.default = BaseModel;
 
 /***/ }),
-/* 57 */
+/* 66 */
 /*!************************************************!*\
   !*** ./src/task/models/OrderableCollection.js ***!
   \************************************************/
@@ -8339,7 +8748,7 @@ webpackJsonp([1],[
 	exports.default = OrderableCollection;
 
 /***/ }),
-/* 58 */
+/* 67 */
 /*!***************************************************!*\
   !*** ./src/task/views/TaskGroupCollectionView.js ***!
   \***************************************************/
@@ -8355,7 +8764,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 59);
+	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 68);
 	
 	var _TaskGroupView2 = _interopRequireDefault(_TaskGroupView);
 	
@@ -8395,7 +8804,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupCollectionView;
 
 /***/ }),
-/* 59 */
+/* 68 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskGroupView.js ***!
   \*****************************************/
@@ -8411,23 +8820,23 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 60);
+	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 69);
 	
 	var _TaskLineCollectionView2 = _interopRequireDefault(_TaskLineCollectionView);
 	
-	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 63);
+	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 72);
 	
 	var _TaskLineFormView2 = _interopRequireDefault(_TaskLineFormView);
 	
-	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 54);
+	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 63);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
-	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 71);
+	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 82);
 	
 	var _TaskGroupTotalView2 = _interopRequireDefault(_TaskGroupTotalView);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
@@ -8441,7 +8850,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 74); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 86); /*
 	                                                               * File Name : TaskGroupView.js
 	                                                               *
 	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -8575,7 +8984,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 60 */
+/* 69 */
 /*!**************************************************!*\
   !*** ./src/task/views/TaskLineCollectionView.js ***!
   \**************************************************/
@@ -8591,7 +9000,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 61);
+	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 70);
 	
 	var _TaskLineView2 = _interopRequireDefault(_TaskLineView);
 	
@@ -8630,7 +9039,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineCollectionView;
 
 /***/ }),
-/* 61 */
+/* 70 */
 /*!****************************************!*\
   !*** ./src/task/views/TaskLineView.js ***!
   \****************************************/
@@ -8650,7 +9059,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -8668,7 +9077,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 62);
+	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 71);
 	
 	var TaskLineView = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -8718,7 +9127,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineView;
 
 /***/ }),
-/* 62 */
+/* 71 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/TaskLineView.mustache ***!
   \********************************************************/
@@ -8760,7 +9169,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 63 */
+/* 72 */
 /*!********************************************!*\
   !*** ./src/task/views/TaskLineFormView.js ***!
   \********************************************/
@@ -8778,27 +9187,27 @@ webpackJsonp([1],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 64);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 73);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 147);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 75);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 67);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 77);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 69);
+	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 79);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
@@ -8808,7 +9217,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 70); /*
+	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 81); /*
 	                                                                  * File Name : TaskLineFormView.js
 	                                                                  *
 	                                                                  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -8938,7 +9347,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 64 */
+/* 73 */
 /*!*************************************!*\
   !*** ./src/widgets/SelectWidget.js ***!
   \*************************************/
@@ -8972,7 +9381,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/SelectWidget.mustache */ 154);
+	var template = __webpack_require__(/*! ./templates/SelectWidget.mustache */ 74);
 	
 	var SelectWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -9021,9 +9430,179 @@ webpackJsonp([1],[
 	exports.default = SelectWidget;
 
 /***/ }),
-/* 65 */,
-/* 66 */,
-/* 67 */
+/* 74 */
+/*!*****************************************************!*\
+  !*** ./src/widgets/templates/SelectWidget.mustache ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "<label for='"
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + "'>"
+	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+	    + "</label>\n";
+	},"3":function(depth0,helpers,partials,data) {
+	  return "multiple";
+	  },"5":function(depth0,helpers,partials,data,depths) {
+	  var stack1, escapeExpression=this.escapeExpression, lambda=this.lambda, buffer = "    <option value='"
+	    + escapeExpression(helpers.lookup.call(depth0, depth0, (depths[1] != null ? depths[1].id_key : depths[1]), {"name":"lookup","hash":{},"data":data}))
+	    + "' ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(6, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + ">"
+	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
+	    + "</option>\n";
+	},"6":function(depth0,helpers,partials,data) {
+	  return "selected";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "<select class='form-control' ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.multiple : depth0), {"name":"if","hash":{},"fn":this.program(3, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += " name='"
+	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
+	    + "'>\n";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</select>\n";
+	},"useData":true,"useDepths":true});
+
+/***/ }),
+/* 75 */
+/*!*************************************************!*\
+  !*** ./src/base/behaviors/ModalFormBehavior.js ***!
+  \*************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
+	
+	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 76);
+	
+	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
+	
+	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 42);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : ModalFormBehavior.js
+	 *
+	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var ModalFormBehavior = _backbone2.default.Behavior.extend({
+	    behaviors: [_ModalBehavior2.default, _FormBehavior2.default],
+	    onSuccessSync: function onSuccessSync() {
+	        console.log("ModalFormBehavior.onSuccessSync");
+	        console.log("Trigger modal:close from ModalFormBehavior");
+	        this.view.triggerMethod('modal:close');
+	    },
+	    onModalBeforeClose: function onModalBeforeClose() {
+	        console.log("Trigger reset:model from ModalFormBehavior");
+	        this.view.triggerMethod('reset:model');
+	    },
+	    onCancelForm: function onCancelForm() {
+	        console.log("ModalFormBehavior.onCancelForm");
+	        console.log("Trigger modal:close from ModalFormBehavior");
+	        this.view.triggerMethod('modal:close');
+	    },
+	    onModalClose: function onModalClose() {
+	        console.log("ModalFormBehavior.onModalClose");
+	    }
+	});
+	
+	exports.default = ModalFormBehavior;
+
+/***/ }),
+/* 76 */
+/*!*********************************************!*\
+  !*** ./src/base/behaviors/ModalBehavior.js ***!
+  \*********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ModalBehavior = _backbone2.default.Behavior.extend({
+	  defaults: {
+	    modalClasses: '',
+	    modalOptions: {
+	      'keyboard': 'false',
+	      'backdrop': 'static'
+	    }
+	  },
+	  ui: {
+	    close: '.close'
+	  },
+	  events: {
+	    'hidden.bs.modal': 'triggerFinish',
+	    'click @ui.close': 'onClose'
+	  },
+	  onRender: function onRender() {
+	    this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
+	  },
+	  onAttach: function onAttach() {
+	    this.view.$el.modal(this.getOption('modalOptions') || {});
+	  },
+	  onClose: function onClose() {
+	    console.log("Trigger modal:beforeClose from ModalBehavior");
+	    this.view.triggerMethod('modal:beforeClose');
+	    console.log("Trigger modal:close from ModalBehavior");
+	    this.view.triggerMethod('modal:close');
+	  },
+	  onModalClose: function onModalClose() {
+	    console.log("ModalBehavior.onModalClose");
+	    this.view.$el.modal('hide');
+	  },
+	  triggerFinish: function triggerFinish() {
+	    console.log("Trigger destroy:modal from ModalBehavior");
+	    this.view.triggerMethod('destroy:modal');
+	  }
+	}); /*
+	     * File Name : ModalBehavior.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = ModalBehavior;
+
+/***/ }),
+/* 77 */
 /*!*******************************************!*\
   !*** ./src/task/views/CatalogTreeView.js ***!
   \*******************************************/
@@ -9053,7 +9632,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 68);
+	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 78);
 	
 	var CatalogTreeView = _backbone2.default.View.extend({
 	    /*
@@ -9147,7 +9726,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 68 */
+/* 78 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/CatalogTreeView.mustache ***!
   \***********************************************************/
@@ -9160,7 +9739,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 69 */
+/* 79 */
 /*!**************************************!*\
   !*** ./src/widgets/LoadingWidget.js ***!
   \**************************************/
@@ -9178,7 +9757,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/LoadingWidget.mustache */ 155); /*
+	var template = __webpack_require__(/*! ./templates/LoadingWidget.mustache */ 80); /*
 	                                                               * File Name : LoadingWidget.js
 	                                                               *
 	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9195,7 +9774,20 @@ webpackJsonp([1],[
 	exports.default = LoadingWidget;
 
 /***/ }),
-/* 70 */
+/* 80 */
+/*!******************************************************!*\
+  !*** ./src/widgets/templates/LoadingWidget.mustache ***!
+  \******************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<div class='loader'>\n<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\" aria-hidden=\"true\"></i>\n</div>\n";
+	  },"useData":true});
+
+/***/ }),
+/* 81 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/TaskLineFormView.mustache ***!
   \************************************************************/
@@ -9222,7 +9814,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 71 */
+/* 82 */
 /*!**********************************************!*\
   !*** ./src/task/views/TaskGroupTotalView.js ***!
   \**********************************************/
@@ -9238,16 +9830,16 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 72);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 83);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TaskGroupTotalView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 73),
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 85),
 	    regions: {
 	        line: {
 	            el: '.line',
@@ -9280,7 +9872,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupTotalView;
 
 /***/ }),
-/* 72 */
+/* 83 */
 /*!***************************************!*\
   !*** ./src/widgets/LabelRowWidget.js ***!
   \***************************************/
@@ -9312,7 +9904,7 @@ webpackJsonp([1],[
 	 */
 	var LabelRowWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
-	    template: __webpack_require__(/*! ./templates/LabelRowWidget.mustache */ 156),
+	    template: __webpack_require__(/*! ./templates/LabelRowWidget.mustache */ 84),
 	    templateContext: function templateContext() {
 	        var values = this.getOption('values');
 	        var label = (0, _tools.getOpt)(this, 'label', '');
@@ -9328,7 +9920,31 @@ webpackJsonp([1],[
 	exports.default = LabelRowWidget;
 
 /***/ }),
-/* 73 */
+/* 84 */
+/*!*******************************************************!*\
+  !*** ./src/widgets/templates/LabelRowWidget.mustache ***!
+  \*******************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='row'>\n<div class='col-md-10 col-xs-8 text-right'>\n    <b>";
+	  stack1 = ((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</b>\n</div>\n<div class='col-md-2 col-xs-4 text-right'>\n    ";
+	  stack1 = ((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "\n</div>\n</div>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.values : depth0), {"name":"each","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
+
+/***/ }),
+/* 85 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/LineContainerView.mustache ***!
   \*************************************************************/
@@ -9341,7 +9957,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 74 */
+/* 86 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskGroupView.mustache ***!
   \*********************************************************/
@@ -9388,7 +10004,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 75 */
+/* 87 */
 /*!*********************************************!*\
   !*** ./src/task/views/TaskGroupFormView.js ***!
   \*********************************************/
@@ -9404,31 +10020,31 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 147);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 75);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 67);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 77);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 69);
+	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 79);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 76); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 88); /*
 	                                                                   * File Name : TaskGroupFormView.js
 	                                                                   *
 	                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9515,7 +10131,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupFormView;
 
 /***/ }),
-/* 76 */
+/* 88 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/TaskGroupFormView.mustache ***!
   \*************************************************************/
@@ -9542,7 +10158,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 77 */
+/* 89 */
 /*!*************************************!*\
   !*** ./src/task/views/ErrorView.js ***!
   \*************************************/
@@ -9563,7 +10179,7 @@ webpackJsonp([1],[
 	var ErrorView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'alert alert-danger',
-	    template: __webpack_require__(/*! ./templates/ErrorView.mustache */ 78),
+	    template: __webpack_require__(/*! ./templates/ErrorView.mustache */ 90),
 	    initialize: function initialize() {
 	        this.errors = this.getOption('errors');
 	    },
@@ -9583,7 +10199,7 @@ webpackJsonp([1],[
 	exports.default = ErrorView;
 
 /***/ }),
-/* 78 */
+/* 90 */
 /*!*****************************************************!*\
   !*** ./src/task/views/templates/ErrorView.mustache ***!
   \*****************************************************/
@@ -9604,7 +10220,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 79 */
+/* 91 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskBlockView.mustache ***!
   \*********************************************************/
@@ -9617,7 +10233,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 80 */
+/* 92 */
 /*!*************************************************!*\
   !*** ./src/task/views/HtBeforeDiscountsView.js ***!
   \*************************************************/
@@ -9633,16 +10249,16 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 72);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 83);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var HtBeforeDiscountsView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 73),
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 85),
 	    regions: {
 	        line: {
 	            el: '.line',
@@ -9673,7 +10289,7 @@ webpackJsonp([1],[
 	exports.default = HtBeforeDiscountsView;
 
 /***/ }),
-/* 81 */
+/* 93 */
 /*!*********************************************!*\
   !*** ./src/task/views/DiscountBlockView.js ***!
   \*********************************************/
@@ -9689,19 +10305,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 82);
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 94);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 83);
+	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 95);
 	
 	var _DiscountCollectionView2 = _interopRequireDefault(_DiscountCollectionView);
 	
-	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 86);
+	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 98);
 	
 	var _DiscountFormPopupView2 = _interopRequireDefault(_DiscountFormPopupView);
 	
-	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 93);
+	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 105);
 	
 	var _ExpenseView2 = _interopRequireDefault(_ExpenseView);
 	
@@ -9730,7 +10346,7 @@ webpackJsonp([1],[
 	var DiscountBlockView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-section discount-group',
-	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 95),
+	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 107),
 	    regions: {
 	        'lines': '.lines',
 	        'modalRegion': '.modalregion',
@@ -9823,7 +10439,7 @@ webpackJsonp([1],[
 	exports.default = DiscountBlockView;
 
 /***/ }),
-/* 82 */
+/* 94 */
 /*!******************************************!*\
   !*** ./src/task/models/DiscountModel.js ***!
   \******************************************/
@@ -9839,9 +10455,9 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 56);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 65);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -9887,7 +10503,7 @@ webpackJsonp([1],[
 	exports.default = DiscountModel;
 
 /***/ }),
-/* 83 */
+/* 95 */
 /*!**************************************************!*\
   !*** ./src/task/views/DiscountCollectionView.js ***!
   \**************************************************/
@@ -9903,7 +10519,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 84);
+	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 96);
 	
 	var _DiscountView2 = _interopRequireDefault(_DiscountView);
 	
@@ -9932,7 +10548,7 @@ webpackJsonp([1],[
 	exports.default = DiscountCollectionView;
 
 /***/ }),
-/* 84 */
+/* 96 */
 /*!****************************************!*\
   !*** ./src/task/views/DiscountView.js ***!
   \****************************************/
@@ -9952,7 +10568,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -9970,7 +10586,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 85);
+	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 97);
 	
 	var DiscountView = _backbone2.default.View.extend({
 	    template: template,
@@ -10010,7 +10626,7 @@ webpackJsonp([1],[
 	exports.default = DiscountView;
 
 /***/ }),
-/* 85 */
+/* 97 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/DiscountView.mustache ***!
   \********************************************************/
@@ -10034,7 +10650,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 86 */
+/* 98 */
 /*!*************************************************!*\
   !*** ./src/task/views/DiscountFormPopupView.js ***!
   \*************************************************/
@@ -10050,19 +10666,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 148);
+	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 76);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 87);
+	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 99);
 	
 	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
 	
-	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 89);
+	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 101);
 	
 	var _DiscountPercentModel2 = _interopRequireDefault(_DiscountPercentModel);
 	
-	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 90);
+	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 102);
 	
 	var _DiscountPercentView2 = _interopRequireDefault(_DiscountPercentView);
 	
@@ -10080,7 +10696,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 92);
+	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 104);
 	
 	var DiscountFormPopupView = _backbone2.default.View.extend({
 	    behaviors: [_ModalBehavior2.default],
@@ -10128,7 +10744,7 @@ webpackJsonp([1],[
 	exports.default = DiscountFormPopupView;
 
 /***/ }),
-/* 87 */
+/* 99 */
 /*!********************************************!*\
   !*** ./src/task/views/DiscountFormView.js ***!
   \********************************************/
@@ -10144,19 +10760,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 64);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 73);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -10168,7 +10784,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 88); /*
+	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 100); /*
 	                                                                  * File Name : DiscountFormView.js
 	                                                                  *
 	                                                                  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -10233,7 +10849,7 @@ webpackJsonp([1],[
 	exports.default = DiscountFormView;
 
 /***/ }),
-/* 88 */
+/* 100 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/DiscountFormView.mustache ***!
   \************************************************************/
@@ -10249,7 +10865,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 89 */
+/* 101 */
 /*!*************************************************!*\
   !*** ./src/task/models/DiscountPercentModel.js ***!
   \*************************************************/
@@ -10298,7 +10914,7 @@ webpackJsonp([1],[
 	exports.default = DiscountPercentModel;
 
 /***/ }),
-/* 90 */
+/* 102 */
 /*!***********************************************!*\
   !*** ./src/task/views/DiscountPercentView.js ***!
   \***********************************************/
@@ -10314,19 +10930,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 82);
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 94);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _BaseFormBehavior = __webpack_require__(/*! ../../base/behaviors/BaseFormBehavior.js */ 146);
+	var _BaseFormBehavior = __webpack_require__(/*! ../../base/behaviors/BaseFormBehavior.js */ 43);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
 	
@@ -10334,7 +10950,7 @@ webpackJsonp([1],[
 	
 	var DiscountPercentView = _backbone2.default.View.extend({
 	    behaviors: [_BaseFormBehavior2.default],
-	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 91),
+	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 103),
 	    regions: {
 	        'description': '.description',
 	        'percentage': '.percentage'
@@ -10389,7 +11005,7 @@ webpackJsonp([1],[
 	exports.default = DiscountPercentView;
 
 /***/ }),
-/* 91 */
+/* 103 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/DiscountPercentView.mustache ***!
   \***************************************************************/
@@ -10405,7 +11021,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 92 */
+/* 104 */
 /*!*****************************************************************!*\
   !*** ./src/task/views/templates/DiscountFormPopupView.mustache ***!
   \*****************************************************************/
@@ -10425,7 +11041,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 93 */
+/* 105 */
 /*!***************************************!*\
   !*** ./src/task/views/ExpenseView.js ***!
   \***************************************/
@@ -10441,18 +11057,18 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var ExpenseView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 94),
+	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 106),
 	    regions: {
 	        expense_container: '.expense-container'
 	    },
@@ -10484,7 +11100,7 @@ webpackJsonp([1],[
 	exports.default = ExpenseView;
 
 /***/ }),
-/* 94 */
+/* 106 */
 /*!*******************************************************!*\
   !*** ./src/task/views/templates/ExpenseView.mustache ***!
   \*******************************************************/
@@ -10497,7 +11113,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 95 */
+/* 107 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/DiscountBlockView.mustache ***!
   \*************************************************************/
@@ -10520,7 +11136,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 96 */
+/* 108 */
 /*!*************************************!*\
   !*** ./src/task/views/TotalView.js ***!
   \*************************************/
@@ -10536,16 +11152,16 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 72);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 83);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TotalView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 97),
+	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 109),
 	    regions: {
 	        ht: {
 	            el: '.ht',
@@ -10601,7 +11217,7 @@ webpackJsonp([1],[
 	exports.default = TotalView;
 
 /***/ }),
-/* 97 */
+/* 109 */
 /*!*****************************************************!*\
   !*** ./src/task/views/templates/TotalView.mustache ***!
   \*****************************************************/
@@ -10614,7 +11230,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 98 */
+/* 110 */
 /*!******************************************!*\
   !*** ./src/task/views/NotesBlockView.js ***!
   \******************************************/
@@ -10630,17 +11246,17 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/NotesBlockView.mustache */ 99); /*
+	var template = __webpack_require__(/*! ./templates/NotesBlockView.mustache */ 111); /*
 	                                                                * File Name : NotesBlockView.js
 	                                                                *
 	                                                                * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -10691,7 +11307,7 @@ webpackJsonp([1],[
 	exports.default = NotesBlockView;
 
 /***/ }),
-/* 99 */
+/* 111 */
 /*!**********************************************************!*\
   !*** ./src/task/views/templates/NotesBlockView.mustache ***!
   \**********************************************************/
@@ -10716,7 +11332,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 100 */
+/* 112 */
 /*!*****************************************************!*\
   !*** ./src/task/views/PaymentConditionBlockView.js ***!
   \*****************************************************/
@@ -10732,17 +11348,17 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 64);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 73);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -10756,7 +11372,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/PaymentConditionBlockView.mustache */ 101); /*
+	var template = __webpack_require__(/*! ./templates/PaymentConditionBlockView.mustache */ 113); /*
 	                                                                           * File Name : PaymentConditionBlockView.js
 	                                                                           *
 	                                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -10795,7 +11411,7 @@ webpackJsonp([1],[
 	        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
 	    },
 	    bindValidation: function bindValidation() {
-	        _backboneValidation2.default.bind(this, { attributes: ['payment_conditions'] });
+	        _backboneValidation2.default.bind(this);
 	    },
 	    unbindValidation: function unbindValidation() {
 	        _backboneValidation2.default.unbind(this);
@@ -10857,7 +11473,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 101 */
+/* 113 */
 /*!*********************************************************************!*\
   !*** ./src/task/views/templates/PaymentConditionBlockView.mustache ***!
   \*********************************************************************/
@@ -10870,7 +11486,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 102 */
+/* 114 */
 /*!********************************************!*\
   !*** ./src/task/views/PaymentBlockView.js ***!
   \********************************************/
@@ -10886,21 +11502,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 64);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 73);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 145);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 42);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _PaymentLineTableView = __webpack_require__(/*! ./PaymentLineTableView.js */ 103);
+	var _PaymentLineTableView = __webpack_require__(/*! ./PaymentLineTableView.js */ 115);
 	
 	var _PaymentLineTableView2 = _interopRequireDefault(_PaymentLineTableView);
 	
@@ -10924,7 +11540,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/PaymentBlockView.mustache */ 111);
+	var template = __webpack_require__(/*! ./templates/PaymentBlockView.mustache */ 123);
 	
 	var PaymentBlockView = _backbone2.default.View.extend({
 	    behaviors: [_FormBehavior2.default],
@@ -11053,7 +11669,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 103 */
+/* 115 */
 /*!************************************************!*\
   !*** ./src/task/views/PaymentLineTableView.js ***!
   \************************************************/
@@ -11069,15 +11685,15 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 104);
+	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 116);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
 	
-	var _PaymentLineCollectionView = __webpack_require__(/*! ./PaymentLineCollectionView.js */ 105);
+	var _PaymentLineCollectionView = __webpack_require__(/*! ./PaymentLineCollectionView.js */ 117);
 	
 	var _PaymentLineCollectionView2 = _interopRequireDefault(_PaymentLineCollectionView);
 	
-	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 108);
+	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 120);
 	
 	var _PaymentLineFormView2 = _interopRequireDefault(_PaymentLineFormView);
 	
@@ -11085,7 +11701,7 @@ webpackJsonp([1],[
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -11100,7 +11716,7 @@ webpackJsonp([1],[
 	 *
 	 */
 	var PaymentLineTableView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 110),
+	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 122),
 	    regions: {
 	        lines: '.lines',
 	        modalRegion: '.payment-line-modal-container'
@@ -11193,7 +11809,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineTableView;
 
 /***/ }),
-/* 104 */
+/* 116 */
 /*!*********************************************!*\
   !*** ./src/task/models/PaymentLineModel.js ***!
   \*********************************************/
@@ -11209,7 +11825,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 56);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 65);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -11257,7 +11873,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineModel;
 
 /***/ }),
-/* 105 */
+/* 117 */
 /*!*****************************************************!*\
   !*** ./src/task/views/PaymentLineCollectionView.js ***!
   \*****************************************************/
@@ -11273,7 +11889,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 106);
+	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 118);
 	
 	var _PaymentLineView2 = _interopRequireDefault(_PaymentLineView);
 	
@@ -11316,7 +11932,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineCollectionView;
 
 /***/ }),
-/* 106 */
+/* 118 */
 /*!*******************************************!*\
   !*** ./src/task/views/PaymentLineView.js ***!
   \*******************************************/
@@ -11332,7 +11948,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -11348,7 +11964,7 @@ webpackJsonp([1],[
 	 */
 	var PaymentLineView = _backbone2.default.View.extend({
 	    className: 'row',
-	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 107),
+	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 119),
 	    modelEvents: {
 	        'change': 'render'
 	    },
@@ -11382,7 +11998,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineView;
 
 /***/ }),
-/* 107 */
+/* 119 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/PaymentLineView.mustache ***!
   \***********************************************************/
@@ -11437,7 +12053,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 108 */
+/* 120 */
 /*!***********************************************!*\
   !*** ./src/task/views/PaymentLineFormView.js ***!
   \***********************************************/
@@ -11453,21 +12069,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 47);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 55);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 46);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 48);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 147);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 75);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 45);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 46);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
@@ -11483,7 +12099,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/PaymentLineFormView.mustache */ 109);
+	var template = __webpack_require__(/*! ./templates/PaymentLineFormView.mustache */ 121);
 	
 	var PaymentLineFormView = _backbone2.default.View.extend({
 	    behaviors: [_ModalFormBehavior2.default],
@@ -11534,7 +12150,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineFormView;
 
 /***/ }),
-/* 109 */
+/* 121 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/PaymentLineFormView.mustache ***!
   \***************************************************************/
@@ -11552,7 +12168,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 110 */
+/* 122 */
 /*!****************************************************************!*\
   !*** ./src/task/views/templates/PaymentLineTableView.mustache ***!
   \****************************************************************/
@@ -11580,7 +12196,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 111 */
+/* 123 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/PaymentBlockView.mustache ***!
   \************************************************************/
@@ -11593,7 +12209,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 112 */
+/* 124 */
 /*!****************************************!*\
   !*** ./src/task/views/RightBarView.js ***!
   \****************************************/
@@ -11613,15 +12229,15 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 113);
+	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 125);
 	
 	var _ActionCollection2 = _interopRequireDefault(_ActionCollection);
 	
-	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 115);
+	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 127);
 	
 	var _ActionListView2 = _interopRequireDefault(_ActionListView);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -11639,7 +12255,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 118);
+	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 132);
 	
 	var RightBarView = _backbone2.default.View.extend({
 	    regions: {
@@ -11680,7 +12296,7 @@ webpackJsonp([1],[
 	exports.default = RightBarView;
 
 /***/ }),
-/* 113 */
+/* 125 */
 /*!*********************************************!*\
   !*** ./src/task/models/ActionCollection.js ***!
   \*********************************************/
@@ -11696,7 +12312,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 114);
+	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 126);
 	
 	var _ActionModel2 = _interopRequireDefault(_ActionModel);
 	
@@ -11718,7 +12334,7 @@ webpackJsonp([1],[
 	exports.default = ActionCollection;
 
 /***/ }),
-/* 114 */
+/* 126 */
 /*!****************************************!*\
   !*** ./src/task/models/ActionModel.js ***!
   \****************************************/
@@ -11749,7 +12365,7 @@ webpackJsonp([1],[
 	exports.default = ActionModel;
 
 /***/ }),
-/* 115 */
+/* 127 */
 /*!******************************************!*\
   !*** ./src/task/views/ActionListView.js ***!
   \******************************************/
@@ -11769,11 +12385,11 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _AnchorWidget = __webpack_require__(/*! ../../widgets/AnchorWidget.js */ 116);
+	var _AnchorWidget = __webpack_require__(/*! ../../widgets/AnchorWidget.js */ 128);
 	
 	var _AnchorWidget2 = _interopRequireDefault(_AnchorWidget);
 	
-	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 159);
+	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 130);
 	
 	var _ToggleWidget2 = _interopRequireDefault(_ToggleWidget);
 	
@@ -11806,7 +12422,7 @@ webpackJsonp([1],[
 	exports.default = ActionListView;
 
 /***/ }),
-/* 116 */
+/* 128 */
 /*!*************************************!*\
   !*** ./src/widgets/AnchorWidget.js ***!
   \*************************************/
@@ -11826,7 +12442,7 @@ webpackJsonp([1],[
 	
 	var AnchorWidget = _backbone2.default.View.extend({
 	  tagName: 'div',
-	  template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 157)
+	  template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 129)
 	}); /*
 	     * File Name : AnchorWidget.js
 	     *
@@ -11840,8 +12456,105 @@ webpackJsonp([1],[
 	exports.default = AnchorWidget;
 
 /***/ }),
-/* 117 */,
-/* 118 */
+/* 129 */
+/*!*****************************************************!*\
+  !*** ./src/widgets/templates/AnchorWidget.mustache ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return "onclick=\""
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), depth0))
+	    + "\"";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a class='"
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.css : stack1), depth0))
+	    + " btn-block' href='"
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.url : stack1), depth0))
+	    + "' title=\""
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.title : stack1), depth0))
+	    + "\" ";
+	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + ">\n    <i class='"
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.icon : stack1), depth0))
+	    + "'></i> "
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.label : stack1), depth0))
+	    + "\n</a>\n";
+	},"useData":true});
+
+/***/ }),
+/* 130 */
+/*!*************************************!*\
+  !*** ./src/widgets/ToggleWidget.js ***!
+  \*************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 131); /*
+	                                                              * File Name : ToggleWidget.js
+	                                                              *
+	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                              * Company : Majerti ( http://www.majerti.fr )
+	                                                              *
+	                                                              * This software is distributed under GPLV3
+	                                                              * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                              *
+	                                                              */
+	
+	
+	var ToggleWidget = _backbone2.default.View.extend({
+	  template: template,
+	  ui: {}
+	});
+	
+	exports.default = ToggleWidget;
+
+/***/ }),
+/* 131 */
+/*!*****************************************************!*\
+  !*** ./src/widgets/templates/ToggleWidget.mustache ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return "    <input type=\"radio\" id=\""
+	    + escapeExpression(lambda((depth0 != null ? depth0.value : depth0), depth0))
+	    + "\" name=\"radio-group\" data-toggle=\"button\">\n    <label class=\""
+	    + escapeExpression(lambda((depth0 != null ? depth0.css : depth0), depth0))
+	    + "\" for=\""
+	    + escapeExpression(lambda((depth0 != null ? depth0.value : depth0), depth0))
+	    + "\">\n        <i class='"
+	    + escapeExpression(lambda((depth0 != null ? depth0.icon : depth0), depth0))
+	    + "'></i> "
+	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
+	    + "\n    </label>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "<div class='btn-group' data-toggle=\"buttons-radio\">\n";
+	  stack1 = helpers.each.call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.values : stack1), {"name":"each","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n";
+	},"useData":true});
+
+/***/ }),
+/* 132 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/RightBarView.mustache ***!
   \********************************************************/
@@ -11894,7 +12607,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 119 */
+/* 133 */
 /*!**************************************!*\
   !*** ./src/task/views/StatusView.js ***!
   \**************************************/
@@ -11910,7 +12623,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 148);
+	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 76);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
@@ -11932,7 +12645,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 120);
+	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 134);
 	
 	var StatusView = _backbone2.default.View.extend({
 	    template: template,
@@ -12000,7 +12713,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 120 */
+/* 134 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/StatusView.mustache ***!
   \******************************************************/
@@ -12031,7 +12744,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 121 */
+/* 135 */
 /*!********************************************!*\
   !*** ./src/task/views/BootomActionView.js ***!
   \********************************************/
@@ -12050,7 +12763,7 @@ webpackJsonp([1],[
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var BootomActionView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 122),
+	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 136),
 	    tagName: 'footer',
 	    className: 'sticky-footer hidden-md hidden-lg text-center',
 	    ui: {
@@ -12087,7 +12800,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 122 */
+/* 136 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/BootomActionView.mustache ***!
   \************************************************************/
@@ -12120,9 +12833,101 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 123 */,
-/* 124 */,
-/* 125 */
+/* 137 */
+/*!*************************************!*\
+  !*** ./src/base/views/LoginView.js ***!
+  \*************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 76);
+	
+	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 138); /*
+	                                                           * File Name : LoginView.js
+	                                                           *
+	                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	                                                           * Company : Majerti ( http://www.majerti.fr )
+	                                                           *
+	                                                           * This software is distributed under GPLV3
+	                                                           * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                           *
+	                                                           */
+	
+	
+	var LoginView = _backbone2.default.View.extend({
+	    className: 'modal-overlay',
+	    behaviors: [_ModalBehavior2.default],
+	    template: template,
+	    url: '/api/login/v1',
+	    ui: {
+	        'form': 'form',
+	        'login': 'input[name=login]',
+	        'password': 'input[type=password]',
+	        'remember_me': 'input[name=remember_me]',
+	        'errors': '.errors'
+	    },
+	    events: {
+	        "submit @ui.form": "onSubmit"
+	    },
+	    onSubmit: function onSubmit(event) {
+	        event.preventDefault();
+	        this.getUI('errors').hide();
+	        var datas = {
+	            login: this.getUI('login').val(),
+	            password: this.getUI('password').val()
+	        };
+	        if (this.getUI('remember_me').is(':checked')) {
+	            datas['remember_me'] = true;
+	        }
+	        var channel = _backbone4.default.channel('auth');
+	        channel.trigger('login', datas, this.success.bind(this), this.error.bind(this));
+	    },
+	    onModalBeforeClose: function onModalBeforeClose() {
+	        console.log("Redirecting");
+	        window.location.replace('#');
+	    },
+	    success: function success() {
+	        this.triggerMethod('close');
+	    },
+	    error: function error() {
+	        this.getUI('errors').html("Erreur d'authentification");
+	        this.getUI('errors').show();
+	    }
+	});
+	exports.default = LoginView;
+
+/***/ }),
+/* 138 */
+/*!*****************************************************!*\
+  !*** ./src/base/views/templates/LoginView.mustache ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<div class=\"modal-dialog login-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n		<form>\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">Authentification</h4>\n          </div>\n            <div class=\"modal-body\">\n                <div class='icon'>\n                    <i class='fa fa-user-circle'></i>\n                </div>\n                <div class=\"errors alert alert-danger\" style=\"display:none;\"></div>\n                <div class=\"form-group  item-login item-login\" title=\"\" id=\"item-deformField1\">\n                    <label for=\"deformField1\" class=\"control-label required\" id=\"req-deformField1\">\n                        Identifiant\n                    </label>\n                    <input name=\"login\" value=\"\" id=\"deformField1\" class=\" form-control \" type=\"text\">\n                </div>\n                <div class=\"form-group   item-password\" title=\"\" id=\"item-deformField2\">\n                    <label for=\"deformField2\" class=\"control-label required\" id=\"req-deformField2\">\n                        Mot de passe\n                    </label>\n                    <input name=\"password\" value=\"\" id=\"deformField2\" class=\" form-control \" type=\"password\">\n                </div>\n                <div class=\"form-group   item-remember_me\" title=\"\" id=\"item-deformField4\">\n                    <div class=\"checkbox\">\n                        <label for=\"deformField4\">\n                            <input name=\"remember_me\" value=\"true\" id=\"deformField4\" type=\"checkbox\">\n                            Rester connecté\n                        </label>\n                    </div>\n                </div>\n            </div>\n            <div class=\"modal-footer\">\n            <button class='btn btn-primary btn-block' type='submit'>Connexion</button>\n            </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
+	  },"useData":true});
+
+/***/ }),
+/* 139 */
 /*!****************************************************!*\
   !*** ./src/task/views/templates/MainView.mustache ***!
   \****************************************************/
@@ -12135,7 +12940,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 126 */
+/* 140 */
 /*!***************************************!*\
   !*** ./src/task/components/Facade.js ***!
   \***************************************/
@@ -12151,27 +12956,27 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 127);
+	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 141);
 	
 	var _CommonModel2 = _interopRequireDefault(_CommonModel);
 	
-	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 128);
+	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 142);
 	
 	var _TaskGroupCollection2 = _interopRequireDefault(_TaskGroupCollection);
 	
-	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 129);
+	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 143);
 	
 	var _DiscountCollection2 = _interopRequireDefault(_DiscountCollection);
 	
-	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 130);
+	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 144);
 	
 	var _PaymentLineCollection2 = _interopRequireDefault(_PaymentLineCollection);
 	
-	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 131);
+	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 145);
 	
 	var _StatusHistoryCollection2 = _interopRequireDefault(_StatusHistoryCollection);
 	
-	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 132);
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 146);
 	
 	var _TotalModel2 = _interopRequireDefault(_TotalModel);
 	
@@ -12366,7 +13171,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 127 */
+/* 141 */
 /*!****************************************!*\
   !*** ./src/task/models/CommonModel.js ***!
   \****************************************/
@@ -12382,11 +13187,11 @@ webpackJsonp([1],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 56);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 65);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	var _backbone = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -12484,7 +13289,7 @@ webpackJsonp([1],[
 	exports.default = CommonModel;
 
 /***/ }),
-/* 128 */
+/* 142 */
 /*!************************************************!*\
   !*** ./src/task/models/TaskGroupCollection.js ***!
   \************************************************/
@@ -12496,11 +13301,11 @@ webpackJsonp([1],[
 	    value: true
 	});
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 57);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 66);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 52);
+	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 61);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
@@ -12587,7 +13392,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 129 */
+/* 143 */
 /*!***********************************************!*\
   !*** ./src/task/models/DiscountCollection.js ***!
   \***********************************************/
@@ -12603,7 +13408,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 82);
+	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 94);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
@@ -12688,7 +13493,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 130 */
+/* 144 */
 /*!**************************************************!*\
   !*** ./src/task/models/PaymentLineCollection.js ***!
   \**************************************************/
@@ -12700,11 +13505,11 @@ webpackJsonp([1],[
 	    value: true
 	});
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 57);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 66);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
-	var _PaymentLineModel = __webpack_require__(/*! ./PaymentLineModel.js */ 104);
+	var _PaymentLineModel = __webpack_require__(/*! ./PaymentLineModel.js */ 116);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
 	
@@ -12853,7 +13658,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1), __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 131 */
+/* 145 */
 /*!****************************************************!*\
   !*** ./src/task/models/StatusHistoryCollection.js ***!
   \****************************************************/
@@ -12888,7 +13693,7 @@ webpackJsonp([1],[
 	exports.default = StatusHistoryCollection;
 
 /***/ }),
-/* 132 */
+/* 146 */
 /*!***************************************!*\
   !*** ./src/task/models/TotalModel.js ***!
   \***************************************/
@@ -12904,7 +13709,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 55);
+	var _math = __webpack_require__(/*! ../../math.js */ 64);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -12952,109 +13757,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 133 */,
-/* 134 */,
-/* 135 */,
-/* 136 */,
-/* 137 */,
-/* 138 */,
-/* 139 */,
-/* 140 */,
-/* 141 */
-/*!*************************************!*\
-  !*** ./src/base/views/LoginView.js ***!
-  \*************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 148);
-	
-	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
-	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
-	
-	var _backbone4 = _interopRequireDefault(_backbone3);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 142); /*
-	                                                           * File Name : LoginView.js
-	                                                           *
-	                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                           * Company : Majerti ( http://www.majerti.fr )
-	                                                           *
-	                                                           * This software is distributed under GPLV3
-	                                                           * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                           *
-	                                                           */
-	
-	
-	var LoginView = _backbone2.default.View.extend({
-	    className: 'modal-overlay',
-	    behaviors: [_ModalBehavior2.default],
-	    template: template,
-	    url: '/api/login/v1',
-	    ui: {
-	        'form': 'form',
-	        'login': 'input[name=login]',
-	        'password': 'input[type=password]',
-	        'remember_me': 'input[name=remember_me]',
-	        'errors': '.errors'
-	    },
-	    events: {
-	        "submit @ui.form": "onSubmit"
-	    },
-	    onSubmit: function onSubmit(event) {
-	        event.preventDefault();
-	        this.getUI('errors').hide();
-	        var datas = {
-	            login: this.getUI('login').val(),
-	            password: this.getUI('password').val()
-	        };
-	        if (this.getUI('remember_me').is(':checked')) {
-	            datas['remember_me'] = true;
-	        }
-	        var channel = _backbone4.default.channel('auth');
-	        channel.trigger('login', datas, this.success.bind(this), this.error.bind(this));
-	    },
-	    onModalBeforeClose: function onModalBeforeClose() {
-	        console.log("Redirecting");
-	        window.location.replace('#');
-	    },
-	    success: function success() {
-	        this.triggerMethod('close');
-	    },
-	    error: function error() {
-	        this.getUI('errors').html("Erreur d'authentification");
-	        this.getUI('errors').show();
-	    }
-	});
-	exports.default = LoginView;
-
-/***/ }),
-/* 142 */
-/*!*****************************************************!*\
-  !*** ./src/base/views/templates/LoginView.mustache ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<div class=\"modal-dialog login-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n		<form>\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">Authentification</h4>\n          </div>\n            <div class=\"modal-body\">\n                <div class='icon'>\n                    <i class='fa fa-user-circle'></i>\n                </div>\n                <div class=\"errors alert alert-danger\" style=\"display:none;\"></div>\n                <div class=\"form-group  item-login item-login\" title=\"\" id=\"item-deformField1\">\n                    <label for=\"deformField1\" class=\"control-label required\" id=\"req-deformField1\">\n                        Identifiant\n                    </label>\n                    <input name=\"login\" value=\"\" id=\"deformField1\" class=\" form-control \" type=\"text\">\n                </div>\n                <div class=\"form-group   item-password\" title=\"\" id=\"item-deformField2\">\n                    <label for=\"deformField2\" class=\"control-label required\" id=\"req-deformField2\">\n                        Mot de passe\n                    </label>\n                    <input name=\"password\" value=\"\" id=\"deformField2\" class=\" form-control \" type=\"password\">\n                </div>\n                <div class=\"form-group   item-remember_me\" title=\"\" id=\"item-deformField4\">\n                    <div class=\"checkbox\">\n                        <label for=\"deformField4\">\n                            <input name=\"remember_me\" value=\"true\" id=\"deformField4\" type=\"checkbox\">\n                            Rester connecté\n                        </label>\n                    </div>\n                </div>\n            </div>\n            <div class=\"modal-footer\">\n            <button class='btn btn-primary btn-block' type='submit'>Connexion</button>\n            </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
-	  },"useData":true});
-
-/***/ }),
-/* 143 */
+/* 147 */
 /*!****************************************!*\
   !*** ./src/base/components/AuthBus.js ***!
   \****************************************/
@@ -13137,7 +13840,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 144 */
+/* 148 */
 /*!*******************************************!*\
   !*** ./src/base/components/MessageBus.js ***!
   \*******************************************/
@@ -13184,328 +13887,6 @@ webpackJsonp([1],[
 	});
 	var MessageBus = new MessageBusClass();
 	exports.default = MessageBus;
-
-/***/ }),
-/* 145 */
-/*!********************************************!*\
-  !*** ./src/base/behaviors/FormBehavior.js ***!
-  \********************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
-	
-	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 38);
-	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
-	
-	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 146);
-	
-	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var FormBehavior = _backbone2.default.Behavior.extend({
-	    behaviors: [_BaseFormBehavior2.default],
-	    ui: {
-	        form: "form",
-	        submit: "button[type=submit]",
-	        reset: "button[type=reset]"
-	    },
-	    events: {
-	        'submit @ui.form': 'onSubmitForm',
-	        'click @ui.reset': 'onCancelClick'
-	    },
-	    defaults: {
-	        errorMessage: "Une erreur est survenue"
-	    },
-	    serializeForm: function serializeForm() {
-	        return (0, _tools.serializeForm)(this.getUI('form'));
-	    },
-	    onSyncError: function onSyncError() {
-	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "sauvegarde de vos données");
-	        _backboneValidation2.default.unbind(this.view);
-	    },
-	    onSyncSuccess: function onSyncSuccess() {
-	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
-	        _backboneValidation2.default.unbind(this.view);
-	        console.log("Trigger success:sync from FormBehavior");
-	        this.view.triggerMethod('success:sync');
-	    },
-	    syncServer: function syncServer(datas, bound) {
-	        var bound = bound || false;
-	        var datas = datas || this.view.model.toJSON();
-	
-	        if (!bound) {
-	            _backboneValidation2.default.bind(this.view, {
-	                attributes: function attributes(view) {
-	                    return _.keys(datas);
-	                }
-	            });
-	        }
-	
-	        if (this.view.model.isValid(_.keys(datas))) {
-	            if (!this.view.model.get('id')) {
-	                this.addSubmit(datas);
-	            } else {
-	                this.editSubmit(datas);
-	            }
-	        }
-	    },
-	    addSubmit: function addSubmit(datas) {
-	        console.log("FormBehavior.addSubmit");
-	        var destCollection = this.view.getOption('destCollection');
-	        destCollection.create(datas, {
-	            success: this.onSyncSuccess.bind(this),
-	            error: this.onSyncError.bind(this),
-	            wait: true,
-	            sort: true
-	        });
-	    },
-	    editSubmit: function editSubmit(datas) {
-	        this.view.model.save(datas, {
-	            success: this.onSyncSuccess.bind(this),
-	            error: this.onSyncError.bind(this),
-	            wait: true,
-	            patch: true
-	        });
-	    },
-	    onSubmitForm: function onSubmitForm(event) {
-	        console.log("FormBehavior.onSubmitForm");
-	        event.preventDefault();
-	        var datas = this.serializeForm();
-	        this.view.model.set(datas, { validate: true });
-	        this.syncServer(datas);
-	    },
-	    onDataPersisted: function onDataPersisted(datas) {
-	        console.log("FormBehavior.onDataPersisted");
-	        this.syncServer(datas, true);
-	    },
-	    onCancelClick: function onCancelClick() {
-	        console.log("FormBehavior.onCancelClick");
-	        console.log("Trigger reset:model from FormBehavior");
-	        this.view.triggerMethod('reset:model');
-	        console.log("Trigger cancel:form from FormBehavior");
-	        this.view.triggerMethod('cancel:form');
-	    },
-	    onResetModel: function onResetModel() {
-	        console.log("FormBehavior.onResetModel");
-	        this.view.model.rollback();
-	    }
-	}); /*
-	     * File Name : FormBehavior.js
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
-	exports.default = FormBehavior;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
-
-/***/ }),
-/* 146 */
-/*!************************************************!*\
-  !*** ./src/base/behaviors/BaseFormBehavior.js ***!
-  \************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
-	
-	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : FormValidationBehavior.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var BaseFormBehavior = _backbone2.default.Behavior.extend({
-	    onDataPersist: function onDataPersist(attribute, value) {
-	        console.log("BaseFormBehavior.onDataPersist");
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.view.triggerMethod('data:persisted', datas);
-	    },
-	    onDataModified: function onDataModified(attribute, value) {
-	        _backboneValidation2.default.unbind(this.view);
-	        _backboneValidation2.default.bind(this.view, {
-	            attributes: function attributes(view) {
-	                return [attribute];
-	            }
-	        });
-	        var datas = {};
-	        datas[attribute] = value;
-	        this.view.model.set(datas);
-	        this.view.model.isValid();
-	    }
-	});
-	exports.default = BaseFormBehavior;
-
-/***/ }),
-/* 147 */
-/*!*************************************************!*\
-  !*** ./src/base/behaviors/ModalFormBehavior.js ***!
-  \*************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
-	
-	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 148);
-	
-	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
-	
-	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 145);
-	
-	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : ModalFormBehavior.js
-	 *
-	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var ModalFormBehavior = _backbone2.default.Behavior.extend({
-	    behaviors: [_ModalBehavior2.default, _FormBehavior2.default],
-	    onSuccessSync: function onSuccessSync() {
-	        console.log("ModalFormBehavior.onSuccessSync");
-	        console.log("Trigger modal:close from ModalFormBehavior");
-	        this.view.triggerMethod('modal:close');
-	    },
-	    onModalBeforeClose: function onModalBeforeClose() {
-	        console.log("Trigger reset:model from ModalFormBehavior");
-	        this.view.triggerMethod('reset:model');
-	    },
-	    onCancelForm: function onCancelForm() {
-	        console.log("ModalFormBehavior.onCancelForm");
-	        console.log("Trigger modal:close from ModalFormBehavior");
-	        this.view.triggerMethod('modal:close');
-	    },
-	    onModalClose: function onModalClose() {
-	        console.log("ModalFormBehavior.onModalClose");
-	    }
-	});
-	
-	exports.default = ModalFormBehavior;
-
-/***/ }),
-/* 148 */
-/*!*********************************************!*\
-  !*** ./src/base/behaviors/ModalBehavior.js ***!
-  \*********************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var ModalBehavior = _backbone2.default.Behavior.extend({
-	  defaults: {
-	    modalClasses: '',
-	    modalOptions: {
-	      'keyboard': 'false',
-	      'backdrop': 'static'
-	    }
-	  },
-	  ui: {
-	    close: '.close'
-	  },
-	  events: {
-	    'hidden.bs.modal': 'triggerFinish',
-	    'click @ui.close': 'onClose'
-	  },
-	  onRender: function onRender() {
-	    this.view.$el.addClass('modal ' + this.getOption('modalClasses'));
-	  },
-	  onAttach: function onAttach() {
-	    this.view.$el.modal(this.getOption('modalOptions') || {});
-	  },
-	  onClose: function onClose() {
-	    console.log("Trigger modal:beforeClose from ModalBehavior");
-	    this.view.triggerMethod('modal:beforeClose');
-	    console.log("Trigger modal:close from ModalBehavior");
-	    this.view.triggerMethod('modal:close');
-	  },
-	  onModalClose: function onModalClose() {
-	    console.log("ModalBehavior.onModalClose");
-	    this.view.$el.modal('hide');
-	  },
-	  triggerFinish: function triggerFinish() {
-	    console.log("Trigger destroy:modal from ModalBehavior");
-	    this.view.triggerMethod('destroy:modal');
-	  }
-	}); /*
-	     * File Name : ModalBehavior.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
-	exports.default = ModalBehavior;
 
 /***/ }),
 /* 149 */
@@ -13589,398 +13970,6 @@ webpackJsonp([1],[
 	var ConfigBus = new ConfigBusClass();
 	exports.default = ConfigBus;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
-
-/***/ }),
-/* 150 */
-/*!***********************************************************!*\
-  !*** ./src/widgets/templates/CheckboxListWidget.mustache ***!
-  \***********************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "    <label>"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</label>\n";
-	},"3":function(depth0,helpers,partials,data,depths) {
-	  var stack1, buffer = "";
-	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(4, data, depths),"inverse":this.program(9, data, depths),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"4":function(depth0,helpers,partials,data,depths) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "        <div class='checkbox'>\n            <label>\n            <input type='checkbox'\n                name='"
-	    + escapeExpression(lambda((depths[1] != null ? depths[1].field_name : depths[1]), depth0))
-	    + "'\n                value='"
-	    + escapeExpression(lambda((depth0 != null ? depth0.id : depth0), depth0))
-	    + "'\n                ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += " /> "
-	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
-	    + "\n            </label>\n        </div>\n";
-	  stack1 = helpers['if'].call(depth0, (depths[1] != null ? depths[1].description : depths[1]), {"name":"if","hash":{},"fn":this.program(7, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"5":function(depth0,helpers,partials,data) {
-	  return "checked";
-	  },"7":function(depth0,helpers,partials,data,depths) {
-	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return "        <span class='help-block'>"
-	    + escapeExpression(lambda((depths[1] != null ? depths[1].description : depths[1]), depth0))
-	    + "</span>\n";
-	},"9":function(depth0,helpers,partials,data) {
-	  return "        <div></div>\n";
-	  },"11":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "        <ul>\n";
-	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(12, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "        </ul>\n";
-	},"12":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(13, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"13":function(depth0,helpers,partials,data) {
-	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return "            <li>"
-	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
-	    + "</li>\n";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
-	  var stack1, buffer = "<div class='form-group'>\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"if","hash":{},"fn":this.program(3, data, depths),"inverse":this.program(11, data, depths),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</div>\n";
-	},"useData":true,"useDepths":true});
-
-/***/ }),
-/* 151 */
-/*!*********************************************************!*\
-  !*** ./src/widgets/templates/DatePickerWidget.mustache ***!
-  \*********************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='form-group date'>\n        <label for='altdate'>"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</label>\n        <input class=\"form-control\" name=\"altdate\" type=\"text\" autocomplete=\"off\" />\n        <input class=\"form-control\" name=\""
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "\" type=\"hidden\" />\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "    </div>\n";
-	},"2":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "        <span class='help-block'>"
-	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
-	    + "</span>\n";
-	},"4":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "    <div class='form-group date'>\n        <label>Date</label>\n        <div class='form-control'>\n            "
-	    + escapeExpression(((helper = (helper = helpers.date || (depth0 != null ? depth0.date : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"date","hash":{},"data":data}) : helper)))
-	    + "\n        </div>\n    </div>\n";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(4, data),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"useData":true});
-
-/***/ }),
-/* 152 */
-/*!*******************************************************!*\
-  !*** ./src/widgets/templates/TextAreaWidget.mustache ***!
-  \*******************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "    <textarea name='"
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "' ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.tagId : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += " class='form-control' rows='"
-	    + escapeExpression(((helper = (helper = helpers.rows || (depth0 != null ? depth0.rows : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"rows","hash":{},"data":data}) : helper)))
-	    + "' ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.placeholder : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + ">"
-	    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
-	    + "</textarea>\n";
-	},"2":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "    <label for='"
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "'>"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</label>\n";
-	},"4":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "id=\""
-	    + escapeExpression(((helper = (helper = helpers.tagId || (depth0 != null ? depth0.tagId : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"tagId","hash":{},"data":data}) : helper)))
-	    + "\"";
-	},"6":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "placeholde=\""
-	    + escapeExpression(((helper = (helper = helpers.placeholder || (depth0 != null ? depth0.placeholder : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"placeholder","hash":{},"data":data}) : helper)))
-	    + "\"";
-	},"8":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "    "
-	    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
-	    + "\n";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(8, data),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"useData":true});
-
-/***/ }),
-/* 153 */
-/*!****************************************************!*\
-  !*** ./src/widgets/templates/InputWidget.mustache ***!
-  \****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<label for="
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + ">"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</label>";
-	},"3":function(depth0,helpers,partials,data) {
-	  return "<div class='input-group'>";
-	  },"5":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class=\"input-group-addon\">";
-	  stack1 = ((helper = (helper = helpers.addon || (depth0 != null ? depth0.addon : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"addon","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</div>";
-	},"7":function(depth0,helpers,partials,data) {
-	  return "</div>";
-	  },"9":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<span class='help-block'><small>"
-	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
-	    + "</small></span>\n";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "<input class='form-control "
-	    + escapeExpression(((helper = (helper = helpers.css_class || (depth0 != null ? depth0.css_class : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"css_class","hash":{},"data":data}) : helper)))
-	    + "' type='"
-	    + escapeExpression(((helper = (helper = helpers.type || (depth0 != null ? depth0.type : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"type","hash":{},"data":data}) : helper)))
-	    + "' value='"
-	    + escapeExpression(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper)))
-	    + "' name=\""
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "\"></input>";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.addon : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"useData":true});
-
-/***/ }),
-/* 154 */
-/*!*****************************************************!*\
-  !*** ./src/widgets/templates/SelectWidget.mustache ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<label for='"
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "'>"
-	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "</label>\n";
-	},"3":function(depth0,helpers,partials,data) {
-	  return "multiple";
-	  },"5":function(depth0,helpers,partials,data,depths) {
-	  var stack1, escapeExpression=this.escapeExpression, lambda=this.lambda, buffer = "    <option value='"
-	    + escapeExpression(helpers.lookup.call(depth0, depth0, (depths[1] != null ? depths[1].id_key : depths[1]), {"name":"lookup","hash":{},"data":data}))
-	    + "' ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(6, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + ">"
-	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
-	    + "</option>\n";
-	},"6":function(depth0,helpers,partials,data) {
-	  return "selected";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "<select class='form-control' ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.multiple : depth0), {"name":"if","hash":{},"fn":this.program(3, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += " name='"
-	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "'>\n";
-	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</select>\n";
-	},"useData":true,"useDepths":true});
-
-/***/ }),
-/* 155 */
-/*!******************************************************!*\
-  !*** ./src/widgets/templates/LoadingWidget.mustache ***!
-  \******************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<div class='loader'>\n<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\" aria-hidden=\"true\"></i>\n</div>\n";
-	  },"useData":true});
-
-/***/ }),
-/* 156 */
-/*!*******************************************************!*\
-  !*** ./src/widgets/templates/LabelRowWidget.mustache ***!
-  \*******************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='row'>\n<div class='col-md-10 col-xs-8 text-right'>\n    <b>";
-	  stack1 = ((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"label","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "</b>\n</div>\n<div class='col-md-2 col-xs-4 text-right'>\n    ";
-	  stack1 = ((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"value","hash":{},"data":data}) : helper));
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "\n</div>\n</div>\n";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "";
-	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.values : depth0), {"name":"each","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
-	},"useData":true});
-
-/***/ }),
-/* 157 */
-/*!*****************************************************!*\
-  !*** ./src/widgets/templates/AnchorWidget.mustache ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return "onclick=\""
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), depth0))
-	    + "\"";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a class='"
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.css : stack1), depth0))
-	    + " btn-block' href='"
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.url : stack1), depth0))
-	    + "' title=\""
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.title : stack1), depth0))
-	    + "\" ";
-	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + ">\n    <i class='"
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.icon : stack1), depth0))
-	    + "'></i> "
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.label : stack1), depth0))
-	    + "\n</a>\n";
-	},"useData":true});
-
-/***/ }),
-/* 158 */,
-/* 159 */
-/*!*************************************!*\
-  !*** ./src/widgets/ToggleWidget.js ***!
-  \*************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 160); /*
-	                                                              * File Name : ToggleWidget.js
-	                                                              *
-	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                              * Company : Majerti ( http://www.majerti.fr )
-	                                                              *
-	                                                              * This software is distributed under GPLV3
-	                                                              * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                              *
-	                                                              */
-	
-	
-	var ToggleWidget = _backbone2.default.View.extend({
-	  template: template,
-	  ui: {}
-	});
-	
-	exports.default = ToggleWidget;
-
-/***/ }),
-/* 160 */
-/*!*****************************************************!*\
-  !*** ./src/widgets/templates/ToggleWidget.mustache ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return "    <input type=\"radio\" id=\""
-	    + escapeExpression(lambda((depth0 != null ? depth0.value : depth0), depth0))
-	    + "\" name=\"radio-group\" data-toggle=\"button\">\n    <label class=\""
-	    + escapeExpression(lambda((depth0 != null ? depth0.css : depth0), depth0))
-	    + "\" for=\""
-	    + escapeExpression(lambda((depth0 != null ? depth0.value : depth0), depth0))
-	    + "\">\n        <i class='"
-	    + escapeExpression(lambda((depth0 != null ? depth0.icon : depth0), depth0))
-	    + "'></i> "
-	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
-	    + "\n    </label>\n";
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<div class='btn-group' data-toggle=\"buttons-radio\">\n";
-	  stack1 = helpers.each.call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.values : stack1), {"name":"each","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</div>\n";
-	},"useData":true});
 
 /***/ })
 ]);

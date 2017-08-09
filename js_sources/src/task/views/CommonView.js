@@ -75,7 +75,7 @@ const CommonView = Mn.View.extend({
         this.$el.removeClass('error');
     },
     bindValidation(){
-        Validation.bind(this, {attributes: this.fields});
+        Validation.bind(this);
     },
     unbindValidation(){
         Validation.unbind(this);

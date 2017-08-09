@@ -1,3 +1,8 @@
-<a class='{{ option.css }} btn-block' href='{{ option.url }}' title="{{ option.title }}" {{#if option.onclick}}onclick="{{ option.onclick }}"{{/if}}>
+<a
+    class='{{ option.css }} btn-block'
+    href='{{ option.url }}'
+    title="{{ option.title }}"
+    {{#if option.onclick}}onclick="{{ option.onclick }}"{{/if}}
+    {{#if option.attrs}} {{ option.attrs }}{{/if}}>
     <i class='{{ option.icon }}'></i> {{ option.label}}
 </a>

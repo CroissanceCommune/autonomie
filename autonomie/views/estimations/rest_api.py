@@ -176,10 +176,13 @@ class EstimationRestView(TaskRestView):
             duplicate
             ...
         """
-        result = TaskRestView._get_other_actions(self)
+        result = []
         result.append(self._get_duplicate_button())
         if self.request.has_permission('set_signed_status.estimation'):
             result.append(self._get_signed_status_button())
+        result.extend(
+            TaskRestView._get_other_actions(self)
+        )
         return result
 
     def _get_duplicate_button(self):
@@ -194,7 +197,7 @@ class EstimationRestView(TaskRestView):
             "widget": "anchor",
             "option": {
                 "url": url,
-                "label": u"Dupliquer ce devis",
+                "label": u"Dupliquer",
                 "title": u"Créer un nouveau devis à partir de celui-ci",
                 "css": "btn btn-default",
                 "icon": "fa fa-copy",

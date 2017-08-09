@@ -206,6 +206,23 @@ class TaskRestView(BaseRestView):
                     u"supprimer cet élément ?');"
                 }
             })
+
+        if self.request.has_permission('add.file'):
+            url = self.request.route_path(
+                "/%ss/{id}/addfile" % self.context.type_,
+                id=self.context.id
+            )
+            result.append({
+                'widget': 'anchor',
+                'option': {
+                    "url": url,
+                    "label": u"Attacher un fichier",
+                    "title": u"Attacher un fichier à ce document",
+                    "css": "btn btn-default",
+                    "icon": "fa fa-files-o",
+                    "attrs": "target=_blank",
+                }
+            })
         return result
 
 

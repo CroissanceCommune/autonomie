@@ -193,21 +193,30 @@ def get_status_actions(data_type):
     manager = ActionManager()
     for status, icon, label, title, css in (
         (
-            'draft', 'save', u'Enregistrer en brouillon',
-            'Enregistrer ce document comme brouillon', 'btn btn-default'
+            'draft',
+            'save',
+            u'Enregistrer en brouillon afin de le modifier ultérieurement',
+            'Enregistrer ce document comme brouillon',
+            'btn btn-default'
         ),
         (
-            'wait', 'time', u"Demander la validation",
+            'wait',
+            'time',
+            u"Demander la validation",
             u"Enregistrer ce document et en demander la validation",
             "btn btn-success btn-primary-action",
         ),
         (
-            'invalid', 'trash', u"Invalider",
-            u"Invalider ce document", "btn btn-danger",
+            'invalid',
+            'trash',
+            u"Invalider",
+            u"Invalider ce document afin que l'entrepreneur le corrige",
+            "btn btn-danger",
         ),
         (
             'valid', "ok-sign", u"Valider",
-            u"Valider ce document", "btn btn-success btn-primary-action",
+            u"Valider ce document (il ne pourra plus être modifié)",
+            "btn btn-success btn-primary-action",
         )
     ):
         action = Action(

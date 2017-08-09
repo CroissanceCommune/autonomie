@@ -76,8 +76,9 @@ class InvoiceRestView(TaskRestView):
             duplicate
             ...
         """
-        result = TaskRestView._get_other_actions(self)
+        result = []
         result.append(self._get_duplicate_button())
+        result.extend(TaskRestView._get_other_actions(self))
         return result
 
     def _get_duplicate_button(self):
@@ -92,7 +93,7 @@ class InvoiceRestView(TaskRestView):
             "widget": "anchor",
             "option": {
                 "url": url,
-                "label": u"Dupliquer cette facture",
+                "label": u"Dupliquer",
                 "title": u"Créer une nouvelle facture à partir de celle-ci",
                 "css": "btn btn-default",
                 "icon": "fa fa-copy",

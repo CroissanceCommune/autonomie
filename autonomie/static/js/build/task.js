@@ -12473,15 +12473,22 @@ webpackJsonp([1],[
 	  return "onclick=\""
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), depth0))
 	    + "\"";
+	},"3":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return " "
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.attrs : stack1), depth0));
 	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a class='"
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a\n    class='"
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.css : stack1), depth0))
-	    + " btn-block' href='"
+	    + " btn-block'\n    href='"
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.url : stack1), depth0))
-	    + "' title=\""
+	    + "'\n    title=\""
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.title : stack1), depth0))
-	    + "\" ";
+	    + "\"\n    ";
 	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "\n    ";
+	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.attrs : stack1), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + ">\n    <i class='"
 	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.icon : stack1), depth0))
@@ -12570,7 +12577,9 @@ webpackJsonp([1],[
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
 	  return "    <button\n        class='btn btn-block "
 	    + escapeExpression(lambda((depth0 != null ? depth0.css : depth0), depth0))
-	    + "'\n        data-url='"
+	    + "'\n        title=\""
+	    + escapeExpression(lambda((depth0 != null ? depth0.title : depth0), depth0))
+	    + "\"\n        data-url='"
 	    + escapeExpression(lambda((depth0 != null ? depth0.url : depth0), depth0))
 	    + "'\n        data-title='"
 	    + escapeExpression(lambda((depth0 != null ? depth0.title : depth0), depth0))

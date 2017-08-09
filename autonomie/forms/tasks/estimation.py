@@ -5,7 +5,10 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import colander
 import deform
-from autonomie.models.task.invoice import get_invoice_years
+from autonomie.models.task.invoice import (
+    get_invoice_years,
+    Invoice,
+)
 from autonomie.models import company
 from autonomie import forms
 from autonomie.forms.tasks.lists import (
@@ -119,3 +122,29 @@ def get_list_schema(is_global=False):
     schema.insert(0, node)
 
     return schema
+
+
+@colander.deferred
+def deferred_invoice_widget(node, kw):
+    """
+    Return a select for estimation selection
+    """
+    query = Invoice.query()
+    query = query.filter_by(project_id=kw['request'].context.project_id)
+    choices = []
+    for invoice in query:
+        if invoice.estimation_id is None:
+            label = invoice.name
+        else:
+            label = u"{0} (est déjà rattachée à un devis)".format(invoice.name)
+        choices.append((invoice.id, label))
+    return deform.widget.CheckboxChoiceWidget(values=choices)
+
+
+class InvoiceAttachSchema(colander.Schema):
+    invoice_ids = colander.SchemaNode(
+        colander.Set(),
+        widget=deferred_invoice_widget,
+        missing=colander.drop,
+        title=u"Factures à rattacher à ce devis",
+    )

@@ -31,7 +31,10 @@ from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.security import has_permission
 
 from autonomie.models import company
-from autonomie.models.task import invoice
+from autonomie.models.task import (
+    invoice,
+    Estimation,
+)
 from autonomie.models.tva import (
     Product,
     Tva,
@@ -606,3 +609,24 @@ def get_payment_schema(request):
             orderable=False,
         )
         return schema
+
+
+@colander.deferred
+def deferred_estimation_widget(node, kw):
+    """
+    Return a select for estimation selection
+    """
+    query = Estimation.query()
+    query = query.filter_by(project_id=kw['request'].context.project_id)
+    choices = [(e.id, e.name) for e in query]
+    choices.insert(0, ('', 'Aucun devis'))
+    return deform.widget.SelectWidget(values=choices)
+
+
+class EstimationAttachSchema(colander.Schema):
+    estimation_id = colander.SchemaNode(
+        colander.Integer(),
+        widget=deferred_estimation_widget,
+        missing=colander.drop,
+        title=u"Devis à rattacher à cette facture",
+    )

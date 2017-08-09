@@ -57,13 +57,19 @@ import logging
 from colanderalchemy import SQLAlchemySchemaNode
 
 from pyramid.httpexceptions import HTTPFound
+from autonomie.forms.tasks.estimation import InvoiceAttachSchema
 from autonomie.models.task import (
     Estimation,
     PaymentLine,
+    Invoice,
 )
+from autonomie.utils.widgets import ViewLink
 from autonomie.resources import estimation_signed_status_js
 from autonomie.views import (
     BaseEditView,
+    BaseFormView,
+    submit_btn,
+    cancel_btn,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.task.views import (
@@ -163,6 +169,49 @@ class EstimationSetMetadatasView(TaskSetMetadatasView):
         )
 
 
+class EstimationAttachInvoiceView(BaseFormView):
+    schema = InvoiceAttachSchema()
+    buttons = (submit_btn, cancel_btn,)
+
+    def before(self, form):
+        self.request.actionmenu.add(
+            ViewLink(
+                label=u"Revenir au devis",
+                path="/estimations/{id}.html",
+                id=self.context.id,
+            )
+        )
+        form.set_appstruct(
+            {
+                'invoice_ids': [invoice.id for invoice in self.context.invoices]
+            }
+        )
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                '/estimations/{id}.html',
+                id=self.context.id,
+            )
+        )
+
+    def submit_success(self, appstruct):
+        invoice_ids = appstruct.get('invoice_ids')
+        for invoice_id in invoice_ids:
+            invoice = Invoice.get(invoice_id)
+            invoice.estimation_id = self.context.id
+            self.request.dbsession.merge(invoice)
+
+        self.context.geninv = True
+        self.request.dbsession.merge(self.context)
+        return self.redirect()
+
+    def cancel_success(self, appstruct):
+        return self.redirect()
+
+    cancel_failure = cancel_success
+
+
 def estimation_geninv_view(context, request):
     """
     Invoice generation view
@@ -212,6 +261,7 @@ def add_routes(config):
         'admin',
         'geninv',
         'set_metadatas',
+        'attach_invoices',
     ):
         config.add_route(
             '/estimations/{id}/%s' % action,
@@ -288,4 +338,11 @@ def includeme(config):
         route_name="/estimations/{id}/set_metadatas",
         permission='view.estimation',
         renderer='tasks/add.mako',
+    )
+
+    config.add_view(
+        EstimationAttachInvoiceView,
+        route_name="/estimations/{id}/attach_invoices",
+        permission='view.estimation',
+        renderer="/base/formpage.mako",
     )

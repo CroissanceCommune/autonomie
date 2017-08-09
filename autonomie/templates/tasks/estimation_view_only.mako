@@ -59,10 +59,9 @@
 
 <%block name='before_tabs'>
     <% estimation = request.context %>
+    <h3>
     ${estimation.name}
-    <p class='lead'>
-    ${api.format_estimation_status(estimation)}
-    </p>
+    </h3>
 
 % if api.has_permission('set_signed_status.estimation'):
     <div
@@ -113,9 +112,19 @@
                 </p>
             </li>
     % endfor
+    <a
+        href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
+        class='btn btn-primary btn-xs'>
+        <i class='glyphicon glyphicon-link'></i> Modifier
+    </a>
 % else:
 <li>
     Aucune facture n'a été générée depuis ce devis
+    <a
+        href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
+        class='btn btn-primary btn-xs'>
+        <i class='glyphicon glyphicon-link'></i> Rattacher ce devis à des factures
+    </a>
     </li>
 % endif
         </ul>

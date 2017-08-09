@@ -33,6 +33,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.task import (
     Invoice,
+    Estimation,
 )
 from autonomie_base.utils.date import format_date
 from autonomie.utils.strings import format_amount
@@ -40,6 +41,7 @@ from autonomie.utils.strings import format_amount
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.tasks.invoice import (
     get_payment_schema,
+    EstimationAttachSchema,
 )
 from autonomie.views import (
     BaseEditView,
@@ -265,9 +267,7 @@ class InvoicePaymentView(BaseFormView):
             )
         )
 
-    def submit_success(self, appstruct):
-        self.context.record_payment(user=self.request.user, **appstruct)
-        self.request.dbsession.merge(self.context)
+    def redirect(self):
         return HTTPFound(
             self.request.route_path(
                 '/invoices/{id}.html',
@@ -276,14 +276,53 @@ class InvoicePaymentView(BaseFormView):
             )
         )
 
+    def submit_success(self, appstruct):
+        self.context.record_payment(user=self.request.user, **appstruct)
+        self.request.dbsession.merge(self.context)
+        return self.redirect()
+
     def cancel_success(self, appstruct):
+        return self.redirect()
+
+    cancel_failure = cancel_success
+
+
+class InvoiceAttachEstimationView(BaseFormView):
+    schema = EstimationAttachSchema()
+    buttons = (submit_btn, cancel_btn,)
+
+    def before(self, form):
+        self.request.actionmenu.add(
+            ViewLink(
+                label=u"Revenir à la facture",
+                path="/invoices/{id}.html",
+                id=self.context.id,
+            )
+        )
+        if self.context.estimation_id:
+            form.set_appstruct({'estimation_id': self.context.estimation_id})
+
+    def redirect(self):
         return HTTPFound(
             self.request.route_path(
                 '/invoices/{id}.html',
                 id=self.context.id,
-                _anchor='payment',
             )
         )
+
+    def submit_success(self, appstruct):
+        estimation_id = appstruct.get('estimation_id')
+        self.context.estimation_id = estimation_id
+        if estimation_id is not None:
+            estimation = Estimation.get(estimation_id)
+            estimation.geninv = True
+            self.request.dbsession.merge(estimation)
+        self.request.dbsession.merge(self.context)
+        return self.redirect()
+
+    def cancel_success(self, appstruct):
+        return self.redirect()
+
     cancel_failure = cancel_success
 
 
@@ -332,6 +371,7 @@ def add_routes(config):
         'addpayment',
         'gencinv',
         'set_metadatas',
+        'attach_estimation',
     ):
         config.add_route(
             '/invoices/{id}/%s' % action,
@@ -432,5 +472,11 @@ def includeme(config):
         InvoiceSetProductsView,
         route_name="/invoices/{id}/set_products",
         permission="admin_treasury",
+        renderer='base/formpage.mako',
+    )
+    config.add_view(
+        InvoiceAttachEstimationView,
+        route_name="/invoices/{id}/attach_estimation",
+        permission="view.invoice",
         renderer='base/formpage.mako',
     )

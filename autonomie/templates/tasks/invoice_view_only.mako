@@ -59,7 +59,7 @@
 
 <%block name='before_tabs'>
     <% invoice = request.context %>
-    ${invoice.name}
+    <h2>${invoice.name}</h2>
     <p class='lead'>
     Cette facture porte le numéro <b>${invoice.prefix}${invoice.official_number}</b>
     </p>
@@ -86,9 +86,18 @@
     >
     ${invoice.estimation.internal_number}
     </a>
+    <a
+        href="${request.route_path('/invoices/{id}/attach_estimation', id=invoice.id)}"
+        class='btn btn-primary btn-xs'>
+        <i class='glyphicon glyphicon-link'></i> Modifier
+    </a>
 % else:
 <div>Aucun devis n'est rattaché à cette facture
-<a href='#' class='btn btn-primary btn-xs'><i class='glyphicon glyphicon-link'></i> Rattacher cette facture à un devis</a>
+    <a
+        href="${request.route_path('/invoices/{id}/attach_estimation', id=invoice.id)}"
+        class='btn btn-primary btn-xs'>
+        <i class='glyphicon glyphicon-link'></i> Rattacher cette facture à un devis
+    </a>
 </div>
 % endif
     </li>
@@ -121,11 +130,13 @@
         <div class='col-xs-12 col-md-10 col-md-offset-1'>
         <div class='alert'>
         Cette facture est rattachée à l'année fiscale ${invoice.financial_year}.
-        <a class='btn btn-default'
+        % if api.has_permission('set_treasury.invoice'):
+        <a class='btn btn-primary btn-xs'
             href="${request.route_path('/invoices/{id}/set_treasury', id=invoice.id)}"
             >
             <i class='glyphicon glyphicon-pencil'></i> Modifier
         </a>
+        % endif
         <br />
         Elle porte le numéro ${invoice.prefix}${invoice.official_number}.
         </div>
@@ -135,7 +146,7 @@
                 </div>
                     <a
                     href="${request.route_path('/invoices/{id}.txt', id=invoice.id, _query={'force': True})}"
-                    class='btn btn-default primary-action'
+                    class='btn btn-default'
                     >
                     <i class='glyphicon glyphicon-export'></i>
                         Forcer la génération d'écritures pour cette facture

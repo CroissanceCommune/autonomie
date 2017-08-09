@@ -17,4 +17,28 @@
     </form>
     <div class='status_history'>
     </div>
+    {{#if attachments}}
+        <a
+                data-target='#files-more'
+                data-toggle='collapse'
+                aria-expanded="false"
+                aria-controls="files-more"
+                >
+                <i class='glyphicon glyphicon-plus-sign'></i>
+            Fichiers attachés
+        </a>
+        <div id="files-more" class='collapse row'>
+        <div class='col-xs-12'>
+        <ul>
+        {{#each attachments}}
+            <li>
+                <a href='/files/{{this.id}}' target='_blank'>
+                <i class='fa fa-file'></i> {{this.label}}
+                </a>
+            </li>
+        {{/each}}
+        </ul>
+        </div>
+        </div>
+    {{/if}}
 </div>

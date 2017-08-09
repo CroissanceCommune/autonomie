@@ -36,11 +36,13 @@ const FacadeClass = Mn.Object.extend({
         'get:totalmodel': 'getTotalModelRequest',
         'get:status_history_collection': 'getStatusHistory',
         'is:valid': "isDataValid",
+        'get:attachments': 'getAttachments',
     },
     initialize(options){
         this.syncModel = this.syncModel.bind(this);
     },
     loadModels(form_datas){
+        this.datas = form_datas;
         this.models = {};
         this.collections = {};
         this.totalmodel = new TotalModel();
@@ -67,6 +69,9 @@ const FacadeClass = Mn.Object.extend({
                 history
             );
         }
+    },
+    getAttachments(){
+        return this.datas.attachments;
     },
     getStatusHistory(){
         return this.status_history_collection;

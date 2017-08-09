@@ -49,9 +49,10 @@ const GeneralView = Mn.View.extend({
     },
     initialize(options){
         this.section = options['section'];
+        this.attachments = Radio.channel('facade').request('get:attachments');
     },
     templateContext: function(){
-        return {};
+        return {attachments: this.attachments};
     },
     showStatusHistory(){
         var collection = Radio.channel('facade').request(

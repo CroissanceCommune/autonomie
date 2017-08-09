@@ -24,9 +24,6 @@
 """
     File model
 """
-import hashlib
-import os
-
 import cStringIO
 from datetime import datetime
 from sqlalchemy import (
@@ -131,6 +128,15 @@ class File(Node):
         target.size = newvalue.file.content_length
 
         return newvalue
+
+    def __json__(self, requets):
+        return {
+            "id": self.id,
+            "label": self.label,
+            "name": self.name,
+            "size": self.size,
+            "mimetype": self.mimetype,
+        }
 
 
 class Template(File):

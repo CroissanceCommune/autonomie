@@ -685,6 +685,9 @@ _{s.date:%m%y}"
             line_groups=[
                 group.__json__(request) for group in self.line_groups
             ],
+            attachments=[
+                f.__json__(request)for f in self.children if f.type_ == 'file'
+            ]
         )
 
     def set_status(self, status, request, **kw):

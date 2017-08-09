@@ -4524,7 +4524,7 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<h4>\n    <a\n        data-target='#comments-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"comments-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i>\n    </a>\nHistorique des commentaires et changements de statut\n</h4>\n<div id='comments-more' class='collapse row comments'>\n</div>\n";
+	  return "<a\n    data-target='#comments-more'\n    data-toggle='collapse'\n    aria-expanded=\"false\"\n    aria-controls=\"comments-more\"\n    >\n    <i class='glyphicon glyphicon-plus-sign'></i>\nHistorique des commentaires et changements de statut\n</a>\n<div id='comments-more' class='collapse row comments'>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
@@ -4617,10 +4617,11 @@ webpackJsonp([1],[
 	    },
 	    initialize: function initialize(options) {
 	        this.section = options['section'];
+	        this.attachments = _backbone4.default.channel('facade').request('get:attachments');
 	    },
 	
 	    templateContext: function templateContext() {
-	        return {};
+	        return { attachments: this.attachments };
 	    },
 	    showStatusHistory: function showStatusHistory() {
 	        var collection = _backbone4.default.channel('facade').request('get:status_history_collection');
@@ -7802,9 +7803,24 @@ webpackJsonp([1],[
 
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 29);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='prefix'></div>\n            </div>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n</div>\n";
-	  },"useData":true});
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "        <a\n                data-target='#files-more'\n                data-toggle='collapse'\n                aria-expanded=\"false\"\n                aria-controls=\"files-more\"\n                >\n                <i class='glyphicon glyphicon-plus-sign'></i>\n            Fichiers attachés\n        </a>\n        <div id=\"files-more\" class='collapse row'>\n        <div class='col-xs-12'>\n        <ul>\n";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.attachments : depth0), {"name":"each","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "        </ul>\n        </div>\n        </div>\n";
+	},"2":function(depth0,helpers,partials,data) {
+	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return "            <li>\n                <a href='/files/"
+	    + escapeExpression(lambda((depth0 != null ? depth0.id : depth0), depth0))
+	    + "' target='_blank'>\n                <i class='fa fa-file'></i> "
+	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
+	    + "\n                </a>\n            </li>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='prefix'></div>\n            </div>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.attachments : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n";
+	},"useData":true});
 
 /***/ }),
 /* 58 */
@@ -13026,12 +13042,14 @@ webpackJsonp([1],[
 	        'get:paymentcollection': 'getPaymentCollectionRequest',
 	        'get:totalmodel': 'getTotalModelRequest',
 	        'get:status_history_collection': 'getStatusHistory',
-	        'is:valid': "isDataValid"
+	        'is:valid': "isDataValid",
+	        'get:attachments': 'getAttachments'
 	    },
 	    initialize: function initialize(options) {
 	        this.syncModel = this.syncModel.bind(this);
 	    },
 	    loadModels: function loadModels(form_datas) {
+	        this.datas = form_datas;
 	        this.models = {};
 	        this.collections = {};
 	        this.totalmodel = new _TotalModel2.default();
@@ -13054,6 +13072,9 @@ webpackJsonp([1],[
 	            var history = form_datas['status_history'];
 	            this.status_history_collection = new _StatusHistoryCollection2.default(history);
 	        }
+	    },
+	    getAttachments: function getAttachments() {
+	        return this.datas.attachments;
 	    },
 	    getStatusHistory: function getStatusHistory() {
 	        return this.status_history_collection;

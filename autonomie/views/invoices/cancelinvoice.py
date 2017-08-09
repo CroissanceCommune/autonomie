@@ -27,20 +27,27 @@
 """
 import logging
 
+from pyramid.httpexceptions import HTTPFound
 from colanderalchemy import SQLAlchemySchemaNode
 
+from autonomie_base.utils.date import format_date
+
+from autonomie.utils.widgets import ViewLink
 from autonomie.models.task import (
     CancelInvoice,
 )
-from autonomie.views.files import FileUploadView
 from autonomie.views import (
     BaseEditView,
 )
+from autonomie.views.files import FileUploadView
+from autonomie.views.sage import SageSingleInvoiceExportPage
 from autonomie.views.task.views import (
     TaskEditView,
     TaskDeleteView,
     TaskHtmlView,
     TaskPdfView,
+    TaskSetMetadatasView,
+    TaskSetProductsView,
 )
 
 
@@ -75,51 +82,74 @@ class CancelInvoiceAdminView(BaseEditView):
     )
 
 
-# class CancelInvoiceStatusView(CommonInvoiceStatusView):
-#     """
-#     Cancelinvoice specific status view
-#     """
-#     def post_valid_process(self, task, status, cancelinvoice):
-#         """
-#         Launched after a cancelinvoice has been validated
-#         """
-#         log.debug(u"+ post_valid_process : checking if the associated invoice \
-# is resulted")
-#         invoice = task.invoice
-#         invoice = invoice.check_resulted(user_id=self.request.user.id)
-#         self.request.dbsession.merge(invoice)
-#         msg = u"L'avoir porte le numéro <b>{0}{1}</b>"
-#         self.session.flash(msg.format(task.prefix, task.official_number))
-#
-#
-# def set_financial_year(request):
-#     """
-#         Set the financial year of a document
-#     """
-#     try:
-#         ret_dict = CancelInvoiceStatusView(request)()
-#     except ValidationFailure, err:
-#         log.exception(u"Financial year set error")
-#         ret_dict = dict(
-#             form=err.render(),
-#             title=u"Année comptable de référence"
-#         )
-#     return ret_dict
-#
-#
-# def set_products(request):
-#     """
-#         Set products in a document
-#     """
-#     try:
-#         ret_dict = CancelInvoiceStatusView(request)()
-#     except ValidationFailure, err:
-#         log.exception(u"Error setting products")
-#         ret_dict = dict(
-#             form=err.render(),
-#             title=u"Année comptable de référence",
-#         )
-#     return ret_dict
+class CancelInvoiceSetTreasuryiew(BaseEditView):
+    """
+    View used to set treasury related informations
+
+    context
+
+        An invoice
+
+    perms
+
+        set_treasury.invoice
+    """
+    factory = CancelInvoice
+    schema = SQLAlchemySchemaNode(
+        CancelInvoice,
+        includes=('prefix', 'financial_year',),
+        title=u"Modifier l'année fiscale de référence et le préfixe "
+        u"du numéro de facture",
+    )
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                "/invoices/{id}.html",
+                id=self.context.id,
+                _anchor="treasury"
+            )
+        )
+
+    def before(self, form):
+        BaseEditView.before(self, form)
+        self.request.actionmenu.add(
+            ViewLink(
+                label=u"Revenir à la facture",
+                path="/invoices/{id}.html",
+                id=self.context.id,
+                _anchor="treasury",
+            )
+        )
+
+    @property
+    def title(self):
+        return u"Facture numéro {0} en date du {1}".format(
+            self.context.official_number,
+            format_date(self.context.date),
+        )
+
+
+class CancelInvoiceSetMetadatasView(TaskSetMetadatasView):
+    """
+    View used for editing invoice metadatas
+    """
+
+    @property
+    def title(self):
+        return u"Modification de l'avoir {task.name}".format(
+            task=self.context
+        )
+
+
+class CancelInvoiceSetProductsView(TaskSetProductsView):
+    @property
+    def title(self):
+        return (
+            u"Configuration des codes produits pour l'avoir {0.name}".format(
+                self.context
+            )
+        )
 
 
 def add_routes(config):
@@ -128,19 +158,22 @@ def add_routes(config):
     """
     config.add_route(
         '/cancelinvoices/{id}',
-        '/cancelinvoice/{id:\d+}',
+        '/cancelinvoices/{id:\d+}',
         traverse='/cancelinvoices/{id}'
     )
-    for extension in ('html', 'pdf'):
+    for extension in ('html', 'pdf', 'txt'):
         config.add_route(
             '/cancelinvoices/{id}.%s' % extension,
             '/cancelinvoices/{id:\d+}.%s' % extension,
             traverse='/cancelinvoices/{id}'
         )
     for action in (
-        'addfile', 'delete', 'admin',
-        'set_financial_year',
+        'addfile',
+        'delete',
+        'admin',
+        'set_treasury',
         'set_products',
+        'set_metadatas',
     ):
         config.add_route(
             '/cancelinvoices/{id}/%s' % action,
@@ -152,11 +185,12 @@ def add_routes(config):
 def includeme(config):
     add_routes(config)
 
+    # Here it's only view.cancelinvoice to allow redirection to the html view
     config.add_view(
         CancelInvoiceEditView,
         route_name='/cancelinvoices/{id}',
         renderer="tasks/form.mako",
-        permission='edit.cancelinvoice',
+        permission='view.cancelinvoice',
     )
 
     config.add_view(
@@ -182,7 +216,7 @@ def includeme(config):
     config.add_view(
         CancelInvoiceHtmlView,
         route_name='/cancelinvoices/{id}.html',
-        renderer='tasks/view_only.mako',
+        renderer='tasks/cancelinvoice_view_only.mako',
         permission='view.cancelinvoice',
     )
 
@@ -192,17 +226,29 @@ def includeme(config):
         renderer='base/formpage.mako',
         permission='edit.cancelinvoice',
     )
-#    config.add_view(
-#        set_financial_year,
-#        route_name='/cancelinvoices/{id}/set_financial_year',
-#        request_param='action=set_financial_year',
-#        permission="admin_treasury",
-#        renderer='base/formpage.mako',
-#    )
-#
-#    config.add_view(
-#        set_products,
-#        route_name='/cancelinvoices/{id}/set_products',
-#        permission="admin_treasury",
-#        renderer='base/formpage.mako',
-#    )
+
+    config.add_view(
+        SageSingleInvoiceExportPage,
+        route_name="/cancelinvoices/{id}.txt",
+        renderer='/treasury/sage_single_export.mako',
+        permission='admin_treasury'
+    )
+
+    config.add_view(
+        CancelInvoiceSetTreasuryiew,
+        route_name="/cancelinvoices/{id}/set_treasury",
+        permission="set_treasury.cancelinvoice",
+        renderer='base/formpage.mako',
+    )
+    config.add_view(
+        CancelInvoiceSetMetadatasView,
+        route_name="/cancelinvoices/{id}/set_metadatas",
+        permission="view.cancelinvoice",
+        renderer='tasks/add.mako',
+    )
+    config.add_view(
+        CancelInvoiceSetProductsView,
+        route_name="/cancelinvoices/{id}/set_products",
+        permission="admin_treasury",
+        renderer='base/formpage.mako',
+    )

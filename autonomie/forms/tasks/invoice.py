@@ -27,6 +27,8 @@
 """
 import colander
 import deform
+import deform_extensions
+
 from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.security import has_permission
 
@@ -223,7 +225,7 @@ class ProductTaskLine(colander.MappingSchema):
     )
     tva = colander.SchemaNode(
         AmountType(),
-        widget=deform.widget.TextInputWidget(readonly=True),
+        widget=deform_extensions.DisabledInput(),
         css_class='col-md-1',
         title=u'TVA',
     )

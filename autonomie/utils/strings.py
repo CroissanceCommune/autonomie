@@ -69,6 +69,22 @@ TASKTYPES_LABEL = dict(
 )
 
 
+def format_status_string(status, genre=''):
+    """
+    Return a label for the given status
+
+    :param str status: One the available status (draft/wait/valid/invalid)
+    :param str genre: '' or 'e'
+    """
+    if status in ESTIMATION_STATUS:
+        result = ESTIMATION_STATUS[status]
+    elif status in INVOICE_STATUS:
+        result = INVOICE_STATUS[status]
+    else:
+        result = STATUS.get(status, status)
+    return result.format(genre=genre)
+
+
 def format_main_status(task, full=True):
     """
         return a formatted status string

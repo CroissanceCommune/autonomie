@@ -66,7 +66,7 @@ from autonomie.forms.tasks.base import (
 from autonomie.models.user import get_deferred_user_choice
 
 from autonomie.utils.strings import (
-    SINGLE_STATUS_LABELS
+    format_status_string,
 )
 from autonomie.compute.task import (
     LineCompute,
@@ -568,7 +568,7 @@ class Task(Node):
 
     statuses = relationship(
         "TaskStatus",
-        order_by="desc(TaskStatus.status_date)",
+        order_by="desc(TaskStatus.status_date), desc(TaskStatus.id)",
         cascade="all, delete-orphan",
         back_populates='task',
         info={'colanderalchemy': forms.EXCLUDED}
@@ -888,7 +888,7 @@ class TaskStatus(DBBASE):
         result = {
             "date": self.status_date,
             'code': self.status_code,
-            "label": SINGLE_STATUS_LABELS.get(self.status_code, ''),
+            "label": format_status_string(self.status_code),
             "comment": self.status_comment,
         }
         if self.status_person is not None:

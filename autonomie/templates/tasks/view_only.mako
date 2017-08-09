@@ -110,6 +110,16 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                     % if hasattr(next, 'after_summary'):
                         ${next.after_summary()}
                     % endif
+                    <h3>Historique</h3>
+                    % for status in request.context.statuses:
+                    <blockquote>
+                    ${status.status_comment | n}
+                    <footer>
+                    ${api.format_status_string(status.status_code)} - \
+                    Par ${api.format_account(status.status_person)} le \
+                    ${api.format_date(status.status_date)}</footer>
+                    </blockquote>
+                    % endfor
                 </div>
             </div>
 

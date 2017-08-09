@@ -44,6 +44,7 @@ from autonomie.utils.strings import (
     format_paymentmode,
     format_quantity,
     format_task_type,
+    format_status_string,
     format_estimation_status,
     format_invoice_status,
     format_cancelinvoice_status,
@@ -158,6 +159,7 @@ class Api(object):
     format_datetime = staticmethod(format_datetime)
     format_task_type = staticmethod(format_task_type)
 
+    format_status_string = staticmethod(format_status_string)
     format_estimation_status = staticmethod(format_estimation_status)
     format_invoice_status = staticmethod(format_invoice_status)
     format_cancelinvoice_status = staticmethod(format_cancelinvoice_status)

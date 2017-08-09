@@ -31,13 +31,13 @@ import datetime
 from pyramid.httpexceptions import HTTPFound
 from colanderalchemy import SQLAlchemySchemaNode
 
+from autonomie_base.utils.date import format_date
+
 from autonomie.models.task import (
     Invoice,
     Estimation,
 )
-from autonomie_base.utils.date import format_date
 from autonomie.utils.strings import format_amount
-
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.tasks.invoice import (
     get_payment_schema,
@@ -450,12 +450,14 @@ def includeme(config):
         renderer='/treasury/sage_single_export.mako',
         permission='admin_treasury'
     )
+
     config.add_view(
         InvoicePaymentView,
         route_name="/invoices/{id}/addpayment",
         permission="add_payment.invoice",
         renderer='base/formpage.mako',
     )
+
     config.add_view(
         InvoiceSetTreasuryiew,
         route_name="/invoices/{id}/set_treasury",

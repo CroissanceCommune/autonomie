@@ -37,6 +37,7 @@ from autonomie.models.task import (
     Invoice,
     Estimation,
 )
+from autonomie.events.tasks import StatusChanged
 from autonomie.utils.strings import format_amount
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.tasks.invoice import (
@@ -276,9 +277,19 @@ class InvoicePaymentView(BaseFormView):
             )
         )
 
+    def notify(self):
+        self.request.registry.notify(
+            StatusChanged(
+                self.request,
+                self.context,
+                self.context.paid_status,
+            )
+        )
+
     def submit_success(self, appstruct):
         self.context.record_payment(user=self.request.user, **appstruct)
         self.request.dbsession.merge(self.context)
+        self.notify()
         return self.redirect()
 
     def cancel_success(self, appstruct):

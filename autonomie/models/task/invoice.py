@@ -357,6 +357,14 @@ class Invoice(Task, InvoiceCompute):
             self.paid_status = 'paid'
         else:
             self.paid_status = 'waiting'
+
+        if user_id is not None:
+            status_record = TaskStatus(
+                status_code=self.paid_status,
+                status_person_id=user_id,
+                status_comment=''
+            )
+            self.statuses.append(status_record)
         return self
 
     def duplicate(self, user, project, phase, customer):

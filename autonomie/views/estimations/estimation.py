@@ -183,7 +183,9 @@ class EstimationAttachInvoiceView(BaseFormView):
         )
         form.set_appstruct(
             {
-                'invoice_ids': [invoice.id for invoice in self.context.invoices]
+                'invoice_ids': [
+                    str(invoice.id) for invoice in self.context.invoices
+                ]
             }
         )
 

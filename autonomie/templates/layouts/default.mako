@@ -45,17 +45,20 @@
   <body
       class="${request.matched_route.name}-view"
       >
-    ${request.layout_manager.render_panel('menu')}
-    ${request.layout_manager.render_panel('submenu')}
-    <%block name="headtitle">
-    <div class='pagetitle visible-lg hidden-sm hidden-print'>
-      <h2 >
-        ${title}
-      </h2>
-    </div>
-    </%block>
+    % if not 'nomenu' in request.GET:
+        ${request.layout_manager.render_panel('menu')}
+        ${request.layout_manager.render_panel('submenu')}
+        <%block name="headtitle">
+        <div class='pagetitle visible-lg hidden-sm hidden-print'>
+          <h2 >
+            ${title}
+          </h2>
+        </div>
+        </%block>
+    % endif
     <div class="container-fluid page-content">
         <div class='subnav hidden-print'>
+        % if not 'nomenu' in request.GET:
         <%block name="actionmenu">
         % if action_menu is not UNDEFINED and not action_menu.void():
             ${action_menu.render(request)|n}
@@ -63,6 +66,7 @@
             ${request.actionmenu.render(request)|n}
         % endif
         </%block>
+        % endif
       </div>
       <%block name='pop_message'>
       % for message in request.session.pop_flash(queue=""):

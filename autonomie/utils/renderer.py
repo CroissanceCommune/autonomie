@@ -132,6 +132,12 @@ def set_export_formatters():
     FORMATTERS_REGISTRY.add_formatter(
         DateTime, format_datetime, 'py3o'
     )
+    FORMATTERS_REGISTRY.add_formatter(
+        Date, format_date, 'csv'
+    )
+    FORMATTERS_REGISTRY.add_formatter(
+        DateTime, format_date, 'csv'
+    )
     FORMATTERS_REGISTRY.add_formatter(Boolean, format_boolean)
     FORMATTERS_REGISTRY.add_formatter(Float, format_quantity)
     FORMATTERS_REGISTRY.add_formatter(Integer, format_quantity)

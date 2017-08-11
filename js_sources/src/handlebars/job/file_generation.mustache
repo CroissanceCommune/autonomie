@@ -26,7 +26,7 @@
     <div class="text-center btn btn-success">
         <i class="fa fa-check fa-4x"></i>
         <br />
-        <b>L'import s'est déroulé avec succès</b>
+        <b>La génération de fichier s'est déroulé avec succès</b>
     </div>
     {{/if}}
 {{/if}}
@@ -36,22 +36,26 @@
 {{^running}}
 <div class='row'>
     <div class='col-md-6'>
+        {{#if filename}}
+        <script type='text/javascript'>
+            var win = window.open("/cooked/{{ filename }}", "_self");
+            setTimeout(function(){win.close(); window.close()}, 1000);
+        </script>
         <h4>Télécharger votre fichier</h4>
         <a href="/cooked/{{ filename }}" target="_blank" class="btn btn-success btn-large">
         <i class='glyphicon glyphicon-download'></i> Télécharger
         </a>
+        {{/if}}
     </div>
     <div class='col-md-6'>
-    <h4>Messages</h4>
-    {{ message }}
-    {{^has_message}}
-    Aucun message n'a été retourné
-    {{/has_message}}
-    <h4>Erreurs</h4>
-    {{ err_message }}
-    {{^has_err_message }}
-    Aucune erreur n'a été retournée
-    {{/has_err_message }}
+    {{#if has_message}}
+        <h4>Messages</h4>
+        {{ message }}
+    {{/if}}
+    {{#if has_err_message}}
+        <h4>Erreurs</h4>
+        {{ err_message }}
+    {{/if}}
     </div>
 </div>
 {{/running}}

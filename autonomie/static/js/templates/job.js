@@ -73,28 +73,35 @@ templates['file_generation.mustache'] = template({"1":function(depth0,helpers,pa
 },"4":function(depth0,helpers,partials,data) {
   return "    <div class=\"text-center btn btn-danger\">\n        <i class=\"fa fa-warning fa-4x\"></i>\n        <br />\n        <b>La génération de fichier a échoué</b>\n    </div>\n";
   },"6":function(depth0,helpers,partials,data) {
-  return "    <div class=\"text-center btn btn-success\">\n        <i class=\"fa fa-check fa-4x\"></i>\n        <br />\n        <b>L'import s'est déroulé avec succès</b>\n    </div>\n";
+  return "    <div class=\"text-center btn btn-success\">\n        <i class=\"fa fa-check fa-4x\"></i>\n        <br />\n        <b>La génération de fichier s'est déroulé avec succès</b>\n    </div>\n";
   },"8":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n    <div class='col-md-6'>\n        <h4>Télécharger votre fichier</h4>\n        <a href=\"/cooked/"
-    + escapeExpression(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"filename","hash":{},"data":data}) : helper)))
-    + "\" target=\"_blank\" class=\"btn btn-success btn-large\">\n        <i class='glyphicon glyphicon-download'></i> Télécharger\n        </a>\n    </div>\n    <div class='col-md-6'>\n    <h4>Messages</h4>\n    "
-    + escapeExpression(((helper = (helper = helpers.message || (depth0 != null ? depth0.message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"message","hash":{},"data":data}) : helper)))
-    + "\n";
-  stack1 = ((helper = (helper = helpers.has_message || (depth0 != null ? depth0.has_message : depth0)) != null ? helper : helperMissing),(options={"name":"has_message","hash":{},"fn":this.noop,"inverse":this.program(9, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
-  if (!helpers.has_message) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  var stack1, buffer = "<div class='row'>\n    <div class='col-md-6'>\n";
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.filename : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
-  buffer += "    <h4>Erreurs</h4>\n    "
-    + escapeExpression(((helper = (helper = helpers.err_message || (depth0 != null ? depth0.err_message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"err_message","hash":{},"data":data}) : helper)))
-    + "\n";
-  stack1 = ((helper = (helper = helpers.has_err_message || (depth0 != null ? depth0.has_err_message : depth0)) != null ? helper : helperMissing),(options={"name":"has_err_message","hash":{},"fn":this.noop,"inverse":this.program(11, data),"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
-  if (!helpers.has_err_message) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  buffer += "    </div>\n    <div class='col-md-6'>\n";
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.has_message : depth0), {"name":"if","hash":{},"fn":this.program(11, data),"inverse":this.noop,"data":data});
+  if (stack1 != null) { buffer += stack1; }
+  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.has_err_message : depth0), {"name":"if","hash":{},"fn":this.program(13, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
   return buffer + "    </div>\n</div>\n";
 },"9":function(depth0,helpers,partials,data) {
-  return "    Aucun message n'a été retourné\n";
-  },"11":function(depth0,helpers,partials,data) {
-  return "    Aucune erreur n'a été retournée\n";
-  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+  return "        <script type='text/javascript'>\n            var win = window.open(\"/cooked/"
+    + escapeExpression(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"filename","hash":{},"data":data}) : helper)))
+    + "\", \"_self\");\n            setTimeout(function(){win.close(); window.close()}, 1000);\n        </script>\n        <h4>Télécharger votre fichier</h4>\n        <a href=\"/cooked/"
+    + escapeExpression(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"filename","hash":{},"data":data}) : helper)))
+    + "\" target=\"_blank\" class=\"btn btn-success btn-large\">\n        <i class='glyphicon glyphicon-download'></i> Télécharger\n        </a>\n";
+},"11":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+  return "        <h4>Messages</h4>\n        "
+    + escapeExpression(((helper = (helper = helpers.message || (depth0 != null ? depth0.message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"message","hash":{},"data":data}) : helper)))
+    + "\n";
+},"13":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+  return "        <h4>Erreurs</h4>\n        "
+    + escapeExpression(((helper = (helper = helpers.err_message || (depth0 != null ? depth0.err_message : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"err_message","hash":{},"data":data}) : helper)))
+    + "\n";
+},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div class='row'>\n<div class='col-md-6'>\n<h2>Génération de fichier</h2>\n<ul>\n<li>Identifiant de la tâche : "
     + escapeExpression(((helper = (helper = helpers.jobid || (depth0 != null ? depth0.jobid : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"jobid","hash":{},"data":data}) : helper)))
     + " </li>\n<li>Initialisée le : "

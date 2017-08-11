@@ -263,7 +263,6 @@ def base_configure(config, dbsession, **settings):
     add_static_views(config, settings)
 
     config.include('autonomie.layouts')
-    config.include('autonomie.celery')
     for module in AUTONOMIE_REQUEST_SUBSCRIBERS:
         config.include(module)
 

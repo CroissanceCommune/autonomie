@@ -159,14 +159,19 @@ class Task(Node):
     id = Column(
         Integer,
         ForeignKey('node.id'),
-        info={'colanderalchemy': {'exclude': deform.widget.HiddenWidget()}},
+        info={
+            'colanderalchemy': {
+                'exclude': deform.widget.HiddenWidget()
+            },
+            'export': forms.EXCLUDED
+        },
         primary_key=True,
     )
     phase_id = Column(
         ForeignKey('phase.id'),
         info={
             'colanderalchemy': forms.EXCLUDED,
-            "export": {'exclude': True},
+            "export": forms.EXCLUDED,
         },
     )
     status = Column(
@@ -178,7 +183,8 @@ class Task(Node):
                     values=zip(ALL_STATES, ALL_STATES)
                 ),
                 "validator": colander.OneOf(ALL_STATES),
-            }
+            },
+            'export': forms.EXCLUDED
         }
     )
     status_comment = Column(
@@ -187,7 +193,8 @@ class Task(Node):
             "colanderalchemy": {
                 "title": u"Commentaires",
                 'widget': deform.widget.TextAreaWidget()
-            }
+            },
+            'export': forms.EXCLUDED
         },
         default="",
     )
@@ -198,7 +205,7 @@ class Task(Node):
                 "title": u"Dernier utilisateur à avoir modifié le document",
                 'widget': get_deferred_user_choice()
             },
-            "export": {'exclude': True},
+            "export": forms.EXCLUDED,
         },
     )
     status_date = Column(
@@ -207,7 +214,8 @@ class Task(Node):
         info={
             'colanderalchemy': {
                 "title": u"Date du dernier changement de statut",
-            }
+            },
+            'export': forms.EXCLUDED
         }
     )
     date = Column(
@@ -224,7 +232,7 @@ class Task(Node):
         ForeignKey('accounts.id'),
         info={
             'colanderalchemy': forms.EXCLUDED,
-            "export": {'exclude': True},
+            "export": forms.EXCLUDED,
         },
     )
     description = Column(
@@ -244,7 +252,8 @@ class Task(Node):
             'colanderalchemy': {
                 "title": u"Montant HT (cache)",
                 "typ": AmountType(5),
-            }
+            },
+            'export': forms.EXCLUDED,
         },
         default=0
     )
@@ -254,7 +263,8 @@ class Task(Node):
             'colanderalchemy': {
                 "title": u"Montant TVA (cache)",
                 "typ": AmountType(5),
-            }
+            },
+            'export': forms.EXCLUDED,
         },
         default=0
     )
@@ -264,24 +274,34 @@ class Task(Node):
             'colanderalchemy': {
                 "title": u"Montant TTC (cache)",
                 "typ": AmountType(5),
-            }
+            },
+            'export': forms.EXCLUDED,
         },
         default=0
     )
     company_id = Column(
         Integer,
         ForeignKey('company.id'),
-        info={'colanderalchemy': {'exclude': True}},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': forms.EXCLUDED,
+        },
     )
     project_id = Column(
         Integer,
         ForeignKey('project.id'),
-        info={'colanderalchemy': {'exclude': True}},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': forms.EXCLUDED,
+        },
     )
     customer_id = Column(
         Integer,
         ForeignKey('customer.id'),
-        info={'colanderalchemy': {'exclude': True}},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': forms.EXCLUDED,
+        },
     )
     project_index = deferred(
         Column(
@@ -289,7 +309,8 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     "title": u"Index dans le projet",
-                }
+                },
+                'export': forms.EXCLUDED,
             },
         ),
         group='edit',
@@ -300,7 +321,8 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     "title": u"Index du document à l'échelle de l'entreprise",
-                }
+                },
+                'export': forms.EXCLUDED,
             },
         ),
         group='edit',
@@ -310,7 +332,8 @@ class Task(Node):
         info={
             'colanderalchemy': {
                 "title": u"Identifiant du document (facture/avoir)",
-            }
+            },
+            'export': {'label': u"Numéro de facture"},
         },
         default=None,
     )
@@ -322,7 +345,8 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     "title": u"Identifiant du document dans la CAE",
-                }
+                },
+                'export': forms.EXCLUDED,
             }
         ),
         group='edit'
@@ -335,7 +359,8 @@ class Task(Node):
                 'colanderalchemy': {
                     "title": u"Afficher le détail ?",
                     "validator": colander.OneOf((0, 1))
-                }
+                },
+                'export': forms.EXCLUDED,
             },
             default=0
         ),
@@ -347,7 +372,8 @@ class Task(Node):
         Column(
             BigInteger(),
             info={
-                'colanderalchemy': {'exclude': True}
+                'colanderalchemy': forms.EXCLUDED,
+                'export': forms.EXCLUDED,
             },
             default=0
         ),
@@ -362,7 +388,8 @@ class Task(Node):
                     'typ': AmountType(5),
                     'title': u'Frais',
                     'validator': forms.positive_validator
-                }
+                },
+                'export': forms.EXCLUDED,
             },
             default=0
         ),
@@ -378,7 +405,8 @@ class Task(Node):
                     'widget': deform.widget.TextAreaWidget(),
                     'validator': forms.textarea_node_validator,
                     'missing': colander.required,
-                }
+                },
+                'export': forms.EXCLUDED,
             },
         ),
         group='edit',
@@ -404,7 +432,8 @@ class Task(Node):
                     'widget': deform.widget.TextAreaWidget(),
                     'validator': forms.textarea_node_validator,
                     'missing': colander.required,
-                }
+                },
+                'export': forms.EXCLUDED,
             },
         ),
         group='edit',
@@ -417,7 +446,8 @@ class Task(Node):
                 'colanderalchemy': {
                     'exlude': True,
                     'title': u"Méthode d'arrondi 'à l'ancienne' ? (floor)"
-                }
+                },
+                'export': forms.EXCLUDED,
             }
         ),
         group='edit',
@@ -428,7 +458,8 @@ class Task(Node):
         info={
             "colanderalchemy": {
                 'title': u"Préfixe du numéro de facture",
-            }
+            },
+            'export': forms.EXCLUDED,
         }
     )
 
@@ -440,12 +471,12 @@ class Task(Node):
             "taskStatuses",
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
+                'export': forms.EXCLUDED,
             },
         ),
         info={
             'colanderalchemy': forms.EXCLUDED,
-            'export': {'exclude': True},
+            'export': forms.EXCLUDED,
         },
     )
     owner = relationship(
@@ -455,12 +486,12 @@ class Task(Node):
             "ownedTasks",
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
+                'export': forms.EXCLUDED,
             },
         ),
         info={
             'colanderalchemy': forms.EXCLUDED,
-            'export': {'exclude': True},
+            'export': forms.EXCLUDED,
         },
     )
 
@@ -472,12 +503,12 @@ class Task(Node):
             order_by='Task.date',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
+                'export': forms.EXCLUDED,
             },
         ),
         info={
             'colanderalchemy': forms.EXCLUDED,
-            'export': {'exclude': True},
+            'export': forms.EXCLUDED,
         },
     )
 
@@ -486,7 +517,7 @@ class Task(Node):
         primaryjoin="Task.company_id==Company.id",
         info={
             'colanderalchemy': forms.EXCLUDED,
-            'export': {'exclude': True},
+            'export': {'related_key': "name", "label": "Entreprise"},
         },
     )
 
@@ -495,7 +526,7 @@ class Task(Node):
         primaryjoin="Task.project_id==Project.id",
         info={
             'colanderalchemy': forms.EXCLUDED,
-            'export': {'exclude': True},
+            'export': forms.EXCLUDED,
         },
     )
 
@@ -507,18 +538,21 @@ class Task(Node):
             order_by='Task.date',
             info={
                 'colanderalchemy': forms.EXCLUDED,
-                'export': {'exclude': True},
+                "export": forms.EXCLUDED,
             },
         ),
         info={
             'colanderalchemy': forms.EXCLUDED,
-            "export": {'exclude': True},
+            'export': {'related_key': 'label', 'label': u"Client"},
         },
     )
     # Content relationships
     discounts = relationship(
         "DiscountLine",
-        info={'colanderalchemy': {'title': u"Remises"}},
+        info={
+            'colanderalchemy': {'title': u"Remises"},
+            'export': forms.EXCLUDED,
+        },
         order_by='DiscountLine.tva',
         cascade="all, delete-orphan",
         back_populates='task',
@@ -527,7 +561,10 @@ class Task(Node):
     payments = relationship(
         "Payment",
         primaryjoin="Task.id==Payment.task_id",
-        info={'colanderalchemy': {'exclude': True}},
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': forms.EXCLUDED,
+        },
         backref=backref(
             'task',
         ),
@@ -543,7 +580,8 @@ class Task(Node):
         info={
             'colanderalchemy': {
                 'children': forms.get_sequence_child_item(TaskMention),
-            }
+            },
+            'export': forms.EXCLUDED,
         },
     )
 
@@ -560,7 +598,8 @@ class Task(Node):
                     min_err=u"Une entrée est requise"
                 ),
                 "missing": colander.required
-            }
+            },
+            'export': forms.EXCLUDED,
         },
         primaryjoin="TaskLineGroup.task_id==Task.id",
         back_populates='task',
@@ -571,7 +610,10 @@ class Task(Node):
         order_by="desc(TaskStatus.status_date), desc(TaskStatus.id)",
         cascade="all, delete-orphan",
         back_populates='task',
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+            'export': forms.EXCLUDED,
+        }
     )
 
     _name_tmpl = u"Task {}"
@@ -826,7 +868,7 @@ class DiscountLine(DBBASE, DiscountLineCompute):
     task = relationship(
         "Task",
         uselist=False,
-        info={'colanderalchemy': {'exclude': True}},
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     def __json__(self, request):

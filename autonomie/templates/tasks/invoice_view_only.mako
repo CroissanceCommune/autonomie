@@ -214,7 +214,7 @@
                             <a href="${request.route_path('/cancelinvoices/{id}.html', id=cancelinvoice.id)}">
                                 ${cancelinvoice.internal_number}
                                 (numéro ${cancelinvoice.prefix}${cancelinvoice.official_number})
-                                d'un montant TTC de ${api.format_amount(cancelinvoice.ttc, precision=5)} €
+                                d'un montant TTC de ${api.format_amount(cancelinvoice.ttc, precision=5)|n} €
                             </a> a été généré depuis cette facture.
                         </p>
                     </li>

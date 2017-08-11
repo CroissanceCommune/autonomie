@@ -320,16 +320,6 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
     return resp
 
 
-def format_quantity(quantity):
-    """
-        format the quantity
-    """
-    if quantity is not None:
-        return locale.format('%g', quantity, grouping=True)
-    else:
-        return ""
-
-
 def format_paymentmode(paymentmode):
     """
        format payment modes for display

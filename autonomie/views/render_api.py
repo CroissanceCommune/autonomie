@@ -34,6 +34,9 @@ from autonomie_base.utils.date import (
     format_long_date,
     format_datetime,
 )
+from autonomie_base.utils.strings import (
+    format_quantity,
+)
 from autonomie.utils.strings import (
     format_amount,
     format_status,
@@ -42,7 +45,6 @@ from autonomie.utils.strings import (
     format_account,
     format_name,
     format_paymentmode,
-    format_quantity,
     format_task_type,
     format_status_string,
     format_estimation_status,

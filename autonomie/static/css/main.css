@@ -9,12 +9,14 @@
  *
  */
 .btn.primary-action {
-  -webkit-box-shadow: 0px 1px 0px #2b638f;
-  -moz-box-shadow: 0px 1px 0px #2b638f;
-  box-shadow: 0px 1px 0px #2b638f;
   padding: 6px 18px;
   font-size: 16px;
   margin-bottom: 2px; }
+
+.btn-primary.primary-action {
+  -webkit-box-shadow: 0px 1px 0px #2b638f;
+  -moz-box-shadow: 0px 1px 0px #2b638f;
+  box-shadow: 0px 1px 0px #2b638f; }
 
 .btn.secondary-action {
   padding: 4px 8px; }

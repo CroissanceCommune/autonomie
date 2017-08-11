@@ -28,7 +28,7 @@ const TaskGroupView = Mn.View.extend({
         errors: '.errors',
         lines: '.lines',
         modalRegion: ".modalregion",
-        total: '.subtotal'
+        subtotal: '.subtotal'
     },
     ui: {
         btn_add: ".btn-add",
@@ -84,11 +84,11 @@ const TaskGroupView = Mn.View.extend({
     onRender: function(){
         if (! this.isEmpty()){
             this.showLines();
-            this.showChildView(
-                'total',
-                new TaskGroupTotalView({collection: this.collection})
-            );
         }
+        this.showChildView(
+            'subtotal',
+            new TaskGroupTotalView({collection: this.collection})
+        );
     },
     onLineEdit: function(childView){
         this.showTaskLineForm(childView.model, "Modifier la prestation", true);

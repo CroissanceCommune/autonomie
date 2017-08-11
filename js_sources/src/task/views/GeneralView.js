@@ -13,6 +13,7 @@ import Mn from 'backbone.marionette';
 import { updateSelectOptions } from '../../tools.js';
 import FormBehavior from "../../base/behaviors/FormBehavior.js";
 import CheckboxListWidget from '../../widgets/CheckboxListWidget.js';
+import CheckboxWidget from '../../widgets/CheckboxWidget.js';
 import DatePickerWidget from '../../widgets/DatePickerWidget.js';
 import TextAreaWidget from '../../widgets/TextAreaWidget.js';
 import InputWidget from '../../widgets/InputWidget.js';
@@ -40,6 +41,7 @@ const GeneralView = Mn.View.extend({
     regions: {
         status_history: '.status_history',
         name: '.name',
+        course: '.course',
         prefix: '.prefix',
         financial_year: '.financial_year',
     },
@@ -71,6 +73,15 @@ const GeneralView = Mn.View.extend({
                 title: "Nom du document",
                 value: this.model.get('name'),
                 field_name: 'name',
+            })
+        );
+        this.showChildView(
+            'course',
+            new CheckboxWidget({
+                label: "Ce document concerne-t-il une formation professionelle continue ?",
+                title: "Formation professionnelle",
+                value: this.model.get('course'),
+                field_name: 'course',
             })
         );
         if (_.has(this.section, 'prefix')){

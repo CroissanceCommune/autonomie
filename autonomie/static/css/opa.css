@@ -6,3 +6,5 @@
   padding-bottom: 15vh;
   min-height: 100vh;
   margin: 0px; }
+  .page-content hr {
+    border-top: 1px solid #dedede; }

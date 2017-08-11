@@ -21,7 +21,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <div role="tabpanel" class="tab-pane row" id="attached_files">
-    <div class="col-md-10 col-md-offset-1 col-xs-12">
+    <div class="col-xs-12">
         <a class='btn btn-primary primary-action'
             href="${add_url}"
             title="Attacher un fichier">

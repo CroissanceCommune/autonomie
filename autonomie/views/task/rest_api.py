@@ -200,8 +200,8 @@ class TaskRestView(BaseRestView):
                     "url": url,
                     "label": u"Supprimer",
                     "title": u"Supprimer définitivement ce document",
-                    "css": "btn btn-danger",
-                    "icon": "glyphicon glypĥicon-trash",
+                    "css": "btn btn-default",
+                    "icon": "fa fa-trash",
                     "onclick": u"return confirm('Êtes-vous sûr de vouloir"
                     u"supprimer cet élément ?');"
                 }

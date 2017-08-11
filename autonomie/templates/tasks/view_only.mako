@@ -125,7 +125,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 
 
             <div role="tabpanel" class="tab-pane row" id="documents">
-                <div class='col-xs-12 col-md-10 col-md-offset-1'>
+                <div class='col-xs-12'>
                     <div class="container-fluid task_view" style="border: 1px solid #dedede; background-color: #fdfdfd; margin:15px;">
                         ${request.layout_manager.render_panel('{0}_html'.format(task.type_), task=task)}
                     </div>

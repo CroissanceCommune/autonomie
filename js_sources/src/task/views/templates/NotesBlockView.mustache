@@ -6,13 +6,13 @@
         aria-controls="exclusions-more"
         >
         <i class='glyphicon glyphicon-plus-sign'></i>
+            {{#if is_more_set}}<i>
+        Note complémentaire
+        </i>
+        {{else}}
+        Note complémentaire
+        {{/if}}
     </a>
-    {{#if is_more_set}}<i>
-Note complémentaire
-</i>
-{{else}}
-Note complémentaire
-{{/if}}
 </h3>
 <div class='content'>
     <div

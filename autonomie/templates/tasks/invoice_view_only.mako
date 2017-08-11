@@ -30,23 +30,23 @@
 
 <%block name='moreactions'>
 <% invoice = request.context %>
-<a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/duplicate', id=invoice.id)}">
-    <i class='fa fa-copy'></i> Dupliquer
-</a>
+% if api.has_permission('add_payment.invoice'):
+    <a class='btn btn-default primary-action btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}">
+        <i class='fa fa-bank'></i> Enregistrer un encaissement
+    </a>
+% endif
 % if api.has_permission('gencinv.invoice'):
     <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/gencinv', id=invoice.id)}">
         <i class='fa fa-files-o'></i> Générer un avoir
-    </a>
-% endif
-% if api.has_permission('add_payment.invoice'):
-    <a class='btn btn-success btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}">
-        <i class='fa fa-bank'></i> Enregistrer un encaissement
     </a>
 % endif
 <a class='btn btn-default btn-block'
     href="${request.route_path('/invoices/{id}/set_metadatas', id=invoice.id)}"
     >
     <i class='glyphicon glyphicon-pencil'></i> Modifier
+</a>
+<a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/duplicate', id=invoice.id)}">
+    <i class='fa fa-copy'></i> Dupliquer
 </a>
 
 % if not invoice.exported:
@@ -127,7 +127,7 @@
 <%block name='moretabs_datas'>
     <% invoice = request.context %>
     <div role="tabpanel" class="tab-pane row" id="treasury">
-        <div class='col-xs-12 col-md-10 col-md-offset-1'>
+        <div class='col-xs-12'>
         <div class='alert'>
         Cette facture est rattachée à l'année fiscale ${invoice.financial_year}.
         % if api.has_permission('set_treasury.invoice'):
@@ -168,7 +168,7 @@
         </div>
     </div>
     <div role="tabpanel" class="tab-pane row" id="payment">
-        <div class="col-xs-12 col-md-10 col-md-offset-1">
+        <div class="col-xs-12">
         % if api.has_permission('add_payment.invoice'):
             <a
                 href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}"

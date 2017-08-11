@@ -51,12 +51,12 @@ const PaymentLineTableView = Mn.View.extend({
         this.listenTo(
             this.totalmodel,
             'change:ttc',
-            this.updateLines.bind(this)
+            this.updateDeposit.bind(this)
         );
         this.listenTo(
             this.facade,
             'update:payment_lines',
-            this.updateLines.bind(this)
+            this.updateDeposit.bind(this)
         );
         this.listenTo(
             this.model,
@@ -131,12 +131,12 @@ const PaymentLineTableView = Mn.View.extend({
         var deposit = this.model.get('deposit');
         var deposit_amount = this.collection.depositAmount(deposit);
         this.depositmodel.set({amount: deposit_amount});
-        return deposit;
+        this.updateLines()
     },
     updateLines(){
         console.log("PaymentLineTableView.updateLines");
         var payment_times = this.model.get('payment_times');
-        var deposit = this.updateDeposit();
+        var deposit = this.model.get('deposit');
 
         payment_times = strToFloat(payment_times);
         if (payment_times > 0){
@@ -152,8 +152,7 @@ const PaymentLineTableView = Mn.View.extend({
         });
         this.showChildView('deposit', view);
     },
-    onRender(){
-        this.showDeposit();
+    showLines(){
         this.showChildView(
             'lines',
             new PaymentLineCollectionView({
@@ -162,6 +161,10 @@ const PaymentLineTableView = Mn.View.extend({
                 edit: this.getOption('edit'),
             })
         );
+    },
+    onRender(){
+        this.showDeposit();
+        this.showLines();
     },
 });
 export default PaymentLineTableView;

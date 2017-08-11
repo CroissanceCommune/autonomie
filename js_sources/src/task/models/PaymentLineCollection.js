@@ -26,7 +26,6 @@ const PaymentLineCollection = OrderableCollection.extend({
         this.callChannel = this.callChannel.bind(this);
     },
     bindEvents(){
-        console.log("PaymentLineCollection.bindEvents");
         this.listenTo(this, 'add', this.callChannel);
         this.listenTo(this, 'remove', this.callChannel);
         this.listenTo(this, 'change:amount', this.callChannel);
@@ -139,7 +138,7 @@ const PaymentLineCollection = OrderableCollection.extend({
         return ttc - sum;
     },
     updateSold(deposit){
-        var value = this.getSoldAmount();
+        var value = this.getSoldAmount(deposit);
         this.models[this.models.length - 1].set({'amount': value});
         this.models[this.models.length - 1].save();
     },

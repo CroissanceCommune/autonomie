@@ -89,7 +89,10 @@ const PaymentBlockView = Mn.View.extend({
                 if (value != -1){
                     // We generate the payment lines (and delete old ones)
                     var this_ = this;
-                    var deferred = this.collection.genPaymentLines(value, this.model.get('deposit'));
+                    var deferred = this.collection.genPaymentLines(
+                        value,
+                        this.model.get('deposit')
+                    );
 
                     // We set the datas after because setting it, we also sync
                     // the model and payment_times attribute is compuated based
@@ -104,21 +107,14 @@ const PaymentBlockView = Mn.View.extend({
                 if ((value == -1) || (old_value == -1)){
                     // If we set it on manual configuration we re-render the
                     // table
-                    this.renderTable();
+                    this.tableview.showLines();
                 }
             }
         } else if (field_name == 'deposit'){
-            console.log("PaymentBlockView: deposit changed");
             var old_value = this.model.get('deposit');
+
             if (old_value != value){
-                var this_ = this;
-                var deferred = this.collection.genPaymentLines(
-                    this.model.get('payment_times'),
-                    value
-                );
-                deferred.then(function(){
-                    this_.triggerMethod('data:persist', field_name, value);
-                });
+                this.triggerMethod('data:persist', field_name, value);
             }
         }
     },
@@ -131,15 +127,13 @@ const PaymentBlockView = Mn.View.extend({
         if (this.model.get('paymentDisplay') == 'ALL_NO_DATE'){
             show_date = false;
         }
-        this.showChildView(
-            'lines',
-            new PaymentLineTableView({
-                collection: this.collection,
-                model: this.model,
-                edit: edit,
-                show_date: show_date,
-            })
-        );
+        this.tableview = new PaymentLineTableView({
+            collection: this.collection,
+            model: this.model,
+            edit: edit,
+            show_date: show_date,
+        });
+        this.showChildView('lines', this.tableview);
     },
     onRender: function(){
         this.showChildView(

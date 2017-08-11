@@ -11771,18 +11771,14 @@ webpackJsonp([1],[
 	                if (value == -1 || old_value == -1) {
 	                    // If we set it on manual configuration we re-render the
 	                    // table
-	                    this.renderTable();
+	                    this.tableview.showLines();
 	                }
 	            }
 	        } else if (field_name == 'deposit') {
-	            console.log("PaymentBlockView: deposit changed");
 	            var old_value = this.model.get('deposit');
+	
 	            if (old_value != value) {
-	                var this_ = this;
-	                var deferred = this.collection.genPaymentLines(this.model.get('payment_times'), value);
-	                deferred.then(function () {
-	                    this_.triggerMethod('data:persist', field_name, value);
-	                });
+	                this.triggerMethod('data:persist', field_name, value);
 	            }
 	        }
 	    },
@@ -11796,12 +11792,13 @@ webpackJsonp([1],[
 	        if (this.model.get('paymentDisplay') == 'ALL_NO_DATE') {
 	            show_date = false;
 	        }
-	        this.showChildView('lines', new _PaymentLineTableView2.default({
+	        this.tableview = new _PaymentLineTableView2.default({
 	            collection: this.collection,
 	            model: this.model,
 	            edit: edit,
 	            show_date: show_date
-	        }));
+	        });
+	        this.showChildView('lines', this.tableview);
 	    },
 	    onRender: function onRender() {
 	        this.showChildView('payment_display', new _SelectWidget2.default({
@@ -11915,8 +11912,8 @@ webpackJsonp([1],[
 	            date: "À la commande",
 	            amount: this.collection.depositAmount(this.model.get('deposit'))
 	        });
-	        this.listenTo(this.totalmodel, 'change:ttc', this.updateLines.bind(this));
-	        this.listenTo(this.facade, 'update:payment_lines', this.updateLines.bind(this));
+	        this.listenTo(this.totalmodel, 'change:ttc', this.updateDeposit.bind(this));
+	        this.listenTo(this.facade, 'update:payment_lines', this.updateDeposit.bind(this));
 	        this.listenTo(this.model, 'change:deposit', this.updateDeposit.bind(this));
 	        this.edit = this.getOption('edit');
 	    },
@@ -11977,12 +11974,12 @@ webpackJsonp([1],[
 	        var deposit = this.model.get('deposit');
 	        var deposit_amount = this.collection.depositAmount(deposit);
 	        this.depositmodel.set({ amount: deposit_amount });
-	        return deposit;
+	        this.updateLines();
 	    },
 	    updateLines: function updateLines() {
 	        console.log("PaymentLineTableView.updateLines");
 	        var payment_times = this.model.get('payment_times');
-	        var deposit = this.updateDeposit();
+	        var deposit = this.model.get('deposit');
 	
 	        payment_times = (0, _math.strToFloat)(payment_times);
 	        if (payment_times > 0) {
@@ -11998,13 +11995,16 @@ webpackJsonp([1],[
 	        });
 	        this.showChildView('deposit', view);
 	    },
-	    onRender: function onRender() {
-	        this.showDeposit();
+	    showLines: function showLines() {
 	        this.showChildView('lines', new _PaymentLineCollectionView2.default({
 	            collection: this.collection,
 	            show_date: this.getOption('show_date'),
 	            edit: this.getOption('edit')
 	        }));
+	    },
+	    onRender: function onRender() {
+	        this.showDeposit();
+	        this.showLines();
 	    }
 	});
 	exports.default = PaymentLineTableView;
@@ -13755,7 +13755,6 @@ webpackJsonp([1],[
 	        this.callChannel = this.callChannel.bind(this);
 	    },
 	    bindEvents: function bindEvents() {
-	        console.log("PaymentLineCollection.bindEvents");
 	        this.listenTo(this, 'add', this.callChannel);
 	        this.listenTo(this, 'remove', this.callChannel);
 	        this.listenTo(this, 'change:amount', this.callChannel);
@@ -13865,7 +13864,7 @@ webpackJsonp([1],[
 	        return ttc - sum;
 	    },
 	    updateSold: function updateSold(deposit) {
-	        var value = this.getSoldAmount();
+	        var value = this.getSoldAmount(deposit);
 	        this.models[this.models.length - 1].set({ 'amount': value });
 	        this.models[this.models.length - 1].save();
 	    },

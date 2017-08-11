@@ -32,7 +32,13 @@
 args = request.GET
 url = request.route_path('customers.csv', id=request.context.id, _query=args)
 %>
-<a class='btn btn-default pull-right' href='${url}' title="Export au formt csv"><i class='fa fa-file'></i>CSV</a>
+<a
+    class='btn btn-default pull-right'
+    href='${url}'
+    title="Export au formt csv"
+    >
+    <i class='fa fa-file'></i> CSV
+</a>
 
 % if api.has_permission('add_customer'):
     <button class='btn btn-primary primary-action' data-target="#customer-forms" aria-expanded="false" aria-controls="customer-forms" data-toggle='collapse'>

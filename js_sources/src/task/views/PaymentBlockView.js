@@ -89,7 +89,7 @@ const PaymentBlockView = Mn.View.extend({
                 if (value != -1){
                     // We generate the payment lines (and delete old ones)
                     var this_ = this;
-                    var deferred = this.collection.genPaymentLines(value);
+                    var deferred = this.collection.genPaymentLines(value, this.model.get('deposit'));
 
                     // We set the datas after because setting it, we also sync
                     // the model and payment_times attribute is compuated based
@@ -106,6 +106,19 @@ const PaymentBlockView = Mn.View.extend({
                     // table
                     this.renderTable();
                 }
+            }
+        } else if (field_name == 'deposit'){
+            console.log("PaymentBlockView: deposit changed");
+            var old_value = this.model.get('deposit');
+            if (old_value != value){
+                var this_ = this;
+                var deferred = this.collection.genPaymentLines(
+                    this.model.get('payment_times'),
+                    value
+                );
+                deferred.then(function(){
+                    this_.triggerMethod('data:persist', field_name, value);
+                });
             }
         }
     },

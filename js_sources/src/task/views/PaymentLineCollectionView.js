@@ -13,6 +13,7 @@ import PaymentLineView from './PaymentLineView.js';
 
 const PaymentLineCollectionView = Mn.CollectionView.extend({
     tagName: 'div',
+    className: 'col-xs-12',
     childView: PaymentLineView,
     collectionEvents: {
         'change:reorder': 'render',

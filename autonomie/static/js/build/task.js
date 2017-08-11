@@ -11756,7 +11756,7 @@ webpackJsonp([1],[
 	                if (value != -1) {
 	                    // We generate the payment lines (and delete old ones)
 	                    var this_ = this;
-	                    var deferred = this.collection.genPaymentLines(value);
+	                    var deferred = this.collection.genPaymentLines(value, this.model.get('deposit'));
 	
 	                    // We set the datas after because setting it, we also sync
 	                    // the model and payment_times attribute is compuated based
@@ -11773,6 +11773,16 @@ webpackJsonp([1],[
 	                    // table
 	                    this.renderTable();
 	                }
+	            }
+	        } else if (field_name == 'deposit') {
+	            console.log("PaymentBlockView: deposit changed");
+	            var old_value = this.model.get('deposit');
+	            if (old_value != value) {
+	                var this_ = this;
+	                var deferred = this.collection.genPaymentLines(this.model.get('payment_times'), value);
+	                deferred.then(function () {
+	                    this_.triggerMethod('data:persist', field_name, value);
+	                });
 	            }
 	        }
 	    },
@@ -11838,6 +11848,10 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _PaymentDepositView = __webpack_require__(/*! ./PaymentDepositView.js */ 153);
+	
+	var _PaymentDepositView2 = _interopRequireDefault(_PaymentDepositView);
+	
 	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 118);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
@@ -11849,6 +11863,10 @@ webpackJsonp([1],[
 	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 122);
 	
 	var _PaymentLineFormView2 = _interopRequireDefault(_PaymentLineFormView);
+	
+	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 120);
+	
+	var _PaymentLineView2 = _interopRequireDefault(_PaymentLineView);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -11871,8 +11889,9 @@ webpackJsonp([1],[
 	var PaymentLineTableView = _backbone2.default.View.extend({
 	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 124),
 	    regions: {
-	        lines: '.lines',
-	        modalRegion: '.payment-line-modal-container'
+	        lines: '.paymentlines',
+	        modalRegion: '.payment-line-modal-container',
+	        deposit: ".deposit"
 	    },
 	    ui: {
 	        btn_add: ".btn-add"
@@ -11884,14 +11903,21 @@ webpackJsonp([1],[
 	        'line:edit': 'onLineEdit',
 	        'line:delete': 'onLineDelete',
 	        'destroy:modal': 'render'
+	
 	    },
 	    initialize: function initialize(options) {
 	        this.collection = options['collection'];
 	        this.message = _backbone4.default.channel('message');
 	        this.facade = _backbone4.default.channel('facade');
 	        this.totalmodel = this.facade.request('get:totalmodel');
+	        this.depositmodel = new _PaymentLineModel2.default({
+	            description: "Facture d'acompte",
+	            date: "À la commande",
+	            amount: this.collection.depositAmount(this.model.get('deposit'))
+	        });
 	        this.listenTo(this.totalmodel, 'change:ttc', this.updateLines.bind(this));
 	        this.listenTo(this.facade, 'update:payment_lines', this.updateLines.bind(this));
+	        this.listenTo(this.model, 'change:deposit', this.updateDeposit.bind(this));
 	        this.edit = this.getOption('edit');
 	    },
 	    onLineAdd: function onLineAdd() {
@@ -11946,16 +11972,34 @@ webpackJsonp([1],[
 	            show_add: this.getOption('edit')
 	        };
 	    },
+	    updateDeposit: function updateDeposit() {
+	        console.log("PaymentLineTableView.updateDeposit");
+	        var deposit = this.model.get('deposit');
+	        var deposit_amount = this.collection.depositAmount(deposit);
+	        this.depositmodel.set({ amount: deposit_amount });
+	        return deposit;
+	    },
 	    updateLines: function updateLines() {
+	        console.log("PaymentLineTableView.updateLines");
 	        var payment_times = this.model.get('payment_times');
+	        var deposit = this.updateDeposit();
+	
 	        payment_times = (0, _math.strToFloat)(payment_times);
 	        if (payment_times > 0) {
-	            this.collection.genPaymentLines(payment_times);
+	            this.collection.genPaymentLines(payment_times, deposit);
 	        } else {
-	            this.collection.updateSold();
+	            this.collection.updateSold(deposit);
 	        }
 	    },
+	    showDeposit: function showDeposit() {
+	        var view = new _PaymentDepositView2.default({
+	            model: this.depositmodel,
+	            show_date: this.getOption('show_date')
+	        });
+	        this.showChildView('deposit', view);
+	    },
 	    onRender: function onRender() {
+	        this.showDeposit();
 	        this.showChildView('lines', new _PaymentLineCollectionView2.default({
 	            collection: this.collection,
 	            show_date: this.getOption('show_date'),
@@ -12064,6 +12108,7 @@ webpackJsonp([1],[
 	 */
 	var PaymentLineCollectionView = _backbone2.default.CollectionView.extend({
 	    tagName: 'div',
+	    className: 'col-xs-12',
 	    childView: _PaymentLineView2.default,
 	    collectionEvents: {
 	        'change:reorder': 'render'
@@ -12341,7 +12386,7 @@ webpackJsonp([1],[
 	  buffer += "    <div class='col-lg-3 col-md-3 col-sm4 col-xs-12 text-center'>Montant</div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "</div>\n<div class='row lines'>\n</div>\n";
+	  buffer += "</div>\n<div class='row'>\n    <div class='deposit col-xs-12 lines'>\n    </div>\n</div>\n<div class='row lines paymentlines'>\n</div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_add : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "<div class='modalregion'></div>\n";
@@ -13683,8 +13728,20 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _math = __webpack_require__(/*! ../../math.js */ 66);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : PaymentLineCollection.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var PaymentLineCollection = _OrderableCollection2.default.extend({
 	    model: _PaymentLineModel2.default,
 	    url: function url() {
@@ -13718,11 +13775,24 @@ webpackJsonp([1],[
 	        }
 	        return result / 100;
 	    },
-	    genPaymentLines: function genPaymentLines(payment_times) {
-	        this.unBindEvents();
-	        console.log("Generating %s payment lines", payment_times);
-	        console.log(" + Actual number of models %s", this.models.length);
+	    depositAmount: function depositAmount(deposit) {
 	        var total = this.totalmodel.get('ttc');
+	        deposit = parseInt(deposit, 10);
+	        var deposit_amount = 0;
+	        if (deposit > 0) {
+	            deposit_amount = (0, _math.getPercent)(total, deposit);
+	        }
+	        return deposit_amount;
+	    },
+	    topayAfterDeposit: function topayAfterDeposit(deposit) {
+	        var total = this.totalmodel.get('ttc');
+	        var deposit_amount = this.depositAmount(deposit);
+	        return total - deposit_amount;
+	    },
+	    genPaymentLines: function genPaymentLines(payment_times, deposit) {
+	        this.unBindEvents();
+	        var total = this.topayAfterDeposit(deposit);
+	
 	        var description = 'Livrable';
 	        var part = 0;
 	        console.log("Total : %s", total);
@@ -13785,8 +13855,8 @@ webpackJsonp([1],[
 	        console.log("The PaymentLineCollection was synced");
 	        this.bindEvents();
 	    },
-	    getSoldAmount: function getSoldAmount() {
-	        var ttc = this.totalmodel.get('ttc');
+	    getSoldAmount: function getSoldAmount(deposit) {
+	        var ttc = this.topayAfterDeposit(deposit);
 	        var sum = 0;
 	        var models = this.slice(0, this.models.length - 1);
 	        _.each(models, function (item) {
@@ -13794,7 +13864,7 @@ webpackJsonp([1],[
 	        });
 	        return ttc - sum;
 	    },
-	    updateSold: function updateSold() {
+	    updateSold: function updateSold(deposit) {
 	        var value = this.getSoldAmount();
 	        this.models[this.models.length - 1].set({ 'amount': value });
 	        this.models[this.models.length - 1].save();
@@ -13810,16 +13880,7 @@ webpackJsonp([1],[
 	        });
 	        return result;
 	    }
-	}); /*
-	     * File Name : PaymentLineCollection.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = PaymentLineCollection;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1), __webpack_require__(/*! jquery */ 2)))
 
@@ -14136,6 +14197,79 @@ webpackJsonp([1],[
 	var ConfigBus = new ConfigBusClass();
 	exports.default = ConfigBus;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
+
+/***/ }),
+/* 152 */,
+/* 153 */
+/*!**********************************************!*\
+  !*** ./src/task/views/PaymentDepositView.js ***!
+  \**********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 66);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : PaymentDepositView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var PaymentDepositView = _backbone2.default.View.extend({
+	    className: 'row taskline',
+	    template: __webpack_require__(/*! ./templates/PaymentDepositView.mustache */ 154),
+	    modelEvents: {
+	        'change:amount': 'render'
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            show_date: this.getOption('show_date'),
+	            amount_label: (0, _math.formatAmount)(this.model.get('amount'))
+	        };
+	    }
+	});
+	exports.default = PaymentDepositView;
+
+/***/ }),
+/* 154 */
+/*!**************************************************************!*\
+  !*** ./src/task/views/templates/PaymentDepositView.mustache ***!
+  \**************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='col-lg-4 col-md-4 col-sm-4 col-xs-12 description'>\n    <b>Facture d'acompte</b>\n</div>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_date : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "<div class='col-lg-3 col-md-3 col-sm4 col-xs-12 text-center'>";
+	  stack1 = ((helper = (helper = helpers.amount_label || (depth0 != null ? depth0.amount_label : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"amount_label","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n<div class='col-lg-3 col-md-5 col-sm-7 text-right'>\n</div>\n";
+	},"2":function(depth0,helpers,partials,data) {
+	  return "<div class='col-md-2 col-sm-4 col-xs-12 date'> à la commmande </div>\n";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.amount : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
 
 /***/ })
 ]);

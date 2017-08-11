@@ -9,17 +9,20 @@
  *
  */
 import Mn from 'backbone.marionette';
+import PaymentDepositView from './PaymentDepositView.js';
 import PaymentLineModel from '../models/PaymentLineModel.js';
 import PaymentLineCollectionView from './PaymentLineCollectionView.js';
 import PaymentLineFormView from './PaymentLineFormView.js';
+import PaymentLineView from './PaymentLineView.js';
 import Radio from 'backbone.radio';
 import {strToFloat} from '../../math.js';
 
 const PaymentLineTableView = Mn.View.extend({
     template: require('./templates/PaymentLineTableView.mustache'),
     regions: {
-        lines: '.lines',
+        lines: '.paymentlines',
         modalRegion: '.payment-line-modal-container',
+        deposit: ".deposit",
     },
     ui: {
         btn_add: ".btn-add"
@@ -31,12 +34,20 @@ const PaymentLineTableView = Mn.View.extend({
         'line:edit': 'onLineEdit',
         'line:delete': 'onLineDelete',
         'destroy:modal': 'render'
+
     },
     initialize(options){
         this.collection = options['collection'];
         this.message = Radio.channel('message');
         this.facade = Radio.channel('facade');
         this.totalmodel = this.facade.request('get:totalmodel');
+        this.depositmodel = new PaymentLineModel(
+            {
+                description: "Facture d'acompte",
+                date: "À la commande",
+                amount: this.collection.depositAmount(this.model.get('deposit'))
+            }
+        );
         this.listenTo(
             this.totalmodel,
             'change:ttc',
@@ -47,6 +58,11 @@ const PaymentLineTableView = Mn.View.extend({
             'update:payment_lines',
             this.updateLines.bind(this)
         );
+        this.listenTo(
+            this.model,
+            'change:deposit',
+            this.updateDeposit.bind(this)
+        )
         this.edit = this.getOption('edit');
     },
     onLineAdd(){
@@ -110,16 +126,34 @@ const PaymentLineTableView = Mn.View.extend({
             show_add: this.getOption('edit'),
         };
     },
+    updateDeposit(){
+        console.log("PaymentLineTableView.updateDeposit");
+        var deposit = this.model.get('deposit');
+        var deposit_amount = this.collection.depositAmount(deposit);
+        this.depositmodel.set({amount: deposit_amount});
+        return deposit;
+    },
     updateLines(){
+        console.log("PaymentLineTableView.updateLines");
         var payment_times = this.model.get('payment_times');
+        var deposit = this.updateDeposit();
+
         payment_times = strToFloat(payment_times);
         if (payment_times > 0){
-            this.collection.genPaymentLines(payment_times);
+            this.collection.genPaymentLines(payment_times, deposit);
         } else {
-            this.collection.updateSold();
+            this.collection.updateSold(deposit);
         }
     },
+    showDeposit(){
+        var view = new PaymentDepositView({
+            model:this.depositmodel,
+            show_date: this.getOption('show_date'),
+        });
+        this.showChildView('deposit', view);
+    },
     onRender(){
+        this.showDeposit();
         this.showChildView(
             'lines',
             new PaymentLineCollectionView({

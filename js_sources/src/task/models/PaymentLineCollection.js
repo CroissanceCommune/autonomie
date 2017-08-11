@@ -11,6 +11,7 @@
 import OrderableCollection from "./OrderableCollection.js";
 import PaymentLineModel from './PaymentLineModel.js';
 import Radio from 'backbone.radio';
+import { getPercent } from '../../math.js';
 
 const PaymentLineCollection = OrderableCollection.extend({
     model: PaymentLineModel,
@@ -45,11 +46,24 @@ const PaymentLineCollection = OrderableCollection.extend({
         }
         return result / 100;
     },
-    genPaymentLines(payment_times){
-        this.unBindEvents();
-        console.log("Generating %s payment lines", payment_times);
-        console.log(" + Actual number of models %s", this.models.length)
+    depositAmount(deposit){
         var total = this.totalmodel.get('ttc');
+        deposit = parseInt(deposit, 10);
+        var deposit_amount = 0;
+        if (deposit > 0){
+            deposit_amount = getPercent(total, deposit);
+        }
+        return deposit_amount;
+    },
+    topayAfterDeposit(deposit){
+        var total = this.totalmodel.get('ttc');
+        var deposit_amount = this.depositAmount(deposit);
+        return total - deposit_amount;
+    },
+    genPaymentLines(payment_times, deposit){
+        this.unBindEvents();
+        var total = this.topayAfterDeposit(deposit);
+
         var description = 'Livrable';
         var part = 0;
         console.log("Total : %s", total);
@@ -117,14 +131,14 @@ const PaymentLineCollection = OrderableCollection.extend({
         console.log("The PaymentLineCollection was synced");
         this.bindEvents();
     },
-    getSoldAmount(){
-        let ttc = this.totalmodel.get('ttc');
+    getSoldAmount(deposit){
+        let ttc = this.topayAfterDeposit(deposit);
         let sum = 0;
         let models = this.slice(0, this.models.length - 1);
         _.each(models, function(item){ sum += item.get('amount');});
         return ttc - sum;
     },
-    updateSold(){
+    updateSold(deposit){
         var value = this.getSoldAmount();
         this.models[this.models.length - 1].set({'amount': value});
         this.models[this.models.length - 1].save();

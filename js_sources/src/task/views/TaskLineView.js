@@ -35,17 +35,21 @@ const TaskLineView = Mn.View.extend({
         'change': 'render'
     },
     initialize(){
-        var channel = Radio.channel('facade');
-        this.tva_options = channel.request('get:options', 'tvas');
+        var channel = Radio.channel('config');
+        this.tva_options = channel.request('get:form_options', 'tvas');
     },
     getTvaLabel(){
         let res = "";
         let current_value = this.model.get('tva');
+        console.log("Current tva_value : %s", current_value);
+        console.log(this.tva_options);
         _.each(this.tva_options, function(tva){
+            console.log(tva.value);
             if (tva.value == current_value){
                 res = tva.name;
             }
         });
+        console.log(res);
         return res
     },
     templateContext(){

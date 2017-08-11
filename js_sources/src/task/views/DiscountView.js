@@ -30,8 +30,8 @@ const DiscountView = Mn.View.extend({
         'change': 'render'
     },
     initialize(){
-        var channel = Radio.channel('facade');
-        this.tva_options = channel.request('get:options', 'tvas');
+        var channel = Radio.channel('config');
+        this.tva_options = channel.request('get:form_options', 'tvas');
     },
     getTvaLabel(){
         let res = "";

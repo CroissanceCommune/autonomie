@@ -30,7 +30,7 @@
 <%block name='actionmenu'>
 <ul class='nav nav-pills'>
     <li>
-    % if api.has_permission('admin_treasury', request.context):
+    % if api.has_permission('admin_treasury'):
         ${pdf_export_btn.render(request)|n}
     % endif
     </li>
@@ -64,6 +64,56 @@
 </div>
 </%block>
 <%block name='content'>
+<div class="well well-sm pull-right btn-group" role='group'>
+    <%
+## We build the link with the current search arguments
+    args = request.GET
+    if is_admin:
+        url = request.route_path('invoices.xls', _query=args)
+    else:
+        url = request.route_path('company_invoices.xls', id=request.context.id, _query=args)
+    %>
+    <a
+        class='btn btn-default'
+        href='${url}'
+        title="Export au format Excel"
+        target='_blank'
+        >
+        <i class='fa fa-file-excel-o'></i> Excel
+    </a>
+    <%
+## We build the link with the current search arguments
+    args = request.GET
+    if is_admin:
+        url = request.route_path('invoices.ods', _query=args)
+    else:
+        url = request.route_path('company_invoices.ods', id=request.context.id, _query=args)
+    %>
+    <a
+        class='btn btn-default'
+        href='${url}'
+        title="Export au formt Open document"
+        target='_blank'
+        >
+        <i class='fa fa-file'></i> ODS
+    </a>
+    <%
+## We build the link with the current search arguments
+    args = request.GET
+    if is_admin:
+        url = request.route_path('invoices.csv', _query=args)
+    else:
+        url = request.route_path('company_invoices.csv', id=request.context.id, _query=args)
+    %>
+    <a
+        class='btn btn-default'
+        href='${url}'
+        title="Export au formt csv"
+        target='_blank'
+        >
+        <i class='fa fa-file'></i> CSV
+    </a>
+</div>
 ${request.layout_manager.render_panel('invoicetable', records, is_admin_view=is_admin)}
 ${pager(records)}
 </%block>

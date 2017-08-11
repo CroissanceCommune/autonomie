@@ -506,6 +506,13 @@ class Customer(DBBASE, PersistentACLMixin):
     def get_label(self):
         return self._autonomie_service.get_label(self)
 
+    @property
+    def label(self):
+        """
+        Property used for exports (as a related_key parameter)
+        """
+        return self.get_label()
+
     def get_name(self):
         return self._autonomie_service.format_name(self)
 

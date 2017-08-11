@@ -9084,7 +9084,7 @@ webpackJsonp([1],[
 	            task_id: this.model.get('id'),
 	            order: this.collection.getMaxOrder() + 1
 	        });
-	        this.showTaskLineForm(model, "Ajouter une prestation", false);
+	        this.showTaskLineForm(model, "Définir une prestation", false);
 	    },
 	    showTaskLineForm: function showTaskLineForm(model, title, edit) {
 	        var form = new _TaskLineFormView2.default({
@@ -11892,6 +11892,7 @@ webpackJsonp([1],[
 	        this.totalmodel = this.facade.request('get:totalmodel');
 	        this.listenTo(this.totalmodel, 'change:ttc', this.updateLines.bind(this));
 	        this.listenTo(this.facade, 'update:payment_lines', this.updateLines.bind(this));
+	        this.edit = this.getOption('edit');
 	    },
 	    onLineAdd: function onLineAdd() {
 	        var model = new _PaymentLineModel2.default({
@@ -11905,10 +11906,13 @@ webpackJsonp([1],[
 	    },
 	
 	    showPaymentLineForm: function showPaymentLineForm(model, title, edit) {
-	        var edit_amount = true;
-	        if (edit) {
-	            if (model.isLast()) {
-	                edit_amount = false;
+	        var edit_amount = false;
+	        if (this.edit) {
+	            edit_amount = true;
+	            if (edit) {
+	                if (model.isLast()) {
+	                    edit_amount = false;
+	                }
 	            }
 	        }
 	        var form = new _PaymentLineFormView2.default({
@@ -12116,7 +12120,7 @@ webpackJsonp([1],[
 	 *
 	 */
 	var PaymentLineView = _backbone2.default.View.extend({
-	    className: 'row',
+	    className: 'row taskline',
 	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 121),
 	    modelEvents: {
 	        'change': 'render'
@@ -12165,29 +12169,20 @@ webpackJsonp([1],[
 	    + escapeExpression(((helper = (helper = helpers.date || (depth0 != null ? depth0.date : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"date","hash":{},"data":data}) : helper)))
 	    + " </div>\n";
 	},"3":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<div class='col-lg-3 col-md-5 col-sm-7 text-right actions'>\n    <button type='button' class='btn btn-default edit'>\n        <i class='glyphicon glyphicon-pencil'></i> <span class='hidden-xs'>Modifier</span>\n    </button>\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_first : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</div>\n";
-	},"4":function(depth0,helpers,partials,data) {
 	  return "    <button type='button' class='btn btn-default delete'>\n        <i class='glyphicon glyphicon-trash'></i> <span class='hidden-xs'>Supprimer</span>\n    </button>\n";
-	  },"6":function(depth0,helpers,partials,data) {
+	  },"5":function(depth0,helpers,partials,data) {
 	  var stack1, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer;
-	},"7":function(depth0,helpers,partials,data) {
+	},"6":function(depth0,helpers,partials,data) {
 	  return "    <button type='button' class='btn btn-default btn-small up'>\n        <i class='glyphicon glyphicon-arrow-up'></i>\n    </button>\n    <br />\n";
-	  },"9":function(depth0,helpers,partials,data) {
+	  },"8":function(depth0,helpers,partials,data) {
 	  var stack1, buffer = "";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_before_last : depth0), {"name":"if","hash":{},"fn":this.program(10, data),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_before_last : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer;
-	},"10":function(depth0,helpers,partials,data) {
+	},"9":function(depth0,helpers,partials,data) {
 	  return "    <button type='button' class='btn btn-default btn-small down'>\n        <i class='glyphicon glyphicon-arrow-down'></i>\n    </button>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='col-lg-4 col-md-4 col-sm-4 col-xs-12 description'>\n    ";
@@ -12199,10 +12194,14 @@ webpackJsonp([1],[
 	  buffer += "<div class='col-lg-3 col-md-3 col-sm4 col-xs-12 text-center'>";
 	  stack1 = ((helper = (helper = helpers.amount || (depth0 != null ? depth0.amount : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"amount","hash":{},"data":data}) : helper));
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "</div>\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.edit : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
+	  buffer += "</div>\n<div class='col-lg-3 col-md-5 col-sm-7 text-right'>\n    <button type='button' class='btn btn-default edit'>\n        <i class='glyphicon glyphicon-pencil'></i> <span class='hidden-xs'>Modifier</span>\n    </button>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer;
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_first : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(8, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n";
 	},"useData":true});
 
 /***/ }),
@@ -13702,7 +13701,7 @@ webpackJsonp([1],[
 	        console.log("PaymentLineCollection.bindEvents");
 	        this.listenTo(this, 'add', this.callChannel);
 	        this.listenTo(this, 'remove', this.callChannel);
-	        this.listenTo(this, 'change', this.callChannel);
+	        this.listenTo(this, 'change:amount', this.callChannel);
 	    },
 	    unBindEvents: function unBindEvents() {
 	        console.log("PaymentLineCollection.unBindEvents");

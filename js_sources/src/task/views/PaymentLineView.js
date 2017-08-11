@@ -12,7 +12,7 @@ import Mn from 'backbone.marionette';
 import { formatAmount } from '../../math.js';
 
 const PaymentLineView = Mn.View.extend({
-    className: 'row',
+    className: 'row taskline',
     template: require('./templates/PaymentLineView.mustache'),
     modelEvents: {
         'change': 'render',

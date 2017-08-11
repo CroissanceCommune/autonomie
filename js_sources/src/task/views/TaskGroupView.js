@@ -98,7 +98,7 @@ const TaskGroupView = Mn.View.extend({
             task_id: this.model.get('id'),
             order: this.collection.getMaxOrder() + 1,
         });
-        this.showTaskLineForm(model, "Ajouter une prestation", false);
+        this.showTaskLineForm(model, "Définir une prestation", false);
     },
     showTaskLineForm: function(model, title, edit){
         var form = new TaskLineFormView(

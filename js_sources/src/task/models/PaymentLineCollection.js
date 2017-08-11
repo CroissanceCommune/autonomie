@@ -28,7 +28,7 @@ const PaymentLineCollection = OrderableCollection.extend({
         console.log("PaymentLineCollection.bindEvents");
         this.listenTo(this, 'add', this.callChannel);
         this.listenTo(this, 'remove', this.callChannel);
-        this.listenTo(this, 'change', this.callChannel);
+        this.listenTo(this, 'change:amount', this.callChannel);
     },
     unBindEvents(){
         console.log("PaymentLineCollection.unBindEvents");

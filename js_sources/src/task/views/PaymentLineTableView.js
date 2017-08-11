@@ -47,6 +47,7 @@ const PaymentLineTableView = Mn.View.extend({
             'update:payment_lines',
             this.updateLines.bind(this)
         );
+        this.edit = this.getOption('edit');
     },
     onLineAdd(){
         var model = new PaymentLineModel(
@@ -61,10 +62,13 @@ const PaymentLineTableView = Mn.View.extend({
         this.showPaymentLineForm(childView.model, "Modifier l'échéance", true);
     },
     showPaymentLineForm: function(model, title, edit){
-        let edit_amount = true;
-        if (edit){
-            if (model.isLast()){
-                edit_amount = false;
+        let edit_amount = false;
+        if (this.edit){
+            edit_amount = true;
+            if (edit){
+                if (model.isLast()){
+                    edit_amount = false;
+                }
             }
         }
         var form = new PaymentLineFormView(

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 GROUPS = (
     ('estimation_validation', u"Peut valider ses propres devis", ),
     ('invoice_validation', u"Peut valider ses propres factures", ),
+    ('estimation_only', u"Ne peut pas créer de factures sans devis"),
     (
         "payment_admin",
         u"Peut saisir/modifier/supprimer les paiements de ses factures",

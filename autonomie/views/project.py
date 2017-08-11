@@ -223,7 +223,7 @@ class ProjectsList(BaseListView):
             u"pencil",
             {}
         )
-        if self.request.has_permission('add_estimation'):
+        if self.request.has_permission('add_estimation', project):
             yield (
                 self.request.route_path("project_estimations", id=project.id),
                 u"Nouveau devis",
@@ -231,7 +231,7 @@ class ProjectsList(BaseListView):
                 u"file",
                 {}
             )
-        if self.request.has_permission('add_invoice'):
+        if self.request.has_permission('add_invoice', project):
             yield (
                 self.request.route_path("project_invoices", id=project.id),
                 u"Nouvelle facture",
@@ -239,7 +239,7 @@ class ProjectsList(BaseListView):
                 u"file",
                 {}
             )
-        if self.request.has_permission('edit_project'):
+        if self.request.has_permission('edit_project', project):
             if project.archived:
                 yield (
                     self.request.route_path(
@@ -252,23 +252,6 @@ class ProjectsList(BaseListView):
                     u"book",
                     {}
                 )
-                if not project.has_tasks():
-                    yield (
-                        self.request.route_path(
-                            "project",
-                            id=project.id,
-                            _query=dict(action="delete")
-                        ),
-                        u"Supprimer",
-                        u"Supprimer ce projet",
-                        u"trash",
-                        {
-                            "onclick": (
-                                u"return confirm('Êtes-vous sûr de "
-                                "vouloir supprimer ce projet ?')"
-                            )
-                        }
-                    )
             else:
                 yield (
                     self.request.route_path(
@@ -281,6 +264,23 @@ class ProjectsList(BaseListView):
                     u"book",
                     {}
                 )
+        if self.request.has_permission('delete_project', project):
+            yield (
+                self.request.route_path(
+                    "project",
+                    id=project.id,
+                    _query=dict(action="delete")
+                ),
+                u"Supprimer",
+                u"Supprimer ce projet",
+                u"trash",
+                {
+                    "onclick": (
+                        u"return confirm('Êtes-vous sûr de "
+                        "vouloir supprimer ce projet ?')"
+                    )
+                }
+            )
 
 
 def project_archive(request):

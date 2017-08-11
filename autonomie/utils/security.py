@@ -446,7 +446,7 @@ def get_estimation_default_acl(self):
     acl.extend(_get_user_status_acl(self))
 
     for user in self.company.employees:
-        perms = ()
+        perms = ('duplicate.estimation', )
 
         if self.status == 'valid':
             perms += ('set_signed_status.estimation', )
@@ -491,10 +491,11 @@ def get_invoice_default_acl(self):
     if self.status == 'valid' and self.paid_status != 'resulted':
         acl.append((Allow, "group:payment_admin", ('add_payment.invoice',)))
 
+    acl.append((Deny, "group:estimation_only", ("duplicate.invoice",)))
     acl.extend(_get_user_status_acl(self))
 
     for user in self.company.employees:
-        perms = ()
+        perms = ('duplicate.invoice', )
         if self.status == 'valid' and self.paid_status != 'resulted':
             perms += ('gencinv.invoice',)
 
@@ -691,8 +692,12 @@ def get_project_acl(self):
     else:
         acl.insert(0, (Deny, Everyone, ('delete_project',)))
 
+    acl.append((Deny, 'group:estimation_only', ('add_invoice',)))
+
     for user in self.company.employees:
         acl.append((Allow, user.login, perms))
+
+    print(acl)
 
     return acl
 

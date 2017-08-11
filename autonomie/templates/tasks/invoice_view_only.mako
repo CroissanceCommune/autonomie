@@ -45,9 +45,11 @@
     >
     <i class='glyphicon glyphicon-pencil'></i> Modifier
 </a>
+% if api.has_permission('duplicate.invoice'):
 <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/duplicate', id=invoice.id)}">
     <i class='fa fa-copy'></i> Dupliquer
 </a>
+% endif
 
 % if not invoice.exported:
     <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/set_products', id=invoice.id)}">

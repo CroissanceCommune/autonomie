@@ -28,6 +28,7 @@
 import logging
 import datetime
 import colander
+
 from deform import (
     Form,
     ValidationFailure,
@@ -38,9 +39,15 @@ from sqlalchemy import (
     and_,
     distinct,
 )
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import (
+    contains_eager,
+    load_only,
+)
 from beaker.cache import cache_region
+from pyramid.httpexceptions import HTTPFound
 
+from autonomie_celery.tasks.export import export_to_file
+from autonomie_celery.models import FileGenerationJob
 from autonomie_base.models.base import (
     DBSESSION,
 )
@@ -113,12 +120,8 @@ def get_year_range(year):
     return fday, lday
 
 
-class GlobalInvoicesList(BaseListView):
-    """
-        Used as base for company invoices listing
-    """
-    title = u"Liste des factures de la CAE"
-    add_template_vars = (u'title', u'pdf_export_btn', 'is_admin',)
+class InvoiceListTools(object):
+    title = u"Liste des factures"
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
         date=Task.date,
@@ -133,18 +136,6 @@ class GlobalInvoicesList(BaseListView):
 
     default_sort = "official_number"
     default_direction = 'desc'
-    is_admin = True
-
-    @property
-    def pdf_export_btn(self):
-        """
-        return a popup open button for the pdf export form and place the popup
-        in the request attribute
-        """
-        form = get_invoice_pdf_export_form(self.request)
-        popup = PopUp("pdfexportform", u'Export massif', form.render())
-        self.request.popups = {popup.name: popup}
-        return popup.open_btn()
 
     def query(self):
         query = DBSESSION().query(Task)
@@ -261,12 +252,106 @@ class GlobalInvoicesList(BaseListView):
         return query
 
 
-class CompanyInvoicesList(GlobalInvoicesList):
+class GlobalInvoicesListView(InvoiceListTools, BaseListView):
+    """
+        Used as base for company invoices listing
+    """
+    add_template_vars = (u'title', u'pdf_export_btn', 'is_admin',)
+    is_admin = True
+
+    @property
+    def pdf_export_btn(self):
+        """
+        return a popup open button for the pdf export form and place the popup
+        in the request attribute
+        """
+        form = get_invoice_pdf_export_form(self.request)
+        popup = PopUp("pdfexportform", u'Export massif', form.render())
+        self.request.popups = {popup.name: popup}
+        return popup.open_btn()
+
+
+class CompanyInvoicesListView(GlobalInvoicesListView):
     """
     Invoice list for one given company
     """
     schema = get_list_schema(is_admin=False)
     is_admin = False
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.id
+
+
+class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
+    model = Invoice
+    file_format = "csv"
+    filename = "factures_"
+
+    def query(self):
+        query = self.request.dbsession.query(Task).with_polymorphic(
+            [Invoice, CancelInvoice]
+        )
+        query = query.options(load_only(Task.id))
+        query = query.filter(Task.status == 'valid')
+        return query
+
+    def _build_return_value(self, schema, appstruct, query):
+        """
+        Return the streamed file object
+        """
+        logger.debug("    + In the GlobalInvoicesCsvView._build_return_value")
+        job = FileGenerationJob()
+        job.set_owner(self.request.user.login)
+        self.request.dbsession.add(job)
+        self.request.dbsession.flush()
+        logger.debug("    + The job {job.id} was initialized".format(job=job))
+        all_ids = [elem.id for elem in query]
+        logger.debug("    + All_ids where collected : {0}".format(all_ids))
+        logger.debug("    + Delaying the export_to_file task")
+        celery_job = export_to_file.delay(
+            job.id,
+            'invoices',
+            all_ids,
+            self.filename,
+            self.file_format
+        )
+
+        logger.info(
+            u"The Celery Task {0} has been delayed, its result "
+            "sould be retrieved from the FileGenerationJob {1}".format(
+                celery_job.id, job.id
+            )
+        )
+
+        return HTTPFound(
+            self.request.route_path('job', id=job.id, _query={'nomenu': 1})
+        )
+
+
+class GlobalInvoicesXlsView(GlobalInvoicesCsvView):
+    file_format = "xls"
+
+
+class GlobalInvoicesOdsView(GlobalInvoicesCsvView):
+    file_format = "ods"
+
+
+class CompanyInvoicesCsvView(GlobalInvoicesCsvView):
+    schema = get_list_schema(is_admin=False)
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.id
+
+
+class CompanyInvoicesXlsView(GlobalInvoicesXlsView):
+    schema = get_list_schema(is_admin=False)
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.id
+
+
+class CompanyInvoicesOdsView(GlobalInvoicesOdsView):
+    schema = get_list_schema(is_admin=False)
 
     def _get_company_id(self, appstruct):
         return self.request.context.id
@@ -374,29 +459,56 @@ def add_routes(config):
     """
     Add module's related route
     """
-    # Company invoices view
+    # Company invoices route
     config.add_route(
         'company_invoices',
         '/company/{id:\d+}/invoices',
         traverse='/companies/{id}',
     )
-    # Global invoices view
+    # Global invoices route
     config.add_route("invoices", "/invoices")
+
+    # invoice export routes
+    for extension in ('csv', 'xls', 'ods'):
+        config.add_route("invoices.%s" % extension, "/invoices.%s" % extension)
+        config.add_route(
+            'company_invoices.%s' % extension,
+            '/company/{id:\d+}/invoices.%s' % extension,
+            traverse='/companies/{id}',
+        )
 
 
 def includeme(config):
     add_routes(config)
     config.add_view(
-        CompanyInvoicesList,
+        CompanyInvoicesListView,
         route_name='company_invoices',
         renderer='invoices.mako',
         permission='list_invoices'
     )
 
     config.add_view(
-        GlobalInvoicesList,
+        GlobalInvoicesListView,
         route_name="invoices",
         renderer="invoices.mako",
+        permission="admin_invoices"
+    )
+
+    config.add_view(
+        GlobalInvoicesCsvView,
+        route_name="invoices.csv",
+        permission="admin_invoices"
+    )
+
+    config.add_view(
+        GlobalInvoicesOdsView,
+        route_name="invoices.ods",
+        permission="admin_invoices"
+    )
+
+    config.add_view(
+        GlobalInvoicesXlsView,
+        route_name="invoices.xls",
         permission="admin_invoices"
     )
 
@@ -405,5 +517,23 @@ def includeme(config):
         route_name="invoices",
         request_param='action=export_pdf',
         renderer="/base/formpage.mako",
-        permission="admin_invoices",
+        permission="list_invoices",
+    )
+
+    config.add_view(
+        CompanyInvoicesCsvView,
+        route_name="company_invoices.csv",
+        permission="list_invoices"
+    )
+
+    config.add_view(
+        CompanyInvoicesOdsView,
+        route_name="company_invoices.ods",
+        permission="list_invoices"
+    )
+
+    config.add_view(
+        CompanyInvoicesXlsView,
+        route_name="company_invoices.xls",
+        permission="list_invoices"
     )

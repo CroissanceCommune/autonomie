@@ -86,8 +86,6 @@ from autonomie.forms.user import (
 )
 from autonomie.views import (
     BaseListView,
-    #   BaseXlsView,
-    BaseCsvView,
     submit_btn,
     cancel_btn,
     BaseFormView,
@@ -1004,7 +1002,7 @@ class UserDatasXlsView(UserDatasListClass, BaseListView):
         )
 
         return HTTPFound(
-            self.request.route_path('job', id=job.id)
+            self.request.route_path('job', id=job.id, _query={'nomenu': 1})
         )
 
 

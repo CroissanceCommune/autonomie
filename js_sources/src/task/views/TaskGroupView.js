@@ -67,11 +67,9 @@ const TaskGroupView = Mn.View.extend({
         return this.model.lines.length === 0;
     },
     showErrors(model, errors){
-        console.log("Showing errors")
         this.$el.addClass('error');
     },
     hideErrors(model){
-        console.log("Hiding errors");
         this.$el.removeClass('error');
     },
     bindValidation(){

@@ -26,7 +26,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <%block name="header">
+    % if not title is UNDEFINED:
     <title>${title}</title>
+    % endif
     <link rel="shortcut icon" href="${request.static_url('autonomie:static/img/favicon.ico')}" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" comment="">
@@ -49,11 +51,13 @@
         ${request.layout_manager.render_panel('menu')}
         ${request.layout_manager.render_panel('submenu')}
         <%block name="headtitle">
+        % if title is not UNDEFINED:
         <div class='pagetitle visible-lg hidden-sm hidden-print'>
           <h2 >
             ${title}
           </h2>
         </div>
+        % endif
         </%block>
     % endif
     <div class="container-fluid page-content">

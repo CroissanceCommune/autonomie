@@ -464,7 +464,9 @@ class ExpenseSheet(Node, ExpenseCompute):
             setattr(payment, key, value)
         logger.info(u"Amount : {0}".format(payment.amount))
         self.payments.append(payment)
-        return self.check_resulted(force_resulted=resulted)
+
+        user_id = kw.get('user_id')
+        return self.check_resulted(force_resulted=resulted, user_id=user_id)
 
     def check_resulted(self, force_resulted=False, user_id=None):
         """

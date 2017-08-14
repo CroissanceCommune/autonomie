@@ -432,9 +432,9 @@ def test_gen_cancelinvoice_with_payment(
     assert cinv.default_line_group.lines[-1].tva == 2000
 
 
-def test_record_payment(full_invoice, request_with_config):
+def test_record_payment(full_invoice, request_with_config, user):
     value = {'amount': 2000000, 'mode': 'cheque'}
-    full_invoice.record_payment(**value)
+    full_invoice.record_payment(user_id=user.id, **value)
     assert len(full_invoice.payments) == 1
     assert full_invoice.payments[0].amount == 2000000
 
@@ -445,32 +445,41 @@ def test_payment_get_amount():
     assert payment.get_amount() == 1895000
 
 
-def test_invoice_topay(full_invoice):
+def test_invoice_topay(full_invoice, user):
     value = {'amount': 2000000, 'mode': 'cheque'}
-    full_invoice.record_payment(**value)
+    full_invoice.record_payment(user_id=user.id, **value)
     assert full_invoice.paid() == 2000000
     assert full_invoice.topay() == full_invoice.total() - 2000000
+    assert full_invoice.payments[-1].user_id == user.id
 
-
-def test_resulted_manual(full_invoice, request_with_config):
+def test_resulted_manual(full_invoice, request_with_config, user):
     full_invoice.status = 'valid'
     full_invoice.paid_status = 'paid'
     request_params = {'amount': 0, 'mode': 'cheque', 'resulted': True}
-    full_invoice.record_payment(**request_params)
+    full_invoice.record_payment(user_id=user.id, **request_params)
     assert full_invoice.paid_status == 'resulted'
 
 
-def test_resulted_auto(full_invoice, request_with_config):
+def test_resulted_auto(full_invoice, request_with_config, user):
     full_invoice.status = 'valid'
     full_invoice.paid_status = 'paid'
     request_params = {'amount': int(full_invoice.topay()), 'mode': 'cheque'}
-    full_invoice.record_payment(**request_params)
+    full_invoice.record_payment(user_id=user.id, **request_params)
     assert full_invoice.paid_status == 'resulted'
 
 
-def test_resulted_auto_more(full_invoice, request_with_config):
+def test_resulted_auto_more(full_invoice, request_with_config, user):
     full_invoice.status = 'valid'
     full_invoice.paid_status = 'paid'
     request_params = {'amount': int(full_invoice.topay()) + 1, 'mode': 'cheque'}
-    full_invoice.record_payment(**request_params)
+    full_invoice.record_payment(user_id=user.id, **request_params)
     assert full_invoice.paid_status == 'resulted'
+
+
+def test_status_register(full_invoice, request_with_config, user):
+    full_invoice.status = 'valid'
+    full_invoice.paid_status = 'paid'
+    request_params = {'amount': int(full_invoice.topay()), 'mode': 'cheque'}
+    full_invoice.record_payment(user_id=user.id, **request_params)
+    assert full_invoice.statuses[-1].status_code == 'resulted'
+    assert full_invoice.statuses[-1].status_person_id == user.id

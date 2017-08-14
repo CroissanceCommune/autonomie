@@ -78,6 +78,7 @@ from .interfaces import (
 from .task import (
     Task,
     TaskLine,
+    TaskStatus,
 )
 from .actions import DEFAULT_ACTION_MANAGER
 
@@ -344,7 +345,11 @@ class Invoice(Task, InvoiceCompute):
                 setattr(payment, key, value)
             log.info(u"Amount : {0}".format(payment.amount))
             self.payments.append(payment)
-        return self.check_resulted(force_resulted=resulted)
+
+        return self.check_resulted(
+            force_resulted=resulted,
+            user_id=kw['user_id'],
+        )
 
     def check_resulted(self, force_resulted=False, user_id=None):
         """

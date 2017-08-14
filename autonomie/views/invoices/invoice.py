@@ -291,7 +291,7 @@ class InvoicePaymentView(BaseFormView):
         )
 
     def submit_success(self, appstruct):
-        self.context.record_payment(user=self.request.user, **appstruct)
+        self.context.record_payment(user_id=self.request.user.id, **appstruct)
         self.request.dbsession.merge(self.context)
         self.notify()
         return self.redirect()

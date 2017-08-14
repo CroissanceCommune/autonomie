@@ -247,7 +247,7 @@ class TaskStatusView(StatusView):
             status_comment=self.context.status_comment
         )
         self.context.statuses.append(status_record)
-        self.request.dbsession.add(self.context)
+        self.request.dbsession.merge(self.context)
         StatusView.post_status_process(self, status, params)
 
     def notify(self, status):

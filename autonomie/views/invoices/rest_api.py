@@ -146,6 +146,11 @@ class CancelInvoiceStatusRestView(TaskStatusView):
             raise err
         return {}
 
+    def post_valid_process(self, status, params):
+        self.context.invoice.check_resulted(
+            user_id=self.request.user.id,
+        )
+
 
 def add_invoice_routes(config):
     """

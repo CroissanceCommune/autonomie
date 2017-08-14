@@ -170,7 +170,7 @@ def config(request, pyramid_request, settings, registry):
 
     from autonomie import setup_services
     setup_services(config, settings)
-    config.include('autonomie.celery')
+    config.include('autonomie_celery')
     from autonomie.utils.renderer import customize_renderers
     customize_renderers(config)
     return config

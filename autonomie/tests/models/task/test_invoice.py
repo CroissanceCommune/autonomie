@@ -176,10 +176,11 @@ def test_cancelinvoice_invoice_id():
         schema.deserialize(value)
 
 
-def test_cancelinvoice(tva, unity):
+def test_cancelinvoice(request_with_config, config, cancelinvoice, tva, unity):
     from autonomie.models.task.invoice import CancelInvoice
     schema = SQLAlchemySchemaNode(CancelInvoice)
-    schema = schema.bind()
+    request_with_config.context = cancelinvoice
+    schema = schema.bind(request=request_with_config)
 
     value = {
         "name": u"Avoir 1",
@@ -241,10 +242,16 @@ def test_cancelinvoice(tva, unity):
         assert result[key] == value
 
 
-def test_invoice(tva, unity):
+def test_invoice(config, invoice, request_with_config, tva, unity):
     from autonomie.models.task.invoice import Invoice
     schema = SQLAlchemySchemaNode(Invoice)
-    schema = schema.bind()
+    request_with_config.context = invoice
+    config.testing_securitypolicy(
+        userid="test",
+        groupids=('admin',),
+        permissive=True
+    )
+    schema = schema.bind(request=request_with_config)
 
     value = {
         "name": u"Facture 1",

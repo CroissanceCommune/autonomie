@@ -10,6 +10,7 @@ import pytest
 
 def test_validate_estimation_base_fail(estimation, request_with_config):
     from autonomie.forms.tasks.estimation import validate_estimation
+    request_with_config.context = estimation
     with pytest.raises(colander.Invalid):
         validate_estimation(estimation, request_with_config)
 
@@ -34,4 +35,5 @@ def test_validate_full_estimation(
     estimation.line_groups = [task_line_group]
     estimation.payment_conditions = "Test"
     estimation.payment_lines = [payment_line]
+    request_with_config.context = estimation
     validate_estimation(estimation, request_with_config)

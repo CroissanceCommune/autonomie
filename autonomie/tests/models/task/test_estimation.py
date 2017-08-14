@@ -161,10 +161,17 @@ def test_estimation_payment_lines():
     assert schema.deserialize(value) == expected_value
 
 
-def test_estimation(unity, tva):
+def test_estimation(config, unity, tva, product, request_with_config, estimation):
     from autonomie.models.task.estimation import Estimation
     schema = SQLAlchemySchemaNode(Estimation)
-    schema = schema.bind()
+    config.testing_securitypolicy(
+        userid="test",
+        groupids=('admin',),
+        permissive=True
+    )
+
+    request_with_config.context = estimation
+    schema = schema.bind(request=request_with_config)
 
     value = {
         "name": u"Devis 1",
@@ -189,6 +196,7 @@ def test_estimation(unity, tva):
                         'unity': u"Mètre",
                         "quantity": 5,
                         "order": 2,
+                        "product_id": product.id
                     }
                 ]
             }
@@ -225,6 +233,7 @@ def test_estimation(unity, tva):
                         'unity': u"Mètre",
                         "quantity": 5.0,
                         "order": 2,
+                        "product_id": product.id
                     }
                 ]
             }

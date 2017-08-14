@@ -403,6 +403,35 @@ def get_task_from_context(context):
     return result
 
 
+def remove_childnode(node, child_node_name):
+    """
+    Remove a schema childnode
+    """
+    if child_node_name in node:
+        del node[child_node_name]
+
+
+def has_set_treasury_perm(kw):
+    """
+    Return True if the current user has set_treasury perms on the current
+    context
+    :param dict kw: The bind keyword arguments
+    """
+    result = True
+    request = kw.get('request')
+    if request is None:
+        result = False
+    else:
+        task = get_task_from_context(request.context)
+        if task is None:
+            result = False
+        else:
+            perm = 'set_treasury.%s' % task.type_
+            result = request.has_permission(perm)
+
+    return result
+
+
 def taskline_after_bind(node, kw):
     """
     After bind method to pass to The tasklines fields
@@ -412,13 +441,8 @@ def taskline_after_bind(node, kw):
     :param obj node: The SchemaNode concerning the TaskLine
     :param dict kw: The bind arguments
     """
-    request = kw['request']
-    task = get_task_from_context(request.context)
-    perm = 'set_treasury.%s' % task.type_
-
-    if not request.has_permission(perm):
-        if 'product_id' in node:
-            del node['product_id']
+    if not has_set_treasury_perm(kw):
+        remove_childnode(node, 'product_id')
 
 
 def task_after_bind(node, kw):
@@ -430,11 +454,6 @@ def task_after_bind(node, kw):
     :param obj node: The SchemaNode concerning the Task
     :param dict kw: The bind arguments
     """
-    request = kw['request']
-    task = get_task_from_context(request.context)
-    perm = 'set_treasury.%s' % task.type_
-    if not request.has_permission(perm):
-        if 'prefix' in node:
-            del node['prefix']
-        if 'financial_year' in node:
-            del node['financial_year']
+    if not has_set_treasury_perm(kw):
+        remove_childnode(node, 'prefix')
+        remove_childnode(node, 'financial_year')

@@ -71,10 +71,11 @@ def test_task_line_tva(tva):
         schema.deserialize(value)
 
 
-def test_task_line_product_id(product):
+def test_task_line_product_id(config, request_with_config, estimation, product):
     from autonomie.models.task.task import TaskLine
     schema = SQLAlchemySchemaNode(TaskLine, includes=('product_id',))
-    schema = schema.bind()
+    request_with_config.context = estimation
+    schema = schema.bind(request=request_with_config)
     value = {'product_id': product.id}
     assert schema.deserialize(value) == value
     value = {'product_id': product.id + 1}
@@ -84,10 +85,12 @@ def test_task_line_product_id(product):
     assert schema.deserialize(value) == value
 
 
-def test_task_line(unity, tva, product, product_without_tva):
+def test_task_line(config, request_with_config, estimation,
+                   unity, tva, product, product_without_tva):
     from autonomie.models.task.task import TaskLine
     schema = SQLAlchemySchemaNode(TaskLine)
-    schema = schema.bind()
+    request_with_config.context = estimation
+    schema = schema.bind(request=request_with_config)
     value = {
         'description': u'test',
         'cost': 450,

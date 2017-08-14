@@ -66,6 +66,7 @@ from .invoice import (
 from .task import (
     Task,
     TaskLine,
+    TaskLineGroup,
     TaskStatus,
 )
 from .actions import (
@@ -73,7 +74,7 @@ from .actions import (
     SIGNED_ACTION_MANAGER,
 )
 
-log = logging.getLogger(__name__)
+logger = log = logging.getLogger(__name__)
 
 
 PAYMENTDISPLAYCHOICES = (
@@ -359,13 +360,23 @@ class Estimation(Task, EstimationCompute):
         sold_groups = []
         for group in self.line_groups:
             sold_groups.append(group.duplicate())
-        order = len(self.line_groups)
+
+        if len(self.line_groups) > 1:
+            current_group = TaskLineGroup()
+            sold_groups.append(current_group)
+        else:
+            current_group = sold_groups[0]
+
+        account_lines.reverse()
+
+        order = len(current_group.lines)
         for line in account_lines:
             order = order + 1
             line.cost = -1 * line.cost
             line.order = order
             # On ajoute les lignes au groupe créé par défaut
-            sold_groups[0].lines.append(line)
+            current_group.lines.append(line)
+
         return sold_groups
 
     def _make_sold(self, invoice, paymentline, paid_lines):
@@ -463,6 +474,7 @@ class Estimation(Task, EstimationCompute):
                     )
 
                 paid_lines.extend(lines)
+                invoices.append(invoice)
         else:
             amounts = self.paymentline_amounts()
 
@@ -488,6 +500,7 @@ class Estimation(Task, EstimationCompute):
                         current_project_index,
                     )
                 paid_lines.extend(lines)
+                invoices.append(invoice)
 
         invoice = self._get_common_invoice(user)
         pline = self.payment_lines[-1]

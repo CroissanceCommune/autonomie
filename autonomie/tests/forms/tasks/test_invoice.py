@@ -83,6 +83,5 @@ def test_deferred_total_validator(
         'mode': mode.label,
         'resulted': True,
     }
-    print(invoice.topay())
     with pytest.raises(colander.Invalid):
         schema.deserialize(value)

@@ -420,7 +420,7 @@ def get_estimation_default_acl(self):
     acl = DEFAULT_PERM_NEW[:]
 
     acl.extend(_get_admin_status_acl(self))
-    admin_perms = ()
+    admin_perms = ('duplicate.estimation',)
 
     if self.status == 'valid' and self.signed_status != 'aborted':
         admin_perms += ('geninv.estimation',)
@@ -468,7 +468,7 @@ def get_invoice_default_acl(self):
     acl = DEFAULT_PERM_NEW[:]
     acl.extend(_get_admin_status_acl(self))
 
-    admin_perms = ()
+    admin_perms = ('duplicate.invoice',)
 
     if self.status == 'valid' and self.paid_status != 'resulted':
         admin_perms += ('gencinv.invoice', 'add_payment.invoice',)

@@ -154,17 +154,23 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     },
     total: function(){
       var total = this.getHT() + this.getTva();
-      if (this.isSpecial()){
-        var percentage = this.getTypeOption(AppOptions['expensetel_types']).percentage;
-        total = getPercent(total, percentage);
-      }
       return total;
     },
     getTva:function(){
-      return parseFloat(this.get('tva'));
+      var result = parseFloat(this.get('tva'));
+      if (this.isSpecial()){
+        var percentage = this.getTypeOption(AppOptions['expensetel_types']).percentage;
+        result = getPercent(result, percentage);
+      }
+      return result
     },
     getHT:function(){
-      return parseFloat(this.get('ht'));
+      var result = parseFloat(this.get('ht'));
+      if (this.isSpecial()){
+        var percentage = this.getTypeOption(AppOptions['expensetel_types']).percentage;
+        result = getPercent(result, percentage);
+      }
+      return result
     },
     isSpecial:function(){
       /*
@@ -295,6 +301,36 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
       }
       return res;
     },
+    total_ht: function(category){
+      /*
+       * Return the total value
+       */
+      var result = 0;
+      this.each(function(model){
+        if (category != undefined){
+          if (model.get('category') != category){
+            return;
+          }
+        }
+        result += model.getHT();
+      });
+      return result;
+    },
+    total_tva: function(category){
+      /*
+       * Return the total value
+       */
+      var result = 0;
+      this.each(function(model){
+        if (category != undefined){
+          if (model.get('category') != category){
+            return;
+          }
+        }
+        result += model.getTva();
+      });
+      return result;
+    },
     total: function(category){
       /*
        * Return the total value
@@ -309,7 +345,7 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
         result += model.total();
       });
       return result;
-    }
+    },
   });
 
   var ExpenseKmCollection = Backbone.Collection.extend({
@@ -317,6 +353,36 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
      * Collection for expenses related to km fees
      */
     model: ExpenseKmLine,
+    total_ht: function(category){
+      /*
+       * Return the total value
+       */
+      var result = 0;
+      this.each(function(model){
+        if (category != undefined){
+          if (model.get('category') != category){
+            return;
+          }
+        }
+        result += model.getHT();
+      });
+      return result;
+    },
+    total_tva: function(category){
+      /*
+       * Return the total value
+       */
+      var result = 0;
+      this.each(function(model){
+        if (category != undefined){
+          if (model.get('category') != category){
+            return;
+          }
+        }
+        result += model.getTva();
+      });
+      return result;
+    },
     total: function(category){
       var result = 0;
       this.each(function(model){
@@ -544,6 +610,14 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
        * Set the total value for the current collection
        */
       AutonomieApp.vent.trigger("expense.totalchanged");
+      if (_.has(this.ui, "internalTotalHT")){
+          console.log("Ui has it");
+          this.ui.internalTotalHT.html(formatAmount(this.collection.total_ht('1')));
+          this.ui.internalTotalTva.html(formatAmount(this.collection.total_tva('1')));
+          this.ui.activityTotalHT.html(formatAmount(this.collection.total_ht('2')));
+          this.ui.activityTotalTva.html(formatAmount(this.collection.total_tva('2')));
+      }
+    console.log("Ui had it ???");
       this.ui.internalTotal.html(formatAmount(this.collection.total('1')));
       this.ui.activityTotal.html(formatAmount(this.collection.total('2')));
     }
@@ -557,6 +631,10 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
     childView: ExpenseLineView,
     id: "expenselines",
     ui:{
+      internalTotalHT:'#internal_total_ht',
+      activityTotalHT:'#activity_total_ht',
+      internalTotalTva:'#internal_total_tva',
+      activityTotalTva:'#activity_total_tva',
       internalTotal:'#internal_total',
       activityTotal:'#activity_total'
     },
@@ -895,6 +973,16 @@ AutonomieApp.module("Expense", function(Expense, AutonomieApp,  Backbone, Marion
   });
 
   var updateTotal = function(){
+      var text = "Total HT des dépenses professionnelles à payer : ";
+      var total = Expense.expense.lines.total_ht() + Expense.expense.kmlines.total();
+      text += formatAmount(total);
+      $('#total_ht').html(text);
+
+      var text = "Total TVA des dépenses professionnelles à payer : ";
+      var total = Expense.expense.lines.total_tva() + Expense.expense.kmlines.total();
+      text += formatAmount(total);
+      $('#total_tva').html(text);
+
       var text = "Total des dépenses professionnelles à payer : ";
       var total = Expense.expense.lines.total() +  Expense.expense.kmlines.total();
       text += formatAmount(total);

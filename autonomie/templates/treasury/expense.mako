@@ -163,7 +163,9 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
     <div id="form-container"></div>
 </div>
 <hr />
-<p class='lead' id='total' style='text-align:right'></p>
+<p class='text-right' id='total_ht'></p>
+<p class='text-right' id='total_tva'></p>
+<p class='lead text-right' id='total'></p>
 <hr />
     ${form|n}
 <div id='messageboxes'>

@@ -182,7 +182,7 @@ templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partia
   },"7":function(depth0,helpers,partials,data) {
   return "            <div>\n                <a href=\"#lines/add/2\" class='btn btn-info' title=\"Ajouter une ligne\"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>\n            </div>\n";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "<div>\n    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Frais\n            </h3>\n            <span class=\"help-block\">\n                Dépenses liées au fonctionnement de l'entreprise\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
+  var stack1, helper, options, functionType="function", helperMissing=helpers.helperMissing, blockHelperMissing=helpers.blockHelperMissing, buffer = "    <div class=\"row\">\n        <div class=\"col-xs-4\">\n            <h3 style=\"margin-top:0px\">\n                Frais\n            </h3>\n            <span class=\"help-block\">\n                Dépenses liées au fonctionnement de l'entreprise\n            </span>\n        </div>\n        <div class=\"col-xs-8\">\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -190,7 +190,7 @@ templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partia
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </thead>\n        <tbody class='internal'>\n        </tbody>\n        <tfoot>\n            <tr>\n                <td colspan='5'>Total</td>\n                <td id='internal_total'></td>\n";
+  buffer += "        </thead>\n        <tbody class='internal'>\n        </tbody>\n        <tfoot>\n            <tr>\n                <td colspan='3'>Total</td>\n                <td id='internal_total_ht'></td>\n                <td id='internal_total_tva'></td>\n                <td id='internal_total'></td>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
@@ -202,7 +202,7 @@ templates['expenseList.mustache'] = template({"1":function(depth0,helpers,partia
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }
-  buffer += "        </thead>\n        <tbody class='activity'>\n        </tbody>\n        <tfoot>\n            <tr>\n                <td colspan='5'>Total</td>\n                <td id='activity_total'></td>\n";
+  buffer += "        </thead>\n        <tbody class='activity'>\n        </tbody>\n        <tfoot>\n            <tr>\n                <td colspan='3'>Total</td>\n                <td id='activity_total_ht'></td>\n                <td id='activity_total_tva'></td>\n                <td id='activity_total'></td>\n";
   stack1 = ((helper = (helper = helpers.edit || (depth0 != null ? depth0.edit : depth0)) != null ? helper : helperMissing),(options={"name":"edit","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data}),(typeof helper === functionType ? helper.call(depth0, options) : helper));
   if (!helpers.edit) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
   if (stack1 != null) { buffer += stack1; }

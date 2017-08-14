@@ -337,6 +337,13 @@ class XlsExpense(XlsWriter):
         # Add the last columns
         columns.append(
             StaticColumn(
+                label='Total HT',
+                key='total_ht',
+                formatter=integer_to_amount
+            )
+        )
+        columns.append(
+            StaticColumn(
                 label='Tva',
                 key='tva',
                 formatter=integer_to_amount
@@ -549,6 +556,15 @@ class XlsExpense(XlsWriter):
 
             elif column.key == 'description':
                 cell.value = "Totaux"
+
+            elif column.key == 'total_ht':
+                cell.value = integer_to_amount(
+                    sum(
+                        [
+                            getattr(line, 'total_ht', 0) for line in lines
+                        ]
+                    )
+                )
 
             elif column.key == 'tva':
                 cell.value = integer_to_amount(

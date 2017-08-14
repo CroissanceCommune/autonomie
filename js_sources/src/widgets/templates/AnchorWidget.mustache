@@ -1,6 +1,6 @@
 <a
     class='{{ option.css }} btn-block'
-    href='{{ option.url }}'
+    href='{{#if option.popup}}#{{else}}{{ option.url }}{{/if}}'
     title="{{ option.title }}"
     {{#if option.onclick}}onclick="{{ option.onclick }}"{{/if}}
     {{#if option.attrs}} {{ option.attrs }}{{/if}}>

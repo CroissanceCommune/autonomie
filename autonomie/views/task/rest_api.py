@@ -223,6 +223,21 @@ class TaskRestView(BaseRestView):
                     "attrs": "target=_blank",
                 }
             })
+        url = self.request.route_path(
+            "/%ss/{id}.preview" % self.context.type_,
+            id=self.context.id,
+        )
+        result.append({
+                'widget': 'anchor',
+                'option': {
+                    "url": url,
+                    "label": u"Prévisualisation",
+                    "title": u"Prévisualiser votre document",
+                    "css": "btn btn-default",
+                    "icon": "fa fa-eye",
+                    "popup": True,
+                }
+            })
         return result
 
 

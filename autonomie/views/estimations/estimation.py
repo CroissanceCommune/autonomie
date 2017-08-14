@@ -64,12 +64,16 @@ from autonomie.models.task import (
     Invoice,
 )
 from autonomie.utils.widgets import ViewLink
-from autonomie.resources import estimation_signed_status_js
+from autonomie.resources import (
+    estimation_signed_status_js,
+    task_html_pdf_css,
+)
 from autonomie.views import (
     BaseEditView,
     BaseFormView,
     submit_btn,
     cancel_btn,
+    add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.task.views import (
@@ -225,7 +229,7 @@ def estimation_geninv_view(context, request):
         request.dbsession.add(invoice)
 
     if len(invoices) > 1:
-        msg = u"{0} factures ont été générées"
+        msg = u"{0} factures ont été générées".format(len(invoices))
     else:
         msg = u"Une facture a été générée"
     request.session.flash(msg)
@@ -250,7 +254,7 @@ def add_routes(config):
         '/estimations/{id:\d+}',
         traverse='/estimations/{id}'
     )
-    for extension in ('html', 'pdf'):
+    for extension in ('html', 'pdf', 'preview'):
         config.add_route(
             '/estimations/{id}.%s' % extension,
             '/estimations/{id:\d+}.%s' % extension,
@@ -313,6 +317,13 @@ def includeme(config):
         EstimationHtmlView,
         route_name="/estimations/{id}.html",
         renderer='tasks/estimation_view_only.mako',
+        permission='view.estimation',
+    )
+    add_panel_page_view(
+        config,
+        'estimation_html',
+        js_resources=(task_html_pdf_css,),
+        route_name="/estimations/{id}.preview",
         permission='view.estimation',
     )
 

@@ -44,11 +44,15 @@ from autonomie.forms.tasks.invoice import (
     get_payment_schema,
     EstimationAttachSchema,
 )
+from autonomie.resources import (
+    task_html_pdf_css,
+)
 from autonomie.views import (
     BaseEditView,
     BaseFormView,
     submit_btn,
     cancel_btn,
+    add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.sage import SageSingleInvoiceExportPage
@@ -366,7 +370,7 @@ def add_routes(config):
         '/invoices/{id:\d+}',
         traverse='/invoices/{id}',
     )
-    for extension in ('html', 'pdf', 'txt'):
+    for extension in ('html', 'pdf', 'txt', 'preview'):
         config.add_route(
             '/invoices/{id}.%s' % extension,
             '/invoices/{id:\d+}.%s' % extension,
@@ -434,6 +438,14 @@ def includeme(config):
         route_name='/invoices/{id}.html',
         renderer='tasks/invoice_view_only.mako',
         permission='view.invoice',
+    )
+
+    add_panel_page_view(
+        config,
+        'invoice_html',
+        js_resources=(task_html_pdf_css,),
+        route_name='/invoices/{id}.preview',
+        permission="view.invoice",
     )
 
     config.add_view(

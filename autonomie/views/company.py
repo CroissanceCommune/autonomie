@@ -57,6 +57,7 @@ from autonomie.views import (
     BaseFormView,
     submit_btn,
     BaseListView,
+    add_panel_view,
 )
 from autonomie.views.render_api import format_account
 from autonomie.forms.company import (
@@ -445,18 +446,6 @@ def get_disable_btn(company_id):
     )
 
 
-def make_panel_wrapper_view(panel_name):
-    """
-        Return a view wrapping the given panel
-    """
-    def myview(request):
-        """
-            Return a panel name for our panel wrapper
-        """
-        return {'panel_name': panel_name}
-    return myview
-
-
 def company_remove_employee_view(context, request):
     """
     Enlève un employé de l'entreprise courante
@@ -559,10 +548,10 @@ def includeme(config):
             ('company_tasks', 'action=tasks_html',),
             ('company_events', 'action=events_html',),
             ):
-        config.add_view(
-            make_panel_wrapper_view(panel),
+        add_panel_view(
+            config,
+            panel,
             route_name='company',
-            renderer="panel_wrapper.mako",
             request_param=request_param,
             permission="view_company",
         )

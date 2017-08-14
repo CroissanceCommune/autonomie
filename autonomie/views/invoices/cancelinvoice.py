@@ -36,8 +36,12 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.models.task import (
     CancelInvoice,
 )
+from autonomie.resources import (
+    task_html_pdf_css,
+)
 from autonomie.views import (
     BaseEditView,
+    add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.sage import SageSingleInvoiceExportPage
@@ -161,7 +165,7 @@ def add_routes(config):
         '/cancelinvoices/{id:\d+}',
         traverse='/cancelinvoices/{id}'
     )
-    for extension in ('html', 'pdf', 'txt'):
+    for extension in ('html', 'pdf', 'txt', 'preview'):
         config.add_route(
             '/cancelinvoices/{id}.%s' % extension,
             '/cancelinvoices/{id:\d+}.%s' % extension,
@@ -218,6 +222,14 @@ def includeme(config):
         route_name='/cancelinvoices/{id}.html',
         renderer='tasks/cancelinvoice_view_only.mako',
         permission='view.cancelinvoice',
+    )
+
+    add_panel_page_view(
+        config,
+        'cancelinvoice_html',
+        js_resources=(task_html_pdf_css,),
+        route_name='/cancelinvoices/{id}.preview',
+        permission="view.invoice",
     )
 
     config.add_view(

@@ -30,10 +30,12 @@ from autonomie.utils.strings import major_status
 from autonomie.views.render_api import status_icon
 
 
-def task_panel(context, request, task, bulk=False):
+def task_panel(context, request, task=None, bulk=False):
     """
         Task panel
     """
+    if task is None:
+        task = context
     tvas = task.get_tvas()
     # Check if we've got multiple positive tvas in our task
     multiple_tvas = len([val for val in tvas if val > 0]) > 1
@@ -110,6 +112,7 @@ def includeme(config):
         panel_name = "{0}_html".format(document_type)
         template = "panels/{0}.mako".format(document_type)
         config.add_panel(task_panel, panel_name, renderer=template)
+
     config.add_panel(
         task_title_panel,
         "task_title_panel",

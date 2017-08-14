@@ -862,3 +862,41 @@ class BaseRestView(BaseView):
         self.logger.info("DELETE request")
         self.request.dbsession.delete(self.context)
         return {}
+
+
+def make_panel_wrapper_view(panel_name, js_resources=()):
+    """
+    Return a view wrapping the given panel
+
+    :param str panel_name: The name of the panel
+    """
+    def myview(request):
+        """
+            Return a panel name for our panel wrapper
+        """
+        if js_resources:
+            for js_resource in js_resources:
+                js_resource.need()
+        return {'panel_name': panel_name}
+    return myview
+
+
+def add_panel_view(config, panel_name, **kwargs):
+    """
+    Add a panel view to the current configuration
+    """
+    config.add_view(
+        make_panel_wrapper_view(panel_name),
+        renderer="panel_wrapper.mako",
+        xhr=True,
+        **kwargs
+    )
+
+
+def add_panel_page_view(config, panel_name, **kwargs):
+    js_resources = kwargs.pop('js_resources', ())
+    config.add_view(
+        make_panel_wrapper_view(panel_name, js_resources),
+        renderer="panel_page_wrapper.mako",
+        **kwargs
+    )

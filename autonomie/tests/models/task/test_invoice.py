@@ -466,3 +466,11 @@ def test_resulted_auto(full_invoice, request_with_config):
     request_params = {'amount': int(full_invoice.topay()), 'mode': 'cheque'}
     full_invoice.record_payment(**request_params)
     assert full_invoice.paid_status == 'resulted'
+
+
+def test_resulted_auto_more(full_invoice, request_with_config):
+    full_invoice.status = 'valid'
+    full_invoice.paid_status = 'paid'
+    request_params = {'amount': int(full_invoice.topay()) + 1, 'mode': 'cheque'}
+    full_invoice.record_payment(**request_params)
+    assert full_invoice.paid_status == 'resulted'

@@ -10,6 +10,7 @@
  */
 import Mn from 'backbone.marionette';
 import { formatAmount } from '../../math.js';
+import { formatDate } from '../../date.js';
 
 const PaymentLineView = Mn.View.extend({
     className: 'row taskline',

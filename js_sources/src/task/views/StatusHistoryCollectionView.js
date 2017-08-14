@@ -9,6 +9,7 @@
  *
  */
 import Mn from 'backbone.marionette';
+import { formatDate } from '../../date.js';
 
 const StatusHistoryItemView = Mn.View.extend({
     tagName: 'div',

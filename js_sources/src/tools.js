@@ -1,6 +1,8 @@
 require('jquery');
 import _ from 'underscore';
 import $ from 'jquery';
+import { parseDate } from './date.js';
+
 var datepicker = require("jquery-ui/ui/widgets/datepicker");
 
 export const setDatePicker = function(input_tag, altfield_selector, value, kwargs){

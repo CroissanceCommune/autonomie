@@ -11,6 +11,7 @@
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
 import { getOpt, setDatePicker } from '../tools.js';
+import { formatDate } from '../date.js';
 
 
 var template = require('./templates/DatePickerWidget.mustache');

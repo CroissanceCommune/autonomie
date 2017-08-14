@@ -10,6 +10,7 @@
  */
 import Bb from 'backbone';
 import BaseModel from "./BaseModel.js";
+import { dateToIso } from '../../date.js';
 
 const PaymentLineModel = BaseModel.extend({
     props: [

@@ -47,7 +47,7 @@ from js.tinymce import tinymce
 lib_autonomie = Library("fanstatic", "static")
 
 
-def get_resource(filepath, minified=None, depends=None):
+def get_resource(filepath, minified=None, depends=None, bottom=False):
     """
     Return a resource object included in autonomie
     """
@@ -56,6 +56,7 @@ def get_resource(filepath, minified=None, depends=None):
         filepath,
         minified=minified,
         depends=depends,
+        bottom=bottom,
     )
 
 
@@ -70,6 +71,17 @@ main_css = get_resource(
     ]
 )
 opa_css = get_resource("css/opa.css", depends=[main_css])
+opa_vendor_js = get_resource(
+    'js/build/vendor.bundle.js',
+    minified='js/build/vendor.min.js',
+    bottom=True,
+)
+base_setup_js = get_resource(
+    'js/build/base_setup.js',
+    minified='js/build/base_setup.min.js',
+    depends=(opa_vendor_js,),
+    bottom=True,
+)
 
 # Js static resources
 _date = get_resource("js/date.js")
@@ -81,8 +93,8 @@ def get_opa_group():
     """
     Return the resources used on one page applications pages
     """
-    js_tools = Group([_date])
-    return Group([main_css, opa_css, js_tools])
+#    js_tools = Group([_date])
+    return Group([main_css, opa_css, opa_vendor_js, base_setup_js])
 
 
 def get_main_group():
@@ -292,6 +304,12 @@ competence_radar_js = get_module_resource(
 
 admin_expense_js = get_module_resource("admin_expense")
 
-task_css = get_resource('css/task.css', depends=(main_css,))
-task_js = get_resource('js/build/task.js')
-task_resources = Group([task_js, task_css])
+# Task form resources
+task_css = get_resource('css/task.css', depends=(opa_css, ))
+task_js = get_resource(
+    'js/build/task.js',
+    minified='js/build/task.min.js',
+    depends=[opa_vendor_js],
+    bottom=True,
+)
+task_resources = Group([task_js, task_css, jstree_css])

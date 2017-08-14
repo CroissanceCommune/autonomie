@@ -42,6 +42,4 @@ AppOption['context_url'] = "${context_url}";
 AppOption['form_config_url'] = "${form_config_url}"
 AppOption['load_catalog_url'] = "${load_catalog_url}";
 </script>
-<script type='text/javascript' src="${request.static_url('autonomie:static/js/build/vendor.bundle.js')}" ></script>
-<script type='text/javascript' src="${request.static_url('autonomie:static/js/build/task.js')}" ></script>
 </%block>

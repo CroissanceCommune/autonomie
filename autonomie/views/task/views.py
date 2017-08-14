@@ -30,8 +30,7 @@ from autonomie.utils.pdf import (
 )
 from autonomie.resources import (
     duplicate_js,
-    task_css,
-    jstree_css,
+    task_resources,
     task_html_pdf_css,
     pdf_css,
     task_add_js,
@@ -154,8 +153,7 @@ class TaskEditView(BaseView):
         if hasattr(self, '_before'):
             self._before()
 
-        task_css.need()
-        jstree_css.need()
+        task_resources.need()
         populate_actionmenu(self.request)
         return dict(
             context=self.context,

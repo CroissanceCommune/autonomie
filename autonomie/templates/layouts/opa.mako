@@ -96,6 +96,5 @@ One page application layout template
     </div>
     <%block name='content' />
     <%block name='footer' />
-    <script type='text/javascript' src="${request.static_url('autonomie:static/js/build/base_setup.js')}"></script>
   </body>
 </html>

@@ -49,6 +49,11 @@ $form-subblock-bgcolor: #fbfbfb;
 .form-section.error{
   border-top: 3px solid #f82211;
 }
+.taskline-group.error{
+  border-top: 3px solid #f82211;
+  background-color: #f2dede;
+}
+
 .discountlines-group{
 }
 
@@ -93,7 +98,7 @@ a[data-toggle=collapse]:hover{
     position: -moz-sticky;
     position: -ms-sticky;
     position: -o-sticky;
-    top: 50px;
+    top: 0px;
     button, a{
       margin-bottom: 0.7em;
     }

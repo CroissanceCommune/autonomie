@@ -60,9 +60,19 @@ const TaskGroupView = Mn.View.extend({
         var channel = Radio.channel('facade');
         this.listenTo(channel, 'bind:validation', this.bindValidation);
         this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+        this.listenTo(this.model, 'validated:invalid', this.showErrors);
+        this.listenTo(this.model, 'validated:valid', this.hideErrors.bind(this));
     },
     isEmpty: function(){
         return this.model.lines.length === 0;
+    },
+    showErrors(model, errors){
+        console.log("Showing errors")
+        this.$el.addClass('error');
+    },
+    hideErrors(model){
+        console.log("Hiding errors");
+        this.$el.removeClass('error');
     },
     bindValidation(){
         Validation.bind(this);

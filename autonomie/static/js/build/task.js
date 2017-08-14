@@ -3434,19 +3434,19 @@ webpackJsonp([1],[
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 143);
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 144);
 	
 	var _Facade2 = _interopRequireDefault(_Facade);
 	
-	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 150);
+	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 151);
 	
 	var _AuthBus2 = _interopRequireDefault(_AuthBus);
 	
-	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 151);
+	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 152);
 	
 	var _MessageBus2 = _interopRequireDefault(_MessageBus);
 	
-	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 152);
+	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 153);
 	
 	var _ConfigBus2 = _interopRequireDefault(_ConfigBus);
 	
@@ -3547,15 +3547,15 @@ webpackJsonp([1],[
 	
 	var _RightBarView2 = _interopRequireDefault(_RightBarView);
 	
-	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 136);
+	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 137);
 	
 	var _StatusView2 = _interopRequireDefault(_StatusView);
 	
-	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 138);
+	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 139);
 	
 	var _BootomActionView2 = _interopRequireDefault(_BootomActionView);
 	
-	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 140);
+	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 141);
 	
 	var _LoginView2 = _interopRequireDefault(_LoginView);
 	
@@ -3567,7 +3567,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 142); /*
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 143); /*
 	                                                          * File Name : MainView.js
 	                                                          *
 	                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
@@ -8309,6 +8309,8 @@ webpackJsonp([1],[
 	    props: ['id', 'order', 'title', 'description', 'lines', 'task_id'],
 	    validation: {
 	        lines: function lines(value) {
+	            console.log("TaskGroupModel.lines");
+	            console.log(value);
 	            if (value.length === 0) {
 	                return "Veuillez saisir au moins une prestation";
 	            }
@@ -9051,9 +9053,19 @@ webpackJsonp([1],[
 	        var channel = _backbone4.default.channel('facade');
 	        this.listenTo(channel, 'bind:validation', this.bindValidation);
 	        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+	        this.listenTo(this.model, 'validated:invalid', this.showErrors);
+	        this.listenTo(this.model, 'validated:valid', this.hideErrors.bind(this));
 	    },
 	    isEmpty: function isEmpty() {
 	        return this.model.lines.length === 0;
+	    },
+	    showErrors: function showErrors(model, errors) {
+	        console.log("Showing errors");
+	        this.$el.addClass('error');
+	    },
+	    hideErrors: function hideErrors(model) {
+	        console.log("Hiding errors");
+	        this.$el.removeClass('error');
 	    },
 	    bindValidation: function bindValidation() {
 	        _backboneValidation2.default.bind(this);
@@ -10139,7 +10151,7 @@ webpackJsonp([1],[
 	  },"13":function(depth0,helpers,partials,data) {
 	  return "    <div class='row lines-header hidden-xs'>\n        <div class='col-md-3 col-sm-4 '>Intitulé des postes</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>Prix unit. HT</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>Qté</div>\n        <div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>Unité</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>Tva</div>\n        <div class='col-md-1 col-sm-1 text-center'>HT</div>\n        <div class='col-lg-1 hidden-sm hidden-xs hidden-md text-center'>Produit</div>\n        <div class='col-md-5 col-lg-3 col-sm-7 text-center'>Actions</div>\n    </div>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<div class='col-xs-12 in_error'>\n    <div class='row'>\n        <div class='col-xs-12'>\n        <div class='errors'></div>\n            <div class='btn-group pull-right'>\n                <button\n                    type='button'\n                    class='btn btn-danger delete btn-small'\n                    title='Supprimer cet ouvrage'\n                    tabindex='-1'\n                    >\n                    <i class='glyphicon glyphicon-trash'></i>\n                </button>\n";
+	  var stack1, buffer = "<div class='col-xs-12'>\n    <div class='row'>\n        <div class='col-xs-12'>\n        <div class='errors'></div>\n            <div class='btn-group pull-right'>\n                <button\n                    type='button'\n                    class='btn btn-danger delete btn-small'\n                    title='Supprimer cet ouvrage'\n                    tabindex='-1'\n                    >\n                    <i class='glyphicon glyphicon-trash'></i>\n                </button>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_first : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_not_last : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
@@ -12524,7 +12536,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 135);
+	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 136);
 	
 	var RightBarView = _backbone2.default.View.extend({
 	    regions: {
@@ -12658,7 +12670,7 @@ webpackJsonp([1],[
 	
 	var _AnchorWidget2 = _interopRequireDefault(_AnchorWidget);
 	
-	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 133);
+	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 134);
 	
 	var _ToggleWidget2 = _interopRequireDefault(_ToggleWidget);
 	
@@ -12715,7 +12727,7 @@ webpackJsonp([1],[
 	
 	var AnchorWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
-	    template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 154),
+	    template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 133),
 	    ui: {
 	        anchor: 'a'
 	    },
@@ -12751,6 +12763,50 @@ webpackJsonp([1],[
 
 /***/ }),
 /* 133 */
+/*!*****************************************************!*\
+  !*** ./src/widgets/templates/AnchorWidget.mustache ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  return "#";
+	  },"3":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.url : stack1), depth0));
+	  },"5":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return "onclick=\""
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), depth0))
+	    + "\"";
+	},"7":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
+	  return " "
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.attrs : stack1), depth0));
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a\n    class='"
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.css : stack1), depth0))
+	    + " btn-block'\n    href='";
+	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.popup : stack1), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "'\n    title=\""
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.title : stack1), depth0))
+	    + "\"\n    ";
+	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "\n    ";
+	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.attrs : stack1), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + ">\n    <i class='"
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.icon : stack1), depth0))
+	    + "'></i> "
+	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.label : stack1), depth0))
+	    + "\n</a>\n";
+	},"useData":true});
+
+/***/ }),
+/* 134 */
 /*!*************************************!*\
   !*** ./src/widgets/ToggleWidget.js ***!
   \*************************************/
@@ -12768,7 +12824,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 134); /*
+	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 135); /*
 	                                                              * File Name : ToggleWidget.js
 	                                                              *
 	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -12788,7 +12844,7 @@ webpackJsonp([1],[
 	exports.default = ToggleWidget;
 
 /***/ }),
-/* 134 */
+/* 135 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/ToggleWidget.mustache ***!
   \*****************************************************/
@@ -12817,7 +12873,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 135 */
+/* 136 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/RightBarView.mustache ***!
   \********************************************************/
@@ -12872,7 +12928,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 136 */
+/* 137 */
 /*!**************************************!*\
   !*** ./src/task/views/StatusView.js ***!
   \**************************************/
@@ -12910,7 +12966,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 137);
+	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 138);
 	
 	var StatusView = _backbone2.default.View.extend({
 	    template: template,
@@ -12978,7 +13034,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 137 */
+/* 138 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/StatusView.mustache ***!
   \******************************************************/
@@ -13009,7 +13065,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 138 */
+/* 139 */
 /*!********************************************!*\
   !*** ./src/task/views/BootomActionView.js ***!
   \********************************************/
@@ -13028,7 +13084,7 @@ webpackJsonp([1],[
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var BootomActionView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 139),
+	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 140),
 	    tagName: 'footer',
 	    className: 'sticky-footer hidden-md hidden-lg text-center',
 	    ui: {
@@ -13065,7 +13121,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 139 */
+/* 140 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/BootomActionView.mustache ***!
   \************************************************************/
@@ -13098,7 +13154,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 140 */
+/* 141 */
 /*!*************************************!*\
   !*** ./src/base/views/LoginView.js ***!
   \*************************************/
@@ -13124,7 +13180,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 141); /*
+	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 142); /*
 	                                                           * File Name : LoginView.js
 	                                                           *
 	                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -13179,7 +13235,7 @@ webpackJsonp([1],[
 	exports.default = LoginView;
 
 /***/ }),
-/* 141 */
+/* 142 */
 /*!*****************************************************!*\
   !*** ./src/base/views/templates/LoginView.mustache ***!
   \*****************************************************/
@@ -13192,7 +13248,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 142 */
+/* 143 */
 /*!****************************************************!*\
   !*** ./src/task/views/templates/MainView.mustache ***!
   \****************************************************/
@@ -13205,7 +13261,7 @@ webpackJsonp([1],[
 	  },"useData":true});
 
 /***/ }),
-/* 143 */
+/* 144 */
 /*!***************************************!*\
   !*** ./src/task/components/Facade.js ***!
   \***************************************/
@@ -13221,27 +13277,27 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 144);
+	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 145);
 	
 	var _CommonModel2 = _interopRequireDefault(_CommonModel);
 	
-	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 145);
+	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 146);
 	
 	var _TaskGroupCollection2 = _interopRequireDefault(_TaskGroupCollection);
 	
-	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 146);
+	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 147);
 	
 	var _DiscountCollection2 = _interopRequireDefault(_DiscountCollection);
 	
-	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 147);
+	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 148);
 	
 	var _PaymentLineCollection2 = _interopRequireDefault(_PaymentLineCollection);
 	
-	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 148);
+	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 149);
 	
 	var _StatusHistoryCollection2 = _interopRequireDefault(_StatusHistoryCollection);
 	
-	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 149);
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 150);
 	
 	var _TotalModel2 = _interopRequireDefault(_TotalModel);
 	
@@ -13441,7 +13497,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 144 */
+/* 145 */
 /*!****************************************!*\
   !*** ./src/task/models/CommonModel.js ***!
   \****************************************/
@@ -13559,7 +13615,7 @@ webpackJsonp([1],[
 	exports.default = CommonModel;
 
 /***/ }),
-/* 145 */
+/* 146 */
 /*!************************************************!*\
   !*** ./src/task/models/TaskGroupCollection.js ***!
   \************************************************/
@@ -13662,7 +13718,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 146 */
+/* 147 */
 /*!***********************************************!*\
   !*** ./src/task/models/DiscountCollection.js ***!
   \***********************************************/
@@ -13763,7 +13819,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 147 */
+/* 148 */
 /*!**************************************************!*\
   !*** ./src/task/models/PaymentLineCollection.js ***!
   \**************************************************/
@@ -13943,7 +13999,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1), __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 148 */
+/* 149 */
 /*!****************************************************!*\
   !*** ./src/task/models/StatusHistoryCollection.js ***!
   \****************************************************/
@@ -13978,7 +14034,7 @@ webpackJsonp([1],[
 	exports.default = StatusHistoryCollection;
 
 /***/ }),
-/* 149 */
+/* 150 */
 /*!***************************************!*\
   !*** ./src/task/models/TotalModel.js ***!
   \***************************************/
@@ -14042,7 +14098,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 150 */
+/* 151 */
 /*!****************************************!*\
   !*** ./src/base/components/AuthBus.js ***!
   \****************************************/
@@ -14125,7 +14181,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 151 */
+/* 152 */
 /*!*******************************************!*\
   !*** ./src/base/components/MessageBus.js ***!
   \*******************************************/
@@ -14174,7 +14230,7 @@ webpackJsonp([1],[
 	exports.default = MessageBus;
 
 /***/ }),
-/* 152 */
+/* 153 */
 /*!******************************************!*\
   !*** ./src/base/components/ConfigBus.js ***!
   \******************************************/
@@ -14255,51 +14311,6 @@ webpackJsonp([1],[
 	var ConfigBus = new ConfigBusClass();
 	exports.default = ConfigBus;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
-
-/***/ }),
-/* 153 */,
-/* 154 */
-/*!*****************************************************!*\
-  !*** ./src/widgets/templates/AnchorWidget.mustache ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 35);
-	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "#";
-	  },"3":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.url : stack1), depth0));
-	  },"5":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return "onclick=\""
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), depth0))
-	    + "\"";
-	},"7":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression;
-	  return " "
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.attrs : stack1), depth0));
-	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "<a\n    class='"
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.css : stack1), depth0))
-	    + " btn-block'\n    href='";
-	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.popup : stack1), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "'\n    title=\""
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.title : stack1), depth0))
-	    + "\"\n    ";
-	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.onclick : stack1), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "\n    ";
-	  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.attrs : stack1), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
-	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + ">\n    <i class='"
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.icon : stack1), depth0))
-	    + "'></i> "
-	    + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.option : depth0)) != null ? stack1.label : stack1), depth0))
-	    + "\n</a>\n";
-	},"useData":true});
 
 /***/ })
 ]);

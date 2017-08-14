@@ -24,6 +24,8 @@ const TaskGroupModel = BaseModel.extend({
     ],
     validation:{
         lines: function(value){
+            console.log("TaskGroupModel.lines");
+            console.log(value);
             if (value.length === 0){
                 return "Veuillez saisir au moins une prestation";
             }

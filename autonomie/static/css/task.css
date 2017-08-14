@@ -37,6 +37,10 @@
 .form-section.error {
   border-top: 3px solid #f82211; }
 
+.taskline-group.error {
+  border-top: 3px solid #f82211;
+  background-color: #f2dede; }
+
 .sticky-footer {
   background-color: #000;
   color: #f5f5f5;
@@ -79,7 +83,7 @@ a[data-toggle=collapse]:hover {
   position: -moz-sticky;
   position: -ms-sticky;
   position: -o-sticky;
-  top: 50px; }
+  top: 0px; }
   .task-desktop-actions button, .task-desktop-actions a {
     margin-bottom: 0.7em; }
   .task-desktop-actions .totals {

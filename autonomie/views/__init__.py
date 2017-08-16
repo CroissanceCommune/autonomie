@@ -571,7 +571,9 @@ class BaseEditView(BaseFormView):
         model = self.schema.objectify(appstruct, self.context)
         self.dbsession.merge(model)
         self.dbsession.flush()
-        self.request.session.flash(self.msg)
+        if self.msg:
+            self.request.session.flash(self.msg)
+
         if self.redirect_route is not None:
             return HTTPFound(self.request.route_path(self.redirect_route))
         elif hasattr(self, 'redirect'):
@@ -612,9 +614,14 @@ class BaseAddView(BaseFormView):
         new_model = self.create_instance()
         new_model = self.schema.objectify(appstruct, new_model)
         self.dbsession.add(new_model)
-        self.request.session.flash(self.msg)
+        self.dbsession.flush()
+        if self.msg:
+            self.request.session.flash(self.msg)
+
         if self.redirect_route is not None:
             return HTTPFound(self.request.route_path(self.redirect_route))
+        elif hasattr(self, 'redirect'):
+            return self.redirect(new_model)
 
 
 class DisableView(BaseView):

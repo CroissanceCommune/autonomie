@@ -52,7 +52,13 @@
         <table class="table table-condensed table-bordered">
             <caption>
                 <b>Feuille de notes de dépense de ${api.format_account(user)}</b>
-                ${user_buttons[user.id].render(request)|n}
+                <a
+                class='btn btn-primary primary-action'
+                href='${request.route_path("user_expenses", id=request.context.id, uid=user.id)}'
+                title="Ajouter un nouvelle note de dépenses"
+                >
+                Créer
+                </a>
             </caption>
         <thead>
             <th>Période</th>
@@ -90,8 +96,8 @@
                         % endfor
                     </td>
                     <td style='text-align:right'>
-                        ${table_btn(request.route_path('expensesheet', id=expense.id), u"Voir", u"Voir cette note de dépense", 'search')}
-                        ${table_btn(request.route_path('expensexlsx', id=expense.id), u"Export", u"Exporter cette note de dépense au format xslx", "file")}
+                        ${table_btn(request.route_path('/expenses/{id}', id=expense.id), u"Voir", u"Voir cette note de dépense", 'search')}
+                        ${table_btn(request.route_path('/expenses/{id}.xlsx', id=expense.id), u"Export", u"Exporter cette note de dépense au format xslx", "file")}
                     </td>
                 </tr>
             % endfor

@@ -51,7 +51,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <div class="row">
     <div id="header-container">
 <a class='btn btn-default pull-right' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
-<a class='btn btn-default pull-right' href='${request.route_path("expensexlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i>Excel</a>
+<a class='btn btn-default pull-right' href='${request.route_path("/expenses/{id}.xlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i>Excel</a>
     </div>
 </div>
 <br/>
@@ -167,16 +167,18 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <p class='text-right' id='total_tva'></p>
 <p class='lead text-right' id='total'></p>
 <hr />
-    ${form|n}
 <div id='messageboxes'>
 </div>
 </%block>
-<%block name="footerjs">
-AppOptions = {};
-AppOptions['loadurl'] = "${loadurl}";
-% if edit:
-    AppOptions['edit'] = true;
+<%block name='footer'>
+<script type='text/javascript'>
+var AppOption = {};
+AppOption['context_url'] = "${context_url}";
+AppOption['form_config_url'] = "${form_config_url}"
+% if request.has_permission("edit.expensesheet"):
+    AppOption['edit'] = true;
 % else:
-    AppOptions['edit'] = false;
+    AppOption['edit'] = false;
 % endif
+</script>
 </%block>

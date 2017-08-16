@@ -73,7 +73,7 @@ Admin expenses list view
     </thead>
     <tbody>
         % for expense in records:
-            <% url = request.route_path('expensesheet', id=expense.id) %>
+            <% url = request.route_path('/expenses/{id}', id=expense.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
             <tr class="status status-${expense.status} paid-status-${expense.paid_status} justified-${expense.justified}">
                 <td class='status-td'>
@@ -115,9 +115,9 @@ Admin expenses list view
                     % endfor
                 </td>
                 <td>
-                    <% url = request.route_path('expensesheet', id=expense.id) %>
+                    <% url = request.route_path('/expenses/{id}', id=expense.id) %>
                     ${table_btn(url, u'Modifier', u"Voir la note de dépense", icon="pencil" )}
-                    <% url = request.route_path('expensexlsx', id=expense.id) %>
+                    <% url = request.route_path('/expenses/{id}.xlsx', id=expense.id) %>
                     ${table_btn(url, u'Excel', u"Télécharger au format Excel", icon="file" )}
                     % if request.has_permission('add_payment.expensesheet', expense):
                         <% onclick = "ExpenseList.payment_form(%s, '%s');" % (expense.id, api.format_amount(expense.topay(), grouping=False)) %>
@@ -137,7 +137,6 @@ ${pager(records)}
 <%block name='footerjs'>
 ExpenseList.popup_selector = "#${payment_formname}";
 % for i in 'year', 'month', 'status', 'owner', 'items':
-    $('#${i}-select').chosen({allow_single_deselect: true});
     $('#${i}-select').change(function(){$(this).closest('form').submit()});
 % endfor
 </%block>

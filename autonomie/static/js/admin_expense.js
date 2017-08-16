@@ -11,7 +11,7 @@
 var ExpenseList = {
   popup_selector: null,
   get_status_url: function(expensesheet_id){
-    return "/expenses/" + expensesheet_id + "?action=payment";
+    return "/expenses/" + expensesheet_id + "/addpayment";
   },
   payment_form: function(expensesheet_id, total){
     var popup = $(this.popup_selector);

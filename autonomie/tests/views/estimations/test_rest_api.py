@@ -25,7 +25,7 @@ def test_status_change_view_invalid_error(
 
     with pytest.raises(RestError) as invalid_exc:
         view.__call__()
-        assert invalid_exc.code == 400
+    assert invalid_exc.value.code == 400
     assert estimation.status == 'draft'
 
 
@@ -52,7 +52,7 @@ def test_status_change_view_forbidden_error(
 
     with pytest.raises(RestError) as forbidden_exc:
         view.__call__()
-        assert forbidden_exc.code == 403
+    assert forbidden_exc.value.code == 403
     assert full_estimation.status == 'draft'
 
 
@@ -105,7 +105,7 @@ def test_signed_status_change_wrong(
     view = EstimationSignedStatusRestView(request)
     with pytest.raises(RestError) as invalid_exc:
         view.__call__()
-        assert invalid_exc.code == 400
+    assert invalid_exc.value.code == 400
 
 
 def test_signed_status_change_forbidden(
@@ -131,7 +131,7 @@ def test_signed_status_change_forbidden(
     view = EstimationSignedStatusRestView(request)
     with pytest.raises(RestError) as forbidden_exc:
         view.__call__()
-        assert forbidden_exc.code == 403
+    assert forbidden_exc.value.code == 403
 
 
 def test_signed_status_change(

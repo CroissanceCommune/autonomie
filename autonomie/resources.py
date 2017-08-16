@@ -313,3 +313,13 @@ task_js = get_resource(
     bottom=True,
 )
 task_resources = Group([task_js, task_css, jstree_css])
+
+# Expense form resources
+expense_css = get_resource('css/expense.css', depends=(opa_css, ))
+expense_js = get_resource(
+    'js/build/expense.js',
+    minified='js/build/expense.min.js',
+    depends=[opa_vendor_js],
+    bottom=True,
+)
+expense_resources = Group([expense_js, expense_css])

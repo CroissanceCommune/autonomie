@@ -22,6 +22,7 @@
 import datetime
 import logging
 import colander
+import deform
 
 from beaker.cache import cache_region
 from sqlalchemy import (
@@ -47,21 +48,26 @@ from autonomie_base.models.base import (
     DBSESSION,
     default_table_args,
 )
-from autonomie.forms import (
-    get_hidden_field_conf,
-    EXCLUDED,
+from autonomie.utils import strings
+from autonomie import forms
+from autonomie.forms.custom_types import (
+    AmountType,
 )
 from autonomie.compute.expense import (
     ExpenseCompute,
     ExpenseLineCompute,
     ExpenseKmLineCompute,
 )
+from autonomie.compute.math_utils import (
+    integer_to_amount,
+)
 
 from autonomie_base.models.types import PersistentACLMixin
-from autonomie.models.statemachine import (
-    StateMachine,
-    State,
+from autonomie.models.action_manager import (
+    Action,
+    ActionManager,
 )
+from autonomie.models.user import get_deferred_user_choice
 from autonomie.models.node import Node
 
 
@@ -74,6 +80,21 @@ PAID_STATES = (
     ('resulted', u"Payée"),
 )
 ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
+
+
+def get_available_years():
+    """
+    Return the available years for ExpenseSheet creation
+    """
+    from autonomie.models.expense import ExpenseSheet
+    years = [i[0] for i in DBSESSION().query(distinct(ExpenseSheet.year))]
+    today = datetime.date.today()
+    for i in (today.year - 1, today.year, today.year + 1):
+        if i not in years:
+            years.append(i)
+
+    years.sort()
+    return years
 
 
 class ExpenseType(DBBASE):
@@ -98,18 +119,18 @@ les formulaires de saisie",
         Integer,
         primary_key=True,
         info={
-            "colanderalchemy": get_hidden_field_conf()
+            "colanderalchemy": forms.get_hidden_field_conf()
         }
     )
     type = Column(
         String(30),
         nullable=False,
-        info={'colanderalchemy': EXCLUDED}
+        info={'colanderalchemy': forms.EXCLUDED}
     )
     active = Column(
         Boolean(),
         default=True,
-        info={'colanderalchemy': EXCLUDED}
+        info={'colanderalchemy': forms.EXCLUDED}
     )
     label = Column(
         String(50),
@@ -189,7 +210,7 @@ utilisables dans les notes de dépense",
         ForeignKey('expense_type.id'),
         primary_key=True,
         info={
-            "colanderalchemy": get_hidden_field_conf()
+            "colanderalchemy": forms.get_hidden_field_conf()
         }
     )
     amount = Column(
@@ -227,7 +248,7 @@ utilisables dans les notes de dépense",
         ForeignKey('expense_type.id'),
         primary_key=True,
         info={
-            "colanderalchemy": get_hidden_field_conf()
+            "colanderalchemy": forms.get_hidden_field_conf()
         }
     )
     percentage = Column(
@@ -273,62 +294,98 @@ def record_expense_payment(request, expense, **kw):
     return expense.record_payment(**kw)
 
 
-def build_state_machine():
+def build_action_manager():
     """
     Return a state machine that allows ExpenseSheet status handling
     """
-    machine = StateMachine()
-    draft = State(
-        'draft',
-        'view.expensesheet',
-        status_attr='status',
-        userid_attr='status_user_id',
-    )
-    wait = State(
-        'wait',
-        'wait.expensesheet',
-        status_attr='status',
-        userid_attr='status_user_id',
-    )
-    valid = State(
-        'valid',
-        "valid.expensesheet",
-        status_attr='status',
-        userid_attr='status_user_id',
-    )
-    invalid = State(
-        'invalid',
-        "invalid.expensesheet",
-        status_attr='status',
-        userid_attr='status_user_id',
-    )
+    manager = ActionManager()
+    for status, icon, label, title, css in (
+        (
+            'valid', "ok-sign",
+            u"Valider",
+            u"Valider ce document (il ne pourra plus être modifié)",
+            "btn btn-primary primary-action",
+        ),
+        (
+            'wait',
+            'time',
+            u"Demander la validation",
+            u"Enregistrer ce document et en demander la validation",
+            "btn btn-primary primary-action",
+        ),
+        (
+            'invalid',
+            'trash',
+            u"Invalider",
+            u"Invalider ce document afin que l'entrepreneur le corrige",
+            "btn btn-default",
+        ),
+        (
+            'draft',
+            'save',
+            u"Enregistrer",
+            u'Enregistrer en brouillon afin de modifier ce document '
+            u'ultérieurement',
+            'btn btn-default',
+        ),
+    ):
+        action = Action(
+            status,
+            '%s.expense' % (status,),
+            status_attr='status',
+            userid_attr='status_person_id',
+            icon=icon,
+            label=label,
+            title=title,
+            css=css,
+        )
+        manager.add(action)
 
-    machine.add_transition('draft', wait)
-    machine.add_transition('draft', valid)
+    return manager
 
-    machine.add_transition('invalid', wait)
-    machine.add_transition('invalid', valid)
 
-    machine.add_transition('wait', draft)
-    machine.add_transition('wait', valid)
-    machine.add_transition('wait', invalid)
-    return machine
+@colander.deferred
+def deferred_unique_expense(node, kw):
+    """
+    Return a validator to check if the expense is unique
+    """
+    from autonomie.models.expense import ExpenseSheet
+    request = kw['request']
+    if isinstance(request.context, ExpenseSheet):
+        company_id = request.context.company_id
+        user_id = request.context.user_id
+    else:
+        if 'uid' in request.matchdict:
+            user_id = request.matchdict['uid']
+        else:
+            user_id = request.user.id
 
-#    draft = ('draft', 'view.expensesheet',)
-#    reset = ('reset', 'edit.expensesheet', None, False)
-#    wait = ('wait', 'edit.expensesheet', )
-#    valid = ('valid', "admin_expense", )
-#    invalid = ('invalid', "admin_expense",)
-#    # Partiellement payé
-#    paid = ('paid', "admin_expense", record_expense_payment, )
-#    resulted = ('resulted', "admin_expense", )  # Soldé
-#    states = {}
-#    states['draft'] = (wait, reset, valid,)
-#    states['invalid'] = (draft, wait,)
-#    states['wait'] = (valid, invalid, draft)
-#    states['valid'] = (resulted, paid,)
-#    states['paid'] = (paid, )
-#    return states
+        company_id = request.context.id
+
+    def validator(node, value):
+        """
+        The validator
+        """
+        month = value['month']
+        year = value['year']
+
+        query = ExpenseSheet.query().filter_by(month=month)
+        query = query.filter_by(year=year)
+        query = query.filter_by(user_id=user_id)
+        query = query.filter_by(company_id=company_id)
+        if query.count() > 0:
+            exc = colander.Invalid(
+                node,
+                u"Une note de dépense pour la période {0} {1} existe "
+                u"déjà".format(
+                    strings.month_name(month),
+                    year,
+                )
+            )
+            exc['month'] = u"Une note de dépense existe"
+            exc['year'] = u"Une note de dépense existe"
+            raise exc
+    return validator
 
 
 class ExpenseSheet(Node, ExpenseCompute):
@@ -348,40 +405,140 @@ class ExpenseSheet(Node, ExpenseCompute):
     __tablename__ = 'expense_sheet'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'expensesheet'}
-    id = Column(ForeignKey('node.id'), primary_key=True)
-    month = Column(Integer)
-    year = Column(Integer)
-    company_id = Column(Integer, ForeignKey("company.id", ondelete="cascade"))
-    user_id = Column(Integer, ForeignKey("accounts.id"))
-
+    __colanderalchemy_config__ = {
+        "validator": deferred_unique_expense
+    }
+    id = Column(
+        ForeignKey('node.id'),
+        primary_key=True,
+        info={"colanderalchemy": forms.EXCLUDED},
+    )
+    month = Column(
+        Integer,
+        info={
+            "colanderalchemy": {
+                "title": u"Mois",
+                "widget": forms.get_month_select_widget({}),
+                "validator": colander.OneOf(range(1, 13)),
+                "default": forms.default_month,
+            }
+        }
+    )
+    year = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                "title": u"Année",
+                "widget": forms.get_year_select_deferred(
+                    query_func=get_available_years
+                ),
+                "validator": colander.Range(
+                    min=0, min_err=u"Veuillez saisir une année valide"
+                ),
+                "default": forms.default_year,
+            }
+        }
+    )
     paid_status = Column(
         String(10),
         default='waiting',
         info={
             'colanderalchemy': {
+                "title": u"Statut du paiement de la note de dépense",
+                'widget': deform.widget.SelectWidget(values=PAID_STATES),
                 'validator': colander.OneOf(dict(PAID_STATES).keys())
             }
         }
     )
 
-    justified = Column(Boolean(), default=False)
+    justified = Column(
+        Boolean(),
+        default=False,
+        info={
+            'colanderalchemy': {
+                'title': u"Justificatifs reçus",
+            }
+        }
+    )
 
     status = Column(
         String(10),
         default='draft',
         info={
             'colanderalchemy': {
-                'validator': colander.OneOf(ALL_STATES)
+                "title": u"Statut de la note de dépense",
+                'validator': colander.OneOf(ALL_STATES),
+                'widget': deform.widget.SelectWidget(
+                    values=zip(ALL_STATES, ALL_STATES)
+                ),
             }
         }
     )
-    status_user_id = Column(Integer, ForeignKey("accounts.id"))
+    status_user_id = Column(
+        Integer,
+        ForeignKey("accounts.id"),
+        info={
+            'colanderalchemy': {
+                "title": u"Dernier utilisateur à avoir modifié le document",
+                'widget': get_deferred_user_choice()
+            },
+            "export": forms.EXCLUDED,
+        }
+    )
     status_date = Column(
         Date(),
         default=datetime.date.today,
-        onupdate=datetime.date.today
+        onupdate=datetime.date.today,
+        info={
+            'colanderalchemy': {
+                "title": u"Date du dernier changement de statut",
+            },
+        }
     )
-    exported = Column(Boolean(), default=False)
+
+    exported = Column(
+        Boolean(),
+        default=False,
+        info={
+            'colanderalchemy': {'title': u"A déjà été exportée ?"},
+        }
+    )
+
+    company_id = Column(
+        Integer,
+        ForeignKey("company.id", ondelete="cascade"),
+        info={
+            "colanderalchemy": forms.EXCLUDED
+        }
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("accounts.id"),
+        info={
+            "colanderalchemy": forms.EXCLUDED
+        }
+    )
+
+    # Relationships
+    lines = relationship(
+        "ExpenseLine",
+        back_populates="sheet",
+        cascade="all, delete-orphan",
+        order_by="ExpenseLine.date",
+        info={
+            "colanderalchemy": {"title": u"Dépenses"}
+        }
+    )
+    kmlines = relationship(
+        "ExpenseKmLine",
+        back_populates="sheet",
+        cascade="all, delete-orphan",
+        order_by="ExpenseKmLine.date",
+        info={
+            "colanderalchemy": {"title": u"Dépenses kilométriques"}
+        }
+    )
     company = relationship(
         "Company",
         backref=backref(
@@ -393,11 +550,14 @@ class ExpenseSheet(Node, ExpenseCompute):
     user = relationship(
         "User",
         primaryjoin="ExpenseSheet.user_id==User.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+        },
         backref=backref(
             "expenses",
             order_by="ExpenseSheet.month",
             info={
-                'colanderalchemy': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
             },
             cascade="all, delete-orphan"
@@ -406,44 +566,59 @@ class ExpenseSheet(Node, ExpenseCompute):
     status_user = relationship(
         "User",
         primaryjoin="ExpenseSheet.status_user_id==User.id",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+        }
     )
-    state_machine = build_state_machine()
+    communications = relationship(
+        "Communication",
+        back_populates="expense_sheet",
+        order_by="desc(Communication.date)",
+        cascade="all, delete-orphan",
+        info={
+            'colanderalchemy': forms.EXCLUDED,
+        }
+    )
+    state_manager = build_action_manager()
 
     def __json__(self, request):
         return dict(
             id=self.id,
+            name=self.name,
+            created_at=self.created_at.isoformat(),
+            updated_at=self.updated_at.isoformat(),
+
+            company_id=self.company_id,
+            user_id=self.user_id,
+            paid_status=self.paid_status,
+            justified=self.justified,
+            status=self.status,
+            status_user_id=self.status_user_id,
+            status_date=self.status_date.isoformat(),
+
             lines=[line.__json__(request) for line in self.lines],
             kmlines=[line.__json__(request) for line in self.kmlines],
             month=self.month,
+            month_label=strings.month_name(self.month),
             year=self.year,
+            attachments=[
+                f.__json__(request)for f in self.children if f.type_ == 'file'
+            ]
         )
 
-    def set_status(self, status, request, user_id, **kw):
+    def set_status(self, status, request, **kw):
         """
-        Set the status of a task through a state machine
+        set the status of a task through the state machine
         """
-        return self.state_machine.process(self, request, user_id, status, **kw)
+        return self.state_manager.process(
+            status,
+            self,
+            request,
+            **kw
+        )
 
-    def get_next_actions(self):
-        """
-            Return the next available actions regarding the current status
-        """
-        return self.state_machine.get_next_states(self.status)
-
-    def is_allowed(self, request, statename):
-        """
-        Return True if the given state is allowed for the current request
-
-        :param obj request: The pyramid request object
-        :param str statename: The name of the state we want ('draft' ...)
-        :returns: True if the given state is allowed
-        :rtype: bool
-        """
-        result = False
-        state_obj = self.state_machine.get_state(self.status, statename)
-        if state_obj is not None:
-            result = state_obj.allowed(self, request)
-        return result
+    def check_status_allowed(self, status, request, **kw):
+        return self.state_manager.check_allowed(status, self, request)
 
     def get_company_id(self):
         """
@@ -473,12 +648,27 @@ class ExpenseSheet(Node, ExpenseCompute):
         Check if the expense is resulted or not and set the appropriate status
         """
         logger.debug(u"-> There still to pay : %s" % self.topay())
-        if self.topay() == 0 or force_resulted:
+        if self.topay() <= 0 or force_resulted:
             self.paid_status = 'resulted'
         elif len(self.payments) > 0:
             self.paid_status = 'paid'
+        else:
+            self.paid_status = "waiting"
 
         return self
+
+    def duplicate(self, year, month):
+        sheet = ExpenseSheet()
+        sheet.month = month
+        sheet.year = year
+
+        sheet.user_id = self.user_id
+        sheet.company_id = self.company_id
+
+        sheet.lines = [line.duplicate() for line in self.lines]
+        sheet.kmlines = [line.duplicate() for line in self.kmlines]
+
+        return sheet
 
 
 class BaseExpenseLine(DBBASE, PersistentACLMixin):
@@ -498,23 +688,68 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
         polymorphic_identity="line",
         with_polymorphic='*',
     )
-    id = Column(Integer, primary_key=True)
-    type = Column(String(30), nullable=False)
-    date = Column(Date(), default=datetime.date.today)
-    description = Column(String(255))
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={"colanderalchemy": forms.EXCLUDED},
+    )
+    type = Column(
+        String(30),
+        nullable=False,
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+    date = Column(
+        Date(),
+        default=datetime.date.today,
+        info={'colanderalchemy': {'title': u"Date"}},
+    )
+    description = Column(
+        String(255),
+        info={'colanderalchemy': {'title': u"Description"}},
+        default="",
+    )
     category = Column(Enum('1', '2', name='category'), default='1')
-    valid = Column(Boolean(), default=True)
-    type_id = Column(Integer)
+    valid = Column(
+        Boolean(),
+        default=True,
+        info={"colanderalchemy": {"title": u"Valide ?"}}
+    )
+
+    type_id = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'validator': forms.get_deferred_select_validator(ExpenseType),
+                'missing': colander.required,
+                "title": u"Type de dépense",
+            }
+        }
+    )
+
     sheet_id = Column(
         Integer,
-        ForeignKey("expense_sheet.id", ondelete="cascade")
+        ForeignKey("expense_sheet.id", ondelete="cascade"),
+        info={'colanderalchemy': forms.EXCLUDED}
     )
+
     type_object = relationship(
         "ExpenseType",
         primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
         uselist=False,
         foreign_keys=type_id,
+        info={'colanderalchemy': forms.EXCLUDED}
     )
+
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            date=self.date,
+            description=self.description,
+            category=self.category,
+            valid=self.valid,
+            type_id=self.type_id,
+            sheet_id=self.sheet_id,
+        )
 
 
 class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
@@ -524,29 +759,57 @@ class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
     __tablename__ = "expense_line"
     __table_args__ = default_table_args
     __mapper_args__ = dict(polymorphic_identity='expenseline')
-    id = Column(Integer, ForeignKey('baseexpense_line.id'), primary_key=True)
-    ht = Column(Integer)
-    tva = Column(Integer)
+    id = Column(
+        Integer,
+        ForeignKey('baseexpense_line.id'),
+        primary_key=True,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
+    ht = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'typ': AmountType(2),
+                'title': 'Montant HT',
+                'missing': colander.required,
+            }
+        },
+    )
+    tva = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'typ': AmountType(2),
+                'title': 'Montant de la TVA',
+                'missing': colander.required,
+            }
+        },
+    )
     sheet = relationship(
         "ExpenseSheet",
-        backref=backref(
-            "lines",
-            order_by="ExpenseLine.date",
-            cascade="all, delete-orphan"
-        )
+        uselist=False,
+        info={'colanderalchemy': forms.EXCLUDED}
     )
 
     def __json__(self, request):
-        return dict(
-            id=self.id,
-            date=self.date,
-            valid=self.valid,
-            category=self.category,
-            description=self.description,
-            ht=self.ht,
-            tva=self.tva,
-            type_id=self.type_id,
+        res = BaseExpenseLine.__json__(self, request)
+        res.update(
+            dict(
+                ht=integer_to_amount(self.ht, 2),
+                tva=integer_to_amount(self.tva, 2)
+            )
         )
+        return res
+
+    def duplicate(self):
+        line = ExpenseLine()
+        line.description = self.description
+        line.category = self.category
+        line.type_id = self.type_id
+
+        line.ht = self.ht
+        line.tva = self.tva
+        return line
 
 
 class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
@@ -559,35 +822,66 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
     __tablename__ = "expensekm_line"
     __table_args__ = default_table_args
     __mapper_args__ = dict(polymorphic_identity='expensekmline')
-    id = Column(Integer, ForeignKey('baseexpense_line.id'), primary_key=True)
+    id = Column(
+        Integer,
+        ForeignKey('baseexpense_line.id'),
+        primary_key=True,
+        info={'colanderalchemy': forms.EXCLUDED}
+    )
     type_label = Column(String(50))
-    start = Column(String(150), default="")
-    end = Column(String(150), default="")
-    km = Column(Integer)
+    start = Column(
+        String(150),
+        default="",
+        info={"colanderalchemy": {"title": u"Point de départ"}}
+    )
+    end = Column(
+        String(150),
+        default="",
+        info={"colanderalchemy": {"title": u"Point d'arrivée"}}
+    )
+    km = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'typ': AmountType(2),
+                'title': 'Nombre de kilomètres',
+                'missing': colander.required,
+            }
+        },
+    )
     sheet = relationship(
         "ExpenseSheet",
-        backref=backref(
-            "kmlines",
-            order_by="ExpenseLine.date",
-            cascade="all, delete-orphan"
-        )
+        uselist=False,
+        info={'colanderalchemy': forms.EXCLUDED}
     )
 
     def __json__(self, request):
-        return dict(id=self.id,
-                    date=self.date,
-                    valid=self.valid,
-                    category=self.category,
-                    description=self.description,
-                    type_label=self.type_label,
-                    km=self.km,
-                    start=self.start,
-                    end=self.end,
-                    type_id=self.type_id)
+        res = BaseExpenseLine.__json__(self, request)
+        res.update(
+            dict(
+                type_label=self.type_label,
+                km=integer_to_amount(self.km),
+                start=self.start,
+                end=self.end,
+                vehicle=self.vehicle,
+            )
+        )
+        return res
 
     @property
     def vehicle(self):
         return self.type_object.label
+
+    def duplicate(self):
+        line = ExpenseKmLine()
+        line.description = self.description
+        line.category = self.category
+        line.type_id = self.type_id
+
+        line.start = self.start
+        line.end = self.end
+        line.km = self.km
+        return line
 
 
 class Communication(DBBASE):
@@ -607,14 +901,7 @@ class Communication(DBBASE):
     )
     expense_sheet_id = Column(Integer, ForeignKey("expense_sheet.id"))
 
-    expense_sheet = relationship(
-        "ExpenseSheet",
-        backref=backref(
-            "communications",
-            order_by="Communication.date",
-            cascade="all, delete-orphan"
-        )
-    )
+    expense_sheet = relationship("ExpenseSheet")
 
     user = relationship(
         "User",
@@ -624,7 +911,7 @@ class Communication(DBBASE):
             order_by="Communication.date",
             cascade="all, delete-orphan",
             info={
-                'colanderalchemy': EXCLUDED,
+                'colanderalchemy': forms.EXCLUDED,
                 'export': {'exclude': True},
             },
         )

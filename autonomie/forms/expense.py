@@ -31,10 +31,9 @@
 import colander
 import deform
 
-from autonomie.models.expense import (
-    ExpenseType,
-    get_expense_years,
-)
+from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.utils import strings
 from autonomie.models import user
 from autonomie.models.task.invoice import get_invoice_years
 from .custom_types import AmountType
@@ -65,6 +64,7 @@ def deferred_type_id_validator(node, kw):
     """
         Return a validator for the expensetype
     """
+    from autonomie.models.expense import ExpenseType
     ids = [t.id for t in ExpenseType.query()]
     return colander.OneOf(ids)
 
@@ -155,6 +155,8 @@ class BookMarkSchema(colander.MappingSchema):
 
 
 def get_list_schema():
+    from autonomie.models.expense import get_expense_years
+
     schema = forms.lists.BaseListsSchema().clone()
 
     schema['search'].description = u"Identifiant du document"
@@ -247,4 +249,17 @@ alors ignorés)""",
 ne recevra plus de paiement), si le montant indiqué correspond au
 montant de feuille de notes de dépense celle-ci est soldée automatiquement""",
         default=False,
+    )
+
+
+def get_new_expense_schema():
+    """
+    Return a schema for expense add
+
+    :rtype: colanderalchemy.SQLAlchemySchemaNode
+    """
+    from autonomie.models.expense import ExpenseSheet
+    return SQLAlchemySchemaNode(
+        ExpenseSheet,
+        includes=('month', 'year'),
     )

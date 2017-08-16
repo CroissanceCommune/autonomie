@@ -14,6 +14,7 @@
  */
 import _ from 'underscore';
 import $ from 'jquery';
+import 'bootstrap/js/dropdown.js';
 
 $(function(){
     var company_menu = $('#company-select-menu');

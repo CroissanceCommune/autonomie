@@ -41,15 +41,11 @@ const TaskLineView = Mn.View.extend({
     getTvaLabel(){
         let res = "";
         let current_value = this.model.get('tva');
-        console.log("Current tva_value : %s", current_value);
-        console.log(this.tva_options);
         _.each(this.tva_options, function(tva){
-            console.log(tva.value);
             if (tva.value == current_value){
                 res = tva.name;
             }
         });
-        console.log(res);
         return res
     },
     templateContext(){

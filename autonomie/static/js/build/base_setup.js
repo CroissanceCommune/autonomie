@@ -15,22 +15,10 @@ webpackJsonp([0],[
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
+	__webpack_require__(/*! bootstrap/js/dropdown.js */ 3);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : base_setup.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	
-	/*
-	 * Setup the main ui elements
-	 */
 	(0, _jquery2.default)(function () {
 	    var company_menu = (0, _jquery2.default)('#company-select-menu');
 	    if (!_underscore2.default.isNull(company_menu)) {
@@ -39,7 +27,20 @@ webpackJsonp([0],[
 	        });
 	    }
 	    (0, _jquery2.default)('a[data-toggle=dropdown]').dropdown();
-	});
+	}); /*
+	     * File Name : base_setup.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	
+	/*
+	 * Setup the main ui elements
+	 */
 
 /***/ })
 ]);

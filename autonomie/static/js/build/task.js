@@ -1,4 +1,4 @@
-webpackJsonp([1],[
+webpackJsonp([2],[
 /* 0 */
 /*!**************************!*\
   !*** ./src/task/task.js ***!
@@ -11,11 +11,11 @@ webpackJsonp([1],[
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	__webpack_require__(/*! bootstrap/dist/js/bootstrap */ 3);
-	
 	var _bootstrap = __webpack_require__(/*! bootstrap */ 4);
 	
 	var _bootstrap2 = _interopRequireDefault(_bootstrap);
+	
+	__webpack_require__(/*! jstree */ 16);
 	
 	var _underscore = __webpack_require__(/*! underscore */ 1);
 	
@@ -29,7 +29,7 @@ webpackJsonp([1],[
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _App = __webpack_require__(/*! ./components/App.js */ 20);
+	var _App = __webpack_require__(/*! ./components/App.js */ 53);
 	
 	var _App2 = _interopRequireDefault(_App);
 	
@@ -39,18 +39,19 @@ webpackJsonp([1],[
 	
 	var _backboneTools = __webpack_require__(/*! ../backbone-tools.js */ 22);
 	
-	var _Router = __webpack_require__(/*! ./components/Router.js */ 23);
+	var _Router = __webpack_require__(/*! ./components/Router.js */ 54);
 	
 	var _Router2 = _interopRequireDefault(_Router);
 	
-	var _Controller = __webpack_require__(/*! ./components/Controller.js */ 24);
+	var _Controller = __webpack_require__(/*! ./components/Controller.js */ 55);
 	
 	var _Controller2 = _interopRequireDefault(_Controller);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	// import 'bootstrap/dist/js/bootstrap';
 	(0, _tools.setupAjaxCallbacks)(); /* global AppOption; */
 	/*
 	 * File Name :
@@ -95,2393 +96,7 @@ webpackJsonp([1],[
 /***/ }),
 /* 1 */,
 /* 2 */,
-/* 3 */
-/*!******************************************!*\
-  !*** ./~/bootstrap/dist/js/bootstrap.js ***!
-  \******************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(jQuery) {/*!
-	 * Bootstrap v3.3.7 (http://getbootstrap.com)
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under the MIT license
-	 */
-	
-	if (typeof jQuery === 'undefined') {
-	  throw new Error('Bootstrap\'s JavaScript requires jQuery')
-	}
-	
-	+function ($) {
-	  'use strict';
-	  var version = $.fn.jquery.split(' ')[0].split('.')
-	  if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] > 3)) {
-	    throw new Error('Bootstrap\'s JavaScript requires jQuery version 1.9.1 or higher, but lower than version 4')
-	  }
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: transition.js v3.3.7
-	 * http://getbootstrap.com/javascript/#transitions
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
-	  // ============================================================
-	
-	  function transitionEnd() {
-	    var el = document.createElement('bootstrap')
-	
-	    var transEndEventNames = {
-	      WebkitTransition : 'webkitTransitionEnd',
-	      MozTransition    : 'transitionend',
-	      OTransition      : 'oTransitionEnd otransitionend',
-	      transition       : 'transitionend'
-	    }
-	
-	    for (var name in transEndEventNames) {
-	      if (el.style[name] !== undefined) {
-	        return { end: transEndEventNames[name] }
-	      }
-	    }
-	
-	    return false // explicit for ie8 (  ._.)
-	  }
-	
-	  // http://blog.alexmaccaw.com/css-transitions
-	  $.fn.emulateTransitionEnd = function (duration) {
-	    var called = false
-	    var $el = this
-	    $(this).one('bsTransitionEnd', function () { called = true })
-	    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
-	    setTimeout(callback, duration)
-	    return this
-	  }
-	
-	  $(function () {
-	    $.support.transition = transitionEnd()
-	
-	    if (!$.support.transition) return
-	
-	    $.event.special.bsTransitionEnd = {
-	      bindType: $.support.transition.end,
-	      delegateType: $.support.transition.end,
-	      handle: function (e) {
-	        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
-	      }
-	    }
-	  })
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: alert.js v3.3.7
-	 * http://getbootstrap.com/javascript/#alerts
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // ALERT CLASS DEFINITION
-	  // ======================
-	
-	  var dismiss = '[data-dismiss="alert"]'
-	  var Alert   = function (el) {
-	    $(el).on('click', dismiss, this.close)
-	  }
-	
-	  Alert.VERSION = '3.3.7'
-	
-	  Alert.TRANSITION_DURATION = 150
-	
-	  Alert.prototype.close = function (e) {
-	    var $this    = $(this)
-	    var selector = $this.attr('data-target')
-	
-	    if (!selector) {
-	      selector = $this.attr('href')
-	      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-	    }
-	
-	    var $parent = $(selector === '#' ? [] : selector)
-	
-	    if (e) e.preventDefault()
-	
-	    if (!$parent.length) {
-	      $parent = $this.closest('.alert')
-	    }
-	
-	    $parent.trigger(e = $.Event('close.bs.alert'))
-	
-	    if (e.isDefaultPrevented()) return
-	
-	    $parent.removeClass('in')
-	
-	    function removeElement() {
-	      // detach from parent, fire event then clean up data
-	      $parent.detach().trigger('closed.bs.alert').remove()
-	    }
-	
-	    $.support.transition && $parent.hasClass('fade') ?
-	      $parent
-	        .one('bsTransitionEnd', removeElement)
-	        .emulateTransitionEnd(Alert.TRANSITION_DURATION) :
-	      removeElement()
-	  }
-	
-	
-	  // ALERT PLUGIN DEFINITION
-	  // =======================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this = $(this)
-	      var data  = $this.data('bs.alert')
-	
-	      if (!data) $this.data('bs.alert', (data = new Alert(this)))
-	      if (typeof option == 'string') data[option].call($this)
-	    })
-	  }
-	
-	  var old = $.fn.alert
-	
-	  $.fn.alert             = Plugin
-	  $.fn.alert.Constructor = Alert
-	
-	
-	  // ALERT NO CONFLICT
-	  // =================
-	
-	  $.fn.alert.noConflict = function () {
-	    $.fn.alert = old
-	    return this
-	  }
-	
-	
-	  // ALERT DATA-API
-	  // ==============
-	
-	  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: button.js v3.3.7
-	 * http://getbootstrap.com/javascript/#buttons
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // BUTTON PUBLIC CLASS DEFINITION
-	  // ==============================
-	
-	  var Button = function (element, options) {
-	    this.$element  = $(element)
-	    this.options   = $.extend({}, Button.DEFAULTS, options)
-	    this.isLoading = false
-	  }
-	
-	  Button.VERSION  = '3.3.7'
-	
-	  Button.DEFAULTS = {
-	    loadingText: 'loading...'
-	  }
-	
-	  Button.prototype.setState = function (state) {
-	    var d    = 'disabled'
-	    var $el  = this.$element
-	    var val  = $el.is('input') ? 'val' : 'html'
-	    var data = $el.data()
-	
-	    state += 'Text'
-	
-	    if (data.resetText == null) $el.data('resetText', $el[val]())
-	
-	    // push to event loop to allow forms to submit
-	    setTimeout($.proxy(function () {
-	      $el[val](data[state] == null ? this.options[state] : data[state])
-	
-	      if (state == 'loadingText') {
-	        this.isLoading = true
-	        $el.addClass(d).attr(d, d).prop(d, true)
-	      } else if (this.isLoading) {
-	        this.isLoading = false
-	        $el.removeClass(d).removeAttr(d).prop(d, false)
-	      }
-	    }, this), 0)
-	  }
-	
-	  Button.prototype.toggle = function () {
-	    var changed = true
-	    var $parent = this.$element.closest('[data-toggle="buttons"]')
-	
-	    if ($parent.length) {
-	      var $input = this.$element.find('input')
-	      if ($input.prop('type') == 'radio') {
-	        if ($input.prop('checked')) changed = false
-	        $parent.find('.active').removeClass('active')
-	        this.$element.addClass('active')
-	      } else if ($input.prop('type') == 'checkbox') {
-	        if (($input.prop('checked')) !== this.$element.hasClass('active')) changed = false
-	        this.$element.toggleClass('active')
-	      }
-	      $input.prop('checked', this.$element.hasClass('active'))
-	      if (changed) $input.trigger('change')
-	    } else {
-	      this.$element.attr('aria-pressed', !this.$element.hasClass('active'))
-	      this.$element.toggleClass('active')
-	    }
-	  }
-	
-	
-	  // BUTTON PLUGIN DEFINITION
-	  // ========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.button')
-	      var options = typeof option == 'object' && option
-	
-	      if (!data) $this.data('bs.button', (data = new Button(this, options)))
-	
-	      if (option == 'toggle') data.toggle()
-	      else if (option) data.setState(option)
-	    })
-	  }
-	
-	  var old = $.fn.button
-	
-	  $.fn.button             = Plugin
-	  $.fn.button.Constructor = Button
-	
-	
-	  // BUTTON NO CONFLICT
-	  // ==================
-	
-	  $.fn.button.noConflict = function () {
-	    $.fn.button = old
-	    return this
-	  }
-	
-	
-	  // BUTTON DATA-API
-	  // ===============
-	
-	  $(document)
-	    .on('click.bs.button.data-api', '[data-toggle^="button"]', function (e) {
-	      var $btn = $(e.target).closest('.btn')
-	      Plugin.call($btn, 'toggle')
-	      if (!($(e.target).is('input[type="radio"], input[type="checkbox"]'))) {
-	        // Prevent double click on radios, and the double selections (so cancellation) on checkboxes
-	        e.preventDefault()
-	        // The target component still receive the focus
-	        if ($btn.is('input,button')) $btn.trigger('focus')
-	        else $btn.find('input:visible,button:visible').first().trigger('focus')
-	      }
-	    })
-	    .on('focus.bs.button.data-api blur.bs.button.data-api', '[data-toggle^="button"]', function (e) {
-	      $(e.target).closest('.btn').toggleClass('focus', /^focus(in)?$/.test(e.type))
-	    })
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: carousel.js v3.3.7
-	 * http://getbootstrap.com/javascript/#carousel
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // CAROUSEL CLASS DEFINITION
-	  // =========================
-	
-	  var Carousel = function (element, options) {
-	    this.$element    = $(element)
-	    this.$indicators = this.$element.find('.carousel-indicators')
-	    this.options     = options
-	    this.paused      = null
-	    this.sliding     = null
-	    this.interval    = null
-	    this.$active     = null
-	    this.$items      = null
-	
-	    this.options.keyboard && this.$element.on('keydown.bs.carousel', $.proxy(this.keydown, this))
-	
-	    this.options.pause == 'hover' && !('ontouchstart' in document.documentElement) && this.$element
-	      .on('mouseenter.bs.carousel', $.proxy(this.pause, this))
-	      .on('mouseleave.bs.carousel', $.proxy(this.cycle, this))
-	  }
-	
-	  Carousel.VERSION  = '3.3.7'
-	
-	  Carousel.TRANSITION_DURATION = 600
-	
-	  Carousel.DEFAULTS = {
-	    interval: 5000,
-	    pause: 'hover',
-	    wrap: true,
-	    keyboard: true
-	  }
-	
-	  Carousel.prototype.keydown = function (e) {
-	    if (/input|textarea/i.test(e.target.tagName)) return
-	    switch (e.which) {
-	      case 37: this.prev(); break
-	      case 39: this.next(); break
-	      default: return
-	    }
-	
-	    e.preventDefault()
-	  }
-	
-	  Carousel.prototype.cycle = function (e) {
-	    e || (this.paused = false)
-	
-	    this.interval && clearInterval(this.interval)
-	
-	    this.options.interval
-	      && !this.paused
-	      && (this.interval = setInterval($.proxy(this.next, this), this.options.interval))
-	
-	    return this
-	  }
-	
-	  Carousel.prototype.getItemIndex = function (item) {
-	    this.$items = item.parent().children('.item')
-	    return this.$items.index(item || this.$active)
-	  }
-	
-	  Carousel.prototype.getItemForDirection = function (direction, active) {
-	    var activeIndex = this.getItemIndex(active)
-	    var willWrap = (direction == 'prev' && activeIndex === 0)
-	                || (direction == 'next' && activeIndex == (this.$items.length - 1))
-	    if (willWrap && !this.options.wrap) return active
-	    var delta = direction == 'prev' ? -1 : 1
-	    var itemIndex = (activeIndex + delta) % this.$items.length
-	    return this.$items.eq(itemIndex)
-	  }
-	
-	  Carousel.prototype.to = function (pos) {
-	    var that        = this
-	    var activeIndex = this.getItemIndex(this.$active = this.$element.find('.item.active'))
-	
-	    if (pos > (this.$items.length - 1) || pos < 0) return
-	
-	    if (this.sliding)       return this.$element.one('slid.bs.carousel', function () { that.to(pos) }) // yes, "slid"
-	    if (activeIndex == pos) return this.pause().cycle()
-	
-	    return this.slide(pos > activeIndex ? 'next' : 'prev', this.$items.eq(pos))
-	  }
-	
-	  Carousel.prototype.pause = function (e) {
-	    e || (this.paused = true)
-	
-	    if (this.$element.find('.next, .prev').length && $.support.transition) {
-	      this.$element.trigger($.support.transition.end)
-	      this.cycle(true)
-	    }
-	
-	    this.interval = clearInterval(this.interval)
-	
-	    return this
-	  }
-	
-	  Carousel.prototype.next = function () {
-	    if (this.sliding) return
-	    return this.slide('next')
-	  }
-	
-	  Carousel.prototype.prev = function () {
-	    if (this.sliding) return
-	    return this.slide('prev')
-	  }
-	
-	  Carousel.prototype.slide = function (type, next) {
-	    var $active   = this.$element.find('.item.active')
-	    var $next     = next || this.getItemForDirection(type, $active)
-	    var isCycling = this.interval
-	    var direction = type == 'next' ? 'left' : 'right'
-	    var that      = this
-	
-	    if ($next.hasClass('active')) return (this.sliding = false)
-	
-	    var relatedTarget = $next[0]
-	    var slideEvent = $.Event('slide.bs.carousel', {
-	      relatedTarget: relatedTarget,
-	      direction: direction
-	    })
-	    this.$element.trigger(slideEvent)
-	    if (slideEvent.isDefaultPrevented()) return
-	
-	    this.sliding = true
-	
-	    isCycling && this.pause()
-	
-	    if (this.$indicators.length) {
-	      this.$indicators.find('.active').removeClass('active')
-	      var $nextIndicator = $(this.$indicators.children()[this.getItemIndex($next)])
-	      $nextIndicator && $nextIndicator.addClass('active')
-	    }
-	
-	    var slidEvent = $.Event('slid.bs.carousel', { relatedTarget: relatedTarget, direction: direction }) // yes, "slid"
-	    if ($.support.transition && this.$element.hasClass('slide')) {
-	      $next.addClass(type)
-	      $next[0].offsetWidth // force reflow
-	      $active.addClass(direction)
-	      $next.addClass(direction)
-	      $active
-	        .one('bsTransitionEnd', function () {
-	          $next.removeClass([type, direction].join(' ')).addClass('active')
-	          $active.removeClass(['active', direction].join(' '))
-	          that.sliding = false
-	          setTimeout(function () {
-	            that.$element.trigger(slidEvent)
-	          }, 0)
-	        })
-	        .emulateTransitionEnd(Carousel.TRANSITION_DURATION)
-	    } else {
-	      $active.removeClass('active')
-	      $next.addClass('active')
-	      this.sliding = false
-	      this.$element.trigger(slidEvent)
-	    }
-	
-	    isCycling && this.cycle()
-	
-	    return this
-	  }
-	
-	
-	  // CAROUSEL PLUGIN DEFINITION
-	  // ==========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.carousel')
-	      var options = $.extend({}, Carousel.DEFAULTS, $this.data(), typeof option == 'object' && option)
-	      var action  = typeof option == 'string' ? option : options.slide
-	
-	      if (!data) $this.data('bs.carousel', (data = new Carousel(this, options)))
-	      if (typeof option == 'number') data.to(option)
-	      else if (action) data[action]()
-	      else if (options.interval) data.pause().cycle()
-	    })
-	  }
-	
-	  var old = $.fn.carousel
-	
-	  $.fn.carousel             = Plugin
-	  $.fn.carousel.Constructor = Carousel
-	
-	
-	  // CAROUSEL NO CONFLICT
-	  // ====================
-	
-	  $.fn.carousel.noConflict = function () {
-	    $.fn.carousel = old
-	    return this
-	  }
-	
-	
-	  // CAROUSEL DATA-API
-	  // =================
-	
-	  var clickHandler = function (e) {
-	    var href
-	    var $this   = $(this)
-	    var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) // strip for ie7
-	    if (!$target.hasClass('carousel')) return
-	    var options = $.extend({}, $target.data(), $this.data())
-	    var slideIndex = $this.attr('data-slide-to')
-	    if (slideIndex) options.interval = false
-	
-	    Plugin.call($target, options)
-	
-	    if (slideIndex) {
-	      $target.data('bs.carousel').to(slideIndex)
-	    }
-	
-	    e.preventDefault()
-	  }
-	
-	  $(document)
-	    .on('click.bs.carousel.data-api', '[data-slide]', clickHandler)
-	    .on('click.bs.carousel.data-api', '[data-slide-to]', clickHandler)
-	
-	  $(window).on('load', function () {
-	    $('[data-ride="carousel"]').each(function () {
-	      var $carousel = $(this)
-	      Plugin.call($carousel, $carousel.data())
-	    })
-	  })
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: collapse.js v3.3.7
-	 * http://getbootstrap.com/javascript/#collapse
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	/* jshint latedef: false */
-	
-	+function ($) {
-	  'use strict';
-	
-	  // COLLAPSE PUBLIC CLASS DEFINITION
-	  // ================================
-	
-	  var Collapse = function (element, options) {
-	    this.$element      = $(element)
-	    this.options       = $.extend({}, Collapse.DEFAULTS, options)
-	    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
-	                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
-	    this.transitioning = null
-	
-	    if (this.options.parent) {
-	      this.$parent = this.getParent()
-	    } else {
-	      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
-	    }
-	
-	    if (this.options.toggle) this.toggle()
-	  }
-	
-	  Collapse.VERSION  = '3.3.7'
-	
-	  Collapse.TRANSITION_DURATION = 350
-	
-	  Collapse.DEFAULTS = {
-	    toggle: true
-	  }
-	
-	  Collapse.prototype.dimension = function () {
-	    var hasWidth = this.$element.hasClass('width')
-	    return hasWidth ? 'width' : 'height'
-	  }
-	
-	  Collapse.prototype.show = function () {
-	    if (this.transitioning || this.$element.hasClass('in')) return
-	
-	    var activesData
-	    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
-	
-	    if (actives && actives.length) {
-	      activesData = actives.data('bs.collapse')
-	      if (activesData && activesData.transitioning) return
-	    }
-	
-	    var startEvent = $.Event('show.bs.collapse')
-	    this.$element.trigger(startEvent)
-	    if (startEvent.isDefaultPrevented()) return
-	
-	    if (actives && actives.length) {
-	      Plugin.call(actives, 'hide')
-	      activesData || actives.data('bs.collapse', null)
-	    }
-	
-	    var dimension = this.dimension()
-	
-	    this.$element
-	      .removeClass('collapse')
-	      .addClass('collapsing')[dimension](0)
-	      .attr('aria-expanded', true)
-	
-	    this.$trigger
-	      .removeClass('collapsed')
-	      .attr('aria-expanded', true)
-	
-	    this.transitioning = 1
-	
-	    var complete = function () {
-	      this.$element
-	        .removeClass('collapsing')
-	        .addClass('collapse in')[dimension]('')
-	      this.transitioning = 0
-	      this.$element
-	        .trigger('shown.bs.collapse')
-	    }
-	
-	    if (!$.support.transition) return complete.call(this)
-	
-	    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
-	
-	    this.$element
-	      .one('bsTransitionEnd', $.proxy(complete, this))
-	      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
-	  }
-	
-	  Collapse.prototype.hide = function () {
-	    if (this.transitioning || !this.$element.hasClass('in')) return
-	
-	    var startEvent = $.Event('hide.bs.collapse')
-	    this.$element.trigger(startEvent)
-	    if (startEvent.isDefaultPrevented()) return
-	
-	    var dimension = this.dimension()
-	
-	    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
-	
-	    this.$element
-	      .addClass('collapsing')
-	      .removeClass('collapse in')
-	      .attr('aria-expanded', false)
-	
-	    this.$trigger
-	      .addClass('collapsed')
-	      .attr('aria-expanded', false)
-	
-	    this.transitioning = 1
-	
-	    var complete = function () {
-	      this.transitioning = 0
-	      this.$element
-	        .removeClass('collapsing')
-	        .addClass('collapse')
-	        .trigger('hidden.bs.collapse')
-	    }
-	
-	    if (!$.support.transition) return complete.call(this)
-	
-	    this.$element
-	      [dimension](0)
-	      .one('bsTransitionEnd', $.proxy(complete, this))
-	      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
-	  }
-	
-	  Collapse.prototype.toggle = function () {
-	    this[this.$element.hasClass('in') ? 'hide' : 'show']()
-	  }
-	
-	  Collapse.prototype.getParent = function () {
-	    return $(this.options.parent)
-	      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
-	      .each($.proxy(function (i, element) {
-	        var $element = $(element)
-	        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
-	      }, this))
-	      .end()
-	  }
-	
-	  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
-	    var isOpen = $element.hasClass('in')
-	
-	    $element.attr('aria-expanded', isOpen)
-	    $trigger
-	      .toggleClass('collapsed', !isOpen)
-	      .attr('aria-expanded', isOpen)
-	  }
-	
-	  function getTargetFromTrigger($trigger) {
-	    var href
-	    var target = $trigger.attr('data-target')
-	      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
-	
-	    return $(target)
-	  }
-	
-	
-	  // COLLAPSE PLUGIN DEFINITION
-	  // ==========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.collapse')
-	      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
-	
-	      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
-	      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
-	      if (typeof option == 'string') data[option]()
-	    })
-	  }
-	
-	  var old = $.fn.collapse
-	
-	  $.fn.collapse             = Plugin
-	  $.fn.collapse.Constructor = Collapse
-	
-	
-	  // COLLAPSE NO CONFLICT
-	  // ====================
-	
-	  $.fn.collapse.noConflict = function () {
-	    $.fn.collapse = old
-	    return this
-	  }
-	
-	
-	  // COLLAPSE DATA-API
-	  // =================
-	
-	  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
-	    var $this   = $(this)
-	
-	    if (!$this.attr('data-target')) e.preventDefault()
-	
-	    var $target = getTargetFromTrigger($this)
-	    var data    = $target.data('bs.collapse')
-	    var option  = data ? 'toggle' : $this.data()
-	
-	    Plugin.call($target, option)
-	  })
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: dropdown.js v3.3.7
-	 * http://getbootstrap.com/javascript/#dropdowns
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // DROPDOWN CLASS DEFINITION
-	  // =========================
-	
-	  var backdrop = '.dropdown-backdrop'
-	  var toggle   = '[data-toggle="dropdown"]'
-	  var Dropdown = function (element) {
-	    $(element).on('click.bs.dropdown', this.toggle)
-	  }
-	
-	  Dropdown.VERSION = '3.3.7'
-	
-	  function getParent($this) {
-	    var selector = $this.attr('data-target')
-	
-	    if (!selector) {
-	      selector = $this.attr('href')
-	      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-	    }
-	
-	    var $parent = selector && $(selector)
-	
-	    return $parent && $parent.length ? $parent : $this.parent()
-	  }
-	
-	  function clearMenus(e) {
-	    if (e && e.which === 3) return
-	    $(backdrop).remove()
-	    $(toggle).each(function () {
-	      var $this         = $(this)
-	      var $parent       = getParent($this)
-	      var relatedTarget = { relatedTarget: this }
-	
-	      if (!$parent.hasClass('open')) return
-	
-	      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
-	
-	      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
-	
-	      if (e.isDefaultPrevented()) return
-	
-	      $this.attr('aria-expanded', 'false')
-	      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
-	    })
-	  }
-	
-	  Dropdown.prototype.toggle = function (e) {
-	    var $this = $(this)
-	
-	    if ($this.is('.disabled, :disabled')) return
-	
-	    var $parent  = getParent($this)
-	    var isActive = $parent.hasClass('open')
-	
-	    clearMenus()
-	
-	    if (!isActive) {
-	      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
-	        // if mobile we use a backdrop because click events don't delegate
-	        $(document.createElement('div'))
-	          .addClass('dropdown-backdrop')
-	          .insertAfter($(this))
-	          .on('click', clearMenus)
-	      }
-	
-	      var relatedTarget = { relatedTarget: this }
-	      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
-	
-	      if (e.isDefaultPrevented()) return
-	
-	      $this
-	        .trigger('focus')
-	        .attr('aria-expanded', 'true')
-	
-	      $parent
-	        .toggleClass('open')
-	        .trigger($.Event('shown.bs.dropdown', relatedTarget))
-	    }
-	
-	    return false
-	  }
-	
-	  Dropdown.prototype.keydown = function (e) {
-	    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
-	
-	    var $this = $(this)
-	
-	    e.preventDefault()
-	    e.stopPropagation()
-	
-	    if ($this.is('.disabled, :disabled')) return
-	
-	    var $parent  = getParent($this)
-	    var isActive = $parent.hasClass('open')
-	
-	    if (!isActive && e.which != 27 || isActive && e.which == 27) {
-	      if (e.which == 27) $parent.find(toggle).trigger('focus')
-	      return $this.trigger('click')
-	    }
-	
-	    var desc = ' li:not(.disabled):visible a'
-	    var $items = $parent.find('.dropdown-menu' + desc)
-	
-	    if (!$items.length) return
-	
-	    var index = $items.index(e.target)
-	
-	    if (e.which == 38 && index > 0)                 index--         // up
-	    if (e.which == 40 && index < $items.length - 1) index++         // down
-	    if (!~index)                                    index = 0
-	
-	    $items.eq(index).trigger('focus')
-	  }
-	
-	
-	  // DROPDOWN PLUGIN DEFINITION
-	  // ==========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this = $(this)
-	      var data  = $this.data('bs.dropdown')
-	
-	      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
-	      if (typeof option == 'string') data[option].call($this)
-	    })
-	  }
-	
-	  var old = $.fn.dropdown
-	
-	  $.fn.dropdown             = Plugin
-	  $.fn.dropdown.Constructor = Dropdown
-	
-	
-	  // DROPDOWN NO CONFLICT
-	  // ====================
-	
-	  $.fn.dropdown.noConflict = function () {
-	    $.fn.dropdown = old
-	    return this
-	  }
-	
-	
-	  // APPLY TO STANDARD DROPDOWN ELEMENTS
-	  // ===================================
-	
-	  $(document)
-	    .on('click.bs.dropdown.data-api', clearMenus)
-	    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
-	    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
-	    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
-	    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: modal.js v3.3.7
-	 * http://getbootstrap.com/javascript/#modals
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // MODAL CLASS DEFINITION
-	  // ======================
-	
-	  var Modal = function (element, options) {
-	    this.options             = options
-	    this.$body               = $(document.body)
-	    this.$element            = $(element)
-	    this.$dialog             = this.$element.find('.modal-dialog')
-	    this.$backdrop           = null
-	    this.isShown             = null
-	    this.originalBodyPad     = null
-	    this.scrollbarWidth      = 0
-	    this.ignoreBackdropClick = false
-	
-	    if (this.options.remote) {
-	      this.$element
-	        .find('.modal-content')
-	        .load(this.options.remote, $.proxy(function () {
-	          this.$element.trigger('loaded.bs.modal')
-	        }, this))
-	    }
-	  }
-	
-	  Modal.VERSION  = '3.3.7'
-	
-	  Modal.TRANSITION_DURATION = 300
-	  Modal.BACKDROP_TRANSITION_DURATION = 150
-	
-	  Modal.DEFAULTS = {
-	    backdrop: true,
-	    keyboard: true,
-	    show: true
-	  }
-	
-	  Modal.prototype.toggle = function (_relatedTarget) {
-	    return this.isShown ? this.hide() : this.show(_relatedTarget)
-	  }
-	
-	  Modal.prototype.show = function (_relatedTarget) {
-	    var that = this
-	    var e    = $.Event('show.bs.modal', { relatedTarget: _relatedTarget })
-	
-	    this.$element.trigger(e)
-	
-	    if (this.isShown || e.isDefaultPrevented()) return
-	
-	    this.isShown = true
-	
-	    this.checkScrollbar()
-	    this.setScrollbar()
-	    this.$body.addClass('modal-open')
-	
-	    this.escape()
-	    this.resize()
-	
-	    this.$element.on('click.dismiss.bs.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
-	
-	    this.$dialog.on('mousedown.dismiss.bs.modal', function () {
-	      that.$element.one('mouseup.dismiss.bs.modal', function (e) {
-	        if ($(e.target).is(that.$element)) that.ignoreBackdropClick = true
-	      })
-	    })
-	
-	    this.backdrop(function () {
-	      var transition = $.support.transition && that.$element.hasClass('fade')
-	
-	      if (!that.$element.parent().length) {
-	        that.$element.appendTo(that.$body) // don't move modals dom position
-	      }
-	
-	      that.$element
-	        .show()
-	        .scrollTop(0)
-	
-	      that.adjustDialog()
-	
-	      if (transition) {
-	        that.$element[0].offsetWidth // force reflow
-	      }
-	
-	      that.$element.addClass('in')
-	
-	      that.enforceFocus()
-	
-	      var e = $.Event('shown.bs.modal', { relatedTarget: _relatedTarget })
-	
-	      transition ?
-	        that.$dialog // wait for modal to slide in
-	          .one('bsTransitionEnd', function () {
-	            that.$element.trigger('focus').trigger(e)
-	          })
-	          .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
-	        that.$element.trigger('focus').trigger(e)
-	    })
-	  }
-	
-	  Modal.prototype.hide = function (e) {
-	    if (e) e.preventDefault()
-	
-	    e = $.Event('hide.bs.modal')
-	
-	    this.$element.trigger(e)
-	
-	    if (!this.isShown || e.isDefaultPrevented()) return
-	
-	    this.isShown = false
-	
-	    this.escape()
-	    this.resize()
-	
-	    $(document).off('focusin.bs.modal')
-	
-	    this.$element
-	      .removeClass('in')
-	      .off('click.dismiss.bs.modal')
-	      .off('mouseup.dismiss.bs.modal')
-	
-	    this.$dialog.off('mousedown.dismiss.bs.modal')
-	
-	    $.support.transition && this.$element.hasClass('fade') ?
-	      this.$element
-	        .one('bsTransitionEnd', $.proxy(this.hideModal, this))
-	        .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
-	      this.hideModal()
-	  }
-	
-	  Modal.prototype.enforceFocus = function () {
-	    $(document)
-	      .off('focusin.bs.modal') // guard against infinite focus loop
-	      .on('focusin.bs.modal', $.proxy(function (e) {
-	        if (document !== e.target &&
-	            this.$element[0] !== e.target &&
-	            !this.$element.has(e.target).length) {
-	          this.$element.trigger('focus')
-	        }
-	      }, this))
-	  }
-	
-	  Modal.prototype.escape = function () {
-	    if (this.isShown && this.options.keyboard) {
-	      this.$element.on('keydown.dismiss.bs.modal', $.proxy(function (e) {
-	        e.which == 27 && this.hide()
-	      }, this))
-	    } else if (!this.isShown) {
-	      this.$element.off('keydown.dismiss.bs.modal')
-	    }
-	  }
-	
-	  Modal.prototype.resize = function () {
-	    if (this.isShown) {
-	      $(window).on('resize.bs.modal', $.proxy(this.handleUpdate, this))
-	    } else {
-	      $(window).off('resize.bs.modal')
-	    }
-	  }
-	
-	  Modal.prototype.hideModal = function () {
-	    var that = this
-	    this.$element.hide()
-	    this.backdrop(function () {
-	      that.$body.removeClass('modal-open')
-	      that.resetAdjustments()
-	      that.resetScrollbar()
-	      that.$element.trigger('hidden.bs.modal')
-	    })
-	  }
-	
-	  Modal.prototype.removeBackdrop = function () {
-	    this.$backdrop && this.$backdrop.remove()
-	    this.$backdrop = null
-	  }
-	
-	  Modal.prototype.backdrop = function (callback) {
-	    var that = this
-	    var animate = this.$element.hasClass('fade') ? 'fade' : ''
-	
-	    if (this.isShown && this.options.backdrop) {
-	      var doAnimate = $.support.transition && animate
-	
-	      this.$backdrop = $(document.createElement('div'))
-	        .addClass('modal-backdrop ' + animate)
-	        .appendTo(this.$body)
-	
-	      this.$element.on('click.dismiss.bs.modal', $.proxy(function (e) {
-	        if (this.ignoreBackdropClick) {
-	          this.ignoreBackdropClick = false
-	          return
-	        }
-	        if (e.target !== e.currentTarget) return
-	        this.options.backdrop == 'static'
-	          ? this.$element[0].focus()
-	          : this.hide()
-	      }, this))
-	
-	      if (doAnimate) this.$backdrop[0].offsetWidth // force reflow
-	
-	      this.$backdrop.addClass('in')
-	
-	      if (!callback) return
-	
-	      doAnimate ?
-	        this.$backdrop
-	          .one('bsTransitionEnd', callback)
-	          .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
-	        callback()
-	
-	    } else if (!this.isShown && this.$backdrop) {
-	      this.$backdrop.removeClass('in')
-	
-	      var callbackRemove = function () {
-	        that.removeBackdrop()
-	        callback && callback()
-	      }
-	      $.support.transition && this.$element.hasClass('fade') ?
-	        this.$backdrop
-	          .one('bsTransitionEnd', callbackRemove)
-	          .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
-	        callbackRemove()
-	
-	    } else if (callback) {
-	      callback()
-	    }
-	  }
-	
-	  // these following methods are used to handle overflowing modals
-	
-	  Modal.prototype.handleUpdate = function () {
-	    this.adjustDialog()
-	  }
-	
-	  Modal.prototype.adjustDialog = function () {
-	    var modalIsOverflowing = this.$element[0].scrollHeight > document.documentElement.clientHeight
-	
-	    this.$element.css({
-	      paddingLeft:  !this.bodyIsOverflowing && modalIsOverflowing ? this.scrollbarWidth : '',
-	      paddingRight: this.bodyIsOverflowing && !modalIsOverflowing ? this.scrollbarWidth : ''
-	    })
-	  }
-	
-	  Modal.prototype.resetAdjustments = function () {
-	    this.$element.css({
-	      paddingLeft: '',
-	      paddingRight: ''
-	    })
-	  }
-	
-	  Modal.prototype.checkScrollbar = function () {
-	    var fullWindowWidth = window.innerWidth
-	    if (!fullWindowWidth) { // workaround for missing window.innerWidth in IE8
-	      var documentElementRect = document.documentElement.getBoundingClientRect()
-	      fullWindowWidth = documentElementRect.right - Math.abs(documentElementRect.left)
-	    }
-	    this.bodyIsOverflowing = document.body.clientWidth < fullWindowWidth
-	    this.scrollbarWidth = this.measureScrollbar()
-	  }
-	
-	  Modal.prototype.setScrollbar = function () {
-	    var bodyPad = parseInt((this.$body.css('padding-right') || 0), 10)
-	    this.originalBodyPad = document.body.style.paddingRight || ''
-	    if (this.bodyIsOverflowing) this.$body.css('padding-right', bodyPad + this.scrollbarWidth)
-	  }
-	
-	  Modal.prototype.resetScrollbar = function () {
-	    this.$body.css('padding-right', this.originalBodyPad)
-	  }
-	
-	  Modal.prototype.measureScrollbar = function () { // thx walsh
-	    var scrollDiv = document.createElement('div')
-	    scrollDiv.className = 'modal-scrollbar-measure'
-	    this.$body.append(scrollDiv)
-	    var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth
-	    this.$body[0].removeChild(scrollDiv)
-	    return scrollbarWidth
-	  }
-	
-	
-	  // MODAL PLUGIN DEFINITION
-	  // =======================
-	
-	  function Plugin(option, _relatedTarget) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.modal')
-	      var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
-	
-	      if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
-	      if (typeof option == 'string') data[option](_relatedTarget)
-	      else if (options.show) data.show(_relatedTarget)
-	    })
-	  }
-	
-	  var old = $.fn.modal
-	
-	  $.fn.modal             = Plugin
-	  $.fn.modal.Constructor = Modal
-	
-	
-	  // MODAL NO CONFLICT
-	  // =================
-	
-	  $.fn.modal.noConflict = function () {
-	    $.fn.modal = old
-	    return this
-	  }
-	
-	
-	  // MODAL DATA-API
-	  // ==============
-	
-	  $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function (e) {
-	    var $this   = $(this)
-	    var href    = $this.attr('href')
-	    var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, ''))) // strip for ie7
-	    var option  = $target.data('bs.modal') ? 'toggle' : $.extend({ remote: !/#/.test(href) && href }, $target.data(), $this.data())
-	
-	    if ($this.is('a')) e.preventDefault()
-	
-	    $target.one('show.bs.modal', function (showEvent) {
-	      if (showEvent.isDefaultPrevented()) return // only register focus restorer if modal will actually get shown
-	      $target.one('hidden.bs.modal', function () {
-	        $this.is(':visible') && $this.trigger('focus')
-	      })
-	    })
-	    Plugin.call($target, option, this)
-	  })
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: tooltip.js v3.3.7
-	 * http://getbootstrap.com/javascript/#tooltip
-	 * Inspired by the original jQuery.tipsy by Jason Frame
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // TOOLTIP PUBLIC CLASS DEFINITION
-	  // ===============================
-	
-	  var Tooltip = function (element, options) {
-	    this.type       = null
-	    this.options    = null
-	    this.enabled    = null
-	    this.timeout    = null
-	    this.hoverState = null
-	    this.$element   = null
-	    this.inState    = null
-	
-	    this.init('tooltip', element, options)
-	  }
-	
-	  Tooltip.VERSION  = '3.3.7'
-	
-	  Tooltip.TRANSITION_DURATION = 150
-	
-	  Tooltip.DEFAULTS = {
-	    animation: true,
-	    placement: 'top',
-	    selector: false,
-	    template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
-	    trigger: 'hover focus',
-	    title: '',
-	    delay: 0,
-	    html: false,
-	    container: false,
-	    viewport: {
-	      selector: 'body',
-	      padding: 0
-	    }
-	  }
-	
-	  Tooltip.prototype.init = function (type, element, options) {
-	    this.enabled   = true
-	    this.type      = type
-	    this.$element  = $(element)
-	    this.options   = this.getOptions(options)
-	    this.$viewport = this.options.viewport && $($.isFunction(this.options.viewport) ? this.options.viewport.call(this, this.$element) : (this.options.viewport.selector || this.options.viewport))
-	    this.inState   = { click: false, hover: false, focus: false }
-	
-	    if (this.$element[0] instanceof document.constructor && !this.options.selector) {
-	      throw new Error('`selector` option must be specified when initializing ' + this.type + ' on the window.document object!')
-	    }
-	
-	    var triggers = this.options.trigger.split(' ')
-	
-	    for (var i = triggers.length; i--;) {
-	      var trigger = triggers[i]
-	
-	      if (trigger == 'click') {
-	        this.$element.on('click.' + this.type, this.options.selector, $.proxy(this.toggle, this))
-	      } else if (trigger != 'manual') {
-	        var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focusin'
-	        var eventOut = trigger == 'hover' ? 'mouseleave' : 'focusout'
-	
-	        this.$element.on(eventIn  + '.' + this.type, this.options.selector, $.proxy(this.enter, this))
-	        this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
-	      }
-	    }
-	
-	    this.options.selector ?
-	      (this._options = $.extend({}, this.options, { trigger: 'manual', selector: '' })) :
-	      this.fixTitle()
-	  }
-	
-	  Tooltip.prototype.getDefaults = function () {
-	    return Tooltip.DEFAULTS
-	  }
-	
-	  Tooltip.prototype.getOptions = function (options) {
-	    options = $.extend({}, this.getDefaults(), this.$element.data(), options)
-	
-	    if (options.delay && typeof options.delay == 'number') {
-	      options.delay = {
-	        show: options.delay,
-	        hide: options.delay
-	      }
-	    }
-	
-	    return options
-	  }
-	
-	  Tooltip.prototype.getDelegateOptions = function () {
-	    var options  = {}
-	    var defaults = this.getDefaults()
-	
-	    this._options && $.each(this._options, function (key, value) {
-	      if (defaults[key] != value) options[key] = value
-	    })
-	
-	    return options
-	  }
-	
-	  Tooltip.prototype.enter = function (obj) {
-	    var self = obj instanceof this.constructor ?
-	      obj : $(obj.currentTarget).data('bs.' + this.type)
-	
-	    if (!self) {
-	      self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
-	      $(obj.currentTarget).data('bs.' + this.type, self)
-	    }
-	
-	    if (obj instanceof $.Event) {
-	      self.inState[obj.type == 'focusin' ? 'focus' : 'hover'] = true
-	    }
-	
-	    if (self.tip().hasClass('in') || self.hoverState == 'in') {
-	      self.hoverState = 'in'
-	      return
-	    }
-	
-	    clearTimeout(self.timeout)
-	
-	    self.hoverState = 'in'
-	
-	    if (!self.options.delay || !self.options.delay.show) return self.show()
-	
-	    self.timeout = setTimeout(function () {
-	      if (self.hoverState == 'in') self.show()
-	    }, self.options.delay.show)
-	  }
-	
-	  Tooltip.prototype.isInStateTrue = function () {
-	    for (var key in this.inState) {
-	      if (this.inState[key]) return true
-	    }
-	
-	    return false
-	  }
-	
-	  Tooltip.prototype.leave = function (obj) {
-	    var self = obj instanceof this.constructor ?
-	      obj : $(obj.currentTarget).data('bs.' + this.type)
-	
-	    if (!self) {
-	      self = new this.constructor(obj.currentTarget, this.getDelegateOptions())
-	      $(obj.currentTarget).data('bs.' + this.type, self)
-	    }
-	
-	    if (obj instanceof $.Event) {
-	      self.inState[obj.type == 'focusout' ? 'focus' : 'hover'] = false
-	    }
-	
-	    if (self.isInStateTrue()) return
-	
-	    clearTimeout(self.timeout)
-	
-	    self.hoverState = 'out'
-	
-	    if (!self.options.delay || !self.options.delay.hide) return self.hide()
-	
-	    self.timeout = setTimeout(function () {
-	      if (self.hoverState == 'out') self.hide()
-	    }, self.options.delay.hide)
-	  }
-	
-	  Tooltip.prototype.show = function () {
-	    var e = $.Event('show.bs.' + this.type)
-	
-	    if (this.hasContent() && this.enabled) {
-	      this.$element.trigger(e)
-	
-	      var inDom = $.contains(this.$element[0].ownerDocument.documentElement, this.$element[0])
-	      if (e.isDefaultPrevented() || !inDom) return
-	      var that = this
-	
-	      var $tip = this.tip()
-	
-	      var tipId = this.getUID(this.type)
-	
-	      this.setContent()
-	      $tip.attr('id', tipId)
-	      this.$element.attr('aria-describedby', tipId)
-	
-	      if (this.options.animation) $tip.addClass('fade')
-	
-	      var placement = typeof this.options.placement == 'function' ?
-	        this.options.placement.call(this, $tip[0], this.$element[0]) :
-	        this.options.placement
-	
-	      var autoToken = /\s?auto?\s?/i
-	      var autoPlace = autoToken.test(placement)
-	      if (autoPlace) placement = placement.replace(autoToken, '') || 'top'
-	
-	      $tip
-	        .detach()
-	        .css({ top: 0, left: 0, display: 'block' })
-	        .addClass(placement)
-	        .data('bs.' + this.type, this)
-	
-	      this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
-	      this.$element.trigger('inserted.bs.' + this.type)
-	
-	      var pos          = this.getPosition()
-	      var actualWidth  = $tip[0].offsetWidth
-	      var actualHeight = $tip[0].offsetHeight
-	
-	      if (autoPlace) {
-	        var orgPlacement = placement
-	        var viewportDim = this.getPosition(this.$viewport)
-	
-	        placement = placement == 'bottom' && pos.bottom + actualHeight > viewportDim.bottom ? 'top'    :
-	                    placement == 'top'    && pos.top    - actualHeight < viewportDim.top    ? 'bottom' :
-	                    placement == 'right'  && pos.right  + actualWidth  > viewportDim.width  ? 'left'   :
-	                    placement == 'left'   && pos.left   - actualWidth  < viewportDim.left   ? 'right'  :
-	                    placement
-	
-	        $tip
-	          .removeClass(orgPlacement)
-	          .addClass(placement)
-	      }
-	
-	      var calculatedOffset = this.getCalculatedOffset(placement, pos, actualWidth, actualHeight)
-	
-	      this.applyPlacement(calculatedOffset, placement)
-	
-	      var complete = function () {
-	        var prevHoverState = that.hoverState
-	        that.$element.trigger('shown.bs.' + that.type)
-	        that.hoverState = null
-	
-	        if (prevHoverState == 'out') that.leave(that)
-	      }
-	
-	      $.support.transition && this.$tip.hasClass('fade') ?
-	        $tip
-	          .one('bsTransitionEnd', complete)
-	          .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
-	        complete()
-	    }
-	  }
-	
-	  Tooltip.prototype.applyPlacement = function (offset, placement) {
-	    var $tip   = this.tip()
-	    var width  = $tip[0].offsetWidth
-	    var height = $tip[0].offsetHeight
-	
-	    // manually read margins because getBoundingClientRect includes difference
-	    var marginTop = parseInt($tip.css('margin-top'), 10)
-	    var marginLeft = parseInt($tip.css('margin-left'), 10)
-	
-	    // we must check for NaN for ie 8/9
-	    if (isNaN(marginTop))  marginTop  = 0
-	    if (isNaN(marginLeft)) marginLeft = 0
-	
-	    offset.top  += marginTop
-	    offset.left += marginLeft
-	
-	    // $.fn.offset doesn't round pixel values
-	    // so we use setOffset directly with our own function B-0
-	    $.offset.setOffset($tip[0], $.extend({
-	      using: function (props) {
-	        $tip.css({
-	          top: Math.round(props.top),
-	          left: Math.round(props.left)
-	        })
-	      }
-	    }, offset), 0)
-	
-	    $tip.addClass('in')
-	
-	    // check to see if placing tip in new offset caused the tip to resize itself
-	    var actualWidth  = $tip[0].offsetWidth
-	    var actualHeight = $tip[0].offsetHeight
-	
-	    if (placement == 'top' && actualHeight != height) {
-	      offset.top = offset.top + height - actualHeight
-	    }
-	
-	    var delta = this.getViewportAdjustedDelta(placement, offset, actualWidth, actualHeight)
-	
-	    if (delta.left) offset.left += delta.left
-	    else offset.top += delta.top
-	
-	    var isVertical          = /top|bottom/.test(placement)
-	    var arrowDelta          = isVertical ? delta.left * 2 - width + actualWidth : delta.top * 2 - height + actualHeight
-	    var arrowOffsetPosition = isVertical ? 'offsetWidth' : 'offsetHeight'
-	
-	    $tip.offset(offset)
-	    this.replaceArrow(arrowDelta, $tip[0][arrowOffsetPosition], isVertical)
-	  }
-	
-	  Tooltip.prototype.replaceArrow = function (delta, dimension, isVertical) {
-	    this.arrow()
-	      .css(isVertical ? 'left' : 'top', 50 * (1 - delta / dimension) + '%')
-	      .css(isVertical ? 'top' : 'left', '')
-	  }
-	
-	  Tooltip.prototype.setContent = function () {
-	    var $tip  = this.tip()
-	    var title = this.getTitle()
-	
-	    $tip.find('.tooltip-inner')[this.options.html ? 'html' : 'text'](title)
-	    $tip.removeClass('fade in top bottom left right')
-	  }
-	
-	  Tooltip.prototype.hide = function (callback) {
-	    var that = this
-	    var $tip = $(this.$tip)
-	    var e    = $.Event('hide.bs.' + this.type)
-	
-	    function complete() {
-	      if (that.hoverState != 'in') $tip.detach()
-	      if (that.$element) { // TODO: Check whether guarding this code with this `if` is really necessary.
-	        that.$element
-	          .removeAttr('aria-describedby')
-	          .trigger('hidden.bs.' + that.type)
-	      }
-	      callback && callback()
-	    }
-	
-	    this.$element.trigger(e)
-	
-	    if (e.isDefaultPrevented()) return
-	
-	    $tip.removeClass('in')
-	
-	    $.support.transition && $tip.hasClass('fade') ?
-	      $tip
-	        .one('bsTransitionEnd', complete)
-	        .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
-	      complete()
-	
-	    this.hoverState = null
-	
-	    return this
-	  }
-	
-	  Tooltip.prototype.fixTitle = function () {
-	    var $e = this.$element
-	    if ($e.attr('title') || typeof $e.attr('data-original-title') != 'string') {
-	      $e.attr('data-original-title', $e.attr('title') || '').attr('title', '')
-	    }
-	  }
-	
-	  Tooltip.prototype.hasContent = function () {
-	    return this.getTitle()
-	  }
-	
-	  Tooltip.prototype.getPosition = function ($element) {
-	    $element   = $element || this.$element
-	
-	    var el     = $element[0]
-	    var isBody = el.tagName == 'BODY'
-	
-	    var elRect    = el.getBoundingClientRect()
-	    if (elRect.width == null) {
-	      // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
-	      elRect = $.extend({}, elRect, { width: elRect.right - elRect.left, height: elRect.bottom - elRect.top })
-	    }
-	    var isSvg = window.SVGElement && el instanceof window.SVGElement
-	    // Avoid using $.offset() on SVGs since it gives incorrect results in jQuery 3.
-	    // See https://github.com/twbs/bootstrap/issues/20280
-	    var elOffset  = isBody ? { top: 0, left: 0 } : (isSvg ? null : $element.offset())
-	    var scroll    = { scroll: isBody ? document.documentElement.scrollTop || document.body.scrollTop : $element.scrollTop() }
-	    var outerDims = isBody ? { width: $(window).width(), height: $(window).height() } : null
-	
-	    return $.extend({}, elRect, scroll, outerDims, elOffset)
-	  }
-	
-	  Tooltip.prototype.getCalculatedOffset = function (placement, pos, actualWidth, actualHeight) {
-	    return placement == 'bottom' ? { top: pos.top + pos.height,   left: pos.left + pos.width / 2 - actualWidth / 2 } :
-	           placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2 } :
-	           placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
-	        /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
-	
-	  }
-	
-	  Tooltip.prototype.getViewportAdjustedDelta = function (placement, pos, actualWidth, actualHeight) {
-	    var delta = { top: 0, left: 0 }
-	    if (!this.$viewport) return delta
-	
-	    var viewportPadding = this.options.viewport && this.options.viewport.padding || 0
-	    var viewportDimensions = this.getPosition(this.$viewport)
-	
-	    if (/right|left/.test(placement)) {
-	      var topEdgeOffset    = pos.top - viewportPadding - viewportDimensions.scroll
-	      var bottomEdgeOffset = pos.top + viewportPadding - viewportDimensions.scroll + actualHeight
-	      if (topEdgeOffset < viewportDimensions.top) { // top overflow
-	        delta.top = viewportDimensions.top - topEdgeOffset
-	      } else if (bottomEdgeOffset > viewportDimensions.top + viewportDimensions.height) { // bottom overflow
-	        delta.top = viewportDimensions.top + viewportDimensions.height - bottomEdgeOffset
-	      }
-	    } else {
-	      var leftEdgeOffset  = pos.left - viewportPadding
-	      var rightEdgeOffset = pos.left + viewportPadding + actualWidth
-	      if (leftEdgeOffset < viewportDimensions.left) { // left overflow
-	        delta.left = viewportDimensions.left - leftEdgeOffset
-	      } else if (rightEdgeOffset > viewportDimensions.right) { // right overflow
-	        delta.left = viewportDimensions.left + viewportDimensions.width - rightEdgeOffset
-	      }
-	    }
-	
-	    return delta
-	  }
-	
-	  Tooltip.prototype.getTitle = function () {
-	    var title
-	    var $e = this.$element
-	    var o  = this.options
-	
-	    title = $e.attr('data-original-title')
-	      || (typeof o.title == 'function' ? o.title.call($e[0]) :  o.title)
-	
-	    return title
-	  }
-	
-	  Tooltip.prototype.getUID = function (prefix) {
-	    do prefix += ~~(Math.random() * 1000000)
-	    while (document.getElementById(prefix))
-	    return prefix
-	  }
-	
-	  Tooltip.prototype.tip = function () {
-	    if (!this.$tip) {
-	      this.$tip = $(this.options.template)
-	      if (this.$tip.length != 1) {
-	        throw new Error(this.type + ' `template` option must consist of exactly 1 top-level element!')
-	      }
-	    }
-	    return this.$tip
-	  }
-	
-	  Tooltip.prototype.arrow = function () {
-	    return (this.$arrow = this.$arrow || this.tip().find('.tooltip-arrow'))
-	  }
-	
-	  Tooltip.prototype.enable = function () {
-	    this.enabled = true
-	  }
-	
-	  Tooltip.prototype.disable = function () {
-	    this.enabled = false
-	  }
-	
-	  Tooltip.prototype.toggleEnabled = function () {
-	    this.enabled = !this.enabled
-	  }
-	
-	  Tooltip.prototype.toggle = function (e) {
-	    var self = this
-	    if (e) {
-	      self = $(e.currentTarget).data('bs.' + this.type)
-	      if (!self) {
-	        self = new this.constructor(e.currentTarget, this.getDelegateOptions())
-	        $(e.currentTarget).data('bs.' + this.type, self)
-	      }
-	    }
-	
-	    if (e) {
-	      self.inState.click = !self.inState.click
-	      if (self.isInStateTrue()) self.enter(self)
-	      else self.leave(self)
-	    } else {
-	      self.tip().hasClass('in') ? self.leave(self) : self.enter(self)
-	    }
-	  }
-	
-	  Tooltip.prototype.destroy = function () {
-	    var that = this
-	    clearTimeout(this.timeout)
-	    this.hide(function () {
-	      that.$element.off('.' + that.type).removeData('bs.' + that.type)
-	      if (that.$tip) {
-	        that.$tip.detach()
-	      }
-	      that.$tip = null
-	      that.$arrow = null
-	      that.$viewport = null
-	      that.$element = null
-	    })
-	  }
-	
-	
-	  // TOOLTIP PLUGIN DEFINITION
-	  // =========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.tooltip')
-	      var options = typeof option == 'object' && option
-	
-	      if (!data && /destroy|hide/.test(option)) return
-	      if (!data) $this.data('bs.tooltip', (data = new Tooltip(this, options)))
-	      if (typeof option == 'string') data[option]()
-	    })
-	  }
-	
-	  var old = $.fn.tooltip
-	
-	  $.fn.tooltip             = Plugin
-	  $.fn.tooltip.Constructor = Tooltip
-	
-	
-	  // TOOLTIP NO CONFLICT
-	  // ===================
-	
-	  $.fn.tooltip.noConflict = function () {
-	    $.fn.tooltip = old
-	    return this
-	  }
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: popover.js v3.3.7
-	 * http://getbootstrap.com/javascript/#popovers
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // POPOVER PUBLIC CLASS DEFINITION
-	  // ===============================
-	
-	  var Popover = function (element, options) {
-	    this.init('popover', element, options)
-	  }
-	
-	  if (!$.fn.tooltip) throw new Error('Popover requires tooltip.js')
-	
-	  Popover.VERSION  = '3.3.7'
-	
-	  Popover.DEFAULTS = $.extend({}, $.fn.tooltip.Constructor.DEFAULTS, {
-	    placement: 'right',
-	    trigger: 'click',
-	    content: '',
-	    template: '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-	  })
-	
-	
-	  // NOTE: POPOVER EXTENDS tooltip.js
-	  // ================================
-	
-	  Popover.prototype = $.extend({}, $.fn.tooltip.Constructor.prototype)
-	
-	  Popover.prototype.constructor = Popover
-	
-	  Popover.prototype.getDefaults = function () {
-	    return Popover.DEFAULTS
-	  }
-	
-	  Popover.prototype.setContent = function () {
-	    var $tip    = this.tip()
-	    var title   = this.getTitle()
-	    var content = this.getContent()
-	
-	    $tip.find('.popover-title')[this.options.html ? 'html' : 'text'](title)
-	    $tip.find('.popover-content').children().detach().end()[ // we use append for html objects to maintain js events
-	      this.options.html ? (typeof content == 'string' ? 'html' : 'append') : 'text'
-	    ](content)
-	
-	    $tip.removeClass('fade top bottom left right in')
-	
-	    // IE8 doesn't accept hiding via the `:empty` pseudo selector, we have to do
-	    // this manually by checking the contents.
-	    if (!$tip.find('.popover-title').html()) $tip.find('.popover-title').hide()
-	  }
-	
-	  Popover.prototype.hasContent = function () {
-	    return this.getTitle() || this.getContent()
-	  }
-	
-	  Popover.prototype.getContent = function () {
-	    var $e = this.$element
-	    var o  = this.options
-	
-	    return $e.attr('data-content')
-	      || (typeof o.content == 'function' ?
-	            o.content.call($e[0]) :
-	            o.content)
-	  }
-	
-	  Popover.prototype.arrow = function () {
-	    return (this.$arrow = this.$arrow || this.tip().find('.arrow'))
-	  }
-	
-	
-	  // POPOVER PLUGIN DEFINITION
-	  // =========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.popover')
-	      var options = typeof option == 'object' && option
-	
-	      if (!data && /destroy|hide/.test(option)) return
-	      if (!data) $this.data('bs.popover', (data = new Popover(this, options)))
-	      if (typeof option == 'string') data[option]()
-	    })
-	  }
-	
-	  var old = $.fn.popover
-	
-	  $.fn.popover             = Plugin
-	  $.fn.popover.Constructor = Popover
-	
-	
-	  // POPOVER NO CONFLICT
-	  // ===================
-	
-	  $.fn.popover.noConflict = function () {
-	    $.fn.popover = old
-	    return this
-	  }
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: scrollspy.js v3.3.7
-	 * http://getbootstrap.com/javascript/#scrollspy
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // SCROLLSPY CLASS DEFINITION
-	  // ==========================
-	
-	  function ScrollSpy(element, options) {
-	    this.$body          = $(document.body)
-	    this.$scrollElement = $(element).is(document.body) ? $(window) : $(element)
-	    this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
-	    this.selector       = (this.options.target || '') + ' .nav li > a'
-	    this.offsets        = []
-	    this.targets        = []
-	    this.activeTarget   = null
-	    this.scrollHeight   = 0
-	
-	    this.$scrollElement.on('scroll.bs.scrollspy', $.proxy(this.process, this))
-	    this.refresh()
-	    this.process()
-	  }
-	
-	  ScrollSpy.VERSION  = '3.3.7'
-	
-	  ScrollSpy.DEFAULTS = {
-	    offset: 10
-	  }
-	
-	  ScrollSpy.prototype.getScrollHeight = function () {
-	    return this.$scrollElement[0].scrollHeight || Math.max(this.$body[0].scrollHeight, document.documentElement.scrollHeight)
-	  }
-	
-	  ScrollSpy.prototype.refresh = function () {
-	    var that          = this
-	    var offsetMethod  = 'offset'
-	    var offsetBase    = 0
-	
-	    this.offsets      = []
-	    this.targets      = []
-	    this.scrollHeight = this.getScrollHeight()
-	
-	    if (!$.isWindow(this.$scrollElement[0])) {
-	      offsetMethod = 'position'
-	      offsetBase   = this.$scrollElement.scrollTop()
-	    }
-	
-	    this.$body
-	      .find(this.selector)
-	      .map(function () {
-	        var $el   = $(this)
-	        var href  = $el.data('target') || $el.attr('href')
-	        var $href = /^#./.test(href) && $(href)
-	
-	        return ($href
-	          && $href.length
-	          && $href.is(':visible')
-	          && [[$href[offsetMethod]().top + offsetBase, href]]) || null
-	      })
-	      .sort(function (a, b) { return a[0] - b[0] })
-	      .each(function () {
-	        that.offsets.push(this[0])
-	        that.targets.push(this[1])
-	      })
-	  }
-	
-	  ScrollSpy.prototype.process = function () {
-	    var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
-	    var scrollHeight = this.getScrollHeight()
-	    var maxScroll    = this.options.offset + scrollHeight - this.$scrollElement.height()
-	    var offsets      = this.offsets
-	    var targets      = this.targets
-	    var activeTarget = this.activeTarget
-	    var i
-	
-	    if (this.scrollHeight != scrollHeight) {
-	      this.refresh()
-	    }
-	
-	    if (scrollTop >= maxScroll) {
-	      return activeTarget != (i = targets[targets.length - 1]) && this.activate(i)
-	    }
-	
-	    if (activeTarget && scrollTop < offsets[0]) {
-	      this.activeTarget = null
-	      return this.clear()
-	    }
-	
-	    for (i = offsets.length; i--;) {
-	      activeTarget != targets[i]
-	        && scrollTop >= offsets[i]
-	        && (offsets[i + 1] === undefined || scrollTop < offsets[i + 1])
-	        && this.activate(targets[i])
-	    }
-	  }
-	
-	  ScrollSpy.prototype.activate = function (target) {
-	    this.activeTarget = target
-	
-	    this.clear()
-	
-	    var selector = this.selector +
-	      '[data-target="' + target + '"],' +
-	      this.selector + '[href="' + target + '"]'
-	
-	    var active = $(selector)
-	      .parents('li')
-	      .addClass('active')
-	
-	    if (active.parent('.dropdown-menu').length) {
-	      active = active
-	        .closest('li.dropdown')
-	        .addClass('active')
-	    }
-	
-	    active.trigger('activate.bs.scrollspy')
-	  }
-	
-	  ScrollSpy.prototype.clear = function () {
-	    $(this.selector)
-	      .parentsUntil(this.options.target, '.active')
-	      .removeClass('active')
-	  }
-	
-	
-	  // SCROLLSPY PLUGIN DEFINITION
-	  // ===========================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.scrollspy')
-	      var options = typeof option == 'object' && option
-	
-	      if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
-	      if (typeof option == 'string') data[option]()
-	    })
-	  }
-	
-	  var old = $.fn.scrollspy
-	
-	  $.fn.scrollspy             = Plugin
-	  $.fn.scrollspy.Constructor = ScrollSpy
-	
-	
-	  // SCROLLSPY NO CONFLICT
-	  // =====================
-	
-	  $.fn.scrollspy.noConflict = function () {
-	    $.fn.scrollspy = old
-	    return this
-	  }
-	
-	
-	  // SCROLLSPY DATA-API
-	  // ==================
-	
-	  $(window).on('load.bs.scrollspy.data-api', function () {
-	    $('[data-spy="scroll"]').each(function () {
-	      var $spy = $(this)
-	      Plugin.call($spy, $spy.data())
-	    })
-	  })
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: tab.js v3.3.7
-	 * http://getbootstrap.com/javascript/#tabs
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // TAB CLASS DEFINITION
-	  // ====================
-	
-	  var Tab = function (element) {
-	    // jscs:disable requireDollarBeforejQueryAssignment
-	    this.element = $(element)
-	    // jscs:enable requireDollarBeforejQueryAssignment
-	  }
-	
-	  Tab.VERSION = '3.3.7'
-	
-	  Tab.TRANSITION_DURATION = 150
-	
-	  Tab.prototype.show = function () {
-	    var $this    = this.element
-	    var $ul      = $this.closest('ul:not(.dropdown-menu)')
-	    var selector = $this.data('target')
-	
-	    if (!selector) {
-	      selector = $this.attr('href')
-	      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-	    }
-	
-	    if ($this.parent('li').hasClass('active')) return
-	
-	    var $previous = $ul.find('.active:last a')
-	    var hideEvent = $.Event('hide.bs.tab', {
-	      relatedTarget: $this[0]
-	    })
-	    var showEvent = $.Event('show.bs.tab', {
-	      relatedTarget: $previous[0]
-	    })
-	
-	    $previous.trigger(hideEvent)
-	    $this.trigger(showEvent)
-	
-	    if (showEvent.isDefaultPrevented() || hideEvent.isDefaultPrevented()) return
-	
-	    var $target = $(selector)
-	
-	    this.activate($this.closest('li'), $ul)
-	    this.activate($target, $target.parent(), function () {
-	      $previous.trigger({
-	        type: 'hidden.bs.tab',
-	        relatedTarget: $this[0]
-	      })
-	      $this.trigger({
-	        type: 'shown.bs.tab',
-	        relatedTarget: $previous[0]
-	      })
-	    })
-	  }
-	
-	  Tab.prototype.activate = function (element, container, callback) {
-	    var $active    = container.find('> .active')
-	    var transition = callback
-	      && $.support.transition
-	      && ($active.length && $active.hasClass('fade') || !!container.find('> .fade').length)
-	
-	    function next() {
-	      $active
-	        .removeClass('active')
-	        .find('> .dropdown-menu > .active')
-	          .removeClass('active')
-	        .end()
-	        .find('[data-toggle="tab"]')
-	          .attr('aria-expanded', false)
-	
-	      element
-	        .addClass('active')
-	        .find('[data-toggle="tab"]')
-	          .attr('aria-expanded', true)
-	
-	      if (transition) {
-	        element[0].offsetWidth // reflow for transition
-	        element.addClass('in')
-	      } else {
-	        element.removeClass('fade')
-	      }
-	
-	      if (element.parent('.dropdown-menu').length) {
-	        element
-	          .closest('li.dropdown')
-	            .addClass('active')
-	          .end()
-	          .find('[data-toggle="tab"]')
-	            .attr('aria-expanded', true)
-	      }
-	
-	      callback && callback()
-	    }
-	
-	    $active.length && transition ?
-	      $active
-	        .one('bsTransitionEnd', next)
-	        .emulateTransitionEnd(Tab.TRANSITION_DURATION) :
-	      next()
-	
-	    $active.removeClass('in')
-	  }
-	
-	
-	  // TAB PLUGIN DEFINITION
-	  // =====================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this = $(this)
-	      var data  = $this.data('bs.tab')
-	
-	      if (!data) $this.data('bs.tab', (data = new Tab(this)))
-	      if (typeof option == 'string') data[option]()
-	    })
-	  }
-	
-	  var old = $.fn.tab
-	
-	  $.fn.tab             = Plugin
-	  $.fn.tab.Constructor = Tab
-	
-	
-	  // TAB NO CONFLICT
-	  // ===============
-	
-	  $.fn.tab.noConflict = function () {
-	    $.fn.tab = old
-	    return this
-	  }
-	
-	
-	  // TAB DATA-API
-	  // ============
-	
-	  var clickHandler = function (e) {
-	    e.preventDefault()
-	    Plugin.call($(this), 'show')
-	  }
-	
-	  $(document)
-	    .on('click.bs.tab.data-api', '[data-toggle="tab"]', clickHandler)
-	    .on('click.bs.tab.data-api', '[data-toggle="pill"]', clickHandler)
-	
-	}(jQuery);
-	
-	/* ========================================================================
-	 * Bootstrap: affix.js v3.3.7
-	 * http://getbootstrap.com/javascript/#affix
-	 * ========================================================================
-	 * Copyright 2011-2016 Twitter, Inc.
-	 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-	 * ======================================================================== */
-	
-	
-	+function ($) {
-	  'use strict';
-	
-	  // AFFIX CLASS DEFINITION
-	  // ======================
-	
-	  var Affix = function (element, options) {
-	    this.options = $.extend({}, Affix.DEFAULTS, options)
-	
-	    this.$target = $(this.options.target)
-	      .on('scroll.bs.affix.data-api', $.proxy(this.checkPosition, this))
-	      .on('click.bs.affix.data-api',  $.proxy(this.checkPositionWithEventLoop, this))
-	
-	    this.$element     = $(element)
-	    this.affixed      = null
-	    this.unpin        = null
-	    this.pinnedOffset = null
-	
-	    this.checkPosition()
-	  }
-	
-	  Affix.VERSION  = '3.3.7'
-	
-	  Affix.RESET    = 'affix affix-top affix-bottom'
-	
-	  Affix.DEFAULTS = {
-	    offset: 0,
-	    target: window
-	  }
-	
-	  Affix.prototype.getState = function (scrollHeight, height, offsetTop, offsetBottom) {
-	    var scrollTop    = this.$target.scrollTop()
-	    var position     = this.$element.offset()
-	    var targetHeight = this.$target.height()
-	
-	    if (offsetTop != null && this.affixed == 'top') return scrollTop < offsetTop ? 'top' : false
-	
-	    if (this.affixed == 'bottom') {
-	      if (offsetTop != null) return (scrollTop + this.unpin <= position.top) ? false : 'bottom'
-	      return (scrollTop + targetHeight <= scrollHeight - offsetBottom) ? false : 'bottom'
-	    }
-	
-	    var initializing   = this.affixed == null
-	    var colliderTop    = initializing ? scrollTop : position.top
-	    var colliderHeight = initializing ? targetHeight : height
-	
-	    if (offsetTop != null && scrollTop <= offsetTop) return 'top'
-	    if (offsetBottom != null && (colliderTop + colliderHeight >= scrollHeight - offsetBottom)) return 'bottom'
-	
-	    return false
-	  }
-	
-	  Affix.prototype.getPinnedOffset = function () {
-	    if (this.pinnedOffset) return this.pinnedOffset
-	    this.$element.removeClass(Affix.RESET).addClass('affix')
-	    var scrollTop = this.$target.scrollTop()
-	    var position  = this.$element.offset()
-	    return (this.pinnedOffset = position.top - scrollTop)
-	  }
-	
-	  Affix.prototype.checkPositionWithEventLoop = function () {
-	    setTimeout($.proxy(this.checkPosition, this), 1)
-	  }
-	
-	  Affix.prototype.checkPosition = function () {
-	    if (!this.$element.is(':visible')) return
-	
-	    var height       = this.$element.height()
-	    var offset       = this.options.offset
-	    var offsetTop    = offset.top
-	    var offsetBottom = offset.bottom
-	    var scrollHeight = Math.max($(document).height(), $(document.body).height())
-	
-	    if (typeof offset != 'object')         offsetBottom = offsetTop = offset
-	    if (typeof offsetTop == 'function')    offsetTop    = offset.top(this.$element)
-	    if (typeof offsetBottom == 'function') offsetBottom = offset.bottom(this.$element)
-	
-	    var affix = this.getState(scrollHeight, height, offsetTop, offsetBottom)
-	
-	    if (this.affixed != affix) {
-	      if (this.unpin != null) this.$element.css('top', '')
-	
-	      var affixType = 'affix' + (affix ? '-' + affix : '')
-	      var e         = $.Event(affixType + '.bs.affix')
-	
-	      this.$element.trigger(e)
-	
-	      if (e.isDefaultPrevented()) return
-	
-	      this.affixed = affix
-	      this.unpin = affix == 'bottom' ? this.getPinnedOffset() : null
-	
-	      this.$element
-	        .removeClass(Affix.RESET)
-	        .addClass(affixType)
-	        .trigger(affixType.replace('affix', 'affixed') + '.bs.affix')
-	    }
-	
-	    if (affix == 'bottom') {
-	      this.$element.offset({
-	        top: scrollHeight - height - offsetBottom
-	      })
-	    }
-	  }
-	
-	
-	  // AFFIX PLUGIN DEFINITION
-	  // =======================
-	
-	  function Plugin(option) {
-	    return this.each(function () {
-	      var $this   = $(this)
-	      var data    = $this.data('bs.affix')
-	      var options = typeof option == 'object' && option
-	
-	      if (!data) $this.data('bs.affix', (data = new Affix(this, options)))
-	      if (typeof option == 'string') data[option]()
-	    })
-	  }
-	
-	  var old = $.fn.affix
-	
-	  $.fn.affix             = Plugin
-	  $.fn.affix.Constructor = Affix
-	
-	
-	  // AFFIX NO CONFLICT
-	  // =================
-	
-	  $.fn.affix.noConflict = function () {
-	    $.fn.affix = old
-	    return this
-	  }
-	
-	
-	  // AFFIX DATA-API
-	  // ==============
-	
-	  $(window).on('load', function () {
-	    $('[data-spy="affix"]').each(function () {
-	      var $spy = $(this)
-	      var data = $spy.data()
-	
-	      data.offset = data.offset || {}
-	
-	      if (data.offsetBottom != null) data.offset.bottom = data.offsetBottom
-	      if (data.offsetTop    != null) data.offset.top    = data.offsetTop
-	
-	      Plugin.call($spy, data)
-	    })
-	  })
-	
-	}(jQuery);
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
-
-/***/ }),
+/* 3 */,
 /* 4 */,
 /* 5 */,
 /* 6 */,
@@ -2498,767 +113,8 @@ webpackJsonp([1],[
 /* 17 */,
 /* 18 */,
 /* 19 */,
-/* 20 */
-/*!************************************!*\
-  !*** ./src/task/components/App.js ***!
-  \************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var AppClass = _backbone2.default.Application.extend({
-	  region: '#js-main-area'
-	}); /*
-	     * File Name : app.js
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
-	
-	var App = new AppClass();
-	exports.default = App;
-
-/***/ }),
-/* 21 */
-/*!***************************************************************!*\
-  !*** ./~/backbone-validation/dist/backbone-validation-amd.js ***!
-  \***************************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	// Backbone.Validation v0.11.5
-	//
-	// Copyright (c) 2011-2015 Thomas Pedersen
-	// Distributed under MIT License
-	//
-	// Documentation and full license available at:
-	// http://thedersen.com/projects/backbone-validation
-	(function (factory) {
-	  if (true) {
-	    module.exports = factory(__webpack_require__(/*! backbone */ 17), __webpack_require__(/*! underscore */ 1));
-	  } else if (typeof define === 'function' && define.amd) {
-	    define(['backbone', 'underscore'], factory);
-	  }
-	}(function (Backbone, _) {
-	  Backbone.Validation = (function(_){
-	    'use strict';
-	  
-	    // Default options
-	    // ---------------
-	  
-	    var defaultOptions = {
-	      forceUpdate: false,
-	      selector: 'name',
-	      labelFormatter: 'sentenceCase',
-	      valid: Function.prototype,
-	      invalid: Function.prototype
-	    };
-	  
-	  
-	    // Helper functions
-	    // ----------------
-	  
-	    // Formatting functions used for formatting error messages
-	    var formatFunctions = {
-	      // Uses the configured label formatter to format the attribute name
-	      // to make it more readable for the user
-	      formatLabel: function(attrName, model) {
-	        return defaultLabelFormatters[defaultOptions.labelFormatter](attrName, model);
-	      },
-	  
-	      // Replaces nummeric placeholders like {0} in a string with arguments
-	      // passed to the function
-	      format: function() {
-	        var args = Array.prototype.slice.call(arguments),
-	            text = args.shift();
-	        return text.replace(/\{(\d+)\}/g, function(match, number) {
-	          return typeof args[number] !== 'undefined' ? args[number] : match;
-	        });
-	      }
-	    };
-	  
-	    // Flattens an object
-	    // eg:
-	    //
-	    //     var o = {
-	    //       owner: {
-	    //         name: 'Backbone',
-	    //         address: {
-	    //           street: 'Street',
-	    //           zip: 1234
-	    //         }
-	    //       }
-	    //     };
-	    //
-	    // becomes:
-	    //
-	    //     var o = {
-	    //       'owner': {
-	    //         name: 'Backbone',
-	    //         address: {
-	    //           street: 'Street',
-	    //           zip: 1234
-	    //         }
-	    //       },
-	    //       'owner.name': 'Backbone',
-	    //       'owner.address': {
-	    //         street: 'Street',
-	    //         zip: 1234
-	    //       },
-	    //       'owner.address.street': 'Street',
-	    //       'owner.address.zip': 1234
-	    //     };
-	    // This may seem redundant, but it allows for maximum flexibility
-	    // in validation rules.
-	    var flatten = function (obj, into, prefix) {
-	      into = into || {};
-	      prefix = prefix || '';
-	  
-	      _.each(obj, function(val, key) {
-	        if(obj.hasOwnProperty(key)) {
-	          if (!!val && _.isArray(val)) {
-	            _.forEach(val, function(v, k) {
-	              flatten(v, into, prefix + key + '.' + k + '.');
-	              into[prefix + key + '.' + k] = v;
-	            });
-	          } else if (!!val && typeof val === 'object' && val.constructor === Object) {
-	            flatten(val, into, prefix + key + '.');
-	          }
-	  
-	          // Register the current level object as well
-	          into[prefix + key] = val;
-	        }
-	      });
-	  
-	      return into;
-	    };
-	  
-	    // Validation
-	    // ----------
-	  
-	    var Validation = (function(){
-	  
-	      // Returns an object with undefined properties for all
-	      // attributes on the model that has defined one or more
-	      // validation rules.
-	      var getValidatedAttrs = function(model, attrs) {
-	        attrs = attrs || _.keys(_.result(model, 'validation') || {});
-	        return _.reduce(attrs, function(memo, key) {
-	          memo[key] = void 0;
-	          return memo;
-	        }, {});
-	      };
-	  
-	      // Returns an array with attributes passed through options
-	      var getOptionsAttrs = function(options, view) {
-	        var attrs = options.attributes;
-	        if (_.isFunction(attrs)) {
-	          attrs = attrs(view);
-	        } else if (_.isString(attrs) && (_.isFunction(defaultAttributeLoaders[attrs]))) {
-	          attrs = defaultAttributeLoaders[attrs](view);
-	        }
-	        if (_.isArray(attrs)) {
-	          return attrs;
-	        }
-	      };
-	  
-	  
-	      // Looks on the model for validations for a specified
-	      // attribute. Returns an array of any validators defined,
-	      // or an empty array if none is defined.
-	      var getValidators = function(model, attr) {
-	        var attrValidationSet = model.validation ? _.result(model, 'validation')[attr] || {} : {};
-	  
-	        // If the validator is a function or a string, wrap it in a function validator
-	        if (_.isFunction(attrValidationSet) || _.isString(attrValidationSet)) {
-	          attrValidationSet = {
-	            fn: attrValidationSet
-	          };
-	        }
-	  
-	        // Stick the validator object into an array
-	        if(!_.isArray(attrValidationSet)) {
-	          attrValidationSet = [attrValidationSet];
-	        }
-	  
-	        // Reduces the array of validators into a new array with objects
-	        // with a validation method to call, the value to validate against
-	        // and the specified error message, if any
-	        return _.reduce(attrValidationSet, function(memo, attrValidation) {
-	          _.each(_.without(_.keys(attrValidation), 'msg'), function(validator) {
-	            memo.push({
-	              fn: defaultValidators[validator],
-	              val: attrValidation[validator],
-	              msg: attrValidation.msg
-	            });
-	          });
-	          return memo;
-	        }, []);
-	      };
-	  
-	      // Validates an attribute against all validators defined
-	      // for that attribute. If one or more errors are found,
-	      // the first error message is returned.
-	      // If the attribute is valid, an empty string is returned.
-	      var validateAttr = function(model, attr, value, computed) {
-	        // Reduces the array of validators to an error message by
-	        // applying all the validators and returning the first error
-	        // message, if any.
-	        return _.reduce(getValidators(model, attr), function(memo, validator){
-	          // Pass the format functions plus the default
-	          // validators as the context to the validator
-	          var ctx = _.extend({}, formatFunctions, defaultValidators),
-	              result = validator.fn.call(ctx, value, attr, validator.val, model, computed);
-	  
-	          if(result === false || memo === false) {
-	            return false;
-	          }
-	          if (result && !memo) {
-	            return _.result(validator, 'msg') || result;
-	          }
-	          return memo;
-	        }, '');
-	      };
-	  
-	      // Loops through the model's attributes and validates the specified attrs.
-	      // Returns and object containing names of invalid attributes
-	      // as well as error messages.
-	      var validateModel = function(model, attrs, validatedAttrs) {
-	        var error,
-	            invalidAttrs = {},
-	            isValid = true,
-	            computed = _.clone(attrs);
-	  
-	        _.each(validatedAttrs, function(val, attr) {
-	          error = validateAttr(model, attr, val, computed);
-	          if (error) {
-	            invalidAttrs[attr] = error;
-	            isValid = false;
-	          }
-	        });
-	  
-	        return {
-	          invalidAttrs: invalidAttrs,
-	          isValid: isValid
-	        };
-	      };
-	  
-	      // Contains the methods that are mixed in on the model when binding
-	      var mixin = function(view, options) {
-	        return {
-	  
-	          // Check whether or not a value, or a hash of values
-	          // passes validation without updating the model
-	          preValidate: function(attr, value) {
-	            var self = this,
-	                result = {},
-	                error;
-	  
-	            if(_.isObject(attr)){
-	              _.each(attr, function(value, key) {
-	                error = self.preValidate(key, value);
-	                if(error){
-	                  result[key] = error;
-	                }
-	              });
-	  
-	              return _.isEmpty(result) ? undefined : result;
-	            }
-	            else {
-	              return validateAttr(this, attr, value, _.extend({}, this.attributes));
-	            }
-	          },
-	  
-	          // Check to see if an attribute, an array of attributes or the
-	          // entire model is valid. Passing true will force a validation
-	          // of the model.
-	          isValid: function(option) {
-	            var flattened, attrs, error, invalidAttrs;
-	  
-	            option = option || getOptionsAttrs(options, view);
-	  
-	            if(_.isString(option)){
-	              attrs = [option];
-	            } else if(_.isArray(option)) {
-	              attrs = option;
-	            }
-	            if (attrs) {
-	              flattened = flatten(this.attributes);
-	              //Loop through all associated views
-	              _.each(this.associatedViews, function(view) {
-	                _.each(attrs, function (attr) {
-	                  error = validateAttr(this, attr, flattened[attr], _.extend({}, this.attributes));
-	                  if (error) {
-	                    options.invalid(view, attr, error, options.selector);
-	                    invalidAttrs = invalidAttrs || {};
-	                    invalidAttrs[attr] = error;
-	                  } else {
-	                    options.valid(view, attr, options.selector);
-	                  }
-	                }, this);
-	              }, this);
-	            }
-	  
-	            if(option === true) {
-	              invalidAttrs = this.validate();
-	            }
-	            if (invalidAttrs) {
-	              this.trigger('invalid', this, invalidAttrs, {validationError: invalidAttrs});
-	            }
-	            return attrs ? !invalidAttrs : this.validation ? this._isValid : true;
-	          },
-	  
-	          // This is called by Backbone when it needs to perform validation.
-	          // You can call it manually without any parameters to validate the
-	          // entire model.
-	          validate: function(attrs, setOptions){
-	            var model = this,
-	                validateAll = !attrs,
-	                opt = _.extend({}, options, setOptions),
-	                validatedAttrs = getValidatedAttrs(model, getOptionsAttrs(options, view)),
-	                allAttrs = _.extend({}, validatedAttrs, model.attributes, attrs),
-	                flattened = flatten(allAttrs),
-	                changedAttrs = attrs ? flatten(attrs) : flattened,
-	                result = validateModel(model, allAttrs, _.pick(flattened, _.keys(validatedAttrs)));
-	  
-	            model._isValid = result.isValid;
-	  
-	            //After validation is performed, loop through all associated views
-	            _.each(model.associatedViews, function(view){
-	  
-	              // After validation is performed, loop through all validated and changed attributes
-	              // and call the valid and invalid callbacks so the view is updated.
-	              _.each(validatedAttrs, function(val, attr){
-	                  var invalid = result.invalidAttrs.hasOwnProperty(attr),
-	                    changed = changedAttrs.hasOwnProperty(attr);
-	  
-	                  if(!invalid){
-	                    opt.valid(view, attr, opt.selector);
-	                  }
-	                  if(invalid && (changed || validateAll)){
-	                    opt.invalid(view, attr, result.invalidAttrs[attr], opt.selector);
-	                  }
-	              });
-	            });
-	  
-	            // Trigger validated events.
-	            // Need to defer this so the model is actually updated before
-	            // the event is triggered.
-	            _.defer(function() {
-	              model.trigger('validated', model._isValid, model, result.invalidAttrs);
-	              model.trigger('validated:' + (model._isValid ? 'valid' : 'invalid'), model, result.invalidAttrs);
-	            });
-	  
-	            // Return any error messages to Backbone, unless the forceUpdate flag is set.
-	            // Then we do not return anything and fools Backbone to believe the validation was
-	            // a success. That way Backbone will update the model regardless.
-	            if (!opt.forceUpdate && _.intersection(_.keys(result.invalidAttrs), _.keys(changedAttrs)).length > 0) {
-	              return result.invalidAttrs;
-	            }
-	          }
-	        };
-	      };
-	  
-	      // Helper to mix in validation on a model. Stores the view in the associated views array.
-	      var bindModel = function(view, model, options) {
-	        if (model.associatedViews) {
-	          model.associatedViews.push(view);
-	        } else {
-	          model.associatedViews = [view];
-	        }
-	        _.extend(model, mixin(view, options));
-	      };
-	  
-	      // Removes view from associated views of the model or the methods
-	      // added to a model if no view or single view provided
-	      var unbindModel = function(model, view) {
-	        if (view && model.associatedViews && model.associatedViews.length > 1){
-	          model.associatedViews = _.without(model.associatedViews, view);
-	        } else {
-	          delete model.validate;
-	          delete model.preValidate;
-	          delete model.isValid;
-	          delete model.associatedViews;
-	        }
-	      };
-	  
-	      // Mix in validation on a model whenever a model is
-	      // added to a collection
-	      var collectionAdd = function(model) {
-	        bindModel(this.view, model, this.options);
-	      };
-	  
-	      // Remove validation from a model whenever a model is
-	      // removed from a collection
-	      var collectionRemove = function(model) {
-	        unbindModel(model);
-	      };
-	  
-	      // Returns the public methods on Backbone.Validation
-	      return {
-	  
-	        // Current version of the library
-	        version: '0.11.3',
-	  
-	        // Called to configure the default options
-	        configure: function(options) {
-	          _.extend(defaultOptions, options);
-	        },
-	  
-	        // Hooks up validation on a view with a model
-	        // or collection
-	        bind: function(view, options) {
-	          options = _.extend({}, defaultOptions, defaultCallbacks, options);
-	  
-	          var model = options.model || view.model,
-	              collection = options.collection || view.collection;
-	  
-	          if(typeof model === 'undefined' && typeof collection === 'undefined'){
-	            throw 'Before you execute the binding your view must have a model or a collection.\n' +
-	                  'See http://thedersen.com/projects/backbone-validation/#using-form-model-validation for more information.';
-	          }
-	  
-	          if(model) {
-	            bindModel(view, model, options);
-	          }
-	          else if(collection) {
-	            collection.each(function(model){
-	              bindModel(view, model, options);
-	            });
-	            collection.bind('add', collectionAdd, {view: view, options: options});
-	            collection.bind('remove', collectionRemove);
-	          }
-	        },
-	  
-	        // Removes validation from a view with a model
-	        // or collection
-	        unbind: function(view, options) {
-	          options = _.extend({}, options);
-	          var model = options.model || view.model,
-	              collection = options.collection || view.collection;
-	  
-	          if(model) {
-	            unbindModel(model, view);
-	          }
-	          else if(collection) {
-	            collection.each(function(model){
-	              unbindModel(model, view);
-	            });
-	            collection.unbind('add', collectionAdd);
-	            collection.unbind('remove', collectionRemove);
-	          }
-	        },
-	  
-	        // Used to extend the Backbone.Model.prototype
-	        // with validation
-	        mixin: mixin(null, defaultOptions)
-	      };
-	    }());
-	  
-	  
-	    // Callbacks
-	    // ---------
-	  
-	    var defaultCallbacks = Validation.callbacks = {
-	  
-	      // Gets called when a previously invalid field in the
-	      // view becomes valid. Removes any error message.
-	      // Should be overridden with custom functionality.
-	      valid: function(view, attr, selector) {
-	        view.$('[' + selector + '~="' + attr + '"]')
-	            .removeClass('invalid')
-	            .removeAttr('data-error');
-	      },
-	  
-	      // Gets called when a field in the view becomes invalid.
-	      // Adds a error message.
-	      // Should be overridden with custom functionality.
-	      invalid: function(view, attr, error, selector) {
-	        view.$('[' + selector + '~="' + attr + '"]')
-	            .addClass('invalid')
-	            .attr('data-error', error);
-	      }
-	    };
-	  
-	  
-	    // Patterns
-	    // --------
-	  
-	    var defaultPatterns = Validation.patterns = {
-	      // Matches any digit(s) (i.e. 0-9)
-	      digits: /^\d+$/,
-	  
-	      // Matches any number (e.g. 100.000)
-	      number: /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/,
-	  
-	      // Matches a valid email address (e.g. mail@example.com)
-	      email: /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
-	  
-	      // Mathes any valid url (e.g. http://www.xample.com)
-	      url: /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i
-	    };
-	  
-	  
-	    // Error messages
-	    // --------------
-	  
-	    // Error message for the build in validators.
-	    // {x} gets swapped out with arguments form the validator.
-	    var defaultMessages = Validation.messages = {
-	      required: '{0} is required',
-	      acceptance: '{0} must be accepted',
-	      min: '{0} must be greater than or equal to {1}',
-	      max: '{0} must be less than or equal to {1}',
-	      range: '{0} must be between {1} and {2}',
-	      length: '{0} must be {1} characters',
-	      minLength: '{0} must be at least {1} characters',
-	      maxLength: '{0} must be at most {1} characters',
-	      rangeLength: '{0} must be between {1} and {2} characters',
-	      oneOf: '{0} must be one of: {1}',
-	      equalTo: '{0} must be the same as {1}',
-	      digits: '{0} must only contain digits',
-	      number: '{0} must be a number',
-	      email: '{0} must be a valid email',
-	      url: '{0} must be a valid url',
-	      inlinePattern: '{0} is invalid'
-	    };
-	  
-	    // Label formatters
-	    // ----------------
-	  
-	    // Label formatters are used to convert the attribute name
-	    // to a more human friendly label when using the built in
-	    // error messages.
-	    // Configure which one to use with a call to
-	    //
-	    //     Backbone.Validation.configure({
-	    //       labelFormatter: 'label'
-	    //     });
-	    var defaultLabelFormatters = Validation.labelFormatters = {
-	  
-	      // Returns the attribute name with applying any formatting
-	      none: function(attrName) {
-	        return attrName;
-	      },
-	  
-	      // Converts attributeName or attribute_name to Attribute name
-	      sentenceCase: function(attrName) {
-	        return attrName.replace(/(?:^\w|[A-Z]|\b\w)/g, function(match, index) {
-	          return index === 0 ? match.toUpperCase() : ' ' + match.toLowerCase();
-	        }).replace(/_/g, ' ');
-	      },
-	  
-	      // Looks for a label configured on the model and returns it
-	      //
-	      //      var Model = Backbone.Model.extend({
-	      //        validation: {
-	      //          someAttribute: {
-	      //            required: true
-	      //          }
-	      //        },
-	      //
-	      //        labels: {
-	      //          someAttribute: 'Custom label'
-	      //        }
-	      //      });
-	      label: function(attrName, model) {
-	        return (model.labels && model.labels[attrName]) || defaultLabelFormatters.sentenceCase(attrName, model);
-	      }
-	    };
-	  
-	    // AttributeLoaders
-	  
-	    var defaultAttributeLoaders = Validation.attributeLoaders = {
-	      inputNames: function (view) {
-	        var attrs = [];
-	        if (view) {
-	          view.$('form [name]').each(function () {
-	            if (/^(?:input|select|textarea)$/i.test(this.nodeName) && this.name &&
-	              this.type !== 'submit' && attrs.indexOf(this.name) === -1) {
-	              attrs.push(this.name);
-	            }
-	          });
-	        }
-	        return attrs;
-	      }
-	    };
-	  
-	  
-	    // Built in validators
-	    // -------------------
-	  
-	    var defaultValidators = Validation.validators = (function(){
-	      // Use native trim when defined
-	      var trim = String.prototype.trim ?
-	        function(text) {
-	          return text === null ? '' : String.prototype.trim.call(text);
-	        } :
-	        function(text) {
-	          var trimLeft = /^\s+/,
-	              trimRight = /\s+$/;
-	  
-	          return text === null ? '' : text.toString().replace(trimLeft, '').replace(trimRight, '');
-	        };
-	  
-	      // Determines whether or not a value is a number
-	      var isNumber = function(value){
-	        return _.isNumber(value) || (_.isString(value) && value.match(defaultPatterns.number));
-	      };
-	  
-	      // Determines whether or not a value is empty
-	      var hasValue = function(value) {
-	        return !(_.isNull(value) || _.isUndefined(value) || (_.isString(value) && trim(value) === '') || (_.isArray(value) && _.isEmpty(value)));
-	      };
-	  
-	      return {
-	        // Function validator
-	        // Lets you implement a custom function used for validation
-	        fn: function(value, attr, fn, model, computed) {
-	          if(_.isString(fn)){
-	            fn = model[fn];
-	          }
-	          return fn.call(model, value, attr, computed);
-	        },
-	  
-	        // Required validator
-	        // Validates if the attribute is required or not
-	        // This can be specified as either a boolean value or a function that returns a boolean value
-	        required: function(value, attr, required, model, computed) {
-	          var isRequired = _.isFunction(required) ? required.call(model, value, attr, computed) : required;
-	          if(!isRequired && !hasValue(value)) {
-	            return false; // overrides all other validators
-	          }
-	          if (isRequired && !hasValue(value)) {
-	            return this.format(defaultMessages.required, this.formatLabel(attr, model));
-	          }
-	        },
-	  
-	        // Acceptance validator
-	        // Validates that something has to be accepted, e.g. terms of use
-	        // `true` or 'true' are valid
-	        acceptance: function(value, attr, accept, model) {
-	          if(value !== 'true' && (!_.isBoolean(value) || value === false)) {
-	            return this.format(defaultMessages.acceptance, this.formatLabel(attr, model));
-	          }
-	        },
-	  
-	        // Min validator
-	        // Validates that the value has to be a number and equal to or greater than
-	        // the min value specified
-	        min: function(value, attr, minValue, model) {
-	          if (!isNumber(value) || value < minValue) {
-	            return this.format(defaultMessages.min, this.formatLabel(attr, model), minValue);
-	          }
-	        },
-	  
-	        // Max validator
-	        // Validates that the value has to be a number and equal to or less than
-	        // the max value specified
-	        max: function(value, attr, maxValue, model) {
-	          if (!isNumber(value) || value > maxValue) {
-	            return this.format(defaultMessages.max, this.formatLabel(attr, model), maxValue);
-	          }
-	        },
-	  
-	        // Range validator
-	        // Validates that the value has to be a number and equal to or between
-	        // the two numbers specified
-	        range: function(value, attr, range, model) {
-	          if(!isNumber(value) || value < range[0] || value > range[1]) {
-	            return this.format(defaultMessages.range, this.formatLabel(attr, model), range[0], range[1]);
-	          }
-	        },
-	  
-	        // Length validator
-	        // Validates that the value has to be a string with length equal to
-	        // the length value specified
-	        length: function(value, attr, length, model) {
-	          if (!_.isString(value) || value.length !== length) {
-	            return this.format(defaultMessages.length, this.formatLabel(attr, model), length);
-	          }
-	        },
-	  
-	        // Min length validator
-	        // Validates that the value has to be a string with length equal to or greater than
-	        // the min length value specified
-	        minLength: function(value, attr, minLength, model) {
-	          if (!_.isString(value) || value.length < minLength) {
-	            return this.format(defaultMessages.minLength, this.formatLabel(attr, model), minLength);
-	          }
-	        },
-	  
-	        // Max length validator
-	        // Validates that the value has to be a string with length equal to or less than
-	        // the max length value specified
-	        maxLength: function(value, attr, maxLength, model) {
-	          if (!_.isString(value) || value.length > maxLength) {
-	            return this.format(defaultMessages.maxLength, this.formatLabel(attr, model), maxLength);
-	          }
-	        },
-	  
-	        // Range length validator
-	        // Validates that the value has to be a string and equal to or between
-	        // the two numbers specified
-	        rangeLength: function(value, attr, range, model) {
-	          if (!_.isString(value) || value.length < range[0] || value.length > range[1]) {
-	            return this.format(defaultMessages.rangeLength, this.formatLabel(attr, model), range[0], range[1]);
-	          }
-	        },
-	  
-	        // One of validator
-	        // Validates that the value has to be equal to one of the elements in
-	        // the specified array. Case sensitive matching
-	        oneOf: function(value, attr, values, model) {
-	          if(!_.include(values, value)){
-	            return this.format(defaultMessages.oneOf, this.formatLabel(attr, model), values.join(', '));
-	          }
-	        },
-	  
-	        // Equal to validator
-	        // Validates that the value has to be equal to the value of the attribute
-	        // with the name specified
-	        equalTo: function(value, attr, equalTo, model, computed) {
-	          if(value !== computed[equalTo]) {
-	            return this.format(defaultMessages.equalTo, this.formatLabel(attr, model), this.formatLabel(equalTo, model));
-	          }
-	        },
-	  
-	        // Pattern validator
-	        // Validates that the value has to match the pattern specified.
-	        // Can be a regular expression or the name of one of the built in patterns
-	        pattern: function(value, attr, pattern, model) {
-	          if (!hasValue(value) || !value.toString().match(defaultPatterns[pattern] || pattern)) {
-	            return this.format(defaultMessages[pattern] || defaultMessages.inlinePattern, this.formatLabel(attr, model), pattern);
-	          }
-	        }
-	      };
-	    }());
-	  
-	    // Set the correct context for all validators
-	    // when used from within a method validator
-	    _.each(defaultValidators, function(validator, key){
-	      defaultValidators[key] = _.bind(defaultValidators[key], _.extend({}, formatFunctions, defaultValidators));
-	    });
-	  
-	    return Validation;
-	  }(_));
-	  return Backbone.Validation;
-	}));
-
-/***/ }),
+/* 20 */,
+/* 21 */,
 /* 22 */
 /*!*******************************!*\
   !*** ./src/backbone-tools.js ***!
@@ -3374,49 +230,674 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 23 */
-/*!***************************************!*\
-  !*** ./src/task/components/Router.js ***!
-  \***************************************/
+/* 23 */,
+/* 24 */,
+/* 25 */,
+/* 26 */,
+/* 27 */,
+/* 28 */
+/*!*********************************!*\
+  !*** ./~/handlebars/runtime.js ***!
+  \*********************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	// Create a simple path alias to allow browserify to resolve
+	// the runtime on a supported path.
+	module.exports = __webpack_require__(/*! ./dist/cjs/handlebars.runtime */ 29);
+
+
+/***/ }),
+/* 29 */
+/*!*****************************************************!*\
+  !*** ./~/handlebars/dist/cjs/handlebars.runtime.js ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	/*globals Handlebars: true */
+	var base = __webpack_require__(/*! ./handlebars/base */ 30);
 	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
+	// Each of these augment the Handlebars object. No need to setup here.
+	// (This is done to easily share code between commonjs and browse envs)
+	var SafeString = __webpack_require__(/*! ./handlebars/safe-string */ 32)["default"];
+	var Exception = __webpack_require__(/*! ./handlebars/exception */ 33)["default"];
+	var Utils = __webpack_require__(/*! ./handlebars/utils */ 31);
+	var runtime = __webpack_require__(/*! ./handlebars/runtime */ 34);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	// For compatibility and usage outside of module systems, make the Handlebars object a namespace
+	var create = function() {
+	  var hb = new base.HandlebarsEnvironment();
 	
-	var _backbone2 = _interopRequireDefault(_backbone);
+	  Utils.extend(hb, base);
+	  hb.SafeString = SafeString;
+	  hb.Exception = Exception;
+	  hb.Utils = Utils;
+	  hb.escapeExpression = Utils.escapeExpression;
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	  hb.VM = runtime;
+	  hb.template = function(spec) {
+	    return runtime.template(spec, hb);
+	  };
 	
-	var Router = _backbone2.default.AppRouter.extend({
-	  appRoutes: {
-	    'login': 'login'
+	  return hb;
+	};
+	
+	var Handlebars = create();
+	Handlebars.create = create;
+	
+	Handlebars['default'] = Handlebars;
+	
+	exports["default"] = Handlebars;
+
+/***/ }),
+/* 30 */
+/*!**************************************************!*\
+  !*** ./~/handlebars/dist/cjs/handlebars/base.js ***!
+  \**************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Utils = __webpack_require__(/*! ./utils */ 31);
+	var Exception = __webpack_require__(/*! ./exception */ 33)["default"];
+	
+	var VERSION = "2.0.0";
+	exports.VERSION = VERSION;var COMPILER_REVISION = 6;
+	exports.COMPILER_REVISION = COMPILER_REVISION;
+	var REVISION_CHANGES = {
+	  1: '<= 1.0.rc.2', // 1.0.rc.2 is actually rev2 but doesn't report it
+	  2: '== 1.0.0-rc.3',
+	  3: '== 1.0.0-rc.4',
+	  4: '== 1.x.x',
+	  5: '== 2.0.0-alpha.x',
+	  6: '>= 2.0.0-beta.1'
+	};
+	exports.REVISION_CHANGES = REVISION_CHANGES;
+	var isArray = Utils.isArray,
+	    isFunction = Utils.isFunction,
+	    toString = Utils.toString,
+	    objectType = '[object Object]';
+	
+	function HandlebarsEnvironment(helpers, partials) {
+	  this.helpers = helpers || {};
+	  this.partials = partials || {};
+	
+	  registerDefaultHelpers(this);
+	}
+	
+	exports.HandlebarsEnvironment = HandlebarsEnvironment;HandlebarsEnvironment.prototype = {
+	  constructor: HandlebarsEnvironment,
+	
+	  logger: logger,
+	  log: log,
+	
+	  registerHelper: function(name, fn) {
+	    if (toString.call(name) === objectType) {
+	      if (fn) { throw new Exception('Arg not supported with multiple helpers'); }
+	      Utils.extend(this.helpers, name);
+	    } else {
+	      this.helpers[name] = fn;
+	    }
+	  },
+	  unregisterHelper: function(name) {
+	    delete this.helpers[name];
+	  },
+	
+	  registerPartial: function(name, partial) {
+	    if (toString.call(name) === objectType) {
+	      Utils.extend(this.partials,  name);
+	    } else {
+	      this.partials[name] = partial;
+	    }
+	  },
+	  unregisterPartial: function(name) {
+	    delete this.partials[name];
 	  }
-	}); /*
-	     * File Name : router.js
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	};
 	
-	exports.default = Router;
+	function registerDefaultHelpers(instance) {
+	  instance.registerHelper('helperMissing', function(/* [args, ]options */) {
+	    if(arguments.length === 1) {
+	      // A missing field in a {{foo}} constuct.
+	      return undefined;
+	    } else {
+	      // Someone is actually trying to call something, blow up.
+	      throw new Exception("Missing helper: '" + arguments[arguments.length-1].name + "'");
+	    }
+	  });
+	
+	  instance.registerHelper('blockHelperMissing', function(context, options) {
+	    var inverse = options.inverse,
+	        fn = options.fn;
+	
+	    if(context === true) {
+	      return fn(this);
+	    } else if(context === false || context == null) {
+	      return inverse(this);
+	    } else if (isArray(context)) {
+	      if(context.length > 0) {
+	        if (options.ids) {
+	          options.ids = [options.name];
+	        }
+	
+	        return instance.helpers.each(context, options);
+	      } else {
+	        return inverse(this);
+	      }
+	    } else {
+	      if (options.data && options.ids) {
+	        var data = createFrame(options.data);
+	        data.contextPath = Utils.appendContextPath(options.data.contextPath, options.name);
+	        options = {data: data};
+	      }
+	
+	      return fn(context, options);
+	    }
+	  });
+	
+	  instance.registerHelper('each', function(context, options) {
+	    if (!options) {
+	      throw new Exception('Must pass iterator to #each');
+	    }
+	
+	    var fn = options.fn, inverse = options.inverse;
+	    var i = 0, ret = "", data;
+	
+	    var contextPath;
+	    if (options.data && options.ids) {
+	      contextPath = Utils.appendContextPath(options.data.contextPath, options.ids[0]) + '.';
+	    }
+	
+	    if (isFunction(context)) { context = context.call(this); }
+	
+	    if (options.data) {
+	      data = createFrame(options.data);
+	    }
+	
+	    if(context && typeof context === 'object') {
+	      if (isArray(context)) {
+	        for(var j = context.length; i<j; i++) {
+	          if (data) {
+	            data.index = i;
+	            data.first = (i === 0);
+	            data.last  = (i === (context.length-1));
+	
+	            if (contextPath) {
+	              data.contextPath = contextPath + i;
+	            }
+	          }
+	          ret = ret + fn(context[i], { data: data });
+	        }
+	      } else {
+	        for(var key in context) {
+	          if(context.hasOwnProperty(key)) {
+	            if(data) {
+	              data.key = key;
+	              data.index = i;
+	              data.first = (i === 0);
+	
+	              if (contextPath) {
+	                data.contextPath = contextPath + key;
+	              }
+	            }
+	            ret = ret + fn(context[key], {data: data});
+	            i++;
+	          }
+	        }
+	      }
+	    }
+	
+	    if(i === 0){
+	      ret = inverse(this);
+	    }
+	
+	    return ret;
+	  });
+	
+	  instance.registerHelper('if', function(conditional, options) {
+	    if (isFunction(conditional)) { conditional = conditional.call(this); }
+	
+	    // Default behavior is to render the positive path if the value is truthy and not empty.
+	    // The `includeZero` option may be set to treat the condtional as purely not empty based on the
+	    // behavior of isEmpty. Effectively this determines if 0 is handled by the positive path or negative.
+	    if ((!options.hash.includeZero && !conditional) || Utils.isEmpty(conditional)) {
+	      return options.inverse(this);
+	    } else {
+	      return options.fn(this);
+	    }
+	  });
+	
+	  instance.registerHelper('unless', function(conditional, options) {
+	    return instance.helpers['if'].call(this, conditional, {fn: options.inverse, inverse: options.fn, hash: options.hash});
+	  });
+	
+	  instance.registerHelper('with', function(context, options) {
+	    if (isFunction(context)) { context = context.call(this); }
+	
+	    var fn = options.fn;
+	
+	    if (!Utils.isEmpty(context)) {
+	      if (options.data && options.ids) {
+	        var data = createFrame(options.data);
+	        data.contextPath = Utils.appendContextPath(options.data.contextPath, options.ids[0]);
+	        options = {data:data};
+	      }
+	
+	      return fn(context, options);
+	    } else {
+	      return options.inverse(this);
+	    }
+	  });
+	
+	  instance.registerHelper('log', function(message, options) {
+	    var level = options.data && options.data.level != null ? parseInt(options.data.level, 10) : 1;
+	    instance.log(level, message);
+	  });
+	
+	  instance.registerHelper('lookup', function(obj, field) {
+	    return obj && obj[field];
+	  });
+	}
+	
+	var logger = {
+	  methodMap: { 0: 'debug', 1: 'info', 2: 'warn', 3: 'error' },
+	
+	  // State enum
+	  DEBUG: 0,
+	  INFO: 1,
+	  WARN: 2,
+	  ERROR: 3,
+	  level: 3,
+	
+	  // can be overridden in the host environment
+	  log: function(level, message) {
+	    if (logger.level <= level) {
+	      var method = logger.methodMap[level];
+	      if (typeof console !== 'undefined' && console[method]) {
+	        console[method].call(console, message);
+	      }
+	    }
+	  }
+	};
+	exports.logger = logger;
+	var log = logger.log;
+	exports.log = log;
+	var createFrame = function(object) {
+	  var frame = Utils.extend({}, object);
+	  frame._parent = object;
+	  return frame;
+	};
+	exports.createFrame = createFrame;
 
 /***/ }),
-/* 24 */
-/*!*******************************************!*\
-  !*** ./src/task/components/Controller.js ***!
-  \*******************************************/
+/* 31 */
+/*!***************************************************!*\
+  !*** ./~/handlebars/dist/cjs/handlebars/utils.js ***!
+  \***************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
+	/*jshint -W004 */
+	var SafeString = __webpack_require__(/*! ./safe-string */ 32)["default"];
+	
+	var escape = {
+	  "&": "&amp;",
+	  "<": "&lt;",
+	  ">": "&gt;",
+	  '"': "&quot;",
+	  "'": "&#x27;",
+	  "`": "&#x60;"
+	};
+	
+	var badChars = /[&<>"'`]/g;
+	var possible = /[&<>"'`]/;
+	
+	function escapeChar(chr) {
+	  return escape[chr];
+	}
+	
+	function extend(obj /* , ...source */) {
+	  for (var i = 1; i < arguments.length; i++) {
+	    for (var key in arguments[i]) {
+	      if (Object.prototype.hasOwnProperty.call(arguments[i], key)) {
+	        obj[key] = arguments[i][key];
+	      }
+	    }
+	  }
+	
+	  return obj;
+	}
+	
+	exports.extend = extend;var toString = Object.prototype.toString;
+	exports.toString = toString;
+	// Sourced from lodash
+	// https://github.com/bestiejs/lodash/blob/master/LICENSE.txt
+	var isFunction = function(value) {
+	  return typeof value === 'function';
+	};
+	// fallback for older versions of Chrome and Safari
+	/* istanbul ignore next */
+	if (isFunction(/x/)) {
+	  isFunction = function(value) {
+	    return typeof value === 'function' && toString.call(value) === '[object Function]';
+	  };
+	}
+	var isFunction;
+	exports.isFunction = isFunction;
+	/* istanbul ignore next */
+	var isArray = Array.isArray || function(value) {
+	  return (value && typeof value === 'object') ? toString.call(value) === '[object Array]' : false;
+	};
+	exports.isArray = isArray;
+	
+	function escapeExpression(string) {
+	  // don't escape SafeStrings, since they're already safe
+	  if (string instanceof SafeString) {
+	    return string.toString();
+	  } else if (string == null) {
+	    return "";
+	  } else if (!string) {
+	    return string + '';
+	  }
+	
+	  // Force a string conversion as this will be done by the append regardless and
+	  // the regex test will do this transparently behind the scenes, causing issues if
+	  // an object's to string has escaped characters in it.
+	  string = "" + string;
+	
+	  if(!possible.test(string)) { return string; }
+	  return string.replace(badChars, escapeChar);
+	}
+	
+	exports.escapeExpression = escapeExpression;function isEmpty(value) {
+	  if (!value && value !== 0) {
+	    return true;
+	  } else if (isArray(value) && value.length === 0) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+	}
+	
+	exports.isEmpty = isEmpty;function appendContextPath(contextPath, id) {
+	  return (contextPath ? contextPath + '.' : '') + id;
+	}
+	
+	exports.appendContextPath = appendContextPath;
+
+/***/ }),
+/* 32 */
+/*!*********************************************************!*\
+  !*** ./~/handlebars/dist/cjs/handlebars/safe-string.js ***!
+  \*********************************************************/
+/***/ (function(module, exports) {
+
+	"use strict";
+	// Build out our basic SafeString type
+	function SafeString(string) {
+	  this.string = string;
+	}
+	
+	SafeString.prototype.toString = function() {
+	  return "" + this.string;
+	};
+	
+	exports["default"] = SafeString;
+
+/***/ }),
+/* 33 */
+/*!*******************************************************!*\
+  !*** ./~/handlebars/dist/cjs/handlebars/exception.js ***!
+  \*******************************************************/
+/***/ (function(module, exports) {
+
+	"use strict";
+	
+	var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
+	
+	function Exception(message, node) {
+	  var line;
+	  if (node && node.firstLine) {
+	    line = node.firstLine;
+	
+	    message += ' - ' + line + ':' + node.firstColumn;
+	  }
+	
+	  var tmp = Error.prototype.constructor.call(this, message);
+	
+	  // Unfortunately errors are not enumerable in Chrome (at least), so `for prop in tmp` doesn't work.
+	  for (var idx = 0; idx < errorProps.length; idx++) {
+	    this[errorProps[idx]] = tmp[errorProps[idx]];
+	  }
+	
+	  if (line) {
+	    this.lineNumber = line;
+	    this.column = node.firstColumn;
+	  }
+	}
+	
+	Exception.prototype = new Error();
+	
+	exports["default"] = Exception;
+
+/***/ }),
+/* 34 */
+/*!*****************************************************!*\
+  !*** ./~/handlebars/dist/cjs/handlebars/runtime.js ***!
+  \*****************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Utils = __webpack_require__(/*! ./utils */ 31);
+	var Exception = __webpack_require__(/*! ./exception */ 33)["default"];
+	var COMPILER_REVISION = __webpack_require__(/*! ./base */ 30).COMPILER_REVISION;
+	var REVISION_CHANGES = __webpack_require__(/*! ./base */ 30).REVISION_CHANGES;
+	var createFrame = __webpack_require__(/*! ./base */ 30).createFrame;
+	
+	function checkRevision(compilerInfo) {
+	  var compilerRevision = compilerInfo && compilerInfo[0] || 1,
+	      currentRevision = COMPILER_REVISION;
+	
+	  if (compilerRevision !== currentRevision) {
+	    if (compilerRevision < currentRevision) {
+	      var runtimeVersions = REVISION_CHANGES[currentRevision],
+	          compilerVersions = REVISION_CHANGES[compilerRevision];
+	      throw new Exception("Template was precompiled with an older version of Handlebars than the current runtime. "+
+	            "Please update your precompiler to a newer version ("+runtimeVersions+") or downgrade your runtime to an older version ("+compilerVersions+").");
+	    } else {
+	      // Use the embedded version info since the runtime doesn't know about this revision yet
+	      throw new Exception("Template was precompiled with a newer version of Handlebars than the current runtime. "+
+	            "Please update your runtime to a newer version ("+compilerInfo[1]+").");
+	    }
+	  }
+	}
+	
+	exports.checkRevision = checkRevision;// TODO: Remove this line and break up compilePartial
+	
+	function template(templateSpec, env) {
+	  /* istanbul ignore next */
+	  if (!env) {
+	    throw new Exception("No environment passed to template");
+	  }
+	  if (!templateSpec || !templateSpec.main) {
+	    throw new Exception('Unknown template object: ' + typeof templateSpec);
+	  }
+	
+	  // Note: Using env.VM references rather than local var references throughout this section to allow
+	  // for external users to override these as psuedo-supported APIs.
+	  env.VM.checkRevision(templateSpec.compiler);
+	
+	  var invokePartialWrapper = function(partial, indent, name, context, hash, helpers, partials, data, depths) {
+	    if (hash) {
+	      context = Utils.extend({}, context, hash);
+	    }
+	
+	    var result = env.VM.invokePartial.call(this, partial, name, context, helpers, partials, data, depths);
+	
+	    if (result == null && env.compile) {
+	      var options = { helpers: helpers, partials: partials, data: data, depths: depths };
+	      partials[name] = env.compile(partial, { data: data !== undefined, compat: templateSpec.compat }, env);
+	      result = partials[name](context, options);
+	    }
+	    if (result != null) {
+	      if (indent) {
+	        var lines = result.split('\n');
+	        for (var i = 0, l = lines.length; i < l; i++) {
+	          if (!lines[i] && i + 1 === l) {
+	            break;
+	          }
+	
+	          lines[i] = indent + lines[i];
+	        }
+	        result = lines.join('\n');
+	      }
+	      return result;
+	    } else {
+	      throw new Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
+	    }
+	  };
+	
+	  // Just add water
+	  var container = {
+	    lookup: function(depths, name) {
+	      var len = depths.length;
+	      for (var i = 0; i < len; i++) {
+	        if (depths[i] && depths[i][name] != null) {
+	          return depths[i][name];
+	        }
+	      }
+	    },
+	    lambda: function(current, context) {
+	      return typeof current === 'function' ? current.call(context) : current;
+	    },
+	
+	    escapeExpression: Utils.escapeExpression,
+	    invokePartial: invokePartialWrapper,
+	
+	    fn: function(i) {
+	      return templateSpec[i];
+	    },
+	
+	    programs: [],
+	    program: function(i, data, depths) {
+	      var programWrapper = this.programs[i],
+	          fn = this.fn(i);
+	      if (data || depths) {
+	        programWrapper = program(this, i, fn, data, depths);
+	      } else if (!programWrapper) {
+	        programWrapper = this.programs[i] = program(this, i, fn);
+	      }
+	      return programWrapper;
+	    },
+	
+	    data: function(data, depth) {
+	      while (data && depth--) {
+	        data = data._parent;
+	      }
+	      return data;
+	    },
+	    merge: function(param, common) {
+	      var ret = param || common;
+	
+	      if (param && common && (param !== common)) {
+	        ret = Utils.extend({}, common, param);
+	      }
+	
+	      return ret;
+	    },
+	
+	    noop: env.VM.noop,
+	    compilerInfo: templateSpec.compiler
+	  };
+	
+	  var ret = function(context, options) {
+	    options = options || {};
+	    var data = options.data;
+	
+	    ret._setup(options);
+	    if (!options.partial && templateSpec.useData) {
+	      data = initData(context, data);
+	    }
+	    var depths;
+	    if (templateSpec.useDepths) {
+	      depths = options.depths ? [context].concat(options.depths) : [context];
+	    }
+	
+	    return templateSpec.main.call(container, context, container.helpers, container.partials, data, depths);
+	  };
+	  ret.isTop = true;
+	
+	  ret._setup = function(options) {
+	    if (!options.partial) {
+	      container.helpers = container.merge(options.helpers, env.helpers);
+	
+	      if (templateSpec.usePartial) {
+	        container.partials = container.merge(options.partials, env.partials);
+	      }
+	    } else {
+	      container.helpers = options.helpers;
+	      container.partials = options.partials;
+	    }
+	  };
+	
+	  ret._child = function(i, data, depths) {
+	    if (templateSpec.useDepths && !depths) {
+	      throw new Exception('must pass parent depths');
+	    }
+	
+	    return program(container, i, templateSpec[i], data, depths);
+	  };
+	  return ret;
+	}
+	
+	exports.template = template;function program(container, i, fn, data, depths) {
+	  var prog = function(context, options) {
+	    options = options || {};
+	
+	    return fn.call(container, context, container.helpers, container.partials, options.data || data, depths && [context].concat(depths));
+	  };
+	  prog.program = i;
+	  prog.depth = depths ? depths.length : 0;
+	  return prog;
+	}
+	
+	exports.program = program;function invokePartial(partial, name, context, helpers, partials, data, depths) {
+	  var options = { partial: true, helpers: helpers, partials: partials, data: data, depths: depths };
+	
+	  if(partial === undefined) {
+	    throw new Exception("The partial " + name + " could not be found");
+	  } else if(partial instanceof Function) {
+	    return partial(context, options);
+	  }
+	}
+	
+	exports.invokePartial = invokePartial;function noop() { return ""; }
+	
+	exports.noop = noop;function initData(context, data) {
+	  if (!data || !('root' in data)) {
+	    data = data ? createFrame(data) : {};
+	    data.root = context;
+	  }
+	  return data;
+	}
+
+/***/ }),
+/* 35 */,
+/* 36 */,
+/* 37 */,
+/* 38 */,
+/* 39 */,
+/* 40 */,
+/* 41 */,
+/* 42 */,
+/* 43 */,
+/* 44 */,
+/* 45 */
+/*!****************************************!*\
+  !*** ./src/base/components/AuthBus.js ***!
+  \****************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -3426,469 +907,74 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _MainView = __webpack_require__(/*! ../views/MainView.js */ 25);
-	
-	var _MainView2 = _interopRequireDefault(_MainView);
-	
-	var _App = __webpack_require__(/*! ./App.js */ 20);
-	
-	var _App2 = _interopRequireDefault(_App);
-	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 145);
-	
-	var _Facade2 = _interopRequireDefault(_Facade);
-	
-	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 152);
-	
-	var _AuthBus2 = _interopRequireDefault(_AuthBus);
-	
-	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 153);
-	
-	var _MessageBus2 = _interopRequireDefault(_MessageBus);
-	
-	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 154);
-	
-	var _ConfigBus2 = _interopRequireDefault(_ConfigBus);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var Controller = _backbone2.default.Object.extend({
-	    initialize: function initialize(options) {
-	        _ConfigBus2.default.setFormConfig(options.form_config);
-	        _Facade2.default.loadModels(options.form_datas);
-	        AppOption.facade = _Facade2.default;
-	
-	        _AuthBus2.default.setAuthCallbacks([_Facade2.default.syncModel]);
-	
-	        AppOption.facade = _Facade2.default;
-	        this.mainView = new _MainView2.default();
-	        _App2.default.showView(this.mainView);
+	/*
+	 * File Name : AuthBus.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var AuthBusClass = _backbone2.default.Object.extend({
+	    channelName: 'auth',
+	    url: '/api/v1/login',
+	    radioEvents: {
+	        'login': 'onLogin'
 	    },
-	    status: function status(_status) {
-	        this.mainView.showBox(_status);
+	    initialize: function initialize() {
+	        this.ok_callback = null;
+	        this.error_callback = null;
 	    },
-	
-	    login: function login() {
+	    setAuthCallbacks: function setAuthCallbacks(callbacks) {
 	        /*
-	         * Login view : show the login form
+	         * Define authentication callbacks that should be fired
+	         * on successfull authentication
 	         */
-	        this.mainView.showLogin();
-	    }
-	}); /*
-	     * File Name : Controller.js
-	     *
-	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
-	exports.default = Controller;
-
-/***/ }),
-/* 25 */
-/*!************************************!*\
-  !*** ./src/task/views/MainView.js ***!
-  \************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
-	
-	var _backbone4 = _interopRequireDefault(_backbone3);
-	
-	var _GeneralView = __webpack_require__(/*! ./GeneralView.js */ 26);
-	
-	var _GeneralView2 = _interopRequireDefault(_GeneralView);
-	
-	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 61);
-	
-	var _CommonView2 = _interopRequireDefault(_CommonView);
-	
-	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 63);
-	
-	var _TaskBlockView2 = _interopRequireDefault(_TaskBlockView);
-	
-	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 95);
-	
-	var _HtBeforeDiscountsView2 = _interopRequireDefault(_HtBeforeDiscountsView);
-	
-	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 96);
-	
-	var _DiscountBlockView2 = _interopRequireDefault(_DiscountBlockView);
-	
-	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 111);
-	
-	var _TotalView2 = _interopRequireDefault(_TotalView);
-	
-	var _NotesBlockView = __webpack_require__(/*! ./NotesBlockView.js */ 113);
-	
-	var _NotesBlockView2 = _interopRequireDefault(_NotesBlockView);
-	
-	var _PaymentConditionBlockView = __webpack_require__(/*! ./PaymentConditionBlockView.js */ 115);
-	
-	var _PaymentConditionBlockView2 = _interopRequireDefault(_PaymentConditionBlockView);
-	
-	var _PaymentBlockView = __webpack_require__(/*! ./PaymentBlockView.js */ 117);
-	
-	var _PaymentBlockView2 = _interopRequireDefault(_PaymentBlockView);
-	
-	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 129);
-	
-	var _RightBarView2 = _interopRequireDefault(_RightBarView);
-	
-	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 138);
-	
-	var _StatusView2 = _interopRequireDefault(_StatusView);
-	
-	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 140);
-	
-	var _BootomActionView2 = _interopRequireDefault(_BootomActionView);
-	
-	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 142);
-	
-	var _LoginView2 = _interopRequireDefault(_LoginView);
-	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 92);
-	
-	var _ErrorView2 = _interopRequireDefault(_ErrorView);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 144); /*
-	                                                          * File Name : MainView.js
-	                                                          *
-	                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	                                                          * Company : Majerti ( http://www.majerti.fr )
-	                                                          *
-	                                                          * This software is distributed under GPLV3
-	                                                          * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                          *
-	                                                          */
-	
-	
-	var MainView = _backbone2.default.View.extend({
-	    template: template,
-	    regions: {
-	        errors: '.errors',
-	        modalRegion: '#modalregion',
-	        general: '#general',
-	        common: '#common',
-	        tasklines: '#tasklines',
-	        discounts: '#discounts',
-	        rightbar: "#rightbar",
-	        ht_before_discounts: '.ht_before_discounts',
-	        totals: '.totals',
-	        notes: '.notes',
-	        payment_conditions: '.payment-conditions',
-	        payments: '.payments',
-	        footer: {
-	            el: '.footer-actions',
-	            replaceElement: true
-	        }
+	        this.callbacks = callbacks;
 	    },
-	    childViewEvents: {
-	        'status:change': 'onStatusChange'
-	    },
-	    initialize: function initialize(options) {
-	        this.config = _backbone4.default.channel('config');
-	        this.facade = _backbone4.default.channel('facade');
-	    },
-	    showGeneralBlock: function showGeneralBlock() {
-	        var section = this.config.request('get:form_section', 'general');
-	        var model = this.facade.request('get:model', 'common');
-	        var view = new _GeneralView2.default({ model: model, section: section });
-	        this.showChildView('general', view);
-	    },
-	    showCommonBlock: function showCommonBlock() {
-	        var section = this.config.request('get:form_section', 'common');
-	        var model = this.facade.request('get:model', 'common');
-	        var view = new _CommonView2.default({ model: model, section: section });
-	        this.showChildView('common', view);
-	    },
-	    showTaskGroupBlock: function showTaskGroupBlock() {
-	        var section = this.config.request('get:form_section', 'tasklines');
-	        var collection = this.facade.request('get:collection', 'task_groups');
-	        var view = new _TaskBlockView2.default({ collection: collection, section: section });
-	        this.showChildView('tasklines', view);
-	    },
-	    showDiscountBlock: function showDiscountBlock() {
-	        var section = this.config.request('get:form_section', 'discounts');
-	        var collection = this.facade.request('get:collection', 'discounts');
-	        var model = this.facade.request('get:model', 'common');
-	        var view = new _DiscountBlockView2.default({ collection: collection, model: model, section: section });
-	        this.showChildView('discounts', view);
-	    },
-	    showNotesBlock: function showNotesBlock() {
-	        var section = this.config.request('get:form_section', 'notes');
-	        var model = this.facade.request('get:model', 'common');
-	        var view = new _NotesBlockView2.default({ model: model, section: section });
-	        this.showChildView('notes', view);
-	    },
-	    showPaymentConditionsBlock: function showPaymentConditionsBlock() {
-	        var section = this.config.request('get:form_section', 'payment_conditions');
-	        var model = this.facade.request('get:model', 'common');
-	        var view = new _PaymentConditionBlockView2.default({ model: model });
-	        this.showChildView('payment_conditions', view);
-	    },
-	    showPaymentBlock: function showPaymentBlock() {
-	        var section = this.config.request('get:form_section', 'payments');
-	        var model = this.facade.request('get:model', 'common');
-	        var collection = this.facade.request('get:paymentcollection');
-	        var view = new _PaymentBlockView2.default({ model: model, collection: collection, section: section });
-	        this.showChildView('payments', view);
-	    },
-	    showLogin: function showLogin() {
-	        var view = new _LoginView2.default({});
-	        this.showChildView('modalRegion', view);
-	    },
-	    onRender: function onRender() {
-	        var totalmodel = this.facade.request('get:totalmodel');
-	        var view;
-	        if (this.config.request('has:form_section', 'general')) {
-	            this.showGeneralBlock();
-	        }
-	        if (this.config.request('has:form_section', 'common')) {
-	            this.showCommonBlock();
-	        }
-	        if (this.config.request('has:form_section', "tasklines")) {
-	            this.showTaskGroupBlock();
-	        }
-	        if (this.config.request('has:form_section', "discounts")) {
-	            view = new _HtBeforeDiscountsView2.default({ model: totalmodel });
-	            this.showChildView('ht_before_discounts', view);
-	            this.showDiscountBlock();
-	        }
-	
-	        view = new _TotalView2.default({ model: totalmodel });
-	        this.showChildView('totals', view);
-	
-	        if (this.config.request('has:form_section', "notes")) {
-	            this.showNotesBlock();
-	        }
-	        if (this.config.request('has:form_section', "payment_conditions")) {
-	            this.showPaymentConditionsBlock();
-	        }
-	        if (this.config.request('has:form_section', "payments")) {
-	            this.showPaymentBlock();
-	        }
-	
-	        view = new _RightBarView2.default({
-	            actions: this.config.request('get:form_actions'),
-	            model: totalmodel
+	    onLogin: function onLogin(datas, onAuthOk, onAuthFailed) {
+	        var callbacks = this.callbacks;
+	        this.ok_callback = onAuthOk;
+	        this.error_callback = onAuthFailed;
+	        (0, _tools.ajax_call)(this.url, datas, 'POST', {
+	            success: this.onAuthSuccess.bind(this),
+	            error: this.onAuthError.bind(this)
 	        });
-	        this.showChildView('rightbar', view);
-	        view = new _BootomActionView2.default({ actions: this.config.request('get:form_actions') });
-	        this.showChildView('footer', view);
 	    },
-	    showStatusView: function showStatusView(status, title, label, url) {
-	        var model = this.facade.request('get:model', 'common');
-	        var view = new _StatusView2.default({
-	            status: status,
-	            title: title,
-	            label: label,
-	            model: model,
-	            url: url
-	        });
-	        this.showChildView('modalRegion', view);
-	    },
-	    formOk: function formOk() {
-	        var result = true;
-	        var errors = this.facade.request('is:valid');
-	        if (!_.isEmpty(errors)) {
-	            this.showChildView('errors', new _ErrorView2.default({ errors: errors }));
-	            result = false;
+	    onAuthSuccess: function onAuthSuccess(result) {
+	        if (result['status'] == 'success') {
+	            _.each(this.callbacks, function (callback) {
+	                callback();
+	            });
+	            this.ok_callback(result);
 	        } else {
-	            this.detachChildView('errors');
+	            this.error_callback(result);
 	        }
-	        return result;
 	    },
-	
-	    onStatusChange: function onStatusChange(status, title, label, url) {
-	        (0, _tools.showLoader)();
-	        if (status != 'draft') {
-	            if (!this.formOk()) {
-	                document.body.scrollTop = document.documentElement.scrollTop = 0;
-	                (0, _tools.hideLoader)();
-	                return;
+	    onAuthError: function onAuthError(xhr) {
+	        if (xhr.status == 400) {
+	            if (_.has(xhr.responseJSON, 'errors')) {
+	                this.error_callback(xhr.responseJSON.errors);
+	            } else {
+	                this.error_callback();
 	            }
-	        }
-	        (0, _tools.hideLoader)();
-	        var common_model = this.facade.request('get:model', 'common');
-	        var this_ = this;
-	        // We ensure the common_model get saved before changing the status
-	        common_model.save(null, {
-	            patch: true,
-	            success: function success() {
-	                this_.showStatusView(status, title, label, url);
-	            },
-	            error: function error() {
-	                (0, _tools.hideLoader)();
-	            }
-	        });
-	    },
-	    onChildviewDestroyModal: function onChildviewDestroyModal() {
-	        this.getRegion('modalRegion').empty();
-	    }
-	});
-	exports.default = MainView;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
-
-/***/ }),
-/* 26 */
-/*!***************************************!*\
-  !*** ./src/task/views/GeneralView.js ***!
-  \***************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _jquery = __webpack_require__(/*! jquery */ 2);
-	
-	var _jquery2 = _interopRequireDefault(_jquery);
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
-	
-	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
-	
-	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 34);
-	
-	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
-	
-	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 43);
-	
-	var _CheckboxWidget2 = _interopRequireDefault(_CheckboxWidget);
-	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 45);
-	
-	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
-	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
-	
-	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
-	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
-	
-	var _InputWidget2 = _interopRequireDefault(_InputWidget);
-	
-	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 56);
-	
-	var _StatusHistoryView2 = _interopRequireDefault(_StatusHistoryView);
-	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
-	
-	var _backbone4 = _interopRequireDefault(_backbone3);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 60); /*
-	                                                             * File Name : GeneralView.js
-	                                                             *
-	                                                             * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	                                                             * Company : Majerti ( http://www.majerti.fr )
-	                                                             *
-	                                                             * This software is distributed under GPLV3
-	                                                             * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                             *
-	                                                             */
-	
-	
-	var GeneralView = _backbone2.default.View.extend({
-	    /*
-	     * Wrapper around the component making part of the 'common'
-	     * invoice/estimation form, provide a main layout with regions for each
-	     * field
-	     */
-	    behaviors: [{
-	        behaviorClass: _FormBehavior2.default,
-	        errorMessage: "Vérifiez votre saisie"
-	    }],
-	    tagName: 'div',
-	    className: 'form-section',
-	    template: template,
-	    regions: {
-	        status_history: '.status_history',
-	        name: '.name',
-	        course: '.course',
-	        prefix: '.prefix',
-	        financial_year: '.financial_year'
-	    },
-	    childViewTriggers: {
-	        'change': 'data:modified',
-	        'finish': 'data:persist'
-	    },
-	    initialize: function initialize(options) {
-	        this.section = options['section'];
-	        this.attachments = _backbone4.default.channel('facade').request('get:attachments');
-	    },
-	
-	    templateContext: function templateContext() {
-	        return { attachments: this.attachments };
-	    },
-	    showStatusHistory: function showStatusHistory() {
-	        var collection = _backbone4.default.channel('facade').request('get:status_history_collection');
-	        if (collection.models.length > 0) {
-	            var view = new _StatusHistoryView2.default({ collection: collection });
-	            this.showChildView('status_history', view);
-	        }
-	    },
-	
-	    onRender: function onRender() {
-	        this.showStatusHistory();
-	        this.showChildView('name', new _InputWidget2.default({
-	            title: "Nom du document",
-	            value: this.model.get('name'),
-	            field_name: 'name'
-	        }));
-	        this.showChildView('course', new _CheckboxWidget2.default({
-	            label: "Ce document concerne-t-il une formation professionelle continue ?",
-	            title: "Formation professionnelle",
-	            value: this.model.get('course'),
-	            field_name: 'course'
-	        }));
-	        if (_.has(this.section, 'prefix')) {
-	            this.showChildView('prefix', new _InputWidget2.default({
-	                title: "Préfixe du numéro de facture",
-	                value: this.model.get('prefix'),
-	                field_name: 'prefix'
-	            }));
-	        }
-	        if (_.has(this.section, 'financial_year')) {
-	            this.showChildView('financial_year', new _InputWidget2.default({
-	                title: "Année comptable de référence",
-	                value: this.model.get('financial_year'),
-	                field_name: 'financial_year'
-	            }));
+	        } else {
+	            alert('Erreur serveur : contactez votre administrateur');
 	        }
 	    }
 	});
-	exports.default = GeneralView;
+	var AuthBus = new AuthBusClass();
+	exports.default = AuthBus;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 27 */
+/* 46 */
 /*!**********************!*\
   !*** ./src/tools.js ***!
   \**********************/
@@ -3909,14 +995,14 @@ webpackJsonp([1],[
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _date = __webpack_require__(/*! ./date.js */ 28);
+	var _date = __webpack_require__(/*! ./date.js */ 47);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	__webpack_require__(/*! jquery */ 2);
 	
 	
-	var datepicker = __webpack_require__(/*! jquery-ui/ui/widgets/datepicker */ 29);
+	var datepicker = __webpack_require__(/*! jquery-ui/ui/widgets/datepicker */ 48);
 	
 	var setDatePicker = exports.setDatePicker = function setDatePicker(input_tag, altfield_selector, value, kwargs) {
 	    /*
@@ -4095,7 +1181,7 @@ webpackJsonp([1],[
 	};
 
 /***/ }),
-/* 28 */
+/* 47 */
 /*!*********************!*\
   !*** ./src/date.js ***!
   \*********************/
@@ -4190,7 +1276,7 @@ webpackJsonp([1],[
 	};
 
 /***/ }),
-/* 29 */
+/* 48 */
 /*!**********************************************!*\
   !*** ./~/jquery-ui/ui/widgets/datepicker.js ***!
   \**********************************************/
@@ -4222,8 +1308,8 @@ webpackJsonp([1],[
 			// AMD. Register as an anonymous module.
 			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
 				__webpack_require__(/*! jquery */ 2),
-				__webpack_require__(/*! ../version */ 30),
-				__webpack_require__(/*! ../keycode */ 31)
+				__webpack_require__(/*! ../version */ 49),
+				__webpack_require__(/*! ../keycode */ 50)
 			], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
@@ -6319,7 +3405,7 @@ webpackJsonp([1],[
 
 
 /***/ }),
-/* 30 */
+/* 49 */
 /*!***********************************!*\
   !*** ./~/jquery-ui/ui/version.js ***!
   \***********************************/
@@ -6345,7 +3431,7 @@ webpackJsonp([1],[
 
 
 /***/ }),
-/* 31 */
+/* 50 */
 /*!***********************************!*\
   !*** ./~/jquery-ui/ui/keycode.js ***!
   \***********************************/
@@ -6369,7 +3455,7 @@ webpackJsonp([1],[
 		if ( true ) {
 	
 			// AMD. Register as an anonymous module.
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 2), __webpack_require__(/*! ./version */ 30) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 2), __webpack_require__(/*! ./version */ 49) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
 			// Browser globals
@@ -6399,7 +3485,688 @@ webpackJsonp([1],[
 
 
 /***/ }),
-/* 32 */
+/* 51 */
+/*!*******************************************!*\
+  !*** ./src/base/components/MessageBus.js ***!
+  \*******************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : MessageBus.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var MessageBusClass = _backbone2.default.Object.extend({
+	    channelName: 'message',
+	    radioEvents: {
+	        'success': 'logSuccess',
+	        'error': 'logError'
+	    },
+	    logSuccess: function logSuccess(view, message) {
+	        console.log("MessageBus : " + message);
+	    },
+	    logError: function logError(view, message) {
+	        console.error("MessageBus : " + message);
+	    }
+	});
+	var MessageBus = new MessageBusClass();
+	exports.default = MessageBus;
+
+/***/ }),
+/* 52 */
+/*!******************************************!*\
+  !*** ./src/base/components/ConfigBus.js ***!
+  \******************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	 * File Name : ConfigBus.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var ConfigBusClass = _backbone2.default.Object.extend({
+	    channelName: 'config',
+	    radioRequests: {
+	        'get:form_options': 'getFormOptions',
+	        'has:form_section': 'hasFormSection',
+	        'get:form_section': 'getFormSection',
+	        'get:form_actions': 'getFormActions'
+	    },
+	    setFormConfig: function setFormConfig(form_config) {
+	        this.form_config = form_config;
+	    },
+	    getFormOptions: function getFormOptions(option_name) {
+	        /*
+	         * Return the form options for option_name
+	         *
+	         * :param str option_name: The name of the option
+	         * :returns: A list of dict with options (for building selects)
+	         */
+	        console.log("FacadeClass.getFormOptions");
+	        return this.form_config['options'][option_name];
+	    },
+	    hasFormSection: function hasFormSection(section_name) {
+	        /*
+	         *
+	         * :param str section_name: The name of the section
+	         * :rtype: bool
+	         */
+	        return _.has(this.form_config['sections'], section_name);
+	    },
+	    getFormSection: function getFormSection(section_name) {
+	        /*
+	         *
+	         * Return the form section description
+	         * :param str section_name: The name of the section
+	         * :returns: The section definition
+	         * :rtype: Object
+	         */
+	        return this.form_config['sections'][section_name];
+	    },
+	    getFormActions: function getFormActions() {
+	        /*
+	         * Return available form action config
+	         */
+	        return this.form_config['actions'];
+	    }
+	});
+	var ConfigBus = new ConfigBusClass();
+	exports.default = ConfigBus;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
+
+/***/ }),
+/* 53 */
+/*!************************************!*\
+  !*** ./src/task/components/App.js ***!
+  \************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var AppClass = _backbone2.default.Application.extend({
+	  region: '#js-main-area'
+	}); /*
+	     * File Name : app.js
+	     *
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	
+	var App = new AppClass();
+	exports.default = App;
+
+/***/ }),
+/* 54 */
+/*!***************************************!*\
+  !*** ./src/task/components/Router.js ***!
+  \***************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Router = _backbone2.default.AppRouter.extend({
+	  appRoutes: {
+	    'login': 'login'
+	  }
+	}); /*
+	     * File Name : router.js
+	     *
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	
+	exports.default = Router;
+
+/***/ }),
+/* 55 */
+/*!*******************************************!*\
+  !*** ./src/task/components/Controller.js ***!
+  \*******************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _MainView = __webpack_require__(/*! ../views/MainView.js */ 56);
+	
+	var _MainView2 = _interopRequireDefault(_MainView);
+	
+	var _App = __webpack_require__(/*! ./App.js */ 53);
+	
+	var _App2 = _interopRequireDefault(_App);
+	
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 164);
+	
+	var _Facade2 = _interopRequireDefault(_Facade);
+	
+	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 45);
+	
+	var _AuthBus2 = _interopRequireDefault(_AuthBus);
+	
+	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 51);
+	
+	var _MessageBus2 = _interopRequireDefault(_MessageBus);
+	
+	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 52);
+	
+	var _ConfigBus2 = _interopRequireDefault(_ConfigBus);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Controller = _backbone2.default.Object.extend({
+	    initialize: function initialize(options) {
+	        _ConfigBus2.default.setFormConfig(options.form_config);
+	        _Facade2.default.loadModels(options.form_datas);
+	        AppOption.facade = _Facade2.default;
+	
+	        _AuthBus2.default.setAuthCallbacks([_Facade2.default.syncModel]);
+	
+	        AppOption.facade = _Facade2.default;
+	        this.mainView = new _MainView2.default();
+	        _App2.default.showView(this.mainView);
+	    },
+	    status: function status(_status) {
+	        this.mainView.showBox(_status);
+	    },
+	
+	    login: function login() {
+	        /*
+	         * Login view : show the login form
+	         */
+	        this.mainView.showLogin();
+	    }
+	}); /*
+	     * File Name : Controller.js
+	     *
+	     * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = Controller;
+
+/***/ }),
+/* 56 */
+/*!************************************!*\
+  !*** ./src/task/views/MainView.js ***!
+  \************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _GeneralView = __webpack_require__(/*! ./GeneralView.js */ 57);
+	
+	var _GeneralView2 = _interopRequireDefault(_GeneralView);
+	
+	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 80);
+	
+	var _CommonView2 = _interopRequireDefault(_CommonView);
+	
+	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 82);
+	
+	var _TaskBlockView2 = _interopRequireDefault(_TaskBlockView);
+	
+	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 114);
+	
+	var _HtBeforeDiscountsView2 = _interopRequireDefault(_HtBeforeDiscountsView);
+	
+	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 115);
+	
+	var _DiscountBlockView2 = _interopRequireDefault(_DiscountBlockView);
+	
+	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 130);
+	
+	var _TotalView2 = _interopRequireDefault(_TotalView);
+	
+	var _NotesBlockView = __webpack_require__(/*! ./NotesBlockView.js */ 132);
+	
+	var _NotesBlockView2 = _interopRequireDefault(_NotesBlockView);
+	
+	var _PaymentConditionBlockView = __webpack_require__(/*! ./PaymentConditionBlockView.js */ 134);
+	
+	var _PaymentConditionBlockView2 = _interopRequireDefault(_PaymentConditionBlockView);
+	
+	var _PaymentBlockView = __webpack_require__(/*! ./PaymentBlockView.js */ 136);
+	
+	var _PaymentBlockView2 = _interopRequireDefault(_PaymentBlockView);
+	
+	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 148);
+	
+	var _RightBarView2 = _interopRequireDefault(_RightBarView);
+	
+	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 157);
+	
+	var _StatusView2 = _interopRequireDefault(_StatusView);
+	
+	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 159);
+	
+	var _BootomActionView2 = _interopRequireDefault(_BootomActionView);
+	
+	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 161);
+	
+	var _LoginView2 = _interopRequireDefault(_LoginView);
+	
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 111);
+	
+	var _ErrorView2 = _interopRequireDefault(_ErrorView);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 163); /*
+	                                                          * File Name : MainView.js
+	                                                          *
+	                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	                                                          * Company : Majerti ( http://www.majerti.fr )
+	                                                          *
+	                                                          * This software is distributed under GPLV3
+	                                                          * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                          *
+	                                                          */
+	
+	
+	var MainView = _backbone2.default.View.extend({
+	    template: template,
+	    regions: {
+	        errors: '.errors',
+	        modalRegion: '#modalregion',
+	        general: '#general',
+	        common: '#common',
+	        tasklines: '#tasklines',
+	        discounts: '#discounts',
+	        rightbar: "#rightbar",
+	        ht_before_discounts: '.ht_before_discounts',
+	        totals: '.totals',
+	        notes: '.notes',
+	        payment_conditions: '.payment-conditions',
+	        payments: '.payments',
+	        footer: {
+	            el: '.footer-actions',
+	            replaceElement: true
+	        }
+	    },
+	    childViewEvents: {
+	        'status:change': 'onStatusChange'
+	    },
+	    initialize: function initialize(options) {
+	        this.config = _backbone4.default.channel('config');
+	        this.facade = _backbone4.default.channel('facade');
+	    },
+	    showGeneralBlock: function showGeneralBlock() {
+	        var section = this.config.request('get:form_section', 'general');
+	        var model = this.facade.request('get:model', 'common');
+	        var view = new _GeneralView2.default({ model: model, section: section });
+	        this.showChildView('general', view);
+	    },
+	    showCommonBlock: function showCommonBlock() {
+	        var section = this.config.request('get:form_section', 'common');
+	        var model = this.facade.request('get:model', 'common');
+	        var view = new _CommonView2.default({ model: model, section: section });
+	        this.showChildView('common', view);
+	    },
+	    showTaskGroupBlock: function showTaskGroupBlock() {
+	        var section = this.config.request('get:form_section', 'tasklines');
+	        var collection = this.facade.request('get:collection', 'task_groups');
+	        var view = new _TaskBlockView2.default({ collection: collection, section: section });
+	        this.showChildView('tasklines', view);
+	    },
+	    showDiscountBlock: function showDiscountBlock() {
+	        var section = this.config.request('get:form_section', 'discounts');
+	        var collection = this.facade.request('get:collection', 'discounts');
+	        var model = this.facade.request('get:model', 'common');
+	        var view = new _DiscountBlockView2.default({ collection: collection, model: model, section: section });
+	        this.showChildView('discounts', view);
+	    },
+	    showNotesBlock: function showNotesBlock() {
+	        var section = this.config.request('get:form_section', 'notes');
+	        var model = this.facade.request('get:model', 'common');
+	        var view = new _NotesBlockView2.default({ model: model, section: section });
+	        this.showChildView('notes', view);
+	    },
+	    showPaymentConditionsBlock: function showPaymentConditionsBlock() {
+	        var section = this.config.request('get:form_section', 'payment_conditions');
+	        var model = this.facade.request('get:model', 'common');
+	        var view = new _PaymentConditionBlockView2.default({ model: model });
+	        this.showChildView('payment_conditions', view);
+	    },
+	    showPaymentBlock: function showPaymentBlock() {
+	        var section = this.config.request('get:form_section', 'payments');
+	        var model = this.facade.request('get:model', 'common');
+	        var collection = this.facade.request('get:paymentcollection');
+	        var view = new _PaymentBlockView2.default({ model: model, collection: collection, section: section });
+	        this.showChildView('payments', view);
+	    },
+	    showLogin: function showLogin() {
+	        var view = new _LoginView2.default({});
+	        this.showChildView('modalRegion', view);
+	    },
+	    onRender: function onRender() {
+	        var totalmodel = this.facade.request('get:totalmodel');
+	        var view;
+	        if (this.config.request('has:form_section', 'general')) {
+	            this.showGeneralBlock();
+	        }
+	        if (this.config.request('has:form_section', 'common')) {
+	            this.showCommonBlock();
+	        }
+	        if (this.config.request('has:form_section', "tasklines")) {
+	            this.showTaskGroupBlock();
+	        }
+	        if (this.config.request('has:form_section', "discounts")) {
+	            view = new _HtBeforeDiscountsView2.default({ model: totalmodel });
+	            this.showChildView('ht_before_discounts', view);
+	            this.showDiscountBlock();
+	        }
+	
+	        view = new _TotalView2.default({ model: totalmodel });
+	        this.showChildView('totals', view);
+	
+	        if (this.config.request('has:form_section', "notes")) {
+	            this.showNotesBlock();
+	        }
+	        if (this.config.request('has:form_section', "payment_conditions")) {
+	            this.showPaymentConditionsBlock();
+	        }
+	        if (this.config.request('has:form_section', "payments")) {
+	            this.showPaymentBlock();
+	        }
+	
+	        view = new _RightBarView2.default({
+	            actions: this.config.request('get:form_actions'),
+	            model: totalmodel
+	        });
+	        this.showChildView('rightbar', view);
+	        view = new _BootomActionView2.default({ actions: this.config.request('get:form_actions') });
+	        this.showChildView('footer', view);
+	    },
+	    showStatusView: function showStatusView(status, title, label, url) {
+	        var model = this.facade.request('get:model', 'common');
+	        var view = new _StatusView2.default({
+	            status: status,
+	            title: title,
+	            label: label,
+	            model: model,
+	            url: url
+	        });
+	        this.showChildView('modalRegion', view);
+	    },
+	    formOk: function formOk() {
+	        var result = true;
+	        var errors = this.facade.request('is:valid');
+	        if (!_.isEmpty(errors)) {
+	            this.showChildView('errors', new _ErrorView2.default({ errors: errors }));
+	            result = false;
+	        } else {
+	            this.detachChildView('errors');
+	        }
+	        return result;
+	    },
+	
+	    onStatusChange: function onStatusChange(status, title, label, url) {
+	        (0, _tools.showLoader)();
+	        if (status != 'draft') {
+	            if (!this.formOk()) {
+	                document.body.scrollTop = document.documentElement.scrollTop = 0;
+	                (0, _tools.hideLoader)();
+	                return;
+	            }
+	        }
+	        (0, _tools.hideLoader)();
+	        var common_model = this.facade.request('get:model', 'common');
+	        var this_ = this;
+	        // We ensure the common_model get saved before changing the status
+	        common_model.save(null, {
+	            patch: true,
+	            success: function success() {
+	                this_.showStatusView(status, title, label, url);
+	            },
+	            error: function error() {
+	                (0, _tools.hideLoader)();
+	            }
+	        });
+	    },
+	    onChildviewDestroyModal: function onChildviewDestroyModal() {
+	        this.getRegion('modalRegion').empty();
+	    }
+	});
+	exports.default = MainView;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
+
+/***/ }),
+/* 57 */
+/*!***************************************!*\
+  !*** ./src/task/views/GeneralView.js ***!
+  \***************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _jquery = __webpack_require__(/*! jquery */ 2);
+	
+	var _jquery2 = _interopRequireDefault(_jquery);
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
+	
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
+	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 60);
+	
+	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
+	
+	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 62);
+	
+	var _CheckboxWidget2 = _interopRequireDefault(_CheckboxWidget);
+	
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 64);
+	
+	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
+	
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
+	
+	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
+	
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
+	
+	var _InputWidget2 = _interopRequireDefault(_InputWidget);
+	
+	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 75);
+	
+	var _StatusHistoryView2 = _interopRequireDefault(_StatusHistoryView);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 79); /*
+	                                                             * File Name : GeneralView.js
+	                                                             *
+	                                                             * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	                                                             * Company : Majerti ( http://www.majerti.fr )
+	                                                             *
+	                                                             * This software is distributed under GPLV3
+	                                                             * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	                                                             *
+	                                                             */
+	
+	
+	var GeneralView = _backbone2.default.View.extend({
+	    /*
+	     * Wrapper around the component making part of the 'common'
+	     * invoice/estimation form, provide a main layout with regions for each
+	     * field
+	     */
+	    behaviors: [{
+	        behaviorClass: _FormBehavior2.default,
+	        errorMessage: "Vérifiez votre saisie"
+	    }],
+	    tagName: 'div',
+	    className: 'form-section',
+	    template: template,
+	    regions: {
+	        status_history: '.status_history',
+	        name: '.name',
+	        course: '.course',
+	        prefix: '.prefix',
+	        financial_year: '.financial_year'
+	    },
+	    childViewTriggers: {
+	        'change': 'data:modified',
+	        'finish': 'data:persist'
+	    },
+	    initialize: function initialize(options) {
+	        this.section = options['section'];
+	        this.attachments = _backbone4.default.channel('facade').request('get:attachments');
+	    },
+	
+	    templateContext: function templateContext() {
+	        return { attachments: this.attachments };
+	    },
+	    showStatusHistory: function showStatusHistory() {
+	        var collection = _backbone4.default.channel('facade').request('get:status_history_collection');
+	        if (collection.models.length > 0) {
+	            var view = new _StatusHistoryView2.default({ collection: collection });
+	            this.showChildView('status_history', view);
+	        }
+	    },
+	
+	    onRender: function onRender() {
+	        this.showStatusHistory();
+	        this.showChildView('name', new _InputWidget2.default({
+	            title: "Nom du document",
+	            value: this.model.get('name'),
+	            field_name: 'name'
+	        }));
+	        this.showChildView('course', new _CheckboxWidget2.default({
+	            label: "Ce document concerne-t-il une formation professionelle continue ?",
+	            title: "Formation professionnelle",
+	            value: this.model.get('course'),
+	            field_name: 'course'
+	        }));
+	        if (_.has(this.section, 'prefix')) {
+	            this.showChildView('prefix', new _InputWidget2.default({
+	                title: "Préfixe du numéro de facture",
+	                value: this.model.get('prefix'),
+	                field_name: 'prefix'
+	            }));
+	        }
+	        if (_.has(this.section, 'financial_year')) {
+	            this.showChildView('financial_year', new _InputWidget2.default({
+	                title: "Année comptable de référence",
+	                value: this.model.get('financial_year'),
+	                field_name: 'financial_year'
+	            }));
+	        }
+	    }
+	});
+	exports.default = GeneralView;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
+
+/***/ }),
+/* 58 */
 /*!********************************************!*\
   !*** ./src/base/behaviors/FormBehavior.js ***!
   \********************************************/
@@ -6419,11 +4186,11 @@ webpackJsonp([1],[
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 33);
+	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 59);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
 	
@@ -6530,7 +4297,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 33 */
+/* 59 */
 /*!************************************************!*\
   !*** ./src/base/behaviors/BaseFormBehavior.js ***!
   \************************************************/
@@ -6593,7 +4360,7 @@ webpackJsonp([1],[
 	exports.default = BaseFormBehavior;
 
 /***/ }),
-/* 34 */
+/* 60 */
 /*!*******************************************!*\
   !*** ./src/widgets/CheckboxListWidget.js ***!
   \*******************************************/
@@ -6613,7 +4380,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -6627,7 +4394,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CheckboxListWidget.mustache */ 35);
+	var template = __webpack_require__(/*! ./templates/CheckboxListWidget.mustache */ 61);
 	
 	var CheckboxListWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -6667,13 +4434,13 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 35 */
+/* 61 */
 /*!***********************************************************!*\
   !*** ./src/widgets/templates/CheckboxListWidget.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -6733,653 +4500,7 @@ webpackJsonp([1],[
 	},"useData":true,"useDepths":true});
 
 /***/ }),
-/* 36 */
-/*!*********************************!*\
-  !*** ./~/handlebars/runtime.js ***!
-  \*********************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	// Create a simple path alias to allow browserify to resolve
-	// the runtime on a supported path.
-	module.exports = __webpack_require__(/*! ./dist/cjs/handlebars.runtime */ 37);
-
-
-/***/ }),
-/* 37 */
-/*!*****************************************************!*\
-  !*** ./~/handlebars/dist/cjs/handlebars.runtime.js ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-	/*globals Handlebars: true */
-	var base = __webpack_require__(/*! ./handlebars/base */ 38);
-	
-	// Each of these augment the Handlebars object. No need to setup here.
-	// (This is done to easily share code between commonjs and browse envs)
-	var SafeString = __webpack_require__(/*! ./handlebars/safe-string */ 40)["default"];
-	var Exception = __webpack_require__(/*! ./handlebars/exception */ 41)["default"];
-	var Utils = __webpack_require__(/*! ./handlebars/utils */ 39);
-	var runtime = __webpack_require__(/*! ./handlebars/runtime */ 42);
-	
-	// For compatibility and usage outside of module systems, make the Handlebars object a namespace
-	var create = function() {
-	  var hb = new base.HandlebarsEnvironment();
-	
-	  Utils.extend(hb, base);
-	  hb.SafeString = SafeString;
-	  hb.Exception = Exception;
-	  hb.Utils = Utils;
-	  hb.escapeExpression = Utils.escapeExpression;
-	
-	  hb.VM = runtime;
-	  hb.template = function(spec) {
-	    return runtime.template(spec, hb);
-	  };
-	
-	  return hb;
-	};
-	
-	var Handlebars = create();
-	Handlebars.create = create;
-	
-	Handlebars['default'] = Handlebars;
-	
-	exports["default"] = Handlebars;
-
-/***/ }),
-/* 38 */
-/*!**************************************************!*\
-  !*** ./~/handlebars/dist/cjs/handlebars/base.js ***!
-  \**************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Utils = __webpack_require__(/*! ./utils */ 39);
-	var Exception = __webpack_require__(/*! ./exception */ 41)["default"];
-	
-	var VERSION = "2.0.0";
-	exports.VERSION = VERSION;var COMPILER_REVISION = 6;
-	exports.COMPILER_REVISION = COMPILER_REVISION;
-	var REVISION_CHANGES = {
-	  1: '<= 1.0.rc.2', // 1.0.rc.2 is actually rev2 but doesn't report it
-	  2: '== 1.0.0-rc.3',
-	  3: '== 1.0.0-rc.4',
-	  4: '== 1.x.x',
-	  5: '== 2.0.0-alpha.x',
-	  6: '>= 2.0.0-beta.1'
-	};
-	exports.REVISION_CHANGES = REVISION_CHANGES;
-	var isArray = Utils.isArray,
-	    isFunction = Utils.isFunction,
-	    toString = Utils.toString,
-	    objectType = '[object Object]';
-	
-	function HandlebarsEnvironment(helpers, partials) {
-	  this.helpers = helpers || {};
-	  this.partials = partials || {};
-	
-	  registerDefaultHelpers(this);
-	}
-	
-	exports.HandlebarsEnvironment = HandlebarsEnvironment;HandlebarsEnvironment.prototype = {
-	  constructor: HandlebarsEnvironment,
-	
-	  logger: logger,
-	  log: log,
-	
-	  registerHelper: function(name, fn) {
-	    if (toString.call(name) === objectType) {
-	      if (fn) { throw new Exception('Arg not supported with multiple helpers'); }
-	      Utils.extend(this.helpers, name);
-	    } else {
-	      this.helpers[name] = fn;
-	    }
-	  },
-	  unregisterHelper: function(name) {
-	    delete this.helpers[name];
-	  },
-	
-	  registerPartial: function(name, partial) {
-	    if (toString.call(name) === objectType) {
-	      Utils.extend(this.partials,  name);
-	    } else {
-	      this.partials[name] = partial;
-	    }
-	  },
-	  unregisterPartial: function(name) {
-	    delete this.partials[name];
-	  }
-	};
-	
-	function registerDefaultHelpers(instance) {
-	  instance.registerHelper('helperMissing', function(/* [args, ]options */) {
-	    if(arguments.length === 1) {
-	      // A missing field in a {{foo}} constuct.
-	      return undefined;
-	    } else {
-	      // Someone is actually trying to call something, blow up.
-	      throw new Exception("Missing helper: '" + arguments[arguments.length-1].name + "'");
-	    }
-	  });
-	
-	  instance.registerHelper('blockHelperMissing', function(context, options) {
-	    var inverse = options.inverse,
-	        fn = options.fn;
-	
-	    if(context === true) {
-	      return fn(this);
-	    } else if(context === false || context == null) {
-	      return inverse(this);
-	    } else if (isArray(context)) {
-	      if(context.length > 0) {
-	        if (options.ids) {
-	          options.ids = [options.name];
-	        }
-	
-	        return instance.helpers.each(context, options);
-	      } else {
-	        return inverse(this);
-	      }
-	    } else {
-	      if (options.data && options.ids) {
-	        var data = createFrame(options.data);
-	        data.contextPath = Utils.appendContextPath(options.data.contextPath, options.name);
-	        options = {data: data};
-	      }
-	
-	      return fn(context, options);
-	    }
-	  });
-	
-	  instance.registerHelper('each', function(context, options) {
-	    if (!options) {
-	      throw new Exception('Must pass iterator to #each');
-	    }
-	
-	    var fn = options.fn, inverse = options.inverse;
-	    var i = 0, ret = "", data;
-	
-	    var contextPath;
-	    if (options.data && options.ids) {
-	      contextPath = Utils.appendContextPath(options.data.contextPath, options.ids[0]) + '.';
-	    }
-	
-	    if (isFunction(context)) { context = context.call(this); }
-	
-	    if (options.data) {
-	      data = createFrame(options.data);
-	    }
-	
-	    if(context && typeof context === 'object') {
-	      if (isArray(context)) {
-	        for(var j = context.length; i<j; i++) {
-	          if (data) {
-	            data.index = i;
-	            data.first = (i === 0);
-	            data.last  = (i === (context.length-1));
-	
-	            if (contextPath) {
-	              data.contextPath = contextPath + i;
-	            }
-	          }
-	          ret = ret + fn(context[i], { data: data });
-	        }
-	      } else {
-	        for(var key in context) {
-	          if(context.hasOwnProperty(key)) {
-	            if(data) {
-	              data.key = key;
-	              data.index = i;
-	              data.first = (i === 0);
-	
-	              if (contextPath) {
-	                data.contextPath = contextPath + key;
-	              }
-	            }
-	            ret = ret + fn(context[key], {data: data});
-	            i++;
-	          }
-	        }
-	      }
-	    }
-	
-	    if(i === 0){
-	      ret = inverse(this);
-	    }
-	
-	    return ret;
-	  });
-	
-	  instance.registerHelper('if', function(conditional, options) {
-	    if (isFunction(conditional)) { conditional = conditional.call(this); }
-	
-	    // Default behavior is to render the positive path if the value is truthy and not empty.
-	    // The `includeZero` option may be set to treat the condtional as purely not empty based on the
-	    // behavior of isEmpty. Effectively this determines if 0 is handled by the positive path or negative.
-	    if ((!options.hash.includeZero && !conditional) || Utils.isEmpty(conditional)) {
-	      return options.inverse(this);
-	    } else {
-	      return options.fn(this);
-	    }
-	  });
-	
-	  instance.registerHelper('unless', function(conditional, options) {
-	    return instance.helpers['if'].call(this, conditional, {fn: options.inverse, inverse: options.fn, hash: options.hash});
-	  });
-	
-	  instance.registerHelper('with', function(context, options) {
-	    if (isFunction(context)) { context = context.call(this); }
-	
-	    var fn = options.fn;
-	
-	    if (!Utils.isEmpty(context)) {
-	      if (options.data && options.ids) {
-	        var data = createFrame(options.data);
-	        data.contextPath = Utils.appendContextPath(options.data.contextPath, options.ids[0]);
-	        options = {data:data};
-	      }
-	
-	      return fn(context, options);
-	    } else {
-	      return options.inverse(this);
-	    }
-	  });
-	
-	  instance.registerHelper('log', function(message, options) {
-	    var level = options.data && options.data.level != null ? parseInt(options.data.level, 10) : 1;
-	    instance.log(level, message);
-	  });
-	
-	  instance.registerHelper('lookup', function(obj, field) {
-	    return obj && obj[field];
-	  });
-	}
-	
-	var logger = {
-	  methodMap: { 0: 'debug', 1: 'info', 2: 'warn', 3: 'error' },
-	
-	  // State enum
-	  DEBUG: 0,
-	  INFO: 1,
-	  WARN: 2,
-	  ERROR: 3,
-	  level: 3,
-	
-	  // can be overridden in the host environment
-	  log: function(level, message) {
-	    if (logger.level <= level) {
-	      var method = logger.methodMap[level];
-	      if (typeof console !== 'undefined' && console[method]) {
-	        console[method].call(console, message);
-	      }
-	    }
-	  }
-	};
-	exports.logger = logger;
-	var log = logger.log;
-	exports.log = log;
-	var createFrame = function(object) {
-	  var frame = Utils.extend({}, object);
-	  frame._parent = object;
-	  return frame;
-	};
-	exports.createFrame = createFrame;
-
-/***/ }),
-/* 39 */
-/*!***************************************************!*\
-  !*** ./~/handlebars/dist/cjs/handlebars/utils.js ***!
-  \***************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-	/*jshint -W004 */
-	var SafeString = __webpack_require__(/*! ./safe-string */ 40)["default"];
-	
-	var escape = {
-	  "&": "&amp;",
-	  "<": "&lt;",
-	  ">": "&gt;",
-	  '"': "&quot;",
-	  "'": "&#x27;",
-	  "`": "&#x60;"
-	};
-	
-	var badChars = /[&<>"'`]/g;
-	var possible = /[&<>"'`]/;
-	
-	function escapeChar(chr) {
-	  return escape[chr];
-	}
-	
-	function extend(obj /* , ...source */) {
-	  for (var i = 1; i < arguments.length; i++) {
-	    for (var key in arguments[i]) {
-	      if (Object.prototype.hasOwnProperty.call(arguments[i], key)) {
-	        obj[key] = arguments[i][key];
-	      }
-	    }
-	  }
-	
-	  return obj;
-	}
-	
-	exports.extend = extend;var toString = Object.prototype.toString;
-	exports.toString = toString;
-	// Sourced from lodash
-	// https://github.com/bestiejs/lodash/blob/master/LICENSE.txt
-	var isFunction = function(value) {
-	  return typeof value === 'function';
-	};
-	// fallback for older versions of Chrome and Safari
-	/* istanbul ignore next */
-	if (isFunction(/x/)) {
-	  isFunction = function(value) {
-	    return typeof value === 'function' && toString.call(value) === '[object Function]';
-	  };
-	}
-	var isFunction;
-	exports.isFunction = isFunction;
-	/* istanbul ignore next */
-	var isArray = Array.isArray || function(value) {
-	  return (value && typeof value === 'object') ? toString.call(value) === '[object Array]' : false;
-	};
-	exports.isArray = isArray;
-	
-	function escapeExpression(string) {
-	  // don't escape SafeStrings, since they're already safe
-	  if (string instanceof SafeString) {
-	    return string.toString();
-	  } else if (string == null) {
-	    return "";
-	  } else if (!string) {
-	    return string + '';
-	  }
-	
-	  // Force a string conversion as this will be done by the append regardless and
-	  // the regex test will do this transparently behind the scenes, causing issues if
-	  // an object's to string has escaped characters in it.
-	  string = "" + string;
-	
-	  if(!possible.test(string)) { return string; }
-	  return string.replace(badChars, escapeChar);
-	}
-	
-	exports.escapeExpression = escapeExpression;function isEmpty(value) {
-	  if (!value && value !== 0) {
-	    return true;
-	  } else if (isArray(value) && value.length === 0) {
-	    return true;
-	  } else {
-	    return false;
-	  }
-	}
-	
-	exports.isEmpty = isEmpty;function appendContextPath(contextPath, id) {
-	  return (contextPath ? contextPath + '.' : '') + id;
-	}
-	
-	exports.appendContextPath = appendContextPath;
-
-/***/ }),
-/* 40 */
-/*!*********************************************************!*\
-  !*** ./~/handlebars/dist/cjs/handlebars/safe-string.js ***!
-  \*********************************************************/
-/***/ (function(module, exports) {
-
-	"use strict";
-	// Build out our basic SafeString type
-	function SafeString(string) {
-	  this.string = string;
-	}
-	
-	SafeString.prototype.toString = function() {
-	  return "" + this.string;
-	};
-	
-	exports["default"] = SafeString;
-
-/***/ }),
-/* 41 */
-/*!*******************************************************!*\
-  !*** ./~/handlebars/dist/cjs/handlebars/exception.js ***!
-  \*******************************************************/
-/***/ (function(module, exports) {
-
-	"use strict";
-	
-	var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
-	
-	function Exception(message, node) {
-	  var line;
-	  if (node && node.firstLine) {
-	    line = node.firstLine;
-	
-	    message += ' - ' + line + ':' + node.firstColumn;
-	  }
-	
-	  var tmp = Error.prototype.constructor.call(this, message);
-	
-	  // Unfortunately errors are not enumerable in Chrome (at least), so `for prop in tmp` doesn't work.
-	  for (var idx = 0; idx < errorProps.length; idx++) {
-	    this[errorProps[idx]] = tmp[errorProps[idx]];
-	  }
-	
-	  if (line) {
-	    this.lineNumber = line;
-	    this.column = node.firstColumn;
-	  }
-	}
-	
-	Exception.prototype = new Error();
-	
-	exports["default"] = Exception;
-
-/***/ }),
-/* 42 */
-/*!*****************************************************!*\
-  !*** ./~/handlebars/dist/cjs/handlebars/runtime.js ***!
-  \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Utils = __webpack_require__(/*! ./utils */ 39);
-	var Exception = __webpack_require__(/*! ./exception */ 41)["default"];
-	var COMPILER_REVISION = __webpack_require__(/*! ./base */ 38).COMPILER_REVISION;
-	var REVISION_CHANGES = __webpack_require__(/*! ./base */ 38).REVISION_CHANGES;
-	var createFrame = __webpack_require__(/*! ./base */ 38).createFrame;
-	
-	function checkRevision(compilerInfo) {
-	  var compilerRevision = compilerInfo && compilerInfo[0] || 1,
-	      currentRevision = COMPILER_REVISION;
-	
-	  if (compilerRevision !== currentRevision) {
-	    if (compilerRevision < currentRevision) {
-	      var runtimeVersions = REVISION_CHANGES[currentRevision],
-	          compilerVersions = REVISION_CHANGES[compilerRevision];
-	      throw new Exception("Template was precompiled with an older version of Handlebars than the current runtime. "+
-	            "Please update your precompiler to a newer version ("+runtimeVersions+") or downgrade your runtime to an older version ("+compilerVersions+").");
-	    } else {
-	      // Use the embedded version info since the runtime doesn't know about this revision yet
-	      throw new Exception("Template was precompiled with a newer version of Handlebars than the current runtime. "+
-	            "Please update your runtime to a newer version ("+compilerInfo[1]+").");
-	    }
-	  }
-	}
-	
-	exports.checkRevision = checkRevision;// TODO: Remove this line and break up compilePartial
-	
-	function template(templateSpec, env) {
-	  /* istanbul ignore next */
-	  if (!env) {
-	    throw new Exception("No environment passed to template");
-	  }
-	  if (!templateSpec || !templateSpec.main) {
-	    throw new Exception('Unknown template object: ' + typeof templateSpec);
-	  }
-	
-	  // Note: Using env.VM references rather than local var references throughout this section to allow
-	  // for external users to override these as psuedo-supported APIs.
-	  env.VM.checkRevision(templateSpec.compiler);
-	
-	  var invokePartialWrapper = function(partial, indent, name, context, hash, helpers, partials, data, depths) {
-	    if (hash) {
-	      context = Utils.extend({}, context, hash);
-	    }
-	
-	    var result = env.VM.invokePartial.call(this, partial, name, context, helpers, partials, data, depths);
-	
-	    if (result == null && env.compile) {
-	      var options = { helpers: helpers, partials: partials, data: data, depths: depths };
-	      partials[name] = env.compile(partial, { data: data !== undefined, compat: templateSpec.compat }, env);
-	      result = partials[name](context, options);
-	    }
-	    if (result != null) {
-	      if (indent) {
-	        var lines = result.split('\n');
-	        for (var i = 0, l = lines.length; i < l; i++) {
-	          if (!lines[i] && i + 1 === l) {
-	            break;
-	          }
-	
-	          lines[i] = indent + lines[i];
-	        }
-	        result = lines.join('\n');
-	      }
-	      return result;
-	    } else {
-	      throw new Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
-	    }
-	  };
-	
-	  // Just add water
-	  var container = {
-	    lookup: function(depths, name) {
-	      var len = depths.length;
-	      for (var i = 0; i < len; i++) {
-	        if (depths[i] && depths[i][name] != null) {
-	          return depths[i][name];
-	        }
-	      }
-	    },
-	    lambda: function(current, context) {
-	      return typeof current === 'function' ? current.call(context) : current;
-	    },
-	
-	    escapeExpression: Utils.escapeExpression,
-	    invokePartial: invokePartialWrapper,
-	
-	    fn: function(i) {
-	      return templateSpec[i];
-	    },
-	
-	    programs: [],
-	    program: function(i, data, depths) {
-	      var programWrapper = this.programs[i],
-	          fn = this.fn(i);
-	      if (data || depths) {
-	        programWrapper = program(this, i, fn, data, depths);
-	      } else if (!programWrapper) {
-	        programWrapper = this.programs[i] = program(this, i, fn);
-	      }
-	      return programWrapper;
-	    },
-	
-	    data: function(data, depth) {
-	      while (data && depth--) {
-	        data = data._parent;
-	      }
-	      return data;
-	    },
-	    merge: function(param, common) {
-	      var ret = param || common;
-	
-	      if (param && common && (param !== common)) {
-	        ret = Utils.extend({}, common, param);
-	      }
-	
-	      return ret;
-	    },
-	
-	    noop: env.VM.noop,
-	    compilerInfo: templateSpec.compiler
-	  };
-	
-	  var ret = function(context, options) {
-	    options = options || {};
-	    var data = options.data;
-	
-	    ret._setup(options);
-	    if (!options.partial && templateSpec.useData) {
-	      data = initData(context, data);
-	    }
-	    var depths;
-	    if (templateSpec.useDepths) {
-	      depths = options.depths ? [context].concat(options.depths) : [context];
-	    }
-	
-	    return templateSpec.main.call(container, context, container.helpers, container.partials, data, depths);
-	  };
-	  ret.isTop = true;
-	
-	  ret._setup = function(options) {
-	    if (!options.partial) {
-	      container.helpers = container.merge(options.helpers, env.helpers);
-	
-	      if (templateSpec.usePartial) {
-	        container.partials = container.merge(options.partials, env.partials);
-	      }
-	    } else {
-	      container.helpers = options.helpers;
-	      container.partials = options.partials;
-	    }
-	  };
-	
-	  ret._child = function(i, data, depths) {
-	    if (templateSpec.useDepths && !depths) {
-	      throw new Exception('must pass parent depths');
-	    }
-	
-	    return program(container, i, templateSpec[i], data, depths);
-	  };
-	  return ret;
-	}
-	
-	exports.template = template;function program(container, i, fn, data, depths) {
-	  var prog = function(context, options) {
-	    options = options || {};
-	
-	    return fn.call(container, context, container.helpers, container.partials, options.data || data, depths && [context].concat(depths));
-	  };
-	  prog.program = i;
-	  prog.depth = depths ? depths.length : 0;
-	  return prog;
-	}
-	
-	exports.program = program;function invokePartial(partial, name, context, helpers, partials, data, depths) {
-	  var options = { partial: true, helpers: helpers, partials: partials, data: data, depths: depths };
-	
-	  if(partial === undefined) {
-	    throw new Exception("The partial " + name + " could not be found");
-	  } else if(partial instanceof Function) {
-	    return partial(context, options);
-	  }
-	}
-	
-	exports.invokePartial = invokePartial;function noop() { return ""; }
-	
-	exports.noop = noop;function initData(context, data) {
-	  if (!data || !('root' in data)) {
-	    data = data ? createFrame(data) : {};
-	    data.root = context;
-	  }
-	  return data;
-	}
-
-/***/ }),
-/* 43 */
+/* 62 */
 /*!***************************************!*\
   !*** ./src/widgets/CheckboxWidget.js ***!
   \***************************************/
@@ -7399,7 +4520,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7413,7 +4534,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CheckboxWidget.mustache */ 44);
+	var template = __webpack_require__(/*! ./templates/CheckboxWidget.mustache */ 63);
 	
 	var CheckboxWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -7450,13 +4571,13 @@ webpackJsonp([1],[
 	exports.default = CheckboxWidget;
 
 /***/ }),
-/* 44 */
+/* 63 */
 /*!*******************************************************!*\
   !*** ./src/widgets/templates/CheckboxWidget.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -7497,7 +4618,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 45 */
+/* 64 */
 /*!*****************************************!*\
   !*** ./src/widgets/DatePickerWidget.js ***!
   \*****************************************/
@@ -7517,9 +4638,9 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
-	var _date = __webpack_require__(/*! ../date.js */ 28);
+	var _date = __webpack_require__(/*! ../date.js */ 47);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7533,7 +4654,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DatePickerWidget.mustache */ 46);
+	var template = __webpack_require__(/*! ./templates/DatePickerWidget.mustache */ 65);
 	
 	var DatePickerWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -7579,13 +4700,13 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 46 */
+/* 65 */
 /*!*********************************************************!*\
   !*** ./src/widgets/templates/DatePickerWidget.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='form-group date'>\n        <label for='altdate'>"
@@ -7614,7 +4735,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 47 */
+/* 66 */
 /*!***************************************!*\
   !*** ./src/widgets/TextAreaWidget.js ***!
   \***************************************/
@@ -7630,15 +4751,15 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
-	var _tinymce = __webpack_require__(/*! ../tinymce.js */ 48);
+	var _tinymce = __webpack_require__(/*! ../tinymce.js */ 67);
 	
 	var _tinymce2 = _interopRequireDefault(_tinymce);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TextAreaWidget.mustache */ 53); /*
+	var template = __webpack_require__(/*! ./templates/TextAreaWidget.mustache */ 72); /*
 	                                                                * File Name : TextAreaWidget.js
 	                                                                *
 	                                                                * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -7710,18 +4831,18 @@ webpackJsonp([1],[
 	exports.default = TextAreaWidget;
 
 /***/ }),
-/* 48 */,
-/* 49 */,
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */
+/* 67 */,
+/* 68 */,
+/* 69 */,
+/* 70 */,
+/* 71 */,
+/* 72 */
 /*!*******************************************************!*\
   !*** ./src/widgets/templates/TextAreaWidget.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
@@ -7770,7 +4891,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 54 */
+/* 73 */
 /*!************************************!*\
   !*** ./src/widgets/InputWidget.js ***!
   \************************************/
@@ -7786,7 +4907,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7803,7 +4924,7 @@ webpackJsonp([1],[
 	var InputWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-group',
-	    template: __webpack_require__(/*! ./templates/InputWidget.mustache */ 55),
+	    template: __webpack_require__(/*! ./templates/InputWidget.mustache */ 74),
 	    ui: {
 	        input: 'input'
 	    },
@@ -7833,13 +4954,13 @@ webpackJsonp([1],[
 	exports.default = InputWidget;
 
 /***/ }),
-/* 55 */
+/* 74 */
 /*!****************************************************!*\
   !*** ./src/widgets/templates/InputWidget.mustache ***!
   \****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -7889,7 +5010,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 56 */
+/* 75 */
 /*!*********************************************!*\
   !*** ./src/task/views/StatusHistoryView.js ***!
   \*********************************************/
@@ -7909,14 +5030,14 @@ webpackJsonp([1],[
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _StatusHistoryCollectionView = __webpack_require__(/*! ./StatusHistoryCollectionView.js */ 57);
+	var _StatusHistoryCollectionView = __webpack_require__(/*! ./StatusHistoryCollectionView.js */ 76);
 	
 	var _StatusHistoryCollectionView2 = _interopRequireDefault(_StatusHistoryCollectionView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var StatusHistoryView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/StatusHistoryView.mustache */ 59),
+	    template: __webpack_require__(/*! ./templates/StatusHistoryView.mustache */ 78),
 	    regions: {
 	        comments: '.comments'
 	    },
@@ -7937,7 +5058,7 @@ webpackJsonp([1],[
 	exports.default = StatusHistoryView;
 
 /***/ }),
-/* 57 */
+/* 76 */
 /*!*******************************************************!*\
   !*** ./src/task/views/StatusHistoryCollectionView.js ***!
   \*******************************************************/
@@ -7953,7 +5074,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 28);
+	var _date = __webpack_require__(/*! ../../date.js */ 47);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7970,7 +5091,7 @@ webpackJsonp([1],[
 	var StatusHistoryItemView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'row',
-	    template: __webpack_require__(/*! ./templates/StatusHistoryItemView.mustache */ 58),
+	    template: __webpack_require__(/*! ./templates/StatusHistoryItemView.mustache */ 77),
 	    templateContext: function templateContext() {
 	        return {
 	            date: (0, _date.formatDate)(this.model.get('date'))
@@ -7986,13 +5107,13 @@ webpackJsonp([1],[
 	exports.default = StatusHistoryCollectionView;
 
 /***/ }),
-/* 58 */
+/* 77 */
 /*!*****************************************************************!*\
   !*** ./src/task/views/templates/StatusHistoryItemView.mustache ***!
   \*****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -8013,26 +5134,26 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 59 */
+/* 78 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/StatusHistoryView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<a\n    data-target='#comments-more'\n    data-toggle='collapse'\n    aria-expanded=\"false\"\n    aria-controls=\"comments-more\"\n    >\n    <i class='glyphicon glyphicon-plus-sign'></i>\nHistorique des commentaires et changements de statut\n</a>\n<div id='comments-more' class='collapse row comments'>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 60 */
+/* 79 */
 /*!*******************************************************!*\
   !*** ./src/task/views/templates/GeneralView.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, buffer = "        <a\n                data-target='#files-more'\n                data-toggle='collapse'\n                aria-expanded=\"false\"\n                aria-controls=\"files-more\"\n                >\n                <i class='glyphicon glyphicon-plus-sign'></i>\n            Fichiers attachés\n        </a>\n        <div id=\"files-more\" class='collapse row'>\n        <div class='col-xs-12'>\n        <ul>\n";
@@ -8054,7 +5175,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 61 */
+/* 80 */
 /*!**************************************!*\
   !*** ./src/task/views/CommonView.js ***!
   \**************************************/
@@ -8074,25 +5195,25 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 34);
+	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 60);
 	
 	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 45);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 64);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
@@ -8116,7 +5237,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 62);
+	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 81);
 	
 	var CommonView = _backbone2.default.View.extend({
 	    /*
@@ -8228,13 +5349,13 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 62 */
+/* 81 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/CommonView.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "in";
@@ -8246,7 +5367,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 63 */
+/* 82 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskBlockView.js ***!
   \*****************************************/
@@ -8262,21 +5383,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 64);
+	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 83);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
-	var _TaskGroupCollectionView = __webpack_require__(/*! ./TaskGroupCollectionView.js */ 70);
+	var _TaskGroupCollectionView = __webpack_require__(/*! ./TaskGroupCollectionView.js */ 89);
 	
 	var _TaskGroupCollectionView2 = _interopRequireDefault(_TaskGroupCollectionView);
 	
-	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 90);
+	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 109);
 	
 	var _TaskGroupFormView2 = _interopRequireDefault(_TaskGroupFormView);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 92);
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 111);
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
@@ -8293,7 +5414,7 @@ webpackJsonp([1],[
 	 *
 	 */
 	var TaskBlockView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 94),
+	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 113),
 	    tagName: 'div',
 	    className: 'form-section',
 	    regions: {
@@ -8381,7 +5502,7 @@ webpackJsonp([1],[
 	exports.default = TaskBlockView;
 
 /***/ }),
-/* 64 */
+/* 83 */
 /*!*******************************************!*\
   !*** ./src/task/models/TaskGroupModel.js ***!
   \*******************************************/
@@ -8397,11 +5518,11 @@ webpackJsonp([1],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 65);
+	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 84);
 	
 	var _TaskLineCollection2 = _interopRequireDefault(_TaskLineCollection);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 68);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 87);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -8411,8 +5532,6 @@ webpackJsonp([1],[
 	    props: ['id', 'order', 'title', 'description', 'lines', 'task_id'],
 	    validation: {
 	        lines: function lines(value) {
-	            console.log("TaskGroupModel.lines");
-	            console.log(value);
 	            if (value.length === 0) {
 	                return "Veuillez saisir au moins une prestation";
 	            }
@@ -8461,7 +5580,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupModel;
 
 /***/ }),
-/* 65 */
+/* 84 */
 /*!***********************************************!*\
   !*** ./src/task/models/TaskLineCollection.js ***!
   \***********************************************/
@@ -8477,7 +5596,7 @@ webpackJsonp([1],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 66);
+	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 85);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
@@ -8485,9 +5604,9 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 69);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 88);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
@@ -8558,7 +5677,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineCollection;
 
 /***/ }),
-/* 66 */
+/* 85 */
 /*!******************************************!*\
   !*** ./src/task/models/TaskLineModel.js ***!
   \******************************************/
@@ -8578,9 +5697,9 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 68);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 87);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -8648,7 +5767,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineModel;
 
 /***/ }),
-/* 67 */
+/* 86 */
 /*!*********************!*\
   !*** ./src/math.js ***!
   \*********************/
@@ -8847,7 +5966,7 @@ webpackJsonp([1],[
 	};
 
 /***/ }),
-/* 68 */
+/* 87 */
 /*!**************************************!*\
   !*** ./src/task/models/BaseModel.js ***!
   \**************************************/
@@ -8909,7 +6028,7 @@ webpackJsonp([1],[
 	exports.default = BaseModel;
 
 /***/ }),
-/* 69 */
+/* 88 */
 /*!************************************************!*\
   !*** ./src/task/models/OrderableCollection.js ***!
   \************************************************/
@@ -9001,7 +6120,7 @@ webpackJsonp([1],[
 	exports.default = OrderableCollection;
 
 /***/ }),
-/* 70 */
+/* 89 */
 /*!***************************************************!*\
   !*** ./src/task/views/TaskGroupCollectionView.js ***!
   \***************************************************/
@@ -9017,7 +6136,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 71);
+	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 90);
 	
 	var _TaskGroupView2 = _interopRequireDefault(_TaskGroupView);
 	
@@ -9057,7 +6176,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupCollectionView;
 
 /***/ }),
-/* 71 */
+/* 90 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskGroupView.js ***!
   \*****************************************/
@@ -9073,23 +6192,23 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 72);
+	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 91);
 	
 	var _TaskLineCollectionView2 = _interopRequireDefault(_TaskLineCollectionView);
 	
-	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 75);
+	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 94);
 	
 	var _TaskLineFormView2 = _interopRequireDefault(_TaskLineFormView);
 	
-	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 66);
+	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 85);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
-	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 85);
+	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 104);
 	
 	var _TaskGroupTotalView2 = _interopRequireDefault(_TaskGroupTotalView);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
@@ -9103,7 +6222,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 89); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 108); /*
 	                                                               * File Name : TaskGroupView.js
 	                                                               *
 	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9245,7 +6364,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 72 */
+/* 91 */
 /*!**************************************************!*\
   !*** ./src/task/views/TaskLineCollectionView.js ***!
   \**************************************************/
@@ -9261,7 +6380,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 73);
+	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 92);
 	
 	var _TaskLineView2 = _interopRequireDefault(_TaskLineView);
 	
@@ -9300,7 +6419,7 @@ webpackJsonp([1],[
 	exports.default = TaskLineCollectionView;
 
 /***/ }),
-/* 73 */
+/* 92 */
 /*!****************************************!*\
   !*** ./src/task/views/TaskLineView.js ***!
   \****************************************/
@@ -9320,7 +6439,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -9338,7 +6457,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 74);
+	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 93);
 	
 	var TaskLineView = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -9366,15 +6485,11 @@ webpackJsonp([1],[
 	    getTvaLabel: function getTvaLabel() {
 	        var res = "";
 	        var current_value = this.model.get('tva');
-	        console.log("Current tva_value : %s", current_value);
-	        console.log(this.tva_options);
 	        _underscore2.default.each(this.tva_options, function (tva) {
-	            console.log(tva.value);
 	            if (tva.value == current_value) {
 	                res = tva.name;
 	            }
 	        });
-	        console.log(res);
 	        return res;
 	    },
 	    templateContext: function templateContext() {
@@ -9392,13 +6507,13 @@ webpackJsonp([1],[
 	exports.default = TaskLineView;
 
 /***/ }),
-/* 74 */
+/* 93 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/TaskLineView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "    <button type='button' class='btn btn-default btn-small up'>\n        <i class='glyphicon glyphicon-arrow-up'></i>\n    </button>\n    <br />\n";
@@ -9434,7 +6549,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 75 */
+/* 94 */
 /*!********************************************!*\
   !*** ./src/task/views/TaskLineFormView.js ***!
   \********************************************/
@@ -9450,29 +6565,29 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 76);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 95);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 78);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 97);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 80);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 99);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 82);
+	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 101);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
@@ -9482,7 +6597,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 84); /*
+	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 103); /*
 	                                                                  * File Name : TaskLineFormView.js
 	                                                                  *
 	                                                                  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9612,7 +6727,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 76 */
+/* 95 */
 /*!*************************************!*\
   !*** ./src/widgets/SelectWidget.js ***!
   \*************************************/
@@ -9632,7 +6747,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -9646,7 +6761,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/SelectWidget.mustache */ 77);
+	var template = __webpack_require__(/*! ./templates/SelectWidget.mustache */ 96);
 	
 	var SelectWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -9695,13 +6810,13 @@ webpackJsonp([1],[
 	exports.default = SelectWidget;
 
 /***/ }),
-/* 77 */
+/* 96 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/SelectWidget.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -9739,7 +6854,7 @@ webpackJsonp([1],[
 	},"useData":true,"useDepths":true});
 
 /***/ }),
-/* 78 */
+/* 97 */
 /*!*************************************************!*\
   !*** ./src/base/behaviors/ModalFormBehavior.js ***!
   \*************************************************/
@@ -9757,11 +6872,11 @@ webpackJsonp([1],[
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 79);
+	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 98);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -9801,7 +6916,7 @@ webpackJsonp([1],[
 	exports.default = ModalFormBehavior;
 
 /***/ }),
-/* 79 */
+/* 98 */
 /*!*********************************************!*\
   !*** ./src/base/behaviors/ModalBehavior.js ***!
   \*********************************************/
@@ -9867,7 +6982,7 @@ webpackJsonp([1],[
 	exports.default = ModalBehavior;
 
 /***/ }),
-/* 80 */
+/* 99 */
 /*!*******************************************!*\
   !*** ./src/task/views/CatalogTreeView.js ***!
   \*******************************************/
@@ -9883,7 +6998,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -9897,7 +7012,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 81);
+	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 100);
 	
 	var CatalogTreeView = _backbone2.default.View.extend({
 	    /*
@@ -9991,20 +7106,20 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 81 */
+/* 100 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/CatalogTreeView.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<input class=\"form-control\" name=\"catalog_search\" placeholder=\"Nom ou référence\" type=\"text\" />\n<div class='tree'>\n</div>\n<div class=\"form-group\">\n    <div class=\"text-right\">\n        <button class=\"btn btn-success primary-action edit-catalog\" type=\"button\">\n            Éditer comme un nouvel élément\n        </button>\n        <button class=\"btn btn-success secondary-action insert-catalog\" type=\"button\">\n            Insérer les éléments sélectionnés\n        </button>\n        <button class=\"btn btn-default secondary-action cancel-catalog\" type=\"button\">\n            Annuler\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 82 */
+/* 101 */
 /*!**************************************!*\
   !*** ./src/widgets/LoadingWidget.js ***!
   \**************************************/
@@ -10022,7 +7137,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/LoadingWidget.mustache */ 83); /*
+	var template = __webpack_require__(/*! ./templates/LoadingWidget.mustache */ 102); /*
 	                                                               * File Name : LoadingWidget.js
 	                                                               *
 	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -10039,26 +7154,26 @@ webpackJsonp([1],[
 	exports.default = LoadingWidget;
 
 /***/ }),
-/* 83 */
+/* 102 */
 /*!******************************************************!*\
   !*** ./src/widgets/templates/LoadingWidget.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='loader'>\n<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\" aria-hidden=\"true\"></i>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 84 */
+/* 103 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/TaskLineFormView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\"\n                        tabindex='-1'\n                        >\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        tabindex='-1'\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
@@ -10079,7 +7194,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 85 */
+/* 104 */
 /*!**********************************************!*\
   !*** ./src/task/views/TaskGroupTotalView.js ***!
   \**********************************************/
@@ -10095,16 +7210,16 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 86);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 105);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TaskGroupTotalView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 88),
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 107),
 	    regions: {
 	        line: {
 	            el: '.line',
@@ -10137,7 +7252,7 @@ webpackJsonp([1],[
 	exports.default = TaskGroupTotalView;
 
 /***/ }),
-/* 86 */
+/* 105 */
 /*!***************************************!*\
   !*** ./src/widgets/LabelRowWidget.js ***!
   \***************************************/
@@ -10153,7 +7268,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -10169,7 +7284,7 @@ webpackJsonp([1],[
 	 */
 	var LabelRowWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
-	    template: __webpack_require__(/*! ./templates/LabelRowWidget.mustache */ 87),
+	    template: __webpack_require__(/*! ./templates/LabelRowWidget.mustache */ 106),
 	    templateContext: function templateContext() {
 	        var values = this.getOption('values');
 	        var label = (0, _tools.getOpt)(this, 'label', '');
@@ -10185,13 +7300,13 @@ webpackJsonp([1],[
 	exports.default = LabelRowWidget;
 
 /***/ }),
-/* 87 */
+/* 106 */
 /*!*******************************************************!*\
   !*** ./src/widgets/templates/LabelRowWidget.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='row'>\n<div class='col-md-10 col-xs-8 text-right'>\n    <b>";
@@ -10209,26 +7324,26 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 88 */
+/* 107 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/LineContainerView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='line'></div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 89 */
+/* 108 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskGroupView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "                <button type='button' class='btn btn-default btn-small up' tabindex='-1'>\n                    <i class='glyphicon glyphicon-arrow-up'></i>\n                </button>\n                <br />\n";
@@ -10269,7 +7384,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 90 */
+/* 109 */
 /*!*********************************************!*\
   !*** ./src/task/views/TaskGroupFormView.js ***!
   \*********************************************/
@@ -10285,31 +7400,31 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 78);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 97);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 80);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 99);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 82);
+	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 101);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 91); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 110); /*
 	                                                                   * File Name : TaskGroupFormView.js
 	                                                                   *
 	                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -10396,13 +7511,13 @@ webpackJsonp([1],[
 	exports.default = TaskGroupFormView;
 
 /***/ }),
-/* 91 */
+/* 110 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/TaskGroupFormView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
@@ -10423,7 +7538,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 92 */
+/* 111 */
 /*!*************************************!*\
   !*** ./src/task/views/ErrorView.js ***!
   \*************************************/
@@ -10444,7 +7559,7 @@ webpackJsonp([1],[
 	var ErrorView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'alert alert-danger',
-	    template: __webpack_require__(/*! ./templates/ErrorView.mustache */ 93),
+	    template: __webpack_require__(/*! ./templates/ErrorView.mustache */ 112),
 	    initialize: function initialize() {
 	        this.errors = this.getOption('errors');
 	    },
@@ -10464,13 +7579,13 @@ webpackJsonp([1],[
 	exports.default = ErrorView;
 
 /***/ }),
-/* 93 */
+/* 112 */
 /*!*****************************************************!*\
   !*** ./src/task/views/templates/ErrorView.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -10485,20 +7600,20 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 94 */
+/* 113 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskBlockView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Description des prestations</h2>\n<div class='content'>\n    <div class='group-errors'></div>\n    <div class='group-container'></div>\n    <div class='group-modalregion'></div>\n    <div class='actions text-right'>\n        <button class='btn btn-default add' type='button'>\n            <i class='glyphicon glyphicon-plus-sign'></i> Ajouter un ouvrage\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 95 */
+/* 114 */
 /*!*************************************************!*\
   !*** ./src/task/views/HtBeforeDiscountsView.js ***!
   \*************************************************/
@@ -10514,16 +7629,16 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 86);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 105);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var HtBeforeDiscountsView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 88),
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 107),
 	    regions: {
 	        line: {
 	            el: '.line',
@@ -10554,7 +7669,7 @@ webpackJsonp([1],[
 	exports.default = HtBeforeDiscountsView;
 
 /***/ }),
-/* 96 */
+/* 115 */
 /*!*********************************************!*\
   !*** ./src/task/views/DiscountBlockView.js ***!
   \*********************************************/
@@ -10570,19 +7685,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 97);
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 116);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 98);
+	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 117);
 	
 	var _DiscountCollectionView2 = _interopRequireDefault(_DiscountCollectionView);
 	
-	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 101);
+	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 120);
 	
 	var _DiscountFormPopupView2 = _interopRequireDefault(_DiscountFormPopupView);
 	
-	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 108);
+	var _ExpenseView = __webpack_require__(/*! ./ExpenseView.js */ 127);
 	
 	var _ExpenseView2 = _interopRequireDefault(_ExpenseView);
 	
@@ -10611,7 +7726,7 @@ webpackJsonp([1],[
 	var DiscountBlockView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-section discount-group',
-	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 110),
+	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 129),
 	    regions: {
 	        'lines': '.lines',
 	        'modalRegion': '.modalregion',
@@ -10704,7 +7819,7 @@ webpackJsonp([1],[
 	exports.default = DiscountBlockView;
 
 /***/ }),
-/* 97 */
+/* 116 */
 /*!******************************************!*\
   !*** ./src/task/models/DiscountModel.js ***!
   \******************************************/
@@ -10720,9 +7835,9 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 68);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 87);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -10768,7 +7883,7 @@ webpackJsonp([1],[
 	exports.default = DiscountModel;
 
 /***/ }),
-/* 98 */
+/* 117 */
 /*!**************************************************!*\
   !*** ./src/task/views/DiscountCollectionView.js ***!
   \**************************************************/
@@ -10784,7 +7899,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 99);
+	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 118);
 	
 	var _DiscountView2 = _interopRequireDefault(_DiscountView);
 	
@@ -10813,7 +7928,7 @@ webpackJsonp([1],[
 	exports.default = DiscountCollectionView;
 
 /***/ }),
-/* 99 */
+/* 118 */
 /*!****************************************!*\
   !*** ./src/task/views/DiscountView.js ***!
   \****************************************/
@@ -10833,7 +7948,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -10851,7 +7966,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 100);
+	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 119);
 	
 	var DiscountView = _backbone2.default.View.extend({
 	    template: template,
@@ -10891,13 +8006,13 @@ webpackJsonp([1],[
 	exports.default = DiscountView;
 
 /***/ }),
-/* 100 */
+/* 119 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/DiscountView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class='col-md-3 col-sm-4 col-xs-12 description'>";
@@ -10915,7 +8030,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 101 */
+/* 120 */
 /*!*************************************************!*\
   !*** ./src/task/views/DiscountFormPopupView.js ***!
   \*************************************************/
@@ -10931,23 +8046,23 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 79);
+	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 98);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 102);
+	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 121);
 	
 	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
 	
-	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 104);
+	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 123);
 	
 	var _DiscountPercentModel2 = _interopRequireDefault(_DiscountPercentModel);
 	
-	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 105);
+	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 124);
 	
 	var _DiscountPercentView2 = _interopRequireDefault(_DiscountPercentView);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -10961,7 +8076,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 107);
+	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 126);
 	
 	var DiscountFormPopupView = _backbone2.default.View.extend({
 	    behaviors: [_ModalBehavior2.default],
@@ -11009,7 +8124,7 @@ webpackJsonp([1],[
 	exports.default = DiscountFormPopupView;
 
 /***/ }),
-/* 102 */
+/* 121 */
 /*!********************************************!*\
   !*** ./src/task/views/DiscountFormView.js ***!
   \********************************************/
@@ -11025,23 +8140,23 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 76);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 95);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -11049,7 +8164,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 103); /*
+	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 122); /*
 	                                                                  * File Name : DiscountFormView.js
 	                                                                  *
 	                                                                  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -11114,13 +8229,13 @@ webpackJsonp([1],[
 	exports.default = DiscountFormView;
 
 /***/ }),
-/* 103 */
+/* 122 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/DiscountFormView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -11130,7 +8245,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 104 */
+/* 123 */
 /*!*************************************************!*\
   !*** ./src/task/models/DiscountPercentModel.js ***!
   \*************************************************/
@@ -11179,7 +8294,7 @@ webpackJsonp([1],[
 	exports.default = DiscountPercentModel;
 
 /***/ }),
-/* 105 */
+/* 124 */
 /*!***********************************************!*\
   !*** ./src/task/views/DiscountPercentView.js ***!
   \***********************************************/
@@ -11195,19 +8310,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 97);
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 116);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _BaseFormBehavior = __webpack_require__(/*! ../../base/behaviors/BaseFormBehavior.js */ 33);
+	var _BaseFormBehavior = __webpack_require__(/*! ../../base/behaviors/BaseFormBehavior.js */ 59);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
 	
@@ -11215,7 +8330,7 @@ webpackJsonp([1],[
 	
 	var DiscountPercentView = _backbone2.default.View.extend({
 	    behaviors: [_BaseFormBehavior2.default],
-	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 106),
+	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 125),
 	    regions: {
 	        'description': '.description',
 	        'percentage': '.percentage'
@@ -11270,13 +8385,13 @@ webpackJsonp([1],[
 	exports.default = DiscountPercentView;
 
 /***/ }),
-/* 106 */
+/* 125 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/DiscountPercentView.mustache ***!
   \***************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -11286,13 +8401,13 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 107 */
+/* 126 */
 /*!*****************************************************************!*\
   !*** ./src/task/views/templates/DiscountFormPopupView.mustache ***!
   \*****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#main-discount-container\"\n                        aria-controls=\"main-discount-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie d'un montant\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#percentage-container\"\n                        aria-controls=\"percentage-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Remise en pourcentage\n                    </a>\n                </li>\n            </ul>\n";
@@ -11306,7 +8421,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 108 */
+/* 127 */
 /*!***************************************!*\
   !*** ./src/task/views/ExpenseView.js ***!
   \***************************************/
@@ -11322,18 +8437,18 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var ExpenseView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 109),
+	    template: __webpack_require__(/*! ./templates/ExpenseView.mustache */ 128),
 	    regions: {
 	        expense_container: '.expense-container'
 	    },
@@ -11365,26 +8480,26 @@ webpackJsonp([1],[
 	exports.default = ExpenseView;
 
 /***/ }),
-/* 109 */
+/* 128 */
 /*!*******************************************************!*\
   !*** ./src/task/views/templates/ExpenseView.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<form class='form-inline'>\n    <div class='col-xs-11 expense-container text-right'></div>\n</form>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 110 */
+/* 129 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/DiscountBlockView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "    <div class='row lines-header hidden-xs'>\n        <div class='col-md-3 col-sm-4'>Description</div>\n        <div class='col-md-3 ol-sm-2 col-xs-12'>Montant HT</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>TVA</div>\n        <div class='col-md-5 col-sm-6 col-xs-12 text-right'>Actions</div>\n    </div>\n";
@@ -11401,7 +8516,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 111 */
+/* 130 */
 /*!*************************************!*\
   !*** ./src/task/views/TotalView.js ***!
   \*************************************/
@@ -11417,16 +8532,16 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 86);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 105);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TotalView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 112),
+	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 131),
 	    regions: {
 	        ht: {
 	            el: '.ht',
@@ -11482,20 +8597,20 @@ webpackJsonp([1],[
 	exports.default = TotalView;
 
 /***/ }),
-/* 112 */
+/* 131 */
 /*!*****************************************************!*\
   !*** ./src/task/views/templates/TotalView.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='ht'></div>\n<div class='tvas'></div>\n<div class='ttc'></div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 113 */
+/* 132 */
 /*!******************************************!*\
   !*** ./src/task/views/NotesBlockView.js ***!
   \******************************************/
@@ -11511,17 +8626,17 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/NotesBlockView.mustache */ 114); /*
+	var template = __webpack_require__(/*! ./templates/NotesBlockView.mustache */ 133); /*
 	                                                                * File Name : NotesBlockView.js
 	                                                                *
 	                                                                * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -11572,13 +8687,13 @@ webpackJsonp([1],[
 	exports.default = NotesBlockView;
 
 /***/ }),
-/* 114 */
+/* 133 */
 /*!**********************************************************!*\
   !*** ./src/task/views/templates/NotesBlockView.mustache ***!
   \**********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "<i>\n        Note complémentaire\n        </i>\n";
@@ -11597,7 +8712,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 115 */
+/* 134 */
 /*!*****************************************************!*\
   !*** ./src/task/views/PaymentConditionBlockView.js ***!
   \*****************************************************/
@@ -11613,17 +8728,17 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 76);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 95);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -11637,7 +8752,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/PaymentConditionBlockView.mustache */ 116); /*
+	var template = __webpack_require__(/*! ./templates/PaymentConditionBlockView.mustache */ 135); /*
 	                                                                           * File Name : PaymentConditionBlockView.js
 	                                                                           *
 	                                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -11738,20 +8853,20 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 116 */
+/* 135 */
 /*!*********************************************************************!*\
   !*** ./src/task/views/templates/PaymentConditionBlockView.mustache ***!
   \*********************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Conditions de paiements</h2>\n<div class='content'>\n<div class='errors'>\n</div>\n    <div class='predefined-conditions'></div>\n    <div class='conditions'></div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 117 */
+/* 136 */
 /*!********************************************!*\
   !*** ./src/task/views/PaymentBlockView.js ***!
   \********************************************/
@@ -11767,21 +8882,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 76);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 95);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 32);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 58);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _PaymentLineTableView = __webpack_require__(/*! ./PaymentLineTableView.js */ 118);
+	var _PaymentLineTableView = __webpack_require__(/*! ./PaymentLineTableView.js */ 137);
 	
 	var _PaymentLineTableView2 = _interopRequireDefault(_PaymentLineTableView);
 	
@@ -11805,7 +8920,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/PaymentBlockView.mustache */ 128);
+	var template = __webpack_require__(/*! ./templates/PaymentBlockView.mustache */ 147);
 	
 	var PaymentBlockView = _backbone2.default.View.extend({
 	    behaviors: [_FormBehavior2.default],
@@ -11941,7 +9056,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 118 */
+/* 137 */
 /*!************************************************!*\
   !*** ./src/task/views/PaymentLineTableView.js ***!
   \************************************************/
@@ -11957,23 +9072,23 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _PaymentDepositView = __webpack_require__(/*! ./PaymentDepositView.js */ 119);
+	var _PaymentDepositView = __webpack_require__(/*! ./PaymentDepositView.js */ 138);
 	
 	var _PaymentDepositView2 = _interopRequireDefault(_PaymentDepositView);
 	
-	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 121);
+	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 140);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
 	
-	var _PaymentLineCollectionView = __webpack_require__(/*! ./PaymentLineCollectionView.js */ 122);
+	var _PaymentLineCollectionView = __webpack_require__(/*! ./PaymentLineCollectionView.js */ 141);
 	
 	var _PaymentLineCollectionView2 = _interopRequireDefault(_PaymentLineCollectionView);
 	
-	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 125);
+	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 144);
 	
 	var _PaymentLineFormView2 = _interopRequireDefault(_PaymentLineFormView);
 	
-	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 123);
+	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 142);
 	
 	var _PaymentLineView2 = _interopRequireDefault(_PaymentLineView);
 	
@@ -11981,7 +9096,7 @@ webpackJsonp([1],[
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -11996,7 +9111,7 @@ webpackJsonp([1],[
 	 *
 	 */
 	var PaymentLineTableView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 127),
+	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 146),
 	    regions: {
 	        lines: '.paymentlines',
 	        modalRegion: '.payment-line-modal-container',
@@ -12122,7 +9237,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineTableView;
 
 /***/ }),
-/* 119 */
+/* 138 */
 /*!**********************************************!*\
   !*** ./src/task/views/PaymentDepositView.js ***!
   \**********************************************/
@@ -12138,7 +9253,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -12154,7 +9269,7 @@ webpackJsonp([1],[
 	 */
 	var PaymentDepositView = _backbone2.default.View.extend({
 	    className: 'row taskline',
-	    template: __webpack_require__(/*! ./templates/PaymentDepositView.mustache */ 120),
+	    template: __webpack_require__(/*! ./templates/PaymentDepositView.mustache */ 139),
 	    modelEvents: {
 	        'change:amount': 'render'
 	    },
@@ -12168,13 +9283,13 @@ webpackJsonp([1],[
 	exports.default = PaymentDepositView;
 
 /***/ }),
-/* 120 */
+/* 139 */
 /*!**************************************************************!*\
   !*** ./src/task/views/templates/PaymentDepositView.mustache ***!
   \**************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='col-lg-4 col-md-4 col-sm-4 col-xs-12 description'>\n    <b>Facture d'acompte</b>\n</div>\n";
@@ -12194,7 +9309,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 121 */
+/* 140 */
 /*!*********************************************!*\
   !*** ./src/task/models/PaymentLineModel.js ***!
   \*********************************************/
@@ -12210,11 +9325,11 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 68);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 87);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 28);
+	var _date = __webpack_require__(/*! ../../date.js */ 47);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -12258,7 +9373,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineModel;
 
 /***/ }),
-/* 122 */
+/* 141 */
 /*!*****************************************************!*\
   !*** ./src/task/views/PaymentLineCollectionView.js ***!
   \*****************************************************/
@@ -12274,7 +9389,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 123);
+	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 142);
 	
 	var _PaymentLineView2 = _interopRequireDefault(_PaymentLineView);
 	
@@ -12318,7 +9433,7 @@ webpackJsonp([1],[
 	exports.default = PaymentLineCollectionView;
 
 /***/ }),
-/* 123 */
+/* 142 */
 /*!*******************************************!*\
   !*** ./src/task/views/PaymentLineView.js ***!
   \*******************************************/
@@ -12334,15 +9449,15 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 28);
+	var _date = __webpack_require__(/*! ../../date.js */ 47);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var PaymentLineView = _backbone2.default.View.extend({
 	    className: 'row taskline',
-	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 124),
+	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 143),
 	    modelEvents: {
 	        'change': 'render'
 	    },
@@ -12385,13 +9500,13 @@ webpackJsonp([1],[
 	exports.default = PaymentLineView;
 
 /***/ }),
-/* 124 */
+/* 143 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/PaymentLineView.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -12435,7 +9550,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 125 */
+/* 144 */
 /*!***********************************************!*\
   !*** ./src/task/views/PaymentLineFormView.js ***!
   \***********************************************/
@@ -12451,21 +9566,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 54);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 73);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 47);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 66);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 78);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 97);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 45);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 64);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
@@ -12481,7 +9596,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/PaymentLineFormView.mustache */ 126);
+	var template = __webpack_require__(/*! ./templates/PaymentLineFormView.mustache */ 145);
 	
 	var PaymentLineFormView = _backbone2.default.View.extend({
 	    behaviors: [_ModalFormBehavior2.default],
@@ -12532,13 +9647,13 @@ webpackJsonp([1],[
 	exports.default = PaymentLineFormView;
 
 /***/ }),
-/* 126 */
+/* 145 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/PaymentLineFormView.mustache ***!
   \***************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -12550,13 +9665,13 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 127 */
+/* 146 */
 /*!****************************************************************!*\
   !*** ./src/task/views/templates/PaymentLineTableView.mustache ***!
   \****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "<div class='col-md-2 col-sm-4 col-xs-12 date'>Date</div>\n";
@@ -12578,20 +9693,20 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 128 */
+/* 147 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/PaymentBlockView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Paiements</h2>\n<div class='content'>\n    <div class='payment_display-container'></div>\n    <div class='payment-deposit-container'></div>\n    <div class='payment_times-container'></div>\n    <div class='payment-lines-container'></div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 129 */
+/* 148 */
 /*!****************************************!*\
   !*** ./src/task/views/RightBarView.js ***!
   \****************************************/
@@ -12611,15 +9726,15 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 130);
+	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 149);
 	
 	var _ActionCollection2 = _interopRequireDefault(_ActionCollection);
 	
-	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 132);
+	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 151);
 	
 	var _ActionListView2 = _interopRequireDefault(_ActionListView);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -12637,7 +9752,7 @@ webpackJsonp([1],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 137);
+	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 156);
 	
 	var RightBarView = _backbone2.default.View.extend({
 	    regions: {
@@ -12678,7 +9793,7 @@ webpackJsonp([1],[
 	exports.default = RightBarView;
 
 /***/ }),
-/* 130 */
+/* 149 */
 /*!*********************************************!*\
   !*** ./src/task/models/ActionCollection.js ***!
   \*********************************************/
@@ -12694,7 +9809,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 131);
+	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 150);
 	
 	var _ActionModel2 = _interopRequireDefault(_ActionModel);
 	
@@ -12716,7 +9831,7 @@ webpackJsonp([1],[
 	exports.default = ActionCollection;
 
 /***/ }),
-/* 131 */
+/* 150 */
 /*!****************************************!*\
   !*** ./src/task/models/ActionModel.js ***!
   \****************************************/
@@ -12747,7 +9862,7 @@ webpackJsonp([1],[
 	exports.default = ActionModel;
 
 /***/ }),
-/* 132 */
+/* 151 */
 /*!******************************************!*\
   !*** ./src/task/views/ActionListView.js ***!
   \******************************************/
@@ -12767,11 +9882,11 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _AnchorWidget = __webpack_require__(/*! ../../widgets/AnchorWidget.js */ 133);
+	var _AnchorWidget = __webpack_require__(/*! ../../widgets/AnchorWidget.js */ 152);
 	
 	var _AnchorWidget2 = _interopRequireDefault(_AnchorWidget);
 	
-	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 135);
+	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 154);
 	
 	var _ToggleWidget2 = _interopRequireDefault(_ToggleWidget);
 	
@@ -12804,7 +9919,7 @@ webpackJsonp([1],[
 	exports.default = ActionListView;
 
 /***/ }),
-/* 133 */
+/* 152 */
 /*!*************************************!*\
   !*** ./src/widgets/AnchorWidget.js ***!
   \*************************************/
@@ -12820,15 +9935,15 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../tools.js */ 46);
 	
-	var _math = __webpack_require__(/*! ../math.js */ 67);
+	var _math = __webpack_require__(/*! ../math.js */ 86);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var AnchorWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
-	    template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 134),
+	    template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 153),
 	    ui: {
 	        anchor: 'a'
 	    },
@@ -12863,13 +9978,13 @@ webpackJsonp([1],[
 	exports.default = AnchorWidget;
 
 /***/ }),
-/* 134 */
+/* 153 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/AnchorWidget.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "#";
@@ -12907,7 +10022,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 135 */
+/* 154 */
 /*!*************************************!*\
   !*** ./src/widgets/ToggleWidget.js ***!
   \*************************************/
@@ -12925,7 +10040,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 136); /*
+	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 155); /*
 	                                                              * File Name : ToggleWidget.js
 	                                                              *
 	                                                              * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -12945,13 +10060,13 @@ webpackJsonp([1],[
 	exports.default = ToggleWidget;
 
 /***/ }),
-/* 136 */
+/* 155 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/ToggleWidget.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -12974,13 +10089,13 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 137 */
+/* 156 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/RightBarView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -13029,7 +10144,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 138 */
+/* 157 */
 /*!**************************************!*\
   !*** ./src/task/views/StatusView.js ***!
   \**************************************/
@@ -13045,21 +10160,21 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 79);
+	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 98);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 28);
+	var _date = __webpack_require__(/*! ../../date.js */ 47);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 139); /*
+	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 158); /*
 	                                                            * File Name : StatusView.js
 	                                                            *
 	                                                            * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -13137,13 +10252,13 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 139 */
+/* 158 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/StatusView.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -13168,7 +10283,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 140 */
+/* 159 */
 /*!********************************************!*\
   !*** ./src/task/views/BootomActionView.js ***!
   \********************************************/
@@ -13187,7 +10302,7 @@ webpackJsonp([1],[
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var BootomActionView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 141),
+	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 160),
 	    tagName: 'footer',
 	    className: 'sticky-footer hidden-md hidden-lg text-center',
 	    ui: {
@@ -13224,13 +10339,13 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 141 */
+/* 160 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/BootomActionView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -13257,7 +10372,7 @@ webpackJsonp([1],[
 	},"useData":true});
 
 /***/ }),
-/* 142 */
+/* 161 */
 /*!*************************************!*\
   !*** ./src/base/views/LoginView.js ***!
   \*************************************/
@@ -13273,7 +10388,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 79);
+	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 98);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
@@ -13283,7 +10398,7 @@ webpackJsonp([1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 143); /*
+	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 162); /*
 	                                                           * File Name : LoginView.js
 	                                                           *
 	                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -13338,33 +10453,33 @@ webpackJsonp([1],[
 	exports.default = LoginView;
 
 /***/ }),
-/* 143 */
+/* 162 */
 /*!*****************************************************!*\
   !*** ./src/base/views/templates/LoginView.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class=\"modal-dialog login-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n		<form>\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">Authentification</h4>\n          </div>\n            <div class=\"modal-body\">\n                <div class='icon'>\n                    <i class='fa fa-user-circle'></i>\n                </div>\n                <div class=\"errors alert alert-danger\" style=\"display:none;\"></div>\n                <div class=\"form-group  item-login item-login\" title=\"\" id=\"item-deformField1\">\n                    <label for=\"deformField1\" class=\"control-label required\" id=\"req-deformField1\">\n                        Identifiant\n                    </label>\n                    <input name=\"login\" value=\"\" id=\"deformField1\" class=\" form-control \" type=\"text\">\n                </div>\n                <div class=\"form-group   item-password\" title=\"\" id=\"item-deformField2\">\n                    <label for=\"deformField2\" class=\"control-label required\" id=\"req-deformField2\">\n                        Mot de passe\n                    </label>\n                    <input name=\"password\" value=\"\" id=\"deformField2\" class=\" form-control \" type=\"password\">\n                </div>\n                <div class=\"form-group   item-remember_me\" title=\"\" id=\"item-deformField4\">\n                    <div class=\"checkbox\">\n                        <label for=\"deformField4\">\n                            <input name=\"remember_me\" value=\"true\" id=\"deformField4\" type=\"checkbox\">\n                            Rester connecté\n                        </label>\n                    </div>\n                </div>\n            </div>\n            <div class=\"modal-footer\">\n            <button class='btn btn-primary btn-block' type='submit'>Connexion</button>\n            </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
 	  },"useData":true});
 
 /***/ }),
-/* 144 */
+/* 163 */
 /*!****************************************************!*\
   !*** ./src/task/views/templates/MainView.mustache ***!
   \****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 36);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 28);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div id='modalregion'>\n</div>\n<div class='container-fluid page-content'>\n    <div class='task-edit col-md-9 col-xs-12'>\n        <div class='errors'>\n        </div>\n        <div id='general'>\n        </div>\n        <div id='common'>\n        </div>\n        <div id='tasklines'>\n        </div>\n        <div class='ht_before_discounts'>\n        </div>\n        <div id='discounts'>\n        </div>\n        <div class='totals'>\n        </div>\n        <div class='notes'>\n        </div>\n        <div class='payment-conditions'>\n        </div>\n        <div class='payments'>\n        </div>\n    </div>\n\n    <div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n         id='rightbar'>\n    </div>\n</div>\n<footer class='footer-actions'></footer>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 145 */
+/* 164 */
 /*!***************************************!*\
   !*** ./src/task/components/Facade.js ***!
   \***************************************/
@@ -13380,27 +10495,27 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 146);
+	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 165);
 	
 	var _CommonModel2 = _interopRequireDefault(_CommonModel);
 	
-	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 147);
+	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 166);
 	
 	var _TaskGroupCollection2 = _interopRequireDefault(_TaskGroupCollection);
 	
-	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 148);
+	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 167);
 	
 	var _DiscountCollection2 = _interopRequireDefault(_DiscountCollection);
 	
-	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 149);
+	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 168);
 	
 	var _PaymentLineCollection2 = _interopRequireDefault(_PaymentLineCollection);
 	
-	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 150);
+	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 169);
 	
 	var _StatusHistoryCollection2 = _interopRequireDefault(_StatusHistoryCollection);
 	
-	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 151);
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 170);
 	
 	var _TotalModel2 = _interopRequireDefault(_TotalModel);
 	
@@ -13600,7 +10715,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 146 */
+/* 165 */
 /*!****************************************!*\
   !*** ./src/task/models/CommonModel.js ***!
   \****************************************/
@@ -13616,11 +10731,11 @@ webpackJsonp([1],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 68);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 87);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	var _backbone = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -13718,7 +10833,7 @@ webpackJsonp([1],[
 	exports.default = CommonModel;
 
 /***/ }),
-/* 147 */
+/* 166 */
 /*!************************************************!*\
   !*** ./src/task/models/TaskGroupCollection.js ***!
   \************************************************/
@@ -13730,15 +10845,15 @@ webpackJsonp([1],[
 	    value: true
 	});
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 69);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 88);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 64);
+	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 83);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	var _backbone = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -13821,7 +10936,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 148 */
+/* 167 */
 /*!***********************************************!*\
   !*** ./src/task/models/DiscountCollection.js ***!
   \***********************************************/
@@ -13837,7 +10952,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 97);
+	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 116);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
@@ -13845,7 +10960,7 @@ webpackJsonp([1],[
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 46);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -13922,7 +11037,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 149 */
+/* 168 */
 /*!**************************************************!*\
   !*** ./src/task/models/PaymentLineCollection.js ***!
   \**************************************************/
@@ -13934,11 +11049,11 @@ webpackJsonp([1],[
 	    value: true
 	});
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 69);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 88);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
-	var _PaymentLineModel = __webpack_require__(/*! ./PaymentLineModel.js */ 121);
+	var _PaymentLineModel = __webpack_require__(/*! ./PaymentLineModel.js */ 140);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
 	
@@ -13946,7 +11061,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -14102,7 +11217,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1), __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 150 */
+/* 169 */
 /*!****************************************************!*\
   !*** ./src/task/models/StatusHistoryCollection.js ***!
   \****************************************************/
@@ -14137,7 +11252,7 @@ webpackJsonp([1],[
 	exports.default = StatusHistoryCollection;
 
 /***/ }),
-/* 151 */
+/* 170 */
 /*!***************************************!*\
   !*** ./src/task/models/TotalModel.js ***!
   \***************************************/
@@ -14153,7 +11268,7 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 67);
+	var _math = __webpack_require__(/*! ../../math.js */ 86);
 	
 	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
 	
@@ -14198,221 +11313,6 @@ webpackJsonp([1],[
 	     *
 	     */
 	exports.default = TotalModel;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
-
-/***/ }),
-/* 152 */
-/*!****************************************!*\
-  !*** ./src/base/components/AuthBus.js ***!
-  \****************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 27);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : AuthBus.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var AuthBusClass = _backbone2.default.Object.extend({
-	    channelName: 'auth',
-	    url: '/api/v1/login',
-	    radioEvents: {
-	        'login': 'onLogin'
-	    },
-	    initialize: function initialize() {
-	        this.ok_callback = null;
-	        this.error_callback = null;
-	    },
-	    setAuthCallbacks: function setAuthCallbacks(callbacks) {
-	        /*
-	         * Define authentication callbacks that should be fired
-	         * on successfull authentication
-	         */
-	        this.callbacks = callbacks;
-	    },
-	    onLogin: function onLogin(datas, onAuthOk, onAuthFailed) {
-	        var callbacks = this.callbacks;
-	        this.ok_callback = onAuthOk;
-	        this.error_callback = onAuthFailed;
-	        (0, _tools.ajax_call)(this.url, datas, 'POST', {
-	            success: this.onAuthSuccess.bind(this),
-	            error: this.onAuthError.bind(this)
-	        });
-	    },
-	    onAuthSuccess: function onAuthSuccess(result) {
-	        if (result['status'] == 'success') {
-	            _.each(this.callbacks, function (callback) {
-	                callback();
-	            });
-	            this.ok_callback(result);
-	        } else {
-	            this.error_callback(result);
-	        }
-	    },
-	    onAuthError: function onAuthError(xhr) {
-	        if (xhr.status == 400) {
-	            if (_.has(xhr.responseJSON, 'errors')) {
-	                this.error_callback(xhr.responseJSON.errors);
-	            } else {
-	                this.error_callback();
-	            }
-	        } else {
-	            alert('Erreur serveur : contactez votre administrateur');
-	        }
-	    }
-	});
-	var AuthBus = new AuthBusClass();
-	exports.default = AuthBus;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
-
-/***/ }),
-/* 153 */
-/*!*******************************************!*\
-  !*** ./src/base/components/MessageBus.js ***!
-  \*******************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
-	
-	var _backbone4 = _interopRequireDefault(_backbone3);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : MessageBus.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var MessageBusClass = _backbone2.default.Object.extend({
-	    channelName: 'message',
-	    radioEvents: {
-	        'success': 'logSuccess',
-	        'error': 'logError'
-	    },
-	    logSuccess: function logSuccess(view, message) {
-	        console.log("MessageBus : " + message);
-	    },
-	    logError: function logError(view, message) {
-	        console.error("MessageBus : " + message);
-	    }
-	});
-	var MessageBus = new MessageBusClass();
-	exports.default = MessageBus;
-
-/***/ }),
-/* 154 */
-/*!******************************************!*\
-  !*** ./src/base/components/ConfigBus.js ***!
-  \******************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
-	
-	var _backbone2 = _interopRequireDefault(_backbone);
-	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
-	
-	var _backbone4 = _interopRequireDefault(_backbone3);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/*
-	 * File Name : ConfigBus.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
-	var ConfigBusClass = _backbone2.default.Object.extend({
-	    channelName: 'config',
-	    radioRequests: {
-	        'get:form_options': 'getFormOptions',
-	        'has:form_section': 'hasFormSection',
-	        'get:form_section': 'getFormSection',
-	        'get:form_actions': 'getFormActions'
-	    },
-	    setFormConfig: function setFormConfig(form_config) {
-	        this.form_config = form_config;
-	    },
-	    getFormOptions: function getFormOptions(option_name) {
-	        /*
-	         * Return the form options for option_name
-	         *
-	         * :param str option_name: The name of the option
-	         * :returns: A list of dict with options (for building selects)
-	         */
-	        console.log("FacadeClass.getFormOptions");
-	        return this.form_config['options'][option_name];
-	    },
-	    hasFormSection: function hasFormSection(section_name) {
-	        /*
-	         *
-	         * :param str section_name: The name of the section
-	         * :rtype: bool
-	         */
-	        return _.has(this.form_config['sections'], section_name);
-	    },
-	    getFormSection: function getFormSection(section_name) {
-	        /*
-	         *
-	         * Return the form section description
-	         * :param str section_name: The name of the section
-	         * :returns: The section definition
-	         * :rtype: Object
-	         */
-	        return this.form_config['sections'][section_name];
-	    },
-	    getFormActions: function getFormActions() {
-	        /*
-	         * Return available form action config
-	         */
-	        return this.form_config['actions'];
-	    }
-	});
-	var ConfigBus = new ConfigBusClass();
-	exports.default = ConfigBus;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ })

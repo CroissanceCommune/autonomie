@@ -10,8 +10,9 @@
  *
  */
 import $ from 'jquery';
-import 'bootstrap/dist/js/bootstrap';
+// import 'bootstrap/dist/js/bootstrap';
 import Modal from 'bootstrap';
+import 'jstree';
 import _ from 'underscore';
 import Bb from 'backbone';
 import Mn from 'backbone.marionette';

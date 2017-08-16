@@ -14,8 +14,9 @@ const config = {
   entry: {
       base_setup: path.join(APP_DIR, 'base_setup.js'),
       task: path.join(APP_DIR, 'task', 'task.js'),
+      expense: path.join(APP_DIR, 'expense', 'expense.js'),
       vendor: ['jquery', 'backbone', 'underscore', 'backbone.marionette',
-                'tinymce', 'jstree', 'bootstrap']
+                'tinymce', 'jstree', 'bootstrap', 'backbone-validation']
   },
   module: {
     loaders: [
@@ -49,7 +50,12 @@ const config = {
         compress: {
             warnings: false
         }
-    })
+    }),
+    new webpack.optimize.CommonsChunkPlugin(
+        "vendor",
+        "vendor.min.js",
+        Infinity
+    )
   ]: [
     new webpack.ProvidePlugin({
       $: 'jquery',
@@ -57,7 +63,11 @@ const config = {
       jquery: 'jquery',
       _: 'underscore'
     }),
-    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js")
+    new webpack.optimize.CommonsChunkPlugin(
+        "vendor",
+        "vendor.bundle.js",
+        Infinity
+    )
   ],
   resolve: {
     root: path.join(__dirname, './src')

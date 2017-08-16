@@ -189,13 +189,13 @@ def add_views(config):
         ExpenseList,
         route_name="expenses",
         permission="admin.expensesheet",
-        renderer="treasury/admin_expenses.mako",
+        renderer="expenses/admin_expenses.mako",
     )
 
     config.add_view(
         company_expenses_view,
         route_name="company_expenses",
-        renderer="treasury/expenses.mako",
+        renderer="expenses/expenses.mako",
         permission="list_expenses",
     )
 

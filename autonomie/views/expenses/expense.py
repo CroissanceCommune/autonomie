@@ -699,7 +699,7 @@ def includeme(config):
     config.add_view(
         ExpenseSheetEditView,
         route_name="/expenses/{id}",
-        renderer="treasury/expense.mako",
+        renderer="expenses/expense.mako",
         permission="view.expensesheet",
         layout="opa",
     )

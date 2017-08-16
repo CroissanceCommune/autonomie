@@ -56,6 +56,7 @@ class RestError(HTTPError):
         common http exceptions
     """
     def __init__(self, errors, code=400):
+        self.code = code
         body = {'status': "error", "errors": errors}
         Response.__init__(self, status=code, body=render("json", body))
         self.content_type = 'application/json'

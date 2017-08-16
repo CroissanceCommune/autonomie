@@ -86,34 +86,14 @@ class TaskRestView(BaseRestView):
         for the different select boxes
         """
         result = {
-            'is_estimation': self.is_estimation(),
             "actions": {
                 'status': self._get_status_actions(),
                 'others': self._get_other_actions(),
             }
         }
-        result = self._add_form_config(result)
         result = self._add_form_options(result)
         result = self._add_form_sections(result)
         return result
-
-    def _add_form_config(self, form_config):
-        """
-        Add more form master configuration parameters
-
-        :param dict form_config: The form configuration dict
-        :returns: The dict with new options
-        """
-        form_config['is_estimation'] = self.is_estimation()
-        if hasattr(self, '_more_form_config'):
-            form_config = self._more_form_config(form_config)
-        return form_config
-
-    def is_estimation(self):
-        """
-        Return True if this is an estimation
-        """
-        return False
 
     def _add_form_options(self, form_config):
         """

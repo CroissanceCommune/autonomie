@@ -111,9 +111,6 @@ class EstimationRestView(TaskRestView):
 
         return appstruct
 
-    def is_estimation(self):
-        return True
-
     def _more_form_sections(self, sections):
         """
         Add estimation specific form sections to the sections returned to the

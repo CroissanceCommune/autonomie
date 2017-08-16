@@ -1,0 +1,133 @@
+# -*- coding: utf-8 -*-
+# * Authors:
+#       * TJEBBES Gaston <g.t@majerti.fr>
+#       * Arezki Feth <f.a@majerti.fr>;
+#       * Miotte Julien <j.m@majerti.fr>;
+from pytest import fixture
+
+
+@fixture
+def expense_teltype(dbsession):
+    from autonomie.models.expense import ExpenseTelType
+    item = ExpenseTelType(
+        label="Tel expense",
+        code="TEL",
+        code_tva="TEL_TVA",
+        compte_tva="TEL_COMPTE_TVA",
+        contribution=False,
+        percentage=50
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def expense_kmtype(dbsession):
+    from autonomie.models.expense import ExpenseKmType
+    item = ExpenseKmType(
+        label="KM expense",
+        code="KM",
+        code_tva="KM_TVA",
+        compte_tva="KM_COMPTE_TVA",
+        contribution=False,
+        amount=1.254
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def expense_type(dbsession):
+    from autonomie.models.expense import ExpenseType
+    item = ExpenseType(
+        label="KM expense",
+        code="KM",
+        code_tva="KM_TVA",
+        compte_tva="KM_COMPTE_TVA",
+        contribution=False,
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def expense_kmline(dbsession, expense_kmtype):
+    from autonomie.models.expense import ExpenseKmLine
+    item = ExpenseKmLine(
+        description=u"Aller retour",
+        category="1",
+        type_id=expense_kmtype.id,
+        km=10000,
+        start="Dijon",
+        end="Lyon",
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def expense_telline(dbsession, expense_teltype):
+    from autonomie.models.expense import ExpenseLine
+    item = ExpenseLine(
+        description=u"Test expense",
+        category="1",
+        type_id=expense_teltype.id,
+        ht=3000,
+        tva=600,
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def expense_line(dbsession, expense_type):
+    from autonomie.models.expense import ExpenseLine
+    item = ExpenseLine(
+        description=u"Test expense",
+        category="2",
+        type_id=expense_type.id,
+        ht=10000,
+        tva=2000,
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def expense_sheet(
+    dbsession,
+    company,
+    user,
+):
+    from autonomie.models.expense import ExpenseSheet
+    item = ExpenseSheet(
+        month=10,
+        year=2015,
+        company_id=company.id,
+        user_id=user.id,
+    )
+    dbsession.add(item)
+    dbsession.flush()
+    return item
+
+
+@fixture
+def full_expense_sheet(
+    dbsession,
+    expense_sheet,
+    expense_line,
+    expense_kmline,
+    expense_telline,
+):
+    expense_sheet.lines.append(expense_line)
+    expense_sheet.lines.append(expense_telline)
+    expense_sheet.kmlines.append(expense_kmline)
+    dbsession.add(expense_sheet)
+    dbsession.flush()
+    return expense_sheet

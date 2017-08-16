@@ -1,0 +1,44 @@
+<div class="row">
+    <div class="col-xs-4">
+        <h3 style="margin-top:0px">
+            Frais
+        </h3>
+        <span class="help-block">
+            Dépenses liées au fonctionnement de l'entreprise
+        </span>
+    </div>
+    <div class="col-xs-8">
+        {{#edit}}
+        <div>
+        <a href="#lines/add/1" class='btn btn-info' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
+        <a href="#tel/add" class='btn btn-info' title="Ajouter une ligne de dépense téléphonique"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des dépenses téléphoniques</a>
+        </div>
+        {{/edit}}
+    </div>
+</div>
+<table class="opa table table-bordered table-condensed">
+    <thead>
+        <th>Date</th>
+        <th>Type de dépense</th>
+        <th>Description</th>
+        <th>Montant HT</th>
+        <th>Tva</th>
+        <th>Total TTC</th>
+        {{#edit}}
+        <th class="hidden-print">Actions</th>
+            {{/edit}}
+    </thead>
+    <tbody class='internal'>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan='3'>Total</td>
+            <td id='internal_total_ht'></td>
+            <td id='internal_total_tva'></td>
+            <td id='internal_total'></td>
+        {{#edit}}
+            <td class="hidden-print"></td>
+            {{/edit}}
+        </tr>
+    </tfoot>
+</table>

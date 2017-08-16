@@ -1029,11 +1029,10 @@ class TaskLineGroup(DBBASE, GroupCompute):
         return result
 
 
-@colander.deferred
-def deferred_tva_product_validator(node, kw):
-    product_id = node.get('product_id')
+def tva_product_validator(node, value):
+    product_id = value.get('product_id')
     if product_id is not None:
-        tva_id = node.get('tva_id')
+        tva_id = value.get('tva_id')
         if tva_id is not None:
             tva = Tva.get(tva_id)
             if product_id not in [p.id for p in tva.products]:
@@ -1041,8 +1040,8 @@ def deferred_tva_product_validator(node, kw):
                     node,
                     u"Ce produit ne correspond pas à la TVA configurée"
                 )
-                exc['title'] = u"Le code produit doit correspondre à la TVA \
-                    configuré pour cette prestation"
+                exc['product_id'] = u"Le code produit doit correspondre à la \
+                    TVA configurée pour cette prestation"
                 raise exc
 
 
@@ -1051,7 +1050,7 @@ class TaskLine(DBBASE, LineCompute):
         Estimation/Invoice/CancelInvoice lines
     """
     __colanderalchemy_config__ = {
-        'validator': deferred_tva_product_validator,
+        'validator': tva_product_validator,
         'after_bind': taskline_after_bind,
     }
     __table_args__ = default_table_args

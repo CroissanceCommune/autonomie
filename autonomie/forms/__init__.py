@@ -25,11 +25,11 @@ Main deferreds functions used in autonomie
 The widgets provided here are model agnostic
 """
 import colander
-import calendar
 import datetime
 import deform
 import deform_extensions
 
+from autonomie.utils import strings
 from autonomie.utils.fileupload import FileTempStore
 from autonomie.utils.html import (
     clean_html,
@@ -248,8 +248,7 @@ def default_month(node, kw):
 
 
 def get_month_options():
-    return [(index, calendar.month_name[index].decode('utf8'))
-            for index in range(1, 13)]
+    return [(index, strings.month_name(index)) for index in range(1, 13)]
 
 
 def range_validator(appstruct):

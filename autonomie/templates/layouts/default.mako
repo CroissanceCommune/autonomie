@@ -74,6 +74,7 @@
       </div>
       <%block name='pop_message'>
       % for message in request.session.pop_flash(queue=""):
+        % if message is not None:
           <div class='row hidden-print'>
           <div class='col-md-6 col-md-offset-3'>
             <div class="alert alert-success">
@@ -82,8 +83,10 @@
             </div>
           </div>
         </div>
+        % endif
       % endfor
       % for message in request.session.pop_flash(queue="error"):
+        % if message is not None:
           <div class='row hidden-print'>
           <div class='col-md-6 col-md-offset-3'>
             <div class="alert alert-danger">
@@ -93,6 +96,7 @@
             </div>
           </div>
         </div>
+        % endif
       % endfor
       </%block>
       <%block name='beforecontent' />

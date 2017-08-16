@@ -179,6 +179,8 @@ class ExpenseSheetAddView(BaseFormView):
         """
         Find an existing expense sheet
         """
+        print("Find existing")
+        print(appstruct)
         return get_expense_sheet(
             appstruct['year'],
             appstruct['month'],
@@ -199,12 +201,21 @@ class ExpenseSheetAddView(BaseFormView):
         return result
 
     def submit_success(self, appstruct):
-        sheet = self._find_existing(appstruct)
-        if sheet is None:
-            sheet = self.create_instance(appstruct)
-            self.dbsession.add(sheet)
-            self.dbsession.flush()
+        sheet = self.create_instance(appstruct)
+        self.dbsession.add(sheet)
+        self.dbsession.flush()
         return self.redirect(sheet)
+
+    def submit_failure(self, e):
+        errors = e.error.asdict()
+        if 'month' in errors and 'year' in errors:
+            print("Trying to find the datas")
+            appstruct = self.request.POST
+            sheet = self._find_existing(appstruct)
+            if sheet is not None:
+                return self.redirect(sheet)
+
+        BaseFormView.submit_failure(self, e)
 
 
 class ExpenseSheetEditView(BaseView):
@@ -312,30 +323,35 @@ class ExpenseSheetDuplicateView(BaseFormView):
 
     def submit_success(self, appstruct):
         logger.debug("# Duplicating an expensesheet #")
-
-        sheet = self._find_existing(appstruct)
-        if sheet is None:
-            sheet = self.context.duplicate(appstruct['year'], appstruct['month'])
-            self.dbsession.add(sheet)
-            self.dbsession.flush()
-            logger.debug(
-                u"ExpenseSheet {0} was duplicated to {1}".format(
-                    self.context.id, sheet.id
-                )
+        sheet = self.context.duplicate(appstruct['year'], appstruct['month'])
+        self.dbsession.add(sheet)
+        self.dbsession.flush()
+        logger.debug(
+            u"ExpenseSheet {0} was duplicated to {1}".format(
+                self.context.id, sheet.id
             )
-        else:
-            sheet = self.context
-            self.request.session.flash(
-                u"Impossible de dupliquer cette note de dépenses."
-                u"Une note de dépense existe déjà pour la période "
-                u"de {0} {1}.".format(
-                    strings.month_name(appstruct['month']),
-                    appstruct['year'],
-                ),
-                'error'
-            )
-
+        )
         return self.redirect(sheet)
+
+    def submit_failure(self, e):
+        errors = e.error.asdict()
+        if 'month' in errors and 'year' in errors:
+            appstruct = self.request.POST
+            sheet = self._find_existing(appstruct)
+            if sheet is not None:
+                sheet = self.context
+                self.request.session.flash(
+                    u"Impossible de dupliquer cette note de dépenses."
+                    u"Une note de dépense existe déjà pour la période "
+                    u"de {0} {1}.".format(
+                        strings.month_name(appstruct['month']),
+                        appstruct['year'],
+                    ),
+                    'error'
+                )
+                return self.redirect(self.context)
+
+        BaseFormView.submit_failure(self, e)
 
 
 

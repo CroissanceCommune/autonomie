@@ -73,9 +73,7 @@ from autonomie.models.workshop import (
 from autonomie.models.expense import (
     ExpenseSheet,
     ExpensePayment,
-    ExpenseType,
-    ExpenseKmType,
-    ExpenseTelType,
+    BaseExpenseLine,
 )
 from autonomie.models.user import (
     User,
@@ -140,21 +138,7 @@ class RootFactory(dict):
             ('discount_lines', 'discount_line', DiscountLine,),
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
-            (
-                'expense_types_expenses',
-                'expense_types_expense',
-                ExpenseType
-            ),
-            (
-                'expense_types_expensekms',
-                'expense_types_expensekm',
-                ExpenseKmType
-            ),
-            (
-                'expense_types_expensetels',
-                'expense_types_expensetel',
-                ExpenseTelType
-            ),
+            ("expenselines", "expenseline", BaseExpenseLine,),
             ('expense_payments', 'expense_payment', ExpensePayment, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
@@ -597,6 +581,13 @@ def get_expense_sheet_default_acl(self):
     return acl
 
 
+def get_expenseline_acl(self):
+    """
+    Return the default acl for an expenseline
+    """
+    return get_expense_sheet_default_acl(self.sheet)
+
+
 def get_payment_default_acl(self):
     """
     Compute the acl for a Payment object
@@ -800,6 +791,4 @@ def set_models_acl():
     Workshop.__default_acl__ = property(get_event_acl)
 
     Tva.__acl__ = property(get_base_acl)
-    ExpenseType.__acl__ = property(get_base_acl)
-    ExpenseKmType.__acl__ = property(get_base_acl)
-    ExpenseTelType.__acl__ = property(get_base_acl)
+    BaseExpenseLine.__acl__ = property(get_expenseline_acl)

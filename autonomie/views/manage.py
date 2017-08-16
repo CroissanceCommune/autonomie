@@ -56,7 +56,7 @@ def manage(request):
         .order_by(ExpenseSheet.month)\
         .order_by(ExpenseSheet.status_date).all()
     for expense in expenses:
-        expense.url = request.route_path("expensesheet", id=expense.id)
+        expense.url = request.route_path("/expenses/{id}", id=expense.id)
 
     user_id = request.user.id
     query = Activity.query()

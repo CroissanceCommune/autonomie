@@ -246,7 +246,6 @@ event_list_js = get_module_resource('event_list')
 
 job_js = get_module_resource("job", tmpl=True)
 
-expense_js = get_module_resource("expense", tmpl=True)
 statistics_js = get_module_resource(
     'statistics',
     tmpl=True,

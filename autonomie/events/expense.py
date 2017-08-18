@@ -61,6 +61,7 @@ Commentaires associés au document :
 
 EXPENSE_NOTIFY_STATUS = dict(
     (
+        ("invalid", u"Invalidée par {0} le {1}"),
         ("valid", u"Validée par {0} le {1}"),
         ('paid', u"Paiement partiel notifié par {0} le {1}"),
         ('resulted', u"Paiement notifié par {0} le {1}")
@@ -135,7 +136,7 @@ class StatusChanged(object):
         owner = format_account(self.expense.user)
         date = u"{0}/{1}".format(self.expense.month, self.expense.year)
         status_verb = get_status_verb(self.new_status)
-        addr = self.request.route_url("expensesheet", id=self.expense.id)
+        addr = self.request.route_url("/expenses/{id}", id=self.expense.id)
         addr = format_link(self.settings, addr)
 
         return MAIL_TMPL.format(

@@ -51,7 +51,14 @@ def task_panel(context, request, task=None, bulk=False):
 
 
 STATUS_LABELS = {
+    'draft': u"Brouillon",
     "wait": u"En attente de validation",
+    "invalid": {
+        "estimation": u"Invalidé",
+        "invoice": u"Invalidée",
+        "cancelinvoice": u"Invalidé",
+        "expensesheet": u"Invalidée",
+    },
     "valid": {
         "estimation": u"En cours",
         "invoice": u"En attente de paiement",

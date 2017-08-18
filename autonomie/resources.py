@@ -263,11 +263,11 @@ task_html_pdf_css = get_resource('css/task_html.css', depends=[pdf_css])
 # Test tools
 def get_test_resource():
     res = []
-    for i in ('math', 'date', 'dom', 'task'):
+    for i in ('math', 'date', 'dom'):
         res.append(
             get_resource(
                 "js/tests/test_%s.js" % i,
-                depends=(jquery_qunit, main_group, task)
+                depends=(jquery_qunit, main_group)
             )
         )
     return Group(res)

@@ -60,7 +60,6 @@ from autonomie.views import (
     BaseFormView,
     BaseView,
 )
-from autonomie.views.status import StatusView
 from autonomie.views.render_api import (
     month_name,
     format_account,
@@ -140,7 +139,7 @@ def get_redirect_btn(request, id_):
     """
 
 
-def populate_actionmenu(request):
+def populate_actionmenu(request, tolist=False):
     """
         Add buttons in the request actionmenu attribute
     """
@@ -152,11 +151,18 @@ def populate_actionmenu(request):
             id=request.context.id
         )
     elif isinstance(request.context, ExpenseSheet):
-        link = ViewLink(
-            u"Revenir à la note de dépenses",
-            path="/expenses/{id}",
-            id=request.context.id
-        )
+        if tolist:
+            link = ViewLink(
+                u"Revenir à la liste des dépenses",
+                path="company_expenses",
+                id=request.context.company_id
+            )
+        else:
+            link = ViewLink(
+                u"Revenir à la note de dépenses",
+                path="/expenses/{id}",
+                id=request.context.id
+            )
     if link is not None:
         request.actionmenu.add(link)
 
@@ -243,9 +249,8 @@ class ExpenseSheetEditView(BaseView):
     def __call__(self):
         # if not self.request.has_permission('edit.expense'):
         #    return HTTPFound(self.request.current_route_path() + '.html')
-
+        populate_actionmenu(self.request, tolist=True)
         expense_resources.need()
-        populate_actionmenu(self.request)
         return dict(
             context=self.context,
             title=self.title(),
@@ -352,250 +357,6 @@ class ExpenseSheetDuplicateView(BaseFormView):
                 return self.redirect(self.context)
 
         BaseFormView.submit_failure(self, e)
-
-
-
-# class ExpenseSheetView(BaseFormView):
-#     """
-#         ExpenseSheet view
-#     """
-#     add_template_vars = (
-#         'title',
-#         'loadurl',
-#         "edit",
-#         "communication_history",
-#     )
-#
-#     def __init__(self, request):
-#         super(ExpenseSheetView, self).__init__(request)
-#         expense_js.need()
-#         self.month = self.request.context.month
-#         self.year = self.request.context.year
-#         self.formcounter = None
-#
-#     @property
-#     def communication_history(self):
-#         """
-#             Communication history data, will be carried to the template
-#         """
-#         return get_expense_history(self.request.context)
-#
-#     @property
-#     def title(self):
-#         """
-#             Return the title of the page
-#         """
-#
-#     @property
-#     def buttons(self):
-#         """
-#             Return the buttons used for form submission
-#         """
-#         btns = []
-#         logger.debug(u"   + Available actions :")
-#         for action in self.request.context.get_next_actions():
-#             logger.debug(u"    * {0}".format(action.name))
-#             if action.allowed(self.request.context, self.request):
-#                 logger.debug(u"     -> is allowed for the current user")
-#                 if hasattr(self, "_%s_btn" % action.name):
-#                     func = getattr(self, "_%s_btn" % action.name)
-#                     btns.append(func())
-#
-#         if self.request.has_permission('add_payment.expense'):
-#             btns.append(self._paid_btn())
-#         return btns
-#
-#     def _reset_btn(self):
-#         """
-#             Return a reset button
-#         """
-#         return Submit(
-#             u"Réinitialiser",
-#             "reset",
-#             name="reset",
-#             request=self.request,
-#             confirm=u"Êtes-vous sûr de vouloir réinitialiser \
-# cette feuille de notes de dépense (toutes les modifications apportées seront \
-# perdues) ?")
-#
-#     def _draft_btn(self):
-#         """
-#         Return a button to set the expense to draft again
-#         """
-#         msg = u"Annuler la mise en validation et repasser en brouillon"
-#         return Submit(
-#             msg,
-#             "draft",
-#             request=self.request,
-#         )
-#
-#     def _wait_btn(self):
-#         """
-#             Return a button for requesting validation
-#         """
-#         return Submit(u"Demander la validation", "wait", request=self.request)
-#
-#     def _valid_btn(self):
-#         """
-#             Return a validation button
-#         """
-#         return Submit(u"Valider le document", "valid", request=self.request)
-#
-#     def _invalid_btn(self):
-#         """
-#             Return an invalidation button
-#         """
-#         return Submit(u"Invalider le document", "invalid", request=self.request)
-#
-#     def _paid_form(self):
-#         """
-#         Return the form for payment registration
-#         """
-#         form = get_payment_form(self.request, self.formcounter)
-#         appstruct = {
-#             'amount': self.context.topay(),
-#             'come_from': self.request.current_route_path(),
-#         }
-#         form.set_appstruct(appstruct)
-#         self.formcounter = form.counter
-#         return form
-#
-#     def _paid_btn(self):
-#         """
-#             Return a button to set a paid btn and a select to choose
-#             the payment mode
-#         """
-#         form = self._paid_form()
-#         title = u"Notifier un paiement"
-#         popup = PopUp("paidform", title, form.render())
-#         self.request.popups[popup.name] = popup
-#         return popup.open_btn(css='btn btn-primary')
-#
-#     @property
-#     def edit(self):
-#         """
-#             return True if the current context is editable by the current user
-#         """
-#         return self.request.has_permission("edit.expensesheet")
-#
-#     @property
-#     def loadurl(self):
-#         """
-#             Returns a json representation of the current expense sheet
-#         """
-#         return self.request.route_path(
-#             "expensejson",
-#             id=self.request.context.id,
-#         )
-#
-#     def before(self, form):
-#         """
-#         Prepopulate the form
-#         """
-#         # Here we override the form counter to avoid field ids conflict
-#         form.set_appstruct(self.request.context.appstruct())
-#         if self.request.has_permission('admin.expensesheet'):
-#             btn = ViewLink(
-#                 u"Revenir à la liste",
-#                 "admin.expensesheet",
-#                 path="expenses",
-#             )
-#         else:
-#             btn = ViewLink(
-#                 u"Revenir à la liste",
-#                 "view.expensesheet",
-#                 path="company_expenses",
-#                 id=self.request.context.company.id,
-#             )
-#         self.request.actionmenu.add(btn)
-#         btn = get_add_file_link(
-#             self.request,
-#             label=u"Déposer des justificatifs",
-#             perm="add.file",
-#         )
-#         self.request.actionmenu.add(btn)
-#
-#     def submit_success(self, appstruct):
-#         """
-#             Handle submission of the expense page, only on state change
-#             validation
-#         """
-#         logger.debug("#  Submitting expense sheet status form  #")
-#         logger.debug(appstruct)
-#
-#         # Comment is now stored in a specific table
-#         comment = None
-#         if "comment" in appstruct:
-#             comment = appstruct.pop('comment')
-#
-#         # here we merge all our parameters with the current expensesheet
-#         merge_session_with_post(self.request.context, appstruct)
-#
-#         # We modifiy the expense status
-#         try:
-#             expense, status = self.set_expense_status(self.request.context)
-#             self._store_communication(comment)
-#             self.request.registry.notify(ExpenseStatusChanged(
-#                 self.request,
-#                 expense,
-#                 status,
-#                 comment,
-#             ))
-#         except Forbidden, err:
-#             logger.exception(u"An access has been forbidden")
-#             self.request.session.flash(err.message, queue='error')
-#
-#         return HTTPFound(
-#             self.request.route_url(
-#                 "expensesheet",
-#                 id=self.request.context.id
-#             )
-#         )
-#
-#     def _store_communication(self, comment):
-#         """
-#             Stores a comment that would have been provided on expense state
-#             change
-#         """
-#         # If there was a comment, we add it in the database
-#         if comment is not None:
-#             comment = Communication(user_id=self.request.user.id,
-#                                     content=comment,
-#                                     expense_sheet_id=self.request.context.id)
-#             self.dbsession.add(comment)
-#
-#     def set_expense_status(self, expense):
-#         """
-#             Handle expense submission
-#         """
-#         params = dict(self.request.POST)
-#         status = params['submit']
-#         logger.debug(u"Setting a new status : %s" % status)
-#         expense.set_status(status, self.request, self.request.user.id, **params)
-#         expense.status_date = datetime.date.today()
-#         return expense, status
-#
-#     def reset_success(self, appstruct):
-#         """
-#             Reset an expense
-#         """
-#         logger.debug(u"Resetting the expense")
-#         if self.context.status == 'draft':
-#             self.dbsession.delete(self.context)
-#             self.session.flash(u"Votre feuille de notes de dépense de {0} {1} a \
-# bien été réinitialisée".format(month_name(self.month), self.year))
-#         else:
-#             self.session.flash(u"Vous n'êtes pas autorisé à réinitialiser \
-# cette feuille de notes de dépense")
-#         cid = self.context.company_id
-#         uid = self.context.user_id
-#         url = self.request.route_url(
-#             "user_expenses",
-#             id=cid,
-#             uid=uid,
-#             _query=dict(year=self.year, month=self.month)
-#         )
-#         return HTTPFound(url)
 
 
 class ExpenseSheetPaymentView(BaseFormView):

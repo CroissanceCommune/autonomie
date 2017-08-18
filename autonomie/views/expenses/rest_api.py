@@ -9,14 +9,19 @@ import colander
 import traceback
 
 from colanderalchemy import SQLAlchemySchemaNode
+from pyramid.httpexceptions import (
+    HTTPFound,
+    HTTPForbidden,
+)
 
 from autonomie.models.expense import (
     ExpenseSheet,
     ExpenseType,
     ExpenseLine,
     ExpenseKmLine,
+    Communication,
 )
-
+from autonomie.utils import strings
 from autonomie.utils.rest import (
     add_rest_views,
     RestError,
@@ -208,6 +213,8 @@ class RestExpenseSheetView(BaseRestView):
 
         date = datetime.date(year, month, 1)
         options['today'] = date
+
+        options['edit'] = bool(self.request.has_permission('edit.expensesheet'))
         form_config['options'] = options
         return form_config
 
@@ -231,15 +238,38 @@ class RestExpenseSheetView(BaseRestView):
         """
         Return other existing expenses available for expense line duplication
         """
-        all_expenses = ExpenseSheet.query().filter_by(user_id=self.context.id)
-        all_expenses = all_expenses.filter_by(company_id=self.company_id)
+        result = [{
+            "label": u"{month_label} / {year} (feuille courante)".format(
+                month_label=strings.month_name(self.context.month),
+                year=self.context.year,
+            ),
+            "id": self.context.id,
+        }]
+        all_expenses = ExpenseSheet.query().filter_by(
+            user_id=self.request.user.id
+        )
+        all_expenses = all_expenses.filter_by(
+            company_id=self.context.company_id
+        )
         all_expenses = all_expenses.filter(ExpenseSheet.id != self.context.id)
-        return [
+        all_expenses = all_expenses.filter(
+            ExpenseSheet.status.in_(['draft', 'invalid'])
+        )
+        all_expenses = all_expenses.order_by(
+            ExpenseSheet.year.desc()
+        ).order_by(
+            ExpenseSheet.month.desc()
+        )
+        result.extend([
             {
-                "label": u"{e.month_label} / {e.year}".format(e),
+                "label": u"{month_label} / {year}".format(
+                    month_label=strings.month_name(e.month),
+                    year=e.year
+                ),
                 "id": e.id
             } for e in all_expenses
-        ]
+        ])
+        return result
 
 
 class RestExpenseLineView(BaseRestView):
@@ -262,6 +292,27 @@ class RestExpenseLineView(BaseRestView):
             entry.sheet = self.context
         return entry
 
+    def duplicate(self):
+        """
+        Duplicate an expense line to an existing ExpenseSheet
+        """
+        logger.info(u"Duplicate ExpenseLine")
+        sheet_id = self.request.json_body.get('sheet_id')
+        sheet = ExpenseSheet.get(sheet_id)
+
+        if sheet is None:
+            return RestError(["Wrong sheet_id"])
+
+        if not self.request.has_permission('edit.expensesheet'):
+            logger.error(u"Unauthorized action : possible break in attempt")
+            raise HTTPForbidden()
+
+        new_line = self.context.duplicate()
+        new_line.sheet_id = sheet.id
+        self.request.dbsession.add(new_line)
+        self.request.dbsession.flush()
+        return new_line
+
 
 class RestExpenseKmLineView(BaseRestView):
     """
@@ -282,6 +333,27 @@ class RestExpenseKmLineView(BaseRestView):
         if not edit:
             entry.sheet = self.context
         return entry
+
+    def duplicate(self):
+        """
+        Duplicate an expense line to an existing ExpenseSheet
+        """
+        logger.info(u"Duplicate ExpenseKmLine")
+        sheet_id = self.request.json_body.get('sheet_id')
+        sheet = ExpenseSheet.get(sheet_id)
+
+        if sheet is None:
+            return RestError(["Wrong sheet_id"])
+
+        if not self.request.has_permission('edit.expensesheet'):
+            logger.error(u"Unauthorized action : possible break in attempt")
+            raise HTTPForbidden()
+
+        new_line = self.context.duplicate()
+        new_line.sheet_id = sheet.id
+        self.request.dbsession.add(new_line)
+        self.request.dbsession.flush()
+        return new_line
 
 
 class RestBookMarkView(BaseView):
@@ -354,6 +426,24 @@ class RestExpenseSheetStatusView(StatusView):
             ExpenseStatusChanged(self.request, self.context, status)
         )
 
+    def redirect(self):
+        loc = self.request.route_path("/expenses/{id}", id=self.context.id)
+        if self.request.is_xhr:
+            return dict(redirect=loc)
+        else:
+            return HTTPFound(loc)
+
+    def pre_status_process(self, status, params):
+        if 'comment' in params:
+            self.context.communications.append(
+                Communication(
+                    content=params.get('comment'),
+                    user_id=self.request.user.id,
+                )
+            )
+
+        return StatusView.pre_status_process(self, status, params)
+
 
 def add_routes(config):
     """
@@ -394,7 +484,7 @@ def add_routes(config):
     config.add_route(
         "/api/v1/expenses/{id}/kmlines/{lid}",
         "/api/v1/expenses/{id:\d+}/kmlines/{lid:\d+}",
-        traverse="/expensekmlines/{lid}",
+        traverse="/expenselines/{lid}",
     )
 
 
@@ -441,9 +531,18 @@ def add_views(config):
         route_name="/api/v1/expenses/{id}/lines/{lid}",
         collection_route_name="/api/v1/expenses/{id}/lines",
         view_rights="view.expensesheet",
-        add_rights="add.expensesheet",
+        add_rights="edit.expensesheet",
         edit_rights="edit.expensesheet",
         delete_rights="edit.expensesheet",
+    )
+    config.add_view(
+        RestExpenseLineView,
+        attr='duplicate',
+        route_name="/api/v1/expenses/{id}/lines/{lid}",
+        request_param='action=duplicate',
+        permission="edit.expensesheet",
+        request_method='POST',
+        renderer="json",
     )
 
     # Km Line views
@@ -453,9 +552,18 @@ def add_views(config):
         route_name="/api/v1/expenses/{id}/kmlines/{lid}",
         collection_route_name="/api/v1/expenses/{id}/kmlines",
         view_rights="view.expensesheet",
-        add_rights="add.expensesheet",
+        add_rights="edit.expensesheet",
         edit_rights="edit.expensesheet",
         delete_rights="edit.expensesheet",
+    )
+    config.add_view(
+        RestExpenseKmLineView,
+        attr='duplicate',
+        route_name="/api/v1/expenses/{id}/kmlines/{lid}",
+        request_param='action=duplicate',
+        permission="edit.expensesheet",
+        request_method='POST',
+        renderer="json",
     )
     # BookMarks
     add_rest_views(
@@ -463,9 +571,10 @@ def add_views(config):
         factory=RestBookMarkView,
         route_name="/api/v1/bookmarks/{id}",
         collection_route_name="/api/v1/bookmarks",
-        view_rights="edit.expense",
-        add_rights="add.expense",
-        edit_rights='edit.expense',
+        view_rights="view",
+        add_rights="view",
+        edit_rights='view',
+        delete_rights="view",
     )
 
 

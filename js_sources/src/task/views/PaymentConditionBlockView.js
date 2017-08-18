@@ -38,7 +38,7 @@ const PaymentConditionBlockView = Mn.View.extend({
     },
     initialize: function(){
         this.payment_conditions_options = Radio.channel('config').request(
-            'get:form_options', 'payment_conditions'
+            'get:options', 'payment_conditions'
         );
         this.lookupDefault();
 

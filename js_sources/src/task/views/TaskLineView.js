@@ -36,7 +36,7 @@ const TaskLineView = Mn.View.extend({
     },
     initialize(){
         var channel = Radio.channel('config');
-        this.tva_options = channel.request('get:form_options', 'tvas');
+        this.tva_options = channel.request('get:options', 'tvas');
     },
     getTvaLabel(){
         let res = "";

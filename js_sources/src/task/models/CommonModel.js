@@ -70,7 +70,7 @@ const CommonModel = BaseModel.extend({
         CommonModel.__super__.initialize.apply(this, arguments);
         var channel = this.channel = Radio.channel('facade');
         this.on('sync', function(){channel.trigger('changed:discount')});
-        this.tva_options = channel.request('get:form_options', 'tvas');
+        this.tva_options = channel.request('get:options', 'tvas');
     },
     ht: function(){
         return strToFloat(this.get('expenses_ht'));

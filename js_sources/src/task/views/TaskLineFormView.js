@@ -51,15 +51,15 @@ const TaskLineFormView = Mn.View.extend({
     initialize(){
         var channel = Radio.channel('config');
         this.workunit_options = channel.request(
-            'get:form_options',
+            'get:options',
             'workunits'
         );
         this.tva_options = channel.request(
-            'get:form_options',
+            'get:options',
             'tvas'
         );
         this.product_options = channel.request(
-            'get:form_options',
+            'get:options',
             'products',
         );
         this.section = channel.request(

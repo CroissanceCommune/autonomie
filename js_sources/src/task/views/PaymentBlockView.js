@@ -40,15 +40,15 @@ const PaymentBlockView = Mn.View.extend({
         this.collection = options['collection'];
         var channel = Radio.channel('config');
         this.payment_display_options = channel.request(
-            'get:form_options',
+            'get:options',
             'payment_displays'
         );
         this.deposit_options = channel.request(
-            'get:form_options',
+            'get:options',
             'deposits',
         );
         this.payment_times_options = channel.request(
-            'get:form_options',
+            'get:options',
             'payment_times'
         );
         channel = Radio.channel('facade');

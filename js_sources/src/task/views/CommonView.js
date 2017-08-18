@@ -65,7 +65,7 @@ const CommonView = Mn.View.extend({
         this.listenTo(channel, 'bind:validation', this.bindValidation);
         this.listenTo(channel, 'unbind:validation', this.unbindValidation);
         this.mentions_options = Radio.channel('config').request(
-            'get:form_options', 'mentions'
+            'get:options', 'mentions'
         );
     },
     showErrors(model, errors){

@@ -41,7 +41,6 @@ const CatalogTreeView = Mn.View.extend({
     ui: {
         tree: '.tree',
         search: 'input[name=catalog_search]',
-        cancel_btn: 'button.cancel-catalog',
         edit_btn: 'button.edit-catalog',
         insert_btn: 'button.insert-catalog'
     },

@@ -54,6 +54,7 @@ NODE_TYPE_ROUTES = {
     'estimation': "/estimations/{id}.html",
     'invoice': "/invoices/{id}.html",
     'cancelinvoice': "/cancelinvoices/{id}.html",
+    'expensesheet': "/expenses/{id}",
 }
 
 

@@ -9,6 +9,8 @@
  *
  */
 import BaseModel from './BaseModel.js';
+import { formatPaymentDate } from '../../date.js';
+import Radio from 'backbone.radio';
 
 const ExpenseKmModel = BaseModel.extend({
     defaults:{
@@ -21,6 +23,8 @@ const ExpenseKmModel = BaseModel.extend({
       if ((options['altdate'] === undefined)&&(options['date']!==undefined)){
         this.set('altdate', formatPaymentDate(options['date']));
       }
+      this.config = Radio.channel('config');
+      this.expensekm_types = this.config.request('get:options', 'expensekm_types');
     },
     validation:{
       category: {
@@ -47,7 +51,12 @@ const ExpenseKmModel = BaseModel.extend({
       /*
        *  Return the reference used for compensation of km fees
        */
-      var elem = _.where(AppOptions['expensekm_types'], {value:this.get('type_id')})[0];
+      var type_id = parseInt(this.get('type_id'), 10);
+
+      var elem = _.findWhere(
+          this.expensekm_types,
+          {value: type_id}
+      );
       if (elem === undefined){
         return 0;
       }
@@ -62,7 +71,7 @@ const ExpenseKmModel = BaseModel.extend({
       return parseFloat(this.get('km'));
     },
     getTypeOptions(){
-      return AppOptions['expensekm_types'];
+      return this.expensekm_types;
     }
 
 });

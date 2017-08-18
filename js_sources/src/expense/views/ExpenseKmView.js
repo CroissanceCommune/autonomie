@@ -11,44 +11,30 @@
 import Mn from 'backbone.marionette';
 import { formatAmount } from '../../math.js';
 
-const tel_template = require('./templates/ExpenseTelView.mustache');
-const template = require('./templates/ExpenseView.mustache');
-
-const ExpenseView = Mn.View.extend({
+const ExpenseKmView = Mn.View.extend({
     tagName: 'tr',
+    template: require('./templates/ExpenseKmView.mustache'),
+    modelEvents: {
+        'change': 'render'
+    },
     ui: {
         edit: 'button.edit',
         delete: 'button.delete',
         duplicate: 'button.duplicate',
-        bookmark: 'button.bookmark',
     },
     triggers: {
         'click @ui.edit': 'edit',
         'click @ui.delete': 'delete',
         'click @ui.duplicate': 'duplicate',
-        'click @ui.bookmark': 'bookmark',
-    },
-    modelEvents: {
-        'change': 'render'
-    },
-    getTemplate(){
-        if (this.model.isSpecial()){
-            return tel_template;
-        } else {
-            return template;
-        }
     },
     templateContext(){
         var total = this.model.total();
         var typelabel = this.model.getTypeLabel();
-
         return {
             edit: this.getOption('edit'),
             typelabel:typelabel,
             total:formatAmount(total),
-            ht_label: formatAmount(this.model.get('ht')),
-            tva_label: formatAmount(this.model.get('tva')),
         };
     }
 });
-export default ExpenseView;
+export default ExpenseKmView;

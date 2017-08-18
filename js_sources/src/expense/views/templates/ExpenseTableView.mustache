@@ -1,18 +1,17 @@
 <div class="row">
-    <div class="col-xs-4">
-        <h3 style="margin-top:0px">
-            Frais
-        </h3>
+    <div class="col-xs-12">
+        <h2 style="margin-top:0px">
+            {{ category.label }}
+        </h2>
         <span class="help-block">
-            Dépenses liées au fonctionnement de l'entreprise
+            {{ category.description }}
         </span>
-    </div>
-    <div class="col-xs-8">
         {{#edit}}
-        <div>
-        <a href="#lines/add/1" class='btn btn-info' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
-        <a href="#tel/add" class='btn btn-info' title="Ajouter une ligne de dépense téléphonique"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter des dépenses téléphoniques</a>
-        </div>
+        <button class='btn btn-primary primary-action add'>
+            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une dépense
+        </button>
+        <br />
+        <br />
         {{/edit}}
     </div>
 </div>
@@ -28,14 +27,14 @@
         <th class="hidden-print">Actions</th>
             {{/edit}}
     </thead>
-    <tbody class='internal'>
+    <tbody class='lines'>
     </tbody>
     <tfoot>
         <tr>
             <td colspan='3'>Total</td>
-            <td id='internal_total_ht'></td>
-            <td id='internal_total_tva'></td>
-            <td id='internal_total'></td>
+            <td class='total_ht'></td>
+            <td class='total_tva'></td>
+            <td class='total_ttc'></td>
         {{#edit}}
             <td class="hidden-print"></td>
             {{/edit}}

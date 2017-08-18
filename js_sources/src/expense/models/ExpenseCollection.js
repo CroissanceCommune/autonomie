@@ -10,13 +10,25 @@
  */
 import Bb from 'backbone';
 import ExpenseModel from "./ExpenseModel.js";
+import Radio from 'backbone.radio';
 
 const ExpenseCollection = Bb.Collection.extend({
     /*
      *  Collection of expense lines
      */
     model: ExpenseModel,
-    url: "/expenses/lines",
+    initialize(){
+        this.on('remove', this.channelCall);
+        this.on('sync', this.channelCall);
+        this.on('reset', this.channelCall);
+    },
+    channelCall: function(model){
+        var channel = Radio.channel('facade');
+        channel.trigger('changed:line', model.get('category'));
+    },
+    url(){
+        return AppOption['context_url'] + "/lines";
+    },
     comparator: function( a, b ){
       /*
        * Sort the collection and place special lines at the end

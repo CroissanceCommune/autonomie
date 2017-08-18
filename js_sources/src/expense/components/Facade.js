@@ -12,68 +12,89 @@ import Mn from 'backbone.marionette';
 import TotalModel from '../models/TotalModel.js';
 import ExpenseCollection from '../models/ExpenseCollection.js';
 import ExpenseKmCollection from '../models/ExpenseKmCollection.js';
+import BookMarkCollection from '../models/BookMarkCollection.js';
 
 const FacadeClass = Mn.Object.extend({
     channelName: 'facade',
     radioEvents: {
+        "changed:line": "computeLineTotal",
+        "changed:kmline": "computeKmLineTotal",
     },
     radioRequests: {
         'get:collection': 'getCollectionRequest',
         'get:totalmodel': 'getTotalModelRequest',
+        'get:bookmarks': 'getBookMarks',
         // 'get:paymentcollection': 'getPaymentCollectionRequest',
         // 'get:totalmodel': 'getTotalModelRequest',
         // 'get:status_history_collection': 'getStatusHistory',
         // 'is:valid': "isDataValid",
         // 'get:attachments': 'getAttachments',
     },
-    loadModels(form_datas){
+    loadModels(form_datas, form_config){
         this.datas = form_datas;
         this.models = {};
         this.collections = {};
         this.totalmodel = new TotalModel();
 
-        var internal = form_datas['internal'];
+        var lines = form_datas['lines'];
+        this.collections['lines'] = new ExpenseCollection(lines);
 
-        var lines = internal['lines'];
-        this.collections['internal_lines'] = new ExpenseCollection(lines);
-        var kmlines = internal['kmlines'];
-        this.collections['internal_kmlines'] = new ExpenseKmCollection(lines);
+        var kmlines = form_datas['kmlines'];
+        this.collections['kmlines'] = new ExpenseKmCollection(kmlines);
 
-        var activity = form_datas['activity'];
-        var lines = activity['lines'];
-        this.collections['activity_lines'] = new ExpenseCollection(lines);
-        var kmlines = activity['kmlines'];
-        this.collections['activity_kmlines'] = new ExpenseKmCollection(lines);
+        this.bookmarks = new BookMarkCollection(form_config.options.bookmarks);
 
-        this.computeTotals();
+        this.computeLineTotal();
+        this.computeKmLineTotal();
     },
-    computeTotals(){
-        var internal_ht = this.collections['internal_lines'].total_ht();
-        var internal_tva = this.collections['internal_lines'].total_tva();
-        var internal_total = this.collections['internal_lines'].total_ttc();
-        var internal_km = this.collections['internal_kmlines'].total_km();
-        var internal_km_total = this.collections['internal_kmlines'] .total();
-        var internal_ttc = internal_total + internal_km_total;
+    getBookMarks(){
+        return this.bookmarks;
+    },
+    computeLineTotal(category){
+        /*
+         * compute the line totals for the given category
+         */
+        var categories;
+        if (_.isUndefined(category)){
+            categories = ['1', '2'];
+        } else {
+            categories = [category]
+        }
+        var collection = this.collections['lines'];
+        var datas = {}
+        _.each(categories, function(category){
+            datas['ht_' + category] = collection.total_ht(category);
+            datas['tva_' + category] = collection.total_tva(category);
+            datas['ttc_' + category] = collection.total(category);
+        });
+        this.totalmodel.set(datas);
+        var channel = this.getChannel();
+        _.each(categories, function(category){
+            channel.trigger('change:lines_' + category);
+        });
 
-        var activity_ht = this.collections['activity_lines'].total_ht();
-        var activity_tva = this.collections['activity_lines'].total_tva();
-        var activity_total = this.collections['activity_lines'].total_ttc();
-        var activity_km = this.collections['activity_kmlines'].total_km();
-        var activity_km_total = this.collections['activity_kmlines'] .total();
-        var activity_ttc = activity_total + activity_km_total;
+    },
+    computeKmLineTotal(category){
+        /*
+         * Compute the kmline totals for the given category
+         */
+        var categories;
+        if (_.isUndefined(category)){
+            categories = ['1', '2'];
+        } else {
+            categories = [category]
+        }
+        var collection = this.collections['kmlines'];
+        var datas = {}
+        _.each(categories, function(category){
+            datas['km_' + category] = collection.total_km(category);
+            datas['km_ttc_' + category] = collection.total(category);
+        });
+        this.totalmodel.set(datas);
 
-        this.totalmodel.set({
-            internal_ht: internal_ht,
-            internal_tva: internal_tva,
-            internal_total:internal_total,
-            internal_km: internal_km,
-            internal_km_total: internal_km_total,
-            internal_ttc: internal_ttc,
-            activity_ht: activity_ht,
-            activity_tva: activity_tva,
-            activity_total: activity_total,
-            activity_km: activity_km,
-            activity_ttc: activity_ttc,
+        var channel = this.getChannel();
+        _.each(categories, function(category){
+            channel.trigger('change:kmlines_' + category);
         });
     },
     getCollectionRequest(label){

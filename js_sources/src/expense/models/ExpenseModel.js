@@ -9,6 +9,9 @@
  *
  */
 import BaseModel from './BaseModel.js';
+import { formatPaymentDate } from '../../date.js';
+import { getPercent } from '../../math.js';
+import Radio from 'backbone.radio';
 
 const ExpenseModel = BaseModel.extend({
     defaults:{
@@ -23,6 +26,9 @@ const ExpenseModel = BaseModel.extend({
       if ((options['altdate'] === undefined)&&(options['date']!==undefined)){
         this.set('altdate', formatPaymentDate(options['date']));
       }
+      this.config = Radio.channel('config');
+      this.expensetel_types = this.config.request('get:options', 'expensetel_types');
+      this.expense_types = this.config.request('get:options', 'expense_types');
     },
     // Validation rules for our model's attributes
     validation:{
@@ -58,7 +64,7 @@ const ExpenseModel = BaseModel.extend({
     getTva:function(){
       var result = parseFloat(this.get('tva'));
       if (this.isSpecial()){
-        var percentage = this.getTypeOption(AppOptions['expensetel_types']).percentage;
+        var percentage = this.getTypeOption(this.expensetel_types).percentage;
         result = getPercent(result, percentage);
       }
       return result
@@ -66,7 +72,7 @@ const ExpenseModel = BaseModel.extend({
     getHT:function(){
       var result = parseFloat(this.get('ht'));
       if (this.isSpecial()){
-        var percentage = this.getTypeOption(AppOptions['expensetel_types']).percentage;
+        var percentage = this.getTypeOption(this.expensetel_types).percentage;
         result = getPercent(result, percentage);
       }
       return result
@@ -75,11 +81,11 @@ const ExpenseModel = BaseModel.extend({
       /*
        * return True if this expense is a special one (related to phone)
        */
-      return this.getTypeOption(AppOptions['expensetel_types']) !== undefined;
+      return this.getTypeOption(this.expensetel_types) !== undefined;
     },
     hasNoType: function(){
-      var isnottel = _.isUndefined(this.getTypeOption(AppOptions['expensetel_types']));
-      var isnotexp = _.isUndefined(this.getTypeOption(AppOptions['expense_types']));
+      var isnottel = _.isUndefined(this.getTypeOption(this.expensetel_types));
+      var isnotexp = _.isUndefined(this.getTypeOption(this.expense_types));
       if (isnottel && isnotexp){
         return true;
       }else{
@@ -89,11 +95,23 @@ const ExpenseModel = BaseModel.extend({
     getTypeOptions: function(){
       var arr;
       if (this.isSpecial()){
-        arr = AppOptions['expensetel_types'];
+        arr = this.expensetel_types;
       }else{
-        arr = AppOptions['expense_types'];
+        arr = this.expense_types;
       }
       return arr;
-    }
+    },
+    loadBookMark(bookmark){
+        var attributes = _.omit(bookmark.attributes, function(value, key){
+            if (_.indexOf(['id', 'cid'], key) > -1){
+                return true;
+            } else if (_.isNull(value) || _.isUndefined(value)){
+                return true;
+            }
+            return false;
+        });
+        this.set(attributes);
+        this.trigger('set:bookmark');
+    },
 });
 export default ExpenseModel;

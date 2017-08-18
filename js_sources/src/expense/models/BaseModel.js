@@ -9,6 +9,7 @@
  *
  */
 import Bb from 'backbone';
+import { ajax_call } from '../../tools.js';
 
 const BaseModel = Bb.Model.extend({
     /*
@@ -46,6 +47,25 @@ const BaseModel = Bb.Model.extend({
         }else{
             return current_type.label;
         }
-    }
+    },
+    rollback: function(){
+        if (this.get('id') && this.url){
+            this.fetch();
+        }
+    },
+    duplicate(datas){
+        var request = ajax_call(
+            this.url() + '?action=duplicate',
+            datas,
+            'POST'
+        );
+        var this_ = this;
+        request.done(
+            function(result){
+                this_.collection.fetch();
+            }
+        );
+        return request;
+    },
 });
 export default BaseModel;

@@ -1,5 +1,5 @@
 /*
- * File Name : ExpenseCollectionView.js
+ * File Name : ExpenseKmCollectionView.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -9,30 +9,29 @@
  *
  */
 import Mn from 'backbone.marionette';
-import ExpenseView from './ExpenseView.js';
+import ExpenseKmView from './ExpenseKmView.js';
 import ExpenseEmptyView from './ExpenseEmptyView.js';
 
-const ExpenseCollectionView = Mn.CollectionView.extend({
+const ExpenseKmCollectionView = Mn.CollectionView.extend({
     tagName: 'tbody',
     // Bubble up child view events
     childViewTriggers: {
-        'edit': 'line:edit',
-        'delete': 'line:delete',
-        'bookmark': 'bookmark:add',
-        'duplicate': 'line:duplicate',
+        'edit': 'kmline:edit',
+        'delete': 'kmline:delete',
+        'duplicate': 'kmline:duplicate',
     },
-    childView: ExpenseView,
+    childView: ExpenseKmView,
     emptyView: ExpenseEmptyView,
     emptyViewOptions(){
         return {
             colspan: 6,
-            edit: this.getOption('edit'),
+            edit: this.getOption('edit')
         };
     },
     childViewOptions(){
         return {edit: this.getOption('edit')};
     },
-    filter (child, index, collection) {
+    filter: function (child, index, collection) {
         if (child.get('category') == this.getOption('category').value){
             return true;
         } else {
@@ -40,4 +39,4 @@ const ExpenseCollectionView = Mn.CollectionView.extend({
         }
     }
 });
-export default ExpenseCollectionView;
+export default ExpenseKmCollectionView;

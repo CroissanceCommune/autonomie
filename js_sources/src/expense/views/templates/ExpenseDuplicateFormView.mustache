@@ -1,0 +1,32 @@
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <form>
+            <div class="modal-header">
+              <button tabindex='-1' type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Dupliquer une note de dépense</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                Note de dépenses : {{description}}<br />
+                HT : {{{ht}}} TVA : {{{ tva }}}
+                </div>
+                <div class='select'></div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    class='btn btn-success primary-action'
+                    type='submit'
+                    value='submit'>
+                    Dupliquer
+                </button>
+                <button
+                    class='btn btn-default secondary-action'
+                    type='reset'
+                    value='submit'>
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+

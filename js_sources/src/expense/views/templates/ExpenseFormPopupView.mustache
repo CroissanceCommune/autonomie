@@ -1,0 +1,65 @@
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+            <div class="modal-header">
+              <button tabindex='-1' type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">{{ title }}</h4>
+            </div>
+            <div class="modal-body">
+            {{#if add}}
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active main">
+                    <a href="#mainform-container"
+                        aria-controls="form-container"
+                        role="tab"
+                        data-toggle="tab"
+                        tabindex='-1'
+                        >
+                        Frais généraux
+                    </a>
+                </li>
+                <li role="presentation" class='tel'>
+                    <a href="#telform-container"
+                        aria-controls="telform-container"
+                        role="tab"
+                        data-toggle="tab"
+                        tabindex='-1'
+                        >
+                        Frais téléphoniques
+                    </a>
+                </li>
+                {{#if show_bookmarks}}
+                    <li role="presentation">
+                        <a href="#bookmark-container"
+                            aria-controls="bookmark-container"
+                            role="tab"
+                            tabindex='-1'
+                            data-toggle="tab">
+                            Favoris
+                        </a>
+                    </li>
+                {{/if}}
+            </ul>
+            {{/if}}
+            <div class='tab-content'>
+                <div
+                    role="tabpanel"
+                    class="tab-pane fade in {{#if show_main}}active{{/if}}"
+                    id="mainform-container">
+                </div>
+                <div
+                    role="tabpanel"
+                    class="tab-pane fade in {{#if show_tel}}active{{/if}}"
+                    id="telform-container">
+                </div>
+                {{#if show_bookmarks}}
+                    <div
+                        role="tabpanel"
+                        class="tab-pane"
+                        id="bookmark-container">
+                    </div>
+                {{/if}}
+            </div>
+            <div class="modal-footer">
+            </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

@@ -1,14 +1,14 @@
 <div class="row">
-    <div class="col-xs-4">
+    <div class="col-xs-12">
         <h3 style="margin-top:0px">
             Dépenses kilométriques
         </h3>
-    </div>
-    <div class="col-xs-8">
         {{#edit}}
-        <div>
-            <a href="#kmlines/add/1" class='btn btn-info visible-desktop hidden-tablet' title="Ajouter une ligne"><i class='icon icon-plus-sign'></i>&nbsp;Ajouter</a>
-        </div>
+        <button class='btn btn-primary primary-action add'>
+            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une dépense
+        </button>
+        <br />
+        <br />
         {{/edit}}
     </div>
 </div>
@@ -26,13 +26,13 @@
         <th class="hidden-print">Actions</th>
         {{/edit}}
     </thead>
-    <tbody class='internal'>
+    <tbody class='lines'>
     </tbody>
     <tfoot>
         <tr>
             <td colspan='5'>Total</td>
-            <td id='km_internal_total_km'></td>
-            <td id='km_internal_total'></td>
+            <td class='total_km'></td>
+            <td class='total_ttc'></td>
             {{#edit}}
             <td class="hidden-print"></td>
             {{/edit}}

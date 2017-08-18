@@ -9,6 +9,7 @@
  *
  */
 import Bb from 'backbone';
+import Radio from 'backbone.radio';
 
 const BookMarkModel = Bb.Model.extend({
     initialize: function(options){
@@ -16,14 +17,23 @@ const BookMarkModel = Bb.Model.extend({
         if (! _.isUndefined(type_id)){
             this.set('type', this.getType(type_id));
         }
+        var config = Radio.channel('config');
+        this.expense_types = config.request('get:option', 'expense_types');
+        this.expensetel_types = this.config.request('get:options', 'expensetel_types');
     },
     getType: function(type_id){
         return _.find(
-            AppOptions['expense_types'],
+            this.expense_types,
             function(type){
                 return type['value'] == type_id;
             }
         );
-    }
+    },
+    isSpecial:function(){
+      /*
+       * return True if this expense is a special one (related to phone)
+       */
+      return this.getTypeOption(this.expensetel_types) !== undefined;
+    },
 });
 export default BookMarkModel;

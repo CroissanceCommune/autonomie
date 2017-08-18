@@ -1,0 +1,11 @@
+{{#each buttons}}
+    <button
+        class='btn {{this.css}}'
+        data-url='{{ this.url }}'
+        data-title='{{ this.title }}'
+        data-label='{{ this.label }}'
+        data-status='{{ this.status }}'>
+    <i class='glyphicon glyphicon-{{this.icon}}'></i> <br />
+    {{this.label}}
+    </button>
+{{/each}}

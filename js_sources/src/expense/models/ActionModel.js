@@ -1,5 +1,5 @@
 /*
- * File Name : TotalModel.js
+ * File Name : ActionModel.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -10,6 +10,6 @@
  */
 import Bb from 'backbone';
 
-const TotalModel = Bb.Model.extend({
-});
-export default TotalModel;
+
+const ActionModel = Bb.Model.extend({});
+export default ActionModel;

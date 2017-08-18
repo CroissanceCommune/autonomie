@@ -10,11 +10,25 @@
  */
 import Bb from 'backbone';
 import ExpenseKmModel from './ExpenseKmModel.js';
+import Radio from 'backbone.radio';
+
 const ExpenseKmCollection = Bb.Collection.extend({
     /*
      * Collection for expenses related to km fees
      */
     model: ExpenseKmModel,
+    initialize(){
+        this.on('remove', this.channelCall);
+        this.on('sync', this.channelCall);
+        this.on('reset', this.channelCall);
+    },
+    channelCall: function(model){
+        var channel = Radio.channel('facade');
+        channel.trigger('changed:kmline', model.get('category'));
+    },
+    url(){
+        return AppOption['context_url'] + '/kmlines';
+    },
     total_km: function(category){
       /*
        * Return the total value

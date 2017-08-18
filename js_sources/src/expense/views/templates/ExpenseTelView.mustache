@@ -1,15 +1,13 @@
-<td colspan='3'>{{ typelabel  }}</td>
-{{#edit}}
-<td><div class='form-group'><div class='controls'><input type='text' class='input-small' value='{{ ht }}' name='ht'/></div></div></td>
-<td><div class='form-group'><div class='controls'><input type='text' class='input-small' value='{{ tva }}' name='tva'/></div></div></td>
-<td><span class='total'>{{{ total }}}</span></td>
-<td class="hidden-print">
-<a class='btn btn-default remove'><i class='icon icon-remove-sign'></i>&nbsp;Supprimer</a>
-</td>
-{{/edit}}
-{{^edit}}
+<td>{{{ altdate }}}</td>
+<td colspan='2'>{{ typelabel  }}</td>
 <td>{{ ht }}</td>
 <td>{{ tva }}</td>
 <td>{{{ total }}}</td>
+{{#edit}}
+<td class='hidden-print'>
+<button class='btn btn-default edit'><i class='glyphicon glyphicon-pencil'></i>&nbsp;Modifier</button>
+<button class='btn btn-default delete'><i class='glyphicon glyphicon-remove-sign'></i>&nbsp;Supprimer</button>
+<button class='btn btn-default duplicate'><i class='fa fa-copy'></i>&nbsp;Dupliquer</button>
+<button class='btn btn-default bookmark'><i class='glyphicon glyphicon-star-empty'></i></button>
+</td>
 {{/edit}}
-

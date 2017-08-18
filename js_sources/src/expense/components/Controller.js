@@ -19,8 +19,9 @@ import ConfigBus from '../../base/components/ConfigBus.js';
 const Controller = Mn.Object.extend({
     initialize: function(options){
         ConfigBus.setFormConfig(options.form_config);
-        Facade.loadModels(options.form_datas);
+        Facade.loadModels(options.form_datas, options.form_config);
         AppOption.facade = Facade;
+        AppOption.config = ConfigBus;
 
         this.mainView = new MainView();
         App.showView(this.mainView);

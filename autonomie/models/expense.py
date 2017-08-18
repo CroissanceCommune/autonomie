@@ -184,7 +184,7 @@ contribution à la CAE ?"
     def __json__(self, request=None):
         return {
             "id": self.id,
-            "value": str(self.id),
+            "value": self.id,
             "active": self.active,
             "code": self.code,
             "label": u"{0} ({1})".format(self.label, self.code),
@@ -331,7 +331,7 @@ def build_action_manager():
     ):
         action = Action(
             status,
-            '%s.expense' % (status,),
+            '%s.expensesheet' % (status,),
             status_attr='status',
             userid_attr='status_person_id',
             icon=icon,

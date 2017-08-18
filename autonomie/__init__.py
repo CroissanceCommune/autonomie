@@ -88,7 +88,6 @@ AUTONOMIE_MODULES = (
     "autonomie.views.sage",
     "autonomie.views.static",
     "autonomie.views.statistics",
-    "autonomie.views.taskaction",
     "autonomie.views.tests",
     "autonomie.views.treasury_files",
     "autonomie.views.user",

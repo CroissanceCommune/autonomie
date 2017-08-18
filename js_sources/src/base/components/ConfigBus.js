@@ -14,7 +14,7 @@ import Radio from 'backbone.radio';
 const ConfigBusClass = Mn.Object.extend({
     channelName: 'config',
     radioRequests: {
-        'get:form_options': 'getFormOptions',
+        'get:options': 'getFormOptions',
         'has:form_section': 'hasFormSection',
         'get:form_section': 'getFormSection',
         'get:form_actions': 'getFormActions',
@@ -29,7 +29,6 @@ const ConfigBusClass = Mn.Object.extend({
          * :param str option_name: The name of the option
          * :returns: A list of dict with options (for building selects)
          */
-        console.log("FacadeClass.getFormOptions");
         return this.form_config['options'][option_name];
     },
     hasFormSection(section_name){

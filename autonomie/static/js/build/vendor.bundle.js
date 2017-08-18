@@ -96,8 +96,9 @@
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 0:
 /*!********************!*\
   !*** multi vendor ***!
   \********************/
@@ -107,14 +108,15 @@
 	__webpack_require__(/*! backbone */17);
 	__webpack_require__(/*! underscore */1);
 	__webpack_require__(/*! backbone.marionette */18);
-	__webpack_require__(/*! tinymce */67);
+	__webpack_require__(/*! tinymce */107);
 	__webpack_require__(/*! jstree */16);
 	__webpack_require__(/*! bootstrap */4);
 	module.exports = __webpack_require__(/*! backbone-validation */21);
 
 
 /***/ }),
-/* 1 */
+
+/***/ 1:
 /*!************************************!*\
   !*** ./~/underscore/underscore.js ***!
   \************************************/
@@ -1671,7 +1673,8 @@
 
 
 /***/ }),
-/* 2 */
+
+/***/ 2:
 /*!*********************************!*\
   !*** ./~/jquery/dist/jquery.js ***!
   \*********************************/
@@ -11933,7 +11936,8 @@
 
 
 /***/ }),
-/* 3 */
+
+/***/ 3:
 /*!************************************!*\
   !*** ./~/bootstrap/js/dropdown.js ***!
   \************************************/
@@ -12108,7 +12112,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 4 */
+
+/***/ 4:
 /*!************************************!*\
   !*** ./~/bootstrap/dist/js/npm.js ***!
   \************************************/
@@ -12129,7 +12134,8 @@
 	__webpack_require__(/*! ../../js/affix.js */ 15)
 
 /***/ }),
-/* 5 */
+
+/***/ 5:
 /*!**************************************!*\
   !*** ./~/bootstrap/js/transition.js ***!
   \**************************************/
@@ -12198,7 +12204,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 6 */
+
+/***/ 6:
 /*!*********************************!*\
   !*** ./~/bootstrap/js/alert.js ***!
   \*********************************/
@@ -12302,7 +12309,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 7 */
+
+/***/ 7:
 /*!**********************************!*\
   !*** ./~/bootstrap/js/button.js ***!
   \**********************************/
@@ -12437,7 +12445,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 8 */
+
+/***/ 8:
 /*!************************************!*\
   !*** ./~/bootstrap/js/carousel.js ***!
   \************************************/
@@ -12684,7 +12693,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 9 */
+
+/***/ 9:
 /*!************************************!*\
   !*** ./~/bootstrap/js/collapse.js ***!
   \************************************/
@@ -12906,7 +12916,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 10 */
+
+/***/ 10:
 /*!*********************************!*\
   !*** ./~/bootstrap/js/modal.js ***!
   \*********************************/
@@ -13255,7 +13266,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 11 */
+
+/***/ 11:
 /*!***********************************!*\
   !*** ./~/bootstrap/js/tooltip.js ***!
   \***********************************/
@@ -13785,7 +13797,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 12 */
+
+/***/ 12:
 /*!***********************************!*\
   !*** ./~/bootstrap/js/popover.js ***!
   \***********************************/
@@ -13903,7 +13916,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 13 */
+
+/***/ 13:
 /*!*************************************!*\
   !*** ./~/bootstrap/js/scrollspy.js ***!
   \*************************************/
@@ -14085,7 +14099,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 14 */
+
+/***/ 14:
 /*!*******************************!*\
   !*** ./~/bootstrap/js/tab.js ***!
   \*******************************/
@@ -14250,7 +14265,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 15 */
+
+/***/ 15:
 /*!*********************************!*\
   !*** ./~/bootstrap/js/affix.js ***!
   \*********************************/
@@ -14422,7 +14438,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 16 */
+
+/***/ 16:
 /*!*********************************!*\
   !*** ./~/jstree/dist/jstree.js ***!
   \*********************************/
@@ -22853,7 +22870,8 @@
 	}));
 
 /***/ }),
-/* 17 */
+
+/***/ 17:
 /*!********************************!*\
   !*** ./~/backbone/backbone.js ***!
   \********************************/
@@ -24783,7 +24801,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 18 */
+
+/***/ 18:
 /*!**********************************************************!*\
   !*** ./~/backbone.marionette/lib/backbone.marionette.js ***!
   \**********************************************************/
@@ -29237,7 +29256,8 @@
 
 
 /***/ }),
-/* 19 */
+
+/***/ 19:
 /*!**************************************************!*\
   !*** ./~/backbone.radio/build/backbone.radio.js ***!
   \**************************************************/
@@ -29595,8 +29615,8 @@
 	//# sourceMappingURL=./backbone.radio.js.map
 
 /***/ }),
-/* 20 */,
-/* 21 */
+
+/***/ 21:
 /*!***************************************************************!*\
   !*** ./~/backbone-validation/dist/backbone-validation-amd.js ***!
   \***************************************************************/
@@ -30322,52 +30342,8 @@
 	}));
 
 /***/ }),
-/* 22 */,
-/* 23 */,
-/* 24 */,
-/* 25 */,
-/* 26 */,
-/* 27 */,
-/* 28 */,
-/* 29 */,
-/* 30 */,
-/* 31 */,
-/* 32 */,
-/* 33 */,
-/* 34 */,
-/* 35 */,
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */,
-/* 41 */,
-/* 42 */,
-/* 43 */,
-/* 44 */,
-/* 45 */,
-/* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */,
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */,
-/* 54 */,
-/* 55 */,
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */,
-/* 61 */,
-/* 62 */,
-/* 63 */,
-/* 64 */,
-/* 65 */,
-/* 66 */,
-/* 67 */
+
+/***/ 107:
 /*!************************!*\
   !*** ./src/tinymce.js ***!
   \************************/
@@ -30389,7 +30365,7 @@
 	 *
 	 */
 	
-	var tinymce = __webpack_require__(/*! tinymce/tinymce */ 68);
+	var tinymce = __webpack_require__(/*! tinymce/tinymce */ 108);
 	var setupTinyMce = function setupTinyMce(kwargs) {
 	  /*
 	   * Setup a tinymce editor
@@ -30424,7 +30400,8 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 68 */
+
+/***/ 108:
 /*!******************************!*\
   !*** ./~/tinymce/tinymce.js ***!
   \******************************/
@@ -86247,10 +86224,11 @@
 	dem('tinymce.core.api.Main')();
 	})();
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../timers-browserify/main.js */ 69).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./../timers-browserify/main.js */ 109).setImmediate))
 
 /***/ }),
-/* 69 */
+
+/***/ 109:
 /*!*************************************!*\
   !*** ./~/timers-browserify/main.js ***!
   \*************************************/
@@ -86306,13 +86284,14 @@
 	};
 	
 	// setimmediate attaches itself to the global object
-	__webpack_require__(/*! setimmediate */ 70);
+	__webpack_require__(/*! setimmediate */ 110);
 	exports.setImmediate = setImmediate;
 	exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 70 */
+
+/***/ 110:
 /*!****************************************!*\
   !*** ./~/setimmediate/setImmediate.js ***!
   \****************************************/
@@ -86505,10 +86484,11 @@
 	    attachTo.clearImmediate = clearImmediate;
 	}(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../process/browser.js */ 71)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../process/browser.js */ 111)))
 
 /***/ }),
-/* 71 */
+
+/***/ 111:
 /*!******************************!*\
   !*** ./~/process/browser.js ***!
   \******************************/
@@ -86701,5 +86681,6 @@
 
 
 /***/ })
-/******/ ]);
+
+/******/ });
 //# sourceMappingURL=vendor.bundle.js.map

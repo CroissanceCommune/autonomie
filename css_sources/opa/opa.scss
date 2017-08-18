@@ -1,4 +1,5 @@
 $bgcolor: #f0e9e0;
+$form-block-bgcolor: #fff;
 .beforeContent{
   background-color: $bgcolor;
 }
@@ -9,5 +10,15 @@ $bgcolor: #f0e9e0;
   margin: 0px;
   hr{
     border-top: 1px solid #dedede;
+  }
+}
+
+.form-section {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: $form-block-bgcolor;
+  margin-bottom: 3em;
+  .content{
+    margin: 10px 5px;
+    padding: 10px 15px;
   }
 }

@@ -492,7 +492,7 @@ $blue_status_label: #5bc0de;
   background-color: $blue_status-label;
   color: #fff;
 }
-.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed{
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid{
   background-color: $red_status-label!important;
   color: #fff;
 }

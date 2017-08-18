@@ -1,25 +1,21 @@
-.form-section {
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  background-color: #fff;
-  margin-bottom: 3em; }
-  .form-section h2, .form-section h3, .form-section h4 {
-    border-bottom: 1px solid #aaa;
-    margin: 3px 0px;
-    padding: 15px 0px 8px 10px;
-    color: #666; }
-  .form-section .content {
-    margin: 10px 5px;
-    padding: 10px 15px; }
-  .form-section .lines-header {
-    background-color: #fbfbfb;
-    margin: 0px 20px 0px 0px;
-    font-weight: bold;
-    border-bottom: 1px solid #000; }
-  .form-section .lines {
-    background-color: #fbfbfb;
-    margin: 0px 20px 0px 0px; }
-  .form-section .actions {
-    padding: 15px 0px; }
+.form-section h2, .form-section h3, .form-section h4 {
+  border-bottom: 1px solid #aaa;
+  margin: 3px 0px;
+  padding: 15px 0px 8px 10px;
+  color: #666; }
+
+.form-section .lines-header {
+  background-color: #fbfbfb;
+  margin: 0px 20px 0px 0px;
+  font-weight: bold;
+  border-bottom: 1px solid #000; }
+
+.form-section .lines {
+  background-color: #fbfbfb;
+  margin: 0px 20px 0px 0px; }
+
+.form-section .actions {
+  padding: 15px 0px; }
 
 .taskline-group {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 20, 0.2), 0 6px 20px 0 rgba(0, 0, 20, 0.19);

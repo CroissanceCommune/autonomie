@@ -456,7 +456,7 @@ header .navbar .nav > li > a {
   background-color: #5bc0de;
   color: #fff; }
 
-.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed {
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid {
   background-color: #d9534f !important;
   color: #fff; }
 

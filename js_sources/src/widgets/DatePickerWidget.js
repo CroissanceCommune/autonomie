@@ -11,7 +11,7 @@
 import _ from 'underscore';
 import Mn from 'backbone.marionette';
 import { getOpt, setDatePicker } from '../tools.js';
-import { formatDate } from '../date.js';
+import { formatDate, dateToIso } from '../date.js';
 
 
 var template = require('./templates/DatePickerWidget.mustache');
@@ -33,14 +33,20 @@ const DatePickerWidget = Mn.View.extend({
     onAttach: function(){
         /* On attachement in case of edit, we setup the datepicker */
         if (getOpt(this, 'editable', true)){
+            var today = dateToIso(new Date());
+            var kwargs = {
+                // Bind the method to access view through the 'this' param
+                onSelect: this.onDateSelect.bind(this),
+                default_value: getOpt(this, 'default_value', today)
+            };
+
             let date = this.getOption('date');
             let selector = this.getSelector();
             setDatePicker(
                 this.getUI('altdate'),
                 selector,
                 date,
-                // Bind the method to access view through the 'this' param
-                {onSelect: this.onDateSelect.bind(this)}
+                kwargs
             );
         }
     },

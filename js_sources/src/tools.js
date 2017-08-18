@@ -25,8 +25,8 @@ export const setDatePicker = function(input_tag, altfield_selector, value, kwarg
         value = parseDate(value);
         input_tag.datepicker('setDate', value);
     } else {
-        if (! _.isUndefined(default_value)) {
-            value = parseDate(default_value);
+        if (! _.isUndefined(options.default_value)) {
+            value = parseDate(options.default_value);
             input_tag.datepicker('setDate', value);
         }
     }

@@ -230,15 +230,6 @@ discount = get_module_resource("discount", extra_depends=[jstree])
 address = get_module_resource("address")
 tva = get_module_resource("tva")
 
-task = get_module_resource(
-    "task",
-    tmpl=True,
-    extra_depends=[
-        address,
-        discount,
-        tva,
-    ]
-)
 task_list_js = get_module_resource("task_list")
 task_add_js = get_module_resource("task_add")
 estimation_signed_status_js = get_module_resource("estimation_signed_status")

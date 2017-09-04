@@ -688,8 +688,6 @@ def get_project_acl(self):
     for user in self.company.employees:
         acl.append((Allow, user.login, perms))
 
-    print(acl)
-
     return acl
 
 

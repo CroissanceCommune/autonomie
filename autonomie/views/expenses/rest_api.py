@@ -433,6 +433,9 @@ class RestExpenseSheetStatusView(StatusView):
         else:
             return HTTPFound(loc)
 
+    def check_allowed(self, status, params):
+        self.request.context.check_status_allowed(status, self.request)
+
     def pre_status_process(self, status, params):
         if 'comment' in params:
             self.context.communications.append(
@@ -519,7 +522,7 @@ def add_views(config):
         RestExpenseSheetStatusView,
         route_name='/api/v1/expenses/{id}',
         request_param='action=status',
-        permission="edit.expensesheet",
+        permission="view.expensesheet",
         request_method='POST',
         renderer="json",
     )

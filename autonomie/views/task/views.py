@@ -418,3 +418,17 @@ class TaskSetProductsView(BaseFormView):
                 id=self.context.id,
             )
         )
+
+
+class TaskSetDraftView(BaseView):
+    """
+    Set the current task status to draft
+    """
+    def __call__(self):
+        self.request.context.status = 'draft'
+        return HTTPFound(
+            self.request.route_path(
+                '/%ss/{id}' % self.context.type_,
+                id=self.context.id,
+            )
+        )

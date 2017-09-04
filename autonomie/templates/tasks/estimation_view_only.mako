@@ -45,6 +45,11 @@
     <i class='fa fa-copy'></i> Dupliquer
 </a>
 % endif
+% if api.has_permission('draft.estimation'):
+    <a class='btn btn-default btn-block' href="${request.route_path('/estimations/{id}/set_draft', id=estimation.id)}">
+        <i class='glyphicon glyphicon-bold'></i> Repasser en brouillon
+    </a>
+% endif
 <a class='btn btn-default btn-block'
     href="${request.route_path('/estimations/{id}/set_metadatas', id=estimation.id)}"
     >

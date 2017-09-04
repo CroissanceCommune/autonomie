@@ -30,13 +30,18 @@
 
 <%block name='moreactions'>
 <% cancelinvoice = request.context %>
+% if api.has_permission('draft.cancelinvoice'):
+    <a class='btn btn-default btn-block' href="${request.route_path('/cancelinvoices/{id}/set_draft', id=cancelinvoice.id)}">
+        <i class='glyphicon glyphicon-bold'></i> Repasser en brouillon
+    </a>
+% endif
 <a class='btn btn-default btn-block'
     href="${request.route_path('/cancelinvoices/{id}/set_metadatas', id=cancelinvoice.id)}"
     >
     <i class='glyphicon glyphicon-pencil'></i> Modifier
 </a>
 
-% if not cancelinvoice.exported:
+% if api.has_permission('set_treasury.invoice'):
     <a class='btn btn-default btn-block' href="${request.route_path('/cancelinvoices/{id}/set_products', id=cancelinvoice.id)}">
         <i class='fa fa-cog'></i> Configurer les codes produits
     </a>

@@ -40,6 +40,11 @@
         <i class='fa fa-files-o'></i> Générer un avoir
     </a>
 % endif
+% if api.has_permission('draft.invoice'):
+    <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/set_draft', id=invoice.id)}">
+        <i class='glyphicon glyphicon-bold'></i> Repasser en brouillon
+    </a>
+% endif
 <a class='btn btn-default btn-block'
     href="${request.route_path('/invoices/{id}/set_metadatas', id=invoice.id)}"
     >
@@ -51,7 +56,7 @@
 </a>
 % endif
 
-% if not invoice.exported:
+% if api.has_permission('set_treasury.invoice'):
     <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/set_products', id=invoice.id)}">
         <i class='fa fa-cog'></i> Configurer les codes produits
     </a>

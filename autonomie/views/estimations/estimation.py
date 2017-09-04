@@ -84,6 +84,7 @@ from autonomie.views.task.views import (
     TaskPdfView,
     TaskDuplicateView,
     TaskSetMetadatasView,
+    TaskSetDraftView,
 )
 
 log = logger = logging.getLogger(__name__)
@@ -268,6 +269,7 @@ def add_routes(config):
         'geninv',
         'set_metadatas',
         'attach_invoices',
+        'set_draft',
     ):
         config.add_route(
             '/estimations/{id}/%s' % action,
@@ -351,6 +353,11 @@ def includeme(config):
         route_name="/estimations/{id}/set_metadatas",
         permission='view.estimation',
         renderer='tasks/add.mako',
+    )
+    config.add_view(
+        TaskSetDraftView,
+        route_name="/estimations/{id}/set_draft",
+        permission="draft.estimation",
     )
 
     config.add_view(

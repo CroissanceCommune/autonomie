@@ -66,6 +66,7 @@ from autonomie.views.task.views import (
     TaskDuplicateView,
     TaskSetMetadatasView,
     TaskSetProductsView,
+    TaskSetDraftView,
 )
 
 
@@ -387,6 +388,7 @@ def add_routes(config):
         'gencinv',
         'set_metadatas',
         'attach_estimation',
+        'set_draft',
     ):
         config.add_route(
             '/invoices/{id}/%s' % action,
@@ -493,6 +495,12 @@ def includeme(config):
         permission="view.invoice",
         renderer='tasks/add.mako',
     )
+    config.add_view(
+        TaskSetDraftView,
+        route_name="/invoices/{id}/set_draft",
+        permission="draft.invoice",
+    )
+
     config.add_view(
         InvoiceSetProductsView,
         route_name="/invoices/{id}/set_products",

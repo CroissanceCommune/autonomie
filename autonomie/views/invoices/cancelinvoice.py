@@ -52,6 +52,7 @@ from autonomie.views.task.views import (
     TaskPdfView,
     TaskSetMetadatasView,
     TaskSetProductsView,
+    TaskSetDraftView,
 )
 
 
@@ -178,6 +179,7 @@ def add_routes(config):
         'set_treasury',
         'set_products',
         'set_metadatas',
+        'set_draft',
     ):
         config.add_route(
             '/cancelinvoices/{id}/%s' % action,
@@ -257,6 +259,11 @@ def includeme(config):
         route_name="/cancelinvoices/{id}/set_metadatas",
         permission="view.cancelinvoice",
         renderer='tasks/add.mako',
+    )
+    config.add_view(
+        TaskSetDraftView,
+        route_name="/cancelinvoices/{id}/set_draft",
+        permission="draft.cancelinvoice",
     )
     config.add_view(
         CancelInvoiceSetProductsView,

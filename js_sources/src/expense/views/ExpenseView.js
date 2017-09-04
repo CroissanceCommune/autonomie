@@ -14,6 +14,8 @@ import { formatAmount } from '../../math.js';
 const tel_template = require('./templates/ExpenseTelView.mustache');
 const template = require('./templates/ExpenseView.mustache');
 
+require("jquery-ui/ui/effects/effect-highlight");
+
 const ExpenseView = Mn.View.extend({
     tagName: 'tr',
     ui: {
@@ -37,6 +39,10 @@ const ExpenseView = Mn.View.extend({
         } else {
             return template;
         }
+    },
+    highlightBookMark(){
+        console.log("Highlight bookmark");
+        this.getUI('bookmark').effect("highlight", {color: "#ceff99"}, "slow");
     },
     templateContext(){
         var total = this.model.total();

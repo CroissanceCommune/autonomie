@@ -129,6 +129,7 @@ const MainView = Mn.View.extend({
    onBookMarkAdd(childView){
        var collection = this.facade.request('get:bookmarks');
        collection.addBookMark(childView.model);
+       childView.highlightBookMark();
    },
    onBookMarkDelete(childView){
        var result = window.confirm("Êtes-vous sûr de vouloir supprimer ce favoris ?");

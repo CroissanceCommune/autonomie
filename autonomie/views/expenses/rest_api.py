@@ -10,7 +10,6 @@ import traceback
 
 from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.httpexceptions import (
-    HTTPFound,
     HTTPForbidden,
 )
 
@@ -25,6 +24,7 @@ from autonomie.utils import strings
 from autonomie.utils.rest import (
     add_rest_views,
     RestError,
+    Apiv1Resp,
 )
 from autonomie.forms.expense import (
     BookMarkSchema,
@@ -143,46 +143,136 @@ class RestExpenseSheetView(BaseRestView):
     def _get_other_actions(self):
         """
         Return the description of other available actions :
-            signed_status
             duplicate
             ...
         """
         result = []
-        if self.request.has_permission('delete.expensesheet'):
+
+        if self.request.has_permission('add_payment.expensesheet'):
             url = self.request.route_path(
-                "/expenses/{id}/delete",
-                id=self.context.id
+                "/expenses/{id}/addpayment",
+                id=self.context.id,
             )
             result.append({
                 'widget': 'anchor',
                 'option': {
                     "url": url,
-                    "label": u"Supprimer",
-                    "title": u"Supprimer définitivement ce document",
+                    "label": u"Enregistrer un paiement",
+                    "title": u"Enregistrer un paiement pour cette note "
+                    u"de dépenses",
                     "css": "btn btn-default",
-                    "icon": "fa fa-trash",
-                    "onclick": u"return confirm('Êtes-vous sûr de vouloir"
-                    u"supprimer cet élément ?');"
+                    "icon": "fa fa-bank",
                 }
             })
 
+        if self.request.has_permission('delete.expensesheet'):
+            result.append(self._delete_btn())
+
         if self.request.has_permission('add.file'):
-            url = self.request.route_path(
-                "/expenses/{id}/addfile",
-                id=self.context.id
-            )
-            result.append({
-                'widget': 'anchor',
-                'option': {
-                    "url": url,
-                    "label": u"Attacher un fichier",
-                    "title": u"Attacher un fichier à ce document",
-                    "css": "btn btn-default",
-                    "icon": "fa fa-files-o",
-                    "attrs": "target=_blank",
-                }
-            })
+            result.append(self._add_file_btn())
+
+        if self.request.has_permission('view.expensesheet'):
+            result.append(self._duplicate_btn())
+
+        if self.request.has_permission('set_justified.expensesheet'):
+            result.append(self._get_justified_toggle())
+
         return result
+
+    def _delete_btn(self):
+        """
+        Return a deletion btn description
+
+        :rtype: dict
+        """
+        url = self.request.route_path(
+            "/expenses/{id}/delete",
+            id=self.context.id
+        )
+        return {
+            'widget': 'anchor',
+            'option': {
+                "url": url,
+                "label": u"Supprimer",
+                "title": u"Supprimer définitivement ce document",
+                "css": "btn btn-default",
+                "icon": "fa fa-trash",
+                "onclick": u"return confirm('Êtes-vous sûr de vouloir"
+                u"supprimer cet élément ?');"
+            }
+        }
+
+    def _add_file_btn(self):
+        """
+        Return an add file description button
+
+        :rtype: dict
+        """
+        url = self.request.route_path(
+            "/expenses/{id}/addfile",
+            id=self.context.id
+        )
+        return {
+            'widget': 'anchor',
+            'option': {
+                "url": url,
+                "label": u"Attacher un fichier",
+                "title": u"Attacher un fichier à ce document",
+                "css": "btn btn-default",
+                "icon": "fa fa-files-o",
+                "attrs": "target=_blank",
+            }
+        }
+
+    def _duplicate_btn(self):
+        """
+        Return a duplicate btn description
+
+        :rtype: dict
+        """
+        url = self.request.route_path(
+            "/expenses/{id}/duplicate",
+            id=self.context.id
+        )
+        return {
+            'widget': 'anchor',
+            'option': {
+                "url": url,
+                "label": u"Dupliquer",
+                "title": u"Créer une nouvelle note de dépenses à partir "
+                u"de celle-ci",
+                "css": "btn btn-default",
+                "icon": "fa fa-copy",
+            }
+        }
+
+    def _get_justified_toggle(self):
+        """
+        Return a justification toggle button description
+
+        :rtype: dict
+        """
+        url = self.request.route_path(
+            "/api/v1/expenses/{id}",
+            id=self.context.id,
+            _query={'action': 'justified_status'}
+        )
+        actions = self.context.justified_state_manager.get_allowed_actions(
+            self.request
+        )
+
+        return {
+            "widget": "toggle",
+            'options': {
+                "url": url,
+                "name": "justified",
+                "current_value": self.context.justified,
+                "label": u"Justificatifs",
+                "buttons": actions,
+                "css": "btn btn-default",
+            }
+        }
+        return
 
     def _add_form_options(self, form_config):
         """
@@ -428,10 +518,7 @@ class RestExpenseSheetStatusView(StatusView):
 
     def redirect(self):
         loc = self.request.route_path("/expenses/{id}", id=self.context.id)
-        if self.request.is_xhr:
-            return dict(redirect=loc)
-        else:
-            return HTTPFound(loc)
+        return dict(redirect=loc)
 
     def check_allowed(self, status, params):
         self.request.context.check_status_allowed(status, self.request)
@@ -446,6 +533,54 @@ class RestExpenseSheetStatusView(StatusView):
             )
 
         return StatusView.pre_status_process(self, status, params)
+
+
+class RestExpenseSheetJustifiedStatusView(StatusView):
+
+    def check_allowed(self, status, params):
+        self.request.context.check_justified_status_allowed(
+            status,
+            self.request
+        )
+
+    def notify(self, status):
+        if status is True:
+            self.request.registry.notify(
+                ExpenseStatusChanged(self.request, self.context, 'justified')
+            )
+
+    def redirect(self):
+        return Apiv1Resp(
+            self.request, {'justified': self.context.justified}
+        )
+
+    def _get_status(self, params):
+        status = params['submit']
+
+        if status in ('True', 'true'):
+            status = True
+        elif status == ('False', 'false'):
+            status = False
+        return status
+
+    def pre_status_process(self, status, params):
+        logger.debug("In pre_status_process : %s %s" % (status, type(status)))
+        if 'comment' in params:
+            self.context.communications.append(
+                Communication(
+                    content=params.get('comment'),
+                    user_id=self.request.user.id,
+                )
+            )
+
+        return StatusView.pre_status_process(self, status, params)
+
+    def status_process(self, status, params):
+        return self.context.set_justified_status(
+            status,
+            self.request,
+            **params
+        )
 
 
 def add_routes(config):
@@ -522,6 +657,16 @@ def add_views(config):
         RestExpenseSheetStatusView,
         route_name='/api/v1/expenses/{id}',
         request_param='action=status',
+        permission="view.expensesheet",
+        request_method='POST',
+        renderer="json",
+    )
+
+    # Status view
+    config.add_view(
+        RestExpenseSheetJustifiedStatusView,
+        route_name='/api/v1/expenses/{id}',
+        request_param='action=justified_status',
         permission="view.expensesheet",
         request_method='POST',
         renderer="json",

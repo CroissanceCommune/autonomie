@@ -222,6 +222,16 @@ utilisables dans les notes de dépense",
         },
         nullable=False,
     )
+    year = Column(
+        Integer,
+        nullable=True,
+        info={
+            "colanderalchemy": {
+                "title": u"Année de référence",
+                "description": u"Année à laquelle ce barême est associé",
+            }
+        }
+    )
 
     def __json__(self, request=None):
         res = ExpenseType.__json__(self)

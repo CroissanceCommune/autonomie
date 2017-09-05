@@ -15,12 +15,7 @@ var EstimationSignedStatus = {
     },
     el: "div.signed_status_group",
     onClick: function(event){
-        console.log("On change");
-        console.log(event);
-        console.log(this);
         var value = $(event.target).find('input').val();
-        console.log(value);
-        console.log(this.url);
         ajax_request(this.url, {'submit': value}, 'POST', {success: this.refresh});
     },
     refresh: function(){

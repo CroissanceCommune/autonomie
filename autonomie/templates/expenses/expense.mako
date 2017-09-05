@@ -34,8 +34,8 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <div class='container-fluid'>
     <div class="row">
         <div id="header-container" class="text-right">
-            <a class='btn btn-default' href='#print'><i class='glyphicon glyphicon-print'></i>Imprimer</a>
-            <a class='btn btn-default' href='${request.route_path("/expenses/{id}.xlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i>Excel</a>
+            <button class='btn btn-default' onclick="window.print()"><i class='glyphicon glyphicon-print'></i> Imprimer</button>
+            <a class='btn btn-default' href='${request.route_path("/expenses/{id}.xlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i> Excel</a>
         </div>
     </div>
     <div class='row well'>

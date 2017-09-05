@@ -3,10 +3,14 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import logging
 from autonomie.exception import (
     Forbidden,
     BadRequest,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class Action(object):
@@ -138,6 +142,7 @@ class ActionManager(object):
         action = self._get_action(action_name)
 
         if action is None:
+            logger.error("Unknown action : %s" % action_name)
             raise BadRequest()
 
         elif not action.allowed(context, request):

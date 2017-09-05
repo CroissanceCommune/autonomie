@@ -21,6 +21,7 @@ import ExpenseKmTableView from './ExpenseKmTableView.js';
 import ExpenseFormPopupView from './ExpenseFormPopupView.js';
 import ExpenseKmFormView from './ExpenseKmFormView.js';
 import ExpenseDuplicateFormView from './ExpenseDuplicateFormView.js';
+import TotalView from './TotalView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
 const MainView = Mn.View.extend({
@@ -209,9 +210,15 @@ const MainView = Mn.View.extend({
        );
        this.showChildView('footer', view);
    },
+   showTotals(){
+       let model = this.facade.request('get:totalmodel');
+       var view = new TotalView({model: model});
+       this.showChildView('totals', view);
+   },
    onRender(){
        this.showInternalTab();
        this.showActitityTab();
+       this.showTotals();
        this.showActions();
    },
    onStatusChange(status, title, label, url){

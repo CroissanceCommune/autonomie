@@ -1,6 +1,8 @@
 .form-section {
   padding-top: 15px;
   padding-left: 10px; }
+  .form-section button.add {
+    margin-bottom: 1em; }
 
 .bookmark-line {
   padding: 10px 5px;
@@ -19,3 +21,62 @@
     margin-top: 10px; }
     .expense-desktop-actions .totals hr {
       margin: 8px 0px; }
+
+.totals {
+  font-size: 1.2em; }
+
+@media print {
+  @page {
+    size: landscape; }
+  .page-content {
+    padding-bottom: 0px !important;
+    min-height: 0px !important; }
+  .well {
+    margin: 0px !important;
+    padding: 0px !important; }
+  table.opa.table-bordered.table-condensed thead tr th, table.opa.table-bordered.table-condensed tfoot tr td {
+    background-color: #ddd !important;
+    -webkit-print-color-adjust: exact;
+    padding: 1px !important; }
+  table.opa.table-bordered.table-condensed td, table.opa.table-bordered.table-condensed th {
+    padding: 0px !important; }
+  table.opa.table-bordered.table-condensed tbody td, table.opa.table-bordered.table-condensed tbody tr {
+    border: 0px !important; }
+  form, .hidden-print, a.btn, button, .nav, .help-block {
+    display: none !important; }
+  .tab-pane {
+    display: block !important;
+    visibility: visible !important;
+    padding: 0px !important; }
+  body, table caption, .lead {
+    font-size: 7pt !important; }
+  .container, .container-fluid {
+    width: 100% !important; }
+  body, html, td, div {
+    font-size: 7pt !important;
+    color: #000 !important; }
+  h1 {
+    font-size: 12pt !important; }
+  h2 {
+    font-size: 11pt !important; }
+  h3 {
+    font-size: 10pt !important; }
+  h4 {
+    font-size: 9pt !important; }
+  h5 {
+    font-size: 8pt !important; }
+  .col-print-12 {
+    width: 100% !important; }
+  .form-section {
+    margin: 0px !important;
+    padding: 0px !important; }
+    .form-section .fade {
+      opacity: 100 !important; }
+    .form-section .content {
+      margin: 0px !important;
+      padding: 0px !important; }
+  .totals {
+    font-size: 1em; }
+    .totals div {
+      font-size: 8pt !important;
+      font-weight: bold; } }

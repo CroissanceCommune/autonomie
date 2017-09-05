@@ -336,7 +336,7 @@ class RestExpenseSheetView(BaseRestView):
             "id": self.context.id,
         }]
         all_expenses = ExpenseSheet.query().filter_by(
-            user_id=self.request.user.id
+            user_id=self.context.user_id
         )
         all_expenses = all_expenses.filter_by(
             company_id=self.context.company_id

@@ -32,7 +32,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <% expense = request.context %>
 <br />
 <div class='container-fluid'>
-    <div class="row">
+    <div class="row hidden-print">
         <div id="header-container" class="text-right">
             <button class='btn btn-default' onclick="window.print()"><i class='glyphicon glyphicon-print'></i> Imprimer</button>
             <a class='btn btn-default' href='${request.route_path("/expenses/{id}.xlsx", id=expense.id)}' ><i class='glyphicon glyphicon-file'></i> Excel</a>
@@ -40,7 +40,8 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
     </div>
     <div class='row well'>
         <div class="col-md-6">
-            <div class="hidden-print">
+            <div>
+                <div class='hidden-print'>
                 <i class='glyphicon glyphicon-play'></i>
                 <strong>
             % if expense.paid_status == 'resulted':
@@ -57,13 +58,19 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                 Cette feuille de notes de dépense est invalide.
             % endif
                 </strong>
+                </div>
                 <ul>
-                    <li>
+                    <li class='hidden-print'>
                         ${api.format_expense_status(expense)}<br />
                     </li>
                 % if request.has_permission('admin_treasury'):
                     <li>
-                    L'identifiant de cette feuille de notes de dépense est : <strong>${ expense.id }</strong>
+                    Numéro de pièce :
+                    % if expense.status == 'valid':
+                        <strong>${ expense.id }</strong>
+                    % else:
+                        <strong>Ce document n'a pas été validé</strong>
+                    % endif
                     </li>
                     <li>
                         % if expense.exported:
@@ -71,6 +78,9 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                         %else:
                             Ce document n'a pas encore été exporté vers le logiciel de comptabilité
                         % endif
+                    </li>
+                    <li>
+                    Porteur de projet : ${api.format_account(expense.user)}
                     </li>
                 % endif
                 % if expense.payments:

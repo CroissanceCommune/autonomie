@@ -53,7 +53,7 @@ One page application layout template
         <i class="fa fa-circle-o-notch fa-spin"></i>
     </div>
     <%block name="headtitle">
-    <div class='pagetitle visible-lg hidden-sm hidden-print'>
+    <div class='pagetitle visible-lg hidden-sm'>
       <h2 >
         ${title}
       </h2>

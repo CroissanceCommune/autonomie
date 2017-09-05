@@ -25,6 +25,6 @@
     % if icon:
     <i class='glyphicon glyphicon-${icon}'></i>&nbsp;
     % endif
-    ${title} (${status_label})
+    <span class='hidden-sm'>${title} (${status_label})</span>
   </h2>
 </div>

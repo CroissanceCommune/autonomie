@@ -34,7 +34,6 @@
     <meta name="description" comment="">
     <meta name="KEYWORDS" CONTENT="">
     <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
-    <link  rel="stylesheet" type="text/css" href="${request.static_url('autonomie:static/css/print.css')}" media="print" />
     </%block>
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -43,6 +42,7 @@
     <%block name="headjs" />
 
     <%block name="css" />
+    <link  rel="stylesheet" type="text/css" href="${request.static_url('autonomie:static/css/print.css')}" media="print" />
   </head>
   <body
       class="${request.matched_route.name}-view"
@@ -52,7 +52,7 @@
         ${request.layout_manager.render_panel('submenu')}
         <%block name="headtitle">
         % if title is not UNDEFINED:
-        <div class='pagetitle visible-lg hidden-sm hidden-print'>
+        <div class='pagetitle visible-lg hidden-print hidden-sm'>
           <h2 >
             ${title}
           </h2>

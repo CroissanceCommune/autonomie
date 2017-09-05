@@ -304,7 +304,8 @@ class ExpenseSheetDuplicateView(BaseFormView):
     @property
     def title(self):
         return u"Dupliquer la note de dépenses de {0} {1}".format(
-            self.context.month_label, self.context.year,
+            strings.month_name(self.context.month),
+            self.context.year,
         )
 
     def before(self, form):

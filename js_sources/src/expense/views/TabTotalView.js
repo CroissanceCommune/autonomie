@@ -1,5 +1,5 @@
 /*
- * File Name : TotalView.js
+ * File Name : TabTotalView.js
  *
  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
  * Company : Majerti ( http://www.majerti.fr )
@@ -12,25 +12,19 @@ import Mn from 'backbone.marionette';
 import Radio from 'backbone.radio';
 import { formatAmount } from '../../math.js';
 
-const TotalView = Mn.View.extend({
+const TabTotalView = Mn.View.extend({
     tagName: 'div',
-    template: require('./templates/TotalView.mustache'),
+    template: require('./templates/TabTotalView.mustache'),
     modelEvents: {
         'change:ttc': 'render',
-        'change:ht': 'render',
-        'change:tva': 'render',
         'change:km_ttc': 'render',
-        'change:km': 'render',
     },
     templateContext(){
         return {
-            ht: formatAmount(this.model.get('ht')),
-            tva: formatAmount(this.model.get('tva')),
             ttc: formatAmount(
                 this.model.get('ttc') + this.model.get('km_ttc')
-            ),
-            total_km: formatAmount(this.model.get('km')),
+            )
         }
     }
 });
-export default TotalView;
+export default TabTotalView;

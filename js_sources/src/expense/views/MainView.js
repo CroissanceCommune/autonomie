@@ -22,6 +22,7 @@ import ExpenseFormPopupView from './ExpenseFormPopupView.js';
 import ExpenseKmFormView from './ExpenseKmFormView.js';
 import ExpenseDuplicateFormView from './ExpenseDuplicateFormView.js';
 import TotalView from './TotalView.js';
+import TabTotalView from './TabTotalView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
 const MainView = Mn.View.extend({
@@ -31,8 +32,10 @@ const MainView = Mn.View.extend({
        modalRegion: '.modalRegion',
        internalLines: '.internal-lines',
        internalKmLines: '.internal-kmlines',
+       internalTotal: '.internal-total',
        activityLines: '.activity-lines',
        activityKmLines: '.activity-kmlines',
+       activityTotal: '.activity-total',
        totals: '.totals',
        footer: {
            el: '.footer-actions',
@@ -67,9 +70,14 @@ const MainView = Mn.View.extend({
        /*
         * Launch when a line should be added
         *
-        * :param str category: 1/2
+        * :param childView: category 1/2 or a childView with a category option
         */
-       var category = childView.getOption('category').value;
+       var category;
+       if (_.isNumber(childView) || _.isString(childView)){
+           category = childView;
+       }else{
+           category = childView.getOption('category').value;
+       }
        var model = new ExpenseModel({category: category});
        this.showLineForm(model, true, "Enregistrer une dépense");
    },
@@ -214,6 +222,11 @@ const MainView = Mn.View.extend({
        let model = this.facade.request('get:totalmodel');
        var view = new TotalView({model: model});
        this.showChildView('totals', view);
+
+       view = new TabTotalView({model: model, category: 1});
+       this.showChildView('internalTotal', view);
+       view = new TabTotalView({model: model, category: 2});
+       this.showChildView('activityTotal', view);
    },
    onRender(){
        this.showInternalTab();

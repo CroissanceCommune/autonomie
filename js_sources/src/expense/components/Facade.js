@@ -92,6 +92,7 @@ const FacadeClass = Mn.Object.extend({
             datas['km_' + category] = collection.total_km(category);
             datas['km_ttc_' + category] = collection.total(category);
         });
+        datas['km'] = collection.total_km();
         datas['km_ttc'] = collection.total();
         this.totalmodel.set(datas);
 

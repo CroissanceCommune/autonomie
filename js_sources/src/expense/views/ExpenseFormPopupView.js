@@ -25,15 +25,16 @@ const ExpenseFormPopupView = Mn.View.extend({
     ui: {
         main_tab: 'ul.nav-tabs li.main a',
         tel_tab: "ul.nav-tabs li.tel a",
+        modalbody: '.modal-body',
     },
     childViewEvents: {
-        'bookmark:insert': 'onBookMarkInsert'
+        'bookmark:insert': 'onBookMarkInsert',
+        'success:sync': 'onSuccessSync',
     },
     // Here we bind the child FormBehavior with our ModalBehavior
     // Like it's done in the ModalFormBehavior
     childViewTriggers: {
         'cancel:form': 'modal:close',
-        'success:sync': 'modal:close',
         'bookmark:delete': 'bookmark:delete',
     },
     modelEvents: {
@@ -44,6 +45,24 @@ const ExpenseFormPopupView = Mn.View.extend({
         this.bookmarks = facade.request('get:bookmarks');
         this.add = this.getOption('add');
         this.tel = this.model.isSpecial();
+    },
+    refresh(){
+        this.triggerMethod('line:add', this.model.get('category'));
+    },
+    onSuccessSync(){
+        if (this.add){
+            var this_ = this;
+            var modalbody = this.getUI('modalbody');
+
+            modalbody.effect(
+                'highlight',
+                {color: '#bbdfbb'},
+                800,
+                this_.refresh.bind(this)
+            );
+        } else {
+            this.triggerMethod('modal:close');
+        }
     },
     onModalBeforeClose(){
         this.model.rollback();
@@ -64,6 +83,7 @@ const ExpenseFormPopupView = Mn.View.extend({
                 destCollection: this.getOption('destCollection'),
                 title: this.getOption('title'),
                 tel: false,
+                add: this.add,
             });
             this.showChildView('main', view);
         }
@@ -75,6 +95,7 @@ const ExpenseFormPopupView = Mn.View.extend({
                 destCollection: this.getOption('destCollection'),
                 title: this.getOption('title'),
                 tel: true,
+                add: this.add,
             });
             this.showChildView('tel', view);
         }

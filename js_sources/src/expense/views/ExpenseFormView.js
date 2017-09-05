@@ -118,6 +118,7 @@ const ExpenseFormView = Mn.View.extend({
     templateContext: function(){
         return {
             title: this.getOption('title'),
+            add: this.getOption('add'),
         };
     }
 });

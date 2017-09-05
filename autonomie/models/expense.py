@@ -344,6 +344,41 @@ def build_action_manager():
     return manager
 
 
+def build_justified_state_manager():
+    """
+    Return a state manager for setting the justified status attribute on
+    ExpenseSheet objects
+    """
+    manager = ActionManager()
+    for status, icon, label, title, css in (
+        (
+            False,
+            'fa fa-clock-o',
+            u"En attente",
+            u"Aucun justificatif n'a été reçu",
+            "btn btn-default",
+        ),
+        (
+            True,
+            'fa fa-check',
+            u"Reçus",
+            u"Les justificatifs ont bien été reçus",
+            "btn btn-default",
+        ),
+    ):
+        action = Action(
+            status,
+            'set_justified.expensesheet',
+            status_attr='justified',
+            icon=icon,
+            label=label,
+            title=title,
+            css=css,
+        )
+        manager.add(action)
+    return manager
+
+
 @colander.deferred
 def deferred_unique_expense(node, kw):
     """
@@ -580,6 +615,7 @@ class ExpenseSheet(Node, ExpenseCompute):
         }
     )
     state_manager = build_action_manager()
+    justified_state_manager = build_justified_state_manager()
 
     def __json__(self, request):
         return dict(
@@ -619,6 +655,20 @@ class ExpenseSheet(Node, ExpenseCompute):
 
     def check_status_allowed(self, status, request, **kw):
         return self.state_manager.check_allowed(status, self, request)
+
+    def set_justified_status(self, status, request, **kw):
+        """
+        set the signed status of a task through the state machine
+        """
+        return self.justified_state_manager.process(
+            status,
+            self,
+            request,
+            **kw
+        )
+
+    def check_justified_status_allowed(self, status, request, **kw):
+        return self.justified_state_manager.check_allowed(status, self, request)
 
     def get_company_id(self):
         """

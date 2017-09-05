@@ -67,12 +67,14 @@ const FacadeClass = Mn.Object.extend({
             datas['tva_' + category] = collection.total_tva(category);
             datas['ttc_' + category] = collection.total(category);
         });
+        datas['ht'] = collection.total_ht();
+        datas['tva'] = collection.total_tva();
+        datas['ttc'] = collection.total();
         this.totalmodel.set(datas);
         var channel = this.getChannel();
         _.each(categories, function(category){
             channel.trigger('change:lines_' + category);
         });
-
     },
     computeKmLineTotal(category){
         /*
@@ -90,6 +92,7 @@ const FacadeClass = Mn.Object.extend({
             datas['km_' + category] = collection.total_km(category);
             datas['km_ttc_' + category] = collection.total(category);
         });
+        datas['km_ttc'] = collection.total();
         this.totalmodel.set(datas);
 
         var channel = this.getChannel();

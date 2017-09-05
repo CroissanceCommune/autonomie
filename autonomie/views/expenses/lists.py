@@ -7,6 +7,8 @@ import colander
 import datetime
 import deform
 
+from collections import OrderedDict
+
 from autonomie.models.user import User
 from autonomie.models.expense import (
     ExpenseSheet,
@@ -134,18 +136,19 @@ def get_expensesheet_years(expenses):
     """
         List of years an expensesheet has been retrieved for
     """
-    years = set([exp.year for exp in expenses])
+    years = list(set([exp.year for exp in expenses]))
     if not years:
-        return [datetime.date.today().year]
-    else:
-        return years
+        years = [datetime.date.today().year]
+
+    years.sort(reverse=True)
+    return years
 
 
 def get_expensesheet_by_year(company):
     """
         Return expenses stored by year and users for display purpose
     """
-    result = {}
+    result = OrderedDict()
     for year in get_expensesheet_years(company.expenses):
         result[year] = []
         for user in company.employees:

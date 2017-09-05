@@ -41,20 +41,24 @@
             </ul>
             {{/if}}
             <div class='tab-content'>
+                {{# if show_main }}
                 <div
                     role="tabpanel"
-                    class="tab-pane fade in {{#if show_main}}active{{/if}}"
+                    class="tab-pane fade in active"
                     id="mainform-container">
                 </div>
+                {{/if}}
+                {{# if show_tel}}
                 <div
                     role="tabpanel"
                     class="tab-pane fade in {{#if show_tel}}active{{/if}}"
                     id="telform-container">
                 </div>
+                {{/if}}
                 {{#if show_bookmarks}}
                     <div
                         role="tabpanel"
-                        class="tab-pane"
+                        class="tab-pane fade in"
                         id="bookmark-container">
                     </div>
                 {{/if}}

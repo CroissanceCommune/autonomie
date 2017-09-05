@@ -5,3 +5,17 @@
 .bookmark-line {
   padding: 10px 5px;
   border-bottom: 1px solid #cdcdcd; }
+
+.expense-desktop-actions {
+  position: sticky;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -ms-sticky;
+  position: -o-sticky;
+  top: 0px; }
+  .expense-desktop-actions button, .expense-desktop-actions a {
+    margin-bottom: 0.7em; }
+  .expense-desktop-actions .totals {
+    margin-top: 10px; }
+    .expense-desktop-actions .totals hr {
+      margin: 8px 0px; }

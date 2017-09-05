@@ -6,3 +6,20 @@
   padding: 10px 5px;
   border-bottom: 1px solid #cdcdcd;
 }
+.expense-desktop-actions{
+    position: sticky;
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    top: 0px;
+    button, a{
+      margin-bottom: 0.7em;
+    }
+    .totals{
+      margin-top: 10px;
+      hr{
+        margin: 8px 0px;
+      }
+    }
+}

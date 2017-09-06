@@ -425,7 +425,7 @@ def get_deferred_select_validator(model, id_key='id'):
 
 
 def get_deferred_select(model, multi=False, mandatory=False,
-                        keys=('id', 'label')):
+                        keys=('id', 'label'), filters=[]):
     """
     Return a deferred select widget based on the given model
 
@@ -445,6 +445,11 @@ def get_deferred_select(model, multi=False, mandatory=False,
         keys
 
             a 2-uple describing the (value, label) of the select's options
+
+        filters
+
+            list of 2-uples allowing to filter the model query
+            (attr/value)
     """
     @colander.deferred
     def deferred_widget(binding_datas, request):
@@ -453,9 +458,25 @@ def get_deferred_select(model, multi=False, mandatory=False,
         """
         key1, key2 = keys
 
-        values = [(getattr(m, key1), getattr(m, key2)) for m in model.query()]
+        values = []
         if not mandatory:
-            values.insert(0, ('', ''))
+            values.append(('', ''))
+
+        query = model.query()
+        for key, value in filters:
+            query = query.filter(getattr(model, key) == value)
+
+        for instance in query:
+            if callable(key1):
+                key = key1(instance)
+            else:
+                key = getattr(instance, key1)
+
+            if callable(key2):
+                label = key2(instance)
+            else:
+                label = getattr(instance, key2)
+            values.append((key, label))
         return deform.widget.SelectWidget(values=values, multi=multi)
     return deferred_widget
 

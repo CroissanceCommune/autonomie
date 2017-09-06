@@ -10,6 +10,7 @@ Create Date: 2017-09-05 18:07:51.101638
 revision = '22721b810d30'
 down_revision = '55acdcdcc473'
 
+import datetime
 from alembic import op
 import sqlalchemy as sa
 
@@ -23,6 +24,11 @@ def migrate_datas():
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()
+    from autonomie.models.expense import ExpenseKmType
+    year = datetime.date.today().year
+    for type_ in ExpenseKmType.query():
+        type_.year = year
+        session.merge(type_)
 
 
 def upgrade():

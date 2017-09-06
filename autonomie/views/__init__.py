@@ -544,42 +544,6 @@ class BaseFormView(FormView):
         return dict(form=e.render(), formerror=True)
 
 
-class BaseEditView(BaseFormView):
-    """
-    ColanderAlchemy schema based view
-
-    class AdminModel(BaseEditView):
-        schema = SQLAlchemySchemaNode(MyModel)
-    """
-    add_template_vars = ('title', 'help_msg')
-    msg = u"Vos modifications ont bien été enregistrées"
-    redirect_route = None
-
-    @property
-    def help_msg(self):
-        factory = getattr(self, 'factory', None)
-        if factory is not None:
-            calchemy_dict = getattr(factory, '__colanderalchemy_config__', {})
-        else:
-            calchemy_dict = {}
-        return calchemy_dict.get('help_msg', '')
-
-    def before(self, form):
-        form.set_appstruct(self.schema.dictify(self.context))
-
-    def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct, self.context)
-        self.dbsession.merge(model)
-        self.dbsession.flush()
-        if self.msg:
-            self.request.session.flash(self.msg)
-
-        if self.redirect_route is not None:
-            return HTTPFound(self.request.route_path(self.redirect_route))
-        elif hasattr(self, 'redirect'):
-            return self.redirect()
-
-
 class BaseAddView(BaseFormView):
     """
     Admin view that should be subclassed adding a colanderalchemy schema
@@ -624,6 +588,42 @@ class BaseAddView(BaseFormView):
             return self.redirect(new_model)
 
 
+class BaseEditView(BaseFormView):
+    """
+    ColanderAlchemy schema based view
+
+    class AdminModel(BaseEditView):
+        schema = SQLAlchemySchemaNode(MyModel)
+    """
+    add_template_vars = ('title', 'help_msg')
+    msg = u"Vos modifications ont bien été enregistrées"
+    redirect_route = None
+
+    @property
+    def help_msg(self):
+        factory = getattr(self, 'factory', None)
+        if factory is not None:
+            calchemy_dict = getattr(factory, '__colanderalchemy_config__', {})
+        else:
+            calchemy_dict = {}
+        return calchemy_dict.get('help_msg', '')
+
+    def before(self, form):
+        form.set_appstruct(self.schema.dictify(self.context))
+
+    def submit_success(self, appstruct):
+        model = self.schema.objectify(appstruct, self.context)
+        self.dbsession.merge(model)
+        self.dbsession.flush()
+        if self.msg:
+            self.request.session.flash(self.msg)
+
+        if hasattr(self, 'redirect'):
+            return self.redirect()
+        elif self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
+
+
 class DisableView(BaseView):
     """
     Main view for enabling/disabling elements
@@ -636,12 +636,6 @@ class DisableView(BaseView):
     enable_msg = None
     disable_msg = None
     redirect_route = None
-
-    @property
-    def redirect(self):
-        if self.redirect_route is None:
-            raise Exception(u"Set a redirect_route attribute for redirection")
-        return self.request.route_path(self.redirect_route)
 
     def __call__(self):
         if self.context.active:
@@ -656,7 +650,11 @@ class DisableView(BaseView):
             self.context.active = True
             self.request.dbsession.merge(self.context)
             self.request.session.flash(self.enable_msg)
-        return HTTPFound(self.redirect)
+
+        if hasattr(self, 'redirect'):
+            return self.redirect()
+        elif self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
 
 
 class DeleteView(BaseView):
@@ -671,16 +669,14 @@ class DeleteView(BaseView):
     delete_msg = u"L'élément a bien été supprimé"
     redirect_route = None
 
-    @property
-    def redirect(self):
-        if self.redirect_route is None:
-            raise Exception(u"Set a redirect_route attribute for redirection")
-        return self.request.route_path(self.redirect_route)
-
     def __call__(self):
         self.request.dbsession.delete(self.context)
         self.request.session.flash(self.delete_msg)
-        return HTTPFound(self.redirect)
+
+        if hasattr(self, 'redirect'):
+            return self.redirect()
+        elif self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
 
 
 class DuplicateView(BaseView):
@@ -716,9 +712,17 @@ class DuplicateView(BaseView):
 generation")
         return self.message.format(self._link(item))
 
-    def _redirect(self):
-        redirect_route = self.collection_route_name or self.route_name + 's'
-        return HTTPFound(self.request.route_path(redirect_route))
+    def redirect(self, item):
+        """
+        Default redirect implementation
+
+        :param obj item: The newly created element (flushed)
+        :returns: The url to redirect to
+        :rtype: str
+        """
+        return HTTPFound(
+            self.request.route_path(self.route_name, id=item.id)
+        )
 
     def __call__(self):
         item = self.context.duplicate()
@@ -726,7 +730,7 @@ generation")
         # We need an id
         self.request.dbsession.flush()
         self.request.session.flash(self._message(item))
-        return self._redirect()
+        return self.redirect(item)
 
 
 class BaseRestView(BaseView):

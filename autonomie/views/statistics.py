@@ -257,8 +257,7 @@ class StatisticDuplicateView(DuplicateView):
     """
     Sheet Duplication view
     """
-    message = u"La feuille de statistique a bien été dupliquée, vous pouvez \
-la modifier <a href='{0}'>Ici</a>"
+    message = u"Vous avez été redirigé vers la nouvelle feuille de statistique"
     route_name = "statistic"
 
 

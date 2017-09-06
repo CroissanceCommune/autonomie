@@ -635,8 +635,7 @@ class WorkShopDuplicateView(DuplicateView):
     """
     Workshop duplication view
     """
-    message = u"L'atelier a bien été dupliqué, vous pouvez le modifier ici \
-<a href='{0}'>Ici</a>."
+    message = u"Vous avez été redirigé vers le nouvel atelier"
     route_name = "workshop"
 
 

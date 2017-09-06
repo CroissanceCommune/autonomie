@@ -159,8 +159,8 @@ def get_vehicle_widget():
     return get_deferred_select(
         ExpenseKmType,
         keys=(
-            lambda a: u"%s-%s".format(a.label, a.code),
-            lambda a: u"%s (%s)".format(a.label, a.code)
+            lambda a: u"%s-%s" % (a.label, a.code),
+            lambda a: u"%s (%s)" % (a.label, a.code)
         ),
         filters=[('active', True)]
     )

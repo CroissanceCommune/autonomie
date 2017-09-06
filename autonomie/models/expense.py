@@ -238,6 +238,17 @@ utilisables dans les notes de dépense",
         res['amount'] = self.amount
         return res
 
+    def duplicate(self, year):
+        new_model = ExpenseKmType()
+        new_model.amount = self.amount
+        new_model.year = year
+        new_model.label = self.label
+        new_model.code = self.code
+        new_model.code_tva = self.code_tva
+        new_model.compte_tva = self.compte_tva
+        new_model.contribution = self.contribution
+        return new_model
+
 
 class ExpenseTelType(ExpenseType):
     """

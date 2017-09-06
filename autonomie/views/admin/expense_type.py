@@ -5,7 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import datetime
 from sqlalchemy import (desc, distinct)
-
+from pyramid.httpexceptions import HTTPFound
 from autonomie.compute.math_utils import convert_to_int
 from autonomie.models.expense import (
     ExpenseType,
@@ -24,6 +24,63 @@ from autonomie.forms.admin import get_admin_schema
 TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
+def _get_year_from_request(request):
+    """
+    Retrieve the current year from the request
+    Usefull for ExpenseKmType edition
+
+    :param obj request: The Pyramid request object
+    :returns: A year
+    :rtype: int
+    """
+    return convert_to_int(request.matchdict['year'], datetime.date.today().year)
+
+
+class ExpenseKmTypesIndexView(BaseView):
+    """
+    Entry point to the km expense types configuration
+    """
+
+    def _get_menus(self):
+        """
+        Return the menu entries
+        """
+        return [
+            dict(
+                label=u"Retour",
+                path="admin_expense",
+                icon="fa fa-step-backward"
+            )
+        ]
+
+    def _get_year_options(self):
+        """
+        Return the year selection options to be provided
+        """
+        years = [
+            a[0]
+            for a in self.request.dbsession.query(
+                distinct(ExpenseKmType.year)
+            )
+            if a[0]
+        ]
+        today = datetime.date.today()
+        years.append(today.year)
+        years.append(today.year + 1)
+
+        years = list(set(years))
+        years.sort()
+        return years
+
+    def __call__(self):
+        return dict(
+            years=self._get_year_options(),
+            menus=self._get_menus(),
+            admin_path="/admin/expenses/expensekm",
+            title=u"Configuration des frais kilométriques"
+        )
+
+
 class ExpenseTypeListView(BaseView):
     columns = [
         u"Libellé", u"Compte de charge"
@@ -33,9 +90,12 @@ class ExpenseTypeListView(BaseView):
 
     def stream_columns(self, expense_type):
         """
-        Stream the table datas for the given item
-        :param obj expense_type: The ExpenseType object to stream
-        :returns: List of labels
+        Stream a column object (called from within the template)
+
+        :param obj expense_type: The object to display
+        :returns: A generator of labels representing the different columns of
+        our list
+        :rtype: generator
         """
         yield expense_type.label or u"Non renseigné"
         yield expense_type.code or "Aucun"
@@ -48,14 +108,15 @@ class ExpenseTypeListView(BaseView):
         """
         shortcut for route_path calls
         """
-        query = None
+        query = dict(self.request.GET)
         if action is not None:
-            query = {'action': action}
+            query['action'] = action
 
         return self.request.route_path(
             "/admin/expenses/%s/{id}" % self.get_type(),
             id=expense_type.id,
-            _query=query
+            _query=query,
+            **self.request.matchdict
         )
 
     def stream_actions(self, expense_type):
@@ -88,6 +149,7 @@ class ExpenseTypeListView(BaseView):
     def _load_items(self):
         """
         Return the sqlalchemy models representing current queried elements
+        :rtype: SQLAlchemy.Query object
         """
         items = self.factory.query().filter(
             self.factory.type == self.get_type()
@@ -112,6 +174,30 @@ class ExpenseTypeListView(BaseView):
             )
         ]
 
+    def _get_add_url(self):
+        """
+        Return the url for the add view
+
+        :returns: The url to access the add form
+        :rtype: str
+        """
+        query = dict(self.request.GET)
+        query['action'] = 'new'
+
+        return self.request.route_path(
+            '/admin/expenses/%s' % self.get_type(),
+            _query=query,
+            **self.request.matchdict
+        )
+
+    def _get_actions(self, items):
+        """
+        Return the description of additionnal main actions buttons
+
+        :rtype: list
+        """
+        return []
+
     def __call__(self):
         menus = self._get_menus()
 
@@ -124,67 +210,12 @@ class ExpenseTypeListView(BaseView):
             stream_actions=self.stream_actions,
             title=self.title,
             menus=menus,
-            addurl=self.request.route_path(
-                '/admin/expenses/%s' % self.get_type(),
-                _query=dict(action="new")
-            ),
+            actions=self._get_actions(items),
+            addurl=self._get_add_url()
         )
         self._more_template_vars(result)
+
         return result
-
-
-class ExpenseKmTypesIndexView(BaseView):
-    """
-    Entry point to the km expense types configuration
-    """
-
-    def _get_menus(self):
-        """
-        Return the menu entries
-        """
-        return [
-            dict(
-                label=u"Retour",
-                path="admin_expense",
-                icon="fa fa-step-backward"
-            )
-        ]
-
-    def _get_year_options(self):
-        """
-        Return the year selection options to be provided
-        """
-        years = [
-            a[0]
-            for a in self.request.dbsession.query(
-                distinct(ExpenseSheet.year)
-            )
-            if a[0]
-        ]
-        years.extend(
-            [
-                a[0]
-                for a in self.request.dbsession.query(
-                    distinct(ExpenseKmType.year)
-                )
-                if a[0]
-            ]
-        )
-        today = datetime.date.today()
-        years.append(today.year)
-        years.append(today.year + 1)
-
-        years = list(set(years))
-        years.sort()
-        return years
-
-    def __call__(self):
-        return dict(
-            years=self._get_year_options(),
-            menus=self._get_menus(),
-            admin_path="/admin/expenses/expensekm",
-            title=u"Configuration des frais kilométriques"
-        )
 
 
 class ExpenseKmTypeListView(ExpenseTypeListView):
@@ -196,15 +227,6 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
 
     factory = ExpenseKmType
 
-    def _get_year(self):
-        today = datetime.date.today()
-        year = today.year
-        if 'year' in self.request.GET:
-            year = self.request.GET.get('year')
-            year = convert_to_int(year, today.year)
-
-        return year
-
     def _get_menus(self):
         """
         Return the menu entries
@@ -214,20 +236,25 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
                 label=u"Retour",
                 path="/admin/expenses/expensekm/",
                 icon="fa fa-step-backward"
-            )
+            ),
         ]
 
     @property
     def title(self):
         title = (
             u"Configuration des types de dépenses kilométriques pour "
-            u"l'année {0}".format(self._get_year())
+            u"l'année {0}".format(_get_year_from_request(self.request))
         )
         return title
 
     def _load_items(self):
+        """
+        Load the items we will display
+
+        :returns: A SQLAlchemy query
+        """
         query = ExpenseTypeListView._load_items(self)
-        year = self._get_year()
+        year = _get_year_from_request(self.request)
         query = query.filter_by(year=year)
         return query
 
@@ -236,6 +263,31 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         yield expense_type.code or "Aucun"
         yield u"%s €/km" % (expense_type.amount or 0)
 
+    def _get_duplicate_url(self):
+        """
+        Return the duplication url
+        """
+        return self.request.current_route_path(
+            _query={'action': 'duplicate'}
+        )
+
+    def _get_actions(self, items):
+        """
+        Return the description of additionnal main actions buttons
+
+        :rtype: generator
+        """
+        current_year = datetime.date.today().year
+        year = _get_year_from_request(self.request)
+        if items.count() > 0 and year != current_year + 1:
+            yield(
+                self._get_duplicate_url(),
+                u"Dupliquer cette grille vers l'année suivante "
+                u"(%s)" % (year + 1),
+                "",
+                u"fa fa-copy",
+                u"btn btn-default"
+            )
 
 class ExpenseTelTypeListView(ExpenseTypeListView):
     columns = [
@@ -272,6 +324,14 @@ class ExpenseTypeDisableView(DisableView):
 class ExpenseKmTypeDisableView(ExpenseTypeDisableView):
     factory = ExpenseKmType
 
+    def redirect(self):
+        """
+        Custom redirect to keep the 'year' param
+        """
+        return HTTPFound(
+            self.request.route_path(self.redirect_route, year=self.context.year)
+        )
+
 
 class ExpenseTelTypeDisableView(ExpenseTypeDisableView):
     factory = ExpenseTelType
@@ -303,8 +363,35 @@ class ExpenseTypeAddView(BaseAddView):
 
 
 class ExpenseKmTypeAddView(ExpenseTypeAddView):
+    """
+    View used to add Expense Km types
+    Custom methods are added here to keep the year param in the url and in the
+    form
+    """
     factory = ExpenseKmType
     schema = get_admin_schema(ExpenseKmType)
+
+    def before(self, form):
+        form.set_appstruct({'year': _get_year_from_request(self.request)})
+
+    def redirect(self, model):
+        """
+        Custom redirect to keep the 'year' param
+        """
+        return HTTPFound(
+            self.request.route_path(self.redirect_route, year=model.year)
+        )
+
+    @property
+    def menus(self):
+        return [
+            dict(
+                label=u"Retour",
+                path="/admin/expenses/%s" % (self.get_type()),
+                icon="fa fa-step-backward",
+                url_context={'year': _get_year_from_request(self.request)}
+            )
+        ]
 
 
 class ExpenseTelTypeAddView(ExpenseTypeAddView):
@@ -341,17 +428,58 @@ class ExpenseKmTypeEditView(ExpenseTypeEditView):
     factory = ExpenseKmType
     schema = get_admin_schema(ExpenseKmType)
 
+    def redirect(self):
+        """
+        Custom redirect to keep the 'year' param
+        """
+        return HTTPFound(
+            self.request.route_path(self.redirect_route, year=self.context.year)
+        )
+
+    @property
+    def menus(self):
+        return [
+            dict(
+                label=u"Retour",
+                path="/admin/expenses/%s" % (self.get_type()),
+                icon="fa fa-step-backward",
+                url_context={'year': _get_year_from_request(self.request)},
+            )
+        ]
+
 
 class ExpenseTelTypeEditView(ExpenseTypeEditView):
     factory = ExpenseTelType
     schema = get_admin_schema(ExpenseTelType)
 
 
+class ExpenseKmTypesDuplicateView(ExpenseKmTypeListView):
+    """
+    Expense km list Duplication view
+    """
+    def __call__(self):
+        year = _get_year_from_request(self.request)
+        new_year = year + 1
+        for item in self._load_items():
+            new_item = item.duplicate(new_year)
+            self.request.dbsession.merge(new_item)
+        self.request.session.flash(
+            u"Vous avez été redirigé vers la grille des frais de l'année %s" % (
+                new_year,
+            )
+        )
+        return HTTPFound(
+            self.request.current_route_path(
+                _query={},
+                year=new_year
+            )
+        )
+
 def add_routes(config):
     """
     Add the routes related to the current module
     """
-    for factory in ExpenseType, ExpenseKmType, ExpenseTelType:
+    for factory in ExpenseType, ExpenseTelType:
         type_label = factory.__mapper_args__['polymorphic_identity']
         path = "/admin/expenses/%s" % (type_label)
         config.add_route(path, path)
@@ -365,6 +493,16 @@ def add_routes(config):
     config.add_route(
         '/admin/expenses/expensekm/',
         "/admin/expenses/expensekm/"
+    )
+
+    config.add_route(
+        '/admin/expenses/expensekm',
+        "/admin/expenses/expensekm/{year}"
+    )
+    config.add_route(
+        "/admin/expenses/expensekm/{id}",
+        "/admin/expenses/expensekm/{year}/{id}",
+        traverse="/expense_types/{id}",
     )
 
 
@@ -425,4 +563,11 @@ def includeme(config):
         route_name="/admin/expenses/expensekm/",
         permission="admin",
         renderer='admin/expense_km_index.mako',
+    )
+
+    config.add_view(
+        ExpenseKmTypesDuplicateView,
+        route_name="/admin/expenses/expensekm",
+        request_param="action=duplicate",
+        permission="admin",
     )

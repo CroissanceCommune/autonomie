@@ -321,19 +321,19 @@ webpackJsonp([1],[
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 91);
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 95);
 	
 	var _Facade2 = _interopRequireDefault(_Facade);
 	
-	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 96);
+	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 100);
 	
 	var _AuthBus2 = _interopRequireDefault(_AuthBus);
 	
-	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 97);
+	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 101);
 	
 	var _MessageBus2 = _interopRequireDefault(_MessageBus);
 	
-	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 98);
+	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 102);
 	
 	var _ConfigBus2 = _interopRequireDefault(_ConfigBus);
 	
@@ -378,7 +378,7 @@ webpackJsonp([1],[
   \***************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -432,19 +432,29 @@ webpackJsonp([1],[
 	
 	var _ExpenseDuplicateFormView2 = _interopRequireDefault(_ExpenseDuplicateFormView);
 	
+	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 90);
+	
+	var _TotalView2 = _interopRequireDefault(_TotalView);
+	
+	var _TabTotalView = __webpack_require__(/*! ./TabTotalView.js */ 92);
+	
+	var _TabTotalView2 = _interopRequireDefault(_TabTotalView);
+	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var MainView = _backbone2.default.View.extend({
 	    className: 'container-fluid page-content',
-	    template: __webpack_require__(/*! ./templates/MainView.mustache */ 90),
+	    template: __webpack_require__(/*! ./templates/MainView.mustache */ 94),
 	    regions: {
 	        modalRegion: '.modalRegion',
 	        internalLines: '.internal-lines',
 	        internalKmLines: '.internal-kmlines',
+	        internalTotal: '.internal-total',
 	        activityLines: '.activity-lines',
 	        activityKmLines: '.activity-kmlines',
+	        activityTotal: '.activity-total',
 	        totals: '.totals',
 	        footer: {
 	            el: '.footer-actions',
@@ -479,9 +489,14 @@ webpackJsonp([1],[
 	        /*
 	         * Launch when a line should be added
 	         *
-	         * :param str category: 1/2
+	         * :param childView: category 1/2 or a childView with a category option
 	         */
-	        var category = childView.getOption('category').value;
+	        var category;
+	        if (_.isNumber(childView) || _.isString(childView)) {
+	            category = childView;
+	        } else {
+	            category = childView.getOption('category').value;
+	        }
 	        var model = new _ExpenseModel2.default({ category: category });
 	        this.showLineForm(model, true, "Enregistrer une dépense");
 	    },
@@ -560,13 +575,16 @@ webpackJsonp([1],[
 	        });
 	        this.showChildView('internalLines', view);
 	
-	        collection = this.facade.request('get:collection', 'kmlines');
-	        view = new _ExpenseKmTableView2.default({
-	            collection: collection,
-	            category: this.categories[0],
-	            edit: this.edit
-	        });
-	        this.showChildView('internalKmLines', view);
+	        var km_type_options = this.config.request('get:options', 'expensekm_types');
+	        if (km_type_options.length !== 0) {
+	            collection = this.facade.request('get:collection', 'kmlines');
+	            view = new _ExpenseKmTableView2.default({
+	                collection: collection,
+	                category: this.categories[0],
+	                edit: this.edit
+	            });
+	            this.showChildView('internalKmLines', view);
+	        }
 	    },
 	    showActitityTab: function showActitityTab() {
 	        var collection = this.facade.request('get:collection', 'lines');
@@ -577,13 +595,16 @@ webpackJsonp([1],[
 	        });
 	        this.showChildView('activityLines', view);
 	
-	        collection = this.facade.request('get:collection', 'kmlines');
-	        view = new _ExpenseKmTableView2.default({
-	            collection: collection,
-	            category: this.categories[1],
-	            edit: this.edit
-	        });
-	        this.showChildView('activityKmLines', view);
+	        var km_type_options = this.config.request('get:options', 'expensekm_types');
+	        if (km_type_options.length !== 0) {
+	            collection = this.facade.request('get:collection', 'kmlines');
+	            view = new _ExpenseKmTableView2.default({
+	                collection: collection,
+	                category: this.categories[1],
+	                edit: this.edit
+	            });
+	            this.showChildView('activityKmLines', view);
+	        }
 	    },
 	    showActions: function showActions() {
 	        var view = new _RightBarView2.default({
@@ -596,9 +617,20 @@ webpackJsonp([1],[
 	        });
 	        this.showChildView('footer', view);
 	    },
+	    showTotals: function showTotals() {
+	        var model = this.facade.request('get:totalmodel');
+	        var view = new _TotalView2.default({ model: model });
+	        this.showChildView('totals', view);
+	
+	        view = new _TabTotalView2.default({ model: model, category: 1 });
+	        this.showChildView('internalTotal', view);
+	        view = new _TabTotalView2.default({ model: model, category: 2 });
+	        this.showChildView('activityTotal', view);
+	    },
 	    onRender: function onRender() {
 	        this.showInternalTab();
 	        this.showActitityTab();
+	        this.showTotals();
 	        this.showActions();
 	    },
 	    onStatusChange: function onStatusChange(status, title, label, url) {
@@ -621,6 +653,7 @@ webpackJsonp([1],[
 	     *
 	     */
 	exports.default = MainView;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
 /* 26 */
@@ -7124,7 +7157,7 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "        <button class='btn btn-primary primary-action add'>\n            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une dépense\n        </button>\n        <br />\n        <br />\n";
+	  return "        <button class='btn btn-primary primary-action add'>\n            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une dépense\n        </button>\n";
 	  },"3":function(depth0,helpers,partials,data) {
 	  return "        <th class=\"hidden-print\">Actions</th>\n";
 	  },"5":function(depth0,helpers,partials,data) {
@@ -7411,7 +7444,7 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "        <button class='btn btn-primary primary-action add'>\n            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une dépense\n        </button>\n        <br />\n        <br />\n";
+	  return "        <button class='btn btn-primary primary-action add'>\n            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une dépense\n        </button>\n";
 	  },"3":function(depth0,helpers,partials,data) {
 	  return "        <th class=\"hidden-print\">Actions</th>\n";
 	  },"5":function(depth0,helpers,partials,data) {
@@ -7477,16 +7510,17 @@ webpackJsonp([1],[
 	    },
 	    ui: {
 	        main_tab: 'ul.nav-tabs li.main a',
-	        tel_tab: "ul.nav-tabs li.tel a"
+	        tel_tab: "ul.nav-tabs li.tel a",
+	        modalbody: '.modal-body'
 	    },
 	    childViewEvents: {
-	        'bookmark:insert': 'onBookMarkInsert'
+	        'bookmark:insert': 'onBookMarkInsert',
+	        'success:sync': 'onSuccessSync'
 	    },
 	    // Here we bind the child FormBehavior with our ModalBehavior
 	    // Like it's done in the ModalFormBehavior
 	    childViewTriggers: {
 	        'cancel:form': 'modal:close',
-	        'success:sync': 'modal:close',
 	        'bookmark:delete': 'bookmark:delete'
 	    },
 	    modelEvents: {
@@ -7497,6 +7531,20 @@ webpackJsonp([1],[
 	        this.bookmarks = facade.request('get:bookmarks');
 	        this.add = this.getOption('add');
 	        this.tel = this.model.isSpecial();
+	    },
+	    refresh: function refresh() {
+	        this.triggerMethod('line:add', this.model.get('category'));
+	    },
+	    onSuccessSync: function onSuccessSync() {
+	        if (this.add) {
+	            var this_ = this;
+	            var modalbody = this.getUI('modalbody');
+	
+	            modalbody.effect('highlight', { color: '#bbdfbb' }, 800, this_.refresh.bind(this));
+	            modalbody.addClass('alert alert-success');
+	        } else {
+	            this.triggerMethod('modal:close');
+	        }
 	    },
 	    onModalBeforeClose: function onModalBeforeClose() {
 	        this.model.rollback();
@@ -7516,7 +7564,8 @@ webpackJsonp([1],[
 	                model: this.model,
 	                destCollection: this.getOption('destCollection'),
 	                title: this.getOption('title'),
-	                tel: false
+	                tel: false,
+	                add: this.add
 	            });
 	            this.showChildView('main', view);
 	        }
@@ -7527,7 +7576,8 @@ webpackJsonp([1],[
 	                model: this.model,
 	                destCollection: this.getOption('destCollection'),
 	                title: this.getOption('title'),
-	                tel: true
+	                tel: true,
+	                add: this.add
 	            });
 	            this.showChildView('tel', view);
 	        }
@@ -7555,6 +7605,7 @@ webpackJsonp([1],[
 	        return {
 	            title: this.getOption('title'),
 	            add: this.add,
+	            show_tel_tab: this.tel,
 	            show_tel: show_tel,
 	            show_bookmarks: this.add && this.bookmarks.length > 0,
 	            show_main: show_main
@@ -7717,7 +7768,8 @@ webpackJsonp([1],[
 	
 	    templateContext: function templateContext() {
 	        return {
-	            title: this.getOption('title')
+	            title: this.getOption('title'),
+	            add: this.getOption('add')
 	        };
 	    }
 	});
@@ -8296,9 +8348,9 @@ webpackJsonp([1],[
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
-	  return "<form class='form expense-form'>\n    <div class='category'></div>\n    <div class='date required'></div>\n    <div class='type_id required'></div>\n    <div class='description required'></div>\n    <div class='ht'></div>\n    <div class='tva'></div>\n    <button\n        class='btn btn-success primary-action'\n        type='submit'\n        value='submit'>\n        "
+	  return "<form class='form expense-form'>\n    <div class='category'></div>\n    <div class='date required'></div>\n    <div class='type_id required'></div>\n    <div class='description required'></div>\n    <div class='ht'></div>\n    <div class='tva'></div>\n    <button\n        class='btn btn-success'\n        type='submit'\n        value='submit'>\n        "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
-	    + "\n    </button>\n    <button\n        class='btn btn-default secondary-action'\n        type='reset'\n        value='submit'>\n        Annuler\n    </button>\n</form>\n";
+	    + "\n    </button>\n\n    <button\n        class='btn btn-default secondary-action'\n        type='reset'\n        value='submit'>\n        Annuler\n    </button>\n</form>\n";
 	},"useData":true});
 
 /***/ }),
@@ -8403,23 +8455,28 @@ webpackJsonp([1],[
 	},"2":function(depth0,helpers,partials,data) {
 	  return "                    <li role=\"presentation\">\n                        <a href=\"#bookmark-container\"\n                            aria-controls=\"bookmark-container\"\n                            role=\"tab\"\n                            tabindex='-1'\n                            data-toggle=\"tab\">\n                            Favoris\n                        </a>\n                    </li>\n";
 	  },"4":function(depth0,helpers,partials,data) {
-	  return "active";
+	  return "                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"mainform-container\">\n                </div>\n";
 	  },"6":function(depth0,helpers,partials,data) {
-	  return "                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane\"\n                        id=\"bookmark-container\">\n                    </div>\n";
+	  var stack1, buffer = "                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in ";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_tel_tab : depth0), {"name":"if","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "\"\n                    id=\"telform-container\">\n                </div>\n";
+	},"7":function(depth0,helpers,partials,data) {
+	  return "active";
+	  },"9":function(depth0,helpers,partials,data) {
+	  return "                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade in\"\n                        id=\"bookmark-container\">\n                    </div>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n    <div class=\"modal-content\">\n            <div class=\"modal-header\">\n              <button tabindex='-1' type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n              <h4 class=\"modal-title\">"
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "</h4>\n            </div>\n            <div class=\"modal-body\">\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in ";
+	  buffer += "            <div class='tab-content'>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_main : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "\"\n                    id=\"mainform-container\">\n                </div>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_tel : depth0), {"name":"if","hash":{},"fn":this.program(4, data),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_tel : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "\"\n                    id=\"telform-container\">\n                </div>\n";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_bookmarks : depth0), {"name":"if","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.show_bookmarks : depth0), {"name":"if","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "            </div>\n            <div class=\"modal-footer\">\n            </div>\n    </div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
 	},"useData":true});
@@ -8762,6 +8819,148 @@ webpackJsonp([1],[
 
 /***/ }),
 /* 90 */
+/*!****************************************!*\
+  !*** ./src/expense/views/TotalView.js ***!
+  \****************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 36);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TotalView = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 91),
+	    modelEvents: {
+	        'change:ttc': 'render',
+	        'change:ht': 'render',
+	        'change:tva': 'render',
+	        'change:km_ttc': 'render',
+	        'change:km': 'render'
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            ht: (0, _math.formatAmount)(this.model.get('ht')),
+	            tva: (0, _math.formatAmount)(this.model.get('tva')),
+	            ttc: (0, _math.formatAmount)(this.model.get('ttc') + this.model.get('km_ttc')),
+	            total_km: (0, _math.formatAmount)(this.model.get('km'))
+	        };
+	    }
+	}); /*
+	     * File Name : TotalView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = TotalView;
+
+/***/ }),
+/* 91 */
+/*!********************************************************!*\
+  !*** ./src/expense/views/templates/TotalView.mustache ***!
+  \********************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='totals form-section'>\n    <div class=\"text-center\">Total HT : ";
+	  stack1 = ((helper = (helper = helpers.ht || (depth0 != null ? depth0.ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ht","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</div>\n    <div class=\"text-center\">Total TVA : ";
+	  stack1 = ((helper = (helper = helpers.tva || (depth0 != null ? depth0.tva : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"tva","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</div>\n    <div class=\"text-center\">Total TTC : ";
+	  stack1 = ((helper = (helper = helpers.ttc || (depth0 != null ? depth0.ttc : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ttc","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n</div>\n";
+	},"useData":true});
+
+/***/ }),
+/* 92 */
+/*!*******************************************!*\
+  !*** ./src/expense/views/TabTotalView.js ***!
+  \*******************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _math = __webpack_require__(/*! ../../math.js */ 36);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TabTotalView = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    template: __webpack_require__(/*! ./templates/TabTotalView.mustache */ 93),
+	    modelEvents: {
+	        'change:ttc': 'render',
+	        'change:km_ttc': 'render'
+	    },
+	    templateContext: function templateContext() {
+	        return {
+	            ttc: (0, _math.formatAmount)(this.model.get('ttc') + this.model.get('km_ttc'))
+	        };
+	    }
+	}); /*
+	     * File Name : TabTotalView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = TabTotalView;
+
+/***/ }),
+/* 93 */
+/*!***********************************************************!*\
+  !*** ./src/expense/views/templates/TabTotalView.mustache ***!
+  \***********************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='totals form-section'>\n    <div class=\"text-center\">Total TTC : ";
+	  stack1 = ((helper = (helper = helpers.ttc || (depth0 != null ? depth0.ttc : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ttc","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "</div>\n</div>\n";
+	},"useData":true});
+
+/***/ }),
+/* 94 */
 /*!*******************************************************!*\
   !*** ./src/expense/views/templates/MainView.mustache ***!
   \*******************************************************/
@@ -8770,11 +8969,11 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<div class='row'>\n    <div class='col-xs-12 col-md-9'>\n        <div class='modalRegion'></div>\n        <div class='totals'></div>\n        <div class='form-section'>\n            <div class='content'>\n                <ul class=\"nav nav-tabs\" role=\"tablist\">\n                    <li role=\"presentation\" class=\"active\">\n                        <a href=\"#internal-container\"\n                            aria-controls=\"internal-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Frais\n                        </a>\n                    </li>\n                    <li role=\"presentation\">\n                        <a href=\"#activity-container\"\n                            aria-controls=\"activity-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Achats\n                        </a>\n                    </li>\n                </ul>\n                <div class='tab-content content'>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade in active\"\n                        id=\"internal-container\">\n                        <div class='internal-lines'>\n                        </div>\n                        <div class='internal-kmlines'>\n                        </div>\n                    </div>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade\"\n                        id=\"activity-container\">\n                        <div class='activity-lines'>\n                        </div>\n                        <div class='activity-kmlines'>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div\n        class='expense-desktop-actions hidden-xs hidden-sm col-md-3'\n        id=\"rightbar\"\n        >\n    </div>\n</div>\n<footer class='footer-actions'></footer>\n";
+	  return "<div class='row'>\n    <div class='col-xs-12 col-md-9 col-print-12'>\n        <div class='modalRegion'></div>\n        <div class='totals'></div>\n        <div class='form-section'>\n            <div class='content'>\n                <ul class=\"nav nav-tabs\" role=\"tablist\">\n                    <li role=\"presentation\" class=\"active\">\n                        <a href=\"#internal-container\"\n                            aria-controls=\"internal-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Frais\n                        </a>\n                    </li>\n                    <li role=\"presentation\">\n                        <a href=\"#activity-container\"\n                            aria-controls=\"activity-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Achats\n                        </a>\n                    </li>\n                </ul>\n                <div class='tab-content content'>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade in active\"\n                        id=\"internal-container\">\n                        <div class='internal-lines'>\n                        </div>\n                        <div class='internal-kmlines'>\n                        </div>\n                        <div class='internal-total'>\n                        </div>\n                    </div>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade\"\n                        id=\"activity-container\">\n                        <div class='activity-lines'>\n                        </div>\n                        <div class='activity-kmlines'>\n                        </div>\n                        <div class='activity-total'>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div\n        class='expense-desktop-actions hidden-xs hidden-sm col-md-3 hidden-print'\n        id=\"rightbar\"\n        >\n    </div>\n</div>\n<footer class='footer-actions hidden-print'></footer>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 91 */
+/* 95 */
 /*!******************************************!*\
   !*** ./src/expense/components/Facade.js ***!
   \******************************************/
@@ -8790,19 +8989,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 92);
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 96);
 	
 	var _TotalModel2 = _interopRequireDefault(_TotalModel);
 	
-	var _ExpenseCollection = __webpack_require__(/*! ../models/ExpenseCollection.js */ 93);
+	var _ExpenseCollection = __webpack_require__(/*! ../models/ExpenseCollection.js */ 97);
 	
 	var _ExpenseCollection2 = _interopRequireDefault(_ExpenseCollection);
 	
-	var _ExpenseKmCollection = __webpack_require__(/*! ../models/ExpenseKmCollection.js */ 94);
+	var _ExpenseKmCollection = __webpack_require__(/*! ../models/ExpenseKmCollection.js */ 98);
 	
 	var _ExpenseKmCollection2 = _interopRequireDefault(_ExpenseKmCollection);
 	
-	var _BookMarkCollection = __webpack_require__(/*! ../models/BookMarkCollection.js */ 95);
+	var _BookMarkCollection = __webpack_require__(/*! ../models/BookMarkCollection.js */ 99);
 	
 	var _BookMarkCollection2 = _interopRequireDefault(_BookMarkCollection);
 	
@@ -8861,6 +9060,9 @@ webpackJsonp([1],[
 	            datas['tva_' + category] = collection.total_tva(category);
 	            datas['ttc_' + category] = collection.total(category);
 	        });
+	        datas['ht'] = collection.total_ht();
+	        datas['tva'] = collection.total_tva();
+	        datas['ttc'] = collection.total();
 	        this.totalmodel.set(datas);
 	        var channel = this.getChannel();
 	        _.each(categories, function (category) {
@@ -8883,6 +9085,8 @@ webpackJsonp([1],[
 	            datas['km_' + category] = collection.total_km(category);
 	            datas['km_ttc_' + category] = collection.total(category);
 	        });
+	        datas['km'] = collection.total_km();
+	        datas['km_ttc'] = collection.total();
 	        this.totalmodel.set(datas);
 	
 	        var channel = this.getChannel();
@@ -8912,7 +9116,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 92 */
+/* 96 */
 /*!******************************************!*\
   !*** ./src/expense/models/TotalModel.js ***!
   \******************************************/
@@ -8943,7 +9147,7 @@ webpackJsonp([1],[
 	exports.default = TotalModel;
 
 /***/ }),
-/* 93 */
+/* 97 */
 /*!*************************************************!*\
   !*** ./src/expense/models/ExpenseCollection.js ***!
   \*************************************************/
@@ -9075,7 +9279,7 @@ webpackJsonp([1],[
 	exports.default = ExpenseCollection;
 
 /***/ }),
-/* 94 */
+/* 98 */
 /*!***************************************************!*\
   !*** ./src/expense/models/ExpenseKmCollection.js ***!
   \***************************************************/
@@ -9160,7 +9364,7 @@ webpackJsonp([1],[
 	exports.default = ExpenseKmCollection;
 
 /***/ }),
-/* 95 */
+/* 99 */
 /*!**************************************************!*\
   !*** ./src/expense/models/BookMarkCollection.js ***!
   \**************************************************/
@@ -9209,7 +9413,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 96 */
+/* 100 */
 /*!****************************************!*\
   !*** ./src/base/components/AuthBus.js ***!
   \****************************************/
@@ -9292,7 +9496,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 97 */
+/* 101 */
 /*!*******************************************!*\
   !*** ./src/base/components/MessageBus.js ***!
   \*******************************************/
@@ -9341,7 +9545,7 @@ webpackJsonp([1],[
 	exports.default = MessageBus;
 
 /***/ }),
-/* 98 */
+/* 102 */
 /*!******************************************!*\
   !*** ./src/base/components/ConfigBus.js ***!
   \******************************************/

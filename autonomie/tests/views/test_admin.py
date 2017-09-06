@@ -130,9 +130,9 @@ def test_base_config_view(config, dbsession, get_csrf_request_with_db):
         keys = ('test_key1', 'test_key2')
         schema = get_config_schema(keys)
         validation_msg = u"Ok"
-        redirect_path = "test"
+        redirect_route_name = "test"
 
-    config.add_route(TestView.redirect_path, '/')
+    config.add_route(TestView.redirect_route_name, '/')
 
     appstruct = {'test_key1': 'test1', 'test_wrong_key': 'test error'}
 

@@ -163,18 +163,24 @@ const MainView = Mn.View.extend({
        });
        this.showChildView('internalLines', view);
 
-       collection = this.facade.request(
-           'get:collection',
-           'kmlines'
+       var km_type_options = this.config.request(
+            'get:options',
+            'expensekm_types',
        );
-       view = new ExpenseKmTableView(
-           {
-               collection: collection,
-               category: this.categories[0],
-               edit: this.edit,
-           }
-       );
-       this.showChildView('internalKmLines', view);
+       if (km_type_options.length !== 0){
+           collection = this.facade.request(
+               'get:collection',
+               'kmlines'
+           );
+           view = new ExpenseKmTableView(
+               {
+                   collection: collection,
+                   category: this.categories[0],
+                   edit: this.edit,
+               }
+           );
+           this.showChildView('internalKmLines', view);
+       }
    },
    showActitityTab(){
        var collection = this.facade.request(
@@ -190,18 +196,24 @@ const MainView = Mn.View.extend({
        );
        this.showChildView('activityLines', view);
 
-       collection = this.facade.request(
-           'get:collection',
-           'kmlines'
+       var km_type_options = this.config.request(
+            'get:options',
+            'expensekm_types',
        );
-       view = new ExpenseKmTableView(
-           {
-               collection: collection,
-               category: this.categories[1],
-               edit: this.edit,
-           }
-       );
-       this.showChildView('activityKmLines', view);
+       if (km_type_options.length !== 0){
+           collection = this.facade.request(
+               'get:collection',
+               'kmlines'
+           );
+           view = new ExpenseKmTableView(
+               {
+                   collection: collection,
+                   category: this.categories[1],
+                   edit: this.edit,
+               }
+           );
+           this.showChildView('activityKmLines', view);
+       }
    },
    showActions(){
        var view = new RightBarView(

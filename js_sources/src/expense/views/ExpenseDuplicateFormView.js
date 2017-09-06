@@ -34,7 +34,6 @@ const ExpenseDuplicateFormView = Mn.View.extend({
         this.options = channel.request('get:options', 'expenses');
     },
     onCancelClick(){
-        console.log("on cancel click");
         this.triggerMethod('modal:close');
     },
     templateContext(){

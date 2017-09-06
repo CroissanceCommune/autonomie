@@ -60,6 +60,7 @@ const ExpenseFormPopupView = Mn.View.extend({
                 800,
                 this_.refresh.bind(this)
             );
+            modalbody.addClass('alert alert-success');
         } else {
             this.triggerMethod('modal:close');
         }
@@ -123,6 +124,7 @@ const ExpenseFormPopupView = Mn.View.extend({
         return {
             title: this.getOption('title'),
             add: this.add,
+            show_tel_tab: this.tel,
             show_tel: show_tel,
             show_bookmarks: this.add && this.bookmarks.length > 0,
             show_main: show_main,

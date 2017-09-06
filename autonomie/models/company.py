@@ -488,7 +488,10 @@ def deferred_fullcustomer_list_widget(node, kw):
 def deferred_customer_list_widget(node, kw):
     values = [('', u'Tous les clients'), ]
     company = kw['request'].context
-    values.extend(((cust.id, cust.name) for cust in company.customers))
+    for cust in company.customers:
+        values.append(
+            (cust.id, u"%s (%s)" % (cust.name, cust.code))
+        )
     return deform.widget.Select2Widget(
         values=values,
         placeholder=u'Sélectionner un client',

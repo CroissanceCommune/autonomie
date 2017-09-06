@@ -8,6 +8,10 @@ import datetime
 import colander
 import traceback
 
+from sqlalchemy import (
+    or_,
+    and_,
+)
 from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -16,6 +20,7 @@ from pyramid.httpexceptions import (
 from autonomie.models.expense import (
     ExpenseSheet,
     ExpenseType,
+    ExpenseKmType,
     ExpenseLine,
     ExpenseKmLine,
     Communication,
@@ -308,20 +313,59 @@ class RestExpenseSheetView(BaseRestView):
         form_config['options'] = options
         return form_config
 
+    def _get_expense_types_options(self, type_label, include_ids):
+        """
+        Return ExpenseType defs or ExpenseTelType available for the end user
+
+        :param str type_label: 'expense' or 'expensetel'
+        :param list include_ids: The ids of already used types
+        :returns: The list of available options
+        :rtype: list
+        """
+        query = ExpenseType.query().filter_by(type=type_label).filter(
+            or_(
+                ExpenseType.id.in_(include_ids),
+                ExpenseType.active == True
+            )
+        )
+        return query.all()
+
+    def _get_expense_km_types_options(self, include_ids):
+        """
+        Return ExpenseKm defs available for the end user
+
+        :param list include_ids: The ids of already used types
+        :returns: The list of available options
+        :rtype: list
+        """
+        query = ExpenseKmType.query().filter(
+            or_(
+                ExpenseKmType.id.in_(include_ids),
+                and_(
+                    ExpenseKmType.active == True,
+                    ExpenseKmType.year == self.context.year,
+                )
+            )
+        )
+        return query.all()
+
     def _get_type_options(self):
         # Load types already used in this expense
-        current_expenses_used_types = self._load_used_type_ids()
+        current_expenses_used_type_ids = self._load_used_type_ids()
 
         options = {
-            "expense_types": [],
-            "expensekm_types": [],
-            "expensetel_types": [],
+            "expense_types": self._get_expense_types_options(
+                'expense',
+                current_expenses_used_type_ids
+            ),
+            "expensetel_types": self._get_expense_types_options(
+                'expensetel',
+                current_expenses_used_type_ids,
+            ),
+            "expensekm_types": self._get_expense_km_types_options(
+                current_expenses_used_type_ids,
+            )
         }
-
-        for etype in ExpenseType.query():
-            if etype.id in current_expenses_used_types or etype.active:
-                key = "%s_types" % etype.type
-                options[key].append(etype)
         return options
 
     def _get_existing_expenses_options(self):

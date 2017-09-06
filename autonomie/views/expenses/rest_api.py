@@ -10,7 +10,6 @@ import traceback
 
 from sqlalchemy import (
     or_,
-    and_,
 )
 from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.httpexceptions import (
@@ -332,6 +331,21 @@ class RestExpenseSheetView(BaseRestView):
         )
         return query.all()
 
+    def _get_kmtype_ids(self):
+        """
+        Return the kmtype ids that should be presented to the end user
+        Filter the given query with the user's configured vehicle
+        """
+        query = self.request.dbsession.query(ExpenseKmType.id)
+        query = query.filter_by(active=True)
+        query = query.filter_by(year=self.context.year)
+
+        if self.context.user.vehicle:
+            label, code = self.context.user.vehicle.split('-')
+            query = query.filter_by(label=label).filter_by(code=code)
+
+        return [i[0] for i in query]
+
     def _get_expense_km_types_options(self, include_ids):
         """
         Return ExpenseKm defs available for the end user
@@ -340,13 +354,11 @@ class RestExpenseSheetView(BaseRestView):
         :returns: The list of available options
         :rtype: list
         """
+        available_ids = self._get_kmtype_ids()
         query = ExpenseKmType.query().filter(
             or_(
                 ExpenseKmType.id.in_(include_ids),
-                and_(
-                    ExpenseKmType.active == True,
-                    ExpenseKmType.year == self.context.year,
-                )
+                ExpenseKmType.id.in_(available_ids),
             )
         )
         return query.all()

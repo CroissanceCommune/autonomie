@@ -45,6 +45,9 @@ from autonomie_celery.tasks.csv_import import (
     get_csv_reader,
     get_csv_import_associator,
 )
+from autonomie_celery.tasks.utils import (
+    check_alive,
+)
 from autonomie.models.config import Config
 from autonomie_celery.models import CsvImportJob
 from autonomie_base.models.base import DBSESSION
@@ -394,6 +397,11 @@ d'Autonomie correspondant</li>"
 
         :param dict importation_datas: The datas we want to import
         """
+        service_ok, msg = check_alive()
+        if not service_ok:
+            self.request.session.flash(msg, 'error')
+            return HTTPFound(self.get_previous_step_route())
+
         log.info(u"Field association has been configured, we're going to \
 import")
         action = importation_datas['action']

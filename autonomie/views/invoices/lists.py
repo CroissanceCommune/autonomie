@@ -48,6 +48,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie_celery.tasks.export import export_to_file
 from autonomie_celery.models import FileGenerationJob
+from autonomie_celery.tasks.utils import check_alive
 from autonomie_base.models.base import (
     DBSESSION,
 )
@@ -299,6 +300,11 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
         """
         Return the streamed file object
         """
+        service_ok, msg = check_alive()
+        if not service_ok:
+            self.request.session.flash(msg, 'error')
+            return HTTPFound(self.request.referrer)
+
         logger.debug("    + In the GlobalInvoicesCsvView._build_return_value")
         job = FileGenerationJob()
         job.set_owner(self.request.user.login)
@@ -315,7 +321,6 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
             self.filename,
             self.file_format
         )
-
         logger.info(
             u"The Celery Task {0} has been delayed, its result "
             "sould be retrieved from the FileGenerationJob {1}".format(

@@ -22,10 +22,24 @@
 </%doc>
 <%doc>
 Admin menu panel
+should be called with a menus params :
+
+:param list menus: List of items
+
+Each item should provide
+:param str path:
+
+Each item could provide:
+:param str title: default ''
+:param str url_query: default {}
+:param str url_context: default {}
+:param str label: default ''
+:param str icon: default fa fa-cogs
+
 </%doc>
 <%def name="render_item(elem)">
     <li>
-    <a title='${elem.get("title")}' href="${request.route_path(elem.get('path'))}">
+    <a title='${elem.get("title")}' href="${request.route_path(elem.get('path'), _query=elem.get('url_query', {}), **elem.get('url_context', {}))}">
         <i class="${elem.get('icon') or 'fa fa-cogs'}"></i>
         ${elem.get('label', "")} <span class='help-block'>${elem.get('title', '')}</span>
     </a>

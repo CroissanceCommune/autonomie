@@ -21,12 +21,12 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%doc>
-:param str addurl: The url to the add form
+:param str addurl: The url for adding items
+:param str actions: List of actions buttons in the form [(url, label, icon, css, btn_type)]
 :param list columns: The list of columns to display
 :param list items: A list of dict {'id': <element id>, 'columns': (col1, col2), 'active': True/False}
 :param obj stream_columns: A factory producing column entries [labels]
-:param obj stream_actions: A factory producing action entries [(url, label, icon, btn_type)]
-                           btn_type is one of the known btn classes
+:param obj stream_actions: A factory producing action entries [(url, label, title, icon)]
 
 :param str warn_msg: An optionnal warning message
 :param str help_msg: An optionnal help message
@@ -36,13 +36,26 @@
 <%block name='content'>
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
+    % if widget is not UNDEFINED:
+    ${request.layout_manager.render_panel(widget)}
+    % endif
     <div class='well'>
-        <a class='btn btn-success'
+        <a class='btn btn-primary primary-action'
             href="${addurl}"
             title="Ajouter un élément à la liste"
         >
-        Ajouter
-    </a>
+        <i class="fa fa-plus-circle"></i>&nbsp;Ajouter
+        </a>
+        % if actions is not UNDEFINED:
+            % for url, label, title, icon, css in actions:
+                <a class="${css or 'btn btn-default'}"
+                    href="${url}"
+                    title="${title}"
+                    >
+                    <i class='${icon}'></i>&nbsp;${label}
+                </a>
+            % endfor
+        % endif
     </div>
     % if warn_msg is not UNDEFINED and warn_msg is not None:
         <div class="alert alert-danger">

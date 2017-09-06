@@ -30,7 +30,7 @@ import logging
 
 
 from autonomie.models.task.task import Task
-from autonomie.models.expense import ExpenseSheet
+from autonomie.models.expense.sheet import ExpenseSheet
 from autonomie.models.activity import Activity
 from autonomie.models.user import User
 

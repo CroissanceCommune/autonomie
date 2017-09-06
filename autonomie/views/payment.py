@@ -21,7 +21,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.models.task import Invoice
-from autonomie.models.expense import ExpenseSheet
+from autonomie.models.expense.sheet import ExpenseSheet
 from autonomie.forms.tasks.invoice import (
     PaymentSchema,
 )

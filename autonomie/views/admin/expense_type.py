@@ -7,7 +7,7 @@ import datetime
 from sqlalchemy import (desc, distinct)
 from pyramid.httpexceptions import HTTPFound
 from autonomie.compute.math_utils import convert_to_int
-from autonomie.models.expense import (
+from autonomie.models.expense.types import (
     ExpenseType,
     ExpenseKmType,
     ExpenseTelType,

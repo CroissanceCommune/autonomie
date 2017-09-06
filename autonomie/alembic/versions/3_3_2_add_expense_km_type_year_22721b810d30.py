@@ -24,7 +24,7 @@ def migrate_datas():
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()
-    from autonomie.models.expense import ExpenseKmType
+    from autonomie.models.expense.types import ExpenseKmType
     year = datetime.date.today().year
     for type_ in ExpenseKmType.query():
         type_.year = year

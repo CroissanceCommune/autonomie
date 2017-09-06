@@ -8,7 +8,7 @@ from pytest import fixture
 
 @fixture
 def expense_teltype(dbsession):
-    from autonomie.models.expense import ExpenseTelType
+    from autonomie.models.expense.types import ExpenseTelType
     item = ExpenseTelType(
         label="Tel expense",
         code="TEL",
@@ -24,7 +24,7 @@ def expense_teltype(dbsession):
 
 @fixture
 def expense_kmtype(dbsession):
-    from autonomie.models.expense import ExpenseKmType
+    from autonomie.models.expense.types import ExpenseKmType
     item = ExpenseKmType(
         label="KM expense",
         code="KM",
@@ -40,7 +40,7 @@ def expense_kmtype(dbsession):
 
 @fixture
 def expense_type(dbsession):
-    from autonomie.models.expense import ExpenseType
+    from autonomie.models.expense.types import ExpenseType
     item = ExpenseType(
         label="KM expense",
         code="KM",
@@ -55,7 +55,7 @@ def expense_type(dbsession):
 
 @fixture
 def expense_kmline(dbsession, expense_kmtype):
-    from autonomie.models.expense import ExpenseKmLine
+    from autonomie.models.expense.sheet import ExpenseKmLine
     item = ExpenseKmLine(
         description=u"Aller retour",
         category="1",
@@ -71,7 +71,7 @@ def expense_kmline(dbsession, expense_kmtype):
 
 @fixture
 def expense_telline(dbsession, expense_teltype):
-    from autonomie.models.expense import ExpenseLine
+    from autonomie.models.expense.sheet import ExpenseLine
     item = ExpenseLine(
         description=u"Test expense",
         category="1",
@@ -86,7 +86,7 @@ def expense_telline(dbsession, expense_teltype):
 
 @fixture
 def expense_line(dbsession, expense_type):
-    from autonomie.models.expense import ExpenseLine
+    from autonomie.models.expense.sheet import ExpenseLine
     item = ExpenseLine(
         description=u"Test expense",
         category="2",
@@ -105,7 +105,7 @@ def expense_sheet(
     company,
     user,
 ):
-    from autonomie.models.expense import ExpenseSheet
+    from autonomie.models.expense.sheet import ExpenseSheet
     item = ExpenseSheet(
         month=10,
         year=2015,

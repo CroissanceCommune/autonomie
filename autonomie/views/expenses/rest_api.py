@@ -17,13 +17,15 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
 )
 
-from autonomie.models.expense import (
+from autonomie.models.expense.sheet import (
     ExpenseSheet,
-    ExpenseType,
-    ExpenseKmType,
     ExpenseLine,
     ExpenseKmLine,
     Communication,
+)
+from autonomie.models.expense.types import (
+    ExpenseType,
+    ExpenseKmType,
 )
 from autonomie.utils import strings
 from autonomie.utils.rest import (

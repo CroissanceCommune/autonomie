@@ -42,9 +42,11 @@ from string import ascii_uppercase
 
 from sqla_inspect.excel import XlsWriter
 from autonomie.compute.math_utils import integer_to_amount
-from autonomie.models.expense import ExpenseType
-from autonomie.models.expense import ExpenseKmType
-from autonomie.models.expense import ExpenseTelType
+from autonomie.models.expense.types import (
+    ExpenseType,
+    ExpenseKmType,
+    ExpenseTelType,
+)
 from autonomie.export.utils import write_file_to_request
 
 

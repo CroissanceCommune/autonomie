@@ -64,7 +64,7 @@ def deferred_type_id_validator(node, kw):
     """
         Return a validator for the expensetype
     """
-    from autonomie.models.expense import ExpenseType
+    from autonomie.models.expense.types import ExpenseType
     ids = [t.id for t in ExpenseType.query()]
     return colander.OneOf(ids)
 
@@ -155,7 +155,7 @@ class BookMarkSchema(colander.MappingSchema):
 
 
 def get_list_schema():
-    from autonomie.models.expense import get_expense_years
+    from autonomie.models.expense.sheet import get_expense_years
 
     schema = forms.lists.BaseListsSchema().clone()
 
@@ -258,7 +258,7 @@ def get_new_expense_schema():
 
     :rtype: colanderalchemy.SQLAlchemySchemaNode
     """
-    from autonomie.models.expense import ExpenseSheet
+    from autonomie.models.expense.sheet import ExpenseSheet
     return SQLAlchemySchemaNode(
         ExpenseSheet,
         includes=('month', 'year'),

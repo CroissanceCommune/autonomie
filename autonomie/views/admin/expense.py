@@ -26,7 +26,7 @@ from autonomie.views.admin.tools import (
 from autonomie.forms.admin import (
     get_config_schema,
 )
-from autonomie.models.expense import (
+from autonomie.models.expense.types import (
     ExpenseType,
     ExpenseKmType,
     ExpenseTelType,

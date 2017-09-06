@@ -307,7 +307,7 @@ def _upgrade_estimations(session):
 
 
 def _upgrade_expenses(session):
-    from autonomie.models.expense import ExpenseSheet
+    from autonomie.models.expense.sheet import ExpenseSheet
     for expense in ExpenseSheet.query():
         status_date = expense.status_date
 

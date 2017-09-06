@@ -48,11 +48,9 @@ from autonomie.export.sage import (
 )
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils.widgets import ViewLink
-from autonomie.models.expense import (
-    ExpenseSheet,
-    ExpenseType,
-    ExpensePayment,
-)
+from autonomie.models.expense.sheet import ExpenseSheet
+from autonomie.models.expense.types import ExpenseType
+from autonomie.models.expense.payment import ExpensePayment
 from autonomie.models.task import (
     Task,
     Invoice,

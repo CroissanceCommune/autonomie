@@ -148,6 +148,24 @@ CLEAN_MAPPING_WIDGET = deform.widget.MappingWidget(
 )
 
 
+def get_vehicle_widget():
+    """
+    Return a select widget for vehicle configuration
+
+    :returns: A deferred widget
+    :rtype: colander.deferred
+    """
+    from autonomie.models.expense.types import ExpenseKmType
+    return get_deferred_select(
+        ExpenseKmType,
+        keys=(
+            lambda a: u"%s-%s".format(a.label, a.code),
+            lambda a: u"%s (%s)".format(a.label, a.code)
+        ),
+        filters=[('active', True)]
+    )
+
+
 class Group(DBBASE):
     """
     Available groups used in autonomie
@@ -304,6 +322,25 @@ class User(DBBASE, PersistentACLMixin):
             default="",
         ),
         group="edit",
+    )
+
+    vehicle = deferred(
+        Column(
+            String(66),  # 50 + 1 + 15
+            nullable=True,
+            info={
+                'colanderalchemy':
+                {
+                    'title': u'Type de véhicule',
+                    'description': (
+                        u"Permet de restreindre les frais "
+                        u"kilométriques déclarables par l'entrepreneur"
+                    ),
+                    'widget': get_vehicle_widget()
+
+                }
+            },
+        )
     )
 
     session_datas = deferred(

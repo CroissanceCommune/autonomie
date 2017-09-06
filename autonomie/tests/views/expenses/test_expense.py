@@ -86,7 +86,7 @@ def test_duplicate(
     result = view.__call__()
     assert result.location != "/{id}".format(id=full_expense_sheet.id)
 
-    from autonomie.models.expense import ExpenseSheet
+    from autonomie.models.expense.sheet import ExpenseSheet
     id = int(result.location[1:])
     new_sheet = ExpenseSheet.get(id)
     assert new_sheet.month == 10

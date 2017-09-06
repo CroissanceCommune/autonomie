@@ -70,12 +70,13 @@ from autonomie.models.workshop import (
     Workshop,
     Timeslot,
 )
-from autonomie.models.expense import (
+from autonomie.models.expense.sheet import (
     ExpenseSheet,
-    ExpensePayment,
     BaseExpenseLine,
-    ExpenseType,
 )
+from autonomie.models.expense.payment import ExpensePayment
+from autonomie.models.expense.types import ExpenseType
+
 from autonomie.models.user import (
     User,
     UserDatas,

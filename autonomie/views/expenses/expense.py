@@ -39,11 +39,13 @@ from autonomie.forms.expense import (
 )
 from autonomie.utils import strings
 from autonomie.models.company import Company
-from autonomie.models.expense import (
-    ExpenseTelType,
+from autonomie.models.expense.sheet import (
     ExpenseLine,
     ExpenseSheet,
     get_expense_sheet_name,
+)
+from autonomie.models.expense.types import (
+    ExpenseTelType,
 )
 from autonomie.events.expense import StatusChanged as ExpenseStatusChanged
 from autonomie.utils.widgets import (

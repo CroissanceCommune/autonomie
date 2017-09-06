@@ -10,8 +10,8 @@ import deform
 from collections import OrderedDict
 
 from autonomie.models.user import User
-from autonomie.models.expense import (
-    ExpenseSheet,
+from autonomie.models.expense.sheet import ExpenseSheet
+from autonomie.models.expense.types import (
     ExpenseType,
     ExpenseKmType,
     ExpenseTelType,

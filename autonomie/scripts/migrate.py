@@ -187,8 +187,9 @@ def list_all():
     """
     pkg_env = PackageEnvironment(DEFAULT_LOCATION)
     print(u'{0}:'.format(pkg_env.pkg_name))
-
-    for script in pkg_env.script_dir.walk_revisions():
+    revisions = list(pkg_env.script_dir.walk_revisions())
+    revisions.reverse()
+    for script in revisions:
         print(u"  - {0} -> {1}: {2}".format(
             script.down_revision,
             script.revision,

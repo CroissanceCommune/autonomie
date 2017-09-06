@@ -27,19 +27,24 @@ should be called with a menus params :
 :param list menus: List of items
 
 Each item should provide
-:param str path:
+:param str route_name:
+or
+:param str url: The url string
 
 Each item could provide:
 :param str title: default ''
-:param str url_query: default {}
-:param str url_context: default {}
 :param str label: default ''
 :param str icon: default fa fa-cogs
 
 </%doc>
 <%def name="render_item(elem)">
     <li>
-    <a title='${elem.get("title")}' href="${request.route_path(elem.get('path'), _query=elem.get('url_query', {}), **elem.get('url_context', {}))}">
+    % if 'route_name' in elem:
+    <% url = request.route_path(elem['route_name']) %>
+    % else:
+    <% url = elem['url'] %>
+    % endif
+    <a title='${elem.get("title")}' href="${url}">
         <i class="${elem.get('icon') or 'fa fa-cogs'}"></i>
         ${elem.get('label', "")} <span class='help-block'>${elem.get('title', '')}</span>
     </a>

@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 class BaseAdminFormView(BaseFormView):
     add_template_vars = ('menus', 'message')
-    redirect_path = "admin_index"
+    redirect_route_name = "admin_index"
     info_message = ""
 
     @property
@@ -49,7 +49,7 @@ class BaseAdminFormView(BaseFormView):
 
     @property
     def menus(self):
-        return [dict(label=u"Retour", path=self.redirect_path,
+        return [dict(label=u"Retour", route_name=self.redirect_route_name,
                      icon="fa fa-step-backward")]
 
 
@@ -60,7 +60,7 @@ class BaseConfigView(BaseAdminFormView):
     keys = ()
     validation_msg = u""
     schema = None
-    redirect_path = None
+    redirect_route_name = None
 
     def before(self, form):
         appstruct = build_config_appstruct(self.request, self.keys)
@@ -86,8 +86,8 @@ class BaseConfigView(BaseAdminFormView):
             logger.debug(u"{0} : {1}".format(key, value))
 
         self.request.session.flash(self.validation_msg)
-        if self.redirect_path is not None:
-            return HTTPFound(self.request.route_path(self.redirect_path))
+        if self.redirect_route_name is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route_name))
         else:
             return HTTPFound(self.request.current_route_path())
 
@@ -111,7 +111,7 @@ class AdminOption(BaseAdminFormView):
 
             The message shown to the end user on successfull validation
 
-        redirect_path
+        redirect_route_name
 
             The route we're redirecting to after successfull validation
 
@@ -242,7 +242,7 @@ class AdminOption(BaseAdminFormView):
             self._add_or_edit(index, datas)
 
         self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.request.route_path(self.redirect_path))
+        return HTTPFound(self.request.route_path(self.redirect_route_name))
 
 
 def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
@@ -257,7 +257,7 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
         title = view_title
         validation_msg = infos.get('validation_msg', u'')
         factory = model
-        redirect_path = r_path
+        redirect_route_name = r_path
         js_resources = js_requirements
     return (
         MyView,
@@ -283,9 +283,9 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
         The dinamycally built view
         """
         menus = []
-        menus.append(dict(label=u"Retour", path=parent_route,
+        menus.append(dict(label=u"Retour", route_name=parent_route,
                           icon="fa fa-step-backward"))
         for view, route_name, tmpl in views_to_link_to:
-            menus.append(dict(label=view.title, path=route_name,))
+            menus.append(dict(label=view.title, route_name=route_name,))
         return dict(title=title, menus=menus)
     return myview

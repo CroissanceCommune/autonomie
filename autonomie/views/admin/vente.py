@@ -132,7 +132,7 @@ class AdminVenteTreasuryMain(BaseConfigView):
 modules prédéfinis"
     description = u"Configuration du code journal et des modules prédéfinis \
 (Export des factures, contribution à la CAE, RG Externe, RG Interne)"
-    redirect_path = "admin_vente_treasury"
+    redirect_route_name = "admin_vente_treasury"
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = (
         'code_journal',
@@ -200,7 +200,7 @@ class MainReceiptsConfig(BaseConfigView):
 configuré"
     message = u"Configurer l'export des encaissements (le code journal \
 utilisé est celui de la banque associé à chaque encaissement)"
-    redirect_path = "admin_receipts"
+    redirect_route_name = "admin_receipts"
 
 
 def admin_vente_index_view(request):
@@ -254,7 +254,7 @@ aux encaissements",
             "",
         )
     ):
-        menus.append(dict(label=label, path=route, title=title, icon=icon))
+        menus.append(dict(label=label, route_name=route, title=title, icon=icon))
     return dict(title=u"Configuration du module Ventes", menus=menus)
 
 
@@ -275,7 +275,7 @@ def admin_vente_treasury_index_view(request):
             ""
         ),
     ):
-        menus.append(dict(label=label, path=route, title=title, icon=icon))
+        menus.append(dict(label=label, route_name=route, title=title, icon=icon))
     return dict(title=u"Configuration comptable du module Ventes", menus=menus)
 
 

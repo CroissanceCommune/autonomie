@@ -67,7 +67,7 @@ class AdminExpense(BaseConfigView):
     schema = get_config_schema(keys)
     validation_msg = u"L'export comptable des notes de dépense a bien été \
 configuré"
-    redirect_path = "admin_expense"
+    redirect_route_name = "admin_expense"
 
 
 class AdminExpensePaymentExport(BaseConfigView):
@@ -81,7 +81,7 @@ class AdminExpensePaymentExport(BaseConfigView):
     schema = get_config_schema(keys)
     validation_msg = u"L'export comptable des décaissements a bien été \
 configuré"
-    redirect_path = "admin_expense"
+    redirect_route_name = "admin_expense"
 
 
 
@@ -127,7 +127,7 @@ décaissements (abandons de créance, code tva ...)",
         ),
     ):
         menus.append(
-            dict(label=label, path=route, icon=icon, title=description)
+            dict(label=label, route_name=route, icon=icon, title=description)
         )
     return dict(title=u"Configuration du module Notes de dépense", menus=menus)
 

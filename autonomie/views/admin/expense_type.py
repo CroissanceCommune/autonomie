@@ -11,7 +11,6 @@ from autonomie.models.expense import (
     ExpenseType,
     ExpenseKmType,
     ExpenseTelType,
-    ExpenseSheet,
 )
 
 from autonomie.views import (
@@ -48,7 +47,7 @@ class ExpenseKmTypesIndexView(BaseView):
         return [
             dict(
                 label=u"Retour",
-                path="admin_expense",
+                route_name="admin_expense",
                 icon="fa fa-step-backward"
             )
         ]
@@ -146,7 +145,7 @@ class ExpenseTypeListView(BaseView):
                 u"",
             )
 
-    def _load_items(self):
+    def _load_items(self, year=None):
         """
         Return the sqlalchemy models representing current queried elements
         :rtype: SQLAlchemy.Query object
@@ -169,7 +168,7 @@ class ExpenseTypeListView(BaseView):
         return [
             dict(
                 label=u"Retour",
-                path="admin_expense",
+                route_name="admin_expense",
                 icon="fa fa-step-backward"
             )
         ]
@@ -234,7 +233,7 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         return [
             dict(
                 label=u"Retour",
-                path="/admin/expenses/expensekm/",
+                route_name="/admin/expenses/expensekm/",
                 icon="fa fa-step-backward"
             ),
         ]
@@ -247,14 +246,15 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         )
         return title
 
-    def _load_items(self):
+    def _load_items(self, year=None):
         """
         Load the items we will display
 
         :returns: A SQLAlchemy query
         """
         query = ExpenseTypeListView._load_items(self)
-        year = _get_year_from_request(self.request)
+        if year is None:
+            year = _get_year_from_request(self.request)
         query = query.filter_by(year=year)
         return query
 
@@ -271,6 +271,14 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
             _query={'action': 'duplicate'}
         )
 
+    def _get_duplicate_from_previous_url(self):
+        """
+        Return the duplicate from previous url
+        """
+        return self.request.current_route_path(
+            _query={'action': 'duplicate', 'from_previous': '1'}
+        )
+
     def _get_actions(self, items):
         """
         Return the description of additionnal main actions buttons
@@ -279,8 +287,10 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         """
         current_year = datetime.date.today().year
         year = _get_year_from_request(self.request)
+
+        # if we've got datas and we're not in the last year
         if items.count() > 0 and year != current_year + 1:
-            yield(
+            yield (
                 self._get_duplicate_url(),
                 u"Dupliquer cette grille vers l'année suivante "
                 u"(%s)" % (year + 1),
@@ -288,6 +298,18 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
                 u"fa fa-copy",
                 u"btn btn-default"
             )
+
+        # If previous year there were some datas configured
+        if self._load_items(year - 1).count() > 0:
+            yield (
+                self._get_duplicate_from_previous_url(),
+                u"Recopier la grille de l'année précédente "
+                u"(%s)" % (year - 1),
+                "",
+                u"fa fa-copy",
+                u"btn btn-default"
+            )
+
 
 class ExpenseTelTypeListView(ExpenseTypeListView):
     columns = [
@@ -356,7 +378,7 @@ class ExpenseTypeAddView(BaseAddView):
         return [
             dict(
                 label=u"Retour",
-                path="/admin/expenses/%s" % (self.get_type()),
+                route_name="/admin/expenses/%s" % (self.get_type()),
                 icon="fa fa-step-backward"
             )
         ]
@@ -387,9 +409,11 @@ class ExpenseKmTypeAddView(ExpenseTypeAddView):
         return [
             dict(
                 label=u"Retour",
-                path="/admin/expenses/%s" % (self.get_type()),
+                url=self.request.route_path(
+                    "/admin/expenses/expensekm",
+                    year=_get_year_from_request(self.request)
+                ),
                 icon="fa fa-step-backward",
-                url_context={'year': _get_year_from_request(self.request)}
             )
         ]
 
@@ -418,7 +442,7 @@ class ExpenseTypeEditView(BaseEditView):
         return [
             dict(
                 label=u"Retour",
-                path="/admin/expenses/%s" % (self.get_type()),
+                route_name="/admin/expenses/%s" % (self.get_type()),
                 icon="fa fa-step-backward"
             )
         ]
@@ -441,9 +465,11 @@ class ExpenseKmTypeEditView(ExpenseTypeEditView):
         return [
             dict(
                 label=u"Retour",
-                path="/admin/expenses/%s" % (self.get_type()),
                 icon="fa fa-step-backward",
-                url_context={'year': _get_year_from_request(self.request)},
+                url=self.request.route_path(
+                    "/admin/expenses/expensekm",
+                    year=_get_year_from_request(self.request)
+                ),
             )
         ]
 
@@ -453,27 +479,40 @@ class ExpenseTelTypeEditView(ExpenseTypeEditView):
     schema = get_admin_schema(ExpenseTelType)
 
 
-class ExpenseKmTypesDuplicateView(ExpenseKmTypeListView):
+class ExpenseKmTypesDuplicateView(BaseView):
     """
     Expense km list Duplication view
+
+    Allows to duplicate :
+        to next (default)
+
+        from previous (if 'from_previous' is set in the GET params
     """
+    def _load_items(self, year):
+        query = ExpenseKmType.query().filter_by(active=True)
+        return query.filter_by(year=year)
+
     def __call__(self):
-        year = _get_year_from_request(self.request)
-        new_year = year + 1
-        for item in self._load_items():
+        if 'from_previous' in self.request.GET:
+            new_year = _get_year_from_request(self.request)
+            year = new_year - 1
+            msg = u"Les données ont bien été réprises"
+        else:
+            year = _get_year_from_request(self.request)
+            new_year = year + 1
+            msg = (
+                u"Vous avez été redirigé vers la grille des frais de "
+                u"l'année %s" % (new_year,)
+            )
+
+        for item in self._load_items(year):
             new_item = item.duplicate(new_year)
             self.request.dbsession.merge(new_item)
-        self.request.session.flash(
-            u"Vous avez été redirigé vers la grille des frais de l'année %s" % (
-                new_year,
-            )
-        )
+        self.request.session.flash(msg)
         return HTTPFound(
-            self.request.current_route_path(
-                _query={},
-                year=new_year
-            )
+            self.request.current_route_path(_query={}, year=new_year)
         )
+
 
 def add_routes(config):
     """

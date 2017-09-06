@@ -110,7 +110,7 @@ def index(request):
     menus.append(
         dict(
             label=u"Configuration générale",
-            path='admin_main',
+            route_name='admin_main',
             title=u"Message d'accueil, logos, entête et pieds de page des \
 devis, factures / avoir)"
         )
@@ -118,14 +118,14 @@ devis, factures / avoir)"
     menus.append(
         dict(
             label=u"Configuration du module Ventes",
-            path="admin_vente",
+            route_name="admin_vente",
             title=u"Mentions des devis et factures, unité de prestation ...",
         )
     )
     menus.append(
         dict(
             label=u"Configuration du module Notes de dépense",
-            path="admin_expense",
+            route_name="admin_expense",
             title=u"Configuration des types de dépense, des \
 différents comptes analytiques liés au module notes de dépense et à leur export"
         )
@@ -133,14 +133,14 @@ différents comptes analytiques liés au module notes de dépense et à leur exp
     menus.append(
         dict(
             label=u"Configuration du module Accompagnement",
-            path="admin_accompagnement",
+            route_name="admin_accompagnement",
             title=u"Ateliers, Rendez-vous, Compétences"
         )
     )
     menus.append(
         dict(
             label=u"Configuration du module Gestion Sociale",
-            path='admin_userdatas',
+            route_name='admin_userdatas',
             title=u"Typologie des données, modèles de documents",
         )
     )
@@ -148,7 +148,7 @@ différents comptes analytiques liés au module notes de dépense et à leur exp
         dict(
             label=u"Configuration des domaines d'activité des entreprises \
 de la CAE",
-            path="admin_company_activity",
+            route_name="admin_company_activity",
         )
     )
     return dict(title=u"Configuration du site", menus=menus)
@@ -370,7 +370,7 @@ class AdminActivities(BaseAdminActivities):
     """
     title = u"Configuration du module de Rendez-vous"
     schema = ActivityConfigSchema(title=u"")
-    redirect_path = "admin_accompagnement"
+    redirect_route_name = "admin_accompagnement"
 
     def before(self, form):
         query = ActivityType.query()
@@ -418,7 +418,7 @@ class AdminWorkshop(BaseAdminActivities):
     """
     title = u"Configuration du module Atelier"
     schema = WorkshopConfigSchema(title=u"")
-    redirect_path = "admin_accompagnement"
+    redirect_route_name = "admin_accompagnement"
 
     def before(self, form):
         """
@@ -462,7 +462,7 @@ class TemplateUploadView(FileUploadView):
 
     @property
     def menus(self):
-        return [dict(label=u'Retour', path='templates',
+        return [dict(label=u'Retour', route_name='templates',
                      icon="fa fa-step-backward")]
 
     def before(self, form):
@@ -484,7 +484,7 @@ class TemplateEditView(FileEditView):
 
     @property
     def menus(self):
-        return [dict(label=u'Retour', path='templates',
+        return [dict(label=u'Retour', route_name='templates',
                      icon="fa fa-step-backward")]
 
     def before(self, form):
@@ -498,7 +498,7 @@ class TemplateList(BaseView):
     title = u"Modèles de documents"
 
     def __call__(self):
-        menus = [dict(label=u"Retour", path="admin_userdatas",
+        menus = [dict(label=u"Retour", route_name="admin_userdatas",
                       icon="fa fa-step-backward")]
 
         templates = files.Template.query()\
@@ -553,7 +553,7 @@ def console_view(request):
         (u"Tâches celery", 'jobs',),
     ):
         menus.append(
-            dict(label=label, path=route, title=label)
+            dict(label=label, route_name=route, title=label)
         )
     return dict(title=u"Console de supervision", menus=menus)
 
@@ -567,7 +567,7 @@ def admin_accompagnement_index_view(request):
         (u"Configuration du module Compétences", "admin_competences", ''),
     ):
         menus.append(
-            dict(label=label, path=route, icon=icon)
+            dict(label=label, route_name=route, icon=icon)
         )
     return dict(title=u"Configuration du module accompagnement", menus=menus)
 

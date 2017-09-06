@@ -93,7 +93,7 @@ Tva par défaut"
             )
 
     def __call__(self):
-        menus = [dict(label=u"Retour", path="admin_vente",
+        menus = [dict(label=u"Retour", route_name="admin_vente",
                       icon="fa fa-step-backward")]
         columns = [
             u"Libellé", u"Valeur", u"Compte CG de TVA", u"Défaut ?"
@@ -141,7 +141,7 @@ class TvaEditView(BaseEditView):
     menus = [
         dict(
             label=u"Retour",
-            path="/admin/vente/tvas",
+            route_name="/admin/vente/tvas",
             icon="fa fa-step-backward"
         )
     ]
@@ -159,7 +159,7 @@ class TvaAddView(BaseAddView):
     menus = [
         dict(
             label=u"Retour",
-            path="/admin/vente/tvas",
+            route_name="/admin/vente/tvas",
             icon="fa fa-step-backward"
         )
     ]

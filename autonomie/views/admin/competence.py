@@ -82,7 +82,7 @@ class AdminCompetenceOption(main_admin_class):
     """
     competence and subcompetence configuration
     """
-    redirect_path = "admin_competences"
+    redirect_route_name = "admin_competences"
     _schema = get_sequence_model_admin(
         CompetenceOption,
         excludes=('requirements',),
@@ -93,7 +93,7 @@ class AdminCompetenceRequirement(req_admin_class):
     """
     Requirements configuration
     """
-    redirect_path = "admin_competences"
+    redirect_route_name = "admin_competences"
     _schema = get_requirement_admin_schema()
 
     def before(self, form):
@@ -153,7 +153,7 @@ class AdminCompetencePrintOutput(BaseAdminFormView):
     title = u"Configuration de la sortie imprimable"
     validation_msg = u"Vos données ont bien été enregistrées"
     schema = CompetencePrintConfigSchema(title=u"")
-    redirect_path = "admin_competences"
+    redirect_route_name = "admin_competences"
 
     def before(self, form):
         appstruct = {}
@@ -198,7 +198,7 @@ def admin_competence_index_view(request):
             'admin_competence_print', ""
         )
     ):
-        menus.append(dict(label=label, path=route, icon=icon))
+        menus.append(dict(label=label, route_name=route, icon=icon))
     return dict(title=u"Configuration du module Compétences", menus=menus)
 
 

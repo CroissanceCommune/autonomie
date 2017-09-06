@@ -582,10 +582,10 @@ class BaseAddView(BaseFormView):
         if self.msg:
             self.request.session.flash(self.msg)
 
-        if self.redirect_route is not None:
-            return HTTPFound(self.request.route_path(self.redirect_route))
-        elif hasattr(self, 'redirect'):
+        if hasattr(self, 'redirect'):
             return self.redirect(new_model)
+        elif self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
 
 
 class BaseEditView(BaseFormView):

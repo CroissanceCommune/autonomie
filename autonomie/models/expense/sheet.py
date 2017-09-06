@@ -86,7 +86,7 @@ def get_available_years():
     """
     Return the available years for ExpenseSheet creation
     """
-    from autonomie.models.expense import ExpenseSheet
+    from autonomie.models.expense.sheet import ExpenseSheet
     years = [i[0] for i in DBSESSION().query(distinct(ExpenseSheet.year))]
     today = datetime.date.today()
     for i in (today.year - 1, today.year, today.year + 1):
@@ -187,7 +187,7 @@ def deferred_unique_expense(node, kw):
     """
     Return a validator to check if the expense is unique
     """
-    from autonomie.models.expense import ExpenseSheet
+    from autonomie.models.expense.sheet import ExpenseSheet
     request = kw['request']
     if isinstance(request.context, ExpenseSheet):
         company_id = request.context.company_id

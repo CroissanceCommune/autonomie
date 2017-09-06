@@ -74,6 +74,7 @@ from autonomie.models.expense import (
     ExpenseSheet,
     ExpensePayment,
     BaseExpenseLine,
+    ExpenseType,
 )
 from autonomie.models.user import (
     User,
@@ -139,6 +140,7 @@ class RootFactory(dict):
             ('estimations', 'estimation', Estimation, ),
             ('expenses', 'expense', ExpenseSheet, ),
             ("expenselines", "expenseline", BaseExpenseLine,),
+            ("expense_types", "expense_type", ExpenseType,),
             ('expense_payments', 'expense_payment', ExpensePayment, ),
             ('files', 'file', File, ),
             ('invoices', 'invoice', Invoice, ),
@@ -793,3 +795,4 @@ def set_models_acl():
 
     Tva.__acl__ = property(get_base_acl)
     BaseExpenseLine.__acl__ = property(get_expenseline_acl)
+    ExpenseType.__acl__ = property(get_base_acl)

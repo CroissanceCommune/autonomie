@@ -3,12 +3,15 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-from sqlalchemy import desc
+import datetime
+from sqlalchemy import (desc, distinct)
 
+from autonomie.compute.math_utils import convert_to_int
 from autonomie.models.expense import (
     ExpenseType,
     ExpenseKmType,
     ExpenseTelType,
+    ExpenseSheet,
 )
 
 from autonomie.views import (
@@ -17,7 +20,6 @@ from autonomie.views import (
     BaseAddView,
     BaseEditView,
 )
-from autonomie.views import render_api
 from autonomie.forms.admin import get_admin_schema
 TEMPLATES_URL = 'autonomie:deform_templates/'
 
@@ -51,7 +53,7 @@ class ExpenseTypeListView(BaseView):
             query = {'action': action}
 
         return self.request.route_path(
-            "/admin/expenses/%s/" % self.get_type(),
+            "/admin/expenses/%s/{id}" % self.get_type(),
             id=expense_type.id,
             _query=query
         )
@@ -83,15 +85,39 @@ class ExpenseTypeListView(BaseView):
                 u"",
             )
 
-    def __call__(self):
-        menus = [dict(label=u"Retour", path="admin_expense",
-                      icon="fa fa-step-backward")]
-
+    def _load_items(self):
+        """
+        Return the sqlalchemy models representing current queried elements
+        """
         items = self.factory.query().filter(
             self.factory.type == self.get_type()
-        ).order_by(desc(self.factory.active)).all()
+        ).order_by(desc(self.factory.active))
+        return items
 
-        return dict(
+    def _more_template_vars(self, result):
+        """
+        Hook allowing to add datas to the templating context
+        """
+        return result
+
+    def _get_menus(self):
+        """
+        Return the menu entries
+        """
+        return [
+            dict(
+                label=u"Retour",
+                path="admin_expense",
+                icon="fa fa-step-backward"
+            )
+        ]
+
+    def __call__(self):
+        menus = self._get_menus()
+
+        items = self._load_items()
+
+        result = dict(
             items=items,
             columns=self.columns,
             stream_columns=self.stream_columns,
@@ -103,6 +129,62 @@ class ExpenseTypeListView(BaseView):
                 _query=dict(action="new")
             ),
         )
+        self._more_template_vars(result)
+        return result
+
+
+class ExpenseKmTypesIndexView(BaseView):
+    """
+    Entry point to the km expense types configuration
+    """
+
+    def _get_menus(self):
+        """
+        Return the menu entries
+        """
+        return [
+            dict(
+                label=u"Retour",
+                path="admin_expense",
+                icon="fa fa-step-backward"
+            )
+        ]
+
+    def _get_year_options(self):
+        """
+        Return the year selection options to be provided
+        """
+        years = [
+            a[0]
+            for a in self.request.dbsession.query(
+                distinct(ExpenseSheet.year)
+            )
+            if a[0]
+        ]
+        years.extend(
+            [
+                a[0]
+                for a in self.request.dbsession.query(
+                    distinct(ExpenseKmType.year)
+                )
+                if a[0]
+            ]
+        )
+        today = datetime.date.today()
+        years.append(today.year)
+        years.append(today.year + 1)
+
+        years = list(set(years))
+        years.sort()
+        return years
+
+    def __call__(self):
+        return dict(
+            years=self._get_year_options(),
+            menus=self._get_menus(),
+            admin_path="/admin/expenses/expensekm",
+            title=u"Configuration des frais kilométriques"
+        )
 
 
 class ExpenseKmTypeListView(ExpenseTypeListView):
@@ -112,15 +194,47 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         u"Indemnité kilométrique"
     ]
 
-    title = u"Configuration des types de dépenses kilométriques"
     factory = ExpenseKmType
+
+    def _get_year(self):
+        today = datetime.date.today()
+        year = today.year
+        if 'year' in self.request.GET:
+            year = self.request.GET.get('year')
+            year = convert_to_int(year, today.year)
+
+        return year
+
+    def _get_menus(self):
+        """
+        Return the menu entries
+        """
+        return [
+            dict(
+                label=u"Retour",
+                path="/admin/expenses/expensekm/",
+                icon="fa fa-step-backward"
+            )
+        ]
+
+    @property
+    def title(self):
+        title = (
+            u"Configuration des types de dépenses kilométriques pour "
+            u"l'année {0}".format(self._get_year())
+        )
+        return title
+
+    def _load_items(self):
+        query = ExpenseTypeListView._load_items(self)
+        year = self._get_year()
+        query = query.filter_by(year=year)
+        return query
 
     def stream_columns(self, expense_type):
         yield expense_type.label or u"Non renseigné"
         yield expense_type.code or "Aucun"
-        yield u"%s €/km" % (
-            expense_type.amount or 0
-        )
+        yield u"%s €/km" % (expense_type.amount or 0)
 
 
 class ExpenseTelTypeListView(ExpenseTypeListView):
@@ -241,12 +355,17 @@ def add_routes(config):
         type_label = factory.__mapper_args__['polymorphic_identity']
         path = "/admin/expenses/%s" % (type_label)
         config.add_route(path, path)
-        path = "/admin/expenses/%s/" % (type_label)
+        path = "/admin/expenses/%s/{id}" % (type_label)
         config.add_route(
             path,
-            '%s{id}' % path,
-            traverse="/expense_types_%ss/{id}" % type_label,
+            path,
+            traverse="/expense_types/{id}",
         )
+
+    config.add_route(
+        '/admin/expenses/expensekm/',
+        "/admin/expenses/expensekm/"
+    )
 
 
 def includeme(config):
@@ -284,7 +403,7 @@ def includeme(config):
     ):
         config.add_view(
             disable_class,
-            route_name="/admin/expenses/%s/" % disable_class.get_type(),
+            route_name="/admin/expenses/%s/{id}" % disable_class.get_type(),
             request_param="action=disable",
             permission="admin",
         )
@@ -296,7 +415,14 @@ def includeme(config):
     ):
         config.add_view(
             edit_class,
-            route_name="/admin/expenses/%s/" % edit_class.get_type(),
+            route_name="/admin/expenses/%s/{id}" % edit_class.get_type(),
             permission="admin",
             renderer='admin/crud_add_edit.mako',
         )
+
+    config.add_view(
+        ExpenseKmTypesIndexView,
+        route_name="/admin/expenses/expensekm/",
+        permission="admin",
+        renderer='admin/expense_km_index.mako',
+    )

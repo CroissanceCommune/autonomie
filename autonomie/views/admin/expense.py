@@ -98,7 +98,7 @@ ainsi que des informations comptables associées",
         ),
         (
             u"Configuration des types de dépénses kilométriques",
-            "/admin/expenses/expensekm",
+            "/admin/expenses/expensekm/",
             "",
             u"Configuration des types de dépenses liées aux déplacements \
 proposés dans l'interface ainsi que des informations comptables associées",

@@ -19,13 +19,15 @@ const TotalView = Mn.View.extend({
         'change:ttc': 'render',
         'change:ht': 'render',
         'change:tva': 'render',
+        'change:km_ht': 'render',
+        'change:km_tva': 'render',
         'change:km_ttc': 'render',
         'change:km': 'render',
     },
     templateContext(){
         return {
-            ht: formatAmount(this.model.get('ht')),
-            tva: formatAmount(this.model.get('tva')),
+            ht: formatAmount(this.model.get('ht') + this.model.get('km_ht')),
+            tva: formatAmount(this.model.get('tva') + this.model.get('km_tva')),
             ttc: formatAmount(
                 this.model.get('ttc') + this.model.get('km_ttc')
             ),

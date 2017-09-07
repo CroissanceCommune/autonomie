@@ -5047,6 +5047,12 @@ webpackJsonp([1],[
 	    }
 	    return parseFloat(elem.amount);
 	  },
+	  getHT: function getHT() {
+	    return this.total();
+	  },
+	  getTVA: function getTVA() {
+	    return 0;
+	  },
 	  total: function total() {
 	    var km = this.getKm();
 	    var amount = this.getIndice();
@@ -8766,7 +8772,6 @@ webpackJsonp([1],[
 	        this.options = channel.request('get:options', 'expenses');
 	    },
 	    onCancelClick: function onCancelClick() {
-	        console.log("on cancel click");
 	        this.triggerMethod('modal:close');
 	    },
 	    templateContext: function templateContext() {
@@ -8849,13 +8854,15 @@ webpackJsonp([1],[
 	        'change:ttc': 'render',
 	        'change:ht': 'render',
 	        'change:tva': 'render',
+	        'change:km_ht': 'render',
+	        'change:km_tva': 'render',
 	        'change:km_ttc': 'render',
 	        'change:km': 'render'
 	    },
 	    templateContext: function templateContext() {
 	        return {
-	            ht: (0, _math.formatAmount)(this.model.get('ht')),
-	            tva: (0, _math.formatAmount)(this.model.get('tva')),
+	            ht: (0, _math.formatAmount)(this.model.get('ht') + this.model.get('km_ht')),
+	            tva: (0, _math.formatAmount)(this.model.get('tva') + this.model.get('km_tva')),
 	            ttc: (0, _math.formatAmount)(this.model.get('ttc') + this.model.get('km_ttc')),
 	            total_km: (0, _math.formatAmount)(this.model.get('km'))
 	        };
@@ -9085,6 +9092,8 @@ webpackJsonp([1],[
 	            datas['km_' + category] = collection.total_km(category);
 	            datas['km_ttc_' + category] = collection.total(category);
 	        });
+	        datas['km_tva'] = collection.total_tva();
+	        datas['km_ht'] = collection.total_ht();
 	        datas['km'] = collection.total_km();
 	        datas['km_ttc'] = collection.total();
 	        this.totalmodel.set(datas);
@@ -9338,6 +9347,12 @@ webpackJsonp([1],[
 	      result += model.getKm();
 	    });
 	    return result;
+	  },
+	  total_tva: function total_tva(category) {
+	    return 0;
+	  },
+	  total_ht: function total_ht(category) {
+	    return this.total(category);
 	  },
 	  total: function total(category) {
 	    var result = 0;

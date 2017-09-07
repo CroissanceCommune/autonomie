@@ -39,8 +39,10 @@ from openpyxl.styles import (
 
 from string import ascii_uppercase
 
+from autonomie.utils import strings
 
 from sqla_inspect.excel import XlsWriter
+
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.expense.types import (
     ExpenseType,
@@ -374,6 +376,19 @@ class XlsExpense(XlsWriter):
             col.set_letter(letter, last_letter)
         return columns
 
+    def _write_inline(self, label, value):
+        """
+        Write inline label value on 3 - 3 columns
+
+        :param str label: The label
+        :param str value: The value
+        """
+        cell = self.get_merged_cells('A', 'D')
+        cell.value = label
+        cell = self.get_merged_cells('E', 'J')
+        cell.value = value
+        self.index += 1
+
     def write_code(self):
         """
             write the company code in the header
@@ -381,34 +396,54 @@ class XlsExpense(XlsWriter):
         code = self.model.company.code_compta
         if not code:
             code = u"Code non renseigné"
-        cell = self.get_merged_cells('A', 'D')
-        cell.value = u"Code analytique de l'entreprise"
-        cell = self.get_merged_cells('E', 'J')
-        cell.value = code
-        self.index += 1
+        self._write_inline(u"Code analytique de l'entreprise", code)
 
     def write_user(self):
         """
             write the username in the header
         """
-        user = self.model.user
-        title = u"%s %s" % (user.lastname, user.firstname)
-        cell = self.get_merged_cells('A', 'D')
-        cell.value = u"Nom de l'entrepreneur"
-        cell = self.get_merged_cells('E', 'J')
-        cell.value = title
-        self.index += 1
+        self._write_inline(u"Nom de l'entrepreneur", self.model.user.label)
 
     def write_period(self):
         """
             write the period in the header
         """
-        period = "01/{0}/{1}".format(self.model.month, self.model.year)
-        cell = self.get_merged_cells('A', 'D')
-        cell.value = u"Période de la demande"
-        cell = self.get_merged_cells('E', 'J')
-        cell.value = period
-        self.index += 2
+        period = "{0} {1}".format(
+            strings.month_name(self.model.month),
+            self.model.year
+        )
+        self._write_inline(u"Période de la demande", period)
+
+    def write_number(self):
+        """
+            write the expense sheet id in the header
+        """
+        if self.model.status != 'valid':
+            number = u"Ce document n'a pas été validé"
+        else:
+            number = self.model.id
+        self._write_inline(u"Numéro de pièce", number)
+
+    def write_global_total_ht(self):
+        """
+        Write the total ht in the upper part of the sheet
+        """
+        print("write_global_total_ht")
+        print(self.model.total_ht)
+        print(len(self.model.lines))
+        self._write_inline(
+            u"Total HT",
+            strings.format_amount(self.model.total_ht, grouping=False)
+        )
+
+    def write_global_total_tva(self):
+        """
+        Write the total tva in the upper part of the sheet
+        """
+        self._write_inline(
+            u"Total TVA",
+            strings.format_amount(self.model.total_tva, grouping=False)
+        )
 
     def get_column_cell(self, column):
         """
@@ -542,6 +577,16 @@ class XlsExpense(XlsWriter):
 
             self.index += 1
 
+        self.write_table_footer(columns, lines)
+
+    def write_table_footer(self, columns, lines):
+        """
+        Write table footer (total, ht, tva, km)
+
+        :param list columns: The columns as described in the static vars here
+        above
+        :param list lines: The lines presented in this table
+        """
         for column in columns:
             cell = self.get_column_cell(column)
             cell.style = FOOTER_CELL
@@ -574,6 +619,13 @@ class XlsExpense(XlsWriter):
                         [
                             getattr(line, 'total_tva', 0) for line in lines
                         ]
+                    )
+                )
+
+            elif column.key == 'km':
+                cell.value = integer_to_amount(
+                    sum(
+                        [getattr(line, 'km', 0) for line in lines]
                     )
                 )
 
@@ -686,9 +738,12 @@ de vos clients)"
         row_dim.height = 30
         self.index += 2
 
+        self.write_number()
         self.write_code()
         self.write_user()
         self.write_period()
+        self.write_global_total_ht()
+        self.write_global_total_tva()
         self.write_internal_expenses()
         self.write_activity_expenses()
         self.write_total()

@@ -44,6 +44,12 @@ const ExpenseKmCollection = Bb.Collection.extend({
       });
       return result;
     },
+    total_tva: function(category){
+        return 0;
+    },
+    total_ht: function(category){
+        return this.total(category);
+    },
     total: function(category){
       var result = 0;
       this.each(function(model){

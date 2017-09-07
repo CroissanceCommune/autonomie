@@ -62,6 +62,12 @@ const ExpenseKmModel = BaseModel.extend({
       }
       return parseFloat(elem.amount);
     },
+    getHT(){
+        return this.total();
+    },
+    getTVA(){
+        return 0;
+    },
     total(){
       var km = this.getKm();
       var amount = this.getIndice();

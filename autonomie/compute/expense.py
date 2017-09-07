@@ -44,17 +44,24 @@ class ExpenseCompute(object):
 
     @property
     def total(self):
-        return sum(
-            [line.total for line in self.lines]
-        ) + sum(
-            [line.total for line in self.kmlines]
-        )
+        return sum([line.total for line in self.lines]) + \
+            sum([line.total for line in self.kmlines])
 
     def paid(self):
         return sum([payment.get_amount() for payment in self.payments])
 
     def topay(self):
         return self.total - self.paid()
+
+    @property
+    def total_tva(self):
+        return sum([line.total_tva for line in self.lines]) + \
+            sum([line.total_tva for line in self.kmlines])
+
+    @property
+    def total_ht(self):
+        return sum([line.total_ht for line in self.lines]) + \
+            sum([line.total_ht for line in self.kmlines])
 
 
 class ExpenseLineCompute(object):

@@ -428,12 +428,11 @@ class XlsExpense(XlsWriter):
         """
         Write the total ht in the upper part of the sheet
         """
-        print("write_global_total_ht")
-        print(self.model.total_ht)
-        print(len(self.model.lines))
         self._write_inline(
             u"Total HT",
-            strings.format_amount(self.model.total_ht, grouping=False)
+            u"%s €" % strings.format_amount(
+                self.model.total_ht, grouping=False
+            )
         )
 
     def write_global_total_tva(self):
@@ -442,7 +441,31 @@ class XlsExpense(XlsWriter):
         """
         self._write_inline(
             u"Total TVA",
-            strings.format_amount(self.model.total_tva, grouping=False)
+            u"%s €" % strings.format_amount(
+                self.model.total_tva, grouping=False
+            )
+        )
+
+    def write_global_total_ttc(self):
+        """
+        Write the total tva in the upper part of the sheet
+        """
+        self._write_inline(
+            u"Total TTC",
+            u"%s €" % strings.format_amount(
+                self.model.total, grouping=False
+            )
+        )
+
+    def write_global_total_km(self):
+        """
+        Write the total number of kilometers registered
+        """
+        self._write_inline(
+            u"Total Kilométrique",
+            u"%s km" % strings.format_amount(
+                self.model.total_km, grouping=False
+            )
         )
 
     def get_column_cell(self, column):
@@ -744,6 +767,9 @@ de vos clients)"
         self.write_period()
         self.write_global_total_ht()
         self.write_global_total_tva()
+        self.write_global_total_ttc()
+        self.write_global_total_km()
+        self.index += 1
         self.write_internal_expenses()
         self.write_activity_expenses()
         self.write_total()

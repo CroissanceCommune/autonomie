@@ -63,6 +63,10 @@ class ExpenseCompute(object):
         return sum([line.total_ht for line in self.lines]) + \
             sum([line.total_ht for line in self.kmlines])
 
+    @property
+    def total_km(self):
+        return sum([line.km for line in self.kmlines])
+
 
 class ExpenseLineCompute(object):
     """

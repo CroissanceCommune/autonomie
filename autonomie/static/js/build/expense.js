@@ -8864,7 +8864,7 @@ webpackJsonp([1],[
 	            ht: (0, _math.formatAmount)(this.model.get('ht') + this.model.get('km_ht')),
 	            tva: (0, _math.formatAmount)(this.model.get('tva') + this.model.get('km_tva')),
 	            ttc: (0, _math.formatAmount)(this.model.get('ttc') + this.model.get('km_ttc')),
-	            total_km: (0, _math.formatAmount)(this.model.get('km'))
+	            km: (0, _math.formatPrice)(this.model.get('km'))
 	        };
 	    }
 	}); /*
@@ -8898,7 +8898,10 @@ webpackJsonp([1],[
 	  buffer += "</div>\n    <div class=\"text-center\">Total TTC : ";
 	  stack1 = ((helper = (helper = helpers.ttc || (depth0 != null ? depth0.ttc : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ttc","hash":{},"data":data}) : helper));
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</div>\n</div>\n";
+	  buffer += "</div>\n    <div class=\"text-center\">Total Km : ";
+	  stack1 = ((helper = (helper = helpers.km || (depth0 != null ? depth0.km : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"km","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "&nbsp;km</div>\n</div>\n";
 	},"useData":true});
 
 /***/ }),

@@ -10,7 +10,7 @@
  */
 import Mn from 'backbone.marionette';
 import Radio from 'backbone.radio';
-import { formatAmount } from '../../math.js';
+import { formatPrice, formatAmount } from '../../math.js';
 
 const TotalView = Mn.View.extend({
     tagName: 'div',
@@ -31,7 +31,7 @@ const TotalView = Mn.View.extend({
             ttc: formatAmount(
                 this.model.get('ttc') + this.model.get('km_ttc')
             ),
-            total_km: formatAmount(this.model.get('km')),
+            km: formatPrice(this.model.get('km')),
         }
     }
 });

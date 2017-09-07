@@ -114,7 +114,7 @@ class StatusChanged(object):
         """
         return SUBJECT_TMPL.format(
                 docname=self.document.name,
-                customer=self.document.customer.name,
+                customer=self.document.customer.label,
                 statusstr=format_status(self.document),
                 )
 
@@ -140,7 +140,7 @@ class StatusChanged(object):
         addr = format_link(self.settings, addr)
 
         docnumber = self.document.internal_number.lower()
-        customer = self.document.customer.name.capitalize()
+        customer = self.document.customer.label
         project = self.document.project.name.capitalize()
         if self.document.type_ == 'invoice':
             docname = u"La facture"

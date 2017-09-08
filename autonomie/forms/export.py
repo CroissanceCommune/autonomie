@@ -51,7 +51,12 @@ class PeriodSchema(colander.MappingSchema):
         A form used to select a period
     """
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début")
-    end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin")
+    end_date = colander.SchemaNode(
+        colander.Date(),
+        title=u"Date de fin",
+        missing=forms.deferred_today,
+        default=forms.deferred_today
+    )
     exported = ExportedField()
 
     def validator(self, form, value):

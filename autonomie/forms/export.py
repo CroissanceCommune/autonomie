@@ -26,6 +26,7 @@
     Form schemas for invoice exports
 """
 import colander
+import deform
 
 from autonomie.models.expense.sheet import get_expense_years
 from autonomie.models.task.invoice import get_invoice_years
@@ -122,6 +123,17 @@ class AllSchema(colander.MappingSchema):
     pass
 
 
+@colander.deferred
+def deferred_category(node, kw):
+    return kw['prefix']
+
+
+class Category(colander.SchemaNode):
+    schema_type = colander.String
+    widget = deform.widget.HiddenWidget()
+    default = deferred_category
+
+
 class ExpenseSchema(colander.MappingSchema):
     """
     Schema for sage expense export
@@ -133,6 +145,7 @@ class ExpenseSchema(colander.MappingSchema):
     year = forms.year_select_node(title=u"Année", query_func=get_expense_years)
     month = forms.month_select_node(title=u"Mois")
     exported = ExportedField()
+    category = Category()
 
 
 class ExpenseIdSchema(colander.MappingSchema):
@@ -142,3 +155,4 @@ class ExpenseIdSchema(colander.MappingSchema):
         description=u"Identifiant de la feuille de notes de dépense "
         u"(voir sur la page associée)")
     exported = ExportedField()
+    category = Category()

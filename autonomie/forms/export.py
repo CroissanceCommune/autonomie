@@ -125,13 +125,17 @@ class AllSchema(colander.MappingSchema):
 
 @colander.deferred
 def deferred_category(node, kw):
-    return kw['prefix']
+    return kw.get('prefix', '0')
 
 
 class Category(colander.SchemaNode):
     schema_type = colander.String
     widget = deform.widget.HiddenWidget()
     default = deferred_category
+
+
+class ExpenseAllSchema(AllSchema):
+    category = Category()
 
 
 class ExpenseSchema(colander.MappingSchema):

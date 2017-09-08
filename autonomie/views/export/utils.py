@@ -10,6 +10,7 @@ from autonomie.forms.export import (
     InvoiceNumberSchema,
     ExpenseIdSchema,
     ExpenseSchema,
+    ExpenseAllSchema,
 )
 
 
@@ -41,6 +42,27 @@ def get_all_form(
     request,
     counter,
     title=u"Exporter les factures non exportées",
+):
+    """
+    Return a void form used to export all non-exported documents
+
+    :param obj counter: An iterator used for form id generation
+    """
+    schema = ExpenseAllSchema(title=title)
+    schema = schema.bind(request=request)
+    formid = u'all_form'
+    return deform.Form(
+        schema=schema,
+        buttons=(EXPORT_BTN,),
+        formid=formid,
+        counter=counter,
+    )
+
+
+def get_expense_all_form(
+    request,
+    counter,
+    title=u"Exporter les factures non exportées",
     prefix='',
 ):
     """
@@ -48,12 +70,9 @@ def get_all_form(
 
     :param obj counter: An iterator used for form id generation
     """
-    schema = AllSchema(title=title)
-    schema = schema.bind(request=request)
-    if prefix:
-        formid = u'%s_all_form' % prefix
-    else:
-        formid = u'all_form'
+    schema = ExpenseAllSchema(title=title)
+    schema = schema.bind(request=request, prefix=prefix)
+    formid = u'%s_all_form' % prefix
     return deform.Form(
         schema=schema,
         buttons=(EXPORT_BTN,),
@@ -86,7 +105,7 @@ def get_expense_id_form(request, counter, title, prefix='expense'):
     :param counter: the iterator used to insert various forms in the same page
     """
     schema = ExpenseIdSchema(title=title)
-    schema = schema.bind(request=request)
+    schema = schema.bind(request=request, prefix=prefix)
     return deform.Form(
         schema=schema,
         buttons=(EXPORT_BTN,),
@@ -103,7 +122,7 @@ def get_expense_form(request, title, prefix='expense'):
 
     """
     schema = ExpenseSchema(title=title)
-    schema = schema.bind(request=request)
+    schema = schema.bind(request=request, prefix=prefix)
     return deform.Form(
         schema=schema,
         buttons=(EXPORT_BTN,),

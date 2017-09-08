@@ -356,4 +356,42 @@ function setupMainBehaviours(){
   };
 }
 
+function openPopup(url, title){
+    var screen_width =  screen.width;
+    var screen_height = screen.height;
+    var width = getPercent(screen_width, 60);
+    var height = getPercent(screen_height, 60);
+    var uniq_id = _.uniqueId('popup');
+    if (_.indexOf(url, '?') != -1){
+        url = url + "&popup=" + uniq_id;
+    } else {
+        url = url + "?popup=" + uniq_id;
+    }
+
+    var new_win = window.open(url, title, "width=" + width + ",height=" + height);
+}
+
+function dismissPopup(win, options){
+    var default_options = {refresh: true};
+    _.extend(default_options, options);
+    win.close();
+
+    var new_content = "<div class='alert alert-success text-center'>";
+
+    if (!_.isUndefined(default_options.message)){
+        new_content += default_options.message;
+    }
+
+    if (default_options.refresh){
+        new_content += "&nbsp;<a href='#' onclick='window.location.reload();'><i class='glyphicon glyphicon-refresh'></i> Rafraîchir</a>";
+    }
+
+    new_content += '</div>';
+    var dest_tag = $('#popupmessage');
+    if (dest_tag.length == 0){
+        dest_tag = $('.pagetitle');
+    }
+    dest_tag.after(new_content);
+}
+
 $(setupMainBehaviours);

@@ -109,7 +109,10 @@ def get_main_group():
 
     main_js = get_resource(
         "js/main.js",
-        depends=[ui_dialog, ui_sortable, underscore, timepicker_js, bootstrap]
+        depends=[
+            ui_dialog, ui_sortable, underscore, timepicker_js, bootstrap,
+            _math,
+        ]
     )
 
     js_tools = Group([main_js, _dom, _math, _date])

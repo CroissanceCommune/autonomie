@@ -333,12 +333,19 @@ class ExpenseSheet(Node, ExpenseCompute):
             },
         }
     )
-
-    exported = Column(
+    purchase_exported = Column(
         Boolean(),
         default=False,
         info={
-            'colanderalchemy': {'title': u"A déjà été exportée ?"},
+            'colanderalchemy': {'title': u"Les achats ont déjà été exportés ?"},
+        }
+    )
+
+    expense_exported = Column(
+        Boolean(),
+        default=False,
+        info={
+            'colanderalchemy': {'title': u"Les frais ont déjà été exportés ?"},
         }
     )
 

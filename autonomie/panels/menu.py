@@ -266,28 +266,28 @@ def get_admin_menus(request):
     if has_permission("admin_treasury", request.context, request):
         treasury = DropDown(label=u"Comptabilité")
 
-        href = request.route_path("sage_invoice_export")
+        href = request.route_path("/export/treasury/invoices")
         treasury.add_item(
             u"Export des factures",
             icon="fa fa-edit",
             href=href
         )
 
-        href = request.route_path("sage_expense_export")
+        href = request.route_path("/export/treasury/expenses")
         treasury.add_item(
             u"Export des notes de dépense",
             icon="fa fa-credit-card",
             href=href
         )
 
-        href = request.route_path("sage_payment_export")
+        href = request.route_path("/export/treasury/payments")
         treasury.add_item(
             u"Export des encaissements",
             icon="fa fa-bank",
             href=href
         )
 
-        href = request.route_path("sage_expense_payment_export")
+        href = request.route_path("/export/treasury/expense_payments")
         treasury.add_item(
             u"Export des paiements de notes de dépense",
             icon="fa fa-bank",

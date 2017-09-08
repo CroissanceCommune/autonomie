@@ -26,7 +26,7 @@
     Filesystem abstraction
 """
 import os
-from datetime import datetime
+import datetime
 import math
 
 from urllib import pathname2url, url2pathname
@@ -105,7 +105,7 @@ class File(Base):
         """
             return a datetime object for the atime of the file
         """
-        return datetime.fromtimestamp(self.mod_time)
+        return datetime.datetime.fromtimestamp(self.mod_time)
 
     def get_size(self):
         """
@@ -146,3 +146,22 @@ class Directory(Base):
 
     def isdir(self):
         return True
+
+
+
+def get_timestamped_filename(root_name, extension):
+    """
+    Build a filename with timestamp info
+
+    :param str root_name: The filename prefix
+    :param str extension: The extension of the destination file
+
+    :returns: a filename with a timestamp
+    :rtype: str
+    """
+    today = datetime.date.today()
+    return u"{0}_{1}.{2}".format(
+        root_name,
+        today.strftime("%d%m%Y"),
+        extension,
+    )

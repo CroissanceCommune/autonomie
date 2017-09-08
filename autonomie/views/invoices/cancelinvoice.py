@@ -44,7 +44,6 @@ from autonomie.views import (
     add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
-from autonomie.views.sage import SageSingleInvoiceExportPage
 from autonomie.views.task.views import (
     TaskEditView,
     TaskDeleteView,
@@ -166,7 +165,7 @@ def add_routes(config):
         '/cancelinvoices/{id:\d+}',
         traverse='/cancelinvoices/{id}'
     )
-    for extension in ('html', 'pdf', 'txt', 'preview'):
+    for extension in ('html', 'pdf', 'preview'):
         config.add_route(
             '/cancelinvoices/{id}.%s' % extension,
             '/cancelinvoices/{id:\d+}.%s' % extension,
@@ -239,13 +238,6 @@ def includeme(config):
         route_name='/cancelinvoices/{id}/addfile',
         renderer='base/formpage.mako',
         permission='edit.cancelinvoice',
-    )
-
-    config.add_view(
-        SageSingleInvoiceExportPage,
-        route_name="/cancelinvoices/{id}.txt",
-        renderer='/treasury/sage_single_export.mako',
-        permission='admin_treasury'
     )
 
     config.add_view(

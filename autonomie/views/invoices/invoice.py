@@ -55,7 +55,6 @@ from autonomie.views import (
     add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
-from autonomie.views.sage import SageSingleInvoiceExportPage
 
 from autonomie.views.task.views import (
     TaskAddView,
@@ -371,7 +370,7 @@ def add_routes(config):
         '/invoices/{id:\d+}',
         traverse='/invoices/{id}',
     )
-    for extension in ('html', 'pdf', 'txt', 'preview'):
+    for extension in ('html', 'pdf', 'preview'):
         config.add_route(
             '/invoices/{id}.%s' % extension,
             '/invoices/{id:\d+}.%s' % extension,
@@ -467,13 +466,6 @@ def includeme(config):
         gencinv_view,
         route_name="/invoices/{id}/gencinv",
         permission="gencinv.invoice",
-    )
-
-    config.add_view(
-        SageSingleInvoiceExportPage,
-        route_name="/invoices/{id}.txt",
-        renderer='/treasury/sage_single_export.mako',
-        permission='admin_treasury'
     )
 
     config.add_view(

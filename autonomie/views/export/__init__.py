@@ -59,6 +59,28 @@ class BaseExportView(BaseView):
         """
         return {}
 
+    def validate_form(self, forms):
+        """
+        Validate a submitted form if needed
+        """
+        form_name = appstruct = None
+        if 'submit' in self.request.params:
+            form_name = self.request.POST['__formid__']
+            form = forms[form_name]['form']
+
+            post_items = self.request.POST.items()
+
+            logger.debug("Form %s was submitted", form_name)
+            try:
+                appstruct = form.validate(post_items)
+            except ValidationFailure as validation_error:
+                logger.exception(u"There was an error on form validation")
+                logger.exception(post_items)
+                # Replace the form, it now contains errors
+                # - will be displayed again
+                forms[form_name]['form'] = validation_error
+        return form_name, appstruct
+
     def query(self, appstruct, form_name):
         """
         :param dict appstruct: The validated form datas
@@ -86,27 +108,15 @@ class BaseExportView(BaseView):
         """
         raise NotImplemented()
 
-    def validate_form(self, forms):
+    def record_exported(self, items, form_name, appstruct):
         """
-        Validate a submitted form if needed
+        Record exported elements in the database
+
+        :param list items: the items to render
+        :param str form_name: The name of the form that was submitted
+        :param dict appstruct: The validated datas
         """
-        form_name = appstruct = None
-        if 'submit' in self.request.params:
-            form_name = self.request.POST['__formid__']
-            form = forms[form_name]['form']
-
-            post_items = self.request.POST.items()
-
-            logger.debug("Form %s was submitted", form_name)
-            try:
-                appstruct = form.validate(post_items)
-            except ValidationFailure as validation_error:
-                logger.exception(u"There was an error on form validation")
-                logger.exception(post_items)
-                # Replace the form, it now contains errors
-                # - will be displayed again
-                forms[form_name]['form'] = validation_error
-        return form_name, appstruct
+        pass
 
     def __call__(self):
         """
@@ -133,7 +143,9 @@ class BaseExportView(BaseView):
             if is_ok:
                 try:
                     # Let's process and return successfully the csvfile
-                    return self.write_file(items)
+                    result = self.write_file(items, form_name, appstruct)
+                    self.record_exported(items, form_name, appstruct)
+                    return result
                 except (MissingData, KeyError):
                     logger.exception("Exception occured while writing file")
                     config_help_msg = HELPMSG_CONFIG.format(

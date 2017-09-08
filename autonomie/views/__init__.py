@@ -48,6 +48,7 @@ from webhelpers import paginate
 from sqla_inspect.csv import SqlaCsvExporter
 from sqla_inspect.excel import SqlaXlsExporter
 from sqla_inspect.ods import SqlaOdsExporter
+from autonomie.utils.renderer import set_close_popup_response
 from autonomie.compute.math_utils import convert_to_int
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils import rest
@@ -499,6 +500,14 @@ class BaseFormView(FormView):
             raise
         if isinstance(result, dict):
             result.update(self._more_template_vars())
+
+        if "popup" in self.request.GET:
+            if isinstance(result, HTTPFound):
+                msg = self.request.session.pop_flash(queue="")
+                if msg:
+                    self.logger.debug("We've got an HTTPFound result")
+                    set_close_popup_response(self.request, msg[0])
+                    return self.request.response
         return result
 
     def _more_template_vars(self):

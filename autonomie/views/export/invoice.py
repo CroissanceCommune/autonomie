@@ -49,6 +49,25 @@ from autonomie.views.export.utils import (
 logger = logging.getLogger(__name__)
 
 
+MISSING_PRODUCT_ERROR_MSG = u"""Le document {0} n'est pas exportable :
+ des comptes produits sont manquants
+<a onclick="openPopup('{1}');" href='#'>
+        Voir le document
+</a>"""
+
+COMPANY_ERROR_MSG = u"""Le document {0} n'est pas exportable :
+Le code analytique de l'entreprise {1} n'a pas été configuré
+<a onclick="openPopup('{2}');" href='#'>
+    Voir l'entreprise
+</a>"""
+
+CUSTOMER_ERROR_MSG = u"""Le document {0} n'est pas exportable :
+Le compte général du client {1} n'a pas été configuré
+<a onclick="openPopup('{2}');" href='#'>
+    Voir le client
+</a>"""
+
+
 class SageSingleInvoiceExportPage(BaseExportView):
     """
     Single invoice export page
@@ -147,13 +166,12 @@ class SageSingleInvoiceExportPage(BaseExportView):
             for line in invoice.all_lines:
                 if not self._check_invoice_line(line):
                     invoice_url = self.request.route_path(
-                        '/invoices/{id}.html',
+                        '/invoices/{id}/set_products',
                         id=invoice.id
                     )
-                    message = u"""Le document {0} n'est pas exportable :
- des comptes produits sont manquants <a href='{1}' target='_blank'>
- Voir le document</a>"""
-                    message = message.format(official_number, invoice_url)
+                    message = MISSING_PRODUCT_ERROR_MSG.format(
+                        official_number, invoice_url
+                    )
                     res['errors'].append(message)
                     break
 
@@ -163,10 +181,7 @@ class SageSingleInvoiceExportPage(BaseExportView):
                     id=invoice.company.id,
                     _query={'action': 'edit'}
                 )
-                message = u"""Le document {0} n'est pas exportable :
-Des informations sur l'entreprise {1} sont manquantes <a href='{2}'
-target='_blank'>Voir l'entreprise</a>"""
-                message = message.format(
+                message = COMPANY_ERROR_MSG.format(
                     official_number,
                     invoice.company.name,
                     company_url)
@@ -178,10 +193,8 @@ target='_blank'>Voir l'entreprise</a>"""
                     'customer',
                     id=invoice.customer.id,
                     _query={'action': 'edit'})
-                message = u"""Le document {0} n'est pas exportable :
- Des informations sur le client {1} sont manquantes <a href='{2}'
- target='_blank'>Voir l'entreprise</a>"""
-                message = message.format(
+
+                message = CUSTOMER_ERROR_MSG.format(
                     official_number,
                     invoice.customer.name,
                     customer_url)

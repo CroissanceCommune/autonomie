@@ -25,11 +25,22 @@ from autonomie.views.export.utils import (
 
 logger = logging.getLogger(__name__)
 
-EXPENSE_CONFIG_ERROR_MSG = u"Veuillez vous assurer que tous les éléments de \
-configuration nécessaire à l'export des notes de dépense ont \
-bien été fournis : <br /><a href='{0}' target='_blank'>Configuration des \
-notes de dépense</a> <br/><a href='{1}' target='_blank'>Configuration \
-comptables du module vente</a>"
+CONFIG_ERROR_MSG = u"""Veuillez vous assurer que tous les éléments de
+configuration nécessaire à l'export des notes de dépense ont
+bien été fournis : <br />
+<a onclick="openPopup('{0}');" href='#'>
+    Configuration des notes de dépense
+</a><br/>
+<a onclick="openPopup('{1}');" href='#'>
+    Configuration comptables du module vente
+</a>"""
+
+
+COMPANY_ERROR_MSG = u"""Le code analytique de l'entreprise {0} n'a pas été
+configuré
+<a onclick="openPopup('{1}');" href='#'>
+    Voir l'entreprise
+</a>"""
 
 
 class SageExpenseExportPage(BaseExportView):
@@ -189,7 +200,7 @@ class SageExpenseExportPage(BaseExportView):
         query = self._filter_by_exported(query, appstruct)
         return query
 
-    def check_config(self, config):
+    def _check_config(self, config):
         """
         Check all configuration values are set for export
 
@@ -211,7 +222,7 @@ class SageExpenseExportPage(BaseExportView):
                         return False
         return True
 
-    def check_company(self, company):
+    def _check_company(self, company):
         """
         Check if the company is fully configured
 
@@ -223,11 +234,7 @@ class SageExpenseExportPage(BaseExportView):
                 id=company.id,
                 _query={'action': 'edit'},
             )
-            message = u""" Des informations sur l'entreprise {0}
-sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
-            message = message.format(
-                company.name,
-                company_url)
+            message = COMPANY_ERROR_MSG.format(company.name, company_url)
             return message
         return None
 
@@ -252,14 +259,14 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
 
         errors = []
 
-        if not self.check_config(self.request.config):
+        if not self._check_config(self.request.config):
             url1 = self.request.route_path('admin_expense')
             url2 = self.request.route_path('admin_vente')
-            errors.append(EXPENSE_CONFIG_ERROR_MSG.format(url1, url2))
+            errors.append(CONFIG_ERROR_MSG.format(url1, url2))
 
         for expense in expenses:
             company = expense.company
-            error = self.check_company(company)
+            error = self._check_company(company)
             if error is not None:
                 errors.append(
                     u"La note de dépense de {0} n'est pas exportable "

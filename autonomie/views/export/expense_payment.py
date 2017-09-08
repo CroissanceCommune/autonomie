@@ -27,10 +27,12 @@ logger = logging.getLogger(__name__)
 
 
 ERR_COMPANY_CONFIG = u"""Un paiement de la feuille de notes de dépense {0}
-n'est pas exportable : Des informations sur l'entreprise sont manquantes : {1}
+n'est pas exportable : Le code analytique de l'entreprise {1} n'a pas été
+configuré
 <a onclick="openPopup('{2}');" href='#'>Voir l'entreprise</a>"""
 ERR_USER_CONFIG = u"""Un paiement de la feuille de notes de dépense {0}
-n'est pas exportable : Des informations sur l'entrepreneur sont manquantes : {1}
+n'est pas exportable : Le compte tiers de l'entrepreneur {1} n'a pas été
+configuré
 <a onclick="openPopup('{2}');" href='#'>Voir l'entrepreneur</a>"""
 
 ERR_BANK_CONFIG = u"""Un paiement de la feuille de notes de dépense {0}

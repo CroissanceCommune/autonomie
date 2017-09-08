@@ -19,7 +19,7 @@ EXPORT_BTN = deform.Button(name="submit", type="submit", title=u"Exporter")
 
 HELPMSG_CONFIG = u"""Des éléments de configuration sont manquants, veuillez
 configurer les informations comptables nécessaires à l'export des documents,
-<a href="{0}" target='_blank'>Ici</a>"""
+<a onclick="openPopup('{2}');" href='#'>Ici</a>"""
 
 
 def get_period_form(
@@ -48,7 +48,7 @@ def get_all_form(
 
     :param obj counter: An iterator used for form id generation
     """
-    schema = ExpenseAllSchema(title=title)
+    schema = AllSchema(title=title)
     schema = schema.bind(request=request)
     formid = u'all_form'
     return deform.Form(

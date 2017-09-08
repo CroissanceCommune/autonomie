@@ -28,14 +28,15 @@ logger = logging.getLogger(__name__)
 PAYMENT_VOID_ERROR_MSG = u"Il n'y a aucun encaissement à exporter"
 
 PAYMENT_CUSTOMER_ERROR_MSG = u"""Un encaissement de la facture {0} n'est pas
-exportable : Des informations sur le client {1} sont manquantes
- <a href='{2}' target='_blank'>Voir le client</a>"""
+exportable : Des informations sur le client {1} (compte général ou compte tiers)
+sont manquantes
+ <a onclick="openPopup('{2}');" href='#'>Voir le client</a>"""
 
-PAYMENT_BANK_ERROR_MSG = (
-    u"Un encaissement de la facture {0} n'est pas exportable : L'encaissement "
-    u"n'est associé à aucune banque <a href='{1}' target='_blank'>Voir "
-    u"l'encaissement</a>"
-)
+PAYMENT_BANK_ERROR_MSG = u"""Un encaissement de la facture {0}
+n'est pas exportable : L'encaissement n'est associé à aucune banque
+<a onclick="openPopup('{1}');" href='#'>
+    Voir l'encaissement
+</a>"""
 
 
 class SagePaymentExportPage(BaseExportView):

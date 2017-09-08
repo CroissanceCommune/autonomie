@@ -5,6 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
 from collections import OrderedDict
+from sqlalchemy import or_
 
 from autonomie.models.expense.sheet import ExpenseSheet
 from autonomie.models.expense.types import ExpenseType
@@ -16,7 +17,7 @@ from autonomie.utils.widgets import ViewLink
 
 from autonomie.views.export import BaseExportView
 from autonomie.views.export.utils import (
-    get_all_form,
+    get_expense_all_form,
     get_expense_id_form,
     get_expense_form,
 )
@@ -55,9 +56,10 @@ class SageExpenseExportPage(BaseExportView):
 
     def _get_forms(
         self,
-        prefix=u'expense',
+        prefix=u'0',
         label=u"dépenses",
-        genre=u'e'
+        genre=u'e',
+        counter=None
     ):
         """
         Generate forms for the given parameters
@@ -75,6 +77,7 @@ class SageExpenseExportPage(BaseExportView):
             self.request,
             title=u"Exporter des %s" % label,
             prefix=prefix,
+            counter=counter,
         )
         id_form = get_expense_id_form(
             self.request,
@@ -82,7 +85,7 @@ class SageExpenseExportPage(BaseExportView):
             title=u"Exporter des %s depuis un identifiant" % label,
             prefix=prefix,
         )
-        all_form = get_all_form(
+        all_form = get_expense_all_form(
             self.request,
             main_form.counter,
             title=u"Exporter les %s non exporté%ss" % (label, genre),
@@ -99,41 +102,91 @@ class SageExpenseExportPage(BaseExportView):
         Implement parent get_forms method
         """
         result = self._get_forms()
+        counter = result.values[0].counter
         result.update(
-            self._get_forms(prefix=u'frais', label=u'frais', genre='')
+            self._get_forms(
+                prefix=u'1', label=u'frais', genre='', counter=counter
+            )
         )
         result.update(
-            self._get_forms(prefix=u'achats', label=u'achats', genre='')
+            self._get_forms(
+                prefix=u'2', label=u'achats', genre='', counter=counter
+            )
         )
         return result
 
-    def query(self, query_params_dict, form_name):
+    def _filter_by_sheet_id(self, query, appstruct):
+        """
+        Add an id filter on the query
+        :param obj query: A sqlalchemy query
+        :param dict appstruct: The form datas
+        """
+        sheet_id = appstruct['sheet_id']
+        return query.filter(ExpenseSheet.id == sheet_id)
+
+    def _filter_by_period(self, query, appstruct):
+        """
+        Add a filter on month and year
+        :param obj query: A sqlalchemy query
+        :param dict appstruct: The form datas
+        """
+        year = appstruct['year']
+        query = query.filter(ExpenseSheet.year == year)
+        month = appstruct['month']
+        query = query.filter(ExpenseSheet.month == month)
+        return query
+
+    def _filter_by_user(self, query, appstruct):
+        """
+        Add a filter on the user_id
+        :param obj query: A sqlalchemy query
+        :param dict appstruct: The form datas
+        """
+        if appstruct.get('user_id', 0) != 0:
+            user_id = appstruct['user_id']
+            query = query.filter(ExpenseSheet.user_id == user_id)
+        return query
+
+    def _filter_by_exported(self, query, appstruct):
+        """
+        Filter exported regarding the category of expense we want to export
+        :param obj query: A sqlalchemy query
+        :param dict appstruct: The form datas
+        """
+        if not appstruct.get('exported'):
+            export_category = appstruct['category']
+            if export_category == '0':
+                query = query.filter(
+                    or_(
+                        ExpenseSheet.purchase_exported == False,
+                        ExpenseSheet.expense_exported == False,
+                    )
+                )
+
+            elif export_category == '1':
+                query = query.filter_by(expense_exported=False)
+
+            elif export_category == '2':
+                query = query.filter_by(purchase_exported=False)
+        return query
+
+    def query(self, appstruct, form_name):
         """
         Base Query for expenses
-        :param query_params_dict: params passed in the query for expense export
+        :param appstruct: params passed in the query for expense export
+        :param str form_name: The submitted form's name
         """
         query = ExpenseSheet.query()
         query = query.filter(ExpenseSheet.status == 'valid')
 
-        if form_name.endswith('id_form'):
-            sheet_id = query_params_dict['sheet_id']
-            query = query.filter(ExpenseSheet.id == sheet_id)
+        if form_name.endswith('_id_form'):
+            query = self._filter_by_sheet_id(query, appstruct)
 
-        elif form_name.endswith('main_form'):
-            year = query_params_dict['year']
-            query = query.filter(ExpenseSheet.year == year)
+        elif form_name.endswith('_main_form'):
+            query = self._filter_by_period(query, appstruct)
+            query = self._filter_by_user(query, appstruct)
 
-            month = query_params_dict['month']
-            query = query.filter(ExpenseSheet.month == month)
-
-            if query_params_dict.get('user_id', 0) != 0:
-                user_id = query_params_dict['user_id']
-                query = query.filter(ExpenseSheet.user_id == user_id)
-
-        if 'exported' not in query_params_dict or \
-                not query_params_dict.get('exported'):
-            query = query.filter_by(exported=False)
-
+        query = self._filter_by_exported(query, appstruct)
         return query
 
     def check_config(self, config):
@@ -219,34 +272,69 @@ sont manquantes <a href='{1}' target='_blank'>Voir l'entreprise</a>"""
         res = {'title': title, 'errors': errors}
         return len(errors) == 0, res
 
-    def record_exported(self, expenses):
+    def record_exported(self, expenses, form_name, appstruct):
         """
         Tag the exported expenses
 
         :param expenses: The expenses we are exporting
         """
+        category = appstruct['category']
+
         for expense in expenses:
             logger.info(u"The expense with id {0} has been exported".format(
                 expense.id))
-            expense.exported = True
+
+            if category == '0':
+                expense.expense_exported = True
+                expense.purchase_exported = True
+            elif category == '1':
+                expense.expense_exported = True
+            elif category == '2':
+                expense.purchase_exported = True
+
             self.request.dbsession.merge(expense)
 
-    def write_file(self, expenses):
+    def _collect_export_datas(self, expenses, appstruct):
         """
+        Collect the datas to export
+
+        If we export all datas, ensure only the non-already exported datas are
+        included
+
+        :returns: A list of book entry lines in dict format
+        :rtype: list
         """
+        force = appstruct.get('exported', False)
+        category = appstruct['category']
+
         from autonomie.interfaces import ITreasuryExpenseProducer
         exporter = self.request.find_service(ITreasuryExpenseProducer)
+        datas = []
+        if category in ('1', '2') or force:
+            datas = exporter.get_book_entries(expenses, category)
+        else:
+            # If we're not forcing and we export all, we filter regarding which
+            # datas were already exported
+            for expense in expenses:
+                if not expense.expense_exported:
+                    datas.extend(exporter.get_book_entry(expense, '1'))
 
+                if not expense.purchase_exported:
+                    datas.extend(exporter.get_book_entry(expense, '2'))
+        return datas
+
+    def write_file(self, expenses, form_name, appstruct):
         from autonomie.interfaces import ITreasuryExpenseWriter
         writer = self.request.find_service(ITreasuryExpenseWriter)
 
-        writer.set_datas(exporter.get_book_entries(expenses))
+        datas = self._collect_export_datas(expenses, appstruct)
+        writer.set_datas(datas)
         write_file_to_request(
             self.request,
             get_timestamped_filename(u"export_ndf", writer.extension),
             writer.render(),
-            headers="application/csv")
-        self.record_exported(expenses)
+            headers="application/csv",
+        )
         return self.request.response
 
 

@@ -48,7 +48,7 @@ class ExpenseCompute(object):
         for line in self._lines_by_category(self.lines, category):
             ret_dict.setdefault(line.type_object.code, []).append(line)
 
-        for line in self._kmlines_by_category(self.kmlines, category):
+        for line in self._lines_by_category(self.kmlines, category):
             ret_dict.setdefault(line.type_object.code, []).append(line)
 
         return ret_dict.values()

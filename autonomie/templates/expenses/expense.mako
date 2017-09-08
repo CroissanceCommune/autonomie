@@ -73,8 +73,15 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                     % endif
                     </li>
                     <li>
-                        % if expense.exported:
-                            Ce document a déjà été exporté vers le logiciel de comptabilité
+                        % if expense.purchase_exported and expense.expense_exported:
+                            Ce document a déjà été exporté vers le
+                            logiciel de comptabilité
+                        % elif expense.purchase_exported:
+                            Les achats déclarés dans ce document ont déjà été
+                            exportés vers le logiciel de comptabilité
+                        % elif expense.expense_exported:
+                            Les frais déclarés dans ce document ont déjà été
+                            exportés vers le logiciel de comptabilité
                         %else:
                             Ce document n'a pas encore été exporté vers le logiciel de comptabilité
                         % endif

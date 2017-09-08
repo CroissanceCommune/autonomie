@@ -24,24 +24,62 @@
 
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
-% if check_messages is not None:
-    <div class='row'>
-        <div class='col-md-6 col-md-offset-3'>
-            <h2>${check_messages['title']}</h2>
-        </div>
+    <hr />
+<div class='row'>
+    <div class='col-md-3'>
+        <ul class="nav nav nav-pills nav-stacked" role="tablist">
+        <% current = request.params.get('__formid__', forms.keys()[0]) %>
+        % for form_name, form_datas in forms.items():
+            <li role="presentation" class="
+            % if form_name == current:
+            active
+            % endif
+            ">
+                <a
+                    href="#${form_name}-container"
+                    aria-controls="${form_name}-container"
+                    role="tab"
+                    data-toggle="tab"
+                    tabindex='-1'
+                    >
+                    ${form_datas['title']}
+                </a>
+            </li>
+        % endfor
+        </ul>
     </div>
-    <p class='text-danger'>
-    % for message in check_messages['errors']:
-        <b>*</b> ${message|n}<br />
-    % endfor
-    </p>
-% endif
-% for form in forms:
-    <div class='row'>
-    <div class='col-md-6 col-md-offset-3'>
-        ${form|n}
+
+     <div class='col-md-6 col-md-offset-1'>
+        % if check_messages is not None:
+            <div class="alert alert-info">
+                ${check_messages['title']}
+            </div>
+            % if check_messages['errors']:
+            <div class="alert alert-danger">
+            <p class='text-danger'>
+            % for message in check_messages['errors']:
+                <b>*</b> ${message|n}<br />
+            % endfor
+            </p>
+            </div>
+            % endif
+        % endif
+
+        <div class='tab-content'>
+        % for form_name, form_datas in forms.items():
+            <div
+                role="tabpanel"
+                class="tab-pane fade
+                % if form_name == current:
+                    in active
+                % endif
+                "
+                id="${form_name}-container"
+            >
+                ${form_datas['form']|n}
+            </div>
+        % endfor
     </div>
 </div>
-% endfor
 </%block>
 

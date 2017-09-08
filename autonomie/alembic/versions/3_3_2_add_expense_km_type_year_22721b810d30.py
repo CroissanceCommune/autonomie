@@ -14,21 +14,22 @@ import datetime
 from alembic import op
 import sqlalchemy as sa
 
+helper = sa.Table(
+    "expensekm_type",
+    sa.MetaData(),
+    sa.Column('id', sa.Integer, primary_key=True),
+    sa.Column('year', sa.Integer),
+)
+
 
 def update_database_structure():
     op.add_column('expensekm_type', sa.Column('year', sa.Integer, nullable=True))
 
 
 def migrate_datas():
-    from autonomie_base.models.base import DBSESSION
-    session = DBSESSION()
-    from alembic.context import get_bind
-    conn = get_bind()
-    from autonomie.models.expense.types import ExpenseKmType
+    connection = op.get_bind()
     year = datetime.date.today().year
-    for type_ in ExpenseKmType.query():
-        type_.year = year
-        session.merge(type_)
+    connection.execute(helper.update().values(year=year))
 
 
 def upgrade():

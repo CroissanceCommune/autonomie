@@ -17,24 +17,33 @@ from autonomie.alembic.utils import rename_column
 import traceback
 
 
-def change_custom_date_type(
-    session, model, table, new_column_name, column_name
-):
-    import datetime
+def change_custom_date_type(table, new_column_name, column_name):
     op.add_column(table, sa.Column(new_column_name, sa.Date()))
-    session.flush()
 
-    from alembic.context import get_bind
-    conn = get_bind()
-    request = "select id, %s from %s" % (column_name, table)
-    result = conn.execute(request)
+    helper = sa.Table(
+        table,
+        sa.MetaData(),
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column(new_column_name, sa.Date()),
+        sa.Column(column_name, sa.Integer()),
+    )
 
-    for (id_, original_value,) in result:
+    import datetime
+
+    connection = op.get_bind()
+
+    for element in connection.execute(helper.select()):
+        original_value = getattr(element, column_name)
+
         try:
             value = datetime.datetime.fromtimestamp(original_value).date()
-            obj = model.get(id_)
-            setattr(obj, new_column_name, value)
-            session.merge(obj)
+            connection.execute(
+                helper.update().where(
+                    helper.c.id == element.id
+                ).values(
+                    {new_column_name: value}
+                )
+            )
         except:
             traceback.print_exc()
             import sys
@@ -44,12 +53,10 @@ def change_custom_date_type(
             )
             )
             continue
-
-    session.flush()
     op.drop_column(table, column_name)
 
 
-def update_database_structure(session):
+def update_database_structure():
     logger = logging.getLogger(__name__)
     op.add_column(
         'customer',
@@ -167,53 +174,31 @@ def update_database_structure(session):
     )
     logger.debug("Migrating date columns")
     logger.debug(" + Projects")
-    from autonomie.models.project import Project
-    change_custom_date_type(
-        session,
-        Project, 'project', 'starting_date', 'startingDate'
-    )
-    change_custom_date_type(
-        session,
-        Project, 'project', 'ending_date', 'endingDate'
-    )
-    logger.debug(" + Customers")
+    change_custom_date_type('project', 'starting_date', 'startingDate')
+    change_custom_date_type('project', 'ending_date', 'endingDate')
 
-    from autonomie.models.customer import Customer
-    change_custom_date_type(
-        session,
-        Customer, 'customer', 'updated_at', 'updateDate'
-    )
-    change_custom_date_type(
-        session,
-        Customer, 'customer', 'created_at', 'creationDate'
-    )
+    logger.debug(" + Customers")
+    change_custom_date_type('customer', 'updated_at', 'updateDate')
+    change_custom_date_type('customer', 'created_at', 'creationDate')
 
     logger.debug(" + Companies")
-    from autonomie.models.company import Company
-    change_custom_date_type(
-        session,
-        Company, 'company', 'updated_at', 'updateDate'
-    )
-    change_custom_date_type(
-        session,
-        Company, 'company', 'created_at', 'creationDate'
-    )
+    change_custom_date_type('company', 'updated_at', 'updateDate')
+    change_custom_date_type('company', 'created_at', 'creationDate')
 
     logger.debug(" + Task and TaskStatus")
-    from autonomie.models.task.task import (TaskStatus, Task)
-    change_custom_date_type(
-        session,
-        TaskStatus, "task_status", "status_date", "statusDate"
-    )
-    change_custom_date_type(
-        session,
-        Task, 'task', "status_date", "statusDate"
-    )
+    change_custom_date_type("task_status", "status_date", "statusDate")
+    change_custom_date_type('task', "status_date", "statusDate")
 
 
 def _user_exists(session, user_id):
     from autonomie.models.user import User
-    return session.query(User.id).filter_by(id=user_id).count()
+    query = session.query(User.id).filter_by(id=user_id)
+    count_q = query.statement.with_only_columns([sa.func.count()]).order_by(
+        None
+    ).count()
+
+    count = query.session.execute(count_q).scalar()
+    return count
 
 
 def _find_status(session, task_id, statusnames):
@@ -251,78 +236,46 @@ def _update_payments(session, task_id, statuses):
             session.merge(payment)
 
 
-def _upgrade_invoices(session):
-    from autonomie.models.task import Invoice
-    for invoice in Invoice.query():
-        status_date = invoice.status_date
-        if invoice.status in ('paid', 'resulted'):
-            invoice.paid_status = invoice.status
-            # Here the date is enforced in the change_status validate func
-            invoice.status = 'valid'
-            invoice.status_date = status_date
-            statuses = _find_status(session, invoice.id, ('valid'))
-            if statuses:
-                invoice.status_person_id = statuses[-1][0]
-                invoice.status_date = statuses[-1][1]
-
-            statuses = _find_status(session, invoice.id, ('paid', 'resulted'))
-            if statuses:
-                _update_payments(session, invoice.id, statuses)
-        else:
-            if invoice.status == 'aboinv':
-                invoice.status = 'valid'
-                invoice.status_date = status_date
-
-            invoice.paid_status = 'waiting'
-
-        session.merge(invoice)
+def _upgrade_invoices(connection):
+    connection.execute(
+        "UPDATE invoice JOIN task ON task.id=invoice.id "
+        "SET invoice.paid_status=task.status "
+        "WHERE status in ('paid', 'resulted');"
+    )
+    connection.execute(
+        "UPDATE invoice JOIN task ON task.id=invoice.id "
+        "SET invoice.paid_status='wait' "
+        "WHERE status NOT in ('paid', 'resulted');"
+    )
+    connection.execute(
+        "UPDATE payment inner join ("
+        "select task_id, status_person_id, status_date from task_status "
+        "inner join accounts on accounts.id=task_status.status_person_id where task_status.status_code IN ('paid', 'resulted') "
+        ") as s on payment.task_id=s.task_id AND DATE(payment.created_at)=status_date "
+        "SET payment.user_id=status_person_id where payment.user_id is NULL;"
+    )
 
 
-def _upgrade_estimations(session):
-    from autonomie.models.task import Estimation
 
-    for estimation in Estimation.query():
-        status_date = estimation.status_date
-        if estimation.status in ('aboest',):
-            estimation.signed_status = 'aborted'
-            estimation.status = 'valid'
-            estimation.status_date = status_date
-
-            statuses = _find_status(session, estimation.id, ('valid'))
-            if statuses:
-                estimation.status_person_id = statuses[-1][0]
-                estimation.status_date = statuses[-1][1]
-
-        else:
-            if estimation.status == 'geninv':
-                estimation.geninv = True
-                estimation.status = 'valid'
-                estimation.status_date = status_date
-            else:
-                estimation.geninv = False
-
-            estimation.signed_status = 'waiting'
-
-        session.merge(estimation)
+def _upgrade_estimations(connection):
+    for cmd in (
+        "update estimation join task on task.id=estimation.id set estimation.signed_status='aborted' where task.status='aboest';",
+        "update estimation join task on task.id=estimation.id set estimation.signed_status='waiting' where task.status!='aboest';",
+        "update estimation join task on task.id=estimation.id set estimation.geninv=1 where task.status='geninv';",
+        "update estimation join task on task.id=estimation.id set estimation.geninv=0 where task.status!='geninv';",
+    ):
+        connection.execute(cmd)
 
 
-def _upgrade_expenses(session):
-    from autonomie.models.expense.sheet import ExpenseSheet
-    for expense in ExpenseSheet.query():
-        status_date = expense.status_date
-
-        if expense.status in ('paid', 'resulted'):
-            expense.paid_status = expense.status
-            if _user_exists(session, expense.status_user_id):
-                for payment in expense.payments:
-                    payment.user_id = expense.status_user_id
-                    session.merge(payment)
-            expense.status = 'valid'
-            expense.status_date = status_date
-        else:
-            expense.paid_status = 'waiting'
-        expense.justified = False
-        session.merge(expense)
+def _upgrade_expenses(connection):
+    for cmd in (
+        "update expense_sheet set paid_status=status where status in ('paid', 'resulted')",
+        "update expense_payment inner join (select e.id, e.status_user_id from expense_sheet as e inner join accounts as a on e.status_user_id=a.id) as sheet on sheet.id=expense_payment.expense_sheet_id set expense_payment.user_id=sheet.status_user_id;",
+        "update expense_sheet set paid_status='waiting' where status not in ('paid', 'resulted')",
+        "update expense_sheet set status='valid' where status in ('paid', 'resulted')",
+        "update expense_sheet set justified=0;",
+    ):
+        connection.execute(cmd)
 
 
 def _upgrade_estimation_payment_dates(session):
@@ -383,47 +336,37 @@ def drop_old_columns():
 
 
 def migrate_datas(session):
-    from autonomie.models.customer import Customer
-    for cust in Customer.query():
-        cust.type_ = 'company'
-        session.merge(cust)
+    connection = op.get_bind()
+    connection.execute("update customer set type_='company';")
 
-    _upgrade_invoices(session)
-    session.flush()
-    _upgrade_estimations(session)
-    session.flush()
-    _upgrade_expenses(session)
-    session.flush()
+    connection.execute(
+        "UPDATE task INNER JOIN ( "
+        "SELECT task_id, status_person_id, status_date from task_status inner join "
+        "accounts on accounts.id=task_status.status_person_id where task_status.status_code='valid' "
+        "ORDER BY status_date DESC LIMIT 1 "
+        ") as s on s.task_id=task.id "
+        "SET task.status_person_id=s.status_person_id, task.status_date=s.status_date "
+        "where task.status IN ('paid', 'resulted', 'aboinv', 'geninv', 'aboest');"
+    )
+    _upgrade_invoices(connection)
+    _upgrade_estimations(connection)
+    _upgrade_expenses(connection)
     _upgrade_estimation_payment_dates(session)
     session.flush()
     drop_old_columns()
+    connection.execute(
+        "UPDATE task "
+        "SET status='valid' "
+        "WHERE status IN ('paid', 'resulted', 'aboinv')"
+    )
 
 
 def upgrade():
     from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
-    update_database_structure(session)
+    update_database_structure()
     migrate_datas(session)
 
 
 def downgrade():
-    for col in ('civilite', 'mobile', 'type_'):
-        op.drop_column('customer', col)
-    rename_column(
-        "customer",
-        'lastname',
-        'contactLastName',
-        sa.String(255)
-    )
-    rename_column(
-        "customer",
-        'firstname',
-        'contactFirstName',
-        sa.String(255)
-    )
-    rename_column(
-        "customer",
-        'tva_intracomm',
-        'intraTVA',
-        sa.String(50)
-    )
+    print("No downgrade supported for this upgrade")

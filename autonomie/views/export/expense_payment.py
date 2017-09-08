@@ -28,15 +28,17 @@ logger = logging.getLogger(__name__)
 
 ERR_COMPANY_CONFIG = u"""Un paiement de la feuille de notes de dépense {0}
 n'est pas exportable : Des informations sur l'entreprise sont manquantes : {1}
-<a href='{2}' target='_blank'>Voir l'entreprise</a>"""
+<a onclick="openPopup('{2}');" href='#'>Voir l'entreprise</a>"""
 ERR_USER_CONFIG = u"""Un paiement de la feuille de notes de dépense {0}
 n'est pas exportable : Des informations sur l'entrepreneur sont manquantes : {1}
-<a href='{2}' target='_blank'>Voir l'entrepreneur</a>"""
+<a onclick="openPopup('{2}');" href='#'>Voir l'entrepreneur</a>"""
+
 ERR_BANK_CONFIG = u"""Un paiement de la feuille de notes de dépense {0}
 n'est pas exportable : Le paiement n'est associé à aucune banque
-<a href='{1}' target='_blank'>Voir le paiement</a>"""
+<a onclick="openPopup('{1}');" href='#'>Voir le paiement</a>"""
 ERR_WAIVER_CONFIG = u"""Le compte pour les abandons de créances n'a pas
-été configuré, vous pouvez le configurer <a href='{0}' target='_blank'>Ici</a>
+été configuré, vous pouvez le configurer
+<a onclick="openPopup('{2}');" href='#'>Ici</a>
 """
 
 
@@ -107,7 +109,7 @@ de notes de dépense",
 
         if 'exported' not in query_params_dict or \
                 not query_params_dict.get('exported'):
-            query = query.filter(ExpensePayment.exported == False)
+            query = query.filter_by(exported=False)
 
         return query
 
@@ -207,7 +209,7 @@ de notes de dépense",
 
         return len(res['errors']) == 0, res
 
-    def record_exported(self, payments):
+    def record_exported(self, payments, form_name, appstruct):
         """
         Record that those payments have already been exported
         """
@@ -222,7 +224,7 @@ de notes de dépense",
             payment.exported = True
             self.request.dbsession.merge(payment)
 
-    def write_file(self, payments):
+    def write_file(self, payments, form_name, appstruct):
         """
         Write the exported csv file to the request
         """
@@ -234,7 +236,6 @@ de notes de dépense",
             get_timestamped_filename(u"export_paiement_ndf", writer.extension),
             writer.render(),
             headers="application/csv")
-        self.record_exported(payments)
         return self.request.response
 
 

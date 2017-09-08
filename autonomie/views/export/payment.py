@@ -182,7 +182,7 @@ class SagePaymentExportPage(BaseExportView):
 
         return len(res['errors']) == 0, res
 
-    def record_exported(self, payments):
+    def record_exported(self, payments, form_name, appstruct):
         for payment in payments:
             logger.info(
                 u"The payment id : {0} (invoice {1} id:{2}) has been exported"
@@ -195,7 +195,7 @@ class SagePaymentExportPage(BaseExportView):
             payment.exported = True
             self.request.dbsession.merge(payment)
 
-    def write_file(self, payments):
+    def write_file(self, payments, form_name, appstruct):
         """
             Write the exported csv file to the request
         """
@@ -210,7 +210,6 @@ class SagePaymentExportPage(BaseExportView):
             get_timestamped_filename(u"export_encaissement", writer.extension),
             writer.render(),
             headers="application/csv")
-        self.record_exported(payments)
         return self.request.response
 
 

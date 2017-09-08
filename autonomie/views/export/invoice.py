@@ -190,7 +190,7 @@ target='_blank'>Voir l'entreprise</a>"""
 
         return len(res['errors']) == 0, res
 
-    def record_exported(self, invoices):
+    def record_exported(self, invoices, form_name, appstruct):
         for invoice in invoices:
             logger.info(
                 "The {0.type_} number {0.official_number} (id : {0.id})"
@@ -199,7 +199,7 @@ target='_blank'>Voir l'entreprise</a>"""
             invoice.exported = True
             self.request.dbsession.merge(invoice)
 
-    def write_file(self, invoices):
+    def write_file(self, invoices, form_name, appstruct):
         """
             Write the exported csv file to the request
         """
@@ -216,7 +216,6 @@ target='_blank'>Voir l'entreprise</a>"""
             get_timestamped_filename(u"export_facture", writer.extension),
             writer.render(),
             headers="application/csv")
-        self.record_exported(invoices)
         return self.request.response
 
 

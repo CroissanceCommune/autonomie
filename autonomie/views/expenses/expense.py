@@ -187,8 +187,6 @@ class ExpenseSheetAddView(BaseFormView):
         """
         Find an existing expense sheet
         """
-        print("Find existing")
-        print(appstruct)
         return get_expense_sheet(
             appstruct['year'],
             appstruct['month'],

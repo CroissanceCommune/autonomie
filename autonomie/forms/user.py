@@ -345,7 +345,10 @@ def deferred_group_widget(node, kw):
     """
     request = kw['request']
     groups = get_groups(request)
-    return deform.widget.CheckboxChoiceWidget(values=groups)
+    return deform.widget.Select2Widget(
+        values=groups,
+        multiple=True,
+    )
 
 
 def get_user_schema(edit=False, permanent=True):

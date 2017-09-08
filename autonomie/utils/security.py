@@ -569,7 +569,7 @@ def get_expense_sheet_default_acl(self):
     acl.extend(_get_admin_status_acl(self))
 
     admin_perms = ()
-    if not self.exported:
+    if not self.expense_exported or not self.purchase_exported:
         admin_perms += ('set_treasury.expensesheet',)
 
     if self.status == 'valid' and self.paid_status != 'resulted':

@@ -99,12 +99,13 @@
             <br />
             Il porte le numéro ${cancelinvoice.prefix}${cancelinvoice.official_number}.
             </div>
+            <% url = request.route_path('/export/treasury/invoices/{id}', id=cancelinvoice.id, _query={'force': True}) %>
             % if cancelinvoice.exported:
                 <div class='lead'>
                     <i class='glyphicon glyphicon-ok-sign'></i> Cet avoir a été exporté vers la comptabilité
                 </div>
                     <a
-                    href="${request.route_path('/cancelinvoices/{id}.txt', id=cancelinvoice.id, _query={'force': True})}"
+                    href="${url}"
                     class='btn btn-default'
                     >
                     <i class='glyphicon glyphicon-export'></i>
@@ -116,7 +117,7 @@
                 </div>
                 % if api.has_permission('admin_treasury'):
                     <a
-                    href="${request.route_path('/cancelinvoices/{id}.txt', id=cancelinvoice.id)}"
+                    href="${url}"
                     class='btn btn-primary primary-action'
                     >
                     <i class='glyphicon glyphicon-export'></i>

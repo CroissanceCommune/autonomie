@@ -147,24 +147,27 @@
         <br />
         Elle porte le numéro ${invoice.prefix}${invoice.official_number}.
         </div>
+        <% url = request.route_path('/export/treasury/invoices/{id}', id=invoice.id, _query={'force': True}) %>
             % if invoice.exported:
                 <div class='lead'>
                     <i class='glyphicon glyphicon-ok-sign'></i> Cette facture a été exportée vers la comptabilité
                 </div>
+                % if api.has_permission('admin_treasury'):
                     <a
-                    href="${request.route_path('/invoices/{id}.txt', id=invoice.id, _query={'force': True})}"
+                    href="${url}"
                     class='btn btn-default'
                     >
                     <i class='glyphicon glyphicon-export'></i>
                         Forcer la génération d'écritures pour cette facture
                     </a>
+                % endif
             % else:
                 <div class='lead'>
                     <i class='glyphicon glyphicon-time'></i> Cette facture n'a pas encore été exportée vers la comptabilité
                 </div>
                 % if api.has_permission('admin_treasury'):
                     <a
-                    href="${request.route_path('/invoices/{id}.txt', id=invoice.id)}"
+                    href="${url}"
                     class='btn btn-primary primary-action'
                     >
                     <i class='glyphicon glyphicon-export'></i>

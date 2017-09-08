@@ -908,7 +908,7 @@ webpackJsonp([1],[
 	            var height = (0, _math.getPercent)(screen_height, 60);
 	            var url = options.url;
 	            var title = options.title;
-	            window.open(url + "?nomenu=true", title, "width=" + width + ",height=" + height);
+	            window.open(url + "?popup=true", title, "width=" + width + ",height=" + height);
 	        }
 	    }
 	}); /*

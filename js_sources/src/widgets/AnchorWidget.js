@@ -35,7 +35,7 @@ const AnchorWidget = Mn.View.extend({
             var url = options.url;
             var title = options.title;
             window.open(
-                url + "?nomenu=true",
+                url + "?popup=true",
                 title,
                 "width=" + width + ",height=" + height
             );

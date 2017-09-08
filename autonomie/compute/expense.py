@@ -30,14 +30,25 @@ class ExpenseCompute(object):
     kmlines = ()
     payments = ()
 
-    def get_lines_by_type(self):
+    def _lines_by_category(self, lines, category=None):
+        """
+        Return the lines matching the category if provided
+        """
+        for line in lines:
+            if category in ('1', '2') and line.category != category:
+                continue
+            else:
+                yield line
+
+    def get_lines_by_type(self, category="0"):
         """
         Return expense lines grouped by treasury code
         """
         ret_dict = {}
-        for line in self.lines:
+        for line in self._lines_by_category(self.lines, category):
             ret_dict.setdefault(line.type_object.code, []).append(line)
-        for line in self.kmlines:
+
+        for line in self._kmlines_by_category(self.kmlines, category):
             ret_dict.setdefault(line.type_object.code, []).append(line)
 
         return ret_dict.values()
@@ -66,6 +77,21 @@ class ExpenseCompute(object):
     @property
     def total_km(self):
         return sum([line.km for line in self.kmlines])
+
+    def get_total(self, category=None):
+        line_total = sum(
+            [
+                line.total
+                for line in self._lines_by_category(self.lines, category)
+            ]
+        )
+        kmlines_total = sum(
+            [
+                line.total
+                for line in self._lines_by_category(self.kmlines, category)
+            ]
+        )
+        return line_total + kmlines_total
 
 
 class ExpenseLineCompute(object):

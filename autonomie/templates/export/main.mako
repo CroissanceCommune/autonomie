@@ -50,20 +50,6 @@
     </div>
 
      <div class='col-md-6 col-md-offset-1'>
-        % if check_messages is not None:
-            <div class="alert alert-info">
-                ${check_messages['title']}
-            </div>
-            % if check_messages['errors']:
-            <div class="alert alert-danger">
-            <p class='text-danger'>
-            % for message in check_messages['errors']:
-                <b>*</b> ${message|n}<br />
-            % endfor
-            </p>
-            </div>
-            % endif
-        % endif
 
         <div class='tab-content'>
         % for form_name, form_datas in forms.items():
@@ -76,6 +62,20 @@
                 "
                 id="${form_name}-container"
             >
+            % if form_name == current and check_messages is not None:
+                <div class="alert alert-info">
+                    ${check_messages['title']}
+                </div>
+                % if check_messages['errors']:
+                <div class="alert alert-danger">
+                <p class='text-danger'>
+                % for message in check_messages['errors']:
+                    <b>*</b> ${message|n}<br />
+                % endfor
+                </p>
+                </div>
+            % endif
+        % endif
                 ${form_datas['form']|n}
             </div>
         % endfor

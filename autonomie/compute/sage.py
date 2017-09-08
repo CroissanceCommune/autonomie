@@ -1270,15 +1270,16 @@ in type_object")
         )
         return entry
 
-    def yield_entries(self):
+    def yield_entries(self, category=None):
         """
         Yield all the book entries for the current expensesheet
         """
-        total = self.expense.total
+        total = self.expense.get_total(category)
+
         if total > 0:
             yield self._credit(total)
 
-            for charge in self.expense.get_lines_by_type():
+            for charge in self.expense.get_lines_by_type(category):
 
                 type_object = charge[0].type_object
                 ht = sum([line.total_ht for line in charge])
@@ -1317,25 +1318,25 @@ class ExpenseExport(object):
         for module in self._default_modules:
             self.modules.append(module(context, request))
 
-    def get_book_entry(self, expense):
+    def get_book_entry(self, expense, category=None):
         """
         Return book entries for a single expense
         """
         for module in self.modules:
             module.set_expense(expense)
-            for entry in module.yield_entries():
+            for entry in module.yield_entries(category):
                 gen_line, analytic_line = entry
                 yield gen_line
                 if self.use_analytic:
                     yield analytic_line
 
-    def get_book_entries(self, expenses):
+    def get_book_entries(self, expenses, category=None):
         """
         Return the book entries for an expenselist
         """
         result = []
         for expense in expenses:
-            result.extend(list(self.get_book_entry(expense)))
+            result.extend(list(self.get_book_entry(expense, category)))
         return result
 
 

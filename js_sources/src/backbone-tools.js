@@ -92,8 +92,8 @@ export const displayServerSuccess = function(msg){
 
 export const setupBbValidationPatterns = function(bb_module){
     _.extend(bb_module.patterns, {
-        amount: /^(\d+(?:[\.\,]\d{1,5})?)$/,
-        amount2: /^(\d+(?:[\.\,]\d{1,2})?)$/
+        amount: /^-?(\d+(?:[\.\,]\d{1,5})?)$/,
+        amount2: /^-?(\d+(?:[\.\,]\d{1,2})?)$/
     });
     _.extend(bb_module.messages, {
         amount: "Doit être un nombre avec au maximum 5 chiffres après la virgule",

@@ -4149,6 +4149,10 @@ webpackJsonp([2],[
 	                onSelect: this.onDateSelect.bind(this),
 	                default_value: (0, _tools.getOpt)(this, 'default_value', today)
 	            };
+	            if ((0, _tools.getOpt)(this, 'current_year', false)) {
+	                kwargs['changeYear'] = false;
+	                kwargs['yearRange'] = '-0:+0';
+	            }
 	
 	            var date = this.getOption('date');
 	            var selector = this.getSelector();

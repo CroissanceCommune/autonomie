@@ -8036,6 +8036,10 @@ webpackJsonp([1],[
 	                onSelect: this.onDateSelect.bind(this),
 	                default_value: (0, _tools.getOpt)(this, 'default_value', today)
 	            };
+	            if ((0, _tools.getOpt)(this, 'current_year', false)) {
+	                kwargs['changeYear'] = false;
+	                kwargs['yearRange'] = '-0:+0';
+	            }
 	
 	            var date = this.getOption('date');
 	            var selector = this.getSelector();
@@ -8572,6 +8576,7 @@ webpackJsonp([1],[
 	            date: this.model.get('date'),
 	            title: "Date",
 	            field_name: "date",
+	            current_year: true,
 	            default_value: this.today
 	        });
 	        this.showChildView("date", view);

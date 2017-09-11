@@ -39,6 +39,11 @@ const DatePickerWidget = Mn.View.extend({
                 onSelect: this.onDateSelect.bind(this),
                 default_value: getOpt(this, 'default_value', today)
             };
+            if (getOpt(this, 'current_year', false)){
+                kwargs['changeYear'] = false;
+                kwargs['yearRange'] = '-0:+0';
+            }
+
 
             let date = this.getOption('date');
             let selector = this.getSelector();

@@ -62,6 +62,7 @@ const ExpenseKmFormView = Mn.View.extend({
             date: this.model.get('date'),
             title: "Date",
             field_name: "date",
+            current_year: true,
             default_value: this.today,
         });
         this.showChildView("date", view);

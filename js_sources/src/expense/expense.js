@@ -37,7 +37,6 @@ App.on('start', function (app, options) {
 
 
 $(function(){
-    showLoader();
     console.log("# Retrieving datas from the server");
     console.log(AppOption['form_config_url']);
     let serverCall1 = ajax_call(AppOption['form_config_url']);

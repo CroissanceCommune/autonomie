@@ -617,7 +617,7 @@ class RestExpenseSheetJustifiedStatusView(StatusView):
 
         if status in ('True', 'true'):
             status = True
-        elif status == ('False', 'false'):
+        elif status in ('False', 'false'):
             status = False
         return status
 

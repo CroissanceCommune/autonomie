@@ -152,7 +152,8 @@ def get_expensesheet_by_year(company):
     for year in get_expensesheet_years(company.expenses):
         result[year] = []
         for user in company.employees:
-            expenses = [exp for exp in user.expenses if exp.year == year]
+            expenses = [exp for exp in user.expenses
+                        if exp.year == year and exp.company_id == company.id]
             result[year].append((user, expenses))
     return result
 

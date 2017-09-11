@@ -1,4 +1,4 @@
-"""3.3.2 : add expense_km_type year
+"""3.4 : add expense_km_type year
 
 Revision ID: 22721b810d30
 Revises: 55acdcdcc473

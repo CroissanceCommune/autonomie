@@ -1,4 +1,4 @@
-"""3.3.2 : groupe fonctionnalite 2017 1
+"""3.4 : groupe fonctionnalite 2017 1
 
 Revision ID: 55acdcdcc473
 Revises: 11219b4e619b

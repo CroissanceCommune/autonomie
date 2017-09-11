@@ -1,4 +1,4 @@
-"""3.3.2 : add_user_vehicle
+"""3.4 : add_user_vehicle
 
 Revision ID: 6a8b2495102
 Revises: 22721b810d30

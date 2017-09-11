@@ -1,4 +1,4 @@
-"""3.3.2 : add expense specific exported flag
+"""3.4 : add expense specific exported flag
 
 Revision ID: 4299e583631c
 Revises: 6a8b2495102

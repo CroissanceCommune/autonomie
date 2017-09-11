@@ -55,7 +55,8 @@ def expense_sheet(dummy_company):
         status='draft',
         company=dummy_company,
         paid_status='waiting',
-        exported=False,
+        expense_exported=False,
+        purchase_exported=False,
         type_='expensesheet',
     )
 
@@ -475,7 +476,8 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
 
     # exported acls
     expense_sheet.paid_status = 'waiting'
-    expense_sheet.exported = True
+    expense_sheet.expense_exported = True
+    expense_sheet.purchase_exported = True
     acl = get_expense_sheet_default_acl(expense_sheet)
     # # User
     assert check_acl(acl, 'add.file', 'user1')

@@ -34,13 +34,12 @@
     %endif
     </li>
 </ul>
+
+</%block>
+<%block name="content">
 <div class='row'>
     <div class='col-md-8'>
-        <div class='container-fluid'>
-            <div class='row'>
                 ${form|n}
-            </div>
-        </div>
     </div>
     <div class='col-md-4'>
     % if request.has_permission('admin_activities'):
@@ -67,26 +66,38 @@
             </a>
         </div>
     % endif
-        <table class='table table-bordered'>
+        <table class='table table-bordered status-table'>
             <tr>
-                <td class='white_tr'><br /></td>
+                <td class='activity-status-planned'><br /></td>
                 <td>Rendez-vous programmés</td>
             </tr>
             <tr>
-                <td class='green_tr'><br /></td>
+                <td class='activity-status-closed'><br /></td>
                 <td>Rendez-vous terminés</td>
             </tr>
             <tr>
-                <td class='orange_tr'><br /></td>
+                <td class='activity-status-cancelled'><br /></td>
                 <td>Rendez-vous annulés</td>
             </tr>
         </table>
     </div>
 </div>
-
-</%block>
-<%block name="content">
-<table class="table table-condensed table-hover">
+% if last_closed_event is not None:
+<div class='row'>
+    <div class='col-md-8 col-md-offset-2 col-xs-12'>
+        <div class='well'>
+        <h3>Dernière préconisations</h3>
+            <blockquote>
+                <i class='glyphicon glyphicon-quotes'></i>
+                ${api.clean_html(last_closed_event.action)|n}
+                <br />
+                <footer>le ${api.format_date(last_closed_event.datetime)}</footer>
+            </blockquote>
+        </div>
+    </div>
+</div>
+% endif
+<table class="table table-condensed table-hover status-table">
     <thead>
         <tr>
             <th>${sortable("Horaire", "datetime")}</th>
@@ -105,15 +116,7 @@
             % else :
                 <% onclick = u"alert(\"Vous n'avez pas accès aux données de ce rendez-vous\");" %>
             % endif
-            <%
-if activity.status == 'planned':
-    css = "white_"
-elif activity.status == 'cancelled':
-    css = "orange_"
-elif activity.status == 'closed':
-    css = "green_"
-%>
-            <tr class='${css}tr'>
+            <tr class="activity-status-${activity.status}">
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_datetime(activity.datetime)}
                 </td>

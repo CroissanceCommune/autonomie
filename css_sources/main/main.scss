@@ -12,6 +12,9 @@ $add-color-primary: #43cf52;
 $add-color-secondary: #989999;
 $add-color-tertiary: #e3e3e3;
 
+blockquote{
+  font-size: 1em;
+}
 
 .btn.primary-action{
   padding: 6px 18px;
@@ -453,6 +456,7 @@ $orange_status_label: #f0ad4e;
 $blue_status_hard: #238bff;
 $blue_status_light: #7db9fd;
 $blue_status_label: #5bc0de;
+
 .status-table{
   td.status-td{
     width: 16px;
@@ -463,7 +467,7 @@ $blue_status_label: #5bc0de;
       background-color: $blue_status_hard;
     }
   }
-  .signed-status-aborted, .tolate-True, .status-wait, .job-failed{
+  .signed-status-aborted, .tolate-True, .status-wait, .job-failed, .activity-status-cancelled{
     background-color: $red_status_light!important;
     a:not(.btn){
       text-transform:uppercase;
@@ -473,7 +477,7 @@ $blue_status_label: #5bc0de;
       background-color: $red_status_hard!important;
     }
   }
-  .geninv-True, .paid-status-resulted, .job-completed{
+  .geninv-True, .paid-status-resulted, .job-completed, .activity-status-closed{
     background-color: $green_status_light;
     .status-td{
       background-color: $green_status_hard;
@@ -492,11 +496,11 @@ $blue_status_label: #5bc0de;
   background-color: $blue_status-label;
   color: #fff;
 }
-.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid{
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled{
   background-color: $red_status-label!important;
   color: #fff;
 }
-.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed{
+.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed, .status-header.activity-status-closed{
   background-color: $green_status-label;
   color: #fff;
 }

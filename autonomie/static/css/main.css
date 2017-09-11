@@ -8,6 +8,9 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+blockquote {
+  font-size: 1em; }
+
 .btn.primary-action {
   padding: 6px 18px;
   font-size: 16px;
@@ -434,17 +437,17 @@ header .navbar .nav > li > a {
   .status-table .signed-status-signed .status-td, .status-table .justified-True .status-td, .status-table .job-planned .status-td {
     background-color: #238bff; }
 
-.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed {
+.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed, .status-table .activity-status-cancelled {
   background-color: #f9aaaa !important; }
-  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait a:not(.btn), .status-table .job-failed a:not(.btn) {
+  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn) {
     text-transform: uppercase;
     text-decoration: underline; }
-  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait .status-td, .status-table .job-failed .status-td {
+  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td {
     background-color: #C43C35 !important; }
 
-.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed {
+.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed {
   background-color: #c4ffaa; }
-  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td {
+  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td {
     background-color: #baff87; }
 
 .status-table .paid-status-paid {
@@ -456,11 +459,11 @@ header .navbar .nav > li > a {
   background-color: #5bc0de;
   color: #fff; }
 
-.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid {
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled {
   background-color: #d9534f !important;
   color: #fff; }
 
-.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed {
+.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed, .status-header.activity-status-closed {
   background-color: #5cb85c;
   color: #fff; }
 

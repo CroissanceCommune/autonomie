@@ -35,10 +35,16 @@ from js.jquery_timepicker_addon import timepicker_fr
 
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import aliased
-from sqlalchemy import asc
-from sqlalchemy import func
-from sqla_inspect import excel
-from sqla_inspect import ods
+from sqlalchemy import (
+    asc,
+    desc,
+    func,
+    orm,
+)
+from sqla_inspect import (
+    excel,
+    ods,
+)
 
 from autonomie.utils.widgets import ViewLink
 from autonomie.utils.pdf import (
@@ -597,6 +603,18 @@ class ActivityListContractor(ActivityList):
     """
     schema = get_list_schema(is_admin=False)
     grid = USER_SEARCH_GRID_FORM
+
+    add_template_vars = ('last_closed_event',)
+
+    @property
+    def last_closed_event(self):
+        query = Activity.query().options(
+            orm.load_only('action', 'datetime', 'id')
+        )
+        query = self.filter_participant(query, None)
+        query = query.filter_by(status='closed')
+        query = query.order_by(desc(Activity.datetime))
+        return query.first()
 
     def _get_conseiller_id(self, appstruct):
         return None

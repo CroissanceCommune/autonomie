@@ -261,6 +261,7 @@ function ajax_request(url, data, method, extra_options){
 
     return $.ajax(options);
 }
+var ajax_call = ajax_request;
 function loadUI(ui_object){
   /*
    * loadUI elements : the UI object is global and is used as a cache
@@ -395,3 +396,6 @@ function dismissPopup(win, options){
 }
 
 $(setupMainBehaviours);
+function capitalize(string){
+    return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase();
+}

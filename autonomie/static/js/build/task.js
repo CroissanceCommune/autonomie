@@ -77,7 +77,6 @@ webpackJsonp([2],[
 	});
 	
 	(0, _jquery2.default)(function () {
-	    (0, _tools.showLoader)();
 	    console.log("# Retrieving datas from the server");
 	    console.log(AppOption['form_config_url']);
 	    var serverCall1 = (0, _tools.ajax_call)(AppOption['form_config_url']);

@@ -68,6 +68,7 @@ Admin expenses list view
             <th>${sortable(u"Période", "month")}</th>
             <th>Montant</th>
             <th>Paiements</th>
+            <th>Justificatifs</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -113,6 +114,48 @@ Admin expenses list view
                             </ul>
                         % endif
                     % endfor
+                </td>
+                <td>
+                    % if api.has_permission('set_justified.expensesheet', expense):
+                    <div
+                        class="btn-group expense-justify"
+                        data-toggle="buttons"
+                        data-href="${request.route_path('/api/v1/expenses/{id}', id=expense.id, _query={'action': 'justified_status'})}"
+                        >
+                        <label
+                            class="btn btn-default
+                            % if not expense.justified:
+                            active
+                            % endif
+                            ">
+                            <input
+                                name=""
+                                value="false"
+                                % if not expense.justified:
+                                checked="true"
+                                % endif
+                                autocomplete="off"
+                                type="radio">
+                                <i class="fa fa-clock-o"></i> En attente
+                        </label>
+                        <label
+                            class="btn btn-default
+                            % if expense.justified:
+                            active
+                            % endif
+                            ">
+                            <input
+                            name=""
+                            value="true"
+                            autocomplete="off"
+                                % if expense.justified:
+                                checked="true"
+                                % endif
+                            type="radio">
+                            <i class="fa fa-check"></i> Reçus
+                        </label>
+                    </div>
+                    % endif
                 </td>
                 <td>
                     <% url = request.route_path('/expenses/{id}', id=expense.id) %>

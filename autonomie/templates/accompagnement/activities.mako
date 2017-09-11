@@ -24,48 +24,89 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    % if api.has_permission('add_activity'):
-        <a href="${request.route_path('activities', _query=dict(action='new'))}">
-            Nouveau rendez-vous
-        </a>
-    %endif
-    </li>
-</ul>
-
-</%block>
 <%block name="content">
-<div class='row'>
-    <div class='col-md-8'>
+% if request.has_permission('admin_activities'):
+<a
+    class='btn btn-primary primary-action'
+    href="${request.route_path('activities', _query={'action': 'new'})}">
+<i class="glyphicon glyphicon-plus-sign"></i>&nbsp;
+Programmer un nouveau rendez-vous
+</a>
+<div class='well well-sm pull-right btn-group' role='group'>
+        <%
+    args = request.GET
+    url = request.route_path('activities.xls', _query=args)
+    %>
+    <a
+        class='btn btn-default'
+        href='${url}'
+        title="Exporter les éléments de la liste au format xls">
+        <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+    </a>
+        <%
+    args = request.GET
+    url = request.route_path('activities.ods', _query=args)
+    %>
+    <a
+        class='btn btn-default'
+        href='${url}'
+        title="Exporter les éléments de la liste au format ods">
+        <i class='fa fa-file'></i>&nbsp;ODS
+    </a>
+</div>
+<hr />
+% endif
+<a class="btn btn-default large-btn
+    % if '__formid__' in request.GET:
+        btn-primary
+    % endif
+    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
+    <i class='glyphicon glyphicon-filter'></i>&nbsp;
+    Filtres&nbsp;
+    <i class='glyphicon glyphicon-chevron-down'></i>
+</a>
+% if '__formid__' in request.GET:
+    <span class='help-text'>
+        <small><i>Des filtres sont actifs</i></small>
+    </span>
+% endif
+% if '__formid__' in request.GET:
+    <div class='collapse' id='filter-form'>
+% else:
+    <div class='in collapse' id='filter-form'>
+% endif
+        <div class='row'>
+            <div class='col-xs-12'>
+<hr/>
+            % if '__formid__' in request.GET:
+                <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
+                <br />
+                <br />
+            %endif
                 ${form|n}
+            </div>
+        </div>
+    </div>
+<hr/>
+
+<div class='row'>
+    % if last_closed_event is not None:
+    <div class='col-xs-12'>
+        <h3>Dernière préconisations</h3>
+        <hr />
+    </div>
+    % endif
+    <div class='col-xs-12 col-md-8'>
+% if last_closed_event is not None:
+    <div class='well'>
+            <blockquote>
+                ${api.clean_html(last_closed_event.action)|n}
+                <footer>le ${api.format_date(last_closed_event.datetime)}</footer>
+            </blockquote>
+    </div>
+% endif
     </div>
     <div class='col-md-4'>
-    % if request.has_permission('admin_activities'):
-        <div class='well well-sm pull-right btn-group' role='group'>
-                <%
-            args = request.GET
-            url = request.route_path('activities.xls', _query=args)
-            %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste au format xls">
-                <i class='fa fa-file-excel-o'></i>&nbsp;Excel
-            </a>
-                <%
-            args = request.GET
-            url = request.route_path('activities.ods', _query=args)
-            %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste au format ods">
-                <i class='fa fa-file'></i>&nbsp;ODS
-            </a>
-        </div>
-    % endif
         <table class='table table-bordered status-table'>
             <tr>
                 <td class='activity-status-planned'><br /></td>
@@ -82,21 +123,6 @@
         </table>
     </div>
 </div>
-% if last_closed_event is not None:
-<div class='row'>
-    <div class='col-md-8 col-md-offset-2 col-xs-12'>
-        <div class='well'>
-        <h3>Dernière préconisations</h3>
-            <blockquote>
-                <i class='glyphicon glyphicon-quotes'></i>
-                ${api.clean_html(last_closed_event.action)|n}
-                <br />
-                <footer>le ${api.format_date(last_closed_event.datetime)}</footer>
-            </blockquote>
-        </div>
-    </div>
-</div>
-% endif
 <table class="table table-condensed table-hover status-table">
     <thead>
         <tr>

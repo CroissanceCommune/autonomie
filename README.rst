@@ -4,7 +4,7 @@ Autonomie
 
 .. image::
     https://secure.travis-ci.org/CroissanceCommune/autonomie.png?branch=master
-   :target: http://travis-ci.org/#!/CroissanceCommune/autonomie
+   :target: http://travis-ci.org/CroissanceCommune/autonomie
    :alt: Travis-ci: continuous integration status.
 
 

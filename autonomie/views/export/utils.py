@@ -114,7 +114,7 @@ def get_expense_id_form(request, counter, title, prefix='expense'):
     )
 
 
-def get_expense_form(request, title, prefix='expense'):
+def get_expense_form(request, counter, title, prefix='expense'):
     """
     Return a form for expense export
     :param obj request: Pyramid request object
@@ -127,4 +127,5 @@ def get_expense_form(request, title, prefix='expense'):
         schema=schema,
         buttons=(EXPORT_BTN,),
         formid=u"%s_main_form" % prefix,
+        counter=counter,
     )

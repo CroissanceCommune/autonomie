@@ -357,7 +357,7 @@ def migrate_datas(session):
     connection.execute(
         "UPDATE task "
         "SET status='valid' "
-        "WHERE status IN ('paid', 'resulted', 'aboinv')"
+        "WHERE status IN ('paid', 'resulted', 'aboinv', 'geninv', 'aboest')"
     )
 
 

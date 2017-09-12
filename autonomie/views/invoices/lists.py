@@ -228,19 +228,14 @@ class InvoiceListTools(object):
     def _filter_paid(self, query):
         return query.filter(
             or_(
-                and_(
-                    Task.paid_status == 'resulted',
-                    Task.type_ == 'invoice'
-                ),
+                Invoice.paid_status=='resulted',
                 Task.type_ == 'cancelinvoice',
             )
         )
 
     def _filter_not_paid(self, query):
         return query.filter(
-            Task.paid_status.in_(('waiting', 'paid'))
-        ).filter(
-            Task.type_ == 'invoice'
+            Invoice.paid_status.in_(('waiting', 'paid'))
         )
 
     def filter_doctype(self, query, appstruct):

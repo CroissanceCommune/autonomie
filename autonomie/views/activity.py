@@ -29,6 +29,7 @@
 import logging
 import deform
 import itertools
+import colander
 
 from js.deform import auto_need
 from js.jquery_timepicker_addon import timepicker_fr
@@ -532,7 +533,7 @@ class ActivityList(BaseListView):
         Add a filter on the conseiller to the current query
         """
         conseiller_id = self._get_conseiller_id(appstruct)
-        if conseiller_id is not None:
+        if conseiller_id not in (None, colander.null):
             query = query.filter(
                 Activity.conseillers.any(user.User.id == conseiller_id)
             )
@@ -541,7 +542,7 @@ class ActivityList(BaseListView):
     def filter_participant(self, query, appstruct):
         participant_id = appstruct.get('participant_id')
 
-        if participant_id is not None:
+        if participant_id not in (None, colander.null):
             query = query.filter(
                 Activity.attendances.any(
                     Attendance.account_id == participant_id
@@ -551,7 +552,7 @@ class ActivityList(BaseListView):
 
     def filter_user_status(self, query, appstruct):
         status = appstruct.get("user_status")
-        if status is not None:
+        if status not in (None, colander.null):
             query = query.filter(
                 Activity.attendances.any(Attendance.status == status)
             )
@@ -559,14 +560,14 @@ class ActivityList(BaseListView):
 
     def filter_type(self, query, appstruct):
         type_id = appstruct.get('type_id')
-        if type_id is not None:
+        if type_id not in (None, colander.null):
             query = query.filter(Activity.type_id == type_id)
         return query
 
     def filter_status(self, query, appstruct):
         status = appstruct.get('status')
 
-        if status is not None:
+        if status not in (None, colander.null):
             query = query.filter(Activity.status == status)
 
         return query
@@ -579,18 +580,21 @@ class ActivityList(BaseListView):
         date_range_start = appstruct.get('date_range_start')
         date_range_end = appstruct.get('date_range_end')
 
-        if date_range_start is not None:
+        if date_range_start not in (None, colander.null):
             query = query.filter(
                 func.date(Activity.datetime) >= date_range_start
             )
 
-        if date_range_end is not None:
+        if date_range_end not in (None, colander.null):
             query = query.filter(
                 func.date(Activity.datetime) <= date_range_end
             )
 
-        if year is not None and date_range_start is None and \
-                date_range_end is None:
+        if (
+            year not in (None, colander.null) and
+            date_range_start not in (None, colander.null) and
+            date_range_end not in (None, colander.null)
+        ):
             query = query.filter(
                 func.extract('YEAR', Activity.datetime) == year
             )

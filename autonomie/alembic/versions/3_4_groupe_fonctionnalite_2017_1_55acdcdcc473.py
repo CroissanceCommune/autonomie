@@ -244,7 +244,7 @@ def _upgrade_invoices(connection):
     )
     connection.execute(
         "UPDATE invoice JOIN task ON task.id=invoice.id "
-        "SET invoice.paid_status='wait' "
+        "SET invoice.paid_status='waiting' "
         "WHERE status NOT in ('paid', 'resulted');"
     )
     connection.execute(

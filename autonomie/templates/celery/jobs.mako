@@ -64,10 +64,6 @@
         % for job in records:
             <% url = request.route_path('job', id=job.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
-            <%
-elif job.status == 'completed':
-    css = "green_"
-%>
             <tr class='job-${job.status}'>
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_datetime(job.created_at)}

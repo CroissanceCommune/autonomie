@@ -113,7 +113,7 @@ class SageExpenseExportPage(BaseExportView):
         Implement parent get_forms method
         """
         result = self._get_forms()
-        counter = result.values[0].counter
+        counter = result.values()[0]['form'].counter
         result.update(
             self._get_forms(
                 prefix=u'1', label=u'frais', genre='', counter=counter

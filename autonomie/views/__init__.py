@@ -153,16 +153,23 @@ class BaseListClass(BaseView):
         the sort_columns dict, maybe overriden to provide a custom sort
         method
         """
-        if appstruct:
-            sort_column_key = appstruct['sort']
-            sort_column = self.sort_columns[sort_column_key]
+        sort_column_key = self.request.GET.get('sort', appstruct['sort'])
+        sort_column = self.sort_columns.get(sort_column_key)
 
-            sort_direction = appstruct['direction']
+        self.logger.debug("  + Sorting the query : %s" % sort_column_key)
+        if sort_column:
+
+            sort_direction = self.request.GET.get(
+                'direction',
+                appstruct['direction']
+            )
+            self.logger.debug("  + Direction : %s" % sort_direction)
             if sort_direction == 'asc':
                 func = asc
-            else:
+                query = query.order_by(func(sort_column))
+            elif sort_direction == 'desc':
                 func = desc
-            query = query.order_by(func(sort_column))
+                query = query.order_by(func(sort_column))
         return query
 
     def set_form_widget(self, form):
@@ -219,9 +226,9 @@ class BaseListClass(BaseView):
         if self.schema is not None:
             schema = self.schema.bind(**self._get_bind_params())
             try:
-                submitted = self.request.GET.items()
                 form = self.get_form(schema)
-                if submitted:
+                if '__formid__' in self.request.GET:
+                    submitted = self.request.GET.items()
                     appstruct = form.validate(submitted)
                 else:
                     appstruct = form.cstruct
@@ -263,11 +270,10 @@ def get_page_url(request, page):
 
     Note : default Webob pagination tool doesn't respect query_params order and
     breaks mapping order, so we can't preserve search params in list views
-
     """
-    get_args = request.GET.copy()
-    get_args['page'] = str(page)
-    return request.current_route_path(_query=get_args)
+    args = request.GET.copy()
+    args['page'] = str(page)
+    return request.current_route_path(_query=args)
 
 
 class BaseListView(BaseListClass):
@@ -286,6 +292,13 @@ class BaseListView(BaseListClass):
     add_template_vars = ()
     grid = None
 
+    def _get_current_page(self, appstruct):
+        """
+        Return the current requested page
+        """
+        res = self.request.GET.get('page', appstruct['page'])
+        return convert_to_int(res)
+
     def _paginate(self, query, appstruct):
         """
             wraps the current SQLA query with pagination
@@ -293,12 +306,23 @@ class BaseListView(BaseListClass):
         # Url builder for page links
         from functools import partial
         page_url = partial(get_page_url, request=self.request)
-        current_page = convert_to_int(appstruct['page'])
+
+        current_page = self._get_current_page(appstruct)
         items_per_page = convert_to_int(appstruct['items_per_page'])
-        return paginate.Page(query,
-                             current_page,
-                             url=page_url,
-                             items_per_page=items_per_page)
+        self.logger.debug(
+            " + Page : %s, items per page : %s" % (
+                current_page, items_per_page
+            )
+        )
+        self.logger.debug(query)
+        page = paginate.Page(
+            query,
+            current_page,
+            url=page_url,
+            items_per_page=items_per_page
+        )
+        self.logger.debug(page)
+        return page
 
     def more_template_vars(self, response_dict):
         """

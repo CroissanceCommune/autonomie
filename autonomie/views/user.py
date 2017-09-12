@@ -380,12 +380,18 @@ class UserList(BaseListView):
             return the button to show disabled users
         """
         disabled = appstruct['disabled']
+        _query = self.request.GET.copy()
+        if '__formid__' not in _query:
+            _query['__formid__'] = 'deform'
+
         if disabled == '0':
-            url = self.request.current_route_path(_query=dict(disabled="1"))
-            link = HTML.a(u"Afficher les comptes désactivés",  href=url)
+            label = u"Afficher les comptes désactivés"
+            _query['disabled'] = '1'
         else:
-            url = self.request.current_route_path(_query=dict(disabled="0"))
-            link = HTML.a(u"Afficher uniquement les comptes actifs", href=url)
+            _query['disabled'] = '0'
+            label = u"Afficher uniquement les comptes actifs"
+        url = self.request.current_route_path(_query=_query)
+        link = HTML.a(label, href=url)
         return StaticWidget(link)
 
 

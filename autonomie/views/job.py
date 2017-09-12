@@ -23,6 +23,7 @@
 Job related pages
 """
 import cStringIO as StringIO
+import colander
 from pyramid.httpexceptions import HTTPNotFound
 
 from autonomie.export.utils import write_file_to_request
@@ -71,14 +72,14 @@ class JobList(BaseListView):
 
     def filter_type(self, query, appstruct):
         type_ = appstruct.get('type_')
-        if type_ is not None:
+        if type_ not in (None, colander.null):
             query = query.filter(Job.type_ == type_)
         return query
 
     def filter_status(self, query, appstruct):
         status = appstruct.get('status')
-        if status is not None:
-            query = query.filter(Job.status == 'status')
+        if status not in (None, colander.null):
+            query = query.filter(Job.status == status)
         return query
 
 

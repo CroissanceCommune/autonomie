@@ -341,7 +341,7 @@ class WorkshopListTools(object):
 
     def filter_participant(self, query, appstruct):
         participant_id = appstruct.get('participant_id')
-        if participant_id is not None:
+        if participant_id not in (None, colander.null):
             query = query.filter(
                 models.Workshop.attendances.any(
                     Attendance.account_id == participant_id
@@ -351,7 +351,7 @@ class WorkshopListTools(object):
 
     def filter_search(self, query, appstruct):
         search = appstruct['search']
-        if search:
+        if search not in (None, colander.null, ''):
             query = query.filter(
                 or_(models.Workshop.name.like('%{0}%'.format(search)),
                     models.Workshop.leaders.like('%{0}%'.format(search))
@@ -361,14 +361,14 @@ class WorkshopListTools(object):
     def filter_date(self, query, appstruct):
         date = appstruct.get('date')
         year = appstruct.get('year')
-        if date is not None:
+        if date not in (None, colander.null):
             query = query.filter(
                 models.Workshop.timeslots.any(
                     func.date(models.Timeslot.start_time) == date
                 )
             )
         # Only filter by year if no date filter is set
-        elif year is not None:
+        elif year not in (None, colander.null):
             query = query.filter(
                 models.Workshop.timeslots.any(
                     func.extract('YEAR', models.Timeslot.start_time) == year
@@ -382,7 +382,7 @@ class WorkshopListTools(object):
         Filter the workshops for which timeslots have not been filled
         """
         notfilled = appstruct.get('notfilled')
-        if notfilled:
+        if notfilled not in (None, colander.null):
             logger.debug(u"Filtering the workshop that where not filled")
             attendance_query = DBSESSION().query(distinct(Attendance.event_id))
             attendance_query = attendance_query.filter(

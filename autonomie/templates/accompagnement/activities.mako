@@ -90,14 +90,14 @@ Programmer un nouveau rendez-vous
 <hr/>
 
 <div class='row'>
-    % if last_closed_event is not None:
+    % if last_closed_event is not UNDEFINED and last_closed_event is not None:
     <div class='col-xs-12'>
         <h3>Dernière préconisations</h3>
         <hr />
     </div>
     % endif
     <div class='col-xs-12 col-md-8'>
-% if last_closed_event is not None:
+% if last_closed_event is not UNDEFINED and last_closed_event is not None:
     <div class='well'>
             <blockquote>
                 ${api.clean_html(last_closed_event.action)|n}

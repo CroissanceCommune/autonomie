@@ -116,8 +116,12 @@ def get_cid(request, submenu=False):
     :param bool submenu: Do we ask this for the submenu ?
     """
     cid = None
+    len_companies = Company.query().count()
     if len(request.user.companies) == 1 and not submenu:
         cid = request.user.companies[0].id
+
+    elif len_companies == 1:
+        cid = Company.query().first().id
 
     # The current context provide a get_company_id utility that allows to
     # retrieve the concerned company

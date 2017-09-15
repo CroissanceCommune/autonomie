@@ -36,7 +36,6 @@ from deform import (
 
 from sqlalchemy import (
     or_,
-    and_,
     distinct,
 )
 from sqlalchemy.orm import (
@@ -61,6 +60,7 @@ from autonomie.models.task import (
 from autonomie.models.customer import Customer
 from autonomie.models.company import Company
 
+from autonomie.utils.renderer import set_close_popup_response
 from autonomie.utils.widgets import (
     PopUp,
     ViewLink,
@@ -228,7 +228,7 @@ class InvoiceListTools(object):
     def _filter_paid(self, query):
         return query.filter(
             or_(
-                Invoice.paid_status=='resulted',
+                Invoice.paid_status == 'resulted',
                 Task.type_ == 'cancelinvoice',
             )
         )
@@ -297,8 +297,12 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
         """
         service_ok, msg = check_alive()
         if not service_ok:
-            self.request.session.flash(msg, 'error')
-            return HTTPFound(self.request.referrer)
+            if "popup" in self.request.GET:
+                set_close_popup_response(self.request, error=msg)
+                return self.request.response
+            else:
+                self.request.session.flash(msg, 'error')
+                return HTTPFound(self.request.referrer)
 
         logger.debug("    + In the GlobalInvoicesCsvView._build_return_value")
         job = FileGenerationJob()

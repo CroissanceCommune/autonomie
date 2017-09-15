@@ -34,17 +34,17 @@ def get_company(id):
 
 def get_user():
     user =  MagicMock()
-    user.companies = [get_company(1)]
+    user.active_companies = [get_company(1)]
     return user
 
 def get_manager():
     user =  MagicMock()
-    user.companies = [get_company(1)]
+    user.active_companies = [get_company(1)]
     return user
 
 def get_admin():
     user =  MagicMock()
-    user.companies = [get_company(1)]
+    user.active_companies = [get_company(1)]
     return user
 
 def get_context():
@@ -58,7 +58,7 @@ def test_get_cid():
     request.user = get_user()
     request.context = get_context()
     assert get_cid(request) == 1
-    request.user.companies.append(get_company(2))
+    request.user.active_companies.append(get_company(2))
     assert get_cid(request) == 200
     # ref bug :#522
     request.user = get_manager()
@@ -70,5 +70,5 @@ def test_get_companies(config, pyramid_request):
     config.testing_securitypolicy(userid="test", permissive=False)
     pyramid_request.user = get_user()
     pyramid_request.context = get_context()
-    assert get_companies(pyramid_request) == pyramid_request.user.companies
+    assert get_companies(pyramid_request) == pyramid_request.user.active_companies
 

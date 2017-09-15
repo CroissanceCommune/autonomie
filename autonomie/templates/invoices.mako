@@ -75,9 +75,9 @@
     %>
     <a
         class='btn btn-default'
-        href='${url}'
+        onclick="openPopup('${url}');"
+        href='#'
         title="Export au format Excel"
-        target='_blank'
         >
         <i class='fa fa-file-excel-o'></i> Excel
     </a>
@@ -91,9 +91,9 @@
     %>
     <a
         class='btn btn-default'
-        href='${url}'
+        onclick="openPopup('${url}');"
+        href='#'
         title="Export au formt Open document"
-        target='_blank'
         >
         <i class='fa fa-file'></i> ODS
     </a>
@@ -107,9 +107,9 @@
     %>
     <a
         class='btn btn-default'
-        href='${url}'
+        onclick="openPopup('${url}');"
+        href='#'
         title="Export au formt csv"
-        target='_blank'
         >
         <i class='fa fa-file'></i> CSV
     </a>

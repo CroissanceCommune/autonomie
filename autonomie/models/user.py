@@ -480,6 +480,13 @@ class User(DBBASE, PersistentACLMixin):
     def label(self):
         return format_name(self.firstname, self.lastname)
 
+    @property
+    def active_companies(self):
+        """
+        Return only enabled companies
+        """
+        return [company for company in self.companies if not company.archived]
+
 
 def get_user_by_roles(roles):
     """

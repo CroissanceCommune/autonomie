@@ -116,8 +116,8 @@ def get_cid(request, submenu=False):
     :param bool submenu: Do we ask this for the submenu ?
     """
     cid = None
-    if len(request.user.companies) == 1 and not submenu:
-        cid = request.user.companies[0].id
+    if len(request.user.active_companies) == 1 and not submenu:
+        cid = request.user.active_companies[0].id
 
     # The current context provide a get_company_id utility that allows to
     # retrieve the concerned company
@@ -126,7 +126,7 @@ def get_cid(request, submenu=False):
             cid = request.context.get_company_id()
 
     else:
-        return request.user.companies[0].id
+        return request.user.active_companies[0].id
 
     return cid
 
@@ -139,7 +139,7 @@ def get_companies(request):
     if request.has_permission('manage'):
         companies = Company.query().all()
     else:
-        companies = request.user.companies
+        companies = request.user.active_companies
     return companies
 
 

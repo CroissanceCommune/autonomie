@@ -377,10 +377,14 @@ function dismissPopup(win, options){
     _.extend(default_options, options);
     win.close();
 
-    var new_content = "<div class='alert alert-success text-center'>";
+    var new_content = "";
 
     if (!_.isUndefined(default_options.message)){
+        new_content += "<div class='alert alert-success text-center'>";
         new_content += default_options.message;
+    } else if (!_.isUndefined(default_options.error)){
+        new_content += "<div class='alert alert-danger text-center'>";
+        new_content += default_options.error;
     }
 
     if (default_options.refresh){

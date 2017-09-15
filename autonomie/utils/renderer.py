@@ -95,14 +95,22 @@ def customize_renderers(config):
     configure_export()
 
 
-def set_close_popup_response(request, message, refresh=True):
+def set_close_popup_response(request, message=None, error=None, refresh=True):
     """
     Write directly js code inside the request reponse's body to call popup close
     """
+    options = u"{"
     refresh = refresh and 'true' or 'false'
+    options += u"refresh: %s" % refresh
+    if message is not None:
+        options += u""", message: "%s" """ % message
+    if error is not None:
+        options += u""", error: "%s" """ % error
+    options += u"}"
+
     request.response.text = u"""<!DOCTYPE html>
     <html><head><title></title></head><body>
     <script type="text/javascript">
-    opener.dismissPopup(window, {message: "%s", refresh: %s});
-    </script></body></html>""" % (message, refresh)
+    opener.dismissPopup(window, %s);
+    </script></body></html>""" % (options)
     return request

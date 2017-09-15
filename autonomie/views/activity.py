@@ -269,7 +269,7 @@ def populate_actionmenu(request):
         # entreprise, le problème c'est qu'on a pas l'id de celle-ci, on prend
         # donc le premier id d'entreprise qu'on trouve (c'est pas génial, mais
         # ça a le mérite de marcher)
-        company = request.user.companies[0]
+        company = request.user.active_companies[0]
         if request.has_permission('list_activities', company):
             link = ViewLink(
                 u"Liste des rendez-vous",

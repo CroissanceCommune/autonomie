@@ -38,7 +38,7 @@ def index(request):
         Index page
     """
     user = request.user
-    companies = user.companies
+    companies = user.active_companies
     if request.has_permission('manage'):
         return HTTPFound(request.route_path('manage'))
     elif len(companies) == 1:
@@ -54,7 +54,7 @@ def index(request):
             )
         return dict(
             title=u"Bienvenue dans Autonomie",
-            companies=user.companies
+            companies=user.active_companies
         )
 
 

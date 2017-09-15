@@ -71,5 +71,5 @@ def get_current_company(request):
     if hasattr(request.context, "get_company_id"):
         cid = request.context.get_company_id()
     else:
-        cid = request.user.companies[0].id
+        cid = request.user.active_companies[0].id
     return cid

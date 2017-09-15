@@ -324,7 +324,7 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
         )
 
         return HTTPFound(
-            self.request.route_path('job', id=job.id, _query={'nomenu': 1})
+            self.request.route_path('job', id=job.id, _query={'popup': 1})
         )
 
 

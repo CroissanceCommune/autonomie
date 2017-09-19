@@ -320,19 +320,19 @@ webpackJsonp([1],[
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 95);
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 97);
 	
 	var _Facade2 = _interopRequireDefault(_Facade);
 	
-	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 100);
+	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 102);
 	
 	var _AuthBus2 = _interopRequireDefault(_AuthBus);
 	
-	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 101);
+	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 103);
 	
 	var _MessageBus2 = _interopRequireDefault(_MessageBus);
 	
-	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 102);
+	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 104);
 	
 	var _ConfigBus2 = _interopRequireDefault(_ConfigBus);
 	
@@ -344,6 +344,7 @@ webpackJsonp([1],[
 	        _Facade2.default.loadModels(options.form_datas, options.form_config);
 	        AppOption.facade = _Facade2.default;
 	        AppOption.config = _ConfigBus2.default;
+	        AppOption.messagebus = _MessageBus2.default;
 	
 	        this.mainView = new _MainView2.default();
 	        _App2.default.showView(this.mainView);
@@ -387,9 +388,13 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	var _backbone3 = __webpack_require__(/*! backbone */ 17);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _backbone5 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone6 = _interopRequireDefault(_backbone5);
 	
 	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 26);
 	
@@ -439,13 +444,17 @@ webpackJsonp([1],[
 	
 	var _TabTotalView2 = _interopRequireDefault(_TabTotalView);
 	
+	var _MessageView = __webpack_require__(/*! ../../base/views/MessageView.js */ 94);
+	
+	var _MessageView2 = _interopRequireDefault(_MessageView);
+	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var MainView = _backbone2.default.View.extend({
 	    className: 'container-fluid page-content',
-	    template: __webpack_require__(/*! ./templates/MainView.mustache */ 94),
+	    template: __webpack_require__(/*! ./templates/MainView.mustache */ 96),
 	    regions: {
 	        modalRegion: '.modalRegion',
 	        internalLines: '.internal-lines',
@@ -459,7 +468,11 @@ webpackJsonp([1],[
 	            el: '.footer-actions',
 	            replaceElement: true
 	        },
-	        rightbar: "#rightbar"
+	        rightbar: "#rightbar",
+	        messages: {
+	            el: '.messages-container',
+	            replaceElement: true
+	        }
 	    },
 	    ui: {
 	        internal: '#internal-container',
@@ -479,8 +492,8 @@ webpackJsonp([1],[
 	        "status:change": 'onStatusChange'
 	    },
 	    initialize: function initialize() {
-	        this.facade = _backbone4.default.channel('facade');
-	        this.config = _backbone4.default.channel('config');
+	        this.facade = _backbone6.default.channel('facade');
+	        this.config = _backbone6.default.channel('config');
 	        this.categories = this.config.request('get:options', 'categories');
 	        this.edit = this.config.request('get:options', 'edit');
 	    },
@@ -616,6 +629,11 @@ webpackJsonp([1],[
 	        });
 	        this.showChildView('footer', view);
 	    },
+	    showMessages: function showMessages() {
+	        var model = new _backbone4.default.Model();
+	        var view = new _MessageView2.default({ model: model });
+	        this.showChildView('messages', view);
+	    },
 	    showTotals: function showTotals() {
 	        var model = this.facade.request('get:totalmodel');
 	        var view = new _TotalView2.default({ model: model });
@@ -631,6 +649,7 @@ webpackJsonp([1],[
 	        this.showActitityTab();
 	        this.showTotals();
 	        this.showActions();
+	        this.showMessages();
 	    },
 	    onStatusChange: function onStatusChange(status, title, label, url) {
 	        var view = new _StatusView2.default({
@@ -4902,20 +4921,14 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 31);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : BaseModel.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var BaseModel = _backbone2.default.Model.extend({
 	    /*
 	     * BaseModel for expenses, provides tools to access main options
@@ -4961,15 +4974,31 @@ webpackJsonp([1],[
 	            this.fetch();
 	        }
 	    },
+	    onDuplicateError: function onDuplicateError(result) {
+	        this.collection.fetch();
+	        var channel = _backbone4.default.channel('message');
+	        channel.trigger('error:ajax', result);
+	    },
+	    onDuplicateCallback: function onDuplicateCallback(result) {
+	        this.collection.fetch();
+	        var channel = _backbone4.default.channel('message');
+	        channel.trigger('success:ajax', result);
+	    },
 	    duplicate: function duplicate(datas) {
 	        var request = (0, _tools.ajax_call)(this.url() + '?action=duplicate', datas, 'POST');
-	        var this_ = this;
-	        request.done(function (result) {
-	            this_.collection.fetch();
-	        });
+	        request.done(this.onDuplicateCallback.bind(this)).fail(this.onDuplicateError.bind(this));
 	        return request;
 	    }
-	});
+	}); /*
+	     * File Name : BaseModel.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = BaseModel;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
@@ -4983,7 +5012,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 54);
@@ -4999,70 +5028,71 @@ webpackJsonp([1],[
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var ExpenseKmModel = _BaseModel2.default.extend({
-	  defaults: {
-	    category: null,
-	    start: "",
-	    end: "",
-	    description: ""
-	  },
-	  initialize: function initialize(options) {
-	    if (options['altdate'] === undefined && options['date'] !== undefined) {
-	      this.set('altdate', (0, _date.formatPaymentDate)(options['date']));
-	    }
-	    this.config = _backbone2.default.channel('config');
-	    this.expensekm_types = this.config.request('get:options', 'expensekm_types');
-	  },
+	    defaults: {
+	        type: 'km',
+	        category: null,
+	        start: "",
+	        end: "",
+	        description: ""
+	    },
+	    initialize: function initialize(options) {
+	        if (options['altdate'] === undefined && options['date'] !== undefined) {
+	            this.set('altdate', (0, _date.formatPaymentDate)(options['date']));
+	        }
+	        this.config = _backbone2.default.channel('config');
+	        this.expensekm_types = this.config.request('get:options', 'expensekm_types');
+	    },
 	
-	  validation: {
-	    category: {
-	      required: true,
-	      msg: "est requise"
+	    validation: {
+	        category: {
+	            required: true,
+	            msg: "est requise"
+	        },
+	        type_id: {
+	            required: true,
+	            msg: "est requis"
+	        },
+	        date: {
+	            required: true,
+	            pattern: /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/,
+	            msg: "est requise"
+	        },
+	        km: {
+	            required: true,
+	            // Match"es 19,6 19.65 but not 19.654"
+	            pattern: /^[\+\-]?[0-9]+(([\.\,][0-9]{1})|([\.\,][0-9]{2}))?$/,
+	            msg: "doit être un nombre"
+	        }
 	    },
-	    type_id: {
-	      required: true,
-	      msg: "est requis"
-	    },
-	    date: {
-	      required: true,
-	      pattern: /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/,
-	      msg: "est requise"
-	    },
-	    km: {
-	      required: true,
-	      // Match"es 19,6 19.65 but not 19.654"
-	      pattern: /^[\+\-]?[0-9]+(([\.\,][0-9]{1})|([\.\,][0-9]{2}))?$/,
-	      msg: "doit être un nombre"
-	    }
-	  },
-	  getIndice: function getIndice() {
-	    /*
-	     *  Return the reference used for compensation of km fees
-	     */
-	    var type_id = parseInt(this.get('type_id'), 10);
+	    getIndice: function getIndice() {
+	        /*
+	         *  Return the reference used for compensation of km fees
+	         */
+	        var type_id = parseInt(this.get('type_id'), 10);
 	
-	    var elem = _.findWhere(this.expensekm_types, { value: type_id });
-	    if (elem === undefined) {
-	      return 0;
+	        var elem = _.findWhere(this.expensekm_types, { value: type_id });
+	        if (elem === undefined) {
+	            return 0;
+	        }
+	        return parseFloat(elem.amount);
+	    },
+	    getHT: function getHT() {
+	        return this.total();
+	    },
+	    getTva: function getTva() {
+	        return 0;
+	    },
+	    total: function total() {
+	        var km = this.getKm();
+	        var amount = this.getIndice();
+	        return km * amount;
+	    },
+	    getKm: function getKm() {
+	        return parseFloat(this.get('km'));
+	    },
+	    getTypeOptions: function getTypeOptions() {
+	        return this.expensekm_types;
 	    }
-	    return parseFloat(elem.amount);
-	  },
-	  getHT: function getHT() {
-	    return this.total();
-	  },
-	  getTVA: function getTVA() {
-	    return 0;
-	  },
-	  total: function total() {
-	    var km = this.getKm();
-	    var amount = this.getIndice();
-	    return km * amount;
-	  },
-	  getKm: function getKm() {
-	    return parseFloat(this.get('km'));
-	  },
-	  getTypeOptions: function getTypeOptions() {
-	    return this.expensekm_types;
-	  }
 	}); /*
 	     * File Name : ExpenseKmModel.js
 	     *
@@ -7803,11 +7833,13 @@ webpackJsonp([1],[
 	
 	var _tools = __webpack_require__(/*! ../../tools.js */ 31);
 	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
-	
 	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 74);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
+	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7828,12 +7860,14 @@ webpackJsonp([1],[
 	    serializeForm: function serializeForm() {
 	        return (0, _tools.serializeForm)(this.getUI('form'));
 	    },
-	    onSyncError: function onSyncError() {
-	        (0, _backboneTools.displayServerError)("Une erreur a été rencontrée lors de la " + "sauvegarde de vos données");
+	    onSyncError: function onSyncError(datas, status, result) {
+	        var channel = _backbone4.default.channel("message");
+	        channel.trigger('error:backbone', result);
 	        _backboneValidation2.default.unbind(this.view);
 	    },
-	    onSyncSuccess: function onSyncSuccess() {
-	        (0, _backboneTools.displayServerSuccess)("Vos données ont bien été sauvegardées");
+	    onSyncSuccess: function onSyncSuccess(datas, status, result) {
+	        var channel = _backbone4.default.channel("message");
+	        channel.trigger('success:backbone', result);
 	        _backboneValidation2.default.unbind(this.view);
 	        console.log("Trigger success:sync from FormBehavior");
 	        this.view.triggerMethod('success:sync');
@@ -7851,30 +7885,41 @@ webpackJsonp([1],[
 	        }
 	
 	        if (this.view.model.isValid(_.keys(datas))) {
+	            var request = void 0;
 	            if (!this.view.model.get('id')) {
-	                this.addSubmit(datas);
+	                request = this.addSubmit(datas);
 	            } else {
-	                this.editSubmit(datas);
+	                request = this.editSubmit(datas);
 	            }
+	            console.log(request);
+	            request.done(this.onSyncSuccess.bind(this)).fail(this.onSyncError.bind(this));
 	        }
 	    },
 	    addSubmit: function addSubmit(datas) {
+	        /*
+	         *
+	         * Since collection.create doesn't return a jquery promise, we need to
+	         * re-implement the destcollection create stuff and return the expected
+	         * promise
+	         *
+	         * See sources : (Collection.create)
+	         * http://backbonejs.org/docs/backbone.html
+	         *
+	         */
 	        console.log("FormBehavior.addSubmit");
 	        var destCollection = this.view.getOption('destCollection');
-	        destCollection.create(datas, {
-	            success: this.onSyncSuccess.bind(this),
-	            error: this.onSyncError.bind(this),
-	            wait: true,
-	            sort: true
+	        var model = destCollection._prepareModel(datas);
+	
+	        var request = model.save(null, { wait: true, sort: true });
+	        request = request.done(function (model, resp, callbackOpts) {
+	            destCollection.add(model, callbackOpts);
+	            return model, 'success', resp;
 	        });
+	        return request;
 	    },
 	    editSubmit: function editSubmit(datas) {
-	        this.view.model.save(datas, {
-	            success: this.onSyncSuccess.bind(this),
-	            error: this.onSyncError.bind(this),
-	            wait: true,
-	            patch: true
-	        });
+	        console.log("FormBehavior.editSubmit");
+	        return this.view.model.save(datas, { wait: true, patch: true });
 	    },
 	    onSubmitForm: function onSubmitForm(event) {
 	        console.log("FormBehavior.onSubmitForm");
@@ -8779,9 +8824,15 @@ webpackJsonp([1],[
 	        this.triggerMethod('modal:close');
 	    },
 	    templateContext: function templateContext() {
+	        var ht = this.model.getHT();
+	        var tva = this.model.getTva();
+	        var ttc = this.model.total();
+	        var is_km_fee = this.model.get('type') == 'km';
 	        return {
-	            ht: (0, _math.formatAmount)(this.model.get('ht')),
-	            tva: (0, _math.formatAmount)(this.model.get('tva'))
+	            ht: (0, _math.formatAmount)(ht),
+	            tva: (0, _math.formatAmount)(tva),
+	            ttc: (0, _math.formatAmount)(ttc),
+	            is_km_fee: is_km_fee
 	        };
 	    },
 	    onRender: function onRender() {
@@ -8814,16 +8865,34 @@ webpackJsonp([1],[
 
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
-	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class=\"modal-dialog\" role=\"document\">\n    <div class=\"modal-content\">\n        <form>\n            <div class=\"modal-header\">\n              <button tabindex='-1' type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n              <h4 class=\"modal-title\">Dupliquer une note de dépense</h4>\n            </div>\n            <div class=\"modal-body\">\n                <div>\n                Note de dépenses : "
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "                <h3>Note de dépenses kilométriques</h3>\n                De "
+	    + escapeExpression(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"start","hash":{},"data":data}) : helper)))
+	    + " à "
+	    + escapeExpression(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"end","hash":{},"data":data}) : helper)))
+	    + " ( "
+	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
+	    + " )<br />\n                Nombre de kilomètres : "
+	    + escapeExpression(((helper = (helper = helpers.km || (depth0 != null ? depth0.km : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"km","hash":{},"data":data}) : helper)))
+	    + " <br />\n                Montant remboursé : ";
+	  stack1 = ((helper = (helper = helpers.ttc || (depth0 != null ? depth0.ttc : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ttc","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "\n";
+	},"3":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "                <h3>Note de dépenses</h3>\n                "
 	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
 	    + "<br />\n                HT : ";
 	  stack1 = ((helper = (helper = helpers.ht || (depth0 != null ? depth0.ht : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"ht","hash":{},"data":data}) : helper));
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += " TVA : ";
+	  buffer += "<br />\n                TVA : ";
 	  stack1 = ((helper = (helper = helpers.tva || (depth0 != null ? depth0.tva : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"tva","hash":{},"data":data}) : helper));
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "\n                </div>\n                <div class='select'></div>\n            </div>\n            <div class=\"modal-footer\">\n                <button\n                    class='btn btn-success primary-action'\n                    type='submit'\n                    value='submit'>\n                    Dupliquer\n                </button>\n                <button\n                    class='btn btn-default secondary-action'\n                    type='reset'\n                    value='submit'>\n                    Annuler\n                </button>\n            </div>\n        </form>\n    </div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n\n";
+	  return buffer + "\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "<div class=\"modal-dialog\" role=\"document\">\n    <div class=\"modal-content\">\n        <form>\n            <div class=\"modal-header\">\n              <button tabindex='-1' type=\"button\" class=\"close\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n              <h4 class=\"modal-title\">Dupliquer une note de dépense</h4>\n            </div>\n            <div class=\"modal-body\">\n                <div class='well'>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_km_fee : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "                </div>\n                <div class='select'></div>\n            </div>\n            <div class=\"modal-footer\">\n                <button\n                    class='btn btn-success primary-action'\n                    type='submit'\n                    value='submit'>\n                    Dupliquer\n                </button>\n                <button\n                    class='btn btn-default secondary-action'\n                    type='reset'\n                    value='submit'>\n                    Annuler\n                </button>\n            </div>\n        </form>\n    </div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n\n";
 	},"useData":true});
 
 /***/ }),
@@ -8975,6 +9044,126 @@ webpackJsonp([1],[
 
 /***/ }),
 /* 94 */
+/*!***************************************!*\
+  !*** ./src/base/views/MessageView.js ***!
+  \***************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _backbone3 = __webpack_require__(/*! backbone */ 17);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
+	var _backbone5 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone6 = _interopRequireDefault(_backbone5);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var MessageView = _backbone2.default.View.extend({
+	    tagName: 'div',
+	    template: __webpack_require__(/*! ./templates/MessageView.mustache */ 95),
+	    ui: {
+	        close: 'span.link'
+	    },
+	    events: {
+	        'click @ui.close': 'onClose'
+	    },
+	    modelEvents: {
+	        "change:notifyClass": 'render'
+	    },
+	    className: 'messages-static-top text-center alert',
+	    onClose: function onClose() {
+	        this.model.set({ notifyText: null });
+	        this.$el.hide();
+	    },
+	    initialize: function initialize() {
+	        var channel = _backbone6.default.channel('message');
+	        channel.reply({
+	            'notify:success': this.notifySuccess.bind(this),
+	            'notify:error': this.notifyError.bind(this)
+	        });
+	    },
+	    notifyError: function notifyError(message) {
+	        console.log("Notify error");
+	        this.model.set({
+	            notifyClass: 'error',
+	            notifyText: message
+	        });
+	        this.$el.removeClass('alert-success');
+	        this.$el.addClass('alert-danger');
+	        this.$el.show();
+	    },
+	    notifySuccess: function notifySuccess(message) {
+	        console.log("Notify success");
+	        this.model.set({
+	            notifyClass: 'success',
+	            notifyText: message
+	        });
+	        this.$el.removeClass('alert-danger');
+	        this.$el.addClass('alert-success');
+	        this.$el.show();
+	    },
+	    templateContext: function templateContext() {
+	        var has_message = false;
+	        if (this.model.get('notifyText')) {
+	            has_message = true;
+	        }
+	        return {
+	            has_message: has_message,
+	            error: this.model.get('notifyClass') == 'error'
+	        };
+	    }
+	}); /*
+	     * File Name : MessageView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = MessageView;
+
+/***/ }),
+/* 95 */
+/*!*******************************************************!*\
+  !*** ./src/base/views/templates/MessageView.mustache ***!
+  \*******************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
+	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.error : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.program(4, data),"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  stack1 = ((helper = (helper = helpers.notifyText || (depth0 != null ? depth0.notifyText : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"notifyText","hash":{},"data":data}) : helper));
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer + "\n<span class='link'><i class='glyphicon glyphicon-remove'></i></span>\n";
+	},"2":function(depth0,helpers,partials,data) {
+	  return "<i class='glyphicon glyphicon-warning-sign'></i>&nbsp;\n";
+	  },"4":function(depth0,helpers,partials,data) {
+	  return "<i class='glyphicon glyphicon-ok'></i>&nbsp;\n";
+	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  var stack1, buffer = "";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.has_message : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
+	},"useData":true});
+
+/***/ }),
+/* 96 */
 /*!*******************************************************!*\
   !*** ./src/expense/views/templates/MainView.mustache ***!
   \*******************************************************/
@@ -8983,11 +9172,11 @@ webpackJsonp([1],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<div class='row'>\n    <div class='col-xs-12 col-md-9 col-print-12'>\n        <div class='modalRegion'></div>\n        <div class='totals'></div>\n        <div class='form-section'>\n            <div class='content'>\n                <ul class=\"nav nav-tabs\" role=\"tablist\">\n                    <li role=\"presentation\" class=\"active\">\n                        <a href=\"#internal-container\"\n                            aria-controls=\"internal-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Frais\n                        </a>\n                    </li>\n                    <li role=\"presentation\">\n                        <a href=\"#activity-container\"\n                            aria-controls=\"activity-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Achats\n                        </a>\n                    </li>\n                </ul>\n                <div class='tab-content content'>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade in active\"\n                        id=\"internal-container\">\n                        <div class='internal-lines'>\n                        </div>\n                        <div class='internal-kmlines'>\n                        </div>\n                        <div class='internal-total'>\n                        </div>\n                    </div>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade\"\n                        id=\"activity-container\">\n                        <div class='activity-lines'>\n                        </div>\n                        <div class='activity-kmlines'>\n                        </div>\n                        <div class='activity-total'>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div\n        class='expense-desktop-actions hidden-xs hidden-sm col-md-3 hidden-print'\n        id=\"rightbar\"\n        >\n    </div>\n</div>\n<footer class='footer-actions hidden-print'></footer>\n";
+	  return "<div class='row'>\n    <div class='col-xs-12 col-md-9 col-print-12'>\n        <div class='messages-container'></div>\n        <div class='modalRegion'></div>\n        <div class='totals'></div>\n        <div class='form-section'>\n            <div class='content'>\n                <ul class=\"nav nav-tabs\" role=\"tablist\">\n                    <li role=\"presentation\" class=\"active\">\n                        <a href=\"#internal-container\"\n                            aria-controls=\"internal-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Frais\n                        </a>\n                    </li>\n                    <li role=\"presentation\">\n                        <a href=\"#activity-container\"\n                            aria-controls=\"activity-container\"\n                            role=\"tab\"\n                            data-toggle=\"tab\">\n                            Achats\n                        </a>\n                    </li>\n                </ul>\n                <div class='tab-content content'>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade in active\"\n                        id=\"internal-container\">\n                        <div class='internal-lines'>\n                        </div>\n                        <div class='internal-kmlines'>\n                        </div>\n                        <div class='internal-total'>\n                        </div>\n                    </div>\n                    <div\n                        role=\"tabpanel\"\n                        class=\"tab-pane fade\"\n                        id=\"activity-container\">\n                        <div class='activity-lines'>\n                        </div>\n                        <div class='activity-kmlines'>\n                        </div>\n                        <div class='activity-total'>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div\n        class='expense-desktop-actions hidden-xs hidden-sm col-md-3 hidden-print'\n        id=\"rightbar\"\n        >\n    </div>\n</div>\n<footer class='footer-actions hidden-print'></footer>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 95 */
+/* 97 */
 /*!******************************************!*\
   !*** ./src/expense/components/Facade.js ***!
   \******************************************/
@@ -9003,19 +9192,19 @@ webpackJsonp([1],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 96);
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 98);
 	
 	var _TotalModel2 = _interopRequireDefault(_TotalModel);
 	
-	var _ExpenseCollection = __webpack_require__(/*! ../models/ExpenseCollection.js */ 97);
+	var _ExpenseCollection = __webpack_require__(/*! ../models/ExpenseCollection.js */ 99);
 	
 	var _ExpenseCollection2 = _interopRequireDefault(_ExpenseCollection);
 	
-	var _ExpenseKmCollection = __webpack_require__(/*! ../models/ExpenseKmCollection.js */ 98);
+	var _ExpenseKmCollection = __webpack_require__(/*! ../models/ExpenseKmCollection.js */ 100);
 	
 	var _ExpenseKmCollection2 = _interopRequireDefault(_ExpenseKmCollection);
 	
-	var _BookMarkCollection = __webpack_require__(/*! ../models/BookMarkCollection.js */ 99);
+	var _BookMarkCollection = __webpack_require__(/*! ../models/BookMarkCollection.js */ 101);
 	
 	var _BookMarkCollection2 = _interopRequireDefault(_BookMarkCollection);
 	
@@ -9132,7 +9321,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 96 */
+/* 98 */
 /*!******************************************!*\
   !*** ./src/expense/models/TotalModel.js ***!
   \******************************************/
@@ -9163,7 +9352,7 @@ webpackJsonp([1],[
 	exports.default = TotalModel;
 
 /***/ }),
-/* 97 */
+/* 99 */
 /*!*************************************************!*\
   !*** ./src/expense/models/ExpenseCollection.js ***!
   \*************************************************/
@@ -9295,7 +9484,7 @@ webpackJsonp([1],[
 	exports.default = ExpenseCollection;
 
 /***/ }),
-/* 98 */
+/* 100 */
 /*!***************************************************!*\
   !*** ./src/expense/models/ExpenseKmCollection.js ***!
   \***************************************************/
@@ -9386,7 +9575,7 @@ webpackJsonp([1],[
 	exports.default = ExpenseKmCollection;
 
 /***/ }),
-/* 99 */
+/* 101 */
 /*!**************************************************!*\
   !*** ./src/expense/models/BookMarkCollection.js ***!
   \**************************************************/
@@ -9435,7 +9624,7 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 100 */
+/* 102 */
 /*!****************************************!*\
   !*** ./src/base/components/AuthBus.js ***!
   \****************************************/
@@ -9518,13 +9707,13 @@ webpackJsonp([1],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 101 */
+/* 103 */
 /*!*******************************************!*\
   !*** ./src/base/components/MessageBus.js ***!
   \*******************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -9554,20 +9743,63 @@ webpackJsonp([1],[
 	    channelName: 'message',
 	    radioEvents: {
 	        'success': 'logSuccess',
-	        'error': 'logError'
+	        'error': 'logError',
+	        'error:ajax': 'onAjaxError',
+	        'success:ajax': 'onAjaxSuccess',
+	        'error:backbone': 'onAjaxError',
+	        'success:backbone': 'onAjaxSuccess'
 	    },
 	    logSuccess: function logSuccess(view, message) {
 	        console.log("MessageBus : " + message);
+	        this.getChannel().request('notify:success', message);
 	    },
 	    logError: function logError(view, message) {
 	        console.error("MessageBus : " + message);
+	        this.getChannel().request('notify:error', message);
+	    },
+	    extractJsonMessage: function extractJsonMessage(xhr) {
+	        var json_resp = xhr.responseJSON;
+	        var result = null;
+	        if (!_.isUndefined(json_resp)) {
+	            if (!_.isUndefined(json_resp.message)) {
+	                result = json_resp.message;
+	            } else if (!_.isUndefined(json_resp.messages)) {
+	                result = json_resp.messages.join("<br />");
+	            } else if (!_.isUndefined(json_resp.errors)) {
+	                result = json_resp.errors.join("<br />");
+	            } else if (!_.isUndefined(json_resp.error)) {
+	                result = json_resp.error;
+	            } else if (json_resp.status == 'success') {
+	                result = "Opération réussie";
+	            } else if (xhr.status == 200) {
+	                result = "Opération réussie";
+	            }
+	        } else if (xhr.status == 403) {
+	            result = "Opération non permise";
+	        } else if (xhr.status == 501) {
+	            result = "Une erreur inconnue est survenue, contactez votre administrateur";
+	        }
+	        return result;
+	    },
+	    onAjaxError: function onAjaxError(xhr) {
+	        var message = this.extractJsonMessage(xhr);
+	        if (!_.isNull(message)) {
+	            this.getChannel().request('notify:error', message);
+	        }
+	    },
+	    onAjaxSuccess: function onAjaxSuccess(xhr) {
+	        // let message = this.extractJsonMessage(xhr);
+	        // if (!_.isNull(message)){
+	        //     this.getChannel().request('notify:success', message);
+	        // }
 	    }
 	});
 	var MessageBus = new MessageBusClass();
 	exports.default = MessageBus;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 102 */
+/* 104 */
 /*!******************************************!*\
   !*** ./src/base/components/ConfigBus.js ***!
   \******************************************/

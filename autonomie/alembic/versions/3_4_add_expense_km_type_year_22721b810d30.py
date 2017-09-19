@@ -24,6 +24,7 @@ helper = sa.Table(
 
 def update_database_structure():
     op.add_column('expensekm_type', sa.Column('year', sa.Integer, nullable=True))
+    op.drop_column('expensekm_line', 'type_label')
 
 
 def migrate_datas():

@@ -22,6 +22,7 @@ const Controller = Mn.Object.extend({
         Facade.loadModels(options.form_datas, options.form_config);
         AppOption.facade = Facade;
         AppOption.config = ConfigBus;
+        AppOption.messagebus = MessageBus;
 
         this.mainView = new MainView();
         App.showView(this.mainView);

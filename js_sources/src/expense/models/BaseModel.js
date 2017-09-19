@@ -9,6 +9,7 @@
  *
  */
 import Bb from 'backbone';
+import Radio from 'backbone.radio';
 import { ajax_call } from '../../tools.js';
 
 const BaseModel = Bb.Model.extend({
@@ -53,17 +54,25 @@ const BaseModel = Bb.Model.extend({
             this.fetch();
         }
     },
+    onDuplicateError(result){
+        this.collection.fetch();
+        let channel = Radio.channel('message');
+        channel.trigger('error:ajax', result);
+    },
+    onDuplicateCallback(result){
+        this.collection.fetch();
+        let channel = Radio.channel('message');
+        channel.trigger('success:ajax', result);
+    },
     duplicate(datas){
         var request = ajax_call(
             this.url() + '?action=duplicate',
             datas,
             'POST'
         );
-        var this_ = this;
-        request.done(
-            function(result){
-                this_.collection.fetch();
-            }
+        request.done(this.onDuplicateCallback.bind(this)
+        ).fail(
+            this.onDuplicateError.bind(this)
         );
         return request;
     },

@@ -9,6 +9,7 @@
  *
  */
 import Mn from 'backbone.marionette';
+import Bb from 'backbone';
 import Radio from 'backbone.radio';
 
 import RightBarView from "./RightBarView.js";
@@ -23,6 +24,7 @@ import ExpenseKmFormView from './ExpenseKmFormView.js';
 import ExpenseDuplicateFormView from './ExpenseDuplicateFormView.js';
 import TotalView from './TotalView.js';
 import TabTotalView from './TabTotalView.js';
+import MessageView from '../../base/views/MessageView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
 const MainView = Mn.View.extend({
@@ -42,6 +44,10 @@ const MainView = Mn.View.extend({
            replaceElement: true
        },
        rightbar: "#rightbar",
+       messages: {
+           el: '.messages-container',
+           replaceElement: true,
+       }
    },
    ui:{
        internal: '#internal-container',
@@ -230,6 +236,11 @@ const MainView = Mn.View.extend({
        );
        this.showChildView('footer', view);
    },
+   showMessages(){
+       var model = new Bb.Model();
+       var view = new MessageView({model: model});
+       this.showChildView('messages', view);
+   },
    showTotals(){
        let model = this.facade.request('get:totalmodel');
        var view = new TotalView({model: model});
@@ -245,6 +256,7 @@ const MainView = Mn.View.extend({
        this.showActitityTab();
        this.showTotals();
        this.showActions();
+       this.showMessages();
    },
    onStatusChange(status, title, label, url){
        var view = new StatusView({

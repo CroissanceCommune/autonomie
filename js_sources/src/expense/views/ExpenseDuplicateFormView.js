@@ -37,9 +37,15 @@ const ExpenseDuplicateFormView = Mn.View.extend({
         this.triggerMethod('modal:close');
     },
     templateContext(){
+        var ht = this.model.getHT();
+        var tva = this.model.getTva();
+        var ttc = this.model.total();
+        var is_km_fee = this.model.get('type') == 'km'
         return {
-            ht: formatAmount(this.model.get('ht')),
-            tva: formatAmount(this.model.get('tva')),
+            ht: formatAmount(ht),
+            tva: formatAmount(tva),
+            ttc: formatAmount(ttc),
+            is_km_fee: is_km_fee
         }
     },
     onRender(){

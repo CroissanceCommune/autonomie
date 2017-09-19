@@ -6,9 +6,18 @@
               <h4 class="modal-title">Dupliquer une note de dépense</h4>
             </div>
             <div class="modal-body">
-                <div>
-                Note de dépenses : {{description}}<br />
-                HT : {{{ht}}} TVA : {{{ tva }}}
+                <div class='well'>
+                {{#if is_km_fee}}
+                <h3>Note de dépenses kilométriques</h3>
+                De {{start}} à {{end}} ( {{description}} )<br />
+                Nombre de kilomètres : {{km}} <br />
+                Montant remboursé : {{{ttc}}}
+                {{else}}
+                <h3>Note de dépenses</h3>
+                {{description}}<br />
+                HT : {{{ht}}}<br />
+                TVA : {{{ tva }}}
+                {{/if}}
                 </div>
                 <div class='select'></div>
             </div>

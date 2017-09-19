@@ -61,10 +61,10 @@ const MessageBusClass = Mn.Object.extend({
         }
     },
     onAjaxSuccess(xhr){
-        let message = this.extractJsonMessage(xhr);
-        if (!_.isNull(message)){
-            this.getChannel().request('notify:success', message);
-        }
+        // let message = this.extractJsonMessage(xhr);
+        // if (!_.isNull(message)){
+        //     this.getChannel().request('notify:success', message);
+        // }
     }
 });
 const MessageBus = new MessageBusClass();

@@ -180,6 +180,22 @@ utilisables dans les notes de dépense",
         new_model.contribution = self.contribution
         return new_model
 
+    def get_by_year(self, year):
+        """
+        Retrieving the ExpenseKmType matching the current one but for the given
+        year
+
+        :param int year: The year the type should be attached to
+        :returns: A ExpenseKmType instance
+        """
+        if year == self.year:
+            return self
+        else:
+            query = ExpenseKmType.query().filter_by(year=year)
+            query = query.filter_by(label=self.label)
+            query = query.filter_by(code=self.code)
+            return query.first()
+
 
 class ExpenseTelType(ExpenseType):
     """

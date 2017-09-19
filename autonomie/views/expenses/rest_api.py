@@ -455,7 +455,7 @@ class RestExpenseLineView(BaseRestView):
             logger.error(u"Unauthorized action : possible break in attempt")
             raise HTTPForbidden()
 
-        new_line = self.context.duplicate()
+        new_line = self.context.duplicate(sheet=sheet)
         new_line.sheet_id = sheet.id
         self.request.dbsession.add(new_line)
         self.request.dbsession.flush()
@@ -497,7 +497,13 @@ class RestExpenseKmLineView(BaseRestView):
             logger.error(u"Unauthorized action : possible break in attempt")
             raise HTTPForbidden()
 
-        new_line = self.context.duplicate()
+        new_line = self.context.duplicate(sheet=sheet)
+        if new_line.type_object is None:
+            return RestError([
+                u"Aucun type de frais kilométriques correspondant n'a pu être "
+                u"retrouvé sur l'année {0}".format(sheet.year)
+            ], code=403)
+
         new_line.sheet_id = sheet.id
         self.request.dbsession.add(new_line)
         self.request.dbsession.flush()

@@ -11,8 +11,8 @@
 import Mn from 'backbone.marionette';
 import Validation from 'backbone-validation';
 import { serializeForm } from '../../tools.js';
-import {displayServerError, displayServerSuccess} from '../../backbone-tools.js';
 import BaseFormBehavior from './BaseFormBehavior.js';
+import Radio from 'backbone.radio';
 
 var FormBehavior = Mn.Behavior.extend({
     behaviors: [BaseFormBehavior],
@@ -31,13 +31,14 @@ var FormBehavior = Mn.Behavior.extend({
     serializeForm(){
         return serializeForm(this.getUI('form'));
     },
-    onSyncError(){
-        displayServerError("Une erreur a été rencontrée lors de la " +
-                           "sauvegarde de vos données");
+    onSyncError(datas, status, result){
+        var channel = Radio.channel("message");
+        channel.trigger('error:backbone', result);
         Validation.unbind(this.view);
     },
-    onSyncSuccess(){
-        displayServerSuccess("Vos données ont bien été sauvegardées");
+    onSyncSuccess(datas, status, result){
+        var channel = Radio.channel("message");
+        channel.trigger('success:backbone', result);
         Validation.unbind(this.view);
         console.log("Trigger success:sync from FormBehavior");
         this.view.triggerMethod('success:sync');
@@ -53,36 +54,48 @@ var FormBehavior = Mn.Behavior.extend({
         }
 
         if (this.view.model.isValid(_.keys(datas))){
+            let request;
             if (! this.view.model.get('id')){
-                this.addSubmit(datas);
+                request = this.addSubmit(datas);
             } else {
-                this.editSubmit(datas);
+                request = this.editSubmit(datas);
             }
+            console.log(request);
+            request.done(this.onSyncSuccess.bind(this)
+                        ).fail(this.onSyncError.bind(this)
+                              );
         }
     },
     addSubmit(datas){
+        /*
+         *
+         * Since collection.create doesn't return a jquery promise, we need to
+         * re-implement the destcollection create stuff and return the expected
+         * promise
+         *
+         * See sources : (Collection.create)
+         * http://backbonejs.org/docs/backbone.html
+         *
+         */
         console.log("FormBehavior.addSubmit");
         var destCollection = this.view.getOption('destCollection');
-        destCollection.create(
-            datas,
-            {
-                success: this.onSyncSuccess.bind(this),
-                error: this.onSyncError.bind(this),
-                wait: true,
-                sort: true
-            },
-        )
-    },
-    editSubmit(datas){
-        this.view.model.save(
-            datas,
-            {
-                success: this.onSyncSuccess.bind(this),
-                error: this.onSyncError.bind(this),
-                wait: true,
-                patch: true
+        let model = destCollection._prepareModel(datas);
+
+        var request = model.save(
+            null,
+            {wait: true, sort: true}
+        );
+        request = request.done(
+            function(model, resp, callbackOpts){
+                destCollection.add(model, callbackOpts);
+                return model, 'success', resp;
             }
         );
+        return request;
+    },
+    editSubmit(datas){
+        console.log("FormBehavior.editSubmit");
+        return this.view.model.save(datas, {wait: true, patch:true});
     },
     onSubmitForm(event){
         console.log("FormBehavior.onSubmitForm");

@@ -16,3 +16,15 @@
   .form-section .content {
     margin: 10px 5px;
     padding: 10px 15px; }
+
+.messages-static-top {
+  width: 100%;
+  top: 0px;
+  position: fixed;
+  z-index: 2000;
+  left: 0px;
+  padding: 5px 0px 8px 0px;
+  border-radius: 0px !important; }
+  .messages-static-top .link {
+    cursor: pointer;
+    margin-left: 15px; }

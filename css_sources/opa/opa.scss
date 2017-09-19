@@ -22,3 +22,16 @@ $form-block-bgcolor: #fff;
     padding: 10px 15px;
   }
 }
+.messages-static-top{
+  width: 100%;
+  top: 0px;
+  position: fixed;
+  z-index: 2000;
+  left: 0px;
+  padding: 5px 0px 8px 0px;
+  border-radius: 0px !important;
+  .link{
+    cursor: pointer;
+    margin-left: 15px;
+  }
+}

@@ -688,7 +688,6 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
         primary_key=True,
         info={'colanderalchemy': forms.EXCLUDED}
     )
-    type_label = Column(String(50))
     start = Column(
         String(150),
         default="",
@@ -719,7 +718,6 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
         res = BaseExpenseLine.__json__(self, request)
         res.update(
             dict(
-                type_label=self.type_label,
                 km=integer_to_amount(self.km),
                 start=self.start,
                 end=self.end,

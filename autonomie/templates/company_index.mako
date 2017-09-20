@@ -73,15 +73,14 @@
                         % endfor
                     </tbody>
                 </table>
+                <% url = request.route_path('company_invoices', id=company.id, _query=dict(__formid__='deform', status="notpaid")) %>
                 % if elapsed_invoices.count() > 5:
                     <b>...</b>
-                    <a class='btn btn-primary btn-sm'
-                        href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">
+                    <a class='btn btn-primary btn-sm' href="${url}">
                         Voir plus
                     </a>
                 % else:
-                    <a class='btn btn-primary btn-sm'
-                        href="${request.route_path('company_invoices', id=company.id, _query=dict(paid="notpaid"))}">
+                    <a class='btn btn-primary btn-sm' href="${url}">
                         Voir
                     </a>
                 % endif

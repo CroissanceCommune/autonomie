@@ -30,9 +30,10 @@
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name='content'>
+<% num_elapsed = elapsed_invoices.count() %>
 <div class='row'>
+    % if num_elapsed:
     <div class='col-md-4'>
-        %if elapsed_invoices:
             <div class='well' style="margin-top:10px">
                 <div class='section-header'>
                     Vos impayés de + de 45 jours
@@ -73,21 +74,23 @@
                         % endfor
                     </tbody>
                 </table>
-                <% url = request.route_path('company_invoices', id=company.id, _query=dict(__formid__='deform', status="notpaid")) %>
-                % if elapsed_invoices.count() > 5:
-                    <b>...</b>
+                % if num_elapsed > 0:
+                    <% label = u'Voir' %>
+                    <% url = request.route_path('company_invoices', id=company.id, _query=dict(__formid__='deform', status="notpaid")) %>
+                    % if num_elapsed > 5:
+                        <b>...</b>
+                        <% label = u'Voir plus' %>
+                    % endif
                     <a class='btn btn-primary btn-sm' href="${url}">
-                        Voir plus
-                    </a>
-                % else:
-                    <a class='btn btn-primary btn-sm' href="${url}">
-                        Voir
+                        ${label}
                     </a>
                 % endif
             </div>
-        %endif
     </div>
     <div class='col-md-6 col-md-offset-1'>
+    % else:
+        <div class='col-md-10 col-md-offset-1'>
+    %endif
         % if request.config.has_key('welcome'):
             <p>
                 ${format_text(request.config['welcome'])}

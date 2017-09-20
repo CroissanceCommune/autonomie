@@ -107,7 +107,7 @@
             % else:
                 <a
                     class='btn btn-primary btn-sm'
-                    href="${request.route_path('activities', _query=dict(conseiller_id=request.user.id))}"
+                    href="${request.route_path('activities', _query=dict(__formid__='deform', conseiller_id=request.user.id))}"
                     >
                     Voir plus
                 </a>

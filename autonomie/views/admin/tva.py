@@ -16,7 +16,6 @@ from autonomie.views import (
 )
 from autonomie.views import render_api
 from autonomie.forms.admin import get_tva_edit_schema
-TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
 class TvaListView(BaseView):

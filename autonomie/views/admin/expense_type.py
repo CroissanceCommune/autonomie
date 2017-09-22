@@ -20,7 +20,6 @@ from autonomie.views import (
     BaseEditView,
 )
 from autonomie.forms.admin import get_admin_schema
-TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
 def _get_year_from_request(request):

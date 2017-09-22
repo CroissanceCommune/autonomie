@@ -184,3 +184,13 @@ def get_config():
     """
     return dict((entry.name, entry.value)
                 for entry in Config.query().all())
+
+
+def get_admin_mail():
+    """
+    Collect the administration mail in the current configuration
+
+    :returns: A configured CAE administration mail
+    :rtype: str
+    """
+    return Config.get('cae_admin_mail')

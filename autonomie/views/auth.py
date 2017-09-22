@@ -172,10 +172,6 @@ def _get_login_form(request, use_ajax=False):
             ),
         ),
     )
-#    if use_ajax:
-#        form.widget = deform.widget.FormWidget(
-#            template='autonomie:deform_templates/formajax.pt'
-#        )
     return form
 
 

@@ -91,7 +91,7 @@ class TreasuryMeasure(DBBASE):
         info={"colanderalchemy": {'exclude': True}},
     )
     company_id = Column(
-        ForeignKey('company.id'),
+        ForeignKey('company.id', ondelete="cascade"),
         info={
             "colanderalchemy": {
                 'title': u"Entreprise associée à cette opération",
@@ -103,3 +103,8 @@ class TreasuryMeasure(DBBASE):
         }
     )
     company = relationship('Company')
+    upload_id = Column(
+        ForeignKey('accounting_operation_upload.id', ondelete="cascade"),
+        info={"colanderalachemy": {'title': u"Related upload"}},
+    )
+    upload = relationship('AccountingOperationUpload')

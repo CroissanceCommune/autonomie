@@ -31,7 +31,7 @@ class AccountingOperationUpload(DBBASE):
     __tablename__ = 'accounting_operation_upload'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    datetime = Column(
+    created_at = Column(
         DateTime(),
         default=datetime.datetime.now,
         info={"colanderalchemy": {'title': u"Heure et date de création"}}
@@ -44,7 +44,8 @@ class AccountingOperationUpload(DBBASE):
         "AccountingOperation",
         primaryjoin="AccountingOperation.upload_id"
         "==AccountingOperationUpload.id",
-        order_by="AccountingOperation.analytical_account"
+        order_by="AccountingOperation.analytical_account",
+        cascade='all,delete,delete-orphan',
     )
     date = Column(
         Date(),
@@ -104,7 +105,7 @@ class AccountingOperation(DBBASE):
         info={'colanderalchemy': {'title': u"Solde"}},
     )
     company_id = Column(
-        ForeignKey('company.id'),
+        ForeignKey('company.id', ondelete="CASCADE"),
         info={
             "colanderalchemy": {
                 'title': u"Entreprise associée à cette opération",
@@ -119,7 +120,9 @@ class AccountingOperation(DBBASE):
         'Company',
         info={"colanderalchemy": {'exclude': True}},
     )
-    upload_id = Column(ForeignKey('accounting_operation_upload.id'))
+    upload_id = Column(
+        ForeignKey('accounting_operation_upload.id', ondelete="CASCADE")
+    )
 
     def __json__(self, request):
         return dict(

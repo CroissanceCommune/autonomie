@@ -28,8 +28,7 @@
 import sys
 
 from autonomie_base.models.base import DBSESSION
-from autonomie.models.user import User, ADMIN_PRIMARY_GROUP, \
-        MANAGER_PRIMARY_GROUP, CONTRACTOR_PRIMARY_GROUP
+from autonomie.models.user import User
 from autonomie.models.company import Company
 from autonomie.models.project import Project
 from autonomie.models.project import Phase
@@ -49,12 +48,6 @@ from autonomie.models.activity import (
     ActivityAction,
 )
 
-GROUPS = {
-    ADMIN_PRIMARY_GROUP: "admin",
-    MANAGER_PRIMARY_GROUP: "manager",
-    CONTRACTOR_PRIMARY_GROUP: "contractor"
-}
-
 
 def add_user(login, password, group, firstname="", lastname="", email=""):
     user = User(login=login,
@@ -63,36 +56,39 @@ def add_user(login, password, group, firstname="", lastname="", email=""):
                 email=email)
     user.set_password(password)
 
-    user.groups.append(GROUPS[group])
+    user.groups.append(group)
 
     session = DBSESSION()
     session.add(user)
 
     session.flush()
 
-    group_name = GROUPS[group]
-    print "Added %s: %s/%s" % (group_name, login, password)
+    print "Added %s: %s/%s" % (group, login, password)
 
     return user
 
 
 def add_simple(login, group):
-    return add_user(login, login, group,
-                    firstname=u"FIRSTNAME_%s" % login,
-                    lastname=u"LASTNAME_%s" % login,
-                   email="%s@example.com" % login)
+    return add_user(
+        login,
+        login,
+        group,
+        firstname=u"FIRSTNAME_%s" % login,
+        lastname=u"LASTNAME_%s" % login,
+        email="%s@example.com" % login
+    )
 
 
 def add_simple_admin(login):
-    return add_simple(login, ADMIN_PRIMARY_GROUP)
+    return add_simple(login, 'admin')
 
 
 def add_simple_manager(login):
-    return add_simple(login, MANAGER_PRIMARY_GROUP)
+    return add_simple(login, 'manage')
 
 
 def add_simple_contractor(login):
-    return add_simple(login, CONTRACTOR_PRIMARY_GROUP)
+    return add_simple(login, 'contractor')
 
 
 def add_company(user, company_name, goal=""):

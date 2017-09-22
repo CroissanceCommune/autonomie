@@ -95,6 +95,13 @@ from autonomie.models.sale_product import (
     SaleProductCategory,
 )
 from autonomie.models.tva import Tva
+from autonomie.models.accounting.operations import (
+    AccountingOperationUpload,
+)
+from autonomie.models.accounting.measures import (
+    TreasuryMeasure,
+    TreasuryMeasureType,
+)
 
 
 DEFAULT_PERM = [
@@ -130,6 +137,11 @@ class RootFactory(dict):
 
         for traversal_name, object_name, factory in (
             ("activities", "activity", Activity, ),
+            (
+                'accounting_operation_uploads',
+                'accounting_operation_upload',
+                AccountingOperationUpload,
+            ),
             ('cancelinvoices', 'cancelinvoice', CancelInvoice, ),
             ('companies', 'company', Company, ),
             ('competences', 'competence', CompetenceGrid, ),
@@ -161,6 +173,7 @@ class RootFactory(dict):
             ('task_line_groups', 'task_line_group', TaskLineGroup),
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
+            ('treasury_measures', 'treasury_measure', TreasuryMeasure, ),
             ('timeslots', 'timeslot', Timeslot, ),
             ('tvas', 'tva', Tva,),
             ('users', 'user', User, ),
@@ -753,6 +766,15 @@ def get_competence_acl(self):
     return acl
 
 
+def get_treasury_measure_acl(self):
+    """
+    Compile the default acl for TreasuryMeasure objects
+    """
+    if self.company is not None:
+        return self.company.__acl__
+    return []
+
+
 def set_models_acl():
     """
     Add acl to the db objects used as context
@@ -761,6 +783,7 @@ def set_models_acl():
     when different roles will be implemented
     """
     Activity.__default_acl__ = property(get_activity_acl)
+    AccountingOperationUpload.__acl__ = property(get_base_acl)
     CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acl)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)
@@ -790,6 +813,7 @@ def set_models_acl():
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
+    TreasuryMeasure.__default_acl__ = property(get_treasury_measure_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     Workshop.__default_acl__ = property(get_event_acl)

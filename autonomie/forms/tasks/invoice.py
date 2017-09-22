@@ -50,11 +50,12 @@ from autonomie import forms
 from autonomie.forms.tasks.lists import (
     PeriodSchema,
     AmountRangeSchema,
-    TEMPLATES_URL,
 )
 from autonomie.forms.custom_types import (
     AmountType,
 )
+from autonomie.forms.widgets import FixedLenSequenceWidget
+from autonomie.forms.widgets import CleanMappingWidget
 from autonomie.forms.payments import (
     get_amount_topay,
     deferred_amount_default,
@@ -244,9 +245,7 @@ class ProductTaskLines(colander.SequenceSchema):
         missing="",
         title=u"",
         validator=product_match_tva_validator,
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + 'clean_mapping.pt',
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -255,10 +254,7 @@ class SetProductsSchema(colander.MappingSchema):
         Form schema used to configure Products
     """
     lines = ProductTaskLines(
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + 'fixed_len_sequence.pt',
-            item_template=TEMPLATES_URL + 'fixed_len_sequence_item.pt',
-            min_len=1),
+        widget=FixedLenSequenceWidget(),
         missing="",
         title=u''
     )
@@ -331,9 +327,7 @@ def get_list_schema(is_admin=False):
                 forms.range_validator,
                 msg=u"La date de début doit précéder la date de début"
             ),
-            widget=deform.widget.MappingWidget(
-                template=TEMPLATES_URL + 'clean_mapping.pt',
-            ),
+            widget=CleanMappingWidget(),
             missing=colander.drop,
         )
     )
@@ -347,9 +341,7 @@ def get_list_schema(is_admin=False):
                 msg=u"Le montant de départ doit être inférieur ou égale \
 à celui de la fin"
             ),
-            widget=deform.widget.MappingWidget(
-                template=TEMPLATES_URL + 'clean_mapping.pt',
-            ),
+            widget=CleanMappingWidget(),
             missing=colander.drop,
         )
     )

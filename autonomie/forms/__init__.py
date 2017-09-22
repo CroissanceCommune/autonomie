@@ -37,7 +37,6 @@ from autonomie.utils.html import (
 )
 
 
-TEMPLATES_PATH = "autonomie:deform_templates/"
 EXCLUDED = {'exclude': True}
 MAIL_ERROR_MESSAGE = u"Veuillez entrer une adresse e-mail valide"
 
@@ -341,7 +340,7 @@ def get_fileupload_widget(store_url, store_path, session,
     )
     return deform.widget.FileUploadWidget(
         tmpstore,
-        template=TEMPLATES_PATH + "fileupload.pt"
+        template="fileupload.pt"
     )
 
 

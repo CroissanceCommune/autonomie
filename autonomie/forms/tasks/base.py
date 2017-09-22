@@ -87,9 +87,6 @@ TASKTYPES_LABELS = {
 }
 
 
-TEMPLATES_URL = 'autonomie:deform_templates/'
-
-
 MAIN_INFOS_GRID = (
     (('date', 6), ('financial_year', 3), ('prefix', 3), ),
     (('address', 6),),

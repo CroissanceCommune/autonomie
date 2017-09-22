@@ -5,21 +5,22 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import colander
 import deform
+
+from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.models import company
+from autonomie.models.task import Estimation
 from autonomie.models.task.invoice import (
     get_invoice_years,
     Invoice,
 )
-from autonomie.models import company
+
 from autonomie import forms
 from autonomie.forms.tasks.lists import (
     PeriodSchema,
     AmountRangeSchema,
-    TEMPLATES_URL,
 )
-
-from colanderalchemy import SQLAlchemySchemaNode
-
-from autonomie.models.task import Estimation
+from autonomie.forms.widgets import CleanMappingWidget
 
 
 def validate_estimation(estimation_object, request):
@@ -84,9 +85,7 @@ def get_list_schema(is_global=False):
                 forms.range_validator,
                 msg=u"La date de début doit précéder la date de début"
             ),
-            widget=deform.widget.MappingWidget(
-                template=TEMPLATES_URL + 'clean_mapping.pt',
-            ),
+            widget=CleanMappingWidget(),
             missing=colander.drop,
         )
     )
@@ -100,9 +99,7 @@ def get_list_schema(is_global=False):
                 msg=u"Le montant de départ doit être inférieur ou égale \
 à celui de la fin"
             ),
-            widget=deform.widget.MappingWidget(
-                template=TEMPLATES_URL + 'clean_mapping.pt',
-            ),
+            widget=CleanMappingWidget(),
             missing=colander.drop,
         )
     )

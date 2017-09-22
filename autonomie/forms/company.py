@@ -66,10 +66,7 @@ def deferred_upload_header_widget(node, kw):
         request,
         filters=HEADER_RESIZER.complete
     )
-    return files.CustomFileUploadWidget(
-        tmpstore,
-        template=forms.TEMPLATES_PATH + "fileupload.pt"
-    )
+    return files.CustomFileUploadWidget(tmpstore)
 
 
 @colander.deferred

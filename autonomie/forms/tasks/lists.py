@@ -7,9 +7,6 @@ import colander
 from autonomie.forms.custom_types import AmountType
 
 
-TEMPLATES_URL = 'autonomie:deform_templates/'
-
-
 class PeriodSchema(colander.MappingSchema):
     """
         A form used to select a period

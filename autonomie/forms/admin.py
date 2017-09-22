@@ -38,6 +38,7 @@ from autonomie.models.competence import (
 )
 from autonomie import forms
 from autonomie.forms import files
+from autonomie.forms.widgets import CleanMappingWidget, CleanSequenceWidget
 from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
 
@@ -46,9 +47,6 @@ log = logging.getLogger(__name__)
 
 
 HEADER_RESIZER = ImageResizer(4, 1)
-
-
-TEMPLATES_URL = 'autonomie:deform_templates/'
 
 
 CONFIGURATION_KEYS = {
@@ -199,7 +197,7 @@ d'écriture RG Client",
         "title": u"Module facturation",
         "description": u"Activé par défaut",
         "widget": deform.widget.CheckboxWidget(
-            template='autonomie:deform_templates/checkbox_readonly.pt'
+            template='checkbox_readonly.pt'
         ),
         "section": u"Activation des modules d'export Sage",
     },
@@ -513,9 +511,7 @@ class ActivityTypesSeqConfig(colander.SequenceSchema):
     """
     activity_type = ActivityTypeConfig(
         title=u"Nature du rendez-vous",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -533,9 +529,7 @@ class ActivityModesSeqConfig(colander.SequenceSchema):
     """
     activity_mode = ActivityModeConfig(
         title=u"Mode d'entretien",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -552,9 +546,7 @@ class ActionConfig(colander.MappingSchema):
 class ActivitySubActionSeq(colander.SequenceSchema):
     subaction = ActionConfig(
         title=u"",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -568,8 +560,7 @@ class ActivityActionConfig(colander.Schema):
     )
     children = ActivitySubActionSeq(
         title=u"",
-        widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_URL + "clean_sequence.pt",
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter un sous-titre",
         )
     )
@@ -578,9 +569,7 @@ class ActivityActionConfig(colander.Schema):
 class ActivityActionSeq(colander.SequenceSchema):
     action = ActivityActionConfig(
         title=u"Titre",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -597,9 +586,7 @@ class WorkshopInfo3(colander.MappingSchema):
 class WorkshopInfo3Seq(colander.SequenceSchema):
     child = WorkshopInfo3(
         title=u"Sous-titre 2",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -613,10 +600,9 @@ class WorkshopInfo2(colander.Schema):
     )
     children = WorkshopInfo3Seq(
         title=u"",
-        widget=deform.widget.SequenceWidget(
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter un sous-titre 2",
             orderable=True,
-            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
 
@@ -624,9 +610,7 @@ class WorkshopInfo2(colander.Schema):
 class WorkshopInfo2Seq(colander.SequenceSchema):
     child = WorkshopInfo2(
         title=u"Sous-titre",
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -640,10 +624,9 @@ class WorkshopInfo1(colander.Schema):
     )
     children = WorkshopInfo2Seq(
         title=u'',
-        widget=deform.widget.SequenceWidget(
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter un sous-titre",
             orderable=True,
-            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
 
@@ -651,9 +634,7 @@ class WorkshopInfo1(colander.Schema):
 class WorkshopInfo1Seq(colander.SequenceSchema):
     actions = WorkshopInfo1(
         title=u'Titre',
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -689,26 +670,23 @@ class ActivityConfigSchema(colander.Schema):
     )
     types = ActivityTypesSeqConfig(
         title=u"Configuration des natures de rendez-vous",
-        widget=deform.widget.SequenceWidget(
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter une nature de rendez-vous ",
             orderable=True,
-            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
     modes = ActivityModesSeqConfig(
         title=u"Configuration des modes d'entretien",
-        widget=deform.widget.SequenceWidget(
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter un mode d'entretien",
             orderable=True,
-            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
     actions = ActivityActionSeq(
         title=u"Configuration des titres disponibles pour la sortie PDF",
-        widget=deform.widget.SequenceWidget(
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter un titre",
             orderable=True,
-            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
 
@@ -725,10 +703,9 @@ class WorkshopConfigSchema(colander.Schema):
     )
     actions = WorkshopInfo1Seq(
         title=u"Configuration des titres disponibles pour la sortie PDF",
-        widget=deform.widget.SequenceWidget(
+        widget=CleanSequenceWidget(
             add_subitem_text_template=u"Ajouter une titre",
             orderable=True,
-            template=TEMPLATES_URL + "clean_sequence.pt",
         )
     )
 
@@ -912,16 +889,13 @@ def get_sequence_model_admin(model, title=u"", excludes=(), **kw):
     """
     node_schema = SQLAlchemySchemaNode(
         model,
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        ),
+        widget=CleanMappingWidget(),
         excludes=excludes,
     )
     node_schema.name = 'data'
 
     default_widget_options = dict(
         orderable=True,
-        template=TEMPLATES_URL + "clean_sequence.pt",
         min_len=1,
     )
     widget_options = kw.get('widget_options', {})
@@ -933,7 +907,7 @@ def get_sequence_model_admin(model, title=u"", excludes=(), **kw):
         colander.SchemaNode(
             colander.Sequence(),
             node_schema,
-            widget=deform.widget.SequenceWidget(
+            widget=CleanSequenceWidget(
                 **default_widget_options
             ),
             title=title,
@@ -961,9 +935,7 @@ class SubCompetenceConfigSchema(colander.MappingSchema):
 
 class SubCompetencesConfigSchema(colander.SequenceSchema):
     subcompetence = SubCompetenceConfigSchema(
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + "clean_mapping.pt",
-        )
+        widget=CleanMappingWidget(),
     )
 
 
@@ -986,18 +958,15 @@ class CompetenceRequirement(colander.MappingSchema):
 class CompetenceRequirementSeq(colander.SequenceSchema):
     requirement = CompetenceRequirement(
         title=u'',
-        widget=deform.widget.MappingWidget(
-            template=TEMPLATES_URL + 'clean_mapping.pt'
-        )
+        widget=CleanMappingWidget(),
     )
 
 
 @colander.deferred
 def deferred_seq_widget(nodex, kw):
     elements = kw['deadlines']
-    return deform.widget.SequenceWidget(
+    return CleanSequenceWidget(
         add_subitem_text_template=u"-",
-        template=TEMPLATES_URL + "clean_sequence.pt",
         min_len=len(elements),
         max_len=len(elements),
     )

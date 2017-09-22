@@ -47,6 +47,8 @@ class CustomFileUploadWidget(deform.widget.FileUploadWidget):
             An optionnal list (or simple filter) that will be fired on the datas
             (for example in order to reduce image sizes)
     """
+    template = "fileupload.pt"
+
     def deserialize(self, field, pstruct):
         data = deform.widget.FileUploadWidget.deserialize(self, field, pstruct)
         # We're returning the datas in the appstruct dict, we format the file if
@@ -112,10 +114,7 @@ class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
 def deferred_upload_widget(node, kw):
     request = kw['request']
     tmpstore = SessionDBFileUploadTempStore(request)
-    return CustomFileUploadWidget(
-        tmpstore,
-        template=forms.TEMPLATES_PATH + "fileupload.pt"
-    )
+    return CustomFileUploadWidget(tmpstore)
 
 
 @colander.deferred

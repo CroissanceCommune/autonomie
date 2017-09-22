@@ -122,7 +122,7 @@ def get_doctypes_form_schema(userdatas_model):
     registrations = userdatas_model.doctypes_registrations
     node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)
     node_schema.widget = deform.widget.MappingWidget(
-        template="autonomie:deform_templates/clean_mapping.pt"
+        template="clean_mapping.pt"
     )
 
     appstruct = {}

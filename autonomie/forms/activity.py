@@ -45,9 +45,6 @@ from autonomie import forms
 from autonomie.forms import lists
 
 
-TEMPLATES_PATH = "autonomie:deform_templates/"
-
-
 def get_activity_types():
     return ActivityType.query().filter(ActivityType.active == True)
 
@@ -229,8 +226,8 @@ class RecordActivitySchema(colander.Schema):
     attendances = Attendances(
         title=u'Présence',
         widget=deform.widget.SequenceWidget(
-            template=TEMPLATES_PATH + 'fixed_len_sequence.pt',
-            item_template=TEMPLATES_PATH + 'fixed_len_sequence_item.pt')
+            template='fixed_len_sequence.pt',
+            item_template='fixed_len_sequence_item.pt')
     )
 
     objectifs = forms.textarea_node(

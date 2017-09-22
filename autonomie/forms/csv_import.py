@@ -79,10 +79,7 @@ def deferred_temporary_upload_widget(node, kw):
     """
     request = kw['request']
     tmpstore = pyramid_deform.SessionFileUploadTempStore(request)
-    return forms.files.CustomFileUploadWidget(
-        tmpstore,
-        template=forms.TEMPLATES_PATH + "fileupload.pt"
-    )
+    return forms.files.CustomFileUploadWidget(tmpstore)
 
 
 def check_csv_content(node, value):

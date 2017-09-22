@@ -170,7 +170,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
         % else:
             <tr>
                 <td colspan='6'>
-                    Aucun client n'a été référencé pour l'instant
+                    Aucun client n'a été référencé
                 </td>
             </tr>
         % endif

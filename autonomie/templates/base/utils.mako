@@ -127,7 +127,7 @@
     >
     <a href='${href}' title="${title}"
         % if onclick:
-            onclick="${onclick}"
+            onclick="${onclick.replace('\n', '\\n')|n}"
         % endif
         >
         %if icotext:

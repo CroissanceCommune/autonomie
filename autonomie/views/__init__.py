@@ -186,7 +186,7 @@ class BaseListClass(BaseView):
                 named_grid=self.grid
             )
         else:
-            form.widget.template = "autonomie:deform_templates/searchform.pt"
+            form.widget.template = "searchform.pt"
         return form
 
     def get_form(self, schema):
@@ -354,7 +354,7 @@ class BaseListView(BaseListClass):
             result['form'] = self.error.render()
         else:
             form = self.get_form(schema)
-            if appstruct:
+            if appstruct and '__formid__' in self.request.GET:
                 form.set_appstruct(appstruct)
             result['form_object'] = form
             result['form'] = form.render()

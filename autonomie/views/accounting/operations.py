@@ -49,16 +49,30 @@ class UploadListView(BaseListView):
         """
         Compile the action description for the given item
         """
-        yield (
-            self.request.route_path(
-                '/accounting/operation_uploads/{id}',
-                id=item.id,
-            ),
-            u"Détails",
-            u"Voir le détail des écritures importées",
-            u"pencil",
-            {}
-        )
+
+        if self._has_operations(item):
+            yield (
+                self.request.route_path(
+                    '/accounting/operation_uploads/{id}',
+                    id=item.id,
+                ),
+                u"Voir le détail",
+                u"Voir le détail des écritures importées",
+                u"pencil",
+                {}
+            )
+            yield (
+                self.request.route_path(
+                    '/accounting/operation_uploads/{id}',
+                    id=item.id,
+                    _query={'action': u"compile"}
+                ),
+                u"Recalculer les indicateurs",
+                u"Recalculer les indicateurs générés depuis ce fichier "
+                u"(ex : vous avez changé la configuration des indicateurs)",
+                u"fa fa-calculator",
+                {}
+            )
 
         yield (
             self.request.route_path(
@@ -80,20 +94,6 @@ class UploadListView(BaseListView):
                     )
             }
         )
-
-        if self._has_operations(item):
-            yield (
-                self.request.route_path(
-                    '/accounting/operation_uploads/{id}',
-                    id=item.id,
-                    _query={'action': u"compile"}
-                ),
-                u"Recalculer les indicateurs",
-                u"Recalculer les indicateurs générés depuis ce fichier "
-                u"(j'ai changé ma configuration)",
-                u"fa fa-calculator",
-                {}
-            )
 
     def query(self):
         return AccountingOperationUpload.query().options(

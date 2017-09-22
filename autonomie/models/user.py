@@ -78,6 +78,7 @@ from autonomie.forms import (
     get_deferred_select,
     mail_validator,
 )
+from autonomie.forms.widgets import CleanMappingWidget
 from autonomie_base.models.types import (
     JsonEncodedDict,
     PersistentACLMixin,
@@ -87,11 +88,6 @@ from autonomie.models.options import (
     get_id_foreignkey_col,
 )
 from autonomie_base.utils.date import str_to_date
-
-
-ADMIN_PRIMARY_GROUP = 1
-MANAGER_PRIMARY_GROUP = 2
-CONTRACTOR_PRIMARY_GROUP = 3
 
 
 # We need to store this datas here (before we find a solution to place a
@@ -140,12 +136,6 @@ CONTRACT_OPTIONS = (
 
 
 log = logging.getLogger(__name__)
-
-
-TEMPLATES_URL = 'autonomie:deform_templates/'
-CLEAN_MAPPING_WIDGET = deform.widget.MappingWidget(
-    template=TEMPLATES_URL + 'clean_mapping.pt'
-)
 
 
 def get_vehicle_widget():
@@ -1976,7 +1966,7 @@ class ExternalActivityDatas(DBBASE):
     """
     __colanderalchemy_config__ = {
         'title': u"une activité Externe à la CAE",
-        'widget': CLEAN_MAPPING_WIDGET,
+        'widget': CleanMappingWidget(),
     }
     __tablename__ = 'external_activity_datas'
     __table_args__ = default_table_args
@@ -2038,7 +2028,7 @@ class ExternalActivityDatas(DBBASE):
 class CompanyDatas(DBBASE):
     __colanderalchemy_config__ = {
         'title': u"une activité",
-        'widget': CLEAN_MAPPING_WIDGET,
+        'widget': CleanMappingWidget(),
     }
     __tablename__ = 'company_datas'
     __table_args__ = default_table_args
@@ -2113,7 +2103,7 @@ class CompanyDatas(DBBASE):
 class DateDiagnosticDatas(DBBASE):
     __colanderalchemy_config__ = {
         'title': u"une date de diagnostic",
-        'widget': CLEAN_MAPPING_WIDGET,
+        'widget': CleanMappingWidget(),
     }
     __tablename__ = 'date_diagnostic_datas'
     __table_args__ = default_table_args
@@ -2149,7 +2139,7 @@ class DateDiagnosticDatas(DBBASE):
 class DateConventionCAPEDatas(DBBASE):
     __colanderalchemy_config__ = {
         'title': u"une date de convention CAPE",
-        'widget': CLEAN_MAPPING_WIDGET,
+        'widget': CleanMappingWidget(),
     }
     __tablename__ = 'date_convention_cape_datas'
     __table_args__ = default_table_args
@@ -2193,7 +2183,7 @@ class DateConventionCAPEDatas(DBBASE):
 class DateDPAEDatas(DBBASE):
     __colanderalchemy_config__ = {
         'title': u"une date de DPAE",
-        'widget': CLEAN_MAPPING_WIDGET,
+        'widget': CleanMappingWidget(),
     }
     __tablename__ = 'date_dpae_datas'
     __table_args__ = default_table_args
@@ -2285,7 +2275,7 @@ class ContractHistory(DBBASE):
     """
     __colanderalchemy_config__ = {
         'title': u"un avenant",
-        'widget': CLEAN_MAPPING_WIDGET,
+        'widget': CleanMappingWidget(),
     }
     __table_args__ = default_table_args
     id = Column(

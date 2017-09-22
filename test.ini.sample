@@ -3,7 +3,7 @@ use = egg:autonomie
 
 pyramid.default_locale_name = fr
 pyramid.includes =  pyramid_tm
-                    pyramid_mailer
+                    pyramid_mailer.testing
                     pyramid_services
                     pyramid_layout
                     pyramid_mako

@@ -24,27 +24,9 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    % if request.has_permission('add_workshop'):
-        <a href="${request.route_path('workshops', _query=dict(action='new'))}">
-            Nouvel Atelier
-        </a>
-    %endif
-    </li>
-</ul>
-<div class="row">
-    <div class="col-md-8">
-        <div class='container-fluid'>
-            <div class="row">
-                ${form|n}
-            </div>
-        </div>
-    </div>
-    <div class='col-md-4'>
-            % if request.has_permission('admin_treasury'):
-        <div class='well well-sm pull-right btn-group'>
+<%block name='content'>
+        % if request.has_permission('admin_treasury'):
+        <div class='pull-right btn-group'>
         <%
             ## We build the link with the current search arguments
             args = request.GET
@@ -72,10 +54,45 @@
             </a>
         </div>
         % endif
+    % if request.has_permission('add_workshop'):
+        <a class='btn btn-primary primary-action'
+        href="${request.route_path('workshops', _query=dict(action='new'))}">
+            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouvel Atelier
+        </a>
+    %endif
+    <hr />
+<a class="btn btn-default large-btn
+    % if '__formid__' in request.GET:
+        btn-primary
+    % endif
+    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
+    <i class='glyphicon glyphicon-filter'></i>&nbsp;
+    Filtres&nbsp;
+    <i class='glyphicon glyphicon-chevron-down'></i>
+</a>
+% if '__formid__' in request.GET:
+    <span class='help-text'>
+        <small><i>Des filtres sont actifs</i></small>
+    </span>
+% endif
+% if '__formid__' in request.GET:
+    <div class='collapse' id='filter-form'>
+% else:
+    <div class='in collapse' id='filter-form'>
+% endif
+        <div class='row'>
+            <div class='col-xs-12'>
+<hr/>
+            % if '__formid__' in request.GET:
+                <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
+                <br />
+                <br />
+            %endif
+                ${form|n}
+            </div>
+        </div>
     </div>
-</div>
-</%block>
-<%block name="content">
+<hr/>
 <% is_admin_view = request.context .__name__ != 'company' %>
 <table class="table table-condensed table-hover">
     <thead>
@@ -175,6 +192,9 @@
                 </td>
             </tr>
         % endfor
+        % if len(records) == 0:
+        <td colspan="6">Aucun atelier ne correspond à votre recherche</td>
+        % endif
     </tbody>
 </table>
 ${pager(records)}

@@ -21,5 +21,7 @@
     </tal:for>
 
 
+    <div>
     <button type="submit" class="btn btn-primary">Filtrer</button>
+    </div>
 </form>

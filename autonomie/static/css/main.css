@@ -437,17 +437,17 @@ header .navbar .nav > li > a {
   .status-table .signed-status-signed .status-td, .status-table .justified-True .status-td, .status-table .job-planned .status-td {
     background-color: #238bff; }
 
-.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed, .status-table .activity-status-cancelled {
+.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait, .status-table .job-failed, .status-table .activity-status-cancelled, .status-table .operation-associated-False {
   background-color: #f9aaaa !important; }
-  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn) {
+  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn), .status-table .operation-associated-False a:not(.btn) {
     text-transform: uppercase;
     text-decoration: underline; }
-  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td {
+  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td, .status-table .operation-associated-False .status-td {
     background-color: #C43C35 !important; }
 
-.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed {
+.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed, .status-table .operation-associated-True {
   background-color: #c4ffaa; }
-  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td {
+  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td, .status-table .operation-associated-True .status-td {
     background-color: #baff87; }
 
 .status-table .paid-status-paid {

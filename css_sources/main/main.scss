@@ -467,7 +467,7 @@ $blue_status_label: #5bc0de;
       background-color: $blue_status_hard;
     }
   }
-  .signed-status-aborted, .tolate-True, .status-wait, .job-failed, .activity-status-cancelled{
+  .signed-status-aborted, .tolate-True, .status-wait, .job-failed, .activity-status-cancelled, .operation-associated-False{
     background-color: $red_status_light!important;
     a:not(.btn){
       text-transform:uppercase;
@@ -477,7 +477,7 @@ $blue_status_label: #5bc0de;
       background-color: $red_status_hard!important;
     }
   }
-  .geninv-True, .paid-status-resulted, .job-completed, .activity-status-closed{
+  .geninv-True, .paid-status-resulted, .job-completed, .activity-status-closed, .operation-associated-True{
     background-color: $green_status_light;
     .status-td{
       background-color: $green_status_hard;

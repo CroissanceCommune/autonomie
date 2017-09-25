@@ -193,4 +193,7 @@ def get_admin_mail():
     :returns: A configured CAE administration mail
     :rtype: str
     """
-    return Config.get('cae_admin_mail')
+    result = Config.get('cae_admin_mail')
+    if result is not None:
+        result = result.value
+    return result

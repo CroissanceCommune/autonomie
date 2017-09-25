@@ -55,6 +55,33 @@
                 ${form|n}
             </div>
         </div>
+        <div class='alert alert-info'>
+            Vous trouverez ci-dessous la liste des fichiers de trésorerie traités par Autonomie.
+            <br />
+            Lors du dépôt d'un fichier:
+            <ul>
+            <li>
+            Le fichier est traité par un automate en "tâche de fond"
+            </li>
+            <li>
+            Après l'import, des indicateurs sont générés depuis les écritures et en fonction de la configuration
+            (<a class='link' href='/admin/accounting/treasury'>Configuration->Configuration du module Vente -> Dépôt de fichiers</a>)
+            </li>
+            </ul>
+            <br />
+            <b>Si une erreur s'est produite</b> :vous devriez avoir reçu un mail à l'adresse
+            d'administration configurée dans
+                <a class='link' href="/admin/main">
+                    Configuration -> Configuration générale
+                </a>
+            <br />
+            <b>Si l'import s'est déroulé avec succès</b> : vous trouverez ici les informations relatives aux données importées.<br />
+            Vous pouvez :
+            <ul>
+                <li>Supprimer les données importées et les indicateurs associés si une erreur s'est produite (données mal associées par exemple)</li>
+                <li>Recalculer les indicateurs issus du dernier import si vous avez modifié la configuration des indicateurs</li>
+            </ul>
+        </div>
 <hr/>
     </div>
 <table class="table table-striped table-condensed table-hover">

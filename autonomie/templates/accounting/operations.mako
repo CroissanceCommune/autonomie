@@ -65,6 +65,29 @@
 <hr/>
                 ${form|n}
             </div>
+    </div>
+    <div class='alert alert-info'>
+        Voici les écritures extraites du fichier ${request.context.filename}.<br />
+        Vous pouvez visualisez:
+        <ul><li>Les écritures importées</li>
+        <li>Les écritures qui n'ont pas pu être associées à des entreprises dans Autonomie</li>
+        </ul>
+        <br />
+        Si vous avez apporter des modifications à la configuration des indicateurs de trésorerie, vous pouvez :
+        <ul>
+        <li>
+            Recalculer les indicateurs en prenant en compte la nouvelle configuration : les indicateurs issus des écritures ci-dessous seront mis à jour
+        </li>
+        </ul>
+        <br />
+        Si certaines écritures n'ont pas été associées à des entreprises dans Autonomie, par exemple parce qu'un compte analytique n'a pas été configuré.
+        <br />
+        Vous pouvez :
+        <ul>
+        <li>Supprimer cet import</li>
+        <li>Modifier la configuration de l'entreprise</li>
+        <li>Re-déposer le fichier d'écriture par le biais de Filezilla (ou autre client sftp)</li>
+        </ul>
         </div>
 <hr/>
     </div>

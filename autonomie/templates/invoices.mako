@@ -27,44 +27,15 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/pager.mako" import="pager"/>
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-    % if api.has_permission('admin_treasury'):
-        ${pdf_export_btn.render(request)|n}
-    % endif
-    </li>
-    <li>
-    </li>
-</ul>
-<div class='row'>
-    <div class='col-md-7'>
-        ${form|n}
-    </div>
-    <div class='col-md-4'>
-        <table class='table table-bordered status-table'>
-            <tr>
-                <td class='paid-status-resulted'><br /></td>
-                <td>Factures payées</td>
-            </tr>
-            <tr>
-                <td class='paid-status-paid'><br /></td>
-                <td>Factures payées partiellement</td>
-            </tr>
-            <tr>
-                <td class=''><br /></td>
-                <td>Factures non payées depuis moins de 45 jours</td>
-            </tr>
-            <tr>
-                <td class='tolate-True'><br /></td>
-                <td>Factures non payées depuis plus de 45 jours</td>
-            </tr>
-        </table>
-    </div>
-</div>
-</%block>
 <%block name='content'>
-<div class="well well-sm pull-right btn-group" role='group'>
+% if api.has_permission('admin_treasury'):
+    <a
+        class='btn btn-default primary-action'
+        href='/invoices?action=export_pdf'>
+        <i class='fa fa-file-pdf-o'></i>&nbsp;Export massif
+    </a>
+% endif
+<div class="pull-right btn-group" role='group'>
     <%
 ## We build the link with the current search arguments
     args = request.GET
@@ -113,6 +84,61 @@
         >
         <i class='fa fa-file'></i> CSV
     </a>
+</div>
+<hr />
+<a class="btn btn-default large-btn
+    % if '__formid__' in request.GET:
+        btn-primary
+    % endif
+    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
+    <i class='glyphicon glyphicon-filter'></i>&nbsp;
+    Filtres&nbsp;
+    <i class='glyphicon glyphicon-chevron-down'></i>
+</a>
+% if '__formid__' in request.GET:
+    <span class='help-text'>
+        <small><i>Des filtres sont actifs</i></small>
+    </span>
+    <div class='help-text'>
+        <a href="${request.current_route_path(_query={})}">
+            <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+        </a>
+    </div>
+% endif
+% if '__formid__' in request.GET:
+    <div class='collapse' id='filter-form'>
+% else:
+    <div class='in collapse' id='filter-form'>
+% endif
+        <div class='row'>
+            <div class='col-xs-12'>
+<hr/>
+                ${form|n}
+            </div>
+        </div>
+<hr/>
+    </div>
+<div class='row'>
+    <div class='col-md-4 col-md-offset-8 col-xs-12'>
+        <table class='table table-bordered status-table'>
+            <tr>
+                <td class='paid-status-resulted'><br /></td>
+                <td>Factures payées</td>
+            </tr>
+            <tr>
+                <td class='paid-status-paid'><br /></td>
+                <td>Factures payées partiellement</td>
+            </tr>
+            <tr>
+                <td class=''><br /></td>
+                <td>Factures non payées depuis moins de 45 jours</td>
+            </tr>
+            <tr>
+                <td class='tolate-True'><br /></td>
+                <td>Factures non payées depuis plus de 45 jours</td>
+            </tr>
+        </table>
+    </div>
 </div>
 ${request.layout_manager.render_panel('invoicetable', records, is_admin_view=is_admin)}
 ${pager(records)}

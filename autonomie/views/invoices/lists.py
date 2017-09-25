@@ -402,51 +402,55 @@ def invoices_pdf_view(request):
     """
     # We retrieve the form
     query_form = get_invoice_pdf_export_form(request)
+    if 'submit' in request.params:
+        try:
+            appstruct = query_form.validate(request.params.items())
+        except ValidationFailure as e:
+            # Form validation failed, the error contains the form with the error
+            # messages
+            query_form = e
+            appstruct = None
 
-    try:
-        appstruct = query_form.validate(request.params.items())
-    except ValidationFailure as e:
-        # Form validation failed, the error contains the form with the error
-        # messages
-        query_form = e
-        appstruct = None
+        if appstruct is not None:
+            # The form has been validated, we can query for documents
+            start_number = appstruct["start"]
+            end_number = appstruct["end"]
+            year = appstruct['year']
 
-    if appstruct is not None:
-        # The form has been validated, we can query for documents
-        start_number = appstruct["start"]
-        end_number = appstruct["end"]
-        year = appstruct['year']
-
-        documents = query_documents_for_export(start_number, end_number, year)
-
-        # We've got some documents to export
-        if documents:
-            # Getting the html output
-            html_string = html(request, documents, bulk=True)
-
-            filename = u"factures_{0}_{1}_{2}.pdf".format(
-                year,
+            documents = query_documents_for_export(
                 start_number,
                 end_number,
+                year
             )
 
-            try:
-                # Placing the pdf datas in the request
-                write_pdf(request, filename, html_string)
-                return request.response
-            except BaseException as e:
-                import traceback
-                traceback.print_exc()
-                request.session.flash(u"Erreur à l'export des factures, \
-essayez de limiter le nombre de factures à exporter. Prévenez \
-votre administrateur si le problème persiste.", queue="error")
-        else:
-            # There were no documents to export, we send a message to the end
-            # user
-            request.session.flash(
-                u"Aucune facture n'a pu être retrouvée",
-                queue="error"
-            )
+            # We've got some documents to export
+            if documents:
+                # Getting the html output
+                html_string = html(request, documents, bulk=True)
+
+                filename = u"factures_{0}_{1}_{2}.pdf".format(
+                    year,
+                    start_number,
+                    end_number,
+                )
+
+                try:
+                    # Placing the pdf datas in the request
+                    write_pdf(request, filename, html_string)
+                    return request.response
+                except BaseException as e:
+                    import traceback
+                    traceback.print_exc()
+                    request.session.flash(u"Erreur à l'export des factures, \
+    essayez de limiter le nombre de factures à exporter. Prévenez \
+    votre administrateur si le problème persiste.", queue="error")
+            else:
+                # There were no documents to export, we send a message to the
+                # end user
+                request.session.flash(
+                    u"Aucune facture n'a pu être retrouvée",
+                    queue="error"
+                )
     gotolist_btn = ViewLink(
         u"Liste des factures",
         "admin_invoices",

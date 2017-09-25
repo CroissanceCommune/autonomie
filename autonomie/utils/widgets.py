@@ -172,9 +172,11 @@ class ViewLink(Widget, PermWidget):
             Return True if the button is active
         """
         request = self.request or request
-        cur_path = urllib.unquote(
-            request.current_route_path(_query={})
-        )
+        cur_path = request.current_route_path(_query={})
+        if 'action' in request.GET:
+            cur_path += "?action=%s" % request.GET['action']
+
+        cur_path = urllib.unquote(cur_path)
         btn_path = self.url(request)
         return cmp_urls(btn_path, cur_path)
 

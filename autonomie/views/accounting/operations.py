@@ -6,6 +6,7 @@
 """
 Upload and operation vizualisation
 """
+import logging
 import colander
 from sqlalchemy.orm import load_only
 
@@ -13,12 +14,18 @@ from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
     AccountingOperation,
 )
-from autonomie.forms.accounting import get_upload_list_schema
+from autonomie.forms.accounting import (
+    get_upload_list_schema,
+    get_operation_list_schema,
+)
+from autonomie.utils.widgets import ViewLink
 
 from autonomie.views import (
     BaseListView,
     DeleteView,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class UploadListView(BaseListView):
@@ -133,6 +140,74 @@ class DeleteUploadView(DeleteView):
     redirect_route = "/accounting/operation_uploads"
 
 
+class OperationListView(BaseListView):
+    """
+    Return the list of operations of a given upload (the view's context)
+    """
+    schema = get_operation_list_schema()
+    sort_columns = {
+        "analytical_account": AccountingOperation.analytical_account,
+        "general_account": AccountingOperation.general_account,
+    }
+    default_sort = "analytical_account"
+    default_direction = "asc"
+
+    @property
+    def title(self):
+        return u"Liste des écritures extraites du fichier {0}".format(
+            self.context.filename
+        )
+
+    def populate_actionmenu(self, appstruct):
+        self.request.actionmenu.add(
+            ViewLink(
+                u"Liste des fichiers télversés",
+                path="/accounting/operation_uploads",
+            )
+        )
+
+    def query(self):
+        query = AccountingOperation.query().options(
+            load_only(
+                AccountingOperation.id,
+                AccountingOperation.analytical_account,
+                AccountingOperation.general_account,
+                AccountingOperation.company_id,
+                AccountingOperation.label,
+                AccountingOperation.debit,
+                AccountingOperation.credit,
+                AccountingOperation.balance,
+            )
+        )
+        return query.filter_by(upload_id=self.context.id)
+
+    def filter_analytical_account(self, query, appstruct):
+        account = appstruct.get('analytical_account')
+        if account not in ('', colander.null, None):
+            logger.debug("    + Filtering by analytical_account")
+            query = query.filter_by(analytical_account=account)
+        return query
+
+    def filter_general_account(self, query, appstruct):
+        account = appstruct.get('general_account')
+        if account not in ('', colander.null, None):
+            logger.debug("    + Filtering by general_account")
+            query = query.filter_by(general_account=account)
+        return query
+
+    def filter_include_associated(self, query, appstruct):
+        include = appstruct.get('include_associated')
+        if not include:
+            query = query.filter_by(company_id=None)
+        return query
+
+    def filter_company_id(self, query, appstruct):
+        cid = appstruct.get('company_id')
+        if cid not in ('', None, colander.null):
+            query = query.filter_by(company_id=cid)
+        return query
+
+
 def add_routes(config):
     config.add_route(
         "/accounting/operation_uploads",
@@ -158,6 +233,13 @@ def add_views(config):
         route_name='/accounting/operation_uploads/{id}',
         request_param="action=delete",
         permission="admin_accounting",
+    )
+
+    config.add_view(
+        OperationListView,
+        route_name='/accounting/operation_uploads/{id}',
+        renderer="/accounting/operations.mako",
+        permission='admin_accounting',
     )
 
 

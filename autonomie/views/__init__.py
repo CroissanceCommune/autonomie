@@ -235,8 +235,10 @@ class BaseListClass(BaseView):
             except deform.ValidationFailure as e:
                 # If values are not valid, we want the default ones to be
                 # provided see the schema definition
-                self.logger.error("  - Current search values are not valid")
+                self.logger.exception("  - Current search values are not valid")
                 self.logger.error(e)
+                if hasattr(e, 'error'):
+                    self.logger.error(e.error)
                 appstruct = schema.deserialize({})
                 self.error = e
 

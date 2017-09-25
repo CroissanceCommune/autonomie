@@ -301,6 +301,13 @@ def get_admin_menus(request):
             href=href
         )
 
+        href = request.route_path("/accounting/operation_uploads")
+        treasury.add_item(
+            u"Comptes de trésorerie",
+            icon="fa fa-file-o",
+            href=href
+        )
+
         menu.add(treasury)
 
     accompagnement = DropDown(label=u"Accompagnement")

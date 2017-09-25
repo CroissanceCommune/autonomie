@@ -50,6 +50,14 @@ HEADER_RESIZER = ImageResizer(4, 1)
 
 
 CONFIGURATION_KEYS = {
+    'cae_admin_mail': {
+        "title": u"Adresse e-mail de contact pour les notifications Autonomie",
+        "description": (
+            u"Les e-mails de notifications (par ex : retour "
+            u"sur le traitement de fichiers de trésorerie "
+            u") sont envoyés à cette adresse"
+        )
+    },
     'receipts_active_tva_module': {
         "title": u"Activer le module TVA pour les encaissements",
         "description": u"Inclue les écritures pour le paiement de la TVA \
@@ -418,6 +426,13 @@ class SiteConfig(colander.MappingSchema):
         missing=u'',
         admin=True,
     )
+    cae_admin_mail = colander.SchemaNode(
+        colander.String(),
+        title=CONFIGURATION_KEYS['cae_admin_mail']['title'],
+        description=CONFIGURATION_KEYS['cae_admin_mail']['description'],
+        validator=forms.mail_validator(),
+        missing=u""
+    )
 
 
 class MainConfig(colander.MappingSchema):
@@ -729,7 +744,7 @@ def get_config_appstruct(request, config_dict, logo):
         transform Config datas to ConfigSchema compatible appstruct
     """
     appstruct = {
-        'site':     {'welcome': ''},
+        'site':     {'welcome': '', 'cae_admin_mail': ''},
         'document': {
             'estimation': {
                 'header': '',
@@ -758,6 +773,7 @@ def get_config_appstruct(request, config_dict, logo):
             )
         }
     appstruct['site']['welcome'] = config_dict.get('welcome', '')
+    appstruct['site']['cae_admin_mail'] = config_dict.get('cae_admin_mail', '')
     appstruct['document']['footertitle'] = config_dict.get(
         'coop_pdffootertitle', ''
     )
@@ -845,6 +861,9 @@ def get_config_dbdatas(appstruct):
             'invoice', {}).get('late')
     dbdatas['welcome'] = appstruct.get('site', {}).get(
         'welcome')
+    dbdatas['cae_admin_mail'] = appstruct.get('site', {}).get(
+        'cae_admin_mail'
+    )
 
     dbdatas['attached_filetypes'] = json.dumps(
         appstruct.get('attached_filetypes', {}).get('types',  [])

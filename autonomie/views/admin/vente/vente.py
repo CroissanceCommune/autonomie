@@ -26,12 +26,10 @@ Configuration générale du module vente:
     Unité de prestation
 """
 import logging
-import functools
 
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseConfigView,
-    make_enter_point_view,
 )
 from autonomie.forms.admin import (
     get_config_schema,
@@ -46,7 +44,6 @@ from autonomie.models.payments import (
     PaymentMode,
     BankAccount,
 )
-from autonomie.models.treasury import CustomInvoiceBookEntryModule
 
 logger = logging.getLogger(__name__)
 
@@ -87,16 +84,6 @@ logger = logging.getLogger(__name__)
 )
 
 
-(
-    custom_treasury_admin_class,
-    custom_treasury_admin_route,
-    custom_treasury_admin_tmpl,
-) = get_model_admin_view(
-    CustomInvoiceBookEntryModule,
-    r_path='admin_vente_treasury',
-)
-
-
 class WorkUnitAdmin(work_unit_admin_class):
     title = u"Configuration des unités de prestation"
     disable = False
@@ -122,87 +109,6 @@ class PaymentConditionAdmin(payment_condition_admin_class):
     title = u"Configuration des conditions de paiement"
     description = u"Les conditions que les entrepreneurs peuvent sélectionner \
 lors de la création d'un devis/d'une facture"
-
-
-class AdminVenteTreasuryMain(BaseConfigView):
-    """
-        Cae information configuration
-    """
-    title = u"Configuration des informations générales et des \
-modules prédéfinis"
-    description = u"Configuration du code journal et des modules prédéfinis \
-(Export des factures, contribution à la CAE, RG Externe, RG Interne)"
-    redirect_route_name = "admin_vente_treasury"
-    validation_msg = u"Les informations ont bien été enregistrées"
-    keys = (
-        'code_journal',
-        'numero_analytique',
-        'compte_frais_annexes',
-        'compte_cg_banque',
-        'compte_rrr',
-        'compte_cg_tva_rrr',
-        'code_tva_rrr',
-        'compte_cg_contribution',
-        "contribution_cae",
-        'compte_rg_interne',
-        "taux_rg_interne",
-        'compte_rg_externe',
-        "taux_rg_client",
-        'sage_facturation_not_used',
-        "sage_contribution",
-        'sage_rginterne',
-        'sage_rgclient',
-    )
-    schema = get_config_schema(keys)
-    info_message = u"""
-Configurez les exports comptables de votre CAE.
-Configurez les champs indispensables aux exports :\
-    <ul>\
-        <li>Code journal</li>\
-        <li>Numéro analytique de la CAE</li>\
-        <li>Compte banque de l'entrepreneur</li>\
-    </ul>\
-Configurez les champs relatifs aux frais et remises:\
-    <ul>\
-<li>Compte de frais annexes</li>\
-<li>Compte RRR (Rabais, Remises et Ristournes)</li>\
-    </ul>\
-    Configurez et activez des modules de retenues optionnels :\
-        <ul>\
-    <li>Module de contribution à la CAE</li>\
-    <li>Module RG Externe (spécifique bâtiment)</li>\
-    <li>Module RG Interne (spécifique bâtiment)</li>\
-    </ul>
-    """
-
-
-class AdminVenteTreasuryCustom(custom_treasury_admin_class):
-    title = u"Configuration des modules de contribution personnalisés"
-    description = u"Ajouter des modules de contribution personnalisés aux \
-exports de factures"
-    widget_options = {
-        'add_subitem_text_template': u"Ajouter un module de contribution \
-personnalisé",
-        "orderable": False,
-    }
-
-    def query_items(self):
-        return self.factory.query().filter_by(active=True).all()
-
-
-class MainReceiptsConfig(BaseConfigView):
-    title = u"Informations générales"
-    keys = (
-        'receipts_active_tva_module',
-    )
-    schema = get_config_schema(keys)
-    validation_msg = u"L'export comptable des encaissement a bien été \
-configuré"
-    message = u"Configurer l'export des encaissements (le code journal \
-utilisé est celui de la banque associé à chaque encaissement)"
-    redirect_route_name = "admin_receipts"
-
-
 def admin_vente_index_view(request):
     """
     vue d'index pour la configuration du module vente
@@ -258,93 +164,20 @@ aux encaissements",
     return dict(title=u"Configuration du module Ventes", menus=menus)
 
 
-def admin_vente_treasury_index_view(request):
-    menus = []
-    for label, route, title, icon in (
-        (u"Retour", "admin_vente", "", "fa fa-step-backward"),
-        (
-            AdminVenteTreasuryMain.title,
-            "admin_vente_treasury_main",
-            AdminVenteTreasuryMain.description,
-            ""
-        ),
-        (
-            AdminVenteTreasuryCustom.title,
-            "admin_vente_treasury_custom",
-            AdminVenteTreasuryCustom.description,
-            ""
-        ),
-    ):
-        menus.append(dict(label=label, route_name=route, title=title, icon=icon))
-    return dict(title=u"Configuration comptable du module Ventes", menus=menus)
-
-
-def include_receipts_views(config):
-    """
-    Add views for payments configuration
-    """
-    config.add_route("admin_receipts", "admin/receipts")
-
-    all_views = [
-        (
-            MainReceiptsConfig,
-            "admin_main_receipts",
-            "/admin/main.mako",
-        ),
-        get_model_admin_view(BankAccount, r_path="admin_receipts"),
-    ]
-
-    for view, route_name, tmpl in all_views:
-        config.add_route(route_name, "admin/" + route_name)
-        config.add_admin_view(
-            view,
-            route_name=route_name,
-            renderer=tmpl,
-        )
-
-    config.add_admin_view(
-        make_enter_point_view(
-            "admin_vente",
-            all_views,
-            u"Configuration comptables du module encaissements",
-        ),
-        route_name='admin_receipts'
-    )
-
-
 def includeme(config):
     config.add_route('admin_vente', "admin/vente")
     config.add_route("admin_vente_print", "admin/vente/print")
     config.add_route("admin_vente_mention", "admin/vente/mention")
     config.add_route("admin_vente_workunit", "admin/vente/workunit")
     config.add_route("admin_vente_payment_mode", "admin/vente/payment_mode")
-    config.add_route("admin_vente_treasury", "admin/vente/treasury")
-    config.add_route("admin_vente_treasury_main", "admin/vente/treasury/main")
-    config.add_route(
-        "admin_vente_treasury_custom",
-        "admin/vente/treasury/custom"
-    )
     config.add_route(
         "admin_vente_payment_condition",
         "admin/vente/payment_condition"
     )
 
-    config.add_admin_view = functools.partial(
-        config.add_view,
-        permission='admin',
-        renderer="admin/main.mako",
-    )
-
-    include_receipts_views(config)
-
     config.add_admin_view(
         admin_vente_index_view,
         route_name="admin_vente",
-    )
-
-    config.add_admin_view(
-        admin_vente_treasury_index_view,
-        route_name="admin_vente_treasury",
     )
 
     config.add_admin_view(
@@ -367,12 +200,3 @@ def includeme(config):
         route_name='admin_vente_payment_condition',
     )
 
-    config.add_admin_view(
-        AdminVenteTreasuryMain,
-        route_name='admin_vente_treasury_main',
-    )
-
-    config.add_admin_view(
-        AdminVenteTreasuryCustom,
-        route_name='admin_vente_treasury_custom',
-    )

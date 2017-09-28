@@ -8,7 +8,6 @@ from transaction import commit
 import sqlalchemy
 
 from autonomie_base.models.base import DBSESSION
-from autonomie_base.models.base import DBBASE
 
 
 logger = logging.getLogger(__name__)
@@ -61,13 +60,40 @@ def populate_groups(session):
     session.flush()
 
 
+def populate_accounting_treasury_measure_types(session):
+    """
+    Populate the database with treasury measure types
+    """
+    from autonomie.models.accounting.measures import TreasuryMeasureType
+    if TreasuryMeasureType.query().count() == 0:
+        for internal_id, start, label in (
+            (1, '5', u"Trésorerie du jour",),
+            (2, "42,43,44", u"Impôts, taxes et cotisations dues",),
+            (3, "40", u"Fournisseurs à payer",),
+            (5, "425", u"Salaires à payer",),
+            (6, '421', u"Notes de dépenses à payer"),
+            (7, "41", u"Clients à encaisser"),
+            (8, "1,2,3", u"Indicateurs par comptes"),
+        ):
+            session.add(
+                TreasuryMeasureType(
+                    internal_id=internal_id, account_prefix=start, label=label
+                )
+            )
+        session.flush()
+
+
 def populate_database():
     """
     Populate the database with default values
     """
     logger.debug("Populating the database")
     session = DBSESSION()
-    for func in (populate_situation_options, populate_groups):
+    for func in (
+        populate_situation_options,
+        populate_groups,
+        populate_accounting_treasury_measure_types,
+    ):
         try:
             func(session)
         except sqlalchemy.exc.OperationalError as e:

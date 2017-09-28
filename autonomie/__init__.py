@@ -266,6 +266,15 @@ def base_configure(config, dbsession, **settings):
         reify=True
     )
 
+    def add_admin_view(config, *args, **kwargs):
+        if 'renderer' not in kwargs:
+            kwargs['renderer'] = 'admin/main.mako'
+        if 'permission' not in kwargs:
+            kwargs['permission'] = 'admin'
+        config.add_view(*args, **kwargs)
+
+    config.add_directive('add_admin_view', add_admin_view)
+
     add_static_views(config, settings)
 
     config.include('autonomie.layouts')

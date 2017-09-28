@@ -654,12 +654,6 @@ def includeme(config):
         traverse="templates/{id}",
     )
 
-    config.add_admin_view = functools.partial(
-        config.add_view,
-        permission='admin',
-        renderer="admin/main.mako",
-    )
-
     config.add_admin_view(
         index,
         route_name='admin_index',

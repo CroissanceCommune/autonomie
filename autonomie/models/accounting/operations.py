@@ -47,6 +47,13 @@ class AccountingOperationUpload(DBBASE):
         order_by="AccountingOperation.analytical_account",
         cascade='all,delete,delete-orphan',
     )
+    measure_grids = relationship(
+        "TreasuryMeasureGrid",
+        primaryjoin="TreasuryMeasureGrid.upload_id"
+        "==AccountingOperationUpload.id",
+        cascade='all,delete,delete-orphan',
+    )
+
     date = Column(
         Date(),
         info={
@@ -134,3 +141,6 @@ class AccountingOperation(DBBASE):
             balance=self.balance,
             company_id=self.company_id,
         )
+
+    def total(self):
+        return self.credit - self.debit

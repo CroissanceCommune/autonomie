@@ -12,6 +12,7 @@ from sqlalchemy import (
     ForeignKey,
     Float,
     DateTime,
+    Date,
     Boolean,
 )
 from sqlalchemy.orm import relationship
@@ -30,23 +31,36 @@ class TreasuryMeasureType(DBBASE):
     """
     __tablename__ = 'treasury_measure_type'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
+    __colanderalchemy_config__ = {
+        "help_msg": u"""Les indicateurs décrits ici sont prédéfinis.
+        Ils permettent d'assembler les tableaux de bord des entrepreneurs.
+        Vous pouvez modifier ici les préfixes de comptes généraux pour indiquer
+        quelles écritures doivent être utilisées pour les calculer."""
+    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalachemy': {'exclude': True}}
+    )
+    internal_id = Column(
+        Integer,
+        info={'colanderalachemy': {'exclude': True}},
+        default=-1
+    )
     label = Column(
         String(255),
         info={
             'colanderalachemy': {'title': u"Libellé de cet indicateur"}
         }
     )
-    account_start_prefix = Column(
+    account_prefix = Column(
         String(10),
         info={
-            'colanderalachemy': {'title': u"Depuis les comptes commençant par"}
-        },
-    )
-    account_end_prefix = Column(
-        String(10),
-        info={
-            'colanderalachemy': {'title': u"Jusqu'au comptes commençant par"}
+            'colanderalachemy': {
+                'title': u"Depuis les comptes commençant par",
+                "description": u"Une liste de préfixe peut être fournie en les \
+séparant par des virgules (ex : 42,43)",
+            }
         },
     )
     active = Column(
@@ -55,12 +69,17 @@ class TreasuryMeasureType(DBBASE):
         info={'colanderalachemy': {'title': u"Indicateur actif ?"}}
     )
 
+    def match(self, account):
+        res = False
+        for prefix in self.account_prefix.split(','):
+            if account.startswith(prefix):
+                res = True
+                break
+        return res
 
-class TreasuryMeasure(DBBASE):
-    """
-    Stores a treasury measure associated to a given company
-    """
-    __tablename__ = 'treasury_measure'
+
+class TreasuryMeasureGrid(DBBASE):
+    __tablename__ = 'treasury_measure_grid'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     datetime = Column(
@@ -68,27 +87,9 @@ class TreasuryMeasure(DBBASE):
         default=datetime.datetime.now,
         info={"colanderalchemy": {'title': u"Heure et date de création"}}
     )
-    label = Column(
-        String(255),
-        info={"colanderalchemy": {'title': u"Libellé"}}
-    )
-    value = Column(
-        Float(precision=2),
-        info={"colanderalchemy": {'title': u"Montant"}}
-    )
-    measure_type_id = Column(
-        ForeignKey('treasury_measure_type.id'),
-        info={
-            "colanderalchemy": {
-                'title': u"Type d'indicateur",
-                "widget": get_deferred_select(TreasuryMeasureType),
-            }
-        }
-    )
-    measure_type = relationship(
-        TreasuryMeasureType,
-        primaryjoin="TreasuryMeasureType.id==TreasuryMeasure.measure_type_id",
-        info={"colanderalchemy": {'exclude': True}},
+    date = Column(
+        Date(),
+        info={"colanderalchemy": {'title': u"Date du dépôt"}}
     )
     company_id = Column(
         ForeignKey('company.id', ondelete="cascade"),
@@ -108,3 +109,41 @@ class TreasuryMeasure(DBBASE):
         info={"colanderalachemy": {'title': u"Related upload"}},
     )
     upload = relationship('AccountingOperationUpload')
+    measures = relationship(
+        "TreasuryMeasure",
+        primaryjoin="TreasuryMeasureGrid.id==TreasuryMeasure.grid_id",
+        cascade="all,delete,delete-orphan",
+    )
+
+
+class TreasuryMeasure(DBBASE):
+    """
+    Stores a treasury measure associated to a given company
+    """
+    __tablename__ = 'treasury_measure'
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(
+        String(255),
+        info={"colanderalchemy": {'title': u"Libellé"}}
+    )
+    value = Column(
+        Float(precision=2),
+        default=0,
+        info={"colanderalchemy": {'title': u"Montant"}},
+    )
+    measure_type_id = Column(
+        ForeignKey('treasury_measure_type.id'),
+        info={
+            "colanderalchemy": {
+                'title': u"Type d'indicateur",
+                "widget": get_deferred_select(TreasuryMeasureType),
+            }
+        }
+    )
+    measure_type = relationship(
+        TreasuryMeasureType,
+        primaryjoin="TreasuryMeasureType.id==TreasuryMeasure.measure_type_id",
+        info={"colanderalchemy": {'exclude': True}},
+    )
+    grid_id = Column(ForeignKey('treasury_measure_grid.id'))

@@ -9010,8 +9010,9 @@ webpackJsonp([1],[
 	        'change:km_ttc': 'render'
 	    },
 	    templateContext: function templateContext() {
+	        var category = this.getOption('category');
 	        return {
-	            ttc: (0, _math.formatAmount)(this.model.get('ttc') + this.model.get('km_ttc'))
+	            ttc: (0, _math.formatAmount)(this.model.get('ttc_' + category) + this.model.get('km_ttc_' + category))
 	        };
 	    }
 	}); /*
@@ -9387,9 +9388,11 @@ webpackJsonp([1],[
 	    this.on('remove', this.channelCall);
 	    this.on('sync', this.channelCall);
 	    this.on('reset', this.channelCall);
+	    this.on('add', this.channelCall);
 	  },
 	
 	  channelCall: function channelCall(model) {
+	    console.log("Triggering Channel call");
 	    var channel = _backbone4.default.channel('facade');
 	    channel.trigger('changed:line', model.get('category'));
 	  },
@@ -9519,6 +9522,7 @@ webpackJsonp([1],[
 	    this.on('remove', this.channelCall);
 	    this.on('sync', this.channelCall);
 	    this.on('reset', this.channelCall);
+	    this.on('add', this.channelCall);
 	  },
 	
 	  channelCall: function channelCall(model) {

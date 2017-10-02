@@ -21,8 +21,10 @@ const ExpenseCollection = Bb.Collection.extend({
         this.on('remove', this.channelCall);
         this.on('sync', this.channelCall);
         this.on('reset', this.channelCall);
+        this.on('add', this.channelCall);
     },
     channelCall: function(model){
+        console.log("Triggering Channel call");
         var channel = Radio.channel('facade');
         channel.trigger('changed:line', model.get('category'));
     },

@@ -149,7 +149,10 @@ class BookMarkSchema(colander.MappingSchema):
         colander.Integer(),
         validator=deferred_type_id_validator
     )
-    description = colander.SchemaNode(colander.String())
+    description = colander.SchemaNode(
+        colander.String(),
+        missing=u"",
+    )
     ht = colander.SchemaNode(colander.Float())
     tva = colander.SchemaNode(colander.Float())
 

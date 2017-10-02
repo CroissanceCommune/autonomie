@@ -6386,6 +6386,7 @@ webpackJsonp([2],[
 	        this.on('remove', this.channelCall);
 	        this.on('sync', this.channelCall);
 	        this.on('reset', this.channelCall);
+	        this.on('add', this.channelCall);
 	    },
 	    channelCall: function channelCall() {
 	        var channel = _backbone2.default.channel('facade');
@@ -11023,6 +11024,7 @@ webpackJsonp([2],[
 	        this.on('remove', this.channelCall);
 	        this.on('sync', this.channelCall);
 	        this.on('reset', this.channelCall);
+	        this.on('add', this.channelCall);
 	    },
 	    channelCall: function channelCall() {
 	        var channel = _backbone2.default.channel('facade');

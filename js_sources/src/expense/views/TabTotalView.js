@@ -20,9 +20,10 @@ const TabTotalView = Mn.View.extend({
         'change:km_ttc': 'render',
     },
     templateContext(){
+        var category = this.getOption('category');
         return {
             ttc: formatAmount(
-                this.model.get('ttc') + this.model.get('km_ttc')
+                this.model.get('ttc_' + category) + this.model.get('km_ttc_' + category)
             )
         }
     }

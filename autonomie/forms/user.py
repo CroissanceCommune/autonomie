@@ -198,6 +198,18 @@ def get_json_auth_schema():
     return BaseAuthSchema(validator=auth)
 
 
+def remove_admin_fields(schema, kw):
+    """
+    Remove admin specific filter fields
+
+    :param obj schema: The colander Schema
+    :param dict kw: The bind parameters
+    """
+    request = kw['request']
+    if not kw['request'].has_permission('admin_users'):
+        del schema['active']
+
+
 def get_list_schema():
     """
     Return a schema for filtering the user list
@@ -216,15 +228,23 @@ def get_list_schema():
         )
     )
 
-    schema.add(colander.SchemaNode(
-        colander.String(),
-        name='disabled',
-        missing="0",
-        default="0",
-        widget=deform.widget.HiddenWidget(),
-        validator=colander.OneOf(('0', '1'))
+    schema.add(
+        colander.SchemaNode(
+            colander.String(),
+            name='active',
+            widget=deform.widget.SelectWidget(
+                values=(
+                    ('Y', u"Seulement les comptes actifs"),
+                    ('N', u"Seulement les comptes désactivés"),
+                    ('', u"Afficher tous les comptes"),
+                )
+            ),
+            default='Y',
+            missing=colander.drop,
+            title=""
         )
     )
+    schema.after_bind = remove_admin_fields
     return schema
 
 

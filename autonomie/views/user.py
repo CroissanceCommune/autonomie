@@ -34,7 +34,6 @@ import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
 from js.deform import auto_need
-from webhelpers.html.builder import HTML
 from sqlalchemy import (
     or_,
     distinct,
@@ -65,8 +64,6 @@ from autonomie.models.company import (
 )
 from autonomie.utils.widgets import (
     ViewLink,
-    PopUp,
-    StaticWidget,
 )
 from autonomie.export.utils import write_file_to_request
 from sqla_inspect import py3o
@@ -93,7 +90,6 @@ from autonomie.views import (
 from autonomie.views.render_api import format_account
 from autonomie.views.company import company_enable
 from autonomie.views.files import (
-    get_add_file_link,
     FileUploadView,
 )
 
@@ -347,52 +343,18 @@ class UserList(BaseListView):
             logger.debug(query)
         return query
 
-    def filter_disabled(self, query, appstruct):
-        disabled = appstruct['disabled']
-        if disabled == '0':
-            val = 'Y'
-        else:
-            val = 'N'
-        return query.filter(User.active == val)
+    def filter_active(self, query, appstruct):
+        active = appstruct.get('active')
+        if active not in (None, '', colander.null):
+            query = query.filter(User.active == active)
+        return query
 
     def populate_actionmenu(self, appstruct):
         """
             Add items to the action menu (directory link,
             add user link and popup for user with add permission ...)
         """
-        populate_actionmenu(self.request)
-
-        if self.request.has_permission("add_user", self.context):
-            form = get_user_form(self.request)
-            popup = PopUp("add", u'Ajouter un permanent', form.render())
-            self.request.popups = {popup.name: popup}
-            self.request.actionmenu.add(popup.open_btn())
-
-        self.request.actionmenu.add(get_add_contractor_btn())
-
-        if self.request.has_permission("admin_users", self.context):
-            self.request.actionmenu.add(self._get_disabled_btn(appstruct))
-
         self.request.actionmenu.add(get_userdatas_link_btn())
-
-    def _get_disabled_btn(self, appstruct):
-        """
-            return the button to show disabled users
-        """
-        disabled = appstruct['disabled']
-        _query = self.request.GET.copy()
-        if '__formid__' not in _query:
-            _query['__formid__'] = 'deform'
-
-        if disabled == '0':
-            label = u"Afficher les comptes désactivés"
-            _query['disabled'] = '1'
-        else:
-            _query['disabled'] = '0'
-            label = u"Afficher uniquement les comptes actifs"
-        url = self.request.current_route_path(_query=_query)
-        link = HTML.a(label, href=url)
-        return StaticWidget(link)
 
 
 class UserAccountView(BaseFormView):
@@ -456,7 +418,7 @@ class UserDatasAdd(BaseFormView):
         self.populate_actionmenu()
 
     def populate_actionmenu(self):
-        self.request.actionmenu.add(get_userdatas_list_btn())
+        self.request.actionmenu.add(get_userdatas_link_btn())
 
     def query_homonym(self, lastname, email):
         """
@@ -622,10 +584,7 @@ class UserDatasEdit(UserDatasAdd):
         self.ensure_doctypes_rel()
 
     def populate_actionmenu(self):
-        self.request.actionmenu.add(get_userdatas_list_btn())
-        self.request.actionmenu.add(
-            get_add_file_link(self.request, perm="admin_userdatas")
-        )
+        self.request.actionmenu.add(get_userdatas_link_btn())
 
     def ensure_doctypes_rel(self):
         """
@@ -1226,18 +1185,7 @@ def get_list_view_btn():
     """
         Return a link to the user list
     """
-    return ViewLink(u"Annuaire", "visit", path="users")
-
-
-def get_userdatas_list_btn():
-    """
-    Return a link to the user datas list
-    """
-    return ViewLink(
-        u"Annuaire 'Gestion sociale'",
-        "admin_userdatas",
-        path="userdatas",
-    )
+    return ViewLink(u"Retour à l'annuaire", "visit", path="users")
 
 
 def get_view_btn(user_id):
@@ -1294,19 +1242,6 @@ def get_disable_btn(user_id):
         path="user",
         id=user_id,
         _query=dict(action="disable")
-    )
-
-
-def get_add_contractor_btn():
-    """
-    Return a button returning the end user to the userdatas page to add a new
-    account
-    """
-    return ViewLink(
-        u"Ajouter un entrepreneur",
-        "admin_userdatas",
-        path="userdatas",
-        _query=dict(action='new'),
     )
 
 
@@ -1436,6 +1371,14 @@ def includeme(config):
         route_name='users',
         renderer='base/formpage.mako',
         request_method='POST',
+        permission='add_user',
+    )
+
+    config.add_view(
+        PermanentUserAddView,
+        route_name='users',
+        request_param='action=new',
+        renderer='base/formpage.mako',
         permission='add_user',
     )
 

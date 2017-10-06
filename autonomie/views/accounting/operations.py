@@ -161,7 +161,7 @@ class OperationListView(BaseListView):
     def populate_actionmenu(self, appstruct):
         self.request.actionmenu.add(
             ViewLink(
-                u"Liste des fichiers télversés",
+                u"Liste des fichiers téléversés",
                 path="/accounting/operation_uploads",
             )
         )

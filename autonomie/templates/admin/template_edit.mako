@@ -23,28 +23,31 @@
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
 <div class='row'>
-    <div class='col-md-6 col-md-offset-3 well'>
-        <dl class='dl-horizontal'>
-            <dt>Description du fichier</dt><dd>${request.context.description}</dd>
-            <dt>Nom du fichier</dt><dd> ${request.context.name}</dd>
-            <dt>Taille du fichier</dt><dd>${api.human_readable_filesize(request.context.size)}</dd>
-            <dt>Date de dépôt</dt><dd>${api.format_date(request.context.created_at)}</dd>
-            <dt>Dernière modification</dt><dd>${api.format_date(request.context.updated_at)}</dd>
-            <dt></dt>
-            <dd><a class='' href="${request.route_path('file', id=request.context.id, _query=dict(action='download'))}">Télécharger le fichier</a></dd>
-        </dl>
-        <a href="${request.route_path('template', id=request.context.id, _query=dict(action='delete'))}"
-           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');"
-           >
-           <i class='glyphicon glyphicon-trash'></i>Supprimer
-       </a>
-    </div>
-</div>
-<h3 class='text-center'>Éditer</h3>
-<hr>
-<div class='row'>
     <div class='col-md-6 col-md-offset-3'>
-        ${form|n}
+        <div class='panel panel-default page-block'>
+            <dl class='dl-horizontal'>
+                <dt>Description du fichier</dt><dd>${request.context.description}</dd>
+                <dt>Nom du fichier</dt><dd> ${request.context.name}</dd>
+                <dt>Taille du fichier</dt><dd>${api.human_readable_filesize(request.context.size)}</dd>
+                <dt>Date de dépôt</dt><dd>${api.format_date(request.context.created_at)}</dd>
+                <dt>Dernière modification</dt><dd>${api.format_date(request.context.updated_at)}</dd>
+                <dt></dt>
+                <dd><a class='' href="${request.route_path('file', id=request.context.id, _query=dict(action='download'))}">Télécharger le fichier</a></dd>
+            </dl>
+            <a href="${request.route_path('template', id=request.context.id, _query=dict(action='delete'))}"
+               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?');"
+               >
+               <i class='glyphicon glyphicon-trash'></i>Supprimer
+           </a>
+        </div>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+                Éditer
+            </div>
+            <div class='panel-body'>
+                ${form|n}
+            </div>
+        </div>
     </div>
 </div>
 </%block>

@@ -130,6 +130,12 @@ AutonomieApp.module("Holiday", function(Holiday, AutonomieApp,  Backbone, Marion
        */
       var route = "edit/" + this.model.cid;
       Holiday.router.navigate(route, {trigger: true});
+    },
+    templateHelpers: function(){
+        return {
+            start_date: formatDate(this.model.start_date),
+            end_date: formatDate(this.model.end_date),
+        }
     }
   });
   var NoHolidatView = Backbone.Marionette.ItemView.extend({

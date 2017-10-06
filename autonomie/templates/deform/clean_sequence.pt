@@ -32,7 +32,7 @@
          tal:attributes="prototype prototype"/>
 
     <div class="clean-panel-heading"></div>
-    <div class="clean-panel-body" style="padding-left: 50px">
+    <div class="clean-panel-body">
 
       <div class="deform-seq-container"
            id="${oid}-orderable">

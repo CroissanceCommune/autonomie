@@ -23,7 +23,8 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='content'>
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
 <a class='btn btn-primary primary-action'
     href="${request.route_path('/accounting/operation_uploads/{id}', id=request.context.id, _query={'action': 'compile'})}"
     >
@@ -34,38 +35,49 @@
     onclick='return window.confirm("Ëtes-vous sûr de vouloir supprimer ces écritures, cela supprimera également tous les indicateurs générés depuis celles-ci. \nContinuer ?");'>
     <i class='glyphicon glyphicon-trash'></i> Supprimer ces écritures
 </a>
-<hr />
-
-<a class="btn btn-default large-btn
+</div>
+</%block>
+<%block name='content'>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    <a href='#filter-form'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="filter-form">
+        <i class='glyphicon glyphicon-search'></i>&nbsp;
+        Filtres&nbsp;
+        <i class='glyphicon glyphicon-chevron-down'></i>
+    </a>
     % if '__formid__' in request.GET:
-        btn-primary
+        <div class='help-text'>
+            <small><i>Des filtres sont actifs</i></small>
+        </div>
+        <div class='help-text'>
+            <a href="${request.current_route_path(_query={})}">
+                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+            </a>
+        </div>
     % endif
-    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
-    <i class='glyphicon glyphicon-filter'></i>&nbsp;
-    Filtres&nbsp;
-    <i class='glyphicon glyphicon-chevron-down'></i>
-</a>
-% if '__formid__' in request.GET:
-    <span class='help-text'>
-        <small><i>Des filtres sont actifs</i></small>
-    </span>
-    <div class='help-text'>
-        <a href="${request.current_route_path(_query={})}">
-            <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
-        </a>
     </div>
-% endif
-% if '__formid__' in request.GET:
-    <div class='collapse' id='filter-form'>
-% else:
-    <div class='in collapse' id='filter-form'>
-% endif
-        <div class='row'>
-            <div class='col-xs-12'>
-<hr/>
-                ${form|n}
+    <div class='panel-body'>
+    % if '__formid__' in request.GET:
+        <div class='collapse' id='filter-form'>
+    % else:
+        <div class='in collapse' id='filter-form'>
+    % endif
+            <div class='row'>
+                <div class='col-xs-12'>
+                    ${form|n}
+                </div>
             </div>
+        </div>
     </div>
+</div>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${records.item_count} Résultat(s)
+    </div>
+    <div class='panel-body'>
     <div class='alert alert-info'>
         Voici les écritures extraites du fichier ${request.context.filename}.<br />
         Vous pouvez visualisez:
@@ -139,5 +151,7 @@
     % endif
     </tbody>
     </table>
+    </div>
+    </div>
 ${pager(records)}
 </%block>

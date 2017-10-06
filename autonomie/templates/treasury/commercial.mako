@@ -25,87 +25,102 @@
 <%inherit file="${context['main_template'].uri}" />
 <%block name='content'>
 <div class='row'>
-<div class='col-md-8 col-md-offset-2'>
-<table class='table table-striped table-bordered' style="margin-top:15px">
-<tr><td><b>Nombre de devis rédigés</b></td><td><b>${estimations}</b></td></tr>
-<tr><td><b>Nombre de devis concrétisés</b></td><td><b>${validated_estimations}</b></td></tr>
-<tr><td><b>Nombre de client</b></td><td><b>${customers}</b></td></tr>
-</table>
-</div>
-</div>
-<div class='row'>
-    <div class='col-md-2 col-md-offset-8'>
-        ${year_form.render()|n}
+    <div class='col-md-8 col-md-offset-2'>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+                Résumé
+            </div>
+            <div class='panel-body'>
+                <table class='table table-striped table-bordered' style="margin-top:15px">
+                <tr><td><b>Nombre de devis rédigés</b></td><td><b>${estimations}</b></td></tr>
+                <tr><td><b>Nombre de devis concrétisés</b></td><td><b>${validated_estimations}</b></td></tr>
+                <tr><td><b>Nombre de client</b></td><td><b>${customers}</b></td></tr>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-<div class='row'>
-    <table class='table table-striped table-bordered' style="margin-top:15px">
-        <thead>
-            <th>Description</th>
-            % for i in range(1, 13):
-                <th>${api.month_name(i)}</th>
-            % endfor
-            <th>Total annuel</th>
-        </thead>
-        <tbody>
-            <tr><td>CA prévisionnel</td>
-                % for i in range(1, 13):
-                    <% turnover = turnover_projections.get(i) %>
-                        % if turnover:
-                            <td id='ca_prev_${i}' title='${turnover.comment}'>
-                                ${api.format_amount(turnover.value, trim=True, precision=5)|n}
-                        % else:
-                            <td id='ca_prev_${i}'>
-                        % endif
-                        <a href='#setform'
-                            % if turnover:
-                                title='${turnover.comment}' onclick='setTurnoverProjectionForm("${i}", "${api.format_amount(turnover.value, grouping=False, precision=5)}", this);'>
-                            % else:
-                                onclick='setTurnoverProjectionForm("${i}");'>
-                            % endif
-                            <i class="glyphicon glyphicon-pencil"></i>
-                        </a>
-                    </td>
-                % endfor
-                <td>
-                    ${api.format_amount(turnover_projections['year_total'], trim=True, precision=5)|n}
-                </td>
-            </tr>
-            <tr><td>CA réalisé</td>
-                % for i in range(1, 13):
-                    <td>${api.format_amount(turnovers[i], trim=True, precision=5)|n}</td>
-                % endfor
-                <td>
-                    ${api.format_amount(turnovers['year_total'], trim=True, precision=5)|n}
-                </td>
-            </tr>
-            <tr><td>Écart</td>
-                % for i in range(1, 13):
-                    <td id='gap_${i}'>
-                        ${api.format_amount(compute_turnover_difference(i, turnover_projections, turnovers), trim=True, precision=5)|n}
-                    </td>
-                % endfor
-                <td>
-                    ${api.format_amount(turnovers['year_total'] - turnover_projections['year_total'], trim=True, precision=5)|n}
-                </td>
-            </tr>
-            <tr><td>Pourcentage</td>
-                % for i in range(1, 13):
-                    <td id='gap_percent_${i}'>
-                        ${compute_turnover_percent(i, turnover_projections, turnovers)}&nbsp;%
-                    </td>
-                % endfor
-                <td>
-                    ${compute_percent(turnovers['year_total'], turnover_projections['year_total'], 0)}&nbsp;%
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<div class='row'>
-    <div class='col-md-6 col-md-offset-2 well' id="form_container">
-        <a class="close" onclick="$('#form_container').fadeOut('slow');" title="Enlever">×</a>
-        ${form.render()|n}
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+        Détails
+    </div>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-xs-12'>
+                ${year_form.render()|n}
+            </div>
+        </div>
+        <div class='row'>
+            <table class='table table-striped table-bordered' style="margin-top:15px">
+                <thead>
+                    <th>Description</th>
+                    % for i in range(1, 13):
+                        <th>${api.month_name(i)}</th>
+                    % endfor
+                    <th>Total annuel</th>
+                </thead>
+                <tbody>
+                    <tr><td>CA prévisionnel</td>
+                        % for i in range(1, 13):
+                            <% turnover = turnover_projections.get(i) %>
+                                % if turnover:
+                                    <td id='ca_prev_${i}' title='${turnover.comment}'>
+                                        ${api.format_amount(turnover.value, trim=True, precision=5)|n}
+                                % else:
+                                    <td id='ca_prev_${i}'>
+                                % endif
+                                <a href='#setform'
+                                    % if turnover:
+                                        title='${turnover.comment}' onclick='setTurnoverProjectionForm("${i}", "${api.format_amount(turnover.value, grouping=False, precision=5)}", this);'>
+                                    % else:
+                                        onclick='setTurnoverProjectionForm("${i}");'>
+                                    % endif
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </a>
+                            </td>
+                        % endfor
+                        <td>
+                            ${api.format_amount(turnover_projections['year_total'], trim=True, precision=5)|n}
+                        </td>
+                    </tr>
+                    <tr><td>CA réalisé</td>
+                        % for i in range(1, 13):
+                            <td>${api.format_amount(turnovers[i], trim=True, precision=5)|n}</td>
+                        % endfor
+                        <td>
+                            ${api.format_amount(turnovers['year_total'], trim=True, precision=5)|n}
+                        </td>
+                    </tr>
+                    <tr><td>Écart</td>
+                        % for i in range(1, 13):
+                            <td id='gap_${i}'>
+                                ${api.format_amount(compute_turnover_difference(i, turnover_projections, turnovers), trim=True, precision=5)|n}
+                            </td>
+                        % endfor
+                        <td>
+                            ${api.format_amount(turnovers['year_total'] - turnover_projections['year_total'], trim=True, precision=5)|n}
+                        </td>
+                    </tr>
+                    <tr><td>Pourcentage</td>
+                        % for i in range(1, 13):
+                            <td id='gap_percent_${i}'>
+                                ${compute_turnover_percent(i, turnover_projections, turnovers)}&nbsp;%
+                            </td>
+                        % endfor
+                        <td>
+                            ${compute_percent(turnovers['year_total'], turnover_projections['year_total'], 0)}&nbsp;%
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class='row'>
+            <div class='col-md-6 col-md-offset-2' id="form_container">
+                <a class="close" onclick="$('#form_container').fadeOut('slow');" title="Enlever">×</a>
+                ${form.render()|n}
+            </div>
+        </div>
     </div>
 </div>
+
 </%block>

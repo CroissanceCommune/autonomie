@@ -22,15 +22,20 @@
 </%doc>
 <%inherit file="/admin/index.mako"></%inherit>
 <%block name='content'>
-    <h3 class='text-center'>Ajouter</h3>
-    <hr>
-    <div class='row'>
-        <div class='col-md-6 col-md-offset-3'>
-            <div class="alert alert-warning">
-                <i class='fa fa-warning'></i>
-                Les modèles de document doivent être au format odt pour pouvoir être utilisés par Autonomie
+<div class='row'>
+    <div class='col-md-6 col-md-offset-3'>
+        <div class='page-block panel panel-default'>
+            <div class='panel-heading'>
+            ${title}
             </div>
-            ${form|n}
+            <div class='panel-body'>
+                <div class="alert alert-warning">
+                    <i class='fa fa-warning'></i>
+                    Les modèles de document doivent être au format odt pour pouvoir être utilisés par Autonomie
+                </div>
+                ${form|n}
+            </div>
         </div>
     </div>
+</div>
 </%block>

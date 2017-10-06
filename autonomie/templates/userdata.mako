@@ -30,52 +30,70 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%namespace file="/base/utils.mako" import="format_filetable" />
 <%namespace file="/base/utils.mako" import="format_text" />
-<%block name="content">
-<% userdata = request.context %>
+<%block name='afteractionmenu'>
 <% user = getattr(request.context, "user", None) %>
-% if userdata.__name__ == 'userdatas':
-    <div class="row well">
-    % if user is not None:
-        <div class='col-xs-8'>
-            Ces données sont associées à un compte utilisateur
-        </div>
-    % endif
-    <div class="col-xs-4">
-        % if user is not None and not user.enabled() or user is None:
-            <% del_url = request.route_path('userdata', id=userdata.id, _query=dict(action="delete")) %>
-            <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
-            % if user is not None:
-                <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
-            % endif
-            ${table_btn(del_url,
-            u"Supprimer les données de gestion sociale",
-            u"Supprimer ces données de gestion sociale",
-            onclick="return confirm('%s');" % del_msg,
-            icon="trash",
-            css_class="glyphicon-white btn-danger"
-            )}
+<div class='page-header-block'>
+% if request.has_permission('admin_userdatas') and request.context.__name__ == 'userdatas':
+    <a
+        class='btn btn-default'
+        href="${request.route_path('userdata', id=request.context.id, _query=dict(action="attach_file"))}"
+        >
+        <i class='glyphicon glyphicon-file'></i>&nbsp;Attacher un fichier
+        </a>
+% endif
+% if user is not None and not user.enabled():
+        <% del_url = request.route_path('userdata', id=request.context.id, _query=dict(action="delete")) %>
+        <% del_msg = u'Êtes vous sûr de vouloir supprimer les données de cette personne ?' %>
+        % if user is not None:
+            <% del_msg += u" Le compte associé sera également supprimé. Cette action n\\'est pas réversible." %>
         % endif
-        </div>
-    </div>
+        <a
+            class='btn btn-danger'
+            href='${del_url}'
+            onclick="return confirm('${del_msg}');"
+            >
+            <i class='glyphicon glyphicon-trash'></i> &nbsp;Supprimer les données de gestion sociale
+        </a>
+% endif
+</div>
+</%block>
+<%block name="content">
+<% user = getattr(request.context, "user", None) %>
+% if request.context.__name__ == 'userdatas':
+        % if user is not None:
+            <div class='panel panel-default page-block'>
+                <div class='panel-body>'>
+                Ces données sont associées à un compte utilisateur
+                </div>
+            </div>
+        % endif
 % else:
     ## IT's a new entry
     % if confirmation_message is not UNDEFINED:
-        <div class="alert alert-warning">
-            ${format_text(confirmation_message)}
-            <button
-                class="btn btn-default btn-success"
-                onclick="submitForm('#${confirm_form_id}');">
-                Confirmer l'ajout
-            </button>
-            <button
-                class="btn btn-default btn-danger"
-                onclick="submitForm('#${confirm_form_id}', 'cancel');">
-                Annuler la saisie
-            </button>
+        <div class='panel panel-default page-block'>
+            <div class='panel-body>'>
+                <div class="alert alert-warning">
+                    ${format_text(confirmation_message)}
+                    <button
+                        class="btn btn-default btn-success"
+                        onclick="submitForm('#${confirm_form_id}');">
+                        Confirmer l'ajout
+                    </button>
+                    <button
+                        class="btn btn-default btn-danger"
+                        onclick="submitForm('#${confirm_form_id}', 'cancel');">
+                        Annuler la saisie
+                    </button>
+                </div>
+            </div>
         </div>
     % endif
 % endif
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+${title}
 </div>
+<div class='panel-body'>
 
 <ul class='nav nav-tabs' role="tablist">
     <li class='active'>
@@ -177,14 +195,14 @@
                 <br />
                 <br />
                 <a class='btn btn-success'
-                href="${request.route_path('userdata', id=userdata.id, _query=dict(action='attach_file'))}"
+                href="${request.route_path('userdata', id=request.context.id, _query=dict(action='attach_file'))}"
                 title="Déposer un document dans autonomie">
                 <i class="glyphicon glyphicon-plus"></i>
                 Déposer un document
             </a>
             </div>
             ## ${format_filelist(userdata, delete=True)}
-            ${format_filetable(userdata.children)}
+            ${format_filetable(request.context.children)}
         </div>
     </div>
     % endif
@@ -193,7 +211,7 @@
             <div class=''>
             % if user.enabled():
                 <% disable_url = request.route_path('user', \
-                    id=userdata.user_id, \
+                    id=request.context.user_id, \
                     _query=dict(action='disable')) %>
                 <% disable_msg = u'Êtes vous sûr de vouloir désactiver le compte de cet utilisateur ?' %>
 
@@ -206,7 +224,7 @@
                 )}
             % else:
                 <% enable_url = request.route_path('user', \
-                id=userdata.user_id, \
+                id=request.context.user_id, \
                 _query=dict(action='enable')) %>
 
                 ${table_btn(enable_url, \
@@ -231,7 +249,7 @@
             <div class='col-md-10'>
             <ul class="nav nav-pills nav-stacked">
         % for doctemplate in doctemplates:
-            <% url = request.route_path('userdata', id=userdata.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
+            <% url = request.route_path('userdata', id=request.context.id, _query=dict(template_id=doctemplate.id, action="py3o")) %>
                 <li>
                     <a href="${url}">
                         <i class="fa fa-file fa-1x"></i>
@@ -246,7 +264,7 @@
                 Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
                     <br />
             % endif
-            % if api.has_permission('admin', request.context):
+            % if request.has_permission('admin'):
                 <a class='btn btn-success'
                     href="${request.route_path('templates')}">
                 <i class="glyphicon glyphicon-plus"></i>
@@ -271,7 +289,7 @@
                         <th class='text-right'>Actions</th>
                     </thead>
                     <tbody>
-                        % for history in userdata.template_history:
+                        % for history in request.context.template_history:
                             % if history.template is not None:
                                 <tr>
                                     <td>${history.template.description}</td>
@@ -288,7 +306,7 @@
                                 </tr>
                             % endif
                         % endfor
-                        % if len(userdata.template_history) == 0:
+                        % if len(request.context.template_history) == 0:
                             <tr><td colspan='4'>Aucun document n'a été généré pour ce compte</td></tr>
                         % endif
                     </tbody>
@@ -383,7 +401,7 @@
                 <i class="glyphicon glyphicon-plus"></i>
                 Associer à une nouvelle entreprise
             </a>
-            <a href="${request.route_path('userdata', id=userdata.id, _query=dict(action='associate'))}"
+            <a href="${request.route_path('userdata', id=request.context.id, _query=dict(action='associate'))}"
                 class='btn btn-info'>
                 <i class="glyphicon glyphicon-link"></i>
                 Associer à une entreprise existante
@@ -398,6 +416,8 @@
                 </a>
         </div>
     % endif
+</div>
+</div>
 </div>
 </%block>
 <%block name="footerjs">

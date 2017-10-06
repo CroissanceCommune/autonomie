@@ -27,10 +27,21 @@
 <%block name='content'>
 <div class='row'>
     <div class='col-md-6 col-md-offset-3'>
+        <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+        ${title}
+        </div>
+        <div class='panel-body'>
         ${form|n}
+        </div>
+        </div>
     </div>
     <div class='col-md-3'>
-        <h4>Codes projet utilisés</h4>
+        <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+            Codes projet utilisés
+        </div>
+        <div class='panel-body'>
         <ul>
             % for project in projects:
                 <li>
@@ -38,6 +49,8 @@
                 </li>
             % endfor
         </ul>
+        </div>
+        </div>
     </div>
 </div>
 </%block>

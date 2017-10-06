@@ -27,38 +27,73 @@ Admin expenses list view
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-<div class='row'>
-    <div class='col-md-7'>
-        ${form|n}
+<%block name='content'>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    <a href='#filter-form'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="filter-form">
+        <i class='glyphicon glyphicon-search'></i>&nbsp;
+        Filtres&nbsp;
+        <i class='glyphicon glyphicon-chevron-down'></i>
+    </a>
+    % if '__formid__' in request.GET:
+        <div class='help-text'>
+            <small><i>Des filtres sont actifs</i></small>
+        </div>
+        <div class='help-text'>
+            <a href="${request.current_route_path(_query={})}">
+                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+            </a>
+        </div>
+    % endif
     </div>
-    <div class='col-md-4'>
-        <table class='table table-bordered status-table'>
-            <tr>
-                <td class='status-wait'><br /></td>
-                <td>Notes de dépense en attente de validation</td>
-            </tr>
-            <tr>
-                <td class=''><br /></td>
-                <td>Notes de dépense validées</td>
-            </tr>
-            <tr>
-                <td class='status justified-True'><br /></td>
-                <td>Justificatifs reçus</td>
-            </tr>
-            <tr>
-                <td class='paid-status-paid'><br /></td>
-                <td>Notes de dépense partiellement payées</td>
-            </tr>
-            <tr>
-                <td class='paid-status-resulted'><br /></td>
-                <td>Notes de dépense payées</td>
-            </tr>
-        </table>
+    <div class='panel-body'>
+    % if '__formid__' in request.GET:
+        <div class='collapse' id='filter-form'>
+    % else:
+        <div class='in collapse' id='filter-form'>
+    % endif
+            <div class='row'>
+                <div class='col-xs-12'>
+                    ${form|n}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-</%block>
-<%block name="content">
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${records.item_count} Résultat(s)
+    </div>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-md-4 col-md-offset-8 col-xs-12'>
+                <table class='table table-bordered status-table'>
+                    <tr>
+                        <td class='status-wait'><br /></td>
+                        <td>Notes de dépense en attente de validation</td>
+                    </tr>
+                    <tr>
+                        <td class=''><br /></td>
+                        <td>Notes de dépense validées</td>
+                    </tr>
+                    <tr>
+                        <td class='status justified-True'><br /></td>
+                        <td>Justificatifs reçus</td>
+                    </tr>
+                    <tr>
+                        <td class='paid-status-paid'><br /></td>
+                        <td>Notes de dépense partiellement payées</td>
+                    </tr>
+                    <tr>
+                        <td class='paid-status-resulted'><br /></td>
+                        <td>Notes de dépense payées</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 <table class="table table-condensed table-bordered status-table">
     <thead>
         <tr>
@@ -176,6 +211,8 @@ Admin expenses list view
     </tbody>
 </table>
 ${pager(records)}
+</div>
+</div>
 </%block>
 <%block name='footerjs'>
 ExpenseList.popup_selector = "#${payment_formname}";

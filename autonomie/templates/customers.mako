@@ -27,6 +27,7 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='content'>
+<div class='row page-header-block'>
 <%
 ## We build the link with the current search arguments
 args = request.GET
@@ -79,40 +80,42 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
                 </div>
             </div>
     </div>
-    <hr />
+
 % endif
-<a class="btn btn-default large-btn
-    % if '__formid__' in request.GET:
-        btn-primary
-    % endif
-    " href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
-    <i class='glyphicon glyphicon-filter'></i>&nbsp;
+</div>
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+<a  href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
+    <i class='glyphicon glyphicon-search'></i>&nbsp;
     Filtres&nbsp;
     <i class='glyphicon glyphicon-chevron-down'></i>
 </a>
 % if '__formid__' in request.GET:
-    <span class='help-text'>
+    <div class='help-text'>
         <small><i>Des filtres sont actifs</i></small>
-    </span>
+    </div>
+    <div class='help-text'>
+        <a href="${request.current_route_path(_query={})}">
+            <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+        </a>
+    </div>
 % endif
-% if '__formid__' in request.GET:
+</div>
+<div class='panel-body'>
     <div class='collapse' id='filter-form'>
-% else:
-    <div class='in collapse' id='filter-form'>
-% endif
         <div class='row'>
             <div class='col-xs-12'>
-<hr/>
-            % if '__formid__' in request.GET:
-                <a href="${request.current_route_path(_query={})}">Supprimer tous les filtres</a>
-                <br />
-                <br />
-            %endif
                 ${form|n}
             </div>
         </div>
-<hr/>
     </div>
+</div>
+</div>
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+${records.item_count} Résultat(s)
+</div>
+<div class='panel-body'>
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>
@@ -177,6 +180,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
     </tbody>
 </table>
 ${pager(records)}
+</div></div>
 </%block>
 <%block name='footerjs'>
 $(function(){

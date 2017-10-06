@@ -30,7 +30,7 @@
     >
         <a title='${elem.get("title")}' href="${elem.get('href')}">
             % if elem.get('icon'):
-                <i class='${elem['icon']}'></i>
+                <i class='${elem['icon']}'></i>&nbsp;
             % endif
              ${elem.get('label', "")}
         </a>
@@ -42,7 +42,7 @@
 <%def name="render_dropdown(elem)">
     <li class='dropdown'>
     <a class='dropdown-toggle' data-toggle='dropdown' href='#' role='button' aria-expanded="false">
-            ${elem.get('label', '')}
+            ${elem.get('label', '')}&nbsp;
             <span class="caret"></span>
         </a>
         <ul class='dropdown-menu' role="menu">
@@ -53,7 +53,7 @@
     </li>
 </%def>
 % if menu is not UNDEFINED or usermenu is not UNDEFINED:
-    <header class="navbar navbar-inverse hidden-print headmenu">
+    <header class="navbar navbar-inverse hidden-print headmenu menu navbar-static-side">
 
     <div class="container-fluid">
 
@@ -85,7 +85,7 @@
                     % endif
                     >
                     <li>
-                    <a href='/'><i class='glyphicon glyphicon-white glyphicon-home'></i>Accueil</a>
+                    <a href='/'><i class='glyphicon glyphicon-white glyphicon-home'></i>&nbsp;Accueil</a>
                     </li>
                     % for item in menu.items:
                         % if item.__type__ == 'item':
@@ -122,7 +122,7 @@
 % endif
 % if submenu is not UNDEFINED:
     ## No usermenu, it's the submenu's bar
-    <header class="navbar navbar-inverse hidden-print headmenu">
+    <header class="navbar navbar-stacked hidden-print headmenu submenu">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button

@@ -24,69 +24,103 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-<div class='row'>
-<div class='col-md-8'>
-    <div class='row'>
-        ${form|n}
-    </div>
-</div>
-        <div class='col-md-4'>
-        <table class='table table-bordered status-table'
-            <tr>
-                <td class='job-planned'><br /></td>
-                <td>Tâches planifiées</td>
-            </tr>
-            <tr>
-                <td class='job-completed'><br /></td>
-                <td>Tâches terminées</td>
-            </tr>
-            <tr>
-                <td class='job-failed'><br /></td>
-                <td>Tâches échouées</td>
-            </tr>
-        </table>
-    </div>
-</div>
-
-</%block>
 <%block name="content">
-<table class="table table-condensed table-hover status-table">
-    <thead>
-        <tr>
-            <th>${sortable(u"Date d'éxécution", "created_at")}</th>
-            <th>Type de tâche</th>
-            <th>Statut</th>
-            <th class="actions">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        % for job in records:
-            <% url = request.route_path('job', id=job.id) %>
-            <% onclick = "document.location='{url}'".format(url=url) %>
-            <tr class='job-${job.status}'>
-                <td onclick="${onclick}" class="rowlink">
-                    ${api.format_datetime(job.created_at)}
-                </td>
-                <td onclick="${onclick}" class="rowlink">
-                    ${job.label}
-                </td>
-                <td onclick="${onclick}" class="rowlink">
-                </td>
-                <td class="actions">
-                    <% view_url = request.route_path('job', id=job.id) %>
-                    ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='pencil')}
-                    <% del_url = request.route_path('job', id=job.id, _query=dict(action="delete")) %>
-                    ${table_btn(\
-                    del_url, \
-                    u"Supprimer",  \
-                    u"Supprimer cette entrée d'historique", \
-                    icon='trash', \
-                    onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette entrée d'historique ?')", css_class="btn-danger")}
-                </td>
-            </tr>
-        % endfor
-    </tbody>
-</table>
-${pager(records)}
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    <a href='#filter-form'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="filter-form">
+        <i class='glyphicon glyphicon-search'></i>&nbsp;
+        Filtres&nbsp;
+        <i class='glyphicon glyphicon-chevron-down'></i>
+    </a>
+    % if '__formid__' in request.GET:
+        <div class='help-text'>
+            <small><i>Des filtres sont actifs</i></small>
+        </div>
+        <div class='help-text'>
+            <a href="${request.current_route_path(_query={})}">
+                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+            </a>
+        </div>
+    % endif
+    </div>
+    <div class='panel-body'>
+    % if '__formid__' in request.GET:
+        <div class='collapse' id='filter-form'>
+    % else:
+        <div class='in collapse' id='filter-form'>
+    % endif
+            <div class='row'>
+                <div class='col-xs-12'>
+                    ${form|n}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${records.item_count} Résultat(s)
+    </div>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-md-4 col-md-offset-8 col-xs-12'>
+                <table class='table table-bordered status-table'
+                    <tr>
+                        <td class='job-planned'><br /></td>
+                        <td>Tâches planifiées</td>
+                    </tr>
+                    <tr>
+                        <td class='job-completed'><br /></td>
+                        <td>Tâches terminées</td>
+                    </tr>
+                    <tr>
+                        <td class='job-failed'><br /></td>
+                        <td>Tâches échouées</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <table class="table table-condensed table-hover status-table">
+            <thead>
+                <tr>
+                    <th>${sortable(u"Date d'éxécution", "created_at")}</th>
+                    <th>Type de tâche</th>
+                    <th>Statut</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for job in records:
+                    <% url = request.route_path('job', id=job.id) %>
+                    <% onclick = "document.location='{url}'".format(url=url) %>
+                    <tr class='job-${job.status}'>
+                        <td onclick="${onclick}" class="rowlink">
+                            ${api.format_datetime(job.created_at)}
+                        </td>
+                        <td onclick="${onclick}" class="rowlink">
+                            ${job.label}
+                        </td>
+                        <td onclick="${onclick}" class="rowlink">
+                        </td>
+                        <td class="actions">
+                            <% view_url = request.route_path('job', id=job.id) %>
+                            ${table_btn(view_url, u"Voir", u"Voir la tâche", icon='pencil')}
+                            <% del_url = request.route_path('job', id=job.id, _query=dict(action="delete")) %>
+                            ${table_btn(\
+                            del_url, \
+                            u"Supprimer",  \
+                            u"Supprimer cette entrée d'historique", \
+                            icon='trash', \
+                            onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cette entrée d'historique ?')", css_class="btn-danger")}
+                        </td>
+                    </tr>
+                % endfor
+            </tbody>
+        </table>
+        ${pager(records)}
+    </div>
+</div>
 </%block>

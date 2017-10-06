@@ -22,20 +22,9 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<%block name='content'>
-<div class='row'>
-    <div class="col-md-10 col-md-offset-1">
-    <div class='well'>
-        <button class='btn btn-success btn-add'
-        title="Créer une nouvelle feuille de statistiques"
-    >
-        Ajouter
-        </button>
-        <div style="display:none" id='form-container'>
-        </div>
-    </div>
-    <div class="alert alert-danger">
-        <i class='fa fa-warning'></i>
+<%block name='afteractionmenu'>
+    <div class="alert alert-info">
+        <i class='fa fa-help'></i>
         Configuration des modèles statistiques:
         <ul>
             <li>Créer une feuille de statistiques</li>
@@ -43,6 +32,24 @@
             <li>Générer les fichiers de sorties</li>
         </ul>
     </div>
+<div class='page-header-block'>
+        <button class='btn btn-success btn-add'
+        title="Créer une nouvelle feuille de statistiques"
+    >
+        Ajouter
+        </button>
+        <div style="display:none" id='form-container'>
+        </div>
+</div>
+</%block>
+<%block name='content'>
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+Feuilles de statistiques
+</div>
+<div class='panel-body'>
+<div class='row'>
+    <div class="col-md-10 col-md-offset-1">
     <table class='table table-stripped table-condensed'>
     <thead>
         <th> Nom de la feuille de statistiques </th>
@@ -78,6 +85,8 @@
     % endfor
     </tbody>
     </table>
+    </div>
+</div>
     </div>
 </div>
 </%block>

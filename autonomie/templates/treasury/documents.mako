@@ -29,44 +29,46 @@
     <% keys.sort() %>
     % for year in keys:
         <% subdirs = documents[year] %>
-        <div class='section-header'>
-            <a href="#" data-toggle='collapse' data-target='#year_${year}'>
-                <div>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+                <a href="#" data-toggle='collapse' data-target='#year_${year}'>
                     <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
+                </a>
+            </div>
+            <div class='panel-body'>
+            % if year in current_years:
+                <div class="in collapse" id='year_${year}'>
+            %else:
+                <div class="collapse" id='year_${year}'>
+            %endif
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                            <th>Mois</th>
+                            <th>Nom du fichier</th>
+                            <th>Taille</th>
+                            <th class="actions">Télécharger</th>
+                        </thead>
+                        <tbody>
+                    <% months = subdirs.keys() %>
+                    <% months.sort(key=lambda m:int(m)) %>
+                    % for month in months:
+                        <% files = subdirs[month] %>
+                        % for file_ in files:
+                            <tr>
+                                <td>${api.month_name(int(month))}</td>
+                                <td>${file_.name}</td>
+                                <td>${file_.size}</td>
+                                <td class="actions"><a href="${file_.url(request)}">Télécharger&nbsp;<i class="fa fa-file-pdf-o fa-1x"></i></a></td>
+                            </tr>
+                        % endfor
+                    % endfor
+                    % if not months:
+                        <tr><td colspan='5'>Aucun document n'est disponible</td></tr>
+                    % endif
+                        </tbody>
+                    </table>
                 </div>
-            </a>
-        </div>
-        % if year in current_years:
-            <div class="section-content in collapse" id='year_${year}'>
-        %else:
-            <div class="section-content collapse" id='year_${year}'>
-        %endif
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <th>Mois</th>
-                    <th>Nom du fichier</th>
-                    <th>Taille</th>
-                    <th class="actions">Télécharger</th>
-                </thead>
-                <tbody>
-            <% months = subdirs.keys() %>
-            <% months.sort(key=lambda m:int(m)) %>
-            % for month in months:
-                <% files = subdirs[month] %>
-                % for file_ in files:
-                    <tr>
-                        <td>${api.month_name(int(month))}</td>
-                        <td>${file_.name}</td>
-                        <td>${file_.size}</td>
-                        <td class="actions"><a href="${file_.url(request)}">Télécharger&nbsp;<i class="fa fa-file-pdf-o fa-1x"></i></a></td>
-                    </tr>
-                % endfor
-            % endfor
-            % if not months:
-                <tr><td colspan='5'>Aucun document n'est disponible</td></tr>
-            % endif
-                </tbody>
-            </table>
+            </div>
         </div>
     % endfor
     % if not keys:

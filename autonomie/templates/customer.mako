@@ -30,12 +30,20 @@
 <%block name='content'>
 <div class="row">
     <div class='col-md-4'>
-        <div class=''>
+        <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+            Informations générales
+        </div>
+        <div class='panel-body'>
             % if customer.is_company():
                 <h2>Entreprise ${customer.name.upper()}</h2>
             % else:
                 <h2>${customer.get_label()}</h2>
             % endif
+        <a class='btn btn-primary secondary-action'
+            href='${request.route_path("customer", id=customer.id, _query=dict(action="edit"))}'>
+            <i class='glyphicon glyphicon-pencil'></i>&nbsp;Modifier
+        </a>
             % if customer.is_company():
                 <h3>Contact principal : ${customer.get_name()}</h3>
                 % if customer.function:
@@ -107,7 +115,13 @@
                     % endif
                 </div>
             </div>
-            <h3>Informations comptables</h3>
+            </div>
+        </div>
+            <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+                Informations comptables
+            </div>
+            <div class='panel-body'>
                 % if customer.is_company():
                     <% datas = (
                     (u"TVA intracommunautaire", customer.tva_intracomm),
@@ -130,12 +144,18 @@
                         </div>
                 </div>
                 % endfor
-        </div>
+            </div>
+            </div>
     </div>
     <div class='col-md-8'>
-        <h2>Projets</h2>
-        <a class='btn btn-default' href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
-            <span class='ui-icon ui-icon-plusthick'></span>Nouveau projet
+    <div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+        Projets
+    </div>
+    <div class='panel-body'>
+        <a class='btn btn-primary primary-action'
+            href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
+            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouveau projet
         </a>
         %if customer.projects:
             <table class="table table-striped table-condensed">
@@ -186,6 +206,8 @@
         %else:
             Aucun projet n'a été initié avec ce client
         %endif
+        </div>
+        </div>
     </div>
 </div>
 <div class='row'>

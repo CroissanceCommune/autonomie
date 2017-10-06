@@ -28,16 +28,20 @@
 <link href="${request.static_url('autonomie:static/css/admin.css')}" rel="stylesheet"  type="text/css" />
 </%block>
 <%block name='content'>
+% if not message is UNDEFINED and not form is UNDEFINED:
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
-        % if not message is UNDEFINED and message:
-            <div class='alert alert-info'>
-                ${format_text(message)}
-            </div>
-        % endif
-        % if not form is UNDEFINED:
-            ${form|n}
-        % endif
+        <div class='page-block panel panel-default'>
+            % if not message is UNDEFINED and message:
+                <div class='alert alert-info'>
+                    ${format_text(message)}
+                </div>
+            % endif
+            % if not form is UNDEFINED:
+                ${form|n}
+            % endif
+        </div>
     </div>
 </div>
+% endif
 </%block>

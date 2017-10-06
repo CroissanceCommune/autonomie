@@ -59,55 +59,56 @@
         </div>
         % endif
         </%block>
+        % if not request.actionmenu.void():
+        <div class='hidden-print'>
+            <div class='subnav'>
+                ${request.actionmenu.render(request)|n}
+            </div>
+        </div>
+        % endif
     % endif
-    <div class="container-fluid page-content">
-        <div class='subnav hidden-print'>
-    % if 'popup' not in request.GET:
-        <%block name="actionmenu">
-        % if action_menu is not UNDEFINED and not action_menu.void():
-            ${action_menu.render(request)|n}
-        % elif not request.actionmenu.void():
-            ${request.actionmenu.render(request)|n}
-        % endif
-        </%block>
-        % endif
-      </div>
-      <%block name='pop_message'>
-      % for message in request.session.pop_flash(queue=""):
-        % if message is not None:
-          <div class='row hidden-print'>
-          <div class='col-md-6 col-md-offset-3'>
-            <div class="alert alert-success">
-              <button class="close" data-dismiss="alert" type="button">×</button>
-              ${api.clean_html(message)|n}
-            </div>
-          </div>
-        </div>
-        % endif
-      % endfor
-      % for message in request.session.pop_flash(queue="error"):
-        % if message is not None:
-          <div class='row hidden-print'>
-          <div class='col-md-6 col-md-offset-3'>
-            <div class="alert alert-danger">
-              <button class="close" data-dismiss="alert" type="button">×</button>
-              <i class='fa fa-warning'></i>
-              ${api.clean_html(message)|n}
-            </div>
-          </div>
-        </div>
-        % endif
-      % endfor
-      </%block>
-      <%block name='beforecontent' />
-      <%block name='content' />
-      % if request.popups is not UNDEFINED:
-          % for name, popup in request.popups.items():
-              <div id="${name}" style="display:none;" class="hidden-print">
-                ${popup.html|n}
+
+    <%block name='afteractionmenu' />
+
+    <div class="page-content-wrapper">
+        <div class="container-fluid">
+          <%block name='pop_message'>
+          % for message in request.session.pop_flash(queue=""):
+            % if message is not None:
+              <div class='row hidden-print'>
+              <div class='col-md-6 col-md-offset-3'>
+                <div class="alert alert-success">
+                  <button class="close" data-dismiss="alert" type="button">×</button>
+                  ${api.clean_html(message)|n}
+                </div>
               </div>
-        % endfor
-      % endif
+            </div>
+            % endif
+          % endfor
+          % for message in request.session.pop_flash(queue="error"):
+            % if message is not None:
+              <div class='row hidden-print'>
+              <div class='col-md-6 col-md-offset-3'>
+                <div class="alert alert-danger">
+                  <button class="close" data-dismiss="alert" type="button">×</button>
+                  <i class='fa fa-warning'></i>
+                  ${api.clean_html(message)|n}
+                </div>
+              </div>
+            </div>
+            % endif
+          % endfor
+          </%block>
+          <%block name='beforecontent' />
+          <%block name='content' />
+          % if request.popups is not UNDEFINED:
+              % for name, popup in request.popups.items():
+                  <div id="${name}" style="display:none;" class="hidden-print">
+                    ${popup.html|n}
+                  </div>
+            % endfor
+          % endif
+        </div>
     </div>
     <div id='loading-box' style='display:none'>
         <i class="fa fa-circle-o-notch fa-spin"></i>

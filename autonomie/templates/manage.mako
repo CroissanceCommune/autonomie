@@ -35,10 +35,11 @@
             (invoices, u"Factures et Avoirs en attente", "valid.invoice"), \
         ):
         % if request.has_permission(perm):
-    <div class="panel panel-info">
+    <div class="panel panel-default">
         <div class="panel-heading">
             ${table_title}
         </div>
+        <div class='panel-body'>
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
@@ -66,11 +67,13 @@
         % endif
             </tbody>
         </table>
+        </div>
     </div>
     % endif
 % endfor
-<div class="panel panel-info">
+<div class="panel panel-default">
     <div class="panel-heading">Mes Activités / Rendez-vous à venir</div>
+        <div class='panel-body'>
     <table class="table table-striped table-condensed table-hover">
         <thead>
             <tr>
@@ -114,14 +117,16 @@
             % endif
         </tbody>
     </table>
+    </div>
 </div>
 </div>
 % if request.has_permission('admin_expense'):
 <div class='col-md-6'>
-    <div class="panel panel-info">
+    <div class="panel panel-default">
         <div class="panel-heading">
             Les feuilles de notes de dépense en attente
         </div>
+        <div class='panel-body'>
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
@@ -149,6 +154,7 @@
         % endif
             </tbody>
         </table>
+    </div>
     </div>
 </div>
 </div>

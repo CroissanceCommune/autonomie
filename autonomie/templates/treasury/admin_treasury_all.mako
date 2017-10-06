@@ -27,13 +27,13 @@
     <% keys.sort() %>
     % for year in keys:
         <% months = datas[year] %>
-        <div class='section-header'>
-            <a href="#" data-toggle='collapse' data-target='#year_${year}'>
-                <div>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+                <a href="#" data-toggle='collapse' data-target='#year_${year}'>
                     <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
-                </div>
-            </a>
-        </div>
+                </a>
+            </div>
+            <div class='panel-body'>
         % if year in current_years:
             <div class="section-content in collapse" id='year_${year}'>
         %else:
@@ -66,5 +66,7 @@
     % if not keys:
         <div>Aucun document n'est disponible</div>
     % endif
+        </div>
+    </div>
 </div>
 </%block>

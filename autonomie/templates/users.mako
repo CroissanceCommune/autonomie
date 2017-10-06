@@ -29,84 +29,148 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-## We place the search form in the actionmenu since there are a few fields
-    <% request.actionmenu.add(form) %>
-    ${request.actionmenu.render(request)|n}
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
+    % if request.has_permission('admin_userdatas'):
+    <a
+        class='btn btn-primary primary-action'
+        href="${request.route_path('userdatas', _query=dict(action='new'))}"
+        >
+        <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un entrepreneur
+    </a>
+    % endif
+    % if request.has_permission('add_user'):
+    <a class='btn btn-default secondary-action'
+    href="${request.route_path('users', _query=dict(action='new'))}"
+    >
+    <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un permanent
+    </a>
+    % endif
+</div>
 </%block>
 <%block name='content'>
-<table class="table table-striped table-condensed">
-    <thead>
-        <tr>
-            <th class='col-xs-2'>${sortable("Nom", "name")}</th>
-            <th class='col-xs-1'>${sortable("E-mail", "email")}</th>
-            <th class='col-xs-5'>Entreprises</th>
-            % if request.has_permission('manage'):
-                <th class='col-xs-1 col-xs-offset-1 text-right'>Actions</th>
-            % endif
-        </tr>
-    </thead>
-    <tbody>
-        % if records:
-            % for id, user in records:
-                % if api.has_permission('view_userdatas', request.context) and user.userdatas is not None:
-                    <% url = request.route_path('userdata', id=user.userdatas.id) %>
-                % else:
-                    <% url = request.route_path('user', id=user.id) %>
-                %endif
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    <a href='#filter-form'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="filter-form">
+        <i class='glyphicon glyphicon-search'></i>&nbsp;
+        Filtres&nbsp;
+        <i class='glyphicon glyphicon-chevron-down'></i>
+    </a>
+    % if '__formid__' in request.GET:
+        <div class='help-text'>
+            <small><i>Des filtres sont actifs</i></small>
+        </div>
+        <div class='help-text'>
+            <a href="${request.current_route_path(_query={})}">
+                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+            </a>
+        </div>
+    % endif
+    </div>
+    <div class='panel-body'>
+    % if '__formid__' in request.GET:
+        <div class='collapse' id='filter-form'>
+    % else:
+        <div class='in collapse' id='filter-form'>
+    % endif
+            <div class='row'>
+                <div class='col-xs-12'>
+                    ${form|n}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${records.item_count} Résultat(s)
+    </div>
+    <div class='panel-body'>
+        <table class="table table-striped table-condensed">
+            <thead>
                 <tr>
-                    <td><a href="${url}">${api.format_account(user)}</a></td>
-                    <td><a href="${url}">${user.email}</a></td>
-                    <td>
-                        <ul class="list-unstyled">
-                            % for company in user.companies:
-                                <% company_url = request.route_path('company', id=company.id) %>
-                                <li>
-                                <a href="${company_url}">${company.name} (<small>${company.goal}</small>)</a>
-                                    % if request.has_permission('admin_company', company):
-                                        % if company.enabled():
-                                            <%doc> -- <span class='label label-success pull-right'>Cette entreprise est active</span> </%doc>
-                                        % else:
-                                            <span class='label label-warning pull-right'>Cette entreprise a été désactivée</span>
-                                        % endif
-                                    % endif
-                                </li>
-                            % endfor
-                        </ul>
-                    </td>
+                    <th class='col-xs-2'>${sortable("Nom", "name")}</th>
+                    <th class='col-xs-1'>${sortable("E-mail", "email")}</th>
+                    <th class='col-xs-5'>Entreprises</th>
                     % if request.has_permission('manage'):
-                        <td class='text-right'>
-                            <div class='btn-group'>
-                                <button
-                                    type="button"
-                                    class="btn btn-default dropdown-toggle"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false">
-                                    Actions <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right">
-
-                                % if api.has_permission('view_userdatas', request.context) and user.userdatas is not None:
-                                    <% url = request.route_path('userdata', id=user.userdatas.id) %>
-                                % else:
-                                    <% url = request.route_path('user', id=user.id) %>
-                                %endif
-                                <li><a href='${url}'>Voir le compte</a></li>
-                                <li role="separator" class="divider"></li>
-                                % if request.has_permission('add_activity'):
-                                    <% activity_url = request.route_path('activities', _query={'action': 'new', 'user_id': user.id}) %>
-                                    <li><a href='${activity_url}'>Nouveau rendez-vous</a></li>
-                                % endif
-                                </ul>
-                            </div>
-                        </td>
+                        <th class='col-xs-1 col-xs-offset-1 text-right'>Actions</th>
                     % endif
                 </tr>
-            % endfor
-        % else:
-            <tr><td colspan='3'>Aucun utilisateur n'est présent dans la base</td></tr>
-        % endif
-</tbody></table>
+            </thead>
+            <tbody>
+                % if records:
+                    % for id, user in records:
+                        % if api.has_permission('view_userdatas', request.context) and user.userdatas is not None:
+                            <% url = request.route_path('userdata', id=user.userdatas.id) %>
+                        % else:
+                            <% url = request.route_path('user', id=user.id) %>
+                        %endif
+                        <tr>
+                            <td>
+                            <a href="${url}">
+                            ${api.format_account(user)}
+                            </a>
+                            % if user.active == 'N':
+                            <span class='label label-warning pull-right'>Désactivé</span>
+                            % endif
+                            </td>
+                            <td><a href="${url}">${user.email}</a></td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    % for company in user.companies:
+                                        <% company_url = request.route_path('company', id=company.id) %>
+                                        <li>
+                                        <a href="${company_url}">${company.name} (<small>${company.goal}</small>)</a>
+                                            % if request.has_permission('admin_company', company):
+                                                % if company.enabled():
+                                                    <%doc> -- <span class='label label-success pull-right'>Cette entreprise est active</span> </%doc>
+                                                % else:
+                                                    <span class='label label-warning pull-right'>Désactivée</span>
+                                                % endif
+                                            % endif
+                                        </li>
+                                    % endfor
+                                </ul>
+                            </td>
+                            % if request.has_permission('manage'):
+                                <td class='text-right'>
+                                    <div class='btn-group'>
+                                        <button
+                                            type="button"
+                                            class="btn btn-default dropdown-toggle"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false">
+                                            Actions <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right">
+
+                                        % if api.has_permission('view_userdatas', request.context) and user.userdatas is not None:
+                                            <% url = request.route_path('userdata', id=user.userdatas.id) %>
+                                        % else:
+                                            <% url = request.route_path('user', id=user.id) %>
+                                        %endif
+                                        <li><a href='${url}'>Voir le compte</a></li>
+                                        <li role="separator" class="divider"></li>
+                                        % if request.has_permission('add_activity'):
+                                            <% activity_url = request.route_path('activities', _query={'action': 'new', 'user_id': user.id}) %>
+                                            <li><a href='${activity_url}'>Nouveau rendez-vous</a></li>
+                                        % endif
+                                        </ul>
+                                    </div>
+                                </td>
+                            % endif
+                        </tr>
+                    % endfor
+                % else:
+                    <tr><td colspan='3'>Aucun utilisateur n'est présent dans la base</td></tr>
+                % endif
+            </tbody>
+        </table>
 ${pager(records)}
+</div>
+</div>
 </%block>

@@ -24,29 +24,21 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='actionmenu'>
-<ul class='nav nav-pills'>
-    <li>
-        <a href="${request.route_path('userdatas', _query=dict(action='new'))}">
-            Nouvelle entrée gestion sociale
-        </a>
-    </li>
-    % if api.has_permission('admin'):
-    <li>
-        <a href="${request.route_path('import_step1')}">
-            Importer des données
-        </a>
-        </li>
-    % endif
-</ul>
-<div class='row'>
-    <div class='col-md-8'>
-        <div class='row'>
-            ${form|n}
-        </div>
-    </div>
-    <div class='col-md-4'>
-        <div class='well well-sm pull-right btn-group' role='group'>
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
+            <a
+                class='btn btn-primary primary-action'
+                href="${request.route_path('userdatas', _query=dict(action='new'))}">
+                Nouvelle entrée gestion sociale
+            </a>
+        % if api.has_permission('admin'):
+            <a
+                class='btn btn-default secondary-action'
+                href="${request.route_path('import_step1')}">
+                Importer des données
+            </a>
+        % endif
+    <div class='pull-right btn-group' role='group'>
             <%
         args = request.GET
         url = request.route_path('userdatas.xls', _query=args)
@@ -80,11 +72,50 @@
             title="Exporter les éléments de la liste au format csv">
             <i class='fa fa-file'></i>&nbsp;CSV
         </a>
-        </div>
     </div>
 </div>
 </%block>
 <%block name="content">
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    <a href='#filter-form'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="filter-form">
+        <i class='glyphicon glyphicon-search'></i>&nbsp;
+        Filtres&nbsp;
+        <i class='glyphicon glyphicon-chevron-down'></i>
+    </a>
+    % if '__formid__' in request.GET:
+        <div class='help-text'>
+            <small><i>Des filtres sont actifs</i></small>
+        </div>
+        <div class='help-text'>
+            <a href="${request.current_route_path(_query={})}">
+                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+            </a>
+        </div>
+    % endif
+    </div>
+    <div class='panel-body'>
+    % if '__formid__' in request.GET:
+        <div class='collapse' id='filter-form'>
+    % else:
+        <div class='in collapse' id='filter-form'>
+    % endif
+            <div class='row'>
+                <div class='col-xs-12'>
+                    ${form|n}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${records.item_count} Résultat(s)
+    </div>
+    <div class='panel-body'>
 <table class="table table-condensed table-hover">
     <thead>
         <tr>
@@ -129,4 +160,6 @@ if userdata.user is not None:
     </tbody>
 </table>
 ${pager(records)}
+</div>
+</div>
 </%block>

@@ -26,10 +26,21 @@
 <%block name='content'>
 <div class='row'>
     <div class="col-md-9">
+        <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+        ${title}
+        </div>
+        <div class='panel-body'>
         ${form|n}
+        </div>
+        </div>
     </div>
     <div class='col-md-3'>
-        <h4>Codes client utilisés</h4>
+        <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+        Codes client utilisés
+        </div>
+        <div class='panel-body'>
         <ul>
             % for customer in customers:
                 <li>
@@ -37,6 +48,8 @@
                 </li>
             % endfor
         </ul>
+        </div>
+        </div>
     </div>
 </div>
 </%block>

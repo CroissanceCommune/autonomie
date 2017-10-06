@@ -22,48 +22,83 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/pager.mako" import="pager"/>
-<%block name='actionmenu'>
-<div class='row'>
-    <div class='col-md-12'>
-        ${form|n}
+<%block name="content">
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    <a href='#filter-form'
+        data-toggle='collapse'
+        aria-expanded="false"
+        aria-controls="filter-form">
+        <i class='glyphicon glyphicon-search'></i>&nbsp;
+        Filtres&nbsp;
+        <i class='glyphicon glyphicon-chevron-down'></i>
+    </a>
+    % if '__formid__' in request.GET:
+        <div class='help-text'>
+            <small><i>Des filtres sont actifs</i></small>
+        </div>
+        <div class='help-text'>
+            <a href="${request.current_route_path(_query={})}">
+                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
+            </a>
+        </div>
+    % endif
+    </div>
+    <div class='panel-body'>
+    % if '__formid__' in request.GET:
+        <div class='collapse' id='filter-form'>
+    % else:
+        <div class='in collapse' id='filter-form'>
+    % endif
+            <div class='row'>
+                <div class='col-xs-12'>
+                    ${form|n}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-</%block>
-<%block name="content">
-<table class="table table-condensed">
-    <thead>
-        <tr>
-            <th>Identifiant</th>
-            <th>Entreprise</th>
-            <th>Période</th>
-            <th>Nom du fichier</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        % for mail in records:
-            <tr>
-                <td>
-                    ${mail.id}
-                </td>
-                <td>
-                    ${mail.company.name}
-                </td>
-                <td>
-                    ${api.month_name(int(mail.month))} ${mail.year}
-                </td>
-                <td>
-                    ${mail.filename}
-                </td>
-                <td>
-                Envoyé le ${api.format_datetime(mail.send_at)}
-                </td>
-                <td>
-                    <a class='btn btn-success' href='${request.route_path("mail", id=mail.id)}'>Renvoyer</button>
-                </td>
-            </tr>
-        % endfor
-    </tbody>
-</table>
-${pager(records)}
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${records.item_count} Résultat(s)
+    </div>
+    <div class='panel-body'>
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Identifiant</th>
+                    <th>Entreprise</th>
+                    <th>Période</th>
+                    <th>Nom du fichier</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for mail in records:
+                    <tr>
+                        <td>
+                            ${mail.id}
+                        </td>
+                        <td>
+                            ${mail.company.name}
+                        </td>
+                        <td>
+                            ${api.month_name(int(mail.month))} ${mail.year}
+                        </td>
+                        <td>
+                            ${mail.filename}
+                        </td>
+                        <td>
+                        Envoyé le ${api.format_datetime(mail.send_at)}
+                        </td>
+                        <td>
+                            <a class='btn btn-success' href='${request.route_path("mail", id=mail.id)}'>Renvoyer</button>
+                        </td>
+                    </tr>
+                % endfor
+            </tbody>
+        </table>
+        ${pager(records)}
+    </div>
+</div>
 </%block>

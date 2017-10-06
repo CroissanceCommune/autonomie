@@ -161,8 +161,11 @@
         ${action_cell(task, view_url)}
 </tr>
 </%def>
-<br />
-
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+${title}
+</div>
+<div class='panel-body'>
 <div class="nav-tabs-responsive">
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active">
@@ -418,6 +421,7 @@
         </div>
     </div>
 
+</div>
 </div>
 </%block>
 <%block name="footerjs">

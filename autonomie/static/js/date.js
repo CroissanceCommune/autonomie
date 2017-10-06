@@ -46,7 +46,7 @@ function formatPaymentDate(isoDate){
     /*
      *  format a date from iso to display format
      */
-    if ((isoDate !== '') && (isoDate !== null)){
+    if ((isoDate !== '') && (isoDate !== null) && (!_.isUndefined(isoDate))){
         var dateObject = parseDate(isoDate);
         return dateToLocaleFormat(dateObject);
     }else{
@@ -79,5 +79,5 @@ function dateToLocaleFormat(dateObject){
     if (month < 10) {
         month = '0' + month;
     }
-    return dt + '-' + month + '-' + year;
+    return dt + '/' + month + '/' + year;
 }

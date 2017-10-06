@@ -24,22 +24,24 @@
 <%block name='content'>
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
-        <div class='alert alert-info'>
-        Les grilles de frais kilométriques sont configurées de manière annuelle.<br />
-        Choisissez l'année que vous voulez administrer.<br />
-        Note : Il est possible de dupliquer les types de frais d'une année vers l'autre.
-        </div>
-        <div class='text-center'>
-            <div class='btn-group'>
-            % for year in years:
-                <a
-                    class='btn btn-default'
-                    href="${request.route_path(admin_path, year=year)}"
-                    >
-                    ${year}
-                </a>
-             % endfor
-             </div>
+        <div class='page-block panel panel-default'>
+            <div class='alert alert-info'>
+            Les grilles de frais kilométriques sont configurées de manière annuelle.<br />
+            Choisissez l'année que vous voulez administrer.<br />
+            Note : Il est possible de dupliquer les types de frais d'une année vers l'autre.
+            </div>
+            <div class='text-center'>
+                <div class='btn-group'>
+                % for year in years:
+                    <a
+                        class='btn btn-default'
+                        href="${request.route_path(admin_path, year=year)}"
+                        >
+                        ${year}
+                    </a>
+                 % endfor
+                 </div>
+            </div>
         </div>
     </div>
 </div>

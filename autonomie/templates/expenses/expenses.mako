@@ -36,78 +36,86 @@
     </div>
 % else:
     % for year, values in expense_sheets.items():
-            <div class='section-header'>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
                 <a href="#" data-toggle='collapse' data-target='#year_${year}'>
                     <div>
-                        <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
+                        <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;&nbsp;${year}
                     </div>
                 </a>
             </div>
+        <div class="panel-body">
             % if year == current_year:
-                <div class="section-content in collapse" id='year_${year}'>
+                <div class="in collapse" id='year_${year}'>
             %else:
-                <div class="section-content collapse" id='year_${year}'>
+                <div class="collapse" id='year_${year}'>
             %endif
-        % for user, expenses in values:
-        <table class="table table-condensed table-bordered">
-            <caption>
-                <b>Feuille de notes de dépense de ${api.format_account(user)}</b>
-                <a
-                class='btn btn-primary primary-action'
-                href='${request.route_path("user_expenses", id=request.context.id, uid=user.id)}'
-                title="Ajouter un nouvelle note de dépenses"
-                >
-                Créer
-                </a>
-            </caption>
-        <thead>
-            <th>Période</th>
-            <th>Statut</th>
-            <th>Total</th>
-            <th>Paiements</th>
-            <th>Actions</th>
-        </thead>
-        <tbody>
-            % for expense in expenses:
-                <tr><td>${api.month_name(expense.month)} ${expense.year}</td>
-                    <td>${api.format_expense_status(expense)}</td>
-                    <td>${api.format_amount(expense.total, trim=True)|n}</td>
-                    <td>
-                        % for payment in expense.payments:
-                            % if loop.first:
-                                <ul>
-                            % endif
-                                    <% url = request.route_path('expense_payment', id=payment.id) %>
-                                    <li>
-                                    <a href="${url}">
-                                        Par ${api.format_account(payment.user)} :&nbsp;
-                                        ${api.format_amount(payment.amount)|n}&nbsp;€
-                                        le ${api.format_date(payment.date)}
-                                        % if payment.waiver:
-                                            (par abandon de créances)
-                                        % else:
-                                            (${api.format_paymentmode(payment.mode)})
+                    % for user, expenses in values:
+                    <div class='panel panel-default'>
+                        <div class='panel-heading'>
+                        Feuille de notes de dépense de ${api.format_account(user)}
+                        </div>
+                        <div class='panel-body'>
+                            <a
+                            class='btn btn-primary primary-action'
+                            href='${request.route_path("user_expenses", id=request.context.id, uid=user.id)}'
+                            title="Ajouter un nouvelle note de dépenses"
+                            >
+                            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Créer
+                            </a>
+                    <table class="table table-condensed table-stripped">
+                    <thead>
+                        <th>Période</th>
+                        <th>Statut</th>
+                        <th>Total</th>
+                        <th>Paiements</th>
+                        <th>Actions</th>
+                    </thead>
+                    <tbody>
+                        % for expense in expenses:
+                            <tr><td>${api.month_name(expense.month)} ${expense.year}</td>
+                                <td>${api.format_expense_status(expense)}</td>
+                                <td>${api.format_amount(expense.total, trim=True)|n}</td>
+                                <td>
+                                    % for payment in expense.payments:
+                                        % if loop.first:
+                                            <ul>
                                         % endif
-                                    </a>
-                                    </li>
-                            % if loop.last:
-                                </ul>
-                            % endif
+                                                <% url = request.route_path('expense_payment', id=payment.id) %>
+                                                <li>
+                                                <a href="${url}">
+                                                    Par ${api.format_account(payment.user)} :&nbsp;
+                                                    ${api.format_amount(payment.amount)|n}&nbsp;€
+                                                    le ${api.format_date(payment.date)}
+                                                    % if payment.waiver:
+                                                        (par abandon de créances)
+                                                    % else:
+                                                        (${api.format_paymentmode(payment.mode)})
+                                                    % endif
+                                                </a>
+                                                </li>
+                                        % if loop.last:
+                                            </ul>
+                                        % endif
+                                    % endfor
+                                </td>
+                                <td style='text-align:right'>
+                                    ${table_btn(request.route_path('/expenses/{id}', id=expense.id), u"Voir", u"Voir cette note de dépense", 'search')}
+                                    ${table_btn(request.route_path('/expenses/{id}.xlsx', id=expense.id), u"Export", u"Exporter cette note de dépense au format xslx", "file")}
+                                </td>
+                            </tr>
                         % endfor
-                    </td>
-                    <td style='text-align:right'>
-                        ${table_btn(request.route_path('/expenses/{id}', id=expense.id), u"Voir", u"Voir cette note de dépense", 'search')}
-                        ${table_btn(request.route_path('/expenses/{id}.xlsx', id=expense.id), u"Export", u"Exporter cette note de dépense au format xslx", "file")}
-                    </td>
-                </tr>
-            % endfor
-            % if not expenses:
-                <tr><td colspan='4'>Il n'y a aucun document</td></tr>
-            % endif
-        </tbody>
-    </table>
-    % endfor
-</div>
+                        % if not expenses:
+                            <tr><td colspan='4'>Il n'y a aucun document</td></tr>
+                        % endif
+                    </tbody>
+                </table>
+                </div>
+                </div>
+                % endfor
+            </div>
+        </div>
+    </div>
     % endfor
 % endif
 </%block>

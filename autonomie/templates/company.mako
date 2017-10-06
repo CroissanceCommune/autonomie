@@ -31,27 +31,50 @@
 <%namespace file="/base/utils.mako" import="format_company" />
 <%block name='content'>
 <div class='row'>
-    <div class="col-md-5">
-        <div class='well'>
-            ${format_company(company)}
-            % if not company.enabled():
-                <span class='label label-warning'>Cette entreprise a été désactivée</span>
-            % endif
-        %for link in link_list:
-            <p>${link.render(request)|n}</p>
-        %endfor
+<div class='col-md-3 col-xs-12'>
+% if request.has_permission('edit_company'):
+    <h3 class='text-center'>Actions</h3>
+    <a
+        class='btn btn-default btn-block'
+        href="${request.route_path('company', id=request.context.id, _query={'action': 'edit'})}"
+        ><i class='glyphicon glyphicon-pencil'></i>&nbsp;Modifier
+    </a>
+% endif
+% if request.has_permission('admin_company'):
+    % if request.context.archived:
+    <% _query = dict(action="enable") %>
+    <% label = u"Désarchiver" %>
+    % else :
+    <% _query = dict(action="disable") %>
+    <% label = u"Archiver" %>
+    % endif
+    <a
+        class='btn btn-default btn-block'
+        href="${request.route_path('company', id=request.context.id, _query=_query)}"
+        ><i class='glyphicon glyphicon-book'></i>&nbsp;${label}
+    </a>
+% endif
+</div>
+<div class="col-md-9">
+    <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+        Informations générales
+        </div>
+        <div class='panel-body'>
+        ${format_company(company)}
+        % if not company.enabled():
+            <span class='label label-warning'>Cette entreprise a été désactivée</span>
+        % endif
+    %for link in link_list:
+        <p>${link.render(request)|n}</p>
+    %endfor
         </div>
     </div>
-    <div class="col-md-6 col-md-offset-1">
-        <div class='well'>
-        %if len(company.employees) > 1:
-            <h3>Employé(s)</h3>
-        %elif len(company.employees) == 1:
-            <h3>Employé</h3>
-        %else:
-            <h3>Il n'y a aucun compte associé à cette entreprise</h3>
-        %endif
-
+    <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+        Employé(s
+        </div>
+        <div class='panel-body'>
         % for user in company.employees:
             % if getattr(user, 'userdatas', None) and api.has_permission('view_userdatas', request.context):
                 <% url = request.route_path('userdata', id=user.userdatas.id) %>
@@ -60,12 +83,15 @@
             % endif
 
             <a href="${url}" title='Voir ce compte'>
-                <i class='glyphicon glyphicon-user'></i>${api.format_account(user)}
+                <i class='glyphicon glyphicon-user'></i>&nbsp;${api.format_account(user)}
             </a>
             <br />
-            <br />
         % endfor
+        % if len(company.employees) == 0:
+            Aucun entrepreneur n'est associé à cette entreprise
+        % endif
+        </div>
     </div>
-    </div>
+</div>
 </div>
 </%block>

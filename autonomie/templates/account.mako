@@ -28,7 +28,7 @@
 <% account = request.user %>
 <div class="row" style="margin-top:10px">
     <div class='col-md-5'>
-        <div class="well">
+        <div class="panel panel-default page-block">
             <dl class="dl-horizontal">
                 %for label, value in ((u'Identifiant', account.login), (u'Nom', account.lastname), (u'Prénom', account.firstname)):
                     %if value:
@@ -38,9 +38,10 @@
                 % endfor
                 <dt>E-mail</dt><dd>${format_mail(account.email)}</dd>
             </dl>
-            <a href="${request.route_path('user', id=account.id, _query=dict(action='accountedit'))}" class="btn btn-primary">Éditer</a>
+            <a href="${request.route_path('user', id=account.id, _query=dict(action='accountedit'))}" class="btn btn-primary">
+                <i class='glyphicon glyphicon-pencil'></i>&nbsp;Modifier</a>
         </div>
-        <div class="well">
+        <div class="panel panel-default page-block">
             % if len(account.companies) == 0:
                 Vous n'êtes lié(e) à aucune entreprise
             % elif len(account.companies) == 1:
@@ -64,7 +65,9 @@
         </div>
     </div>
     <div class='col-md-5 col-md-offset-2'>
+        <div class='panel panel-default page-block'>
         ${form|n}
+        </div>
     </div>
 </div>
 </%block>

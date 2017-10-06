@@ -39,7 +39,7 @@
     % if widget is not UNDEFINED:
     ${request.layout_manager.render_panel(widget)}
     % endif
-    <div class='well'>
+    <div class='page-block panel panel-default'>
         <a class='btn btn-primary primary-action'
             href="${addurl}"
             title="Ajouter un élément à la liste"
@@ -56,7 +56,6 @@
                 </a>
             % endfor
         % endif
-    </div>
     % if warn_msg is not UNDEFINED and warn_msg is not None:
         <div class="alert alert-danger">
             <i class='fa fa-warning'></i>
@@ -69,6 +68,8 @@
             ${help_msg}
         </div>
     % endif
+    </div>
+    <div class='page-block panel panel-default'>
     <table class='table table-stripped table-condensed'>
     <thead>
     % for column in columns:
@@ -110,6 +111,7 @@
     % endif
     </tbody>
     </table>
+    </div>
     </div>
 </div>
 </%block>

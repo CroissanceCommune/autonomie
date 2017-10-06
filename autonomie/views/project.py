@@ -391,7 +391,7 @@ def project_view(request):
     """
         Return datas for displaying one project
     """
-    populate_actionmenu(request, request.context)
+    populate_actionmenu(request)
     phases = request.context.phases
 
     set_task_colors(phases)
@@ -480,7 +480,7 @@ class ProjectEdit(ProjectAdd):
         return query.filter(Project.id != self.context.id)
 
     def before(self, form):
-        populate_actionmenu(self.request)
+        populate_actionmenu(self.request, self.context)
         form.widget = GridFormWidget(named_grid=FORM_GRID)
 
     def submit_success(self, appstruct):
@@ -505,6 +505,8 @@ def populate_actionmenu(request, project=None):
     """
     company_id = request.context.get_company_id()
     request.actionmenu.add(get_list_view_btn(company_id))
+    if project is not None:
+        request.actionmenu.add(get_view_btn(project))
 
 
 def get_list_view_btn(cid):
@@ -519,6 +521,20 @@ def get_list_view_btn(cid):
         "list_projects",
         path="company_projects",
         id=cid,
+    )
+
+
+def get_view_btn(project):
+    """
+    Build a link returning to a project's view page
+
+    :param obj project: A Project instance
+    """
+    return ViewLink(
+        u"Retour au projet",
+        "view_project",
+        path="project",
+        id=project.id,
     )
 
 

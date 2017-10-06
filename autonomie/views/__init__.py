@@ -248,6 +248,7 @@ class BaseListClass(BaseView):
         self.logger.debug(u"# Calling the list view #")
         self.logger.debug(u" + Collecting the appstruct from submitted datas")
         schema, appstruct = self._collect_appstruct()
+        self.appstruct = appstruct
         self.logger.debug(appstruct)
         self.logger.debug(u" + Launching query")
         query = self.query()

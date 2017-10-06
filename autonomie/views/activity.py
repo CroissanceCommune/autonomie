@@ -592,8 +592,8 @@ class ActivityList(BaseListView):
 
         if (
             year not in (None, colander.null) and
-            date_range_start not in (None, colander.null) and
-            date_range_end not in (None, colander.null)
+            date_range_start in (None, colander.null) and
+            date_range_end in (None, colander.null)
         ):
             query = query.filter(
                 func.extract('YEAR', Activity.datetime) == year

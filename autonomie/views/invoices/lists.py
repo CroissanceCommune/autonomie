@@ -122,7 +122,7 @@ def get_year_range(year):
 
 
 class InvoiceListTools(object):
-    title = u"Liste des factures"
+    title = u"Factures de la CAE"
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
         date=Task.date,
@@ -276,6 +276,10 @@ class CompanyInvoicesListView(GlobalInvoicesListView):
 
     def _get_company_id(self, appstruct):
         return self.request.context.id
+
+    @property
+    def title(self):
+        return u"Factures de l'entreprise {0}".format(self.request.context.name)
 
 
 class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):

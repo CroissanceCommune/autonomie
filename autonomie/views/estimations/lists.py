@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class GlobalEstimationList(BaseListView):
-    title = u""
+    title = u"Devis de la CAE"
     add_template_vars = (u'title', 'is_admin',)
     schema = get_list_schema(is_global=True)
     sort_columns = dict(
@@ -138,6 +138,12 @@ class GlobalEstimationList(BaseListView):
 class EstimationList(GlobalEstimationList):
     schema = get_list_schema(is_global=False)
     is_admin = False
+
+    @property
+    def title(self):
+        return u"Devis de l'entreprise {0}".format(
+            self.request.context.name
+        )
 
     def _get_company_id(self, appstruct):
         """

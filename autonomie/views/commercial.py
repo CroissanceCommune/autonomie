@@ -112,6 +112,10 @@ class DisplayCommercialHandling(BaseView):
         commercial_js.need()
         self.year = self.submit_year()['year']
 
+    @property
+    def title(self):
+        return u"Gestion commerciale pour l'année {0}".format(self.year)
+
     def submit_year(self):
         """
             Validate the year form datas
@@ -284,6 +288,7 @@ class DisplayCommercialHandling(BaseView):
             turnovers=self.turnovers(),
             turnover_projections=turnover_projections,
             year_form=year_form,
+            year=self.year,
             form=form,
             compute_turnover_difference=compute_turnover_difference,
             compute_percent=percent,

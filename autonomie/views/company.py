@@ -90,7 +90,7 @@ def company_view(request):
         Company main view
     """
     company = request.context
-    populate_actionmenu(request, request.context)
+    populate_actionmenu(request)
     link_list = []
     link_list.append(
         ViewLink(
@@ -383,12 +383,6 @@ def populate_actionmenu(request, company=None):
     request.actionmenu.add(get_list_view_btn())
     if company is not None:
         request.actionmenu.add(get_view_btn(company.id))
-        if request.has_permission('edit_company'):
-            request.actionmenu.add(get_edit_btn(company.id))
-            if company.archived:
-                request.actionmenu.add(get_enable_btn(company.id))
-            else:
-                request.actionmenu.add(get_disable_btn(company.id))
 
 
 def get_list_view_btn():
@@ -403,48 +397,6 @@ def get_view_btn(company_id):
         Return a link to the view page
     """
     return ViewLink(u"Voir", "visit", path="company", id=company_id)
-
-
-def get_edit_btn(company_id):
-    """
-        Return a link to the edition form
-    """
-    return ViewLink(
-        u"Modifier",
-        "edit_company",
-        path="company",
-        id=company_id,
-        _query=dict(action="edit"),
-    )
-
-
-def get_enable_btn(company_id):
-    """
-        Return a link to enable a company
-    """
-    return ViewLink(
-        u"Désarchiver",
-        "admin_company",
-        path="company",
-        id=company_id,
-        _query=dict(action="enable")
-    )
-
-
-def get_disable_btn(company_id):
-    """
-        Return a link to disable a company
-    """
-    return ViewLink(
-        u"Archiver",
-        "admin_company",
-        path="company",
-        id=company_id,
-        confirm=u'Êtes-vous sûr de vouloir archiver cette entreprise \
-(les comptes des employés resteront actifs) ?',
-        _query=dict(action="disable")
-    )
-
 
 def company_remove_employee_view(context, request):
     """

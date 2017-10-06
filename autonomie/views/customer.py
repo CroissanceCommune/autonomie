@@ -39,7 +39,6 @@ from deform import Form
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import has_permission
 
 from autonomie.models.customer import (
     Customer,
@@ -297,12 +296,12 @@ def customer_view(request):
     """
         Return the view of a customer
     """
-    populate_actionmenu(request, request.context)
+    populate_actionmenu(request)
+    title = u"Client : {0}".format(request.context.get_label())
+    if request.context.code:
+        title += u" {0}".format(request.context.code)
     return dict(
-        title=u"Client : {0} {1}".format(
-            request.context.get_label(),
-            request.context.code
-        ),
+        title=title,
         customer=request.context
     )
 
@@ -451,16 +450,14 @@ class CustomerEdit(CustomerAdd):
         )
 
 
-def populate_actionmenu(request, context):
+def populate_actionmenu(request, context=None):
     """
         populate the actionmenu for the different views (list/add/edit ...)
     """
     company_id = request.context.get_company_id()
     request.actionmenu.add(get_list_view_btn(company_id))
-    if context.__name__ == 'customer':
+    if context is not None and context.__name__ == 'customer':
         request.actionmenu.add(get_view_btn(context.id))
-        if has_permission('edit_customer', request.context, request):
-            request.actionmenu.add(get_edit_btn(context.id))
 
 
 def get_list_view_btn(id_):
@@ -472,7 +469,12 @@ def get_list_view_btn(id_):
 
 
 def get_view_btn(customer_id):
-    return ViewLink(u"Voir", "view_customer", path="customer", id=customer_id)
+    return ViewLink(
+        u"Revenir au client",
+        "view_customer",
+        path="customer",
+        id=customer_id
+    )
 
 
 def get_edit_btn(customer_id):

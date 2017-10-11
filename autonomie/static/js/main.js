@@ -308,10 +308,10 @@ function showLoader(){
 function setupJsonRedirect() {
   $(document).ajaxComplete(
     function( data, xhr, settings ) {
-      json_resp = jQuery.parseJSON( xhr.responseText );
-      if ( json_resp.redirect ){
-        window.location.href = json_resp.redirect;
-      }
+        let json_resp = xhr.responseJSON;
+        if (!_.isUndefined(json_resp) && ( json_resp.redirect )){
+            window.location.href = json_resp.redirect;
+        }
     }
   );
 }

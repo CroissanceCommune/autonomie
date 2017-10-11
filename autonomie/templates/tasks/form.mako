@@ -35,11 +35,9 @@
 % endif
 <div id='js-main-area' class='task-edit'></div>
 </%block>
-<%block name='footer'>
-<script type='text/javascript'>
+<%block name='footerjs'>
 var AppOption = {};
 AppOption['context_url'] = "${context_url}";
 AppOption['form_config_url'] = "${form_config_url}"
 AppOption['load_catalog_url'] = "${load_catalog_url}";
-</script>
 </%block>

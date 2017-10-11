@@ -125,6 +125,9 @@
       % endif
       <%block name='footerjs' />
     </script>
+    <footer id='page-footer-block'>
+    Autonomie v${layout.autonomie_version}
     <%block name='footer' />
+    </footer>
   </body>
 </html>

@@ -164,8 +164,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <%block name='content'>
 <div id="js-main-area"></div>
 </%block>
-<%block name='footer'>
-<script type='text/javascript'>
+<%block name='footerjs'>
 var AppOption = {};
 AppOption['context_url'] = "${context_url}";
 AppOption['form_config_url'] = "${form_config_url}"
@@ -174,5 +173,4 @@ AppOption['form_config_url'] = "${form_config_url}"
 % else:
     AppOption['edit'] = false;
 % endif
-</script>
 </%block>

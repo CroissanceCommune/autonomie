@@ -24,22 +24,28 @@
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
-<%block name="content">
-<div class="activity-view">
+<%block name='afteractionmenu'>
 <% activity = request.context %>
 <% pdf_url = request.route_path("activity.pdf", id=activity.id) %>
-% if activity.status != 'planned':
-<a
-    class='btn btn-default pull-right'
-    href='${pdf_url}'
-    >
-    <i class='glyphicon glyphicon-file'></i>Voir le PDF
-</a>
-% endif
+    % if activity.status != 'planned':
+    <a
+        class='btn btn-default pull-right'
+        href='${pdf_url}'
+        >
+        <i class='glyphicon glyphicon-file'></i>Voir le PDF
+    </a>
+    % endif
+</%block>
+<%block name="content">
+<% activity = request.context %>
 <div class='row'>
     <div class='col-md-4'>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+            Informations générales
+            </div>
+            <div class='panel-body'>
             <% companies = set() %>
-            <div class='well'>
                 <h3>Participants</h3>
                 <ul>
                 % for participant in activity.participants:
@@ -85,9 +91,14 @@
                     % endfor
                 % endif
             </div>
+        </div>
     </div>
     <div class='col-md-8'>
-            <div class='well'>
+            <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+                Configuraiton du rendez-vous
+            </div>
+            <div class='panel-body'>
                 <% items = (\
                 (u'Conseiller(s)', ', '.join([api.format_account(conseiller) for conseiller in activity.conseillers])), \
                     (u'Horaire', api.format_datetime(activity.datetime)), \
@@ -110,6 +121,7 @@
                         </button>
                     </div>
                 </div>
+            </div>
 
                 <div
                     % if formerror is not UNDEFINED:
@@ -127,13 +139,17 @@
                     ${next_activity_form|n}
                 </div>
             </div>
-        ${record_form|n}
+            <div class='panel panel-default page-block'>
+                <div class='panel-heading'>
+                    Saisie des données
+                </div>
+                <div class='panel-body'>
+                    ${record_form|n}
+                </div>
+                </div>
+            </div>
+            </div>
     </div>
-</div>
-<div class='row'>
-    <div class="col-md-4">
-    </div>
-</div>
 </div>
 </%block>
 <%block name="footerjs">

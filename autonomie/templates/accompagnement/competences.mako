@@ -22,43 +22,47 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="content">
-<div class='row'>
-    <div class='col-sm-8 col-sm-offset-2'>
-        <form method='POST' enctype="multipart/form-data" accept-charset="utf-8">
-            % if api.has_permission('admin_competences', request.context):
-                <div class="form-group">
-                    <label for="contractor_id">Entrepreneur à évaluer</label>
-                        <select name='contractor_id' class='form-control'>
-                            % for id, label in user_options:
-                                <option value='${id}'>${label}</option>
-                            % endfor
-                        </select>
-                </div>
-            % else:
-                <div><b>Mes compétences</b></div>
-                <input type="hidden" name='contractor_id' value="${request.context.id}" />
-            % endif
-            <div class='row'>
-                <div class='col-sm-6 col-sm-offset-3'>
-                    <div class="form-group">
-                        <div>
-                            <b>Choisissez une échéance</b>
+<div class='panel panel-default page-block'>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-sm-8 col-sm-offset-2'>
+                <form method='POST' enctype="multipart/form-data" accept-charset="utf-8">
+                    % if api.has_permission('admin_competences', request.context):
+                        <div class="form-group">
+                            <label for="contractor_id">Entrepreneur à évaluer</label>
+                                <select name='contractor_id' class='form-control'>
+                                    % for id, label in user_options:
+                                        <option value='${id}'>${label}</option>
+                                    % endfor
+                                </select>
                         </div>
-                        <div class='btn-group' role='group'>
-                            % for deadline in deadlines:
-                                <button
-                                    class='btn btn-default'
-                                    type='submit'
-                                    name='deadline'
-                                    value='${deadline.id}'>
-                                    ${deadline.label}
-                                </button>
-                            % endfor
+                    % else:
+                        <div><b>Mes compétences</b></div>
+                        <input type="hidden" name='contractor_id' value="${request.context.id}" />
+                    % endif
+                    <div class='row'>
+                        <div class='col-sm-6 col-sm-offset-3'>
+                            <div class="form-group">
+                                <div>
+                                    <b>Choisissez une échéance</b>
+                                </div>
+                                <div class='btn-group' role='group'>
+                                    % for deadline in deadlines:
+                                        <button
+                                            class='btn btn-default'
+                                            type='submit'
+                                            name='deadline'
+                                            value='${deadline.id}'>
+                                            ${deadline.label}
+                                        </button>
+                                    % endfor
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 </%block>

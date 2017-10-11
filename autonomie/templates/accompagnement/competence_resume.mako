@@ -22,18 +22,26 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="autonomie:templates/base/utils.mako" import="format_text" />
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
+    <a class='btn btn-default pull-right hidden-print' href='#print' onclick="window.print()">
+        <i class='glyphicon glyphicon-print'></i>Imprimer
+    </a>
+</div>
+</%block>
 <%block name="content">
-<a class='btn btn-default pull-right hidden-print' href='#print' onclick="window.print()">
-    <i class='glyphicon glyphicon-print'></i>Imprimer
-</a>
 <div class='row'>
     <div class='col-xs-12'>
-        <img src="/public/competence_header.png" style="width:auto;max-height:200px;"/>
+        <img src="/public/competence_header.png" style="width:auto;max-height:200px;" alt=''/>
     </div>
 </div>
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+    <h1 class='text-center'>${title}</h1>
+</div>
+<div class='panel-body'>
 <div class='row' style="margin-bottom: 40px">
     <div class="col-xs-12">
-        <h1 class='text-center'>${title}</h1>
         <div>
             <b>Nom Prénom :&nbsp;${request.context.contractor.label}</b>
         </div>
@@ -66,9 +74,15 @@
     <div class='col-xs-8 col-offset-xs-2' id='radar' style='page-break-after:always;'>
     </div>
 </div>
+</div>
+</div>
+<div class='panel panel-default page-block'>
+<div class='panel-heading'>
+<h2 class='text-center'>Grille d'autonomie</h2>
+</div>
+<div class='panel-body'>
 <div class='row'>
     <div class='col-xs-12'>
-        <h2 class='text-center'>Grille d'autonomie</h2>
         <h3 class='text-center' style='margin-bottom: 30px'>
             Auto-évaluation et évolution des compétences entrepreneuriales
         </h3>
@@ -144,23 +158,31 @@
         % endfor
     </div>
 </div>
-<div class='row'>
-    <div class='col-xs-12'>
+</div>
+</div>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
         <h2 class='text-center'>Axe de progrès identifiés</h2>
-        <table class='table table-striped table-condensed table-bordered'>
-            <thead>
-                <th>Compétences</th>
-                <th>Axe de progrès</th>
-            </thead>
-            <tbody>
-                % for item in grids[-1].items:
-                    <tr>
-                        <td style='width: 30%'>${item.option.label}</td>
-                        <td>${format_text(item.progress)}</td>
-                    </tr>
-                % endfor
-            </tbody>
-        </table>
+    </div>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-xs-12'>
+                <table class='table table-striped table-condensed table-bordered'>
+                    <thead>
+                        <th>Compétences</th>
+                        <th>Axe de progrès</th>
+                    </thead>
+                    <tbody>
+                        % for item in grids[-1].items:
+                            <tr>
+                                <td style='width: 30%'>${item.option.label}</td>
+                                <td>${format_text(item.progress)}</td>
+                            </tr>
+                        % endfor
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 </%block>

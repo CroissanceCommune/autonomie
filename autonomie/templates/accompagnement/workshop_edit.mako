@@ -22,34 +22,47 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="content">
-<div class='row'>
-    <div class='col-md-12'>
-        <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
-            <i class="fa fa-pencil"></i> Modifier les données relatives à l'atelier
-        </button>
-        <a class='btn btn-default'
-            href='${request.route_path("workshop", id=request.context.id, _query=dict(action="duplicate"))}' >
-            <i class='fa fa-copy'></i>
-            Dupliquer cet atelier
-        </a>
-        <a class='btn btn-default' href='${request.route_path("workshop.pdf", id=request.context.id)}' >
-            <i class='fa fa-download'></i>
-            Télécharger la feuille d'émargement globale
-        </a>
-        <div
-            % if formerror is not UNDEFINED:
-                class='section-content'
-            % else:
-                class='section-content collapse'
-            % endif
-            id='edition_form'>
-            <button class="close" data-toggle="collapse" data-target='#edition_form' type="button">×</button>
-            ${form|n}
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    Actions
+    </div>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-md-12'>
+                <a class='btn btn-primary primary-action'
+                    href='${request.route_path("workshop.pdf", id=request.context.id)}' >
+                    <i class='fa fa-download'></i>&nbsp;
+                    Télécharger la feuille d'émargement globale
+                </a>
+                <button
+                    class='btn btn-default'
+                    data-toggle='collapse'
+                    data-target='#edition_form'>
+                    <i class="fa fa-pencil"></i>&nbsp;Modifier les données relatives à l'atelier
+                </button>
+                <a class='btn btn-default'
+                    href='${request.route_path("workshop", id=request.context.id, _query=dict(action="duplicate"))}' >
+                    <i class='fa fa-copy'></i>&nbsp;Dupliquer cet atelier
+                </a>
+                <div
+                    % if formerror is not UNDEFINED:
+                        class='section-content'
+                    % else:
+                        class='section-content collapse'
+                    % endif
+                    id='edition_form'>
+                    <button class="close" data-toggle="collapse" data-target='#edition_form' type="button">×</button>
+                    ${form|n}
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-    <h3>Émargement</h3>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    Émargement
+    </div>
+    <div class='panel-body'>
     <form method='POST'
         class="deform  deform" accept-charset="utf-8"
         enctype="multipart/form-data" action="${request.route_path('workshop',\
@@ -126,4 +139,6 @@
                    <button id="deformsubmit" class="btn btn-primary " value="submit" type="submit" name="submit"> Enregistrer </button>
                </div>
         </form>
+</div>
+</div>
 </%block>

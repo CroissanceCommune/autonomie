@@ -70,48 +70,54 @@
             ${table_btn(url, u"Voir", u"Voir l'évènement", icon='glyphicon glyphicon-search')}
         </td>
 </%def>
-<div class='section-header'>Vos rendez-vous</div>
-Afficher <select id='number_of_events'>
-  % for i in (5, 10, 15, 50):
-  <option value='${i}'
-  % if events.items_per_page == i:
-    selected=true
-  % endif
-  >
-  ${i}
-  </option>
-  % endfor
-</select>
-éléments à la fois
-<table class='table table-stripped'>
-    <thead>
-        <th class="visible-lg">
-            Type
-        </th>
-        <th>
-            Date de début
-        </th>
-        <th>
-            Conseiller / Animateur
-        </th>
-        <th class="visible-lg">
-            Intitulé
-        </th>
-        <th class="visible-lg">
-        </th>
-    </thead>
-    <tbody>
-        % for event in events:
-            <tr>
-                % if event.type_ == 'activity':
-                    ${activity_row(event)}
-                % elif event.type_ == 'timeslot':
-                    ${timeslot_row(event)}
-                % else:
-                    ${event.type_}
-                % endif
-            </tr>
-        % endfor
-    </tbody>
-</table>
-${pager(events)}
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    Vos rendez-vous
+    </div>
+    <div class='panel-body'>
+        Afficher <select id='number_of_events'>
+          % for i in (5, 10, 15, 50):
+          <option value='${i}'
+          % if events.items_per_page == i:
+            selected=true
+          % endif
+          >
+          ${i}
+          </option>
+          % endfor
+        </select>
+        éléments à la fois
+        <table class='table table-stripped'>
+            <thead>
+                <th class="visible-lg">
+                    Type
+                </th>
+                <th>
+                    Date de début
+                </th>
+                <th>
+                    Conseiller / Animateur
+                </th>
+                <th class="visible-lg">
+                    Intitulé
+                </th>
+                <th class="visible-lg">
+                </th>
+            </thead>
+            <tbody>
+                % for event in events:
+                    <tr>
+                        % if event.type_ == 'activity':
+                            ${activity_row(event)}
+                        % elif event.type_ == 'timeslot':
+                            ${timeslot_row(event)}
+                        % else:
+                            ${event.type_}
+                        % endif
+                    </tr>
+                % endfor
+            </tbody>
+        </table>
+        ${pager(events)}
+    </div>
+</div>

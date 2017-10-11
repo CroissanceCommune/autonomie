@@ -26,16 +26,37 @@
     Template for the page showing the document waiting for approval
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
+<h3>Bonjour ${api.format_account(request.user)}</h3>
+<div class='row'>
+% if activities:
+<div class='col-md-4 col-xs-12'>
+<small>Vous avez ${len(activities)} rendez-vous programmés</small>
+<ul class='list-group'>
+% for activity in activities[:5]:
+<li class='list-group-item clickable-row' data-href="${activity.url}">
+    <span class='pull-right'>${api.format_datetime(activity.datetime)}</span>
+    <span class='label label-info'>${loop.index + 1}</span>&nbsp;
+    ${', '.join(api.format_account(p) for p in activity.participants)}
+    <br />
+</li>
+% endfor
+</div>
+</div>
+% endif
+</div>
+</div>
+</%block>
 <%block name="content">
-<br />
 <div class='row'>
     <div class='col-md-6'>
         % for dataset, table_title, perm in (\
-            (estimations, u"Devis en attente", "valid.estimation"), \
-            (invoices, u"Factures et Avoirs en attente", "valid.invoice"), \
+            (estimations, u"Devis en attente de validation", "valid.estimation"), \
+            (invoices, u"Factures et Avoirs en attente de validation", "valid.invoice"), \
         ):
         % if request.has_permission(perm):
-    <div class="panel panel-default">
+    <div class="panel panel-default page-block">
         <div class="panel-heading">
             ${table_title}
         </div>
@@ -71,7 +92,7 @@
     </div>
     % endif
 % endfor
-<div class="panel panel-default">
+<div class="panel panel-default page-block">
     <div class="panel-heading">Mes Activités / Rendez-vous à venir</div>
         <div class='panel-body'>
     <table class="table table-striped table-condensed table-hover">
@@ -122,9 +143,9 @@
 </div>
 % if request.has_permission('admin_expense'):
 <div class='col-md-6'>
-    <div class="panel panel-default">
+    <div class="panel panel-default  page-block">
         <div class="panel-heading">
-            Les feuilles de notes de dépense en attente
+            Les feuilles de notes de dépense en attente de validation
         </div>
         <div class='panel-body'>
         <table class="table table-striped table-condensed table-hover">

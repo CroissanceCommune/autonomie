@@ -100,5 +100,8 @@ One page application layout template
     </div>
     <%block name='content' />
     <%block name='footer' />
+    <script type='text/javascript'>
+    <%block name='footerjs' />
+    </script>
   </body>
 </html>

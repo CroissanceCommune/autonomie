@@ -29,85 +29,49 @@
 <%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_customer" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
-<%block name='content'>
+<%block name='afteractionmenu'>
 <% num_elapsed = elapsed_invoices.count() %>
-<div class='row'>
+<div class='page-header-block'>
+    <h3>Bonjour ${api.format_account(request.user)}</h3>
+    <div class='row'>
     % if num_elapsed:
-    <div class='col-md-4'>
-            <div class='well' style="margin-top:10px">
-                <div class='section-header'>
-                    Vos impayés de + de 45 jours
-                </div>
-                <table class='table table-stripped'>
-                    <thead>
-                        <th class='col-xs-4'>Client</th>
-                        <th class="col-xs-3">Total</th>
-                        <th class="col-md-4 col-xs-5">Actions</th>
-                    </thead>
-                    <tbody>
-                        % for invoice in elapsed_invoices.limit(5):
-                            <tr>
-                                <% url = request.route_path("/invoices/{id}.html", id=invoice.id) %>
-                                <% onclick = "document.location='{url}'".format(url=url) %>
-                                <td class="rowlink" onclick="${onclick}">
-                                    ${format_customer(invoice.customer, False)}
-                                </td>
-                                <td class="rowlink" onclick="${onclick}">
-                                    ${api.format_amount(invoice.total(), precision=5)|n}&nbsp;€
-                                </td>
-                                <td style="text-align:right">
-                                    <div class='btn-group'>
-                                    ${table_btn(\
-                                    request.route_path("/invoices/{id}.html", id=invoice.id), \
-                                    u"", \
-                                    u"Voir ce document", \
-                                    icon=u"search")\
-                                    }
-                                    ${table_btn(
-                                    request.route_path("/invoices/{id}.pdf", id=invoice.id),
-                                        u"",
-                                        u"Télécharger ce document au format pdf",
-                                        icon=u"fa fa-file-pdf-o")}
-                                    </div>
-                                </td>
-                            </tr>
-                        % endfor
-                    </tbody>
-                </table>
-                % if num_elapsed > 0:
-                    <% label = u'Voir' %>
-                    <% url = request.route_path('company_invoices', id=company.id, _query=dict(__formid__='deform', status="notpaid")) %>
-                    % if num_elapsed > 5:
-                        <b>...</b>
-                        <% label = u'Voir plus' %>
-                    % endif
-                    <a class='btn btn-primary btn-sm' href="${url}">
-                        ${label}
-                    </a>
-                % endif
-            </div>
-    </div>
-    <div class='col-md-6 col-md-offset-1'>
-    % else:
-        <div class='col-md-10 col-md-offset-1'>
-    %endif
+        <div class='col-md-4 col-xs-12'>
+        <small>
+            <i class='glyphicon glyphicon-danger'></i>&nbsp;
+            Vous avez des factures impayées depuis + de 45 jours
+        </small>
+        <ul class='list-group'>
+            % for invoice in elapsed_invoices.limit(5):
+            <li
+                class='list-group-item clickable-row'
+                data-href="${request.route_path("/invoices/{id}.html", id=invoice.id)}">
+                <span class='label label-info'>${loop.index + 1}</span>&nbsp;
+                ${format_customer(invoice.customer, False)} - ${api.format_amount(invoice.ttc, precision=5)}
+            </li>
+            % endfor
+        </ul>
+        <a class='' href="${request.route_path('company_invoices', id=company.id, _query=dict(__formid__='deform', status="notpaid"))}">
+            Voir plus
+        </a>
+        </div>
+    % endif
+        <div class='col-md-8 col-xs-12'>
         % if request.config.has_key('welcome'):
             <p>
                 ${format_text(request.config['welcome'])}
             </p>
         % endif
+        </div>
     </div>
 </div>
+</%block>
+<%block name='content'>
 <div class='row'>
-    <div class='col-md-6'>
-        <div class='well tasklist' style="margin-top:10px" id='tasklist_container'>
-            ${panel('company_tasks')}
-        </div>
+    <div class='col-md-6' id='tasklist_container'>
+        ${panel('company_tasks')}
     </div>
-    <div class='col-md-6'>
-        <div class='well tasklist' style="margin-top:10px" id='event_container'>
-            ${panel('company_events')}
-        </div>
+    <div class='col-md-6' id='event_container'>
+        ${panel('company_events')}
     </div>
 </div>
 </%block>

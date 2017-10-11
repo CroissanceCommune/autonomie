@@ -28,11 +28,7 @@ Render an action menu
 % if elem.items:
     <ul class='nav nav-pills'>
     % for item in elem.items:
-        % if hasattr(item, "selected") and item.selected(request):
-            <li class='active'>
-        % else:
-            <li>
-        % endif
+        <li>
         % if hasattr(item, 'render'):
             ${item.render(request)|n}
         % else:

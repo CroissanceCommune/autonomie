@@ -75,17 +75,27 @@
             </li>
             <li>
             Après l'import, des indicateurs sont générés depuis les écritures et en fonction de la configuration
-            (<a class='link' href='/admin/accounting/treasury'>Configuration->Configuration du module Vente -> Dépôt de fichiers</a>)
+            (<a
+                class='link'
+                onclick="openPopup('/admin/accounting/treasury_measure_types');"
+                href='#'>
+                Configuration-> Configuration du module Fichiers de trésorerie -> Configuration des indicateurs de trésorerie
+            </a>)
             </li>
             </ul>
             <br />
-            <b>Si une erreur s'est produite</b> :vous devriez avoir reçu un mail à l'adresse
+            <b>Si une erreur s'est produite</b> : vous devriez avoir reçu un mail à l'adresse
             d'administration configurée dans
-                <a class='link' href="/admin/main">
+                <a
+                class='link'
+                href="#"
+                onclick="openPopup('/admin/main');">
                     Configuration -> Configuration générale
                 </a>
             <br />
+            <br />
             <b>Si l'import s'est déroulé avec succès</b> : vous trouverez ici les informations relatives aux données importées.<br />
+            <br />
             Vous pouvez :
             <ul>
                 <li>Supprimer les données importées et les indicateurs associés si une erreur s'est produite (données mal associées par exemple)</li>

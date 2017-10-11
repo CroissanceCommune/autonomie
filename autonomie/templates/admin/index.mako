@@ -28,7 +28,9 @@
 <%inherit file="${context['main_template'].uri}" />
 <%block name='afteractionmenu'>
 <div class='page-header-block'>
+% if 'popup' not in request.GET:
 ${request.layout_manager.render_panel('admin_nav', menus)}
+% endif
 <%block name='afteradminmenu'>
 </%block>
 </div>

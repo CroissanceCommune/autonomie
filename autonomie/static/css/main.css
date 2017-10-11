@@ -118,6 +118,19 @@ td.actions, th.actions {
 .estimation-view .page-content-wrapper {
   background-color: #f8f8f8; }
 
+#page-footer-block {
+  background-color: #2f4050;
+  padding: 15px 40px 20px 40px;
+  color: #fff; }
+
+/* End page wrap */
+/* Listes */
+.list-group .list-group-item {
+  border: none;
+  border-bottom: 1px solid #dedede;
+  background-color: transparent; }
+
+/* End listes */
 /* Le formulaire d'authentification */
 .authentication-form fieldset {
   width: 90%;

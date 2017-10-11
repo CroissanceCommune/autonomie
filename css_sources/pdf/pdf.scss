@@ -27,52 +27,52 @@ html{
   -pdf-keep-with-next: true;
 }
 /* Task line and line groups */
-.lines td, .lines th{
-  padding: 2px;
-  vertical-align: middle;
-}
 .lines{
   border: 0.01cm solid #cdcdcd;
   margin-bottom:33px;
-}
-.lines thead tr{
-  background-color:#f6f6f6;
-  font-size:12px;
-}
-.lines thead tr.group-description{
-  background-color:#fff;
-}
-.lines h3{
-  font-size: 13px;
-  font-weight: 400;
-  padding: 4px 0px;
-}
-.group-description td{
-  font-weight: normal;
-  text-align: left;
-  font-size: 11px;
-}
-.lines .price{
-  text-align:right;
-  width:4cm;
-  background-color:#f6f6f6;
-}
-.lines .tva{
-  text-align:right;
-  width: 2cm;
-  font-size: 9px;
-}
-.lines .quantity{
-  text-align:center;
-  width: 3cm;
-}
-.lines .unity{
-  text-align:center;
-  width: 4cm;
-}
-.lines .rightalign{
-  text-align:right;
-  font-weight:bold;
+  thead tr{
+    background-color:#f6f6f6;
+    font-size:12px;
+  }
+  thead tr.group-description{
+    background-color:#fff;
+  }
+  h3{
+    font-size: 13px;
+    font-weight: 400;
+    padding: 4px 0px;
+  }
+  td, th{
+    padding: 2px;
+    vertical-align: middle;
+  }
+  .group-description td{
+    font-weight: normal;
+    text-align: left;
+    font-size: 11px;
+  }
+  .price{
+    text-align:right;
+    width:4cm;
+    background-color:#f6f6f6;
+  }
+  .tva{
+    text-align:right;
+    width: 2cm;
+    font-size: 9px;
+  }
+  .quantity{
+    text-align:center;
+    width: 3cm;
+  }
+  .unity{
+    text-align:center;
+    width: 4cm;
+  }
+  .rightalign{
+    text-align:right;
+    font-weight:bold;
+  }
 }
 .title{
   padding:3px;
@@ -138,4 +138,11 @@ text-transform: uppercase;
 }
 .activity-content{
   padding-left: 0.5cm;
+}
+
+.page-block, .panel-default{
+  border-color: #fff !important;
+  h2, h3{
+    color: #000;
+  }
 }

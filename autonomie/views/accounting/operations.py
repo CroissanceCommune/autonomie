@@ -9,6 +9,12 @@ Upload and operation vizualisation
 import logging
 import colander
 from sqlalchemy.orm import load_only
+from pyramid.httpexceptions import HTTPFound
+
+from autonomie_celery.tasks.utils import check_alive
+from autonomie_celery.tasks.accounting_measure_compute import (
+    compile_measures_task,
+)
 
 from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
@@ -208,6 +214,32 @@ class OperationListView(BaseListView):
         return query
 
 
+def compile_measures_view(context, request):
+    """
+    Handle compilation of measures
+
+    :param obj context: The AccountingOperationUpload instance
+    :param obj request: The pyramid request object
+    """
+    service_ok, msg = check_alive()
+    if not service_ok:
+        request.session.flash(msg, 'error')
+        return HTTPFound(request.referrer)
+    logger.debug(u"Compiling measures for upload {0}".format(context.id))
+    query = request.dbsession.query(AccountingOperation.id)
+    operation_ids = query.filter_by(upload_id=context.id).all()
+
+    celery_job = compile_measures_task.delay(context.id, operation_ids)
+    logger.info(
+        u"The Celery Task {0} has been delayed, see celery logs for "
+        u"details".format(
+            celery_job.id
+        )
+    )
+    request.session.flash(u"Les indicateurs sont en cours de génération")
+    return HTTPFound(request.referrer)
+
+
 def add_routes(config):
     config.add_route(
         "/accounting/operation_uploads",
@@ -240,6 +272,12 @@ def add_views(config):
         route_name='/accounting/operation_uploads/{id}',
         renderer="/accounting/operations.mako",
         permission='admin_accounting',
+    )
+    config.add_view(
+        compile_measures_view,
+        route_name='/accounting/operation_uploads/{id}',
+        request_param="action=compile",
+        permission="admin_accounting",
     )
 
 

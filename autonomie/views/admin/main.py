@@ -29,7 +29,6 @@
     - logo upload
 """
 import logging
-import functools
 
 from sqlalchemy import desc
 from pyramid.httpexceptions import HTTPFound
@@ -102,7 +101,7 @@ UPLOAD_OK_MSG = u"Le modèle de document a bien été ajouté"
 EDIT_OK_MSG = u"Le modèle de document a bien été modifié"
 
 
-def index(request):
+def admin_index_view(request):
     """
         Return datas for the index view
     """
@@ -128,6 +127,14 @@ devis, factures / avoir)"
             route_name="admin_expense",
             title=u"Configuration des types de dépense, des \
 différents comptes analytiques liés au module notes de dépense et à leur export"
+        )
+    )
+    menus.append(
+        dict(
+            label=u"Configuration du module Fichiers de trésorerie",
+            route_name="/admin/accounting",
+            title=u"Configuration des indicateurs de trésorerie générés "
+            u"depuis les fichiers provenant du logiciel comptable."
         )
     )
     menus.append(
@@ -655,7 +662,7 @@ def includeme(config):
     )
 
     config.add_admin_view(
-        index,
+        admin_index_view,
         route_name='admin_index',
     )
 

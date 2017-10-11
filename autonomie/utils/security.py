@@ -100,6 +100,7 @@ from autonomie.models.accounting.operations import (
 )
 from autonomie.models.accounting.measures import (
     TreasuryMeasure,
+    TreasuryMeasureType,
 )
 
 
@@ -173,6 +174,11 @@ class RootFactory(dict):
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
             ('treasury_measures', 'treasury_measure', TreasuryMeasure, ),
+            (
+                'treasury_measure_types',
+                'treasury_measure_type',
+                TreasuryMeasureType,
+            ),
             ('timeslots', 'timeslot', Timeslot, ),
             ('tvas', 'tva', Tva,),
             ('users', 'user', User, ),
@@ -813,6 +819,7 @@ def set_models_acl():
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
     TreasuryMeasure.__default_acl__ = property(get_treasury_measure_acl)
+    TreasuryMeasureType.__acl__ = property(get_base_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     Workshop.__default_acl__ = property(get_event_acl)

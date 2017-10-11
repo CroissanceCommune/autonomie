@@ -124,6 +124,7 @@ AUTONOMIE_ADMIN_MODULES = (
     "autonomie.views.admin.expense_type",
     "autonomie.views.admin.vente",
     "autonomie.views.admin.tva",
+    "autonomie.views.admin.accounting",
 )
 
 AUTONOMIE_SERVICE_FACTORIES = (

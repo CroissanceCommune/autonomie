@@ -4,6 +4,7 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import datetime
+import deform
 
 from sqlalchemy import (
     Column,
@@ -32,33 +33,49 @@ class TreasuryMeasureType(DBBASE):
     __tablename__ = 'treasury_measure_type'
     __table_args__ = default_table_args
     __colanderalchemy_config__ = {
-        "help_msg": u"""Les indicateurs décrits ici sont prédéfinis.
-        Ils permettent d'assembler les tableaux de bord des entrepreneurs.
+        "help_msg": u"""Les indicateurs de trésorerie sont prédéfinis.<br />
+        Ils permettent d'assembler les tableaux de bord des entrepreneurs.<br />
         Vous pouvez modifier ici les préfixes de comptes généraux pour indiquer
-        quelles écritures doivent être utilisées pour les calculer."""
+        quelles écritures doivent être utilisées pour calculer cet indicateur.
+        <br />
+        Si nécessaire vous pourrez alors recalculer les derniers indicateurs
+        générés.
+        """
     }
     id = Column(
         Integer,
         primary_key=True,
-        info={'colanderalachemy': {'exclude': True}}
+        info={'colanderalchemy': {'exclude': True}}
     )
     internal_id = Column(
         Integer,
-        info={'colanderalachemy': {'exclude': True}},
+        info={
+            'colanderalchemy': {
+                'exclude': True,
+                'title': u"Identifiant utilisé en interne pour le regroupement "
+                u"(voir la partie populate pour le détail)"
+            }
+        },
         default=-1
     )
     label = Column(
         String(255),
         info={
-            'colanderalachemy': {'title': u"Libellé de cet indicateur"}
+            'colanderalchemy': {
+                'title': u"Libellé de cet indicateur",
+                'widget': deform.widget.TextInputWidget(readonly=True),
+            }
         }
     )
     account_prefix = Column(
         String(10),
         info={
-            'colanderalachemy': {
-                'title': u"Depuis les comptes commençant par",
-                "description": u"Une liste de préfixe peut être fournie en les \
+            'colanderalchemy': {
+                'title': u"Rassemble tous les comptes commençant par",
+                "description": u"Toutes les écritures dont le compte commence "
+                u"par le préfixe fournit seront utilisées pour calculer cet "
+                u"indicateur de trésorerie. "
+                u"NB : Une liste de préfixe peut être fournie en les \
 séparant par des virgules (ex : 42,43)",
             }
         },
@@ -66,7 +83,9 @@ séparant par des virgules (ex : 42,43)",
     active = Column(
         Boolean(),
         default=True,
-        info={'colanderalachemy': {'title': u"Indicateur actif ?"}}
+        info={'colanderalchemy': {
+            'title': u"Indicateur actif ?", "exclude": True
+        }}
     )
 
     def match(self, account):
@@ -106,7 +125,7 @@ class TreasuryMeasureGrid(DBBASE):
     company = relationship('Company')
     upload_id = Column(
         ForeignKey('accounting_operation_upload.id', ondelete="cascade"),
-        info={"colanderalachemy": {'title': u"Related upload"}},
+        info={"colanderalchemy": {'title': u"Related upload"}},
     )
     upload = relationship('AccountingOperationUpload')
     measures = relationship(

@@ -72,7 +72,7 @@ def manage(request):
         activity.url = request.route_path("activity", id=activity.id)
 
     return dict(
-        title=u"Documents en attente de validation",
+        title=u"Mon tableau de bord",
         invoices=invoices,
         estimations=estimations,
         expenses=expenses,

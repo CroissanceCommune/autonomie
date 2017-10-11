@@ -9,17 +9,22 @@ from autonomie.resources import (
     main_group,
     opa_group,
 )
+import pkg_resources
 
 logger = logging.getLogger(__name__)
 
 
 class DefaultLayout(object):
+    autonomie_version = pkg_resources.get_distribution('autonomie').version
+
     def __init__(self, context, request):
         logger.debug("In the default layout")
         main_group.need()
 
 
 class OpaLayout(object):
+    autonomie_version = pkg_resources.get_distribution('autonomie').version
+
     def __init__(self, context, request):
         logger.debug("In the opa layout")
         opa_group.need()

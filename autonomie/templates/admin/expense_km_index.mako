@@ -21,15 +21,21 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="/admin/index.mako"></%inherit>
+<%block name='afteradminmenu'>
+    <div class='alert alert-info'>
+    Les grilles de frais kilométriques sont configurées de manière annuelle.<br />
+    Choisissez l'année que vous voulez administrer.<br />
+    Note : Il est possible de dupliquer les types de frais d'une année vers l'autre.
+    </div>
+</%block>
 <%block name='content'>
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
         <div class='page-block panel panel-default'>
-            <div class='alert alert-info'>
-            Les grilles de frais kilométriques sont configurées de manière annuelle.<br />
-            Choisissez l'année que vous voulez administrer.<br />
-            Note : Il est possible de dupliquer les types de frais d'une année vers l'autre.
-            </div>
+        <div class='panel-heading'>
+        Choisir une année
+        </div>
+        <div class='panel-body'>
             <div class='text-center'>
                 <div class='btn-group'>
                 % for year in years:
@@ -41,6 +47,7 @@
                     </a>
                  % endfor
                  </div>
+            </div>
             </div>
         </div>
     </div>

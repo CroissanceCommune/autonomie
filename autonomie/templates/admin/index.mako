@@ -26,6 +26,10 @@
     Admin index page template
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
-<%block name='beforecontent'>
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
 ${request.layout_manager.render_panel('admin_nav', menus)}
+<%block name='afteradminmenu'>
+</%block>
+</div>
 </%block>

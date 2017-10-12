@@ -1,0 +1,33 @@
+form, .hidden-print, a.btn, button{
+  display:none;
+}
+body, table caption, .lead{
+  font-size: 9pt;
+}
+.container{
+  width: 95%;
+}
+body, html, td, div{
+  font-size: 13pt;
+}
+h1{
+  font-size: 40pt;
+}
+h2{
+  font-size: 32pt;
+}
+h3{
+  font-size: 26pt;
+}
+h4{
+  font-size: 22pt;
+}
+h5{
+  font-size: 17pt;
+}
+.page-block, .panel-default{
+  border-color: #fff !important;
+  h2, h3{
+    color: #000;
+  }
+}

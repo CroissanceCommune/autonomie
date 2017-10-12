@@ -129,8 +129,3 @@ html {
 
 .activity-content {
   padding-left: 0.5cm; }
-
-.page-block, .panel-default {
-  border-color: #fff !important; }
-  .page-block h2, .page-block h3, .panel-default h2, .panel-default h3 {
-    color: #000; }

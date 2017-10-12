@@ -23,24 +23,31 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="definition_list" />
 <%block name="content">
-<div class='alert'>
-% if request.context.exported:
-    <i class='glyphicon glyphicon-ok-sign'></i> Cet encaissement a été exporté vers la comptabilité
-% else:
-    <i class='glyphicon glyphicon-time'></i> Cet encaissement n'a pas encore été exporté vers la comptabilité
-% endif
-</div>
-<dl class="dl-horizontal">
-    <dt>Enregistré par </dt><dd>${api.format_account(request.context.user)}</dd>
-    <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>
-    <dt>Mode de paiement</dt><dd>${request.context.mode}</dd>
-    <dt>Montant</dt><dd>${api.format_amount(request.context.amount, precision=request.context.precision)|n}&nbsp;&euro;</dd>
-    <dt>Banque</dt><dd>
-        % if request.context.bank:
-            ${request.context.bank.label} (${request.context.bank.compte_cg})
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+        ${title}
+    </div>
+    <div class='panel-body'>
+        <div class='alert'>
+        % if request.context.exported:
+            <i class='glyphicon glyphicon-ok-sign'></i> Cet encaissement a été exporté vers la comptabilité
         % else:
-            Non renseignée
+            <i class='glyphicon glyphicon-time'></i> Cet encaissement n'a pas encore été exporté vers la comptabilité
         % endif
-        </dd>
-</dl>
+        </div>
+        <dl class="dl-horizontal">
+            <dt>Enregistré par </dt><dd>${api.format_account(request.context.user)}</dd>
+            <dt>Date</dt><dd>${api.format_date(request.context.date)}</dd>
+            <dt>Mode de paiement</dt><dd>${request.context.mode}</dd>
+            <dt>Montant</dt><dd>${api.format_amount(request.context.amount, precision=request.context.precision)|n}&nbsp;&euro;</dd>
+            <dt>Banque</dt><dd>
+                % if request.context.bank:
+                    ${request.context.bank.label} (${request.context.bank.compte_cg})
+                % else:
+                    Non renseignée
+                % endif
+                </dd>
+        </dl>
+    </div>
+</div>
 </%block>

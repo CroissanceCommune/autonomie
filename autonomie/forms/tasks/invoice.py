@@ -42,7 +42,11 @@ from autonomie.models.tva import (
     Tva,
 )
 
-from autonomie.models.task import (Invoice, CancelInvoice,)
+from autonomie.models.task import (
+    Invoice,
+    CancelInvoice,
+    Payment,
+)
 from autonomie.models.payments import BankAccount
 
 from autonomie.utils.strings import format_amount
@@ -436,6 +440,27 @@ des paiements + montant d'un éventuel avoir)" % (
     )
 
 
+@colander.deferred
+def deferred_tva_id_validator(node, kw):
+    ctx = kw['request'].context
+    if isinstance(ctx, Payment):
+        invoice = ctx.parent
+    else:
+        invoice = ctx
+    values = []
+    for tva_value in invoice.topay_by_tvas().keys():
+        values.append(Tva.by_value(tva_value))
+
+    def validator(node, value):
+        if value not in [v.id for v in values]:
+            raise colander.Invalid(
+                node,
+                u"Ce taux de tva n'est pas utilisé dans la facture",
+            )
+
+    return validator
+
+
 class PaymentSchema(colander.MappingSchema):
     """
         colander schema for payment recording
@@ -469,6 +494,14 @@ retrouver la remise en banque à laquelle cet encaissement est associé",
         validator=deferred_bank_validator,
         default=forms.get_deferred_default(BankAccount),
     )
+    tva_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Tva liée à cet encaissement",
+        widget=forms.get_deferred_select(
+            Tva, mandatory=True, keys=('id', 'name')
+        ),
+        validator=deferred_tva_id_validator
+    )
     resulted = colander.SchemaNode(
         colander.Boolean(),
         title=u"Soldé",
@@ -490,6 +523,7 @@ class TvaPayment(colander.MappingSchema):
         widget=forms.get_deferred_select(
             Tva, mandatory=True, keys=('id', 'name')
         ),
+        validator=deferred_tva_id_validator
     )
 
 
@@ -591,12 +625,15 @@ def get_payment_schema(request):
     num_tvas = len(invoice.get_tvas().keys())
 
     # Only one tva
-    if num_tvas == 1 or not tva_module:
-        return PaymentSchema()
+    if num_tvas == 1:
+        schema = PaymentSchema().clone()
+        if not tva_module or tva_module == '0':
+            schema['tva_id'].widget = deform.widget.HiddenWidget()
+        return schema
     else:
         schema = MultiplePaymentSchema(
             validator=deferred_payment_amount_validation
-        )
+        ).clone()
         schema['tvas'].widget = deform.widget.SequenceWidget(
             min_len=1,
             max_len=num_tvas,

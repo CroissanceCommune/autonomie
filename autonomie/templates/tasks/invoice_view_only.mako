@@ -199,7 +199,11 @@
                             Enregistré par ${api.format_account(payment.user)} :&nbsp;
                             ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
                             le ${api.format_date(payment.date)}
-                            (${api.format_paymentmode(payment.mode)})
+                            (${api.format_paymentmode(payment.mode)}
+                            % if payment.tva is not None:
+                            ${payment.tva.name}
+                            % endif
+                            )
                         </a>
                         </li>
                     % if loop.last:

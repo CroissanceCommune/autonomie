@@ -14,6 +14,7 @@ import TaskGroupCollectionView from './TaskGroupCollectionView.js';
 import TaskGroupFormView from './TaskGroupFormView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 import ErrorView from './ErrorView.js';
+import DisplayUnitsView from './DisplayUnitsView.js';
 
 const TaskBlockView = Mn.View.extend({
     template: require('./templates/TaskBlockView.mustache'),
@@ -23,9 +24,10 @@ const TaskBlockView = Mn.View.extend({
         errors: '.group-errors',
         container: '.group-container',
         modalRegion: ".group-modalregion",
+        display_units_container: '.display-units-container',
     },
     ui: {
-        add_button: 'button.add'
+        add_button: 'button.add',
     },
     triggers: {
         "click @ui.add_button": "group:add"
@@ -102,6 +104,10 @@ const TaskBlockView = Mn.View.extend({
     	this.getRegion('modalRegion').empty();
   	},
     onRender: function(){
+        this.showChildView(
+            'display_units_container',
+            new DisplayUnitsView({model: this.model})
+        );
         this.showChildView(
             'container',
             new TaskGroupCollectionView(

@@ -71,12 +71,13 @@ const MainView = Mn.View.extend({
     },
     showTaskGroupBlock: function(){
         var section = this.config.request('get:form_section', 'tasklines');
+        var model = this.facade.request('get:model', 'common');
         var collection = this.facade.request(
             'get:collection',
             'task_groups'
         );
         var view = new TaskBlockView(
-            {collection: collection, section:section}
+            {collection: collection, section:section, model:model}
         );
         this.showChildView('tasklines', view);
     },

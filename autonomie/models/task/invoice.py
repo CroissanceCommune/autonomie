@@ -126,8 +126,6 @@ class InvoiceService(object):
         if task.official_number is None:
             task.official_number = self._get_next_official_number()
 
-        task.date = datetime.date.today()
-
 
 def translate_invoices(invoicequery, from_point):
     """

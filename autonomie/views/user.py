@@ -928,7 +928,7 @@ class UserDatasListClass(object):
         """
         logger.debug("APPSTRUCT : %s" % appstruct)
         situation = appstruct.get('situation_situation')
-        if situation is not None:
+        if situation not in (None, '', colander.null):
             query = query.filter(
                 UserDatas.situation_situation_id == situation
             )
@@ -940,7 +940,7 @@ class UserDatasListClass(object):
         """
         search = appstruct.get('search')
 
-        if search not in (None, ''):
+        if search not in (None, '', colander.null):
             filter_ = "%" + search + "%"
             query = query.filter(
                 or_(
@@ -960,7 +960,7 @@ class UserDatasListClass(object):
         """
         follower_id = appstruct.get('situation_follower_id')
 
-        if follower_id not in (None, -1):
+        if follower_id not in (None, -1, colander.null):
             query = query.filter(
                 UserDatas.situation_follower_id == follower_id
             )

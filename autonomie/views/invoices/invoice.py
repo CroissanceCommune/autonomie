@@ -277,6 +277,10 @@ class InvoicePaymentView(BaseFormView):
         for tva_value, value in self.context.topay_by_tvas().items():
             tva = Tva.by_value(tva_value)
             appstruct.append({'tva_id': tva.id, 'amount': value})
+
+        if len(appstruct) == 1:
+            form.set_appstruct(appstruct[0])
+        else:
             form.set_appstruct({'tvas': appstruct})
 
     def redirect(self):

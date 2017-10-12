@@ -273,6 +273,12 @@ class InvoicePaymentView(BaseFormView):
             )
         )
 
+        appstruct = []
+        for tva_value, value in self.context.topay_by_tvas().items():
+            tva = Tva.by_value(tva_value)
+            appstruct.append({'tva_id': tva.id, 'amount': value})
+            form.set_appstruct({'tvas': appstruct})
+
     def redirect(self):
         return HTTPFound(
             self.request.route_path(
@@ -296,8 +302,25 @@ class InvoicePaymentView(BaseFormView):
             appstruct['tva_id'] = Tva.by_value(
                 self.context.get_tvas().keys()[0]
             ).id
+            self.context.record_payment(
+                user_id=self.request.user.id,
+                **appstruct
+            )
+        elif 'tvas' in appstruct:
+            appstruct.pop('payment_amount')
+            # si on a plusieurs tva :
+            for tva_payment in appstruct['tvas']:
+                remittance_amount = appstruct['remittance_amount']
+                tva_payment['remittance_amount'] = remittance_amount
+                tva_payment['date'] = appstruct['date']
+                tva_payment['mode'] = appstruct['mode']
+                tva_payment['bank_id'] = appstruct.get('bank_id')
+                tva_payment['resulted'] = appstruct.get('resulted', False)
+                self.context.record_payment(
+                    user_id=self.request.user.id,
+                    **tva_payment
+                )
 
-        self.context.record_payment(user_id=self.request.user.id, **appstruct)
         self.request.dbsession.merge(self.context)
         self.notify()
         return self.redirect()

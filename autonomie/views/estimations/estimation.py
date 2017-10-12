@@ -284,7 +284,7 @@ def includeme(config):
     config.add_view(
         EstimationAddView,
         route_name="project_estimations",
-        renderer='base/formpage.mako',
+        renderer='tasks/add.mako',
         permission='add_estimation',
     )
 

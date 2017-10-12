@@ -267,7 +267,6 @@ def get_userdatas_list_schema():
         user.user_node(
             roles=['manager', 'admin'],
             missing=-1,
-            default=forms.deferred_current_user_id,
             name='situation_follower_id',
             widget_options={
                 'default_option': (-1, ''),

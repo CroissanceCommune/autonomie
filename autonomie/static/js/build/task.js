@@ -5095,8 +5095,9 @@ webpackJsonp([2],[
 	    },
 	    showTaskGroupBlock: function showTaskGroupBlock() {
 	        var section = this.config.request('get:form_section', 'tasklines');
+	        var model = this.facade.request('get:model', 'common');
 	        var collection = this.facade.request('get:collection', 'task_groups');
-	        var view = new _TaskBlockView2.default({ collection: collection, section: section });
+	        var view = new _TaskBlockView2.default({ collection: collection, section: section, model: model });
 	        this.showChildView('tasklines', view);
 	    },
 	    showDiscountBlock: function showDiscountBlock() {
@@ -6168,18 +6169,12 @@ webpackJsonp([2],[
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
+	var _DisplayUnitsView = __webpack_require__(/*! ./DisplayUnitsView.js */ 208);
+	
+	var _DisplayUnitsView2 = _interopRequireDefault(_DisplayUnitsView);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : TaskBlockView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var TaskBlockView = _backbone2.default.View.extend({
 	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 154),
 	    tagName: 'div',
@@ -6187,7 +6182,8 @@ webpackJsonp([2],[
 	    regions: {
 	        errors: '.group-errors',
 	        container: '.group-container',
-	        modalRegion: ".group-modalregion"
+	        modalRegion: ".group-modalregion",
+	        display_units_container: '.display-units-container'
 	    },
 	    ui: {
 	        add_button: 'button.add'
@@ -6263,9 +6259,19 @@ webpackJsonp([2],[
 	        this.getRegion('modalRegion').empty();
 	    },
 	    onRender: function onRender() {
+	        this.showChildView('display_units_container', new _DisplayUnitsView2.default({ model: this.model }));
 	        this.showChildView('container', new _TaskGroupCollectionView2.default({ collection: this.collection }));
 	    }
-	});
+	}); /*
+	     * File Name : TaskBlockView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = TaskBlockView;
 
 /***/ }),
@@ -7922,7 +7928,7 @@ webpackJsonp([2],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  return "<h2>Description des prestations</h2>\n<div class='content'>\n    <div class='group-errors'></div>\n    <div class='group-container'></div>\n    <div class='group-modalregion'></div>\n    <div class='actions text-right'>\n        <button class='btn btn-default add' type='button'>\n            <i class='glyphicon glyphicon-plus-sign'></i> Ajouter un ouvrage\n        </button>\n    </div>\n</div>\n";
+	  return "<h2>Description des prestations</h2>\n<div class='content'>\n    <div class='display-units-container'></div>\n    <div class='group-errors'></div>\n    <div class='group-container'></div>\n    <div class='group-modalregion'></div>\n    <div class='actions text-right'>\n        <button class='btn btn-default add' type='button'>\n            <i class='glyphicon glyphicon-plus-sign'></i> Ajouter un ouvrage\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
@@ -10897,7 +10903,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var CommonModel = _BaseModel2.default.extend({
-	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'prefix', 'course'],
+	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'prefix', 'course', 'display_units'],
 	    validation: {
 	        date: {
 	            required: true,
@@ -11458,6 +11464,85 @@ webpackJsonp([2],[
 	     */
 	exports.default = TotalModel;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
+
+/***/ }),
+/* 208 */
+/*!********************************************!*\
+  !*** ./src/task/views/DisplayUnitsView.js ***!
+  \********************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 18);
+	
+	var _backbone2 = _interopRequireDefault(_backbone);
+	
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
+	
+	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
+	
+	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 112);
+	
+	var _CheckboxWidget2 = _interopRequireDefault(_CheckboxWidget);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var DisplayUnitsView = _backbone2.default.View.extend({
+	    template: __webpack_require__(/*! ./templates/DisplayUnitsView.mustache */ 209),
+	    fields: ['display_units'],
+	    behaviors: [_FormBehavior2.default],
+	    regions: {
+	        "content": "div"
+	    },
+	    childViewTriggers: {
+	        'change': 'data:modified',
+	        'finish': 'data:persist'
+	    },
+	    onRender: function onRender() {
+	        var value = this.model.get('display_units');
+	        var checked = false;
+	        if (value == 1 || value == '1') {
+	            checked = true;
+	        }
+	        console.log(this.model);
+	
+	        this.showChildView("content", new _CheckboxWidget2.default({
+	            title: "",
+	            label: "Afficher le détail des prestations dans le PDF",
+	            field_name: "display_units",
+	            checked: checked,
+	            value: this.model.get('display_units')
+	        }));
+	    }
+	}); /*
+	     * File Name : DisplayUnitsView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
+	exports.default = DisplayUnitsView;
+
+/***/ }),
+/* 209 */
+/*!************************************************************!*\
+  !*** ./src/task/views/templates/DisplayUnitsView.mustache ***!
+  \************************************************************/
+/***/ (function(module, exports, __webpack_require__) {
+
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
+	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
+	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+	  return "<div></div>\n";
+	  },"useData":true});
 
 /***/ })
 ]);

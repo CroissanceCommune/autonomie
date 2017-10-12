@@ -360,6 +360,9 @@ class TaskSetMetadatasView(BaseFormView):
         return HTTPFound(url)
 
     def submit_success(self, appstruct):
+        logger.debug(
+            u"TaskSetMetadatasView.submit_success : %s" % appstruct
+        )
         appstruct.pop('customer_id')
         for key, value in appstruct.items():
             setattr(self.context, key, value)

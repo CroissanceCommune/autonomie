@@ -66,6 +66,7 @@ from autonomie.models.project import (
     build_customer_values,
     Project,
 )
+from autonomie.forms import today_node
 
 
 logger = logging.getLogger(__name__)
@@ -352,6 +353,21 @@ def get_new_task_schema():
     return NewTaskSchema()
 
 
+def add_date_field_after_bind(schema, kw):
+    """
+    Add a date edition field if the current user has the appropriate rights
+    """
+    req = kw['request']
+    ctx_type = req.context.__name__
+    if req.has_permission('set_date.%s' % ctx_type):
+        schema.add(
+            today_node(
+                default=req.context.date,
+                name='date',
+            )
+        )
+
+
 def get_task_metadatas_edit_schema():
     """
     Return the schema for editing tasks metadatas
@@ -364,6 +380,7 @@ def get_task_metadatas_edit_schema():
     schema['project_id'].widget = deferred_customer_project_widget
     schema['project_id'].title = u"Projet vers lequel déplacer ce document"
     schema['phase_id'].title = u"Dossier dans lequel déplacer ce document"
+    schema.after_bind = add_date_field_after_bind
     return schema
 
 

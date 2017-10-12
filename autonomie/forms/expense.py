@@ -182,6 +182,7 @@ def get_list_schema():
         title=u"Mois",
         missing=-1,
         name='month',
+        default=-1,
         widget_options={'default_val': (-1, '')},
     ))
 

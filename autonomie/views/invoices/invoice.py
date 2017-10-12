@@ -37,6 +37,7 @@ from autonomie.models.task import (
     Invoice,
     Estimation,
 )
+from autonomie.models.tva import Tva
 from autonomie.events.tasks import StatusChanged
 from autonomie.utils.strings import format_amount
 from autonomie.utils.widgets import ViewLink
@@ -291,6 +292,11 @@ class InvoicePaymentView(BaseFormView):
         )
 
     def submit_success(self, appstruct):
+        if 'amount' in appstruct:
+            appstruct['tva_id'] = Tva.by_value(
+                self.context.get_tvas().keys()[0]
+            ).id
+
         self.context.record_payment(user_id=self.request.user.id, **appstruct)
         self.request.dbsession.merge(self.context)
         self.notify()

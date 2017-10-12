@@ -136,7 +136,7 @@ def _build_action_manager():
             status,
             '%s.expensesheet' % (status,),
             status_attr='status',
-            userid_attr='status_person_id',
+            userid_attr='status_user_id',
             icon=icon,
             label=label,
             title=title,

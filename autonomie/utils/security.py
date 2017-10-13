@@ -632,9 +632,8 @@ def get_expense_payment_acl(self):
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', admin_perms))
 
-    for user in self.task.company.employees:
+    for user in self.expense.company.employees:
         acl.append((Allow, user.login, ('view.payment',)))
-
     return acl
 
 
@@ -771,7 +770,7 @@ def set_models_acl():
     DiscountLine.__acl__ = property(get_discount_line_acl)
     Estimation.__default_acl__ = property(get_estimation_default_acl)
     ExpenseSheet.__default_acl__ = property(get_expense_sheet_default_acl)
-    ExpensePayment.__default_acl__ = property(get_expense_payment_acl)
+    ExpensePayment.__acl__ = property(get_expense_payment_acl)
     File.__default_acl__ = property(get_file_acl)
     Invoice.__default_acl__ = property(get_invoice_default_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]

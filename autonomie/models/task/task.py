@@ -565,11 +565,9 @@ class Task(Node):
             'colanderalchemy': forms.EXCLUDED,
             'export': forms.EXCLUDED,
         },
-        backref=backref(
-            'task',
-        ),
         order_by='Payment.date',
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        back_populates='task',
     )
 
     mentions = relationship(

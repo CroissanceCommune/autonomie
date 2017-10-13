@@ -686,6 +686,10 @@ class Payment(DBBASE, PersistentACLMixin):
         "Tva",
         info={'colanderalchemy': {'exclude': True}}
     )
+    task = relationship(
+        "Task",
+        primaryjoin="Task.id==Payment.task_id",
+    )
     # Formatting precision
     precision = 5
 

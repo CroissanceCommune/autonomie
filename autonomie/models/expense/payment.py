@@ -98,3 +98,6 @@ expense_sheet_id:{s.expense_sheet_id} \
 amount:{s.amount} \
 mode:{s.mode} \
 date:{s.date}".format(s=self)
+
+    def get_company_id(self):
+        return self.expense.company.id

@@ -6,6 +6,7 @@
 import colander
 import datetime
 import deform
+import logging
 
 from collections import OrderedDict
 
@@ -30,6 +31,8 @@ from autonomie.views import (
     submit_btn,
 )
 from autonomie.views.expenses.utils import get_payment_form
+
+logger = logging.getLogger(__name__)
 
 
 class ExpenseList(BaseListView):
@@ -83,7 +86,7 @@ class ExpenseList(BaseListView):
 
     def filter_month(self, query, appstruct):
         month = appstruct['month']
-        if month and month not in (-1, colander.null):
+        if month and month not in (-1, colander.null, '-1'):
             query = query.filter(ExpenseSheet.month == month)
         return query
 

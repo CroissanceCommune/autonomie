@@ -131,13 +131,13 @@ class PaymentEdit(BaseFormView):
 def populate_expense_payment_actionmenu(context, request):
     link = ViewLink(
         u"Voir la feuille de notes de dépense",
-        path="expensesheet",
+        path="/expenses/{id}",
         id=context.parent.id,
     )
     request.actionmenu.add(link)
     link = ViewLink(
         u"Modifier",
-        "edit.expensesheet_payment",
+        "edit.payment",
         path="expense_payment",
         id=context.id,
         _query=dict(action="edit")
@@ -145,7 +145,7 @@ def populate_expense_payment_actionmenu(context, request):
     request.actionmenu.add(link)
     link = ViewLink(
         u"Supprimer",
-        "edit.expensesheet_payment",
+        "edit.payment",
         path="expense_payment",
         confirm=u"Êtes-vous sûr de vouloir supprimer ce paiement ?",
         id=context.id,
@@ -247,13 +247,13 @@ def includeme(config):
     config.add_view(
         expense_payment_view,
         route_name="expense_payment",
-        permission="view.expensesheet_payment",
+        permission="view.payment",
         renderer="/payment.mako",
     )
     config.add_view(
         ExpensePaymentEdit,
         route_name="expense_payment",
-        permission="edit.expensesheet_payment",
+        permission="edit.payment",
         request_param='action=edit',
         renderer="/base/formpage.mako",
     )

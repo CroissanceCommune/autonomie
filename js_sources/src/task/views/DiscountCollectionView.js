@@ -9,7 +9,9 @@
  *
  */
 import Mn from 'backbone.marionette';
+import Radio from 'backbone.radio';
 import DiscountView from './DiscountView.js';
+import Validation from 'backbone-validation';
 
 const DiscountCollectionView = Mn.CollectionView.extend({
     tagName: 'div',
@@ -19,6 +21,25 @@ const DiscountCollectionView = Mn.CollectionView.extend({
     childViewTriggers: {
         'edit': 'line:edit',
         'delete': 'line:delete'
+    },
+    initialize: function(options){
+        var channel = Radio.channel('facade');
+        this.listenTo(channel, 'bind:validation', this.bindValidation);
+        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+        this.listenTo(this.model, 'validated:invalid', this.showErrors);
+        this.listenTo(this.model, 'validated:valid', this.hideErrors.bind(this));
+    },
+    showErrors(model, errors){
+        this.$el.addClass('error');
+    },
+    hideErrors(model){
+        this.$el.removeClass('error');
+    },
+    bindValidation(){
+        Validation.bind(this);
+    },
+    unbindValidation(){
+        Validation.unbind(this);
     },
 });
 export default DiscountCollectionView;

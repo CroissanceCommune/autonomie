@@ -94,7 +94,7 @@ def get_opa_group():
     Return the resources used on one page applications pages
     """
 #    js_tools = Group([_date])
-    return Group([main_css, opa_css, opa_vendor_js, base_setup_js])
+    return Group([main_css, opa_css, opa_vendor_js, base_setup_js, select2])
 
 
 def get_main_group():
@@ -115,7 +115,7 @@ def get_main_group():
         ]
     )
 
-    js_tools = Group([main_js, _dom, _math, _date])
+    js_tools = Group([main_js, _dom, _math, _date, select2])
 
     return Group([
         main_css,

@@ -5,11 +5,11 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
 
+import pkg_resources
 from autonomie.resources import (
     main_group,
     opa_group,
 )
-import pkg_resources
 
 logger = logging.getLogger(__name__)
 

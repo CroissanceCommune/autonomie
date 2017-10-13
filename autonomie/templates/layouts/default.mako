@@ -115,7 +115,13 @@
     </div>
     <div id='login_form' style='display:none'></div>
     <script type='text/javascript'>
-      $('#company-select-menu').change(function(){window.location = $(this).val();});
+      var company_select_tag = $('#company-select-menu');
+      if (!_.isUndefined(company_select_tag)){
+          $('#company-select-menu').select2();
+          $('#company-select-menu').change(
+            function(){window.location = $(this).val();}
+          );
+      }
       % if request.popups is not UNDEFINED:
         $( function() {
           % for name, popup in request.popups.items():

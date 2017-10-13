@@ -185,3 +185,18 @@ def full_invoice(
     invoice = dbsession.merge(invoice)
     dbsession.flush()
     return invoice
+
+
+@pytest.fixture
+def sale_product(dbsession):
+    from autonomie.models.sale_product import SaleProduct
+    s = SaleProduct(
+        value=1.5,
+        tva=2000,
+        label=u"Produit du catalogue",
+        unity="m",
+    )
+    dbsession.add(s)
+    dbsession.flush()
+    return s
+

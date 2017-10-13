@@ -458,3 +458,12 @@ def test_duplicate_task_line_group(task_line_group, task_line):
         assert getattr(newgroup, i) == getattr(task_line_group, i)
 
     assert newgroup.total_ht() == task_line_group.total_ht()
+
+
+def test_task_line_from_sale_product(sale_product):
+    from autonomie.models.task.task import TaskLine
+    t = TaskLine.from_sale_product(sale_product)
+    assert t.tva == sale_product.tva
+    assert t.cost == 100000 * sale_product.value
+    assert t.description == sale_product.label
+    assert t.unity == sale_product.unity

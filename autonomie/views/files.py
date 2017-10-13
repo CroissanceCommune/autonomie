@@ -267,7 +267,13 @@ def file_delete_view(context, request):
     """
     parent = context.parent
     DBSESSION().delete(context)
-    return HTTPFound(request.route_path(parent.type_, id=parent.id))
+    if parent.type_ in ('estimation', 'invoice', 'cancelinvoice',):
+        route_name = "/%ss/{id}" % parent.type_
+    elif parent.type_ in 'expensesheet':
+        route_name = "/expenses/{id}"
+    else:
+        route_name = parent.type_
+    return HTTPFound(request.route_path(route_name, id=parent.id))
 
 
 def add_routes(config):

@@ -8134,14 +8134,6 @@ webpackJsonp([2],[
 	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
-	
-	var _backbone4 = _interopRequireDefault(_backbone3);
-	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
-	
-	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	/*
@@ -8178,17 +8170,7 @@ webpackJsonp([2],[
 	    initialize: function initialize(options) {
 	        this.collection = options['collection'];
 	        this.model = options['model'];
-	        var channel = _backbone4.default.channel('facade');
-	        this.listenTo(channel, 'bind:validation', this.bindValidation);
-	        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
 	    },
-	    bindValidation: function bindValidation() {
-	        _backboneValidation2.default.bind(this);
-	    },
-	    unbindValidation: function unbindValidation() {
-	        _backboneValidation2.default.unbind(this);
-	    },
-	
 	    isEmpty: function isEmpty() {
 	        return this.collection.length === 0;
 	    },
@@ -8330,9 +8312,17 @@ webpackJsonp([2],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 19);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 161);
 	
 	var _DiscountView2 = _interopRequireDefault(_DiscountView);
+	
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 21);
+	
+	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -8354,6 +8344,25 @@ webpackJsonp([2],[
 	    childViewTriggers: {
 	        'edit': 'line:edit',
 	        'delete': 'line:delete'
+	    },
+	    initialize: function initialize(options) {
+	        var channel = _backbone4.default.channel('facade');
+	        this.listenTo(channel, 'bind:validation', this.bindValidation);
+	        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
+	        this.listenTo(this.model, 'validated:invalid', this.showErrors);
+	        this.listenTo(this.model, 'validated:valid', this.hideErrors.bind(this));
+	    },
+	    showErrors: function showErrors(model, errors) {
+	        this.$el.addClass('error');
+	    },
+	    hideErrors: function hideErrors(model) {
+	        this.$el.removeClass('error');
+	    },
+	    bindValidation: function bindValidation() {
+	        _backboneValidation2.default.bind(this);
+	    },
+	    unbindValidation: function unbindValidation() {
+	        _backboneValidation2.default.unbind(this);
 	    }
 	});
 	exports.default = DiscountCollectionView;

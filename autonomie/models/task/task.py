@@ -1212,7 +1212,7 @@ class TaskLine(DBBASE, LineCompute):
         result = cls()
         result.description = sale_product.label
         result.cost = amount(sale_product.value, 5)
-        result.tva = amount(sale_product.tva, 2)
+        result.tva = sale_product.tva
         result.unity = sale_product.unity
         result.quantity = 1
         return result

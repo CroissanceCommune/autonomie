@@ -37,6 +37,7 @@ const DisplayUnitsView = Mn.View.extend({
                 {
                     title: "",
                     label: "Afficher le détail des prestations dans le PDF",
+                    description: "Le prix unitaire et la quantité seront affichés dans le PDF",
                     field_name: "display_units",
                     checked: checked,
                     value: this.model.get('display_units'),

@@ -10,6 +10,7 @@
  */
 import Mn from 'backbone.marionette';
 import { ajax_call, getOpt } from '../../tools.js';
+import {strToFloat} from '../../math.js';
 import InputWidget from '../../widgets/InputWidget.js';
 import SelectWidget from '../../widgets/SelectWidget.js';
 import TextAreaWidget from '../../widgets/TextAreaWidget.js';
@@ -43,10 +44,12 @@ const TaskLineFormView = Mn.View.extend({
     //
     childViewTriggers: {
         'catalog:insert': 'catalog:insert',
-        'change': 'data:modified'
+        'change': 'data:modified',
+        'finish': 'data:modified'
     },
     modelEvents: {
-        'set:product': 'refreshForm'
+        'set:product': 'refreshForm',
+        'change:tva': 'refreshProductSelect'
     },
     initialize(){
         var channel = Radio.channel('config');
@@ -143,12 +146,33 @@ const TaskLineFormView = Mn.View.extend({
                 }
             )
         );
+        this.refreshProductSelect();
+        if (this.isAddView()){
+            this.getUI('main_tab').tab('show');
+        }
+    },
+    getTvaIdFromValue(value){
+        return _.findWhere(this.tva_options, {value: strToFloat(value)});
+    },
+    refreshProductSelect(){
+        /*
+         * Show the product select tag
+         */
         if (_.has(this.section, 'product')){
+            var tva_value = this.model.get('tva');
+            var tva = this.getTvaIdFromValue(tva_value);
+            var product_options = this.product_options;
+            if (!_.isUndefined(tva)){
+                product_options = _.where(
+                    this.product_options,
+                    {tva_id: tva.id}
+                );
+            }
             this.showChildView(
                 'product_id',
                 new SelectWidget(
                     {
-                        options: this.product_options,
+                        options: product_options,
                         title: "Code produit",
                         value: this.model.get('product_id'),
                         field_name: 'product_id',
@@ -156,9 +180,6 @@ const TaskLineFormView = Mn.View.extend({
                     }
                 )
             );
-        }
-        if (this.isAddView()){
-            this.getUI('main_tab').tab('show');
         }
     },
     onRender: function(){

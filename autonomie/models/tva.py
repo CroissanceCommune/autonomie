@@ -269,7 +269,8 @@ class Product(DBBASE):
             id=self.id,
             name=self.name,
             label=self.name,
-            compte_cg=self.compte_cg
+            compte_cg=self.compte_cg,
+            tva_id=self.tva_id,
         )
 
     @classmethod

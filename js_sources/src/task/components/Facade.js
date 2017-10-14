@@ -125,6 +125,7 @@ const FacadeClass = Mn.Object.extend({
         });
     },
     computeMainTotals(){
+        console.log("computeMainTotals");
         this.totalmodel.set({
             'ht_before_discounts': this.tasklines_ht(),
             'ht': this.HT(),
@@ -143,6 +144,7 @@ const FacadeClass = Mn.Object.extend({
         _.each(this.models, function(model){
             result += model.ht();
         });
+        console.log("Computing HT : %s", result)
         return result;
     },
     TVAParts(){

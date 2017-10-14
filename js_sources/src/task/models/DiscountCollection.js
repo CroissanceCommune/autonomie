@@ -20,6 +20,7 @@ const DiscountCollection = Bb.Collection.extend({
         this.on('remove', this.channelCall);
         this.on('sync', this.channelCall);
         this.on('reset', this.channelCall);
+        this.on('add', this.channelCall);
     },
     channelCall: function(){
         var channel = Radio.channel('facade');

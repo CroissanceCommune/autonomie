@@ -202,14 +202,14 @@ def includeme(config):
         CancelInvoiceAdminView,
         route_name='/cancelinvoices/{id}/admin',
         renderer="base/formpage.mako",
-        permission="admin",
         request_param="token=admin",
+        permission="admin",
     )
 
     config.add_view(
         CancelInvoiceDeleteView,
         route_name='/cancelinvoices/{id}/delete',
-        permission='delete.invoice',
+        permission='delete.cancelinvoice',
     )
 
     config.add_view(
@@ -230,7 +230,7 @@ def includeme(config):
         'cancelinvoice_html',
         js_resources=(task_html_pdf_css,),
         route_name='/cancelinvoices/{id}.preview',
-        permission="view.invoice",
+        permission="view.cancelinvoice",
     )
 
     config.add_view(
@@ -243,14 +243,14 @@ def includeme(config):
     config.add_view(
         CancelInvoiceSetTreasuryiew,
         route_name="/cancelinvoices/{id}/set_treasury",
-        permission="set_treasury.cancelinvoice",
         renderer='base/formpage.mako',
+        permission="set_treasury.cancelinvoice",
     )
     config.add_view(
         CancelInvoiceSetMetadatasView,
         route_name="/cancelinvoices/{id}/set_metadatas",
-        permission="view.cancelinvoice",
         renderer='tasks/add.mako',
+        permission="view.cancelinvoice",
     )
     config.add_view(
         TaskSetDraftView,

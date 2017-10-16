@@ -622,8 +622,8 @@ def get_payment_default_acl(self):
     acl = DEFAULT_PERM_NEW[:]
 
     admin_perms = ('view.payment',)
-    if not self.exported:
-        admin_perms += ('edit.payment', 'delete.payment')
+    # if not self.exported:
+    admin_perms += ('edit.payment', 'delete.payment')
 
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', admin_perms))
@@ -644,8 +644,8 @@ def get_expense_payment_acl(self):
     """
     acl = DEFAULT_PERM_NEW[:]
     admin_perms = ('view.payment',)
-    if not self.exported:
-        admin_perms += ('edit.payment',)
+    # if not self.exported:
+    admin_perms += ('edit.payment', 'delete.payment')
 
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', admin_perms))

@@ -245,6 +245,8 @@ class InvoiceListTools(object):
         type_ = appstruct.get('doctype')
         if type_ in ('invoice', 'cancelinvoice'):
             query = query.filter(Task.type_ == type_)
+        else:
+            query = query.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
         return query
 
 

@@ -15,5 +15,5 @@ class CleanSequenceWidget(deform.widget.SequenceWidget):
 
 
 class FixedLenSequenceWidget(deform.widget.SequenceWidget):
-    template = 'fixed_len_sequence.pt',
+    template = 'fixed_len_sequence.pt'
     item_template = 'fixed_len_sequence_item.pt'

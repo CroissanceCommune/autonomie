@@ -151,7 +151,7 @@
     % endif
     </tbody>
     </table>
-    </div>
-    </div>
 ${pager(records)}
+    </div>
+    </div>
 </%block>

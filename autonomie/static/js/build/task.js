@@ -10908,6 +10908,7 @@ webpackJsonp([2],[
 	        });
 	    },
 	    computeMainTotals: function computeMainTotals() {
+	        console.log("computeMainTotals");
 	        this.totalmodel.set({
 	            'ht_before_discounts': this.tasklines_ht(),
 	            'ht': this.HT(),
@@ -10926,6 +10927,7 @@ webpackJsonp([2],[
 	        _.each(this.models, function (model) {
 	            result += model.ht();
 	        });
+	        console.log("Computing HT : %s", result);
 	        return result;
 	    },
 	    TVAParts: function TVAParts() {
@@ -11251,6 +11253,7 @@ webpackJsonp([2],[
 	        this.on('remove', this.channelCall);
 	        this.on('sync', this.channelCall);
 	        this.on('reset', this.channelCall);
+	        this.on('add', this.channelCall);
 	    },
 	    channelCall: function channelCall() {
 	        var channel = _backbone4.default.channel('facade');

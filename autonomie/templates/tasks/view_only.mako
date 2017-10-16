@@ -101,6 +101,9 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                                 <dt>Client</dt>
                                 <dd>
                                     ${request.context.customer.get_label()}
+                                    % if request.context.customer:
+                                        (${request.context.customer.code})
+                                    % endif
                                     <a href="${request.route_path('customer', id=request.context.customer.id)}">
                                         Voir le compte client
                                     </a>

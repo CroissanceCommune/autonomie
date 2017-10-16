@@ -102,8 +102,16 @@ class InvoiceAddView(TaskAddView):
 class InvoiceEditView(TaskEditView):
 
     def title(self):
-        return u"Modification de la facture {task.name}".format(
-            task=self.context
+        customer = self.context.customer
+        customer_label = customer.label
+        if customer.code is not None:
+            customer_label += u" ({0})".format(customer.code)
+        return (
+            u"Modification de la facture {task.name} avec le client "
+            u"{customer}".format(
+                task=self.context,
+                customer=customer_label,
+            )
         )
 
 

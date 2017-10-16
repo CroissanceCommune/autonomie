@@ -60,8 +60,17 @@ log = logging.getLogger(__name__)
 
 class CancelInvoiceEditView(TaskEditView):
     def title(self):
-        return u"Modification de l'avoir {task.name}".format(
-            task=self.context
+        customer = self.context.customer
+        customer_label = customer.label
+        if customer.code is not None:
+            customer_label += u" ({0})".format(customer.code)
+
+        return (
+            u"Modification de l'avoir {task.name} avec le client "
+            u"{customer}".format(
+                task=self.context,
+                customer=customer_label,
+            )
         )
 
 

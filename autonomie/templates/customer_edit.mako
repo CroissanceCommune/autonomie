@@ -24,6 +24,16 @@
 
 <%inherit file="${context['main_template'].uri}" />
 <%block name='content'>
+% if 'popup' in request.GET:
+<div class='text-center'>
+    <h2>
+    Édition du client ${request.context.label}
+    <br />
+    <small>Activité : ${request.context.company.name}</small>
+    </h2>
+</div>
+<hr />
+% endif
 <div class='row'>
     <div class="col-md-9">
         ${form|n}

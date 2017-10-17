@@ -98,7 +98,7 @@
                             % endif
                             <td>${line.description}</td>
                             %if task.manualDeliverables == 1:
-                                <td>${api.format_amount(line.amount, precision=5)|n}&nbsp;€</td>
+                                <td class='price'>${api.format_amount(line.amount, precision=5)|n}&nbsp;€</td>
                             %else:
                                 <td class='price'>${api.format_amount(task.paymentline_amount_ttc(), precision=5)|n}&nbsp;€</td>
                             %endif

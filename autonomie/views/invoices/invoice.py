@@ -537,7 +537,7 @@ def includeme(config):
     config.add_view(
         InvoiceSetProductsView,
         route_name="/invoices/{id}/set_products",
-        permission="admin_treasury",
+        permission="set_treasury.invoice",
         renderer='base/formpage.mako',
     )
     config.add_view(

@@ -41,7 +41,7 @@
     <i class='glyphicon glyphicon-pencil'></i> Modifier
 </a>
 
-% if api.has_permission('set_treasury.invoice'):
+% if api.has_permission('set_treasury.cancelinvoice'):
     <a class='btn btn-default btn-block' href="${request.route_path('/cancelinvoices/{id}/set_products', id=cancelinvoice.id)}">
         <i class='fa fa-cog'></i> Configurer les codes produits
     </a>

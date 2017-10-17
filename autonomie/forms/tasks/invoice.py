@@ -70,12 +70,12 @@ from autonomie.forms.payments import (
 )
 
 
-STATUS_OPTIONS = (("both", u"Toutes les factures", ),
+STATUS_OPTIONS = (("both", u"Filtrer par statut de paiement", ),
                   ("paid", u"Les factures payées", ),
                   ("notpaid", u"Seulement les impayés", ))
 
 TYPE_OPTIONS = (
-    ("both", u"Toutes les factures", ),
+    ("both", u"Filtrer par factures/avoirs", ),
     ('invoice', u"Seulement les factures", ),
     ('cancelinvoice', u"Seulement les avoirs",),
 )

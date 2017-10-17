@@ -21,9 +21,11 @@ from sqlalchemy.orm import relationship
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 from autonomie.forms import get_deferred_select
 from autonomie.models.company import Company
+from autonomie.models.accounting.services import TreasuryMeasureGridService
 
 
 class TreasuryMeasureType(DBBASE):
@@ -96,8 +98,33 @@ séparant par des virgules (ex : 42,43)",
                 break
         return res
 
+    @classmethod
+    def get_by_internal_id(cls, internal_id):
+        query = DBSESSION().query(cls.id).filter_by(internal_id=internal_id)
+        query = query.first()
+
+        if query is not None:
+            result = query[0]
+        else:
+            result = None
+        return result
+
 
 class TreasuryMeasureGrid(DBBASE):
+    """
+    A grid of measures
+
+    1. Trésorerie du jour : somme des comptes 5 ;
+    2. Impôts, taxes et cotisations dues : somme des comptes 42,43 et 44 ;
+    3. Fournisseurs à payer : sommes des comptes 40 ;
+    4. Trésorerie de référence : somme des trois indicateurs précédents (1,2,3);
+    5. Salaires à payer : somme des comptes 425 ;
+    6. Notes de dépenses à payer : somme des comptes 421 ;
+    7. Clients à encaisser : somme des 41 ;
+    8. Trésorerie future : somme de la trésorerie de référence et des trois
+    indicateurs précédents (5,6,7) ;
+    9. Liste des entrées pour les comptes 1xxxxx,2xxxxx et 3xxxxx.
+    """
     __tablename__ = 'treasury_measure_grid'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
@@ -134,6 +161,55 @@ class TreasuryMeasureGrid(DBBASE):
         cascade="all,delete,delete-orphan",
     )
 
+    _autonomie_service = TreasuryMeasureGridService
+
+    @classmethod
+    def last(cls, company_id):
+        return cls._autonomie_service.last(cls, company_id)
+
+    def __todict__(self, request):
+        """
+        Compile the different measures and return a dict representation of
+        the grid
+        """
+        result = {"date": self.date, "id": self.id, "upload_id": self.upload_id}
+        result["measures"] = measures_dict = {}
+
+        for measure in self.measures:
+            measures_dict[
+                measure.measure_type.internal_id
+            ] = measure.__todict__(request)
+
+        ref_treasury = 0
+        for i in range(1, 4):
+            if i in measures_dict:
+                ref_treasury += measures_dict[i]['value']
+
+        measures_dict[4] = {
+            "label": u"Trésorerie de référence",
+            "value": ref_treasury
+        }
+
+        for i in range(5, 8):
+            if i in measures_dict:
+                ref_treasury += measures_dict[i]['value']
+
+        measures_dict[8] = {
+            "label": u"Trésorerie future",
+            "value": ref_treasury,
+        }
+        return result
+
+    @classmethod
+    def get_years(cls):
+        return cls._autonomie_service.get_years(cls)
+
+    def get_first_measure(self):
+        return self._autonomie_service.measure_by_internal_id(self, 1)
+
+    def get_company_id(self):
+        return self.company_id
+
 
 class TreasuryMeasure(DBBASE):
     """
@@ -166,3 +242,11 @@ class TreasuryMeasure(DBBASE):
         info={"colanderalchemy": {'exclude': True}},
     )
     grid_id = Column(ForeignKey('treasury_measure_grid.id'))
+
+    def __todict__(self, request):
+        return {
+            "id": self.id,
+            "label": self.label,
+            "value": self.value,
+            "measure_type_id": self.measure_type_id
+        }

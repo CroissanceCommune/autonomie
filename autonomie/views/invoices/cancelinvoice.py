@@ -269,6 +269,6 @@ def includeme(config):
     config.add_view(
         CancelInvoiceSetProductsView,
         route_name="/cancelinvoices/{id}/set_products",
-        permission="admin_treasury",
+        permission="set_treasury.cancelinvoice",
         renderer='base/formpage.mako',
     )

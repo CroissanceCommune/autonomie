@@ -167,11 +167,14 @@ def get_company_menu(request, cid, css=None):
     # Gestion
     gestion = DropDown(label=u"Gestion")
 
+    href = request.route_path("company_estimations", id=cid)
+    gestion.add_item(u"Devis", icon="fa fa-file-o", href=href)
+
     href = request.route_path("company_invoices", id=cid)
     gestion.add_item(u"Factures", icon="fa fa-file", href=href)
 
-    href = request.route_path("company_estimations", id=cid)
-    gestion.add_item(u"Devis", icon="fa fa-file-o", href=href)
+    href = request.route_path("company_expenses", id=cid)
+    gestion.add_item(u"Notes de dépense", icon="fa fa-credit-card", href=href)
 
     href = request.route_path("commercial_handling", id=cid)
     gestion.add_item(
@@ -179,9 +182,6 @@ def get_company_menu(request, cid, css=None):
         icon="fa fa-line-chart",
         href=href
     )
-
-    href = request.route_path("company_expenses", id=cid)
-    gestion.add_item(u"Notes de dépense", icon="fa fa-credit-card", href=href)
 
     menu.add(gestion)
 
@@ -209,6 +209,16 @@ def get_company_menu(request, cid, css=None):
     if request.user.has_userdatas():
         href = request.route_path('mydocuments', id=request.user.id)
         docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
+
+    href = request.route_path(
+        "/companies/{id}/accounting/treasury_measure_grids",
+        id=cid
+    )
+    docs.add_item(
+        u"État de trésorerie",
+        icon="fa fa-money",
+        href=href
+    )
 
     menu.add(docs)
 

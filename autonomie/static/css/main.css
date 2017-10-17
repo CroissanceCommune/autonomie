@@ -148,6 +148,12 @@ input[type=password] {
 .authentication-form .form-actions button {
   font-size: 16px; }
 
+.primary-text-lg {
+  color: #2196f3;
+  font-size: 63px;
+  font-weight: 100;
+  font-stretch: semi-condensed; }
+
 /* Login box related css */
 .loginbox {
   margin-top: 10%;

@@ -27,10 +27,10 @@
 <%block name='afteractionmenu'>
 <div class='page-header-block'>
 % if current_grid is not None:
-        <div class='row'>
-        <div class='col-xs-12 col-md-6 col-md-offset-3'>
+    <div class='text-center'>
         <h4>
-        Votre trésorerie au <b>${api.format_date(current_grid['date'])}</b>
+        Votre
+        trésorerie au <b>${api.format_date(current_grid['date'])}</b>
         % if last_grid != current_grid:
         <small>
         <a
@@ -41,33 +41,45 @@
         </small>
         % endif
         </h4>
-        <% keys = current_grid['measures'].keys() %>
-        <% keys.sort() %>
-        <table class='table table-stripped table-condensed' style="font-size: 14px">
-        % for key in keys:
-            <tr>
-            <% measure = current_grid['measures'][key] %>
-                <td style="vertical-align:middle">
-                ${measure['label']}
-                </td>
-                <td class='text-right'>
-                % if key == 1:
-                <h2>
-                % else:
-                <h4>
-                % endif
-                ${api.format_amount(measure['value'], precision=0)|n}&nbsp;€
-                % if key == 1:
-                </h2>
-                % else:
-                </h4>
-                % endif
-                </td>
-            </tr>
-        % endfor
-        </table>
+    </div>
+    <% measures = current_grid['measures'] %>
+    <div class='row'>
+        <div class='col-xs-12 col-md-3 col-lg-3 text-center'>
+            ## 1 est un internal_id defini par le cdc de ce module
+            % if 1 in measures:
+                <h4>${measures[1][0]['label'] | n}</h4>
+            <div class='primary-text-lg'>
+                ${api.format_amount(measures[1][0]['value'], precision=0) | n}&nbsp;€
+            </div>
+            % endif
         </div>
+        <div class='col-xs-12 col-md-6'>
+            <% keys = measures.keys() %>
+            <% keys.sort() %>
+            <table class='table table-striped table-condensed' style="font-size: 14px">
+            % for key in keys:
+                % for measure in measures[key]:
+                <tr >
+                    <td style="vertical-align:middle">
+                    % if key in (1, 4, 8):
+                    <h3>
+                    % endif
+                    ${measure['label'] | n}
+                    % if key in (1, 4, 8):
+                    </h3>
+                    % endif
+                    </td>
+                    <td class='text-right'>
+                    <h4>
+                    ${api.format_amount(measure['value'], precision=0)|n}&nbsp;€
+                    </h4>
+                    </td>
+                </tr>
+                % endfor
+            % endfor
+            </table>
         </div>
+    </div>
 % else:
 <h4>Aucun état de trésorerie n'est disponible</h4>
 % endif
@@ -76,6 +88,7 @@
 <%block name='content'>
 <div class='panel panel-default page-block'>
 <div class='panel-heading'>
+<h3>Historique des états trésorerie</h3>
 <a  href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
     <i class='glyphicon glyphicon-search'></i>&nbsp;
     Filtres&nbsp;

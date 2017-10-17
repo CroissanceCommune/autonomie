@@ -252,10 +252,11 @@ class BaseListClass(BaseView):
         self.logger.debug(appstruct)
         self.logger.debug(u" + Launching query")
         query = self.query()
-        self.logger.debug(u" + Filtering query")
-        query = self._filter(query, appstruct)
-        self.logger.debug(u" + Sorting query")
-        query = self._sort(query, appstruct)
+        if query is not None:
+            self.logger.debug(u" + Filtering query")
+            query = self._filter(query, appstruct)
+            self.logger.debug(u" + Sorting query")
+            query = self._sort(query, appstruct)
 
         self.logger.debug(u" + Building the return values")
         return self._build_return_value(schema, appstruct, query)
@@ -350,7 +351,11 @@ class BaseListView(BaseListClass):
         """
         Return the datas expected by the template
         """
-        records = self._paginate(query, appstruct)
+        if query is None:
+            records = None
+        else:
+            records = self._paginate(query, appstruct)
+
         result = dict(records=records)
         if self.error is not None:
             result['form_object'] = self.error

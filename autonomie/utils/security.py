@@ -99,7 +99,7 @@ from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
 )
 from autonomie.models.accounting.measures import (
-    TreasuryMeasure,
+    TreasuryMeasureGrid,
     TreasuryMeasureType,
 )
 
@@ -173,7 +173,11 @@ class RootFactory(dict):
             ('task_line_groups', 'task_line_group', TaskLineGroup),
             ('templates', 'template', Template, ),
             ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
-            ('treasury_measures', 'treasury_measure', TreasuryMeasure, ),
+            (
+                'treasury_measure_grids',
+                'treasury_measure_grid',
+                TreasuryMeasureGrid,
+            ),
             (
                 'treasury_measure_types',
                 'treasury_measure_type',
@@ -329,6 +333,7 @@ def get_company_acl(self):
                 # Accompagnement
                 "list_activities",
                 "list_workshops",
+                "view.accounting",
             )
         )for user in self.employees]
     )
@@ -772,7 +777,7 @@ def get_competence_acl(self):
 
 def get_treasury_measure_acl(self):
     """
-    Compile the default acl for TreasuryMeasure objects
+    Compile the default acl for TreasuryMeasureGrid objects
     """
     if self.company is not None:
         return self.company.__acl__
@@ -817,7 +822,7 @@ def set_models_acl():
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
-    TreasuryMeasure.__default_acl__ = property(get_treasury_measure_acl)
+    TreasuryMeasureGrid.__acl__ = property(get_treasury_measure_acl)
     TreasuryMeasureType.__acl__ = property(get_base_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)

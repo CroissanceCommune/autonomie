@@ -176,28 +176,29 @@ class TreasuryMeasureGrid(DBBASE):
         result["measures"] = measures_dict = {}
 
         for measure in self.measures:
-            measures_dict[
-                measure.measure_type.internal_id
-            ] = measure.__todict__(request)
+            m_list = measures_dict.setdefault(
+                measure.measure_type.internal_id, []
+            )
+            m_list.append(measure.__todict__(request))
 
         ref_treasury = 0
         for i in range(1, 4):
             if i in measures_dict:
-                ref_treasury += measures_dict[i]['value']
+                ref_treasury += measures_dict[i][0]['value']
 
-        measures_dict[4] = {
+        measures_dict[4] = [{
             "label": u"Trésorerie de référence",
             "value": ref_treasury
-        }
+        }]
 
         for i in range(5, 8):
             if i in measures_dict:
-                ref_treasury += measures_dict[i]['value']
+                ref_treasury += measures_dict[i][0]['value']
 
-        measures_dict[8] = {
+        measures_dict[8] = [{
             "label": u"Trésorerie future",
             "value": ref_treasury,
-        }
+        }]
         return result
 
     @classmethod

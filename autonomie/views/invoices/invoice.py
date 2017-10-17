@@ -472,7 +472,7 @@ def includeme(config):
         InvoiceDuplicateView,
         route_name="/invoices/{id}/duplicate",
         permission="duplicate.invoice",
-        renderer='base/formpage.mako',
+        renderer='tasks/add.mako',
     )
 
     config.add_view(

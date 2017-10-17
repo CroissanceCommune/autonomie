@@ -323,7 +323,7 @@ def includeme(config):
         EstimationDuplicateView,
         route_name="/estimations/{id}/duplicate",
         permission="duplicate.estimation",
-        renderer='base/formpage.mako',
+        renderer='tasks/add.mako',
     )
     config.add_view(
         EstimationHtmlView,

@@ -29,7 +29,6 @@ from autonomie.utils.pdf import (
     render_html,
 )
 from autonomie.resources import (
-    duplicate_js,
     task_resources,
     task_html_pdf_css,
     pdf_css,
@@ -203,7 +202,6 @@ class TaskDuplicateView(BaseFormView):
     """
     Task duplication view
     """
-    form_options = (('formid', 'duplicate_form'),)
     schema = get_duplicate_schema()
 
     @property
@@ -212,7 +210,7 @@ class TaskDuplicateView(BaseFormView):
 
     def before(self, form):
         BaseFormView.before(self, form)
-        duplicate_js.need()
+        task_add_js.need()
 
     def submit_success(self, appstruct):
         logger.debug("# Duplicating a document #")

@@ -629,6 +629,13 @@ $blue_status_label: #5bc0de;
   color: #fff;
 }
 
+.table{
+  .tr_highlighted{
+      font-weight: bold;
+      background-color: #efffef !important;
+  }
+}
+
 .overlay{
   background-color: #fff;
   top: 0px;

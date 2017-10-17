@@ -8277,8 +8277,15 @@ webpackJsonp([2],[
 	    ht: function ht() {
 	        return -1 * (0, _math.strToFloat)(this.get('amount'));
 	    },
+	    tva_value: function tva_value() {
+	        var tva = this.get('tva');
+	        if (tva < 0) {
+	            tva = 0;
+	        }
+	        return tva;
+	    },
 	    tva: function tva() {
-	        return (0, _math.getTvaPart)(this.ht(), this.get('tva'));
+	        return (0, _math.getTvaPart)(this.ht(), this.tva_value());
 	    },
 	    ttc: function ttc() {
 	        return this.ht() + this.tva();

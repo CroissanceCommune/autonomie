@@ -101,19 +101,83 @@ MAIN_INFOS_GRID = (
 )
 
 
+@colander.deferred
+def deferred_default_name(node, kw):
+    """
+    Return a default name for the new document
+    """
+    request = kw['request']
+    tasktype = get_tasktype_from_request(request)
+    method = "get_next_{0}_index".format(tasktype)
+
+    if request.context.type_ == 'project':
+        # e.g : project.get_next_invoice_number()
+        number = getattr(request.context, method)()
+
+        name = TASKTYPES_LABELS[tasktype] + ' %s' % number
+    else:
+        # Unusefull
+        name = request.context.name
+    return name
+
+
 def get_customers_from_request(request):
+    """
+    Get customers options for new task and task duplicate form
+
+    Find customers regarding the current context
+
+    Project -> Project.customers
+    ...
+
+    :returns: A list of customers
+    :rtype: list
+    """
+    from autonomie.models.customer import Customer
+    from autonomie.models.task import Task
     customers = []
     context = request.context
-    if context.type_ == 'project':
+
+    if isinstance(context, Project):
         customers = context.customers
+
+    elif isinstance(context, Task):
+        customers = [context.customer]
+
+    elif isinstance(context, Customer):
+        customers = [context]
+
     elif hasattr(context, 'project') and context.project is not None:
         customers = context.project.customers
+
     else:
         company_id = request.current_company
         from autonomie.models.customer import Customer
         customers = Customer.query().filter_by(company_id=company_id).all()
 
     return customers
+
+
+@colander.deferred
+def deferred_customer_widget(node, kw):
+    request = kw['request']
+    customers = get_customers_from_request(request)
+    return deform.widget.SelectWidget(
+        values=build_customer_values(customers, default=False),
+        placeholder=u"Sélectionner un client",
+    )
+
+
+@colander.deferred
+def deferred_company_customer_widget(node, kw):
+    from autonomie.models.customer import Customer
+    request = kw['request']
+    company_id = request.context.get_company_id()
+    customers = Customer.query().filter_by(company_id=company_id).all()
+    return deform.widget.SelectWidget(
+        values=build_customer_values(customers, default=False),
+        placeholder=u"Sélectionner un client",
+    )
 
 
 @colander.deferred
@@ -132,16 +196,6 @@ def deferred_default_customer(node, kw):
     elif request.context.type_ in ('invoice', 'estimation', 'cancelinvoice'):
         res = request.context.customer_id
     return res
-
-
-@colander.deferred
-def deferred_customer_list(node, kw):
-    request = kw['request']
-    customers = get_customers_from_request(request)
-    return deform.widget.SelectWidget(
-        values=build_customer_values(customers, default=False),
-        placeholder=u"Sélectionner un client",
-    )
 
 
 @colander.deferred
@@ -169,90 +223,6 @@ def get_tasktype_from_request(request):
         return request.context.type_
     raise Exception(u"You shouldn't have come here with the current route %s"
                     % route_name)
-
-
-@colander.deferred
-def deferred_course_title(node, kw):
-    """
-        deferred title
-    """
-    request = kw['request']
-    tasktype = get_tasktype_from_request(request)
-    if tasktype == "invoice":
-        return u"Cette facture concerne-t-elle une formation professionnelle \
-continue ?"
-    elif tasktype == "cancelinvoice":
-        return u"Cet avoir concerne-t-il une formation professionnelle \
-continue ?"
-
-    elif tasktype == "estimation":
-        return u"Ce devis concerne-t-il une formation professionnelle \
-continue ?"
-
-
-@colander.deferred
-def deferred_default_name(node, kw):
-    """
-    Return a default name for the new document
-    """
-    request = kw['request']
-    tasktype = get_tasktype_from_request(request)
-    method = "get_next_{0}_index".format(tasktype)
-
-    if request.context.type_ == 'project':
-        # e.g : project.get_next_invoice_number()
-        number = getattr(request.context, method)()
-
-        name = TASKTYPES_LABELS[tasktype] + ' %s' % number
-    else:
-        # Unusefull
-        name = request.context.name
-    return name
-
-
-def get_phases_from_request(request):
-    """
-    Get the phases from the current project regarding request context
-    """
-    phases = []
-    if request.context.type_ == 'project':
-        phases = request.context.phases
-    elif request.context.type_ in ('invoice', 'cancelinvoice', 'estimation'):
-        phases = request.context.project.phases
-    return phases
-
-
-def get_phase_choices(phases):
-    """
-        Return data structure for phase select options
-    """
-    return ((phase.id, phase.name) for phase in phases)
-
-
-@colander.deferred
-def deferred_phases_widget(node, kw):
-    """
-        return phase select widget
-    """
-    request = kw['request']
-    phases = get_phases_from_request(request)
-    choices = get_phase_choices(phases)
-    wid = deform.widget.SelectWidget(values=choices)
-    return wid
-
-
-@colander.deferred
-def deferred_default_phase(node, kw):
-    """
-    Return the default phase if one is present in the request arguments
-    """
-    request = kw['request']
-    phases = get_phases_from_request(request)
-    phase = request.params.get('phase')
-    if phase in [str(p.id) for p in phases]:
-        return int(phase)
-    else:
-        return colander.null
 
 
 def get_projects_from_request(request):
@@ -307,6 +277,70 @@ def deferred_default_project(node, kw):
     return res
 
 
+@colander.deferred
+def deferred_course_title(node, kw):
+    """
+        deferred title
+    """
+    request = kw['request']
+    tasktype = get_tasktype_from_request(request)
+    if tasktype == "invoice":
+        return u"Cette facture concerne-t-elle une formation professionnelle \
+continue ?"
+    elif tasktype == "cancelinvoice":
+        return u"Cet avoir concerne-t-il une formation professionnelle \
+continue ?"
+
+    elif tasktype == "estimation":
+        return u"Ce devis concerne-t-il une formation professionnelle \
+continue ?"
+
+
+def get_phases_from_request(request):
+    """
+    Get the phases from the current project regarding request context
+    """
+    phases = []
+    if request.context.type_ == 'project':
+        phases = request.context.phases
+    elif request.context.type_ in ('invoice', 'cancelinvoice', 'estimation'):
+        phases = request.context.project.phases
+    return phases
+
+
+def get_phase_choices(phases):
+    """
+        Return data structure for phase select options
+    """
+    return ((phase.id, phase.name) for phase in phases)
+
+
+@colander.deferred
+def deferred_phases_widget(node, kw):
+    """
+        return phase select widget
+    """
+    request = kw['request']
+    phases = get_phases_from_request(request)
+    choices = get_phase_choices(phases)
+    wid = deform.widget.SelectWidget(values=choices)
+    return wid
+
+
+@colander.deferred
+def deferred_default_phase(node, kw):
+    """
+    Return the default phase if one is present in the request arguments
+    """
+    request = kw['request']
+    phases = get_phases_from_request(request)
+    phase = request.params.get('phase')
+    if phase in [str(p.id) for p in phases]:
+        return int(phase)
+    else:
+        return colander.null
+
+
 class NewTaskSchema(colander.Schema):
     """
     schema used to initialize a new task
@@ -322,7 +356,7 @@ class NewTaskSchema(colander.Schema):
     customer_id = colander.SchemaNode(
         colander.Integer(),
         title=u"Choix du client",
-        widget=deferred_customer_list,
+        widget=deferred_customer_widget,
         validator=deferred_customer_validator,
         default=deferred_default_customer,
     )
@@ -391,7 +425,13 @@ class DuplicateSchema(NewTaskSchema):
     """
     schema used to duplicate a task
     """
-    pass
+    customer_id = colander.SchemaNode(
+        colander.Integer(),
+        title=u"Choix du client",
+        widget=deferred_company_customer_widget,
+        validator=deferred_customer_validator,
+        default=deferred_default_customer,
+    )
 
 
 def get_duplicate_schema():

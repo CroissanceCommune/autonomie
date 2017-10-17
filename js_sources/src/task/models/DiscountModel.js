@@ -39,8 +39,15 @@ const DiscountModel = BaseModel.extend({
     ht: function(){
         return -1 * strToFloat(this.get('amount'));
     },
+    tva_value: function(){
+        var tva = this.get('tva');
+        if (tva < 0){
+            tva = 0;
+        }
+        return tva;
+    },
     tva: function(){
-        return getTvaPart(this.ht(), this.get('tva'));
+        return getTvaPart(this.ht(), this.tva_value());
     },
     ttc: function(){
         return this.ht() + this.tva();

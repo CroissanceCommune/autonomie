@@ -26,8 +26,8 @@
 <%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='content'>
-<div class='row page-header-block'>
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
 <%
 ## We build the link with the current search arguments
 args = request.GET
@@ -83,6 +83,8 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
 
 % endif
 </div>
+</%block>
+<%block name='content'>
 <div class='panel panel-default page-block'>
 <div class='panel-heading'>
 <a  href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">

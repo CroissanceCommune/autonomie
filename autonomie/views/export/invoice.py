@@ -166,8 +166,7 @@ class SageSingleInvoiceExportPage(BaseExportView):
             for line in invoice.all_lines:
                 if not self._check_invoice_line(line):
                     invoice_url = self.request.route_path(
-                        '/{type_}s/{id}/set_products',
-                        type_=invoice.type_,
+                        '/%ss/{id}/set_products' % invoice.type_,
                         id=invoice.id
                     )
                     message = MISSING_PRODUCT_ERROR_MSG.format(

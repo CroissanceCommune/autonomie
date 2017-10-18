@@ -460,12 +460,10 @@ def get_invoice_default_acl(self):
     if self.status == 'valid' and self.paid_status != 'resulted':
         admin_perms += ('gencinv.invoice', 'add_payment.invoice',)
 
-    if self.status == 'valid' and self.paid_status == 'waiting' \
-            and not self.exported:
+    if self.status == 'valid' and self.paid_status == 'waiting':
         admin_perms += ('set_date.invoice',)
 
-    if not self.exported:
-        admin_perms += ('set_treasury.invoice',)
+    admin_perms += ('set_treasury.invoice',)
 
     if admin_perms:
         acl.append((Allow, "group:admin", admin_perms))
@@ -500,7 +498,7 @@ def get_cancelinvoice_default_acl(self):
     acl.extend(_get_admin_status_acl(self))
 
     admin_perms = ()
-    if not self.exported and self.status == 'valid':
+    if self.status == 'valid':
         admin_perms += ('set_treasury.cancelinvoice', 'set_date.cancelinvoice')
 
     if admin_perms:
@@ -569,8 +567,7 @@ def get_expense_sheet_default_acl(self):
     acl.extend(_get_admin_status_acl(self))
 
     admin_perms = ()
-    if not self.expense_exported or not self.purchase_exported:
-        admin_perms += ('set_treasury.expensesheet',)
+    admin_perms += ('set_treasury.expensesheet',)
 
     if self.status == 'valid' and self.paid_status != 'resulted':
         admin_perms += ('add_payment.expensesheet',)
@@ -604,7 +601,6 @@ def get_payment_default_acl(self):
     acl = DEFAULT_PERM_NEW[:]
 
     admin_perms = ('view.payment',)
-    # if not self.exported:
     admin_perms += ('edit.payment', 'delete.payment')
 
     acl.append((Allow, 'group:admin', admin_perms))

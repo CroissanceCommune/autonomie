@@ -595,8 +595,7 @@ def get_expense_sheet_default_acl(self):
     if self.status == 'valid' and self.paid_status != 'resulted':
         admin_perms += ('add_payment.expensesheet',)
 
-    if self.status == 'valid':
-        admin_perms += ('set_justified.expensesheet',)
+    admin_perms += ('set_justified.expensesheet',)
 
     if admin_perms:
         acl.append((Allow, "group:admin", admin_perms))

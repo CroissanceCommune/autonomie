@@ -168,14 +168,20 @@ def deferred_customer_widget(node, kw):
     )
 
 
-@colander.deferred
-def deferred_company_customer_widget(node, kw):
+def get_company_customers(kw):
+    """
+    Retrieve all customers attached to a context's company
+    """
     from autonomie.models.customer import Customer
     request = kw['request']
     company_id = request.context.get_company_id()
-    customers = Customer.query().filter_by(company_id=company_id).all()
+    return Customer.query().filter_by(company_id=company_id).all()
+
+
+@colander.deferred
+def deferred_company_customer_widget(node, kw):
     return deform.widget.SelectWidget(
-        values=build_customer_values(customers, default=False),
+        values=build_customer_values(get_company_customers(kw), default=False),
         placeholder=u"Sélectionner un client",
     )
 
@@ -210,6 +216,19 @@ def deferred_customer_validator(node, kw):
         elif value not in customer_ids:
             return u"Entrée invalide"
         return True
+    return colander.Function(customer_oneof)
+
+
+@colander.deferred
+def deferred_company_customer_validator(node, kw):
+    customers = get_company_customers(kw)
+    customer_ids = [customer.id for customer in customers]
+
+    def customer_oneof(value):
+        if value not in customer_ids:
+            return u"Entrée invalide"
+        else:
+            return True
     return colander.Function(customer_oneof)
 
 
@@ -429,7 +448,7 @@ class DuplicateSchema(NewTaskSchema):
         colander.Integer(),
         title=u"Choix du client",
         widget=deferred_company_customer_widget,
-        validator=deferred_customer_validator,
+        validator=deferred_company_customer_validator,
         default=deferred_default_customer,
     )
 

@@ -14,6 +14,7 @@ from autonomie.models.task import (
     TaskLineGroup,
     DiscountLine,
 )
+from autonomie.models.tva import Product
 from autonomie.models.sale_product import (
     SaleProductGroup,
     SaleProduct,
@@ -345,6 +346,10 @@ class TaskLineRestView(BaseRestView):
         """
         if not edit:
             entry.group = self.context
+
+        if 'tva' in attributes and 'product_id' not in attributes and \
+                entry.tva is not None:
+            entry.product_id = Product.first_by_tva_value(entry.tva)
         return entry
 
     def post_load_lines_from_catalog_view(self):

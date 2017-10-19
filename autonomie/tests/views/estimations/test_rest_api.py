@@ -208,7 +208,7 @@ def test_edit_task_group(
 
 def test_add_task_line(
     dbsession, config, get_csrf_request_with_db, task_line_group, user,
-    unity, tva
+    unity, tva, product
 ):
     config.testing_securitypolicy(
         userid="test",
@@ -238,6 +238,7 @@ def test_add_task_line(
     assert result.tva == tva.value
     assert result.quantity == 2
     assert result.unity == unity.label
+    assert result.product_id == product.id
 
     # test invalid entry
     from autonomie.utils.rest import RestError

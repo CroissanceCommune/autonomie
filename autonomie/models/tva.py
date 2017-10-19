@@ -44,8 +44,11 @@ from sqlalchemy.orm import (
 from autonomie.utils.html import clean_html
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie.forms.custom_types import AmountType
-from autonomie_base.models.base import DBBASE
-from autonomie_base.models.base import default_table_args
+from autonomie_base.models.base import (
+    DBBASE,
+    DBSESSION,
+    default_table_args,
+)
 
 
 TVA_GRID = (
@@ -281,3 +284,17 @@ class Product(DBBASE):
             q = q.filter(Product.active == True)
             q = q.filter(Tva.active == True)
         return q.order_by('name')
+
+    @classmethod
+    def first_by_tva_value(cls, tva_value):
+        try:
+            tva = Tva.by_value(tva_value)
+        except:
+            return None
+
+        res = DBSESSION().query(Product.id).filter_by(active=True).filter_by(
+            tva_id=tva.id
+        ).first()
+        if res is not None:
+            res = res[0]
+        return res

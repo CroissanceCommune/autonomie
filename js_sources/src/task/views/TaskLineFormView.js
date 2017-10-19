@@ -154,19 +154,34 @@ const TaskLineFormView = Mn.View.extend({
     getTvaIdFromValue(value){
         return _.findWhere(this.tva_options, {value: strToFloat(value)});
     },
+    getDefaultTva(){
+        return _.findWhere(this.tva_options, {selected: true});
+    },
     refreshProductSelect(){
         /*
          * Show the product select tag
          */
         if (_.has(this.section, 'product')){
-            var tva_value = this.model.get('tva');
-            var tva = this.getTvaIdFromValue(tva_value);
             var product_options = this.product_options;
+
+            var tva_value = this.model.get('tva');
+            var tva;
+            if (! _.isUndefined(tva_value)){
+                tva = this.getTvaIdFromValue(tva_value);
+            }
             if (!_.isUndefined(tva)){
                 product_options = _.where(
                     this.product_options,
                     {tva_id: tva.id}
                 );
+            } else{
+                var default_tva = this.getDefaultTva();
+                if (!_.isUndefined(default_tva)){
+                    product_options = _.where(
+                        this.product_options,
+                        {tva_id: default_tva.id}
+                    );
+                }
             }
             this.showChildView(
                 'product_id',

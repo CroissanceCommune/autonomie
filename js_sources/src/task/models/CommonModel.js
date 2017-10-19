@@ -22,7 +22,7 @@ const CommonModel = BaseModel.extend({
         'date',
         'description',
         'address',
-        'mention_ids',
+        'mentions',
         'workplace',
         'expenses_ht',
         'exclusions',

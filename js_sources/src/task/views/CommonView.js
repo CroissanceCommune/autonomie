@@ -81,11 +81,7 @@ const CommonView = Mn.View.extend({
         Validation.unbind(this);
     },
     getMentionIds(){
-        var mentions = this.model.get('mentions');
-        var mention_ids = [];
-        _.each(mentions, function(mention){
-            mention_ids.push(mention.id);
-        });
+        var mention_ids = this.model.get('mentions');
         return mention_ids;
     },
     isMoreSet(){

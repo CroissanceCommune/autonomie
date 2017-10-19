@@ -82,8 +82,10 @@ const PaymentConditionBlockView = Mn.View.extend({
          */
         var option = getDefaultItem(this.payment_conditions_options);
         if (!_.isUndefined(option)){
-            if (!this.model.get('payment_conditions')){
+            var payment_conditions = this.model.get('payment_conditions');
+            if (_.isUndefined(payment_conditions) || payment_conditions.trim() == ''){
                 this.model.set('payment_conditions', option.label);
+                this.model.save({'payment_conditions': option.label}, {patch: true});
             }
         }
     },

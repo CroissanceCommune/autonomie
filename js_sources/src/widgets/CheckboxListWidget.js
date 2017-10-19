@@ -25,7 +25,7 @@ const CheckboxListWidget = Mn.View.extend({
         'click @ui.checkboxes': 'onClick'
     },
     getCurrentValues: function(){
-        var checkboxes = this.getUI('checkboxes').find(':checked');
+        var checkboxes = this.$el.find('input[type=checkbox]:checked');
         var res = [];
         _.each(checkboxes, function(checkbox){
             res.push($(checkbox).attr('value'));

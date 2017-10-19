@@ -5409,7 +5409,7 @@ webpackJsonp([2],[
 	        'click @ui.checkboxes': 'onClick'
 	    },
 	    getCurrentValues: function getCurrentValues() {
-	        var checkboxes = this.getUI('checkboxes').find(':checked');
+	        var checkboxes = this.$el.find('input[type=checkbox]:checked');
 	        var res = [];
 	        _.each(checkboxes, function (checkbox) {
 	            res.push((0, _jquery2.default)(checkbox).attr('value'));
@@ -5949,7 +5949,7 @@ webpackJsonp([2],[
   \**************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(_) {'use strict';
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -6056,11 +6056,7 @@ webpackJsonp([2],[
 	        _backboneValidation2.default.unbind(this);
 	    },
 	    getMentionIds: function getMentionIds() {
-	        var mentions = this.model.get('mentions');
-	        var mention_ids = [];
-	        _.each(mentions, function (mention) {
-	            mention_ids.push(mention.id);
-	        });
+	        var mention_ids = this.model.get('mentions');
 	        return mention_ids;
 	    },
 	    isMoreSet: function isMoreSet() {
@@ -6114,7 +6110,6 @@ webpackJsonp([2],[
 	    }
 	});
 	exports.default = CommonView;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
 /* 127 */
@@ -7294,16 +7289,28 @@ webpackJsonp([2],[
 	    getTvaIdFromValue: function getTvaIdFromValue(value) {
 	        return _.findWhere(this.tva_options, { value: (0, _math.strToFloat)(value) });
 	    },
+	    getDefaultTva: function getDefaultTva() {
+	        return _.findWhere(this.tva_options, { selected: true });
+	    },
 	    refreshProductSelect: function refreshProductSelect() {
 	        /*
 	         * Show the product select tag
 	         */
 	        if (_.has(this.section, 'product')) {
-	            var tva_value = this.model.get('tva');
-	            var tva = this.getTvaIdFromValue(tva_value);
 	            var product_options = this.product_options;
+	
+	            var tva_value = this.model.get('tva');
+	            var tva;
+	            if (!_.isUndefined(tva_value)) {
+	                tva = this.getTvaIdFromValue(tva_value);
+	            }
 	            if (!_.isUndefined(tva)) {
 	                product_options = _.where(this.product_options, { tva_id: tva.id });
+	            } else {
+	                var default_tva = this.getDefaultTva();
+	                if (!_.isUndefined(default_tva)) {
+	                    product_options = _.where(this.product_options, { tva_id: default_tva.id });
+	                }
 	            }
 	            this.showChildView('product_id', new _SelectWidget2.default({
 	                options: product_options,
@@ -9272,8 +9279,10 @@ webpackJsonp([2],[
 	         */
 	        var option = (0, _tools.getDefaultItem)(this.payment_conditions_options);
 	        if (!_.isUndefined(option)) {
-	            if (!this.model.get('payment_conditions')) {
+	            var payment_conditions = this.model.get('payment_conditions');
+	            if (_.isUndefined(payment_conditions) || payment_conditions.trim() == '') {
 	                this.model.set('payment_conditions', option.label);
+	                this.model.save({ 'payment_conditions': option.label }, { patch: true });
 	            }
 	        }
 	    },
@@ -11033,7 +11042,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var CommonModel = _BaseModel2.default.extend({
-	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mention_ids', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'prefix', 'course', 'display_units'],
+	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'prefix', 'course', 'display_units'],
 	    validation: {
 	        date: {
 	            required: true,

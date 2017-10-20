@@ -193,6 +193,9 @@ class Group(DBBASE):
 
         return res
 
+    def __json__(self, request):
+        return dict(name=self.name, label=self.label)
+
 
 class User(DBBASE, PersistentACLMixin):
     """

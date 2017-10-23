@@ -212,7 +212,7 @@ def cancelinvoice_get_major_status(cinvoice):
 def expense_get_major_status(expense):
     if expense.paid_status != 'waiting':
         return expense.paid_status
-    elif expense.justified:
+    elif expense.status == 'waiting' and expense.justified:
         return 'justified'
     else:
         return expense.status

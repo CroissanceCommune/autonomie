@@ -80,6 +80,7 @@ def task_title_panel(context, request, title):
     Panel returning a label for the given context's status
     """
     status = major_status(context)
+    print("The majot status is : %s" % status)
     status_label = STATUS_LABELS.get(status)
     if isinstance(status_label, dict):
         status_label = status_label[context.type_]

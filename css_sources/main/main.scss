@@ -588,13 +588,13 @@ $blue_status_label: #5bc0de;
   td.status-td{
     width: 16px;
   }
-  .signed-status-signed, .justified-True, .job-planned{
+  .signed-status-signed, .justified-True:not(.status-valid), .job-planned{
     background-color: $blue_status_light;
     .status-td{
       background-color: $blue_status_hard;
     }
   }
-  .signed-status-aborted, .tolate-True, .status-wait, .job-failed, .activity-status-cancelled, .operation-associated-False{
+  .signed-status-aborted, .tolate-True, .status-wait:not(.justified-True), .job-failed, .activity-status-cancelled, .operation-associated-False{
     background-color: $red_status_light!important;
     a:not(.btn){
       text-transform:uppercase;
@@ -619,11 +619,11 @@ $blue_status_label: #5bc0de;
 }
 .status-header.status-valid:not(.paid-status-resulted):not(.paid-status-paid):not(.signed-status-signed):not(.justified-True){
 }
-.status-header.signed-status-signed, .status-header.justified-True, .status-header.job-planned{
+.status-header.signed-status-signed, .status-header.justified-True:not(.status-valid), .status-header.job-planned{
   background-color: $blue_status-label;
   color: #fff;
 }
-.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait, .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled{
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait:not(.justified-True), .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled{
   background-color: $red_status-label!important;
   color: #fff;
 }

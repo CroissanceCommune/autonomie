@@ -121,8 +121,19 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
             </div>
             <div class="hidden-print">
                 <i class='glyphicon glyphicon-play'></i>
-                <strong>Justificatifs</strong>
-                <br />
+                <strong>
+                    Justificatifs
+                    % if expense.justified:
+                    % endif
+                </strong>
+                <div>
+                    % if expense.justified:
+                    <span class='label label-success'>
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Justificatifs reçus
+                    </span>
+                    % endif
+                </div>
                 ${format_filelist(expense)}
                 % if not expense.children:
                     <small>

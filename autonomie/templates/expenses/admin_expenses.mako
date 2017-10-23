@@ -151,7 +151,7 @@ Admin expenses list view
                     % endfor
                 </td>
                 <td>
-                    % if api.has_permission('set_justified.expensesheet', expense):
+                    % if api.has_permission('set_justified.expensesheet', expense) and expense.status != 'valid':
                     <div
                         class="btn-group expense-justify"
                         data-toggle="buttons"

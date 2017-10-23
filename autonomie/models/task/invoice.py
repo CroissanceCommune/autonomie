@@ -353,7 +353,6 @@ class Invoice(Task, InvoiceCompute):
         """
         Check if the invoice is resulted or not and set the appropriate status
         """
-        print("Check resulted")
         log.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() <= 0 or force_resulted:
             self.paid_status = 'resulted'

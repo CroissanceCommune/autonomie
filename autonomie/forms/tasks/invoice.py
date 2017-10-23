@@ -82,6 +82,7 @@ TYPE_OPTIONS = (
 AMOUNT_PRECISION = 5
 # 5€ => 500000 in db format
 PAYMENT_EPSILON = 5 * 10 ** AMOUNT_PRECISION
+PAYMENT_SUM_EPSILON = 0.1 * 10 ** AMOUNT_PRECISION
 
 
 def validate_invoice(invoice_object, request):
@@ -568,7 +569,7 @@ def deferred_payment_amount_validation(node, kw):
         tva_sum = sum([tvap['amount'] for tvap in values['tvas']])
         remittance_amount = values['payment_amount']
         diff = abs(tva_sum - remittance_amount)
-        if diff >= 0.1:
+        if diff >= PAYMENT_SUM_EPSILON:
             return u"Le montant du paiement doit correspondre à la somme \
 des encaissements correspondant"
         return True

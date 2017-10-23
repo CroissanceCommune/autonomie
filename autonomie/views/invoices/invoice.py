@@ -37,6 +37,7 @@ from autonomie.models.task import (
     Invoice,
     Estimation,
 )
+from autonomie.compute.math_utils import floor_to_precision
 from autonomie.models.tva import Tva
 from autonomie.events.tasks import StatusChanged
 from autonomie.utils.strings import format_amount
@@ -284,7 +285,16 @@ class InvoicePaymentView(BaseFormView):
         appstruct = []
         for tva_value, value in self.context.topay_by_tvas().items():
             tva = Tva.by_value(tva_value)
-            appstruct.append({'tva_id': tva.id, 'amount': value})
+            appstruct.append(
+                {
+                    'tva_id': tva.id,
+                    'amount': floor_to_precision(
+                        value,
+                        precision=2,
+                        dialect_precision=5
+                    )
+                }
+            )
 
         if len(appstruct) == 1:
             form.set_appstruct(appstruct[0])

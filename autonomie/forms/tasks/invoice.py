@@ -567,7 +567,8 @@ def deferred_payment_amount_validation(node, kw):
         """
         tva_sum = sum([tvap['amount'] for tvap in values['tvas']])
         remittance_amount = values['payment_amount']
-        if tva_sum != remittance_amount:
+        diff = abs(tva_sum - remittance_amount)
+        if diff >= 0.1:
             return u"Le montant du paiement doit correspondre à la somme \
 des encaissements correspondant"
         return True

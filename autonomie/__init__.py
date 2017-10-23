@@ -37,21 +37,6 @@ from pyramid.path import DottedNameResolver
 
 from pyramid_beaker import set_cache_regions_from_settings
 
-from autonomie.utils.security import (
-    RootFactory,
-    TraversalDbAccess,
-    set_models_acl,
-)
-
-from autonomie_base.models.initialize import initialize_sql
-from autonomie.models import adjust_for_engine
-from autonomie.models.populate import populate_database
-from autonomie.models.config import get_config
-from autonomie.utils.avatar import (
-    get_groups,
-    get_avatar,
-    get_current_company,
-)
 from autonomie.utils.session import get_session_factory
 from autonomie.utils.filedepot import (
     configure_filedepot,
@@ -175,6 +160,20 @@ def resolve(dotted_path):
     return DottedNameResolver().resolve(dotted_path)
 
 
+def get_groups(login, request):
+    """
+        return the current user's groups
+    """
+    user = request.user
+    if user is None:
+        return None
+    res = []
+    for group in user.groups:
+        res.append('group:{0}'.format(group))
+
+    return res
+
+
 def prepare_config(**settings):
     """
     Prepare the configuration object to setup the main application elements
@@ -206,10 +205,11 @@ def setup_bdd(settings):
     :returns: The dbsession
     :rtype: obj
     """
+    from autonomie_base.models.initialize import initialize_sql
+    from autonomie.models import adjust_for_engine
     engine = engine_from_config(settings, 'sqlalchemy.')
     adjust_for_engine(engine)
     dbsession = initialize_sql(engine)
-    populate_database()
     return dbsession
 
 
@@ -250,6 +250,16 @@ def base_configure(config, dbsession, **settings):
     """
     All plugin and others configuration stuff
     """
+    from autonomie.utils.security import (
+        RootFactory,
+        TraversalDbAccess,
+        set_models_acl,
+    )
+    from autonomie.models.config import get_config
+    from autonomie.utils.avatar import (
+        get_avatar,
+        get_current_company,
+    )
     set_models_acl()
     TraversalDbAccess.dbsession = dbsession
 
@@ -325,15 +335,24 @@ def main(global_config, **settings):
     """
     config = prepare_config(**settings)
 
+    import logging
+    logger = logging.getLogger(__name__)
+
+    logger.debug("Setting up the bdd")
     dbsession = setup_bdd(settings)
 
+    logger.debug("Loading views ...")
     config = base_configure(config, dbsession, **settings)
 
+    logger.debug("Configuring file depot")
     configure_filedepot(settings)
 
     config.configure_celery(global_config['__file__'])
 
     config.commit()
+
+    from autonomie.models.populate import populate_database
+    populate_database()
 
     return config.make_wsgi_app()
 

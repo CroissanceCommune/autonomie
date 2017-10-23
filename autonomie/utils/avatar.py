@@ -34,20 +34,6 @@ from autonomie.models.user import User
 log = logging.getLogger(__name__)
 
 
-def get_groups(login, request):
-    """
-        return the current user's groups
-    """
-    user = request.user
-    if user is None:
-        return None
-    res = []
-    for group in user.groups:
-        res.append('group:{0}'.format(group))
-
-    return res
-
-
 def get_avatar(request):
     """
         Returns the current User object

@@ -40,13 +40,15 @@
         </address>
     %endif
 </%def>
-<%def name="format_text(data, breaklines=True)">
+<%def name="format_text(data, breaklines=False)">
     <%doc>
         Replace \n with br for html output
     </%doc>
     <% text = data %>
     %if data is not UNDEFINED and data is not None and breaklines:
         <% text = text.replace(u'\n', u'<br />') %>
+    % else:
+        <% text = text.replace(u'\n', u'') %>
     %endif
     ${api.clean_html(text)|n}
 </%def>

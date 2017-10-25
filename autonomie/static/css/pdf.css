@@ -129,3 +129,8 @@ html {
 
 .activity-content {
   padding-left: 0.5cm; }
+
+p {
+  margin: 0px;
+}
+

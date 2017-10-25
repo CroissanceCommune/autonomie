@@ -131,6 +131,11 @@ html {
   padding-left: 0.5cm; }
 
 p {
-  margin: 0px;
-}
+  margin: 0px; }
 
+br {
+  line-height: 1;
+  font-size: 12px; }
+
+div {
+  margin: 0px; }

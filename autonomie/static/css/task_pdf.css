@@ -31,4 +31,5 @@ h3 {
   font-weight: 500; }
 
 table thead tr.group-description td {
-  line-height: 1; }
+  line-height: 1;
+  font-size: 9px; }

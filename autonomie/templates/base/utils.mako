@@ -50,6 +50,7 @@
     % else:
         <% text = text.replace(u'\n', u'') %>
     %endif
+    ${api.clean_html(text)}
     ${api.clean_html(text)|n}
 </%def>
 <%def name="format_customer(customer, link=True)">

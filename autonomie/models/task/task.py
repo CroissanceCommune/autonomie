@@ -1208,7 +1208,7 @@ class TaskLine(DBBASE, LineCompute):
         :returns: A TaskLine instance
         """
         result = cls()
-        result.description = sale_product.label
+        result.description = sale_product.description
         result.cost = amount(sale_product.value, 5)
         result.tva = sale_product.tva
         result.unity = sale_product.unity

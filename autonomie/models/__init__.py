@@ -29,6 +29,7 @@
 from autonomie_base.models.base import DBBASE
 from autonomie_base.models.base import DBSESSION
 
+
 import activity
 import company
 import config
@@ -44,7 +45,8 @@ import statistics
 import competence
 import sale_product
 import treasury
-
+import files
+from autonomie_celery import models
 
 def adjust_for_engine(engine):
     """

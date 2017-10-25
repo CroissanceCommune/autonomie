@@ -84,7 +84,7 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
 
 
 def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente import PaymentModeAdmin
+    from autonomie.views.admin.vente.vente import PaymentModeAdmin
     config.add_route('admin_vente', '/')
     appstruct = {'datas': [
         {'label': u"Chèque"},
@@ -101,7 +101,7 @@ def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):
 
 
 def test_workunit_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente import WorkUnitAdmin
+    from autonomie.views.admin.vente.vente import WorkUnitAdmin
     config.add_route('admin_vente', '/')
     appstruct = {'datas': [
         {'label': u"Semaines"},
@@ -144,7 +144,7 @@ def test_base_config_view(config, dbsession, get_csrf_request_with_db):
 
 
 def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente import AdminVenteTreasuryMain
+    from autonomie.views.admin.vente.accounting import AdminVenteTreasuryMain
     config.add_route('admin_vente_treasury', '/')
     appstruct = {'compte_cg_contribution':"00000668",
             'compte_rrr':"000009558"}

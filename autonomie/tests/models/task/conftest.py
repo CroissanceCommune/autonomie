@@ -194,6 +194,7 @@ def sale_product(dbsession):
         value=1.5,
         tva=2000,
         label=u"Produit du catalogue",
+        description=u"Description du produit du catalogue",
         unity="m",
     )
     dbsession.add(s)

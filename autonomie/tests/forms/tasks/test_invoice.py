@@ -16,6 +16,7 @@ def test_paymentform_schema(
     bank,
     task_line,
     task_line_group,
+    tva,
 ):
     task_line_group.lines = [task_line]
     invoice.line_groups = [task_line_group]
@@ -30,6 +31,7 @@ def test_paymentform_schema(
         'bank_id': str(bank.id),
         'mode': mode.label,
         'resulted': True,
+        'tva_id': str(tva.id),
     }
     expected_value = {
         'come_from': '',
@@ -39,6 +41,7 @@ def test_paymentform_schema(
         'bank_id': bank.id,
         'mode': mode.label,
         'resulted': True,
+        'tva_id': tva.id,
     }
     assert schema.deserialize(value) == expected_value
 
@@ -50,6 +53,7 @@ def test_deferred_total_validator(
     bank,
     task_line,
     task_line_group,
+    tva,
 ):
     invoice.line_groups = [task_line_group]
     task_line_group.lines = [task_line]
@@ -64,6 +68,7 @@ def test_deferred_total_validator(
         'bank_id': str(bank.id),
         'mode': mode.label,
         'resulted': True,
+        'tva_id': str(tva.id),
     }
     expected_value = {
         'remittance_amount': '79.4',
@@ -72,6 +77,7 @@ def test_deferred_total_validator(
         'bank_id': str(bank.id),
         'mode': mode.label,
         'resulted': True,
+        'tva_id': tva.id,
     }
     schema.deserialize(value) == expected_value
 
@@ -82,6 +88,7 @@ def test_deferred_total_validator(
         'bank_id': str(bank.id),
         'mode': mode.label,
         'resulted': True,
+        'tva_id': str(tva.id),
     }
     with pytest.raises(colander.Invalid):
         schema.deserialize(value)

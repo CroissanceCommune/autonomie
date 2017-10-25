@@ -8,7 +8,7 @@ import datetime
 
 
 def test_get_file_path_from_pool():
-    from autonomie_celery.schedulers.accounting_parser import (
+    from autonomie_celery.tasks.accounting_parser import (
         _get_file_path_from_pool
     )
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
@@ -18,8 +18,8 @@ def test_get_file_path_from_pool():
     assert result is None
 
 
-def test_parser():
-    from autonomie_celery.schedulers.accounting_parser import (
+def test_parser(content):
+    from autonomie_celery.tasks.accounting_parser import (
         _get_file_path_from_pool,
         Parser,
     )
@@ -35,7 +35,7 @@ def test_parser():
     if file_datas['extension'] == 'csv':
         parser.encoding = 'utf-8'
     num_operations = len(file(filepath, 'rb').read().strip().splitlines())
-    assert len(parser._fill_db(file_datas).operations) == num_operations
+    assert len(parser._fill_db(file_datas)[0].operations) == num_operations
 
     if file_datas['extension'] == 'csv':
         parser.file_path = u"%s.slk" % parser.file_path[:-4]
@@ -45,5 +45,5 @@ def test_parser():
         parser.file_path = u"%s.csv" % parser.file_path[:-4]
         file_datas['extension'] = 'csv'
 
-    assert len(parser._fill_db(file_datas).operations) == num_operations
+    assert len(parser._fill_db(file_datas)[0].operations) == num_operations
 

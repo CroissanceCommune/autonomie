@@ -29,23 +29,32 @@
 from autonomie_base.models.base import DBBASE
 from autonomie_base.models.base import DBSESSION
 
+
 import activity
+import commercial
 import company
+import competence
 import config
 import customer
+import files
 import holiday
+import node
+import options
 import payments
 import project
+import sale_product
+import statistics
+import treasury
 import tva
 import user
 import task
 import workshop
-import statistics
-import competence
-import sale_product
-import treasury
 from .accounting import operations
 from .accounting import measures
+from .expense import sheet
+from .expense import types
+from .expense import payment
+from autonomie_celery import models
 
 
 def adjust_for_engine(engine):

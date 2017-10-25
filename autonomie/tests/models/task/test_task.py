@@ -465,5 +465,5 @@ def test_task_line_from_sale_product(sale_product):
     t = TaskLine.from_sale_product(sale_product)
     assert t.tva == sale_product.tva
     assert t.cost == 100000 * sale_product.value
-    assert t.description == sale_product.label
+    assert t.description == sale_product.description
     assert t.unity == sale_product.unity

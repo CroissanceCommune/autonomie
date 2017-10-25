@@ -27,6 +27,7 @@ from pyramid import testing
 from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
+from autonomie import models
 
 from autonomie.utils.widgets import ActionMenu
 

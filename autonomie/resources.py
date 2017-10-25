@@ -260,7 +260,7 @@ commercial_js = get_module_resource("commercial")
 
 pdf_css = get_resource('css/pdf.css', depends=[main_group])
 # Permet d'overrider ou compléter les css de la sortie pdf pour l'affichage html
-task_html_pdf_css = get_resource('css/task_html.css', depends=[pdf_css])
+task_html_pdf_css = get_resource('css/task_pdf.css', depends=[pdf_css])
 
 
 # Test tools

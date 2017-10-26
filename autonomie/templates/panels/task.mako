@@ -71,7 +71,7 @@
                     % if group.description != "":
                         <tr class='group-description'>
                             <td colspan="${num_cols}">
-                                ${format_text(group.description)}
+                                ${format_text(group.description, False)}
                             </td>
                     </tr>
                     % endif

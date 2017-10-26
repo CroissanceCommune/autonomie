@@ -77,7 +77,11 @@ var TaskAddProxy = {
                 }else{
                     options += "'>";
                 }
-                options += project.name + '(' + project.code + ')' + "</option>";
+                options += project.name;
+                if (!_.isNull(project.code)){
+                    options += ' (' + project.code + ')';
+                }
+                options += "</option>";
             }
         }
         this.ui.project.html(options);

@@ -27,7 +27,6 @@
 <%namespace file="base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <%block name='content'>
-<div class="project-view">
 <%def name="action_cell(task, view_url)">
     <% pdf_url = request.route_path('/%ss/{id}.pdf' % task.type_, id=task.id) %>
     <% del_url = request.route_path('/%ss/{id}/delete' % task.type_, id=task.id) %>
@@ -161,267 +160,274 @@
         ${action_cell(task, view_url)}
 </tr>
 </%def>
+
+
 <div class='panel panel-default page-block'>
-<div class='panel-heading'>
-${title}
-</div>
-<div class='panel-body'>
-<div class="nav-tabs-responsive">
-    <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active">
-            <a href="#documents" aria-control="documents" role='tab' data-toggle='tab'>
-                Documents
-            </a>
-        </li>
-        <li role="presentation">
-            <a href="#general_information" aria-control="general_information" role='tab' data-toggle='tab'>Informations générales</a>
-        </li>
-        <li role="presentation">
-            <a href="#attached_files" aria-control="attached_files" role='tab' data-toggle='tab'>
-                Fichiers attachés
-                % if project.children:
-                    <span class="badge">${len(project.children)}</span>
-                % endif
-            </a>
-        </li>
-    </ul>
-</div>
-<div class='tab-content'>
-    <!-- Documents tab -->
-    <div role="tabpanel" class="tab-pane active row" id="documents">
-        % if api.has_permission('add_phase'):
-        <button class='btn btn-default secondary-action'
-            data-target="#phase-form"
-            aria-expanded="false"
-            aria-controls="phase-form"
-            data-toggle='collapse'>
-            <i class='glyphicon glyphicon-plus'></i>
-            Ajouter un dossier
-        </button>
-
-        <div class='collapse' id='phase-form'>
-            <h3>Ajouter un dossier</h3>
-            ${phase_form.render()|n}
-        </div>
-        <hr />
-        % endif
-
-
-        <div class='panel-group' id='phase_accordion'>
-            %for phase in project.phases:
-                % if len(project.phases) > 1:
-                    %if phase == latest_phase:
-                        <% section_css = 'in collapse' %>
-                    %else:
-                        <% section_css = 'collapse' %>
-                    %endif
-                    <div class='panel panel-default'>
-                        <div class='panel-heading section-header'>
-                            <a href="#phase_${phase.id}"
-                                data-toggle='collapse'
-                                data-parent='#phase_accordion'
-                                class='accordion-toggle'>
-                                <%
-                                    if phase.is_default():
-                                        label = u"Dossier par défaut"
-                                    else:
-                                        label = phase.name
-                                %>
-                                        <i style="vertical-align:middle"
-                                            class="glyphicon glyphicon-folder-open">
-                                        </i>
-                                        &nbsp;${label}&nbsp;
-                            </a>
-                            % if api.has_permission('edit_phase'):
-                                <a
-                                    href="${request.route_path('phase', id=phase.id)}"
-                                    title="Éditer le libellé de ce dossier"
-                                    >
-                                    <i style="vertical-align:middle"
-                                        class="glyphicon glyphicon-pencil">
-                                    </i>
-                                </a>
-                                % if len(phase.tasks) == 0:
-                                    <a
-                                        href="${request.route_path('phase', id=phase.id, _query=dict(action='delete'))}"
-                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');"
-                                        title="Supprimer ce dossier"
-                                        >
-                                        <i style="vertical-align:middle"
-                                            class="glyphicon glyphicon-trash">
-                                        </i>
-                                    </a>
-                                % endif
-                            % endif
-                    </div>
-                    <div class="panel-collapse ${section_css}"
-                        id='phase_${phase.id}'>
-                        <div class='panel-body'>
-            % else:
-                    <div class='panel panel-default'>
-                        <div class="panel-collapse" id='phase_${phase.id}'>
-                            <div class='panel-body'>
-            % endif
-
-        <div class='header'>
-            <h3 class='pull-left'>Devis</h3>
-            % if api.has_permission('add_estimation'):
-                <a
-                    class='btn btn-primary primary-action'
-                    href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'
-                    >
-                    <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer un devis
-                </a>
-            % endif
-        </div>
-        % if  phase.estimations:
-            <table class='table table-striped table-condensed'>
-                <thead>
-                    <th></th>
-                    <th>Nom</th>
-                    <th class="hidden-xs">État</th>
-                    <th class="actions">Action</th>
-                </thead>
-                %for task in phase.estimations:
-                    ${estimation_row(task)}
-                %endfor
-            </table>
-        % else:
-            <div class="alert alert-warning" style='clear:both'>Aucun devis n'a été créé</div>
-        %endif
-        <hr />
-        <div class='header'>
-            <h3 class='pull-left'>
-                Facture(s), Avoir(s)
-            </h3>
-            % if api.has_permission('add_invoice'):
-                <a class='btn btn-primary primary-action'
-                    href='${request.route_path(\
-                    "project_invoices", \
-                    id=project.id, \
-                    _query=dict(phase=phase.id))}'>
-                    <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer une facture
-                </a>
-            % endif
-        </div>
-        %if phase.invoices:
-            <table class='table table-striped table-condensed'>
-                <thead>
-                    <th></th>
-                    <th>Numéro</th>
-                    <th>Nom</th>
-                    <th class="hidden-xs">État</th>
-                    <th style="text-align:center">Action</th>
-                </thead>
-                %for task in phase.invoices:
-                    ${invoice_row(task)}
-                %endfor
-                % for task in phase.cancelinvoices:
-                    ${cancelinvoice_row(task)}
-                % endfor
-            </table>
-        % else:
-            <div class="alert alert-warning" style='clear:both'>Aucune facture n'a été créée</div>
-        % endif
-        </div>
-        </div>
-        </div>
-    %endfor
+    <div class='panel-heading'>
+    ${title}
     </div>
-    %if not project.phases:
-        <strong>Aucune phase n'a été créée dans ce projet</strong>
-    %endif
 
-</div>
-
-    <!-- General information tab -->
-    <div role="tabpanel" class="tab-pane row" id="general_information">
-        <div class="col-md-10 col-md-offset-1 col-xs-12">
-            <a class='btn btn-primary primary-action'
-                href="${request.route_path('project', id=request.context.id, _query={'action': 'edit'})}"
-                title="Modifier le projet">
-                <i class='glyphicon glyphicon-pencil'></i>
-                Modifier
-            </a>
-            <h3>Client(s)</h3>
-            % for customer in project.customers:
-                <div class=''>
-                    <a href="${request.route_path('customer', id=customer.id, _query={'action': 'edit'})}"
-                        class='btn btn-default btn-small pull-right'
-                        title="Modifier ce client">
-                        <i class='glyphicon glyphicon-pencil'></i> Modifier
+    <div class='panel-body'>
+        <div class="nav-tabs-responsive">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#documents" aria-control="documents" role='tab' data-toggle='tab'>
+                        Documents
                     </a>
-                    <address>
-                        ${format_text(customer.full_address)}
-                    </address>
-                    <div class='clearfix'></div>
-                    <hr />
+                </li>
+                <li role="presentation">
+                    <a href="#general_information" aria-control="general_information" role='tab' data-toggle='tab'>Informations générales</a>
+                </li>
+                <li role="presentation">
+                    <a href="#attached_files" aria-control="attached_files" role='tab' data-toggle='tab'>
+                        Fichiers attachés
+                        % if project.children:
+                            <span class="badge">${len(project.children)}</span>
+                        % endif
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class='tab-content'>
+
+            <!-- Documents tab -->
+            <div role="tabpanel" class="tab-pane active row" id="documents">
+                % if api.has_permission('add_phase'):
+                <button class='btn btn-default secondary-action'
+                    data-target="#phase-form"
+                    aria-expanded="false"
+                    aria-controls="phase-form"
+                    data-toggle='collapse'>
+                    <i class='glyphicon glyphicon-plus'></i>
+                    Ajouter un dossier
+                </button>
+
+                <div class='collapse' id='phase-form'>
+                    <h3>Ajouter un dossier</h3>
+                    ${phase_form.render()|n}
                 </div>
-            % endfor
-            <h3>Informations générales</h3>
-            <dl>
-                %if project.type:
-                    <dt>Type de projet :</dt> <dd>${project.type}</dd>
+                <hr />
                 % endif
-                % if project.starting_date:
-                    <dt>Début prévu le :</dt><dd>${api.format_date(project.starting_date)}</dd>
+
+
+                <div class='panel-group' id='phase_accordion'>
+                    %for phase in project.phases:
+                        % if len(project.phases) > 1:
+                            %if phase == latest_phase:
+                                <% section_css = 'in collapse' %>
+                            %else:
+                                <% section_css = 'collapse' %>
+                            %endif
+                            <div class='panel panel-default'>
+                                <div class='panel-heading section-header'>
+                                    <a href="#phase_${phase.id}"
+                                        data-toggle='collapse'
+                                        data-parent='#phase_accordion'
+                                        class='accordion-toggle'>
+                                        <%
+                                            if phase.is_default():
+                                                label = u"Dossier par défaut"
+                                            else:
+                                                label = phase.name
+                                        %>
+                                                <i style="vertical-align:middle"
+                                                    class="glyphicon glyphicon-folder-open">
+                                                </i>
+                                                &nbsp;${label}&nbsp;
+                                    </a>
+                                    % if api.has_permission('edit_phase'):
+                                        <a
+                                            href="${request.route_path('phase', id=phase.id)}"
+                                            title="Éditer le libellé de ce dossier"
+                                            >
+                                            <i style="vertical-align:middle"
+                                                class="glyphicon glyphicon-pencil">
+                                            </i>
+                                        </a>
+                                        % if len(phase.tasks) == 0:
+                                            <a
+                                                href="${request.route_path('phase', id=phase.id, _query=dict(action='delete'))}"
+                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');"
+                                                title="Supprimer ce dossier"
+                                                >
+                                                <i style="vertical-align:middle"
+                                                    class="glyphicon glyphicon-trash">
+                                                </i>
+                                            </a>
+                                        % endif
+                                    % endif
+                            </div>
+                            <div class="panel-collapse ${section_css}"
+                                id='phase_${phase.id}'>
+                                <div class='panel-body'>
+                    % else:
+                            <div class='panel panel-default'>
+                                <div class="panel-collapse" id='phase_${phase.id}'>
+                                    <div class='panel-body'>
+                    % endif
+
+                <div class='header'>
+                    <h3 class='pull-left'>Devis</h3>
+                    % if api.has_permission('add_estimation'):
+                        <a
+                            class='btn btn-primary primary-action'
+                            href='${request.route_path("project_estimations", id=project.id, _query=dict(phase=phase.id))}'
+                            >
+                            <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer un devis
+                        </a>
+                    % endif
+                </div>
+                % if  phase.estimations:
+                    <table class='table table-striped table-condensed'>
+                        <thead>
+                            <th></th>
+                            <th>Nom</th>
+                            <th class="hidden-xs">État</th>
+                            <th class="actions">Action</th>
+                        </thead>
+                        %for task in phase.estimations:
+                            ${estimation_row(task)}
+                        %endfor
+                    </table>
+                % else:
+                    <div class="alert alert-warning" style='clear:both'>Aucun devis n'a été créé</div>
+                %endif
+                <hr />
+                <div class='header'>
+                    <h3 class='pull-left'>
+                        Facture(s), Avoir(s)
+                    </h3>
+                    % if api.has_permission('add_invoice'):
+                        <a class='btn btn-primary primary-action'
+                            href='${request.route_path(\
+                            "project_invoices", \
+                            id=project.id, \
+                            _query=dict(phase=phase.id))}'>
+                            <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer une facture
+                        </a>
+                    % endif
+                </div>
+                %if phase.invoices:
+                    <table class='table table-striped table-condensed'>
+                        <thead>
+                            <th></th>
+                            <th>Numéro</th>
+                            <th>Nom</th>
+                            <th class="hidden-xs">État</th>
+                            <th style="text-align:center">Action</th>
+                        </thead>
+                        %for task in phase.invoices:
+                            ${invoice_row(task)}
+                        %endfor
+                        % for task in phase.cancelinvoices:
+                            ${cancelinvoice_row(task)}
+                        % endfor
+                    </table>
+                % else:
+                    <div class="alert alert-warning" style='clear:both'>Aucune facture n'a été créée</div>
                 % endif
-                % if project.ending_date:
-                    <dt>Livraison prévue le :</dt><dd>${api.format_date(project.ending_date)}</dd>
-                % endif
-            </dl>
-            % if project.definition:
-                <h3>Définition du projet</h3>
-                <p>
-                    ${format_text(project.definition)|n}
-                </p>
-            % endif
+                </div>
+                </div>
+                </div>
+            %endfor
+            </div>
+            %if not project.phases:
+                <strong>Aucune phase n'a été créée dans ce projet</strong>
+            %endif
+
+        </div>
+
+            <!-- General information tab -->
+            <div role="tabpanel" class="tab-pane row" id="general_information">
+                <div class="col-md-10 col-md-offset-1 col-xs-12">
+                    <a class='btn btn-primary primary-action'
+                        href="${request.route_path('project', id=request.context.id, _query={'action': 'edit'})}"
+                        title="Modifier le projet">
+                        <i class='glyphicon glyphicon-pencil'></i>
+                        Modifier
+                    </a>
+                    <h3>Client(s)</h3>
+                    % for customer in project.customers:
+                        <div class=''>
+                            <a href="${request.route_path('customer', id=customer.id, _query={'action': 'edit'})}"
+                                class='btn btn-default btn-small pull-right'
+                                title="Modifier ce client">
+                                <i class='glyphicon glyphicon-pencil'></i> Modifier
+                            </a>
+                            <address>
+                                ${format_text(customer.full_address)}
+                            </address>
+                            <div class='clearfix'></div>
+                            <hr />
+                        </div>
+                    % endfor
+                    <h3>Informations générales</h3>
+                    <dl>
+                        %if project.type:
+                            <dt>Type de projet :</dt> <dd>${project.type}</dd>
+                        % endif
+                        % if project.starting_date:
+                            <dt>Début prévu le :</dt><dd>${api.format_date(project.starting_date)}</dd>
+                        % endif
+                        % if project.ending_date:
+                            <dt>Livraison prévue le :</dt><dd>${api.format_date(project.ending_date)}</dd>
+                        % endif
+                    </dl>
+                    % if project.definition:
+                        <h3>Définition du projet</h3>
+                        <p>
+                            ${format_text(project.definition)|n}
+                        </p>
+                    % endif
+                </div>
+            </div>
+
+            <!-- attached files tab -->
+            <div role="tabpanel" class="tab-pane row" id="attached_files">
+                <div class="col-md-10 col-md-offset-1 col-xs-12">
+                    <a class='btn btn-primary primary-action'
+                        href="${request.route_path('project', id=project.id, _query={'action': 'attach_file'})}"
+                        title="Attacher un fichier">
+                        <i class='glyphicon glyphicon-plus-sign'></i>
+                       Attacher un fichier
+                    </a>
+                    <h3>Liste des fichiers rattachés à ce projet</h3>
+                    % for child in project.children:
+                        % if child.type_ == 'file':
+                            <div>
+                                <dl class='dl-horizontal'>
+                                    <dt>Description du fichier</dt><dd>${child.description}</dd>
+                                    <dt>Taille du fichier</dt><dd>${api.human_readable_filesize(child.size)}</dd>
+                                    <dt>Dernière modification</dt><dd>${api.format_date(child.updated_at)}</dd>
+                                </dl>
+                                  % if api.has_permission('edit.file', child):
+                                      <a class='btn btn-default btn-small'
+                                          href="${request.route_path('file', id=child.id)}">
+                                          <i class='glyphicon glyphicon-pencil'></i> Voir/modifier
+                                      </a>
+                                  % endif
+                                      <a class='btn btn-default btn-small'
+                                          href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                                          <i class='glyphicon glyphicon-download'></i> Télécharger
+                                      </a>
+                                  % if api.has_permission('edit.file', child):
+                                      <a class='btn btn-small btn-danger'
+                                            href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}"
+                                            onclick="return confirm('Supprimer ce fichier ?');">
+                                          <i class='glyphicon glyphicon-trash'></i> Supprimer
+                                      </a>
+                                 % endif
+                            </div>
+                            <hr />
+                        % endif
+                    % endfor
+                </div>
+            </div>
+
+
         </div>
     </div>
-
-    <!-- attached files tab -->
-    <div role="tabpanel" class="tab-pane row" id="attached_files">
-        <div class="col-md-10 col-md-offset-1 col-xs-12">
-            <a class='btn btn-primary primary-action'
-                href="${request.route_path('project', id=project.id, _query={'action': 'attach_file'})}"
-                title="Attacher un fichier">
-                <i class='glyphicon glyphicon-plus-sign'></i>
-               Attacher un fichier
-            </a>
-            <h3>Liste des fichiers rattachés à ce projet</h3>
-            % for child in project.children:
-                % if child.type_ == 'file':
-                    <div>
-                        <dl class='dl-horizontal'>
-                            <dt>Description du fichier</dt><dd>${child.description}</dd>
-                            <dt>Taille du fichier</dt><dd>${api.human_readable_filesize(child.size)}</dd>
-                            <dt>Dernière modification</dt><dd>${api.format_date(child.updated_at)}</dd>
-                        </dl>
-                          % if api.has_permission('edit.file', child):
-                              <a class='btn btn-default btn-small'
-                                  href="${request.route_path('file', id=child.id)}">
-                                  <i class='glyphicon glyphicon-pencil'></i> Voir/modifier
-                              </a>
-                          % endif
-                              <a class='btn btn-default btn-small'
-                                  href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
-                                  <i class='glyphicon glyphicon-download'></i> Télécharger
-                              </a>
-                          % if api.has_permission('edit.file', child):
-                              <a class='btn btn-small btn-danger'
-                                    href="${request.route_path('file', id=child.id, _query=dict(action='delete'))}"
-                                    onclick="return confirm('Supprimer ce fichier ?');">
-                                  <i class='glyphicon glyphicon-trash'></i> Supprimer
-                              </a>
-                         % endif
-                    </div>
-                    <hr />
-                % endif
-            % endfor
-        </div>
-    </div>
-
-</div>
 </div>
 </%block>
 <%block name="footerjs">

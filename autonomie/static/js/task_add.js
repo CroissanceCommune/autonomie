@@ -121,14 +121,31 @@ var TaskAddProxy = {
         var customer = this.collection.findWhere({id: current_id});
         return customer;
     },
+    toggle_project:function(value){
+        if (_.isUndefined(value)){
+            value = true;
+        }
+        this.ui.project.attr('disabled', value);
+    },
+    toggle_phase:function(value){
+        if (_.isUndefined(value)){
+            value = true;
+        }
+        this.ui.phase.attr('disabled', value);
+    },
     customerChange: function(event){
+        this.toggle_phase();
+        this.toggle_project();
         var customer = this.findCustomer();
         var project_id = this.getProjectId();
         this.updateProject(customer.get('projects'), project_id);
+        this.toggle_project(false);
     },
     projectChange: function(event){
+        this.toggle_phase();
         var project = this.findProject();
         this.updatePhase(project.get('phases'));
+        this.toggle_phase(false);
     },
     setupUi: function(){
         var this_ = this;
@@ -141,12 +158,12 @@ var TaskAddProxy = {
             'change.customer',
             _.bind(this.customerChange, this)
         );
-        this.ui.customer.change();
         this.ui.project.off('change.project');
         this.ui.project.on(
             'change.project',
             _.bind(this.projectChange, this)
         );
+        this.ui.customer.change();
     },
     setup: function(){
         this.collection = new CustomerCollection();

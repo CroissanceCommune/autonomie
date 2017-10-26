@@ -90,7 +90,11 @@
                         % endif
                         >
                         % for value in stream_columns(item):
-                            <td>${ value|n }</td>
+                            <td>
+                            % if value is not None:
+                                ${ value|n }
+                            % endif
+                            </td>
                         % endfor
                         <td class='text-right'>
                             <div class='btn-group'>

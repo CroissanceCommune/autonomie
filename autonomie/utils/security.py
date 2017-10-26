@@ -392,7 +392,7 @@ def _get_user_status_acl(self):
     return acl
 
 
-def _get_admin_status_acl(self, expense=False):
+def _get_admin_status_acl(self):
     """
     Return the common status related acls
     """
@@ -413,7 +413,7 @@ def _get_admin_status_acl(self, expense=False):
         )
         if self.status == 'wait':
             perms += ('invalid.%s' % self.type_,)
-        elif expense:
+        else:
             perms += ('wait.%s' % self.type_,)
 
     return [
@@ -589,7 +589,7 @@ def get_expense_sheet_default_acl(self):
     :rtype: list
     """
     acl = DEFAULT_PERM_NEW[:]
-    acl.extend(_get_admin_status_acl(self, expense=True))
+    acl.extend(_get_admin_status_acl(self))
 
     admin_perms = ()
     admin_perms += ('set_treasury.expensesheet',)

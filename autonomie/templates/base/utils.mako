@@ -40,7 +40,7 @@
         </address>
     %endif
 </%def>
-<%def name="format_text(data, breaklines=False)">
+<%def name="format_text(data, breaklines=True)">
     <%doc>
         Replace \n with br for html output
     </%doc>

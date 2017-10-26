@@ -47,7 +47,7 @@
     <% text = data %>
     %if data is not UNDEFINED and data is not None and breaklines:
         <% text = text.replace(u'\n', u'<br />') %>
-    % else:
+    % elif data is not UNDEFINED and data is not None:
         <% text = text.replace(u'\n', u'') %>
     %endif
     ${api.clean_html(text)}

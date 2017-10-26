@@ -4,7 +4,6 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import datetime
-import deform
 
 from sqlalchemy import (
     Column,
@@ -64,8 +63,8 @@ class TreasuryMeasureType(DBBASE):
         String(255),
         info={
             'colanderalchemy': {
+                'exclude': True,
                 'title': u"Libellé de cet indicateur",
-                'widget': deform.widget.TextInputWidget(readonly=True),
             }
         }
     )

@@ -71,9 +71,9 @@ def populate_accounting_treasury_measure_types(session):
             (2, "42,43,44", u"Impôts, taxes et cotisations dues",),
             (3, "40", u"Fournisseurs à payer",),
             (5, "425", u"Salaires à payer",),
-            (6, '421', u"Notes de dépenses à payer"),
-            (7, "41", u"Clients à encaisser"),
-            (8, "1,2,3", u"Indicateurs par comptes"),
+            (6, '41', u"Notes de dépenses à payer"),
+            (7, "421", u"Clients à encaisser"),
+            (9, "1,2,3", u"Indicateurs par comptes"),
         ):
             session.add(
                 TreasuryMeasureType(

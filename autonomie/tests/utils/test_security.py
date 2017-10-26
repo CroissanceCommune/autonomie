@@ -82,7 +82,7 @@ def test_estimation_default_acls(estimation, dummy_company):
             assert check_acl(acl, ace, group)
 
         assert check_acl(acl, 'valid.estimation', group)
-        assert not check_acl(acl, 'wait.estimation', group)
+        assert check_acl(acl, 'wait.estimation', group)
 
         assert not check_acl(acl, 'geninv.estimation', group)
         assert not check_acl(acl, 'set_signed_status.estimation', group)
@@ -106,7 +106,7 @@ def test_estimation_default_acls(estimation, dummy_company):
             assert check_acl(acl, ace, group)
 
         assert check_acl(acl, 'valid.estimation', group)
-        assert not check_acl(acl, 'wait.estimation', group)
+        assert check_acl(acl, 'wait.estimation', group)
 
         assert not check_acl(acl, 'geninv.estimation', group)
         assert not check_acl(acl, 'set_signed_status.estimation', group)
@@ -222,7 +222,7 @@ def test_invoice_default_acls(invoice, dummy_company):
             assert check_acl(acl, ace, group)
 
         assert check_acl(acl, 'valid.invoice', group)
-        assert not check_acl(acl, 'wait.invoice', group)
+        assert check_acl(acl, 'wait.invoice', group)
         assert not check_acl(acl, 'gencinv.invoice', group)
         assert not check_acl(acl, 'add_payment.invoice', group)
     assert check_acl(acl, 'valid.invoice', 'group:invoice_validation')
@@ -309,8 +309,8 @@ def test_invoice_default_acls(invoice, dummy_company):
     for group in ('group:admin', 'group:manager'):
         assert check_acl(acl, 'gencinv.invoice', group)
         assert check_acl(acl, 'add_payment.invoice', group)
-        assert not check_acl(acl, 'set_date.invoice', group)
-        assert not check_acl(acl, 'set_treasury.invoice', group)
+        assert check_acl(acl, 'set_date.invoice', group)
+        assert check_acl(acl, 'set_treasury.invoice', group)
         assert check_acl(acl, 'add.file', group)
 
 
@@ -337,7 +337,7 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
             assert check_acl(acl, ace, group)
 
         assert check_acl(acl, 'valid.cancelinvoice', group)
-        assert not check_acl(acl, 'wait.cancelinvoice', group)
+        assert check_acl(acl, 'wait.cancelinvoice', group)
     assert check_acl(acl, 'valid.cancelinvoice', 'group:invoice_validation')
 
     # Wait acls
@@ -384,8 +384,8 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
-        assert not check_acl(acl, 'set_date.cancelinvoice', group)
-        assert not check_acl(acl, 'set_treasury.cancelinvoice', group)
+        assert check_acl(acl, 'set_date.cancelinvoice', group)
+        assert check_acl(acl, 'set_treasury.cancelinvoice', group)
         assert check_acl(acl, 'add.file', group)
 
 
@@ -414,7 +414,7 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
             assert check_acl(acl, ace, group)
 
         assert check_acl(acl, 'valid.expensesheet', group)
-        assert not check_acl(acl, 'wait.expensesheet', group)
+        assert check_acl(acl, 'wait.expensesheet', group)
         assert not check_acl(acl, 'add_payment.expensesheet', group)
 
     # Wait acls
@@ -485,5 +485,5 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
     # # Admins
     for group in ('group:admin', 'group:manager'):
         assert check_acl(acl, 'add_payment.expensesheet', group)
-        assert not check_acl(acl, 'set_treasury.expensesheet', group)
+        assert check_acl(acl, 'set_treasury.expensesheet', group)
         assert check_acl(acl, 'add.file', group)

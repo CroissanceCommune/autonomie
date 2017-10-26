@@ -360,6 +360,10 @@ class Project(Node):
     def __json__(self, request):
         return self.todict()
 
+    @classmethod
+    def check_phase_id(cls, project_id, phase_id):
+        return cls._autonomie_service.check_phase_id(project_id, phase_id)
+
 
 class Phase(DBBASE, PersistentACLMixin):
     """

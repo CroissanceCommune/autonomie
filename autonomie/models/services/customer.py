@@ -95,3 +95,13 @@ class CustomerService(object):
         if country is not None and country.lower() != "france":
             address += u"\n{0}".format(country)
         return address
+
+    @classmethod
+    def check_project_id(cls, customer_id, project_id):
+        """
+        Check that the given customer is attached to the given project
+        """
+        from autonomie.models.project import ProjectCustomer
+        return DBSESSION().query(ProjectCustomer).filter_by(
+            project_id=project_id).filter_by(
+                customer_id=customer_id).count() > 0

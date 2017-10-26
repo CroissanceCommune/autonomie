@@ -100,3 +100,12 @@ class ProjectService(object):
         """
         from autonomie.models.task import CancelInvoice
         return cls.get_next_index(project, CancelInvoice)
+
+    @classmethod
+    def check_phase_id(cls, project_id, phase_id):
+        """
+        Check phase_id is attached to project_id
+        """
+        from autonomie.models.project import Phase
+        return DBSESSION().query(Phase.id).filter_by(
+            id=phase_id).filter_by(project_id=project_id).count() > 0

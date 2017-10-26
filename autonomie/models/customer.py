@@ -516,6 +516,10 @@ class Customer(DBBASE, PersistentACLMixin):
     def get_name(self):
         return self._autonomie_service.format_name(self)
 
+    @classmethod
+    def check_project_id(cls, customer_id, project_id):
+        return cls._autonomie_service.check_project_id(customer_id, project_id)
+
 
 COMPANY_FORM_GRID = (
     (

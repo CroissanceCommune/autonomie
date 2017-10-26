@@ -449,6 +449,8 @@ def phase(dbsession, project):
     from autonomie.models.project import Phase
     phase = Phase(name=u"Phase")
     phase.project = project
+    phase.project_id = project.id
+    project.phases.append(phase)
     dbsession.add(phase)
     dbsession.flush()
     return phase

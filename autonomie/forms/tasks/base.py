@@ -231,14 +231,13 @@ def deferred_company_customer_validator(node, kw):
 
 def get_tasktype_from_request(request):
     route_name = request.matched_route.name
+    result = request.context.type_
     for predicate in ('estimation', 'invoice', 'cancelinvoice'):
         # Matches estimation and estimations
-        if route_name in [predicate, "project_%ss" % (predicate,)]:
-            return predicate
-    else:
-        return request.context.type_
-    raise Exception(u"You shouldn't have come here with the current route %s"
-                    % route_name)
+        if route_name == "project_%ss" % predicate:
+            result = predicate
+            break
+    return result
 
 
 def get_projects_from_request(request):
@@ -397,13 +396,36 @@ class NewTaskSchema(colander.Schema):
     )
 
 
+def validate_customer_project_phase(form, value):
+    """
+    Validate that customer project and phase are linked
+
+    :param obj form: The form object
+    :param dict value: The submitted values
+    """
+    from autonomie.models.project import Project
+    customer_id = value['customer_id']
+    project_id = value['project_id']
+    phase_id = value['phase_id']
+
+    if not Project.check_phase_id(project_id, phase_id):
+        exc = colander.Invalid(form, u"Projet et dossier ne correspondent pas")
+        exc['phase_id'] = u"Ne correspond pas au projet ci-dessus"
+        raise exc
+    from autonomie.models.customer import Customer
+    if not Customer.check_project_id(customer_id, project_id):
+        exc = colander.Invalid(form, u"Client et projet ne correspondent pas")
+        exc['project_id'] = u"Ne correspond pas au client ci-dessus"
+        raise exc
+
+
 def get_new_task_schema():
     """
     Return the schema for adding tasks
 
     :returns: The schema
     """
-    return NewTaskSchema()
+    return NewTaskSchema(validator=validate_customer_project_phase)
 
 
 def add_date_field_after_bind(schema, kw):
@@ -456,7 +478,7 @@ def get_duplicate_schema():
 
     :returns: The schema
     """
-    return DuplicateSchema()
+    return DuplicateSchema(validator=validate_customer_project_phase)
 
 
 def get_task_from_context(context):

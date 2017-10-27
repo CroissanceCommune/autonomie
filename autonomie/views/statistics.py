@@ -317,6 +317,7 @@ class RestStatisticCriterion(BaseRestView):
     Api rest pour la gestion des critères statistiques
     """
     def get_schema(self, submitted):
+        logger.debug("Looking for a schema : %s" % submitted)
         model_type = submitted['type']
 
         model = CRITERION_MODELS.get(model_type)
@@ -328,7 +329,10 @@ class RestStatisticCriterion(BaseRestView):
         if model_type in ('or', 'and'):
             schema['criteria'] = colander.SchemaNode(
                 colander.Sequence(),
-                forms.get_sequence_child_item(BaseStatisticCriterion)[0],
+                forms.get_sequence_child_item(
+                    BaseStatisticCriterion,
+                    child_attrs=('id', 'key')
+                )[0],
                 name='criteria',
                 missing=colander.drop,
             )

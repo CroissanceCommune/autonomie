@@ -183,6 +183,16 @@ def get_company_menu(request, cid, css=None):
         href=href
     )
 
+    href = request.route_path(
+        "/companies/{id}/accounting/treasury_measure_grids",
+        id=cid
+    )
+    gestion.add_item(
+        u"État de trésorerie",
+        icon="fa fa-money",
+        href=href
+    )
+
     menu.add(gestion)
 
     # Docs
@@ -209,16 +219,6 @@ def get_company_menu(request, cid, css=None):
     if request.user.has_userdatas():
         href = request.route_path('mydocuments', id=request.user.id)
         docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
-
-    href = request.route_path(
-        "/companies/{id}/accounting/treasury_measure_grids",
-        id=cid
-    )
-    docs.add_item(
-        u"État de trésorerie",
-        icon="fa fa-money",
-        href=href
-    )
 
     menu.add(docs)
 

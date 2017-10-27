@@ -590,7 +590,7 @@ class CustomSchemaNode(colander.SchemaNode):
 
 
 def get_sequence_child_item(
-    model, label_attr='title', required=False
+    model, required=False, child_attrs=('id', 'label'),
 ):
     """
     Return the schema node to be used for sequence of related elements
@@ -612,6 +612,12 @@ def get_sequence_child_item(
             },
             backref="company_info",
         )
+
+    :param obj model: The model used for child items
+    :param bool required: At least one element is required ?
+    :param tuple child_attrs: The child attributes used to build the options in
+    the form ('id_attr', 'label_attr') in most cases id_attr is used as foreign
+    key and label_attr is the model's attribute used for display
     """
     missing = colander.drop
     if required:
@@ -621,7 +627,7 @@ def get_sequence_child_item(
         CustomSchemaNode(
             colander.Integer(),
             name='id',
-            widget=get_deferred_select(model),
+            widget=get_deferred_select(model, keys=child_attrs),
             missing=missing,
             model=model,
             validator=get_deferred_select_validator(model)

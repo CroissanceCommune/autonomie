@@ -67,7 +67,7 @@
 </div>
 </%block>
 <%block name="footerjs">
-% if api.has_permission('admin_competences', request.context)
+% if api.has_permission('admin_competences', request.context):
 $('select[name=contractor_id]').select2();
 % endif
 </%block>

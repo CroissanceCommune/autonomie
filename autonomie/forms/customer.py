@@ -98,7 +98,6 @@ def get_individual_customer_schema():
     schema = SQLAlchemySchemaNode(Customer, excludes=excludes)
 
     schema['firstname'].title = u"Prénom"
-    schema['firstname'].missing = colander.required
     schema['lastname'].title = u'Nom'
     schema['civilite'].missing = colander.required
     return schema

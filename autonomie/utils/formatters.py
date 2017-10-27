@@ -18,4 +18,6 @@ def format_civilite(civilite_str):
         res = u"Mr"
     elif civilite_str.lower() == u'madame':
         res = u"Mme"
+    elif civilite_str.lower() == u'mr&mme':
+        res = u"Mr et Mme"
     return res

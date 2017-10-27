@@ -52,7 +52,7 @@ from sqlalchemy.orm import (
     deferred,
     relationship,
 )
-from autonomie_base.consts import CIVILITE_OPTIONS
+from autonomie_base.consts import CIVILITE_OPTIONS as ORIG_CIVILITE_OPTIONS
 from autonomie import forms
 from autonomie.forms.customer import customer_after_bind
 from autonomie_base.models.types import (
@@ -65,6 +65,8 @@ from autonomie_base.models.base import (
 from autonomie.models.services.customer import CustomerService
 
 log = logging.getLogger(__name__)
+
+CIVILITE_OPTIONS = ORIG_CIVILITE_OPTIONS + (('mr&mme', u"Monsieur et Madame"),)
 
 
 def get_customers_from_request(request):

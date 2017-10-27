@@ -62,7 +62,7 @@
         <a href="${request.route_path('customer', id=customer.id)}"
             title="Voir le client ${customer.name}">
         % endif
-        ${customer.name}
+        ${customer.label}
         % if link:
         </a>
     %endif

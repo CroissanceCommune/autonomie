@@ -601,11 +601,10 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       "select": "form[name=criterion] select"
     },
     templateHelpers: function(){
-      console.log(this.template);
       var type = this.model.get('type');
       var criteria_options = [];
       _.each(this.destCollection.models, function(model){
-        if (model.get('type') != 'or'){
+        if ((model.get('type') != 'or') && (model.get('type') != 'and') ){
           criteria_options.push(
             {
               value: model.get('id'),

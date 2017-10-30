@@ -603,17 +603,9 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     templateHelpers: function(){
       var type = this.model.get('type');
       var criteria_options = [];
-      _.each(this.destCollection.models, function(model){
-        if ((model.get('type') != 'or') && (model.get('type') != 'and') ){
-          criteria_options.push(
-            {
-              value: model.get('id'),
-              label: model.get_full_label(AppOptions)
-            }
-          );
-        }
-        }
-      );
+      var selected_criteria_ids = [];
+
+      /* Collect selected criteria */
       _.each(this.model.get('criteria'), function(datas){
         if (_.isObject(datas)){
           var model = new CriterionModel(datas);
@@ -623,8 +615,22 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
               label: model.get_full_label(AppOptions),
               selected: true}
           );
+          selected_criteria_ids.push(model.get('id'));
         }
       });
+      _.each(this.destCollection.models, function(model){
+        if ((model.get('type') != 'or') && (model.get('type') != 'and') ){
+          if (!_.contains(selected_criteria_ids, model.get('id'))){
+              criteria_options.push(
+                {
+                  value: model.get('id'),
+                  label: model.get_full_label(AppOptions)
+                }
+              );
+          }
+        }
+        }
+      );
       return {
         type: type,
         label: this.label,

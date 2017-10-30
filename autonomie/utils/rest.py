@@ -223,7 +223,7 @@ class RestJsonRepr(object):
 def add_rest_views(
     config, route_name, factory, edit_rights='edit',
     add_rights='view', view_rights='view', delete_rights='edit',
-    collection_route_name=None
+    collection_route_name=None, collection_view_rights=None,
 ):
     """
         Add a rest iface associating the factory's methods to the different
@@ -237,6 +237,9 @@ def add_rest_views(
     """
     if collection_route_name is None:
         collection_route_name = route_name + 's'
+
+    if collection_view_rights is None:
+        collection_view_rights = view_rights
 
     config.add_view(
         factory,
@@ -254,7 +257,7 @@ def add_rest_views(
             route_name=collection_route_name,
             renderer="json",
             request_method='GET',
-            permission=view_rights,
+            permission=collection_view_rights,
             xhr=True,
         )
 

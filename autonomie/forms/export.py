@@ -78,6 +78,8 @@ def deferred_invoice_number_clean(node, kw):
     prefix = request.config.get('invoiceprefix', '')
 
     def cleaner(value):
+        if value == colander.null:
+            return value
         if prefix and value.startswith(prefix):
             return value[len(prefix):]
         else:

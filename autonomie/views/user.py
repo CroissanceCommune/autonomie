@@ -69,6 +69,7 @@ from autonomie.utils.widgets import (
     StaticWidget,
 )
 from autonomie.export.utils import write_file_to_request
+from autonomie.utils.renderer import set_close_popup_response
 from sqla_inspect import py3o
 from deform_extensions import (
     AccordionFormWidget,
@@ -987,11 +988,17 @@ class UserDatasXlsView(UserDatasListClass, BaseListView):
         """
         Return the streamed file object
         """
+        all_ids = [elem[0] for elem in query]
+
+        if not all_ids:
+            msg = u"Il n'y a aucun élément à exporter"
+            set_close_popup_response(self.request, msg)
+            return self.request.response
+
         job = FileGenerationJob()
         job.set_owner(self.request.user.login)
         self.request.dbsession.add(job)
         self.request.dbsession.flush()
-        all_ids = [elem[0] for elem in query]
         celery_job = export_to_file.delay(
             job.id,
             'userdatas',

@@ -6308,13 +6308,14 @@ webpackJsonp([2],[
 	    initialize: function initialize() {
 	        this.populate();
 	        this.on('change:id', this.populate.bind(this));
+	        this.listenTo(this.lines, 'add', this.updateLines);
+	        this.listenTo(this.lines, 'sync', this.updateLines);
+	        this.listenTo(this.lines, 'remove', this.updateLines);
 	    },
 	    populate: function populate() {
 	        if (this.get('id')) {
 	            this.lines = new _TaskLineCollection2.default(this.get('lines'));
 	            this.lines.url = this.url() + '/task_lines';
-	            this.listenTo(this.lines, 'sync', this.updateLines);
-	            this.listenTo(this.lines, 'remove', this.updateLines);
 	        }
 	    },
 	    updateLines: function updateLines() {
@@ -8139,20 +8140,14 @@ webpackJsonp([2],[
 	
 	var _ExpenseView2 = _interopRequireDefault(_ExpenseView);
 	
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 152);
+	
+	var _ErrorView2 = _interopRequireDefault(_ErrorView);
+	
 	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 22);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/*
-	 * File Name : DiscountBlockView.js
-	 *
-	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	 * Company : Majerti ( http://www.majerti.fr )
-	 *
-	 * This software is distributed under GPLV3
-	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	 *
-	 */
 	var DiscountBlockView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-section discount-group',
@@ -8160,7 +8155,8 @@ webpackJsonp([2],[
 	    regions: {
 	        'lines': '.lines',
 	        'modalRegion': '.modalregion',
-	        'expenses_ht': '.expenses_ht'
+	        'expenses_ht': '.expenses_ht',
+	        'errors': ".block-errors"
 	    },
 	    ui: {
 	        add_button: 'button.btn-add'
@@ -8174,10 +8170,25 @@ webpackJsonp([2],[
 	        'destroy:modal': 'render',
 	        'insert:percent': 'onInsertPercent'
 	    },
+	    collectionEvents: {
+	        'change': 'hideErrors'
+	    },
 	    initialize: function initialize(options) {
 	        this.collection = options['collection'];
 	        this.model = options['model'];
+	        this.listenTo(this.collection, 'validated:invalid', this.showErrors);
+	        this.listenTo(this.collection, 'validated:valid', this.hideErrors.bind(this));
 	    },
+	    showErrors: function showErrors(model, errors) {
+	        this.detachChildView('errors');
+	        this.showChildView('errors', new _ErrorView2.default({ errors: errors }));
+	        this.$el.addClass('error');
+	    },
+	    hideErrors: function hideErrors(model) {
+	        this.detachChildView('errors');
+	        this.$el.removeClass('error');
+	    },
+	
 	    isEmpty: function isEmpty() {
 	        return this.collection.length === 0;
 	    },
@@ -8235,7 +8246,16 @@ webpackJsonp([2],[
 	        }
 	        this.showChildView('expenses_ht', new _ExpenseView2.default({ model: this.model }));
 	    }
-	});
+	}); /*
+	     * File Name : DiscountBlockView.js
+	     *
+	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	     * Company : Majerti ( http://www.majerti.fr )
+	     *
+	     * This software is distributed under GPLV3
+	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	     *
+	     */
 	exports.default = DiscountBlockView;
 
 /***/ }),
@@ -8268,17 +8288,17 @@ webpackJsonp([2],[
 	    validation: {
 	        description: {
 	            required: true,
-	            msg: "Veuillez saisir un objet"
+	            msg: "Remise : Veuillez saisir un objet"
 	        },
 	        amount: {
 	            required: true,
 	            pattern: "amount",
-	            msg: "Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule"
+	            msg: "Remise : Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule"
 	        },
 	        tva: {
 	            required: true,
 	            pattern: "number",
-	            msg: "Veuillez sélectionner une TVA"
+	            msg: "Remise : Veuillez sélectionner une TVA"
 	        }
 	    },
 	    ht: function ht() {
@@ -8363,8 +8383,8 @@ webpackJsonp([2],[
 	        var channel = _backbone4.default.channel('facade');
 	        this.listenTo(channel, 'bind:validation', this.bindValidation);
 	        this.listenTo(channel, 'unbind:validation', this.unbindValidation);
-	        this.listenTo(this.model, 'validated:invalid', this.showErrors);
-	        this.listenTo(this.model, 'validated:valid', this.hideErrors.bind(this));
+	        this.listenTo(this.collection, 'validated:invalid', this.showErrors);
+	        this.listenTo(this.collection, 'validated:valid', this.hideErrors.bind(this));
 	    },
 	    showErrors: function showErrors(model, errors) {
 	        this.$el.addClass('error');
@@ -8960,7 +8980,7 @@ webpackJsonp([2],[
 	  },"3":function(depth0,helpers,partials,data) {
 	  return "in";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<h2>Remises et frais</h2>\n<div class='modalregion'></div>\n<div class='content'>\n";
+	  var stack1, buffer = "<h2>Remises et frais</h2>\n<div class='modalregion'></div>\n<div class='content'>\n    <div class='block-errors'></div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.not_empty : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  buffer += "    <div class='row lines'>\n    </div>\n    <div class='row'>\n        <div class='col-xs-11 text-right'>\n            <button type='button' class='btn btn-default btn-add'>\n                <i class='glyphicon glyphicon-plus-sign'></i> Ajouter une remise\n            </button>\n        </div>\n    </div>\n    <a\n        data-target='#discount-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"discount-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i> Plus d'options (Frais forfaitaires)\n    </a>\n    <div\n        class='collapse row ";

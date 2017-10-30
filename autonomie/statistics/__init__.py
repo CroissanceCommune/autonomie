@@ -56,11 +56,13 @@ On doit pouvoir générer des query :
         ).filter(models.user.ExternalActivityDatas.hours<8).count()
 
 TODO :
-    In [3]: query = db().query(UserDatas.id).outerjoin(UserDatas.parcours_convention_cape)
+    In [3]: query = db().query(UserDatas.id).outerjoin(
+        UserDatas.parcours_convention_cape)
 
     In [4]: query = query.group_by(UserDatas.id)
 
-    In [5]: query = query.having(func.max(DateConventionCAPEDatas.date) > datetime.date.today())
+    In [5]: query = query.having(
+        func.max(DateConventionCAPEDatas.date) > datetime.date.today())
 
     In [6]: query.count()
 """
@@ -440,7 +442,10 @@ class OptRelCriterionQueryHelper(CriterionQueryHelper):
     def filter_nioo(self, attr):
         """ is not one of """
         if self.searches:
-            return not_(attr.in_(self.searches))
+            return or_(
+                not_(attr.in_(self.searches)),
+                attr == None,
+            )
 
 
 class NumericCriterionQueryHelper(CriterionQueryHelper):
@@ -709,9 +714,8 @@ class QueryFactory(object):
                 ids = factory.get_ids()
             else:
                 # AND CLAUSE
-                ids = ids.intersection(ids)
+                ids = ids.intersection(factory.get_ids())
         return ids
-
 
     def query(self):
         """
@@ -873,4 +877,3 @@ class AndQueryFactory(OrQueryFactory):
                 # AND CLAUSE
                 ids = ids.intersection(factory.get_ids())
         return ids
-

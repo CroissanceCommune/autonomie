@@ -77,7 +77,8 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       'click #entry_list_header button.edit': "toggleForm",
       "click #entry_edit_form button[name=submit]": "changeDatas",
       "submit form": "changeDatas",
-      "click #entry_edit_form button[name=cancel]": "toggleForm"
+      "click #entry_edit_form button[name=cancel]": "toggleForm",
+      'click button.csv_export': '_open_csv_popup'
     },
     modelEvents: {
       change: "updateDatas"
@@ -133,8 +134,9 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
       Backbone.Validation.unbind(this);
       return true;
     },
-    templateHelpers: function(){
-      return {csv_url: this.model.csv_url()};
+    _open_csv_popup: function(){
+        var csv_url = this.model.csv_url();
+        openPopup(csv_url, this.model.title);
     }
   });
 
@@ -295,10 +297,12 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     template: "entry",
     tagName: "tr",
     events: {
-      'click a.remove':'_remove'
+      'click a.remove':'_remove',
+      'click button.csv_export': '_open_csv_popup'
     },
-    templateHelpers: function(){
-      return {csv_url: this.model.csv_url()};
+    _open_csv_popup: function(){
+        var csv_url = this.model.csv_url();
+        openPopup(csv_url, this.model.title);
     },
     modelEvents:{
       "change:title": "render"

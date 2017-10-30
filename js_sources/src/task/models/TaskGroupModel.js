@@ -32,13 +32,14 @@ const TaskGroupModel = BaseModel.extend({
     initialize: function(){
         this.populate();
         this.on('change:id', this.populate.bind(this));
+        this.listenTo(this.lines, 'add', this.updateLines);
+        this.listenTo(this.lines, 'sync', this.updateLines);
+        this.listenTo(this.lines, 'remove', this.updateLines);
     },
     populate: function(){
         if (this.get('id')){
             this.lines = new TaskLineCollection(this.get('lines'));
             this.lines.url = this.url() + '/task_lines';
-            this.listenTo(this.lines, 'sync', this.updateLines);
-            this.listenTo(this.lines, 'remove', this.updateLines);
         }
     },
     updateLines(){

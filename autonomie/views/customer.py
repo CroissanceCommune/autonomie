@@ -672,4 +672,5 @@ def includeme(config):
         edit_rights="edit_customer",
         add_rights="add_customer",
         delete_rights="delete_customer",
+        collection_view_rights="list_customers",
     )

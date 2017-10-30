@@ -23,17 +23,17 @@ const DiscountModel = BaseModel.extend({
     validation: {
         description: {
             required: true,
-            msg: "Veuillez saisir un objet",
+            msg: "Remise : Veuillez saisir un objet",
         },
         amount: {
             required: true,
             pattern: "amount",
-            msg: "Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule",
+            msg: "Remise : Veuillez saisir un coup unitaire, dans la limite de 5 chiffres après la virgule",
         },
         tva: {
             required: true,
             pattern: "number",
-            msg: "Veuillez sélectionner une TVA"
+            msg: "Remise : Veuillez sélectionner une TVA"
         },
     },
     ht: function(){

@@ -26,8 +26,8 @@ const DiscountCollectionView = Mn.CollectionView.extend({
         var channel = Radio.channel('facade');
         this.listenTo(channel, 'bind:validation', this.bindValidation);
         this.listenTo(channel, 'unbind:validation', this.unbindValidation);
-        this.listenTo(this.model, 'validated:invalid', this.showErrors);
-        this.listenTo(this.model, 'validated:valid', this.hideErrors.bind(this));
+        this.listenTo(this.collection, 'validated:invalid', this.showErrors);
+        this.listenTo(this.collection, 'validated:valid', this.hideErrors.bind(this));
     },
     showErrors(model, errors){
         this.$el.addClass('error');

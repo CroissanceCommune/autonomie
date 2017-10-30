@@ -13,6 +13,7 @@ import DiscountModel from '../models/DiscountModel.js';
 import DiscountCollectionView from './DiscountCollectionView.js';
 import DiscountFormPopupView from './DiscountFormPopupView.js';
 import ExpenseView from './ExpenseView.js';
+import ErrorView from './ErrorView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
 const DiscountBlockView = Mn.View.extend({
@@ -23,6 +24,7 @@ const DiscountBlockView = Mn.View.extend({
         'lines': '.lines',
         'modalRegion': '.modalregion',
         'expenses_ht': '.expenses_ht',
+        'errors': ".block-errors",
     },
     ui: {
         add_button: 'button.btn-add'
@@ -36,9 +38,23 @@ const DiscountBlockView = Mn.View.extend({
         'destroy:modal': 'render',
         'insert:percent': 'onInsertPercent',
     },
+    collectionEvents: {
+        'change': 'hideErrors'
+    },
     initialize: function(options){
         this.collection = options['collection'];
         this.model = options['model'];
+        this.listenTo(this.collection, 'validated:invalid', this.showErrors);
+        this.listenTo(this.collection, 'validated:valid', this.hideErrors.bind(this));
+    },
+    showErrors(model, errors){
+        this.detachChildView('errors');
+        this.showChildView('errors', new ErrorView({errors: errors}));
+        this.$el.addClass('error');
+    },
+    hideErrors(model){
+        this.detachChildView('errors');
+        this.$el.removeClass('error');
     },
     isEmpty: function(){
         return this.collection.length === 0;

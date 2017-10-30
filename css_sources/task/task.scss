@@ -16,6 +16,9 @@ $form-subblock-bgcolor: #fbfbfb;
   .lines{
     background-color: $form-subblock-bgcolor;
     margin: 0px 20px 0px 0px;
+    .error{
+      background-color: #f2dede;
+    }
   }
   .actions{
     padding: 15px 0px;

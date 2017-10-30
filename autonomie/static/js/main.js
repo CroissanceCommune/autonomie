@@ -397,6 +397,9 @@ function dismissPopup(win, options){
         dest_tag = $('.pagetitle');
     }
     dest_tag.after(new_content);
+    $('html, body').animate({
+        scrollTop: dest_tag.offset().top
+    });
 }
 
 $(setupMainBehaviours);

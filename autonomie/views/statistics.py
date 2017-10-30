@@ -392,14 +392,6 @@ class CsvEntryView(UserDatasCsvView):
         filename = "{0}.csv".format(ascii.force_ascii(self.context.title))
         return filename
 
-    def _stream_rows(self, query):
-        """
-        Return a generator with the rows we expect in our output,
-        we remove the id (used to ensure that the count is ok)
-        """
-        for id, item in query.all():
-            yield item
-
 
 class CsvSheetView(BaseView):
     """

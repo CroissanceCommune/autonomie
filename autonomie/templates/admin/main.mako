@@ -30,7 +30,7 @@
 <%block name="afteradminmenu">
 % if not message is UNDEFINED and message:
     <div class='alert alert-info'>
-        ${format_text(message, False)}
+        ${format_text(message)}
     </div>
 % endif
 </%block>

@@ -143,4 +143,4 @@ class AccountingOperation(DBBASE):
         )
 
     def total(self):
-        return self.credit - self.debit
+        return self.debit - self.credit

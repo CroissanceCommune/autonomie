@@ -68,12 +68,12 @@ def populate_accounting_treasury_measure_types(session):
     if TreasuryMeasureType.query().count() == 0:
         for internal_id, start, label in (
             (1, '5', u"Trésorerie du jour",),
-            (2, "42,43,44", u"Impôts, taxes et cotisations dues",),
+            (2, "42,-425,43,44", u"Impôts, taxes et cotisations dues",),
             (3, "40", u"Fournisseurs à payer",),
             (5, "421", u"Salaires à payer",),
             (6, '425', u"Notes de dépenses à payer"),
             (7, "41", u"Clients à encaisser"),
-            (9, "1,2,3", u"Indicateurs par comptes"),
+            (9, "1,2,3", u"Comptes bilan non pris en compte"),
         ):
             session.add(
                 TreasuryMeasureType(

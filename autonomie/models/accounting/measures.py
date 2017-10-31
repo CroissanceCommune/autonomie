@@ -69,7 +69,7 @@ class TreasuryMeasureType(DBBASE):
         }
     )
     account_prefix = Column(
-        String(10),
+        String(255),
         info={
             'colanderalchemy': {
                 'title': u"Rassemble tous les comptes commençant par",

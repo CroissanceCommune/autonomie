@@ -43,13 +43,14 @@
         </h4>
     </div>
     <% measures = current_grid['measures'] %>
+    <% highlight_measure = int(request.config.get('treasury_measure_ui', default="1")) %>
     <div class='row'>
         <div class='col-xs-12 col-md-3 col-lg-3 text-center'>
             ## 1 est un internal_id defini par le cdc de ce module
-            % if 1 in measures:
-                <h4>${measures[1][0]['label'] | n}</h4>
+            % if highlight_measure in measures:
+                <h4>${measures[highlight_measure][0]['label'] | n}</h4>
             <div class='primary-text-lg'>
-                ${api.format_amount(measures[1][0]['value'], precision=0) | n}&nbsp;€
+                ${api.format_amount(measures[highlight_measure][0]['value'], precision=0) | n}&nbsp;€
             </div>
             % endif
         </div>

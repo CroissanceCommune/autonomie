@@ -13,11 +13,36 @@ from sqlalchemy import asc
 from autonomie.models.accounting.measures import (
     TreasuryMeasureType,
 )
-from autonomie.forms.admin import get_admin_schema
+from autonomie.forms.admin import (
+    get_admin_schema,
+    get_config_schema,
+)
+
+from autonomie.views.admin.tools import (
+    BaseConfigView,
+)
 from autonomie.views import (
     BaseView,
     BaseEditView,
 )
+
+
+logger = logging.getLogger(__name__)
+
+
+class TreasuryMeasureUiView(BaseConfigView):
+    title = u"Configuration de l'interface entrepreneur"
+    description = (
+        u"Configuration des priorités d'affichage dans l'interface"
+        u" de l'entrepreneur"
+    )
+    redirect_route_name = "/admin/accounting"
+    validation_msg = u"Les informations ont bien été enregistrées"
+    keys = ('treasury_measure_ui',)
+    schema = get_config_schema(keys)
+    info_message = u"""
+    Configurer l'indicateur de trésorerie qui sera mis en avant dans \
+    l'interface de l'entrepreneur"""
 
 
 class TreasuryMeasureTypeListView(BaseView):
@@ -163,12 +188,21 @@ def add_routes(config):
         "/admin/accounting/treasury_measure_types/{id}",
         traverse="treasury_measure_types/{id}",
     )
+    config.add_route(
+        '/admin/accounting/treasury_measure_ui',
+        '/admin/accounting/treasury_measure_ui',
+    )
 
 
 def add_views(config):
     """
     Add views defined in this module
     """
+    config.add_admin_view(
+        TreasuryMeasureUiView,
+        route_name="/admin/accounting/treasury_measure_ui",
+        renderer="admin/main.mako",
+    )
     config.add_admin_view(
         TreasuryMeasureTypeListView,
         route_name="/admin/accounting/treasury_measure_types",

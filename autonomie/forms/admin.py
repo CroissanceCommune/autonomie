@@ -233,6 +233,19 @@ abandons de créance dans les notes de dépense",
     "code_tva_ndf": {
         "title": u"Code TVA utilisé pour les décaissements",
         "description": u"Le code TVA utilisé pour l'export des décaissements"
+    },
+    "treasury_measure_ui": {
+        "title": u"Indicateur à mettre en évidence",
+        "description": u"Indicateur qui sera mis en évidence dans l'interface "
+        u"entrepreneur",
+        "widget": forms.get_radio(
+            values=(
+                ('1', u"Trésorerie du jour"),
+                ("4", u"Trésorerie de référence"),
+                ("8", u"Trésorerie future"),
+                ("10", u"Résultat de l'entreprise"),
+            )
+        )
     }
 }
 

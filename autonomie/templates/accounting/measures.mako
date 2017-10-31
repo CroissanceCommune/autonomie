@@ -61,7 +61,7 @@
                 % for measure in measures[key]:
                 <tr >
                     <td style="vertical-align:middle">
-                    % if key in (1, 4, 8):
+                    % if key in (1, 4, 8, 10):
                     <h3>
                     % endif
                     ${measure['label'] | n}

@@ -40,9 +40,8 @@ class TreasuryMeasureUiView(BaseConfigView):
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = ('treasury_measure_ui',)
     schema = get_config_schema(keys)
-    info_message = u"""
-    Configurer l'indicateur de trésorerie qui sera mis en avant dans \
-    l'interface de l'entrepreneur"""
+    info_message = u"""Configurer l'indicateur de trésorerie qui sera mis en \
+        avant dans l'interface de l'entrepreneur"""
 
 
 class TreasuryMeasureTypeListView(BaseView):

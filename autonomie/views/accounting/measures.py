@@ -10,6 +10,7 @@ from sqlalchemy import extract
 from autonomie.models.accounting.measures import (
     TreasuryMeasureGrid,
 )
+from autonomie.models.config import Config
 from autonomie.forms.accounting import get_treasury_measures_list_schema
 from autonomie.views import BaseListView
 
@@ -25,12 +26,22 @@ class CompanyAccountingMeasuresListView(BaseListView):
         'current_grid',
         'stream_actions',
         'last_grid',
+        'highlight_key',
     )
     sort_columns = {
         'date': 'date',
     }
     default_sort = 'date'
     default_direction = "desc"
+
+    @property
+    def highlight_key(self):
+        config_key = Config.get("treasury_measure_ui")
+        if config_key is None:
+            key = 1
+        else:
+            key = int(config_key.value)
+        return key
 
     @property
     def info_msg(self):

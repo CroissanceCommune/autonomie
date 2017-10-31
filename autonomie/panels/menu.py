@@ -313,8 +313,8 @@ def get_admin_menus(request):
 
         href = request.route_path("/accounting/operation_uploads")
         treasury.add_item(
-            u"Comptes de trésorerie",
-            icon="fa fa-file-o",
+            u"Fichiers d'états de trésorerie",
+            icon="fa fa-money",
             href=href
         )
 

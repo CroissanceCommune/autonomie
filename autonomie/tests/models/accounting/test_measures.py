@@ -11,3 +11,7 @@ def test_treasury_measure_type():
     assert type_.match("1122334455")
     assert not type_.match("1222334455")
     assert type_.match("3322334455")
+
+    type_ = TreasuryMeasureType(label=u"Test", account_prefix="11,-112")
+    assert type_.match("11111")
+    assert not type_.match("112111")

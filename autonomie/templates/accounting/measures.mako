@@ -46,10 +46,10 @@
     <div class='row'>
         <div class='col-xs-12 col-md-3 col-lg-3 text-center'>
             ## 1 est un internal_id defini par le cdc de ce module
-            % if 1 in measures:
-                <h4>${measures[1][0]['label'] | n}</h4>
+            % if highlight_key in measures:
+                <h4>${measures[highlight_key][0]['label'] | n}</h4>
             <div class='primary-text-lg'>
-                ${api.format_amount(measures[1][0]['value'], precision=0) | n}&nbsp;€
+                ${api.format_amount(measures[highlight_key][0]['value'], precision=0) | n}&nbsp;€
             </div>
             % endif
         </div>
@@ -61,7 +61,7 @@
                 % for measure in measures[key]:
                 <tr >
                     <td style="vertical-align:middle">
-                    % if key in (1, 4, 8):
+                    % if key in (1, 4, 8, 10):
                     <h3>
                     % endif
                     ${measure['label'] | n}

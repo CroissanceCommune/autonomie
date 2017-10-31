@@ -64,6 +64,7 @@ def populate_accounting_treasury_measure_types(session):
     """
     Populate the database with treasury measure types
     """
+    from autonomie.models.config import Config
     from autonomie.models.accounting.measures import TreasuryMeasureType
     if TreasuryMeasureType.query().count() == 0:
         for internal_id, start, label in (
@@ -80,6 +81,9 @@ def populate_accounting_treasury_measure_types(session):
                     internal_id=internal_id, account_prefix=start, label=label
                 )
             )
+        session.add(
+            Config(name="treasury_measure_ui", value="1")
+        )
         session.flush()
 
 

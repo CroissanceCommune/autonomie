@@ -76,8 +76,10 @@ class TreasuryMeasureType(DBBASE):
                 "description": u"Toutes les écritures dont le compte commence "
                 u"par le préfixe fournit seront utilisées pour calculer cet "
                 u"indicateur de trésorerie. "
-                u"NB : Une liste de préfixe peut être fournie en les \
-séparant par des virgules (ex : 42,43)",
+                u"NB : Une liste de préfixe peut être fournie en les "
+                u"séparant par des virgules (ex : 42,43), un préfixe peut "
+                u"être exclu en plaçant le signe '-' devant (ex: 42,-425 "
+                u"incluera tous les comptes 42... sauf les comptes 425...)",
             }
         },
     )
@@ -90,11 +92,24 @@ séparant par des virgules (ex : 42,43)",
     )
 
     def match(self, account):
+        """
+        Check if the current Type definition matches the given account number
+
+        :param str account: A string representing an accounting account (e.g:
+            42500000)
+        :returns: True or False if it matches
+        :rtype: bool
+        """
         res = False
         for prefix in self.account_prefix.split(','):
-            if account.startswith(prefix):
-                res = True
-                break
+            if prefix.startswith('-'):
+                prefix = prefix[1:].strip()
+                if account.startswith(prefix):
+                    res = False
+                    break
+            elif not res:
+                if account.startswith(prefix):
+                    res = True
         return res
 
     @classmethod

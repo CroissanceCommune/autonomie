@@ -45,8 +45,8 @@
         %>
         <a
             class='btn btn-default'
-            href='${url}'
-            target='_blank'
+            href='#'
+            onclick="openPopup('${url}');"
             title="Exporter les éléments de la liste au format xls">
             <i class='fa fa-file-excel-o'></i>&nbsp;Excel
         </a>
@@ -56,8 +56,8 @@
         %>
         <a
             class='btn btn-default'
-            href='${url}'
-            target='_blank'
+            href='#'
+            onclick="openPopup('${url}');"
             title="Exporter les éléments de la liste au format ods">
             <i class='fa fa-file'></i>&nbsp;ODS
         </a>
@@ -67,8 +67,8 @@
         %>
         <a
             class='btn btn-default'
-            href='${url}'
-            target='_blank'
+            href='#'
+            onclick="openPopup('${url}');"
             title="Exporter les éléments de la liste au format csv">
             <i class='fa fa-file'></i>&nbsp;CSV
         </a>

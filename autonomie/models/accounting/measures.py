@@ -198,6 +198,14 @@ class TreasuryMeasureGrid(DBBASE):
             "label": u"Trésorerie future",
             "value": ref_treasury,
         }]
+
+        if 9 in measures_dict:
+            ref_treasury += measures_dict[9][0]['value']
+
+        measures_dict[10] = [{
+            'label': u"Résultat de l'entreprise",
+            "value": ref_treasury,
+        }]
         return result
 
     @classmethod

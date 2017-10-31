@@ -69,11 +69,11 @@ def populate_accounting_treasury_measure_types(session):
     if TreasuryMeasureType.query().count() == 0:
         for internal_id, start, label in (
             (1, '5', u"Trésorerie du jour",),
-            (2, "42,-425,43,44", u"Impôts, taxes et cotisations dues",),
+            (2, "42,-421,-425,43,44", u"Impôts, taxes et cotisations dues",),
             (3, "40", u"Fournisseurs à payer",),
             (5, "421", u"Salaires à payer",),
-            (6, '425', u"Notes de dépenses à payer"),
-            (7, "41", u"Clients à encaisser"),
+            (6, "41", u"Clients à encaisser"),
+            (7, '425', u"Notes de dépenses à payer"),
             (9, "1,2,3", u"Comptes bilan non pris en compte"),
         ):
             session.add(
@@ -81,9 +81,7 @@ def populate_accounting_treasury_measure_types(session):
                     internal_id=internal_id, account_prefix=start, label=label
                 )
             )
-        session.add(
-            Config(name="treasury_measure_ui", value="1")
-        )
+        Config.set("treasury_measure_ui", "1")
         session.flush()
 
 

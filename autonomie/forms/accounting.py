@@ -45,7 +45,7 @@ def deferred_analytical_account_widget(node, kw):
     """
     datas = DBSESSION().query(
         distinct(AccountingOperation.analytical_account)
-    ).all()
+    ).order_by(AccountingOperation.analytical_account).all()
     datas = zip(*datas)[0]
     values = zip(datas, datas)
     values.insert(0, ('', u'Filtrer par code analytique'))
@@ -59,7 +59,7 @@ def deferred_general_account_widget(node, kw):
     """
     datas = DBSESSION().query(
         distinct(AccountingOperation.general_account)
-    ).all()
+    ).order_by(AccountingOperation.general_account).all()
     datas = zip(*datas)[0]
     values = zip(datas, datas)
     values.insert(0, ('', u'Filtrer par compte général'))

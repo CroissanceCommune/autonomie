@@ -75,6 +75,11 @@
                     </h4>
                     </td>
                 </tr>
+                % if key == 8:
+                <tr>
+                <td colspan=2> <hr /></td>
+                </tr>
+                % endif
                 % endfor
             % endfor
             </table>

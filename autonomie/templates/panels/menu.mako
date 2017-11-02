@@ -53,7 +53,7 @@
     </li>
 </%def>
 % if menu is not UNDEFINED or usermenu is not UNDEFINED:
-    <header class="navbar navbar-inverse hidden-print headmenu menu navbar-static-side">
+    <header class="navbar navbar-stacked navbar-inverse hidden-print headmenu menu">
 
     <div class="container-fluid">
 

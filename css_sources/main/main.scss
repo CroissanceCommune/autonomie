@@ -41,6 +41,9 @@ body{
   li a{
     font-weight: 100;
   }
+  .company-search{
+    min-width: 140px;
+  }
 }
 .headmenu.menu{
   background-color: $header-bkg-color-dark;
@@ -50,6 +53,9 @@ body{
   li a{
     font-weight: 100;
     color: #fff;
+  }
+  li .company-search a{
+    color: #222;
   }
   .navbar-nav .open a, .navbar-nav .open a:hover, .navbar-nav .open a:focus, .navbar-nav li.active a{
     background-color: $header-bkg-color-dark;

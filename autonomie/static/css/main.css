@@ -23,6 +23,8 @@ body {
   min-height: 35px; }
   .headmenu li a {
     font-weight: 100; }
+  .headmenu .company-search {
+    min-width: 140px; }
 
 .headmenu.menu {
   background-color: #2c3a49;
@@ -32,6 +34,8 @@ body {
   .headmenu.menu li a {
     font-weight: 100;
     color: #fff; }
+  .headmenu.menu li .company-search a {
+    color: #222; }
   .headmenu.menu .navbar-nav .open a, .headmenu.menu .navbar-nav .open a:hover, .headmenu.menu .navbar-nav .open a:focus, .headmenu.menu .navbar-nav li.active a {
     background-color: #2c3a49;
     font-weight: 400; }

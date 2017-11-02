@@ -146,6 +146,25 @@ class TvaEditView(BaseEditView):
     ]
     title = u"Modifier"
 
+    def submit_success(self, appstruct):
+        old_products = []
+        for product in self.context.products:
+            if product.id not in [p.get('id') for p in appstruct['products']]:
+                product.active = False
+                old_products.append(product)
+        model = self.schema.objectify(appstruct, self.context)
+        model.products.extend(old_products)
+        self.dbsession.merge(model)
+        self.dbsession.flush()
+
+        if self.msg:
+            self.request.session.flash(self.msg)
+
+        if hasattr(self, 'redirect'):
+            return self.redirect()
+        elif self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
+
 
 class TvaAddView(BaseAddView):
     """

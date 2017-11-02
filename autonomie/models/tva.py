@@ -60,6 +60,16 @@ TVA_GRID = (
     (('products', 12),),
 )
 
+PRODUCT_GRID = (
+    (
+        ('name', 6),
+        ('compte_cg', 6),
+    ),
+    (
+        ('active', 12),
+    ),
+)
+
 
 class Tva(DBBASE):
     """
@@ -230,7 +240,7 @@ devis/une facture,la mention apparaitra dans la sortie PDF
 class Product(DBBASE):
     __colanderalchemy_config__ = {
         'title': u"Compte produit",
-        'widget': deform_extensions.InlineMappingWidget(),
+        'widget': deform_extensions.GridMappingWidget(named_grid=PRODUCT_GRID)
     }
     __tablename__ = 'product'
     __table_args__ = default_table_args
@@ -254,7 +264,13 @@ class Product(DBBASE):
     active = Column(
         Boolean(),
         default=True,
-        info={'colanderalchemy': {'exclude': True}},
+        info={
+            'colanderalchemy': {
+                'title': u"Activer ce produit ?",
+                'description': u"Si ce produit est inactif, il ne sera plus \
+proposé dans l'interface de configuration des produits",
+            }
+        },
     )
     tva_id = Column(
         Integer,

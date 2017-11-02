@@ -104,7 +104,9 @@ AutonomieApp.on("start", function(){
    *""" Launche the history (controller and router stuff)
    */
   AutonomieApp.router = new MainRouter();
-  Backbone.history.start();
+  if (! Backbone.History.started){
+      Backbone.history.start();
+  }
 });
 
 // Provide a default table item view

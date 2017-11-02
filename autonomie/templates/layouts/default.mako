@@ -114,26 +114,27 @@
         <i class="fa fa-circle-o-notch fa-spin"></i>
     </div>
     <div id='login_form' style='display:none'></div>
-    <script type='text/javascript'>
-      var company_select_tag = $('#company-select-menu');
-      if (!_.isUndefined(company_select_tag)){
-          $('#company-select-menu').select2();
-          $('#company-select-menu').change(
-            function(){window.location = $(this).val();}
-          );
-      }
-      % if request.popups is not UNDEFINED:
-        $( function() {
-          % for name, popup in request.popups.items():
-            setPopUp("${name}", "${popup.title}");
-          % endfor
-        });
-      % endif
-      <%block name='footerjs' />
-    </script>
     <footer id='page-footer-block'>
     Autonomie v${layout.autonomie_version}
     <%block name='footer' />
     </footer>
+    <script type='text/javascript'>
+        $( function() {
+            console.log("In the js func");
+            % if request.popups is not UNDEFINED:
+            % for name, popup in request.popups.items():
+                setPopUp("${name}", "${popup.title}");
+            % endfor
+            % endif
+            var company_select_tag = $('#company-select-menu');
+            if (!_.isUndefined(company_select_tag)){
+                $('#company-select-menu').select2();
+                $('#company-select-menu').change(
+                  function(){window.location = $(this).val();}
+                );
+            }
+        });
+      <%block name='footerjs' />
+    </script>
   </body>
 </html>

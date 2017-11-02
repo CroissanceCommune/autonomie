@@ -189,11 +189,14 @@ class TreasuryMeasureGrid(DBBASE):
         result = {"date": self.date, "id": self.id, "upload_id": self.upload_id}
         result["measures"] = measures_dict = {}
 
+        for type_ in TreasuryMeasureType.query():
+            measures_dict[type_.internal_id] = [
+                {'value': 0, 'label': type_.label}]
+
         for measure in self.measures:
-            m_list = measures_dict.setdefault(
-                measure.measure_type.internal_id, []
-            )
-            m_list.append(measure.__todict__(request))
+            measures_dict[measure.measure_type.internal_id] = [
+                measure.__todict__(request)
+            ]
 
         ref_treasury = 0
         for i in range(1, 4):

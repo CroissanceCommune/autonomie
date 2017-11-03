@@ -19,7 +19,7 @@ EXPORT_BTN = deform.Button(name="submit", type="submit", title=u"Exporter")
 
 HELPMSG_CONFIG = u"""Des éléments de configuration sont manquants, veuillez
 configurer les informations comptables nécessaires à l'export des documents,
-<a onclick="openPopup('{2}');" href='#'>Ici</a>"""
+<a onclick="openPopup('{0}');" href='#'>Ici</a>"""
 
 
 def get_period_form(

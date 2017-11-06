@@ -98,7 +98,7 @@ def test_mail(arguments, env):
     """
     Test tool for mail sending
     """
-    from autonomie.mail import send_mail
+    from autonomie_base.mail import send_mail
     dest = get_value(arguments, 'to', 'autonomie@majerti.fr')
     request = env['request']
     subject = u"Test d'envoi de mail"
@@ -128,7 +128,6 @@ def autonomie_admin_cmd():
         -h --help     Show this screen.
     """
     def callback(arguments, env):
-        args = ()
         if arguments['useradd']:
             func = user_add
         elif arguments['testmail']:

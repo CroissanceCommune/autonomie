@@ -47,12 +47,8 @@ def test_main_config_success(config, get_csrf_request_with_db, dbsession):
     assert get_config()['coop_pdffootertitle'] == u'testvalue2'
 
 
-def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin.tva import (
-        TvaDisableView,
-        TvaEditView,
-        TvaAddView,
-    )
+def test_tva_add_view_success(config, get_csrf_request_with_db, dbsession):
+    from autonomie.views.admin.tva import TvaAddView
     config.add_route('/admin/vente/tvas', '/')
 
     appstruct = {
@@ -67,20 +63,28 @@ def test_tvaview_success(config, get_csrf_request_with_db, dbsession):
 
     assert dbsession.query(tva.Tva).filter(tva.Tva.name == 'test').count() == 1
 
-    appstruct = {
-        'id': 1, 'name':"21%", 'value':2100, "default": True, 'products': []
-    }
-    view = TvaEditView(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-    assert dbsession.query(tva.Tva).filter(tva.Tva.id == 1).first().value == 2100
 
+def test_tva_edit_view_success(config, get_csrf_request_with_db, dbsession, tva):
+    config.add_route('/admin/vente/tvas', '/')
+    from autonomie.views.admin.tva import TvaEditView
+    appstruct = {
+        'name':"21%", 'value':2100, "default": True, 'products': []
+    }
     request = get_csrf_request_with_db()
-    request.context = dbsession.query(
-        tva.Tva).filter(tva.Tva.id == 1).first()
+    request.context = tva
+    view = TvaEditView(request)
+    view.submit_success(appstruct)
+
+    assert tva.name == '21%'
+
+def test_tva_disable_view_sucess(config, get_csrf_request_with_db, dbsession, tva):
+    config.add_route('/admin/vente/tvas', '/')
+    from autonomie.views.admin.tva import TvaDisableView
+    request = get_csrf_request_with_db()
+    request.context = tva
     view = TvaDisableView(request)
     view.__call__()
-    assert dbsession.query(tva.Tva).filter(
-        tva.Tva.id == 1).first().active == False
+    assert not tva.active
 
 
 def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):

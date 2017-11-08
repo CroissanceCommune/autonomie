@@ -2,7 +2,6 @@ var AppOptions = {};
 
 var pp = Popup.extend({
   closefunc: function(){
-    console.log("Not redirecting");
   },
   el: "#popup_container"
 });
@@ -73,7 +72,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
         msg: "est requis"
       },
       value: function(value){
-        if (isNaN(value) || ! ( parseInt(value, 10) >= 0)){
+        if (isNaN(value) || ! ( parseFloat(value) >= 0)){
           return "doit être un nombre positif";
         }
       }
@@ -218,7 +217,9 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     templateHelpers: function(){
       var tva = this.model.get('tva');
       var current_tva = _.find(
-        AppOptions['tvas'], function(item){return item.value == tva;}
+        AppOptions['tvas'], function(item){
+            return item.value == tva;
+        }
       );
       var tva_label = "";
       if (!_.isUndefined(current_tva)){
@@ -337,10 +338,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     templateHelpers: function(){
       var ids = _.pluck(this.model.get('products'), 'id');
-      console.log(ids);
       var product_options = this.updateSelectOptions(
         this.init_options.products, ids, 'id');
-      console.log(product_options);
       return {
         product_options: product_options
       };
@@ -372,7 +371,6 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       }
     },
     category_add: function(){
-      console.log("category_add");
       var model = new CategoryModel({});
 
       this.category_add_view = new CategoryAddFormView({

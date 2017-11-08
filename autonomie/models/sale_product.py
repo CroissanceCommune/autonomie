@@ -39,7 +39,9 @@ from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
+from autonomie.compute.math_utils import integer_to_amount
 from autonomie import forms
+from autonomie.forms.custom_types import AmountType
 
 
 PRODUCT_TO_GROUP_REL_TABLE = Table(
@@ -121,7 +123,17 @@ class SaleProduct(DBBASE):
     label = Column(String(255), nullable=False)
     ref = Column(String(100), nullable=True)
     description = Column(Text(), default='')
-    tva = Column(Integer, default=0)
+    tva = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                "title": u"Montant TVA (cache)",
+                "typ": AmountType(2),
+            },
+            'export': forms.EXCLUDED,
+        },
+        default=0
+    )
     value = Column(Float(), default=0)
     unity = Column(String(100), default='')
 
@@ -141,7 +153,7 @@ class SaleProduct(DBBASE):
             label=self.label,
             ref=self.ref,
             description=self.description,
-            tva=self.tva,
+            tva=integer_to_amount(self.tva, 2),
             value=self.value,
             unity=self.unity,
             category_id=self.category_id,

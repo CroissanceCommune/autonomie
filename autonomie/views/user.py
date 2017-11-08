@@ -348,6 +348,8 @@ class UserList(BaseListView):
         active = appstruct.get('active')
         if active not in (None, '', colander.null):
             query = query.filter(User.active == active)
+        else:
+            query = query.filter(User.active == 'Y')
         return query
 
     def populate_actionmenu(self, appstruct):

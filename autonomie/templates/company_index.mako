@@ -46,7 +46,7 @@
                 class='list-group-item clickable-row'
                 data-href="${request.route_path("/invoices/{id}.html", id=invoice.id)}">
                 <span class='label label-info'>${loop.index + 1}</span>&nbsp;
-                ${format_customer(invoice.customer, False)} - ${api.format_amount(invoice.ttc, precision=5)}
+                ${format_customer(invoice.customer, False)} - ${api.format_amount(invoice.ttc, precision=5)|n}&nbsp;€
             </li>
             % endfor
         </ul>

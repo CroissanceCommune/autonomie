@@ -38,7 +38,7 @@ def task_panel(context, request, task=None, bulk=False):
         task = context
     tvas = task.get_tvas()
     # Check if we've got multiple positive tvas in our task
-    multiple_tvas = len([val for val in tvas if val > 0]) > 1
+    multiple_tvas = len([val for val in tvas if val]) > 1
     return dict(
         task=task,
         project=task.project,

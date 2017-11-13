@@ -50,6 +50,7 @@
         <% colspan = 1 %>
         % for group in groups:
             <% display_tvas_column = multiple_tvas and len(groups) == 1 and group.title == '' %>
+            <% display_tvas_column = multiple_tvas %>
 
             <% num_cols = 2 %>
             %if task.display_units == 1:
@@ -103,6 +104,8 @@
                                 <td class='tva'>
                                     % if line.tva>=0:
                                         ${api.format_amount(line.tva, precision=2)|n}&nbsp;%
+                                    % else:
+                                        0 %
                                     % endif
                                 </td>
                             % endif
@@ -198,11 +201,18 @@
                         % endif
                     </tr>
                 % endif
+                <%doc>
+                If we've got only one tva, for 0% tvas, we only show text
+                For multiple tvas documents, we display a value for each tva amount
+                </%doc>
                 <% tva_objects_dict = task.get_tva_objects() %>
                 %for tva, tva_amount in task.get_tvas().items():
                     <% tva_object = tva_objects_dict.get(tva) %>
                     <tr>
-                        % if tva > 0:
+                        % if multiple_tvas:
+                            <td colspan='${colspan}'
+                                class='rightalign'>
+                        % elif tva > 0:
                             <td colspan='${colspan}'
                                 class='rightalign'>
                         % else:
@@ -219,10 +229,18 @@
                            TVA (${api.format_amount(tva, precision=2)|n} %)
                         % endif
                        </td>
-                       % if tva > 0:
-                        <td class='price'>
-                            ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€
-                        </td>
+                       % if multiple_tvas:
+                            <td class='price'>
+                            % if tva > 0:
+                                ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€
+                            % else:
+                                0&nbsp;€
+                            % endif
+                            </td>
+                        % elif tva > 0:
+                            <td class='price'>
+                                ${api.format_amount(tva_amount, precision=5)|n}&nbsp;€
+                            </td>
                         % endif
                     </tr>
                 % endfor

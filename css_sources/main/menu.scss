@@ -1,0 +1,60 @@
+
+.headmenu{
+  border-radius: 0px;
+  margin-bottom: 0px;
+  min-height: 35px;
+  li a{
+    font-weight: 100;
+  }
+  .company-search{
+    min-width: 140px;
+    margin-top: 9px;
+  }
+}
+.headmenu.menu{
+  background-color: $header-bkg-color-dark;
+  border-bottom: 1px solid $header-bkg-color;
+	box-shadow: 0 1px 5px 0 rgba(0,0,0,0.3);
+  border: none;
+  li a{
+    font-weight: 100;
+    color: #fff;
+  }
+  li .company-search a{
+    color: #222;
+  }
+  .navbar-nav .open a, .navbar-nav .open a:hover, .navbar-nav .open a:focus, .navbar-nav li.active a{
+    background-color: $header-bkg-color-dark;
+    font-weight: 400;
+  }
+  .navbar-nav .open .dropdown-menu li a{
+    background-color: #fff;
+    color: #333;
+  }
+ .navbar-nav .open .dropdown-menu li a:hover, .navbar-nav .open .dropdown-menu li a:focus, .navbar-nav .open .dropdown-menu li.active a{
+   background-color: $header-bkg-color-light;
+    color: #222;
+ }
+}
+.headmenu.submenu{
+  background-color: $bkg-color;
+  border-bottom: 1px solid $bkg-color-dark;
+  .dropdown-menu .active a{
+    background-color: $bkg-color;
+  }
+  li a{
+    font-size: 12px;
+    color: $font-grey2;
+    i{
+      color: #1ab394;
+    }
+  }
+}
+.submenu li a, .headmenu.menu li a{
+}
+.subnav{
+  padding: 3px 0px 5px 40px;
+  ul li a{
+    padding: 5px 10px;
+  }
+}

@@ -1,0 +1,59 @@
+form{
+    textarea{
+      width:auto;
+    }
+    textarea.tinymce {
+      height: 400px;
+    }
+}
+.deform{
+  margin-bottom:0px;
+  label{
+    font-weight: normal;
+    font-size: 16px;
+  }
+  legend{
+    font-size:1.4em;
+    font-weight:bold;
+  }
+  fieldset{
+    border:none;
+    padding:0px;
+  }
+  fieldset:hover{
+    border:none;
+  }
+  .errorMsgLbl{
+    background-color:transparent;
+  }
+  .deform-fixed-seq label{
+    font-weight: bold;
+  }
+  .deform-seq-item{
+    border-radius: 0px;
+    border: 1px solid #e7eaec;
+  }
+  .deform-seq-container{
+    margin: 0 15px 0 15px;
+  }
+}
+#grid_search_form .form-group{
+    margin-bottom: 0px;
+}
+#grid_search_form  label.control-label{
+    display: none;
+}
+
+ul.form-tabs li.error a {
+  color: #b94a48;
+}
+
+.form-row{
+  padding-bottom: 4px;
+}
+.form-row select, .form-row input{
+  width: 100%;
+}
+.form-row input[type=radio], .form-row input[type=checkbox]{
+  width: 15px;
+}

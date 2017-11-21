@@ -26,7 +26,7 @@ devjs:
 # build css with libsassc
 css:
 	for dir in $(CSSDIRECTORIES);do \
-		$(SASSC) $(CSS_SOURCES)/$$dir/*.scss $(CSS_DEST)/$$dir.css; \
+		$(SASSC) $(CSS_SOURCES)$$dir/$$dir.scss $(CSS_DEST)$$dir.css; \
     done
 	
 

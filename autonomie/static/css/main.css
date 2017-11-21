@@ -8,15 +8,6 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
-blockquote {
-  font-size: 0.9em; }
-
-body {
-  padding: 0px;
-  overflow: auto;
-  font-size: 13px; }
-
-/* MENUS */
 .headmenu {
   border-radius: 0px;
   margin-bottom: 0px;
@@ -24,7 +15,8 @@ body {
   .headmenu li a {
     font-weight: 100; }
   .headmenu .company-search {
-    min-width: 140px; }
+    min-width: 140px;
+    margin-top: 9px; }
 
 .headmenu.menu {
   background-color: #2c3a49;
@@ -57,155 +49,196 @@ body {
     .headmenu.submenu li a i {
       color: #1ab394; }
 
-.pagetitle {
-  padding: 25px 0 30px 40px;
-  border-bottom: 1px solid #d5d5d6;
-  text-align: left;
-  background-color: #fff;
-  overflow: hidden;
-  color: #7f888f; }
-
-.pagetitle h2 {
-  float: left;
-  font-size: 24px;
-  line-height: 15px;
-  margin: 0px;
-  font-family: "sans serif"; }
-
 .subnav {
   padding: 3px 0px 5px 40px; }
   .subnav ul li a {
     padding: 5px 10px; }
 
-/* Fin MENUS */
-/* PANELS */
+/*
+* Sidebar css stuff used in the user view ...
+*/
+nav.sidebar-menu li {
+  border-bottom: 1px solid #ededed; }
+  nav.sidebar-menu li.active {
+    font-weight: bold;
+    border-left: 4px solid #19aa8d; }
+
+nav.sidebar-menu .subnav li {
+  border-bottom: none; }
+  nav.sidebar-menu .subnav li.active {
+    border-left: none; }
+  nav.sidebar-menu .subnav li:not(.active) {
+    font-weight: 100; }
+
+/*
+ PAnel relative classes
+*/
 .panel {
   border-radius: 0px; }
+  .panel .panel-heading {
+    border-radius: 0px;
+    font-size: 1.2em;
+    color: #7f888f; }
+    .panel .panel-heading .help-text {
+      font-size: 0.75em; }
+  .panel.panel-default {
+    border-color: #e7eaec;
+    border-top: 2px solid #d7dadc;
+    margin-bottom: 15px; }
+    .panel.panel-default .panel-heading {
+      background-color: #fff !important;
+      border-bottom: 1px solid #e4eef0; }
+    .panel.panel-default .panel-body {
+      background-color: #fff;
+      padding: 10px 15px; }
 
-.panel .panel-heading {
-  border-radius: 0px;
-  font-size: 1.2em;
-  color: #7f888f; }
-  .panel .panel-heading .help-text {
-    font-size: 0.75em; }
+.breadcrumb {
+  padding: 7px 14px;
+  margin: 0 0 18px;
+  background-color: #fbfbfb;
+  background-image: -moz-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -ms-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f5f5f5));
+  background-image: -webkit-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: -o-linear-gradient(top, #ffffff, #f5f5f5);
+  background-image: linear-gradient(to bottom, #ffffff, #f5f5f5);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f5f5f5', GradientType=0);
+  border: 1px solid #ddd;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 0 #ffffff;
+  -moz-box-shadow: inset 0 1px 0 #ffffff;
+  box-shadow: inset 0 1px 0 #ffffff; }
+  .breadcrumb li {
+    display: inline-block;
+    text-shadow: 0 1px 0 #ffffff; }
+  .breadcrumb .divider {
+    padding: 0 5px;
+    color: #999999; }
+  .breadcrumb .active a {
+    color: #333333; }
 
-.panel-default {
-  border-color: #e7eaec;
-  border-top: 2px solid #d7dadc;
-  margin-bottom: 15px; }
-  .panel-default .panel-heading {
-    background-color: #fff !important;
-    border-bottom: 1px solid #e4eef0; }
-  .panel-default .panel-body {
-    background-color: #fff;
-    padding: 10px 15px; }
+/* Table related css classes */
+table {
+  font-size: 13px; }
+  table caption {
+    font-weight: bold;
+    font-size: 17px;
+    text-align: left;
+    padding: 15px; }
+  table td.actions, table th.actions {
+    text-align: right; }
+  table .rowlink {
+    cursor: pointer; }
 
-/* END PANELS */
-/* PAGE WRAP */
-.page-content-wrapper {
-  background-color: #f5f5f6;
-  min-height: 100vh; }
+.table-disable-hover.table tbody tr:hover td,
+.table-disable-hover.table tbody tr:hover th {
+  background-color: inherit; }
 
-.page-header-block {
-  background-color: #fff;
-  padding: 20px;
-  margin-bottom: 15px; }
+.table-disable-hover.table-striped tbody tr:nth-child(odd):hover td,
+.table-disable-hover.table-striped tbody tr:nth-child(odd):hover th {
+  background-color: #f9f9f9; }
 
-.page-block {
-  padding: 10px 5px;
-  margin: 10px 0px 7px 0px;
-  background-color: #fff; }
+table.opa thead th {
+  background-color: #D9EDF7; }
 
-td.actions, th.actions {
-  text-align: right; }
+table.opa tfoot td {
+  background-color: #FCF8E3; }
 
-.estimation-view .page-content-wrapper {
-  background-color: #f8f8f8; }
+.status-table td.status-td {
+  width: 16px; }
 
-#page-footer-block {
-  background-color: #2f4050;
-  padding: 15px 40px 20px 40px;
+.status-table .signed-status-signed, .status-table .justified-True:not(.status-valid), .status-table .job-planned {
+  background-color: #7db9fd; }
+  .status-table .signed-status-signed .status-td, .status-table .justified-True:not(.status-valid) .status-td, .status-table .job-planned .status-td {
+    background-color: #238bff; }
+
+.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait:not(.justified-True), .status-table .job-failed, .status-table .activity-status-cancelled, .status-table .operation-associated-False {
+  background-color: #f9aaaa !important; }
+  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait:not(.justified-True) a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn), .status-table .operation-associated-False a:not(.btn) {
+    text-transform: uppercase;
+    text-decoration: underline; }
+  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait:not(.justified-True) .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td, .status-table .operation-associated-False .status-td {
+    background-color: #C43C35 !important; }
+
+.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed, .status-table .operation-associated-True {
+  background-color: #c4ffaa; }
+  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td, .status-table .operation-associated-True .status-td {
+    background-color: #baff87; }
+
+.status-table .paid-status-paid {
+  background-color: #ffb266; }
+  .status-table .paid-status-paid .status-td {
+    background-color: #ffb266; }
+
+.status-header.signed-status-signed, .status-header.justified-True:not(.status-valid), .status-header.job-planned {
+  background-color: #5bc0de;
   color: #fff; }
 
-/* End page wrap */
-/* Listes */
-.list-group .list-group-item {
-  border: none;
-  border-bottom: 1px solid #dedede;
-  background-color: transparent; }
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait:not(.justified-True), .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled {
+  background-color: #d9534f !important;
+  color: #fff; }
 
-/* End listes */
-/* Le formulaire d'authentification */
-.authentication-form fieldset {
-  width: 90%;
-  padding-left: 5%; }
+.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed, .status-header.activity-status-closed {
+  background-color: #5cb85c;
+  color: #fff; }
 
-form.authentication-form input[type=text], form.authentication-form input[type=password] {
-  width: 100%; }
+.status-header.paid-status-paid {
+  background-color: #f0ad4e;
+  color: #fff; }
 
-input[type=password] {
-  margin-bottom: 4px; }
+.table .tr_highlighted {
+  font-weight: bold;
+  background-color: #efffef !important; }
 
-.authentication-form .form-actions {
-  padding: 20px 0 20px 0; }
+form textarea {
+  width: auto; }
 
-.authentication-form .form-actions button {
-  font-size: 16px; }
+form textarea.tinymce {
+  height: 400px; }
 
-.primary-text-lg {
-  color: #2196f3;
-  font-size: 63px;
-  font-weight: 100;
-  font-stretch: semi-condensed; }
+.deform {
+  margin-bottom: 0px; }
+  .deform label {
+    font-weight: normal;
+    font-size: 16px; }
+  .deform legend {
+    font-size: 1.4em;
+    font-weight: bold; }
+  .deform fieldset {
+    border: none;
+    padding: 0px; }
+  .deform fieldset:hover {
+    border: none; }
+  .deform .errorMsgLbl {
+    background-color: transparent; }
+  .deform .deform-fixed-seq label {
+    font-weight: bold; }
+  .deform .deform-seq-item {
+    border-radius: 0px;
+    border: 1px solid #e7eaec; }
+  .deform .deform-seq-container {
+    margin: 0 15px 0 15px; }
 
-/* Login box related css */
-.loginbox {
-  margin-top: 10%;
-  height: 80%;
-  text-align: center;
-  max-width: 350px;
-  margin: 0 auto; }
+#grid_search_form .form-group {
+  margin-bottom: 0px; }
 
-.loginbox img-div {
-  margin-bottom: 15px;
-  text-align: center; }
-
-.loginbox img {
-  max-height: 250px; }
-
-.loginbox h1 {
-  text-align: center; }
-
-#authentication {
-  max-width: 350px;
-  text-align: center; }
-
-#authentication label {
-  font-weight: normal;
-  font-size: 15px; }
-
-#authentication button {
-  display: block;
-  width: 100%;
-  font-size: 16px; }
-
-#authentication .checkbox {
-  margin-top: 0px; }
-
-#authentication #req-deformField4 {
-  height: 0px;
-  margin: 0;
-  padding: 0;
-  visible: false;
+#grid_search_form label.control-label {
   display: none; }
 
-.loginbox img {
-  max-width: 100%;
-  height: auto; }
+ul.form-tabs li.error a {
+  color: #b94a48; }
 
-.ui-icon {
-  float: left;
-  margin-right: 3px; }
+.form-row {
+  padding-bottom: 4px; }
+
+.form-row select, .form-row input {
+  width: 100%; }
+
+.form-row input[type=radio], .form-row input[type=checkbox] {
+  width: 15px; }
 
 .btn {
   font-size: 1em;
@@ -232,45 +265,110 @@ input[type=password] {
   border-radius: 2px;
   background-color: transparent;
   color: inherit; }
+  .btn-nostyle:hover {
+    background-color: rgba(255, 255, 255, 0.1); }
 
-.btn-nostyle:hover {
-  background-color: rgba(255, 255, 255, 0.1); }
+.login-dialog .modal-body .icon {
+  font-size: 100px;
+  color: #999;
+  text-align: center; }
+
+.loginbox {
+  padding: 15px 20px 20px 20px;
+  background-color: #fff;
+  height: 80%;
+  text-align: center;
+  max-width: 350px;
+  margin: 20px auto auto auto;
+  border-top: 1px solid #e7eaec; }
+  .loginbox img-div {
+    margin-bottom: 15px;
+    text-align: center; }
+  .loginbox img {
+    max-height: 250px;
+    max-width: 100%;
+    height: auto; }
+  .loginbox h1 {
+    text-align: center; }
+  .loginbox #authentication {
+    max-width: 350px;
+    text-align: center; }
+    .loginbox #authentication label {
+      font-weight: normal;
+      font-size: 15px; }
+    .loginbox #authentication button {
+      display: block;
+      width: 100%;
+      font-size: 16px; }
+    .loginbox #authentication .checkbox {
+      margin-top: 0px; }
+    .loginbox #authentication #req-deformField4 {
+      height: 0px;
+      margin: 0;
+      padding: 0;
+      visible: false;
+      display: none; }
+    .loginbox #authentication input[type=password] {
+      margin-bottom: 4px; }
+
+body {
+  padding: 0px;
+  overflow: auto;
+  font-size: 14px; }
+
+.pagetitle {
+  padding: 25px 0 30px 40px;
+  border-bottom: 1px solid #d5d5d6;
+  text-align: left;
+  background-color: #fff;
+  overflow: hidden;
+  color: #7f888f; }
+  .pagetitle h2 {
+    float: left;
+    font-size: 24px;
+    line-height: 15px;
+    margin: 0px;
+    font-family: "sans serif"; }
+
+.page-content-wrapper {
+  background-color: #f5f5f6;
+  min-height: 100vh; }
+
+.page-header-block {
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 15px; }
+
+.page-block {
+  padding: 10px 5px;
+  margin: 10px 0px 7px 0px;
+  background-color: #fff; }
+
+blockquote {
+  font-size: 0.9em; }
+
+.estimation-view .page-content-wrapper {
+  background-color: #f8f8f8; }
+
+footer#page-footer-block {
+  background-color: #2f4050;
+  padding: 15px 40px 20px 40px;
+  color: #fff; }
+
+/* Listes */
+.list-group .list-group-item {
+  border: none;
+  border-bottom: 1px solid #dedede;
+  background-color: transparent; }
+
+.primary-text-lg {
+  color: #2196f3;
+  font-size: 63px;
+  font-weight: 100;
+  font-stretch: semi-condensed; }
 
 .ui-button-primary .ui-icon, .btn-primary .ui-icon {
   background-image: url("theme/images/ui-icons_f6cf3b_256x240.png"); }
-
-.deform label {
-  font-weight: normal;
-  font-size: 16px; }
-
-.deform legend {
-  font-size: 1.4em;
-  font-weight: bold; }
-
-.deform fieldset {
-  border: none;
-  padding: 0px; }
-
-.deform fieldset:hover {
-  border: none; }
-
-.deform .errorMsgLbl {
-  background-color: transparent; }
-
-.deform .deform-fixed-seq label {
-  font-weight: bold; }
-
-.deform .deform-seq-item {
-  border-radius: 0px;
-  border: 1px solid #e7eaec; }
-
-.deform .deform-seq-container {
-  margin: 0 15px 0 15px; }
-
-/* Class used to set a max width to forms */
-.medium-form-container {
-  max-width: 600px;
-  margin: auto; }
 
 #actionmenu {
   padding-left: 5%; }
@@ -281,55 +379,9 @@ input[type=password] {
   position: relative;
   text-align: center; }
 
-.breadcrumb {
-  padding: 7px 14px;
-  margin: 0 0 18px;
-  background-color: #fbfbfb;
-  background-image: -moz-linear-gradient(top, #ffffff, #f5f5f5);
-  background-image: -ms-linear-gradient(top, #ffffff, #f5f5f5);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f5f5f5));
-  background-image: -webkit-linear-gradient(top, #ffffff, #f5f5f5);
-  background-image: -o-linear-gradient(top, #ffffff, #f5f5f5);
-  background-image: linear-gradient(to bottom, #ffffff, #f5f5f5);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f5f5f5', GradientType=0);
-  border: 1px solid #ddd;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-  -webkit-box-shadow: inset 0 1px 0 #ffffff;
-  -moz-box-shadow: inset 0 1px 0 #ffffff;
-  box-shadow: inset 0 1px 0 #ffffff; }
-
-.breadcrumb li {
-  display: inline-block;
-  text-shadow: 0 1px 0 #ffffff; }
-
-.breadcrumb .divider {
-  padding: 0 5px;
-  color: #999999; }
-
-.breadcrumb .active a {
-  color: #333333; }
-
-textarea {
-  width: auto; }
-
-.rowlink {
-  cursor: pointer; }
-
 .help-block {
   font-size: 11px;
   font-style: italic; }
-
-.company-search {
-  margin-top: 9px; }
-
-#grid_search_form .form-group {
-  margin-bottom: 0px; }
-
-#grid_search_form label.control-label {
-  display: none; }
 
 /* Project page */
 .section-header {
@@ -360,23 +412,6 @@ h3.floatted {
   font-size: 16px;
   font-weight: 100; }
 
-form.deform {
-  margin-bottom: 0px; }
-
-.table-disable-hover.table tbody tr:hover td,
-.table-disable-hover.table tbody tr:hover th {
-  background-color: inherit; }
-
-.table-disable-hover.table-striped tbody tr:nth-child(odd):hover td,
-.table-disable-hover.table-striped tbody tr:nth-child(odd):hover th {
-  background-color: #f9f9f9; }
-
-table caption {
-  font-weight: bold;
-  font-size: 17px;
-  text-align: left;
-  padding: 15px; }
-
 /* Box used to display ajax calls success or errors */
 #messageboxes {
   position: fixed;
@@ -384,29 +419,8 @@ table caption {
   left: 50px;
   z-index: 2000; }
 
-table.opa thead th {
-  background-color: #D9EDF7; }
-
-table.opa tfoot td {
-  background-color: #FCF8E3; }
-
 .inline-element {
   display: inline-block; }
-
-textarea.tinymce {
-  height: 400px; }
-
-ul.form-tabs li.error a {
-  color: #b94a48; }
-
-.form-row {
-  padding-bottom: 4px; }
-
-.form-row select, .form-row input {
-  width: 100%; }
-
-.form-row input[type=radio], .form-row input[type=checkbox] {
-  width: 15px; }
 
 .accordion-heading a {
   color: #555; }
@@ -535,52 +549,6 @@ header .navbar .nav > li > a {
   overflow: auto; }
 
 /* Task lists css */
-.status-table td.status-td {
-  width: 16px; }
-
-.status-table .signed-status-signed, .status-table .justified-True:not(.status-valid), .status-table .job-planned {
-  background-color: #7db9fd; }
-  .status-table .signed-status-signed .status-td, .status-table .justified-True:not(.status-valid) .status-td, .status-table .job-planned .status-td {
-    background-color: #238bff; }
-
-.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait:not(.justified-True), .status-table .job-failed, .status-table .activity-status-cancelled, .status-table .operation-associated-False {
-  background-color: #f9aaaa !important; }
-  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait:not(.justified-True) a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn), .status-table .operation-associated-False a:not(.btn) {
-    text-transform: uppercase;
-    text-decoration: underline; }
-  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait:not(.justified-True) .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td, .status-table .operation-associated-False .status-td {
-    background-color: #C43C35 !important; }
-
-.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed, .status-table .operation-associated-True {
-  background-color: #c4ffaa; }
-  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td, .status-table .operation-associated-True .status-td {
-    background-color: #baff87; }
-
-.status-table .paid-status-paid {
-  background-color: #ffb266; }
-  .status-table .paid-status-paid .status-td {
-    background-color: #ffb266; }
-
-.status-header.signed-status-signed, .status-header.justified-True:not(.status-valid), .status-header.job-planned {
-  background-color: #5bc0de;
-  color: #fff; }
-
-.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait:not(.justified-True), .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled {
-  background-color: #d9534f !important;
-  color: #fff; }
-
-.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed, .status-header.activity-status-closed {
-  background-color: #5cb85c;
-  color: #fff; }
-
-.status-header.paid-status-paid {
-  background-color: #f0ad4e;
-  color: #fff; }
-
-.table .tr_highlighted {
-  font-weight: bold;
-  background-color: #efffef !important; }
-
 .overlay {
   background-color: #fff;
   top: 0px;
@@ -598,11 +566,6 @@ header .navbar .nav > li > a {
 
 .modal-content {
   border-radius: 0px; }
-
-.login-dialog .modal-body .icon {
-  font-size: 100px;
-  color: #999;
-  text-align: center; }
 
 .modal-overlay {
   background-color: rgba(5, 5, 5, 0.7); }

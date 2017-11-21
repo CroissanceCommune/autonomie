@@ -1,0 +1,24 @@
+/*
+* Sidebar css stuff used in the user view ...
+*/
+
+nav.sidebar-menu{
+    li{
+        border-bottom: 1px solid #ededed;
+        &.active{
+            font-weight: bold;
+            border-left: 4px solid #19aa8d;
+        }
+    }
+    .subnav{
+      li{
+        border-bottom: none;
+        &.active{
+            border-left: none;
+        }
+        &:not(.active){
+          font-weight: 100;
+        }
+      }
+    }
+}

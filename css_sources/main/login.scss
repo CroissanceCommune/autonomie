@@ -1,0 +1,59 @@
+.login-dialog{
+  .modal-header{
+  }
+  .modal-body{
+    .icon{
+      font-size: 100px;
+      color: #999;
+      text-align: center;
+    }
+  }
+}
+
+.loginbox{
+    padding: 15px 20px 20px 20px;
+    background-color: #fff;
+    height: 80%;
+    text-align:center;
+    max-width: 350px;
+    margin: 20px auto auto auto;
+    border-top: 1px solid #e7eaec;
+    img-div{
+      margin-bottom:15px;
+      text-align:center;
+    }
+    img{
+      max-height: 250px;
+      max-width:100%;
+      height: auto;
+    }
+    h1{
+      text-align:center;
+    }
+    #authentication{
+        max-width: 350px;
+        text-align:center;
+        label{
+          font-weight: normal;
+          font-size: 15px;
+        }
+        button{
+          display: block;
+          width: 100%;
+          font-size: 16px;
+        }
+        .checkbox{
+          margin-top: 0px;
+        }
+        #req-deformField4{
+          height: 0px;
+          margin: 0;
+          padding: 0;
+          visible: false;
+          display:none;
+        }
+        input[type=password]{
+          margin-bottom: 4px;
+        }
+    }
+}

@@ -1,0 +1,27 @@
+/*
+ PAnel relative classes
+*/
+.panel {
+  border-radius: 0px;
+    .panel-heading{
+      border-radius: 0px;
+      font-size: 1.2em;
+      color: $font-grey1;
+      .help-text{
+        font-size: 0.75em;
+      }
+    }
+    &.panel-default{
+      border-color: #e7eaec;
+      border-top: 2px solid #d7dadc;
+      margin-bottom: 15px;
+      .panel-heading{
+        background-color: $panel-heading-color !important;
+        border-bottom: 1px solid #e4eef0;
+      }
+      .panel-body{
+        background-color: #fff;
+        padding: 10px 15px;
+      }
+    }
+}

@@ -1,0 +1,102 @@
+/* Table related css classes */
+$green_status_hard: #baff87;
+$green_status_light: #c4ffaa;
+$green_status_label: #5cb85c;
+$red_status_hard: #C43C35;
+$red_status_light: #f9aaaa;
+$red_status_label:#d9534f;
+$orange_status_hard: #ffb266;
+$orange_status_light: #ffb266;
+$orange_status_label: #f0ad4e;
+$blue_status_hard: #238bff;
+$blue_status_light: #7db9fd;
+$blue_status_label: #5bc0de;
+
+table{
+  font-size: 13px;
+    caption{
+      font-weight:bold;
+      font-size:17px;
+      text-align:left;
+      padding:15px;
+    }
+    td.actions, th.actions{
+      text-align: right;
+    }
+    .rowlink{
+      cursor:pointer;
+    }
+}
+.table-disable-hover.table tbody tr:hover td,
+.table-disable-hover.table tbody tr:hover th {
+    background-color: inherit;
+}
+.table-disable-hover.table-striped tbody tr:nth-child(odd):hover td,
+.table-disable-hover.table-striped tbody tr:nth-child(odd):hover th {
+  background-color: #f9f9f9;
+}
+table.opa thead th{
+  background-color:#D9EDF7;
+}
+table.opa tfoot td{
+  background-color:#FCF8E3;
+}
+
+.status-table{
+  td.status-td{
+    width: 16px;
+  }
+  .signed-status-signed, .justified-True:not(.status-valid), .job-planned{
+    background-color: $blue_status_light;
+    .status-td{
+      background-color: $blue_status_hard;
+    }
+  }
+  .signed-status-aborted, .tolate-True, .status-wait:not(.justified-True), .job-failed, .activity-status-cancelled, .operation-associated-False{
+    background-color: $red_status_light!important;
+    a:not(.btn){
+      text-transform:uppercase;
+      text-decoration:underline;
+    }
+    .status-td{
+      background-color: $red_status_hard!important;
+    }
+  }
+  .geninv-True, .paid-status-resulted, .job-completed, .activity-status-closed, .operation-associated-True{
+    background-color: $green_status_light;
+    .status-td{
+      background-color: $green_status_hard;
+    }
+  }
+  .paid-status-paid{
+    background-color: $orange_status_light;
+    .status-td{
+      background-color: $orange_status_hard;
+    }
+  }
+}
+.status-header.status-valid:not(.paid-status-resulted):not(.paid-status-paid):not(.signed-status-signed):not(.justified-True){
+}
+.status-header.signed-status-signed, .status-header.justified-True:not(.status-valid), .status-header.job-planned{
+  background-color: $blue_status-label;
+  color: #fff;
+}
+.status-header.signed-status-aborted, .status-header.tolate-True, .status-header.status-wait:not(.justified-True), .status-header.job-failed, .status-header.status-invalid, .status-header.activity-status-cancelled{
+  background-color: $red_status-label!important;
+  color: #fff;
+}
+.status-header.geninv-True, .status-header.paid-status-resulted, .status-header.job-completed, .status-header.activity-status-closed{
+  background-color: $green_status-label;
+  color: #fff;
+}
+.status-header.paid-status-paid{
+  background-color: $orange_status-label;
+  color: #fff;
+}
+
+.table{
+  .tr_highlighted{
+      font-weight: bold;
+      background-color: #efffef !important;
+  }
+}

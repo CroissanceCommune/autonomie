@@ -74,7 +74,7 @@ var JobModule = AutonomieApp.module(
       initialize: function(args){
         this.url = args.url;
         var reload = _.bind(this.reload, this);
-        this.scheduler = setInterval(reload, 1000);
+        this.scheduler = setInterval(reload, 3000);
       },
       reload: function(){
         if ((this.get('status') == 'completed') || (this.get('status') == 'failed')){

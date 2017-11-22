@@ -66,7 +66,10 @@ from autonomie.compute.task import (
     TaskCompute,
     InvoiceCompute,
 )
-from autonomie.models.tva import Tva
+from autonomie.models.tva import (
+    Tva,
+    Product,
+)
 from autonomie.models.payments import (
     PaymentMode,
     BankAccount,
@@ -307,6 +310,7 @@ class Invoice(Task, InvoiceCompute):
                 order=order,
                 unity='NONE',
             )
+            discount_line.product_id = Product.first_by_tva_value(discount.tva)
             order += 1
             cancelinvoice.default_line_group.lines.append(discount_line)
 
@@ -323,6 +327,7 @@ class Invoice(Task, InvoiceCompute):
                 order=order,
                 unity='NONE',
             )
+            paid_line.product_id = Product.first_by_tva_value(payment.tva.value)
             order += 1
             cancelinvoice.default_line_group.lines.append(paid_line)
         cancelinvoice.mentions = self.mentions

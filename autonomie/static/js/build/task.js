@@ -11394,8 +11394,8 @@ webpackJsonp([2],[
 	        PaymentLineCollection.__super__.initialize.apply(this, options);
 	        this.channel = _backbone2.default.channel('facade');
 	        this.totalmodel = this.channel.request('get:totalmodel');
-	        this.bindEvents();
 	        this.callChannel = this.callChannel.bind(this);
+	        this.bindEvents();
 	    },
 	    bindEvents: function bindEvents() {
 	        this.listenTo(this, 'add', this.callChannel);
@@ -11432,6 +11432,7 @@ webpackJsonp([2],[
 	        return total - deposit_amount;
 	    },
 	    genPaymentLines: function genPaymentLines(payment_times, deposit) {
+	        console.log("Gen payment lines");
 	        this.unBindEvents();
 	        var total = this.topayAfterDeposit(deposit);
 	
@@ -11507,6 +11508,7 @@ webpackJsonp([2],[
 	        return ttc - sum;
 	    },
 	    updateSold: function updateSold(deposit) {
+	        this.unBindEvents();
 	        var value = this.getSoldAmount(deposit);
 	        this.models[this.models.length - 1].set({ 'amount': value });
 	        this.models[this.models.length - 1].save();

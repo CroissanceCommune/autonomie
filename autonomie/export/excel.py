@@ -408,7 +408,7 @@ class XlsExpense(XlsWriter):
         """
             write the period in the header
         """
-        period = "{0} {1}".format(
+        period = u"{0} {1}".format(
             strings.month_name(self.model.month),
             self.model.year
         )

@@ -22,8 +22,8 @@ const PaymentLineCollection = OrderableCollection.extend({
         PaymentLineCollection.__super__.initialize.apply(this, options);
         this.channel = Radio.channel('facade');
         this.totalmodel = this.channel.request('get:totalmodel');
-        this.bindEvents();
         this.callChannel = this.callChannel.bind(this);
+        this.bindEvents();
     },
     bindEvents(){
         this.listenTo(this, 'add', this.callChannel);
@@ -60,6 +60,7 @@ const PaymentLineCollection = OrderableCollection.extend({
         return total - deposit_amount;
     },
     genPaymentLines(payment_times, deposit){
+        console.log("Gen payment lines");
         this.unBindEvents();
         var total = this.topayAfterDeposit(deposit);
 
@@ -138,6 +139,7 @@ const PaymentLineCollection = OrderableCollection.extend({
         return ttc - sum;
     },
     updateSold(deposit){
+        this.unBindEvents();
         var value = this.getSoldAmount(deposit);
         this.models[this.models.length - 1].set({'amount': value});
         this.models[this.models.length - 1].save();

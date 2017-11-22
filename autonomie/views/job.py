@@ -117,7 +117,7 @@ def job_json_model_view(context, request):
     """
     Return a job as json datas, check if the job should be cancelled or not
     """
-    if context.timeout():
+    if context.timeout() and context.status in ('planned', 'running'):
         request.dbsession.merge(context)
     return request.context
 

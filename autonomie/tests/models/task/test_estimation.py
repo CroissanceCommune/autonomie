@@ -311,6 +311,15 @@ def test_light_gen_invoice(dbsession, full_estimation):
     total = sum([i.total() for i in invoices])
     assert total == full_estimation.total()
 
+def test_gen_invoice_ref450(dbsession, full_estimation):
+    # for line in full_estimation.all_lines:
+        # line.product_id = None
+
+    invoices = full_estimation.gen_invoices(full_estimation.owner)
+    for invoice in invoices:
+        for line in invoice.all_lines:
+            assert line.product_id is not None
+
 
 def test_duplicate_payment_line(payment_line):
     newline = payment_line.duplicate()

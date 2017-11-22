@@ -113,6 +113,15 @@ def make_stream_csv_by_key(job_key, filename):
     return stream_csv
 
 
+def job_json_model_view(context, request):
+    """
+    Return a job as json datas, check if the job should be cancelled or not
+    """
+    if context.timeout():
+        request.dbsession.merge(context)
+    return request.context
+
+
 def includeme(config):
     config.add_route(
         'job',
@@ -149,4 +158,12 @@ def includeme(config):
         route_name='job',
         request_param='action=unhandled.csv',
         permission='view',
+    )
+    config.add_view(
+        job_json_model_view,
+        route_name="job",
+        renderer="json",
+        request_method="GET",
+        xhr=True,
+        permission="view",
     )

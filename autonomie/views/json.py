@@ -47,12 +47,3 @@ def includeme(config):
             xhr=True,
             permission='view_%s' % route_name
         )
-
-    config.add_view(
-        json_model_view,
-        route_name="job",
-        renderer="json",
-        request_method="GET",
-        xhr=True,
-        permission="view",
-    )

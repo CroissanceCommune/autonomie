@@ -57,6 +57,7 @@ from autonomie.compute.task import (
     EstimationCompute,
 )
 from autonomie.compute.math_utils import integer_to_amount
+from autonomie.models.tva import Product
 from .interfaces import (
     IMoneyTask,
 )
@@ -323,7 +324,9 @@ class Estimation(Task, EstimationCompute):
         """
             Return an account invoiceline
         """
-        return TaskLine(cost=amount, description=description, tva=tva)
+        line = TaskLine(cost=amount, description=description, tva=tva)
+        line.product_id = Product.first_by_tva_value(tva)
+        return line
 
     def _make_deposit(self, invoice):
         """

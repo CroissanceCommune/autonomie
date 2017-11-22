@@ -30,16 +30,12 @@ var JobModule = AutonomieApp.module(
         return this.dataType;
       },
       templateHelpers: function(){
-        var failed = false;
-        var running = true;
-        if (this.model.get('status') == 'failed'){
-          failed = true;
-          running = false;
-        }else{
-          if (this.model.get('status') == 'completed'){
-            running = false;
-          }
-        }
+        var waiting = this.model.get('status') == 'planned';
+        var running = this.model.get('status') == 'running';
+        var failed = this.model.get('status') == 'failed';
+        var success = this.model.get('status') == 'completed';
+        var finished = failed || success;
+
         var has_err_message = false;
         var err_message = "";
         _.each(this.model.get('error_messages'), function(item){
@@ -60,27 +56,32 @@ var JobModule = AutonomieApp.module(
         );
 
         return {
-          running: running,
-          failed: failed,
-          err_message: new Handlebars.SafeString(err_message),
-          message: new Handlebars.SafeString(message),
-          has_message: has_message,
-          has_err_message: has_err_message,
-          dataType: this.dataType
-          };
+            waiting: waiting,
+            running: running,
+            failed: failed,
+            success: success,
+            finished: finished,
+            err_message: new Handlebars.SafeString(err_message),
+            message: new Handlebars.SafeString(message),
+            has_message: has_message,
+            has_err_message: has_err_message,
+            dataType: this.dataType
+        };
       }
     });
     var JobModel = Backbone.Model.extend({
+        defaults: {
+            'status': 'planned'
+        },
       initialize: function(args){
         this.url = args.url;
-        var reload = _.bind(this.reload, this);
-        this.scheduler = setInterval(reload, 3000);
-      },
-      reload: function(){
-        if ((this.get('status') == 'completed') || (this.get('status') == 'failed')){
-          clearInterval(this.scheduler);
-        }
+        this.on('sync', _.bind(this.askReload, this));
         this.fetch();
+      },
+      askReload: function(){
+        if ((this.get('status') != 'completed') && (this.get('status') != 'failed')){
+            setTimeOut(this.fetch, 3000);
+        }
       }
     });
     JobModule.on('start', function(){

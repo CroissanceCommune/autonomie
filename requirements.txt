@@ -64,8 +64,8 @@ deform_extensions==0.2.4
 filedepot==0.1.2
 pyramid_services
 Genshi==0.7
-autonomie_base==3.4.11
-autonomie_celery==3.4.11
+autonomie_base==3.4.12
+autonomie_celery==3.4.12
 billiard==3.5.0.2
 kombu==4.0.2
 redis==2.10.5

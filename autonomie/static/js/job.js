@@ -80,7 +80,7 @@ var JobModule = AutonomieApp.module(
       },
       askReload: function(){
         if ((this.get('status') != 'completed') && (this.get('status') != 'failed')){
-            setTimeOut(this.fetch, 3000);
+            setTimeout(_.bind(this.fetch, this), 3000);
         }
       }
     });

@@ -255,6 +255,7 @@ def includeme(config):
         edit_rights="edit_holiday",
         view_rights='list_holidays',
         add_rights='add_holiday',
+        edit_rights="edit_holiday",
     )
     config.add_view(
         make_redirect_view("user_holidays"),

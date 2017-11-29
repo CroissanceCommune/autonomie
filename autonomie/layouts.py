@@ -45,3 +45,8 @@ def includeme(config):
         template='autonomie:templates/layouts/opa.mako',
         name='opa'
     )
+    config.add_layout(
+        DefaultLayout,
+        template='autonomie:templates/layouts/login.mako',
+        name='login',
+    )

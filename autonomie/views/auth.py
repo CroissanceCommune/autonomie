@@ -327,14 +327,17 @@ def includeme(config):
         permission=NO_PERMISSION_REQUIRED,
         renderer="forbidden.mako"
     )
-    config.add_view(logout_view,
-                    route_name='logout',
-                    permission=NO_PERMISSION_REQUIRED)
+    config.add_view(
+        logout_view,
+        route_name='logout',
+        permission=NO_PERMISSION_REQUIRED
+    )
     config.add_view(
         LoginView,
         route_name='login',
         permission=NO_PERMISSION_REQUIRED,
         renderer='login.mako',
+        layout='login',
     )
     config.add_view(
         LoginView,

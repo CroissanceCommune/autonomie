@@ -23,12 +23,7 @@
 </%doc>
 
 <%inherit file="${context['main_template'].uri}" />
-<%block name="headtitle">
-</%block>
 <%block name='content'>
-<style>
-
-</style>
     <div class='loginbox'>
         <div class='img-div'>
             <img src="/public/logo.png" alt='Votre CAE' />

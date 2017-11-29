@@ -35,9 +35,6 @@
     <meta name="KEYWORDS" CONTENT="">
     <meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW,ALL">
     </%block>
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
 
     <%block name="headjs" />
 

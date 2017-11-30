@@ -53,6 +53,9 @@ from autonomie.models.options import (
 )
 
 
+EPSILON = 0.01
+
+
 class CompetenceDeadline(ConfigurableOption):
     __colanderalchemy_config__ = {
         'title': u"une échéance",
@@ -469,8 +472,8 @@ class CompetenceGridSubItem(DBBASE):
             result = scales.first()
         else:
             result = scales.filter(
-                CompetenceScale.value <= self.evaluation
-            ).all()[-1]
+                CompetenceScale.value <= self.evaluation + EPSILON
+            ).order_by(CompetenceScale.value).all()[-1]
         if result is None:  # No scale is lower than evaluation
             result = scales.first()
         return result

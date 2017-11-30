@@ -360,7 +360,8 @@ class CompetenceGridItem(DBBASE):
     option_id = Column(ForeignKey("competence_option.id"))
     option = relationship(
         "CompetenceOption",
-        primaryjoin="and_(CompetenceOption.id==CompetenceGridItem.option_id, CompetenceOption.active==True)"
+        primaryjoin="and_(CompetenceOption.id==CompetenceGridItem.option_id, "
+        "CompetenceOption.active==True)"
     )
 
     grid_id = Column(ForeignKey("competence_grid.id"))
@@ -393,7 +394,7 @@ class CompetenceGridItem(DBBASE):
         if not values:
             values = [0.0]
         sum_of_values = sum(values)
-        return sum_of_values / float(len(values))
+        return sum_of_values / float(len(self.subitems))
 
     def ensure_subitem(self, competence_option):
         """

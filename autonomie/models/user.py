@@ -480,6 +480,28 @@ class User(DBBASE, PersistentACLMixin):
         """
         return [company for company in self.companies if not company.archived]
 
+    @classmethod
+    def find_user(cls, value, *args, **kw):
+        """
+        Try to find a user instance based on the given value
+
+        :param str value: The value that should match a user
+        """
+        result = cls.query().filter_by(login=value).first()
+
+        if result is None:
+            value = value.split(' ')
+            if len(value) == 2:
+                lastname, firstname = value
+                try:
+                    query = cls.query()
+                    query = query.filter_by(lastname=lastname)
+                    query = query.filter_by(firstname=firstname)
+                    result = query.one()
+                except:
+                    result = None
+        return result
+
 
 def get_user_by_roles(roles):
     """
@@ -939,7 +961,7 @@ class UserDatas(Node):
                 'label': u"Conseiller",
             },
             'import': {
-                'related_key': 'login',
+                'related_retriever': User.find_user
             }
         }
     )

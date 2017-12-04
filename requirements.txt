@@ -60,7 +60,7 @@ zope.interface==4.1.2
 zope.sqlalchemy==0.7.1
 sqla_inspect==0.4.2
 Unidecode==0.04.17
-deform_extensions==0.2.4
+deform_extensions==0.2.5
 filedepot==0.1.2
 pyramid_services
 Genshi==0.7

@@ -312,6 +312,8 @@ def base_configure(config, dbsession, **settings):
     )
     customize_renderers(config)
 
+    config.commit()
+
     for module in settings.get('autonomie.includes', '').split():
         if module.strip():
             config.include(module)

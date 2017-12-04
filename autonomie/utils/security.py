@@ -122,6 +122,61 @@ class RootFactory(dict):
        the request object
     """
     __name__ = "root"
+    leaves = (
+        ("activities", "activity", Activity, ),
+        (
+            'accounting_operation_uploads',
+            'accounting_operation_upload',
+            AccountingOperationUpload,
+        ),
+        ('cancelinvoices', 'cancelinvoice', CancelInvoice, ),
+        ('companies', 'company', Company, ),
+        ('competences', 'competence', CompetenceGrid, ),
+        ('competence_items', 'competence_item', CompetenceGridItem, ),
+        ('competence_subitems', 'competence_subitem',
+            CompetenceGridSubItem, ),
+        ('customers', 'customer', Customer, ),
+        ('discount_lines', 'discount_line', DiscountLine,),
+        ('estimations', 'estimation', Estimation, ),
+        ('expenses', 'expense', ExpenseSheet, ),
+        ("expenselines", "expenseline", BaseExpenseLine,),
+        ("expense_types", "expense_type", ExpenseType,),
+        ('expense_payments', 'expense_payment', ExpensePayment, ),
+        ('files', 'file', File, ),
+        ('invoices', 'invoice', Invoice, ),
+        ('jobs', 'job', Job, ),
+        ('payments', 'payment', Payment, ),
+        ('payment_lines', 'payment_line', PaymentLine,),
+        ('phases', 'phase', Phase, ),
+        ('projects', 'project', Project, ),
+        ('sale_categories', 'sale_category', SaleProductCategory, ),
+        ('sale_products', 'sale_product', SaleProduct, ),
+        ('sale_product_groups', 'sale_product_group', SaleProductGroup, ),
+        ('statistics', 'statistic', StatisticSheet,),
+        ('statistic_entries', 'statistic_entry', StatisticEntry,),
+        ('statistic_criteria', 'statistic_criterion',
+            BaseStatisticCriterion,),
+        ('task_lines', 'task_line', TaskLine),
+        ('task_line_groups', 'task_line_group', TaskLineGroup),
+        ('templates', 'template', Template, ),
+        ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
+        (
+            'treasury_measure_grids',
+            'treasury_measure_grid',
+            TreasuryMeasureGrid,
+        ),
+        (
+            'treasury_measure_types',
+            'treasury_measure_type',
+            TreasuryMeasureType,
+        ),
+        ('timeslots', 'timeslot', Timeslot, ),
+        ('tvas', 'tva', Tva,),
+        ('users', 'user', User, ),
+        ('userdatas', 'userdatas', UserDatas, ),
+        ('workshops', 'workshop', Workshop, ),
+    )
+    subtrees = ()
 
     @property
     def __acl__(self):
@@ -135,61 +190,7 @@ class RootFactory(dict):
     def __init__(self, request):
         self.request = request
 
-        for traversal_name, object_name, factory in (
-            ("activities", "activity", Activity, ),
-            (
-                'accounting_operation_uploads',
-                'accounting_operation_upload',
-                AccountingOperationUpload,
-            ),
-            ('cancelinvoices', 'cancelinvoice', CancelInvoice, ),
-            ('companies', 'company', Company, ),
-            ('competences', 'competence', CompetenceGrid, ),
-            ('competence_items', 'competence_item', CompetenceGridItem, ),
-            ('competence_subitems', 'competence_subitem',
-             CompetenceGridSubItem, ),
-            ('customers', 'customer', Customer, ),
-            ('discount_lines', 'discount_line', DiscountLine,),
-            ('estimations', 'estimation', Estimation, ),
-            ('expenses', 'expense', ExpenseSheet, ),
-            ("expenselines", "expenseline", BaseExpenseLine,),
-            ("expense_types", "expense_type", ExpenseType,),
-            ('expense_payments', 'expense_payment', ExpensePayment, ),
-            ('files', 'file', File, ),
-            ('invoices', 'invoice', Invoice, ),
-            ('jobs', 'job', Job, ),
-            ('payments', 'payment', Payment, ),
-            ('payment_lines', 'payment_line', PaymentLine,),
-            ('phases', 'phase', Phase, ),
-            ('projects', 'project', Project, ),
-            ('sale_categories', 'sale_category', SaleProductCategory, ),
-            ('sale_products', 'sale_product', SaleProduct, ),
-            ('sale_product_groups', 'sale_product_group', SaleProductGroup, ),
-            ('statistics', 'statistic', StatisticSheet,),
-            ('statistic_entries', 'statistic_entry', StatisticEntry,),
-            ('statistic_criteria', 'statistic_criterion',
-             BaseStatisticCriterion,),
-            ('task_lines', 'task_line', TaskLine),
-            ('task_line_groups', 'task_line_group', TaskLineGroup),
-            ('templates', 'template', Template, ),
-            ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
-            (
-                'treasury_measure_grids',
-                'treasury_measure_grid',
-                TreasuryMeasureGrid,
-            ),
-            (
-                'treasury_measure_types',
-                'treasury_measure_type',
-                TreasuryMeasureType,
-            ),
-            ('timeslots', 'timeslot', Timeslot, ),
-            ('tvas', 'tva', Tva,),
-            ('users', 'user', User, ),
-            ('userdatas', 'userdatas', UserDatas, ),
-            ('workshops', 'workshop', Workshop, ),
-        ):
-
+        for traversal_name, object_name, factory in self.leaves:
             self[traversal_name] = TraversalDbAccess(
                 self,
                 traversal_name,
@@ -197,9 +198,29 @@ class RootFactory(dict):
                 factory,
             )
 
+        for traversal_name, subtree in self.subtrees:
+            self[traversal_name] = subtree
+
         self['configfiles'] = TraversalDbAccess(
             self, 'configfiles', 'config_file', ConfigFiles, 'key'
         )
+
+    @classmethod
+    def register_subtree(cls, traversal_name, subtree):
+        cls.subtrees = cls.subtrees + ((traversal_name, subtree),)
+
+
+class TraversalNode(dict):
+    """
+    Class representing a simple traversal node
+    """
+    @property
+    def __acl__(self):
+        """
+            Default permissions
+        """
+        acl = DEFAULT_PERM[:]
+        return acl
 
 
 class TraversalDbAccess(object):

@@ -101,64 +101,56 @@ UPLOAD_OK_MSG = u"Le modèle de document a bien été ajouté"
 EDIT_OK_MSG = u"Le modèle de document a bien été modifié"
 
 
+ADMIN_INDEX_MENUS = [
+    dict(
+        label=u"Configuration générale",
+        route_name='admin_main',
+        title=u"Message d'accueil, logos, entête et pieds de page des \
+devis, factures / avoir)"
+    ),
+    dict(
+        label=u"Configuration du module Ventes",
+        route_name="admin_vente",
+        title=u"Mentions des devis et factures, unité de prestation ...",
+    ),
+    dict(
+        label=u"Configuration du module Notes de dépense",
+        route_name="admin_expense",
+        title=u"Configuration des types de dépense, des \
+différents comptes analytiques liés au module notes de dépense et à leur export"
+    ),
+    dict(
+        label=u"Configuration du module Fichiers de trésorerie",
+        route_name="/admin/accounting",
+        title=u"Configuration des indicateurs de trésorerie générés "
+        u"depuis les fichiers provenant du logiciel comptable."
+    ),
+    dict(
+        label=u"Configuration du module Accompagnement",
+        route_name="admin_accompagnement",
+        title=u"Ateliers, Rendez-vous, Compétences"
+    ),
+    dict(
+        label=u"Configuration du module Gestion Sociale",
+        route_name='admin_userdatas',
+        title=u"Typologie des données, modèles de documents",
+    ),
+    dict(
+        label=u"Configuration des domaines d'activité des entreprises \
+de la CAE",
+        route_name="admin_company_activity",
+    )
+]
+
+
 def admin_index_view(request):
     """
         Return datas for the index view
     """
-    menus = []
-    menus.append(
-        dict(
-            label=u"Configuration générale",
-            route_name='admin_main',
-            title=u"Message d'accueil, logos, entête et pieds de page des \
-devis, factures / avoir)"
-        )
+    return dict(
+        title=u"Configuration du site",
+        menus=ADMIN_INDEX_MENUS,
     )
-    menus.append(
-        dict(
-            label=u"Configuration du module Ventes",
-            route_name="admin_vente",
-            title=u"Mentions des devis et factures, unité de prestation ...",
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration du module Notes de dépense",
-            route_name="admin_expense",
-            title=u"Configuration des types de dépense, des \
-différents comptes analytiques liés au module notes de dépense et à leur export"
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration du module Fichiers de trésorerie",
-            route_name="/admin/accounting",
-            title=u"Configuration des indicateurs de trésorerie générés "
-            u"depuis les fichiers provenant du logiciel comptable."
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration du module Accompagnement",
-            route_name="admin_accompagnement",
-            title=u"Ateliers, Rendez-vous, Compétences"
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration du module Gestion Sociale",
-            route_name='admin_userdatas',
-            title=u"Typologie des données, modèles de documents",
-        )
-    )
-    menus.append(
-        dict(
-            label=u"Configuration des domaines d'activité des entreprises \
-de la CAE",
-            route_name="admin_company_activity",
-        )
-    )
-    return dict(title=u"Configuration du site", menus=menus)
 
 
 class AdminMain(BaseAdminFormView):

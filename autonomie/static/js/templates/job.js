@@ -93,13 +93,13 @@ templates['file_generation.mustache'] = template({"1":function(container,depth0,
     + "    </div>\n    <div class='col-md-6'>\n"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.has_message : depth0),{"name":"if","hash":{},"fn":container.program(14, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.has_err_message : depth0),{"name":"if","hash":{},"fn":container.program(16, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "    </div>\n</div>\n";
+    + "    </div>\n</div>\n<div class='text-center'>\n        <button class='btn btn-default primary-action' onclick=\"win.close();\">\n        <i class='fa fa-close'></i>&nbsp;Fermer cette fenêtre\n        </button>\n</div>\n";
 },"12":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "        <script type='text/javascript'>\n            var win = window.open(\"/cooked/"
     + alias4(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"filename","hash":{},"data":data}) : helper)))
-    + "\", \"_self\");\n            setTimeout(function(){win.close(); window.close()}, 1000);\n        </script>\n        <h4>Télécharger votre fichier</h4>\n        <a href=\"/cooked/"
+    + "\", \"_self\");\n            // setTimeout(function(){win.close(); window.close()}, 1000);\n        </script>\n        <h4>Télécharger votre fichier</h4>\n        <a href=\"/cooked/"
     + alias4(((helper = (helper = helpers.filename || (depth0 != null ? depth0.filename : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"filename","hash":{},"data":data}) : helper)))
     + "\" target=\"_blank\" class=\"btn btn-success btn-large\">\n        <i class='glyphicon glyphicon-download'></i> Télécharger\n        </a>\n";
 },"14":function(container,depth0,helpers,partials,data) {

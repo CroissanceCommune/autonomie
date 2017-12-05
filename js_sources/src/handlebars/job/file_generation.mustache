@@ -46,7 +46,7 @@
         {{#if filename}}
         <script type='text/javascript'>
             var win = window.open("/cooked/{{ filename }}", "_self");
-            setTimeout(function(){win.close(); window.close()}, 1000);
+            // setTimeout(function(){win.close(); window.close()}, 1000);
         </script>
         <h4>Télécharger votre fichier</h4>
         <a href="/cooked/{{ filename }}" target="_blank" class="btn btn-success btn-large">
@@ -64,5 +64,10 @@
         {{ err_message }}
     {{/if}}
     </div>
+</div>
+<div class='text-center'>
+        <button class='btn btn-default primary-action' onclick="win.close();">
+        <i class='fa fa-close'></i>&nbsp;Fermer cette fenêtre
+        </button>
 </div>
 {{/if}}

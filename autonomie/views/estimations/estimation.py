@@ -239,6 +239,8 @@ def estimation_geninv_view(context, request):
     for invoice in invoices:
         request.dbsession.add(invoice)
 
+    context.geninv = True
+
     if len(invoices) > 1:
         msg = u"{0} factures ont été générées".format(len(invoices))
     else:

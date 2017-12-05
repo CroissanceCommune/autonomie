@@ -118,11 +118,14 @@ def clean_html(text):
         Return a sanitized version of an html code keeping essential html tags
         and allowing only a few attributes
     """
-    text = strip_html(text)
-    return bleach.clean(
-        text,
-        tags=ALLOWED_HTML_TAGS,
-        attributes=ALLOWED_HTML_ATTRS,
-        styles=ALLOWED_CSS_STYLES,
-        strip=True,
-    )
+    if text:
+        text = strip_html(text)
+        return bleach.clean(
+            text,
+            tags=ALLOWED_HTML_TAGS,
+            attributes=ALLOWED_HTML_ATTRS,
+            styles=ALLOWED_CSS_STYLES,
+            strip=True,
+        )
+    else:
+        return text

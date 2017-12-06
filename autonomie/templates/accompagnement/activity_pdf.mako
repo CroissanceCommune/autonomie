@@ -92,7 +92,9 @@ else:
         % for label, attr in options:
             <div class='text12 activity-title' >${label}</div>
             <div class="activity-content">
+                % if getattr(activity, attr) is not None:
                 ${api.clean_html(getattr(activity, attr))|n}
+                % endif
             </div>
         % endfor
         <br />

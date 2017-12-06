@@ -61,10 +61,10 @@ def populate_actionmenu(request):
         Add buttons in the request actionmenu attribute
     """
     if request.context.type_ == 'project':
-        project = request.context
+        project_id = request.context.id
     else:
-        project = request.context.project
-    request.actionmenu.add(get_project_redirect_btn(request, project.id))
+        project = request.context.phase.project_id
+    request.actionmenu.add(get_project_redirect_btn(request, project_id))
 
 
 class TaskAddView(BaseFormView):

@@ -156,7 +156,8 @@ class SageInvoice(object):
         """
         compte_cg_tva = self.config.get('compte_cg_tva_rrr')
         code_tva = self.config.get('code_tva_rrr', "")
-        if compte_cg_tva:
+        compte_rrr = self.config.get('compte_rrr')
+        if compte_cg_tva and compte_rrr:
             for line in self.invoice.discounts:
                 prod = self.get_product(
                     self.config.get('compte_rrr'),
@@ -165,6 +166,10 @@ class SageInvoice(object):
                     self.tvas.get('rrr', 0)
                 )
                 prod['ht'] = prod.get('ht', 0) + line.total_ht()
+        else:
+            raise MissingData(
+                u"Missing RRR configuration"
+            )
 
     def _populate_expenses(self):
         """

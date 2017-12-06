@@ -464,12 +464,22 @@ def test_populate_discount_lines(sageinvoice_discount):
     assert sageinvoice_discount.products['CG_RRR']['tva'] == 2660000
 
 
+def test_populate_discount_lines_without_compte_rrr(sageinvoice_discount):
+    from autonomie.compute.sage import MissingData
+    # If one compte_cg_tva_rrr is not def
+    # No entry should be returned
+    sageinvoice_discount.config.pop("compte_rrr")
+    with pytest.raises(MissingData):
+        sageinvoice_discount._populate_discounts()
+
+
 def test_populate_discount_lines_without_compte_cg_tva(sageinvoice_discount):
+    from autonomie.compute.sage import MissingData
     # If one compte_cg_tva_rrr is not def
     # No entry should be returned
     sageinvoice_discount.config.pop("compte_cg_tva_rrr")
-    sageinvoice_discount._populate_discounts()
-    assert sageinvoice_discount.products.keys() == []
+    with pytest.raises(MissingData):
+        sageinvoice_discount._populate_discounts()
 
 
 def test_populate_discount_lines_without_code_tva(sageinvoice_discount):

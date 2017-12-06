@@ -68,6 +68,13 @@ Le compte général du client {1} n'a pas été configuré
 </a>"""
 
 
+MISSING_RRR_CONFIG_ERROR_MSG = u"""Le document {0} n'est pas exportable :
+Il contient des remises et les comptes RRR ne sont pas configurés.
+<a onclick="openPopup('{1}');" href='#'>
+Configurer les comptes RRR
+</a>"""
+
+
 class SageSingleInvoiceExportPage(BaseExportView):
     """
     Single invoice export page
@@ -144,6 +151,13 @@ class SageSingleInvoiceExportPage(BaseExportView):
         """
         return len(invoices)
 
+    def _check_discount_config(self):
+        """
+        Check that the rrr accounts are configured
+        """
+        return self.request.config.get("compte_rrr") and \
+            self.request.config.get("compte_cg_tva_rrr")
+
     def check(self, invoices):
         """
             Check that the given invoices are 'exportable'
@@ -174,6 +188,18 @@ class SageSingleInvoiceExportPage(BaseExportView):
                     )
                     res['errors'].append(message)
                     break
+
+            if invoice.discounts:
+                if not self._check_discount_config():
+                    admin_url = self.request.route_path(
+                        "admin_vente_treasury_main"
+                    )
+
+                    message = MISSING_RRR_CONFIG_ERROR_MSG.format(
+                        official_number,
+                        admin_url,
+                    )
+                    res['errors'].append(message)
 
             if not self._check_company(invoice.company):
                 company_url = self.request.route_path(

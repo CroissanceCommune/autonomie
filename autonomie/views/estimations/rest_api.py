@@ -122,6 +122,7 @@ class EstimationRestView(TaskRestView):
         sections['discounts'] = {'edit': True}
         sections['payment_conditions'] = {'edit': True}
         sections['payments'] = {'edit': True}
+        sections['notes'] = {'edit': True},
 
         return sections
 

@@ -63,7 +63,7 @@ def populate_actionmenu(request):
     if request.context.type_ == 'project':
         project_id = request.context.id
     else:
-        project = request.context.phase.project_id
+        project_id = request.context.phase.project_id
     request.actionmenu.add(get_project_redirect_btn(request, project_id))
 
 

@@ -271,9 +271,11 @@
         <div class="title">
             ${mention.title}
         </div>
-        <div class='content'>
-            ${format_text(mention.full_text)}
-        </div>
+        % if mention.full_text is not None:
+            <div class='content'>
+                ${format_text(mention.full_text)}
+            </div>
+        % endif
     % endfor
     <%block name="end_document">
     ## Add infos at the end of the document

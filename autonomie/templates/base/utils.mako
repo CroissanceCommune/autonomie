@@ -44,13 +44,15 @@
     <%doc>
         Replace \n with br for html output
     </%doc>
-    <% text = data %>
-    %if data is not UNDEFINED and data is not None and breaklines:
-        <% text = text.replace(u'\n', u'<br />') %>
-    % elif data is not UNDEFINED and data is not None:
-        <% text = text.replace(u'\n', u'') %>
+    % if data is not UNDEFINED and datas is not None:
+        <% text = data %>
+        %if breaklines:
+            <% text = text.replace(u'\n', u'<br />') %>
+        % else:
+            <% text = text.replace(u'\n', u'') %>
+            ${api.clean_html(text)|n}
+        %endif
     %endif
-    ${api.clean_html(text)|n}
 </%def>
 <%def name="format_customer(customer, link=True)">
     <%doc>

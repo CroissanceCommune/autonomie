@@ -44,7 +44,7 @@
     <%doc>
         Replace \n with br for html output
     </%doc>
-    % if data is not UNDEFINED and datas is not None:
+    % if data is not UNDEFINED and data is not None:
         <% text = data %>
         %if breaklines:
             <% text = text.replace(u'\n', u'<br />') %>

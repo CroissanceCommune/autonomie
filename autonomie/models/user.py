@@ -319,7 +319,7 @@ class User(DBBASE, PersistentACLMixin):
 
     vehicle = deferred(
         Column(
-            String(66),  # 50 + 1 + 15
+            String(116),  # 100 + 1 + 15
             nullable=True,
             info={
                 'colanderalchemy':

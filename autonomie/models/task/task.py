@@ -387,7 +387,6 @@ class Task(Node):
                 'colanderalchemy': {
                     'typ': AmountType(5),
                     'title': u'Frais',
-                    'validator': forms.positive_validator
                 },
                 'export': forms.EXCLUDED,
             },

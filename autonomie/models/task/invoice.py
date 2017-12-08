@@ -308,7 +308,7 @@ class Invoice(Task, InvoiceCompute):
                 quantity=1,
                 description=discount.description,
                 order=order,
-                unity='NONE',
+                unity='',
             )
             discount_line.product_id = Product.first_by_tva_value(discount.tva)
             order += 1

@@ -16,6 +16,7 @@ import CommonView from "./CommonView.js";
 import TaskBlockView from './TaskBlockView.js';
 import HtBeforeDiscountsView from './HtBeforeDiscountsView.js';
 import DiscountBlockView from './DiscountBlockView.js';
+import ExpenseHtBlockView from './ExpenseHtBlockView.js';
 import TotalView from './TotalView.js';
 import NotesBlockView from './NotesBlockView.js';
 import PaymentConditionBlockView from './PaymentConditionBlockView.js';
@@ -39,6 +40,7 @@ const MainView = Mn.View.extend({
         common: '#common',
         tasklines: '#tasklines',
         discounts: '#discounts',
+        expenses_ht: '#expenses_ht',
         rightbar: "#rightbar",
         ht_before_discounts: '.ht_before_discounts',
         totals: '.totals',
@@ -93,6 +95,12 @@ const MainView = Mn.View.extend({
         );
         this.showChildView('discounts', view);
     },
+    showExpenseHtBlock: function(){
+        var section = this.config.request('get:form_section', 'expenses_ht');
+        var model = this.facade.request('get:model', 'common');
+        var view = new ExpenseHtBlockView({model: model, section: section});
+        this.showChildView('expenses_ht', view);
+    },
     showNotesBlock: function(){
         var section = this.config.request('get:form_section', 'notes');
         var model = this.facade.request('get:model', 'common');
@@ -134,6 +142,9 @@ const MainView = Mn.View.extend({
             view = new HtBeforeDiscountsView({model: totalmodel});
             this.showChildView('ht_before_discounts', view);
             this.showDiscountBlock();
+        }
+        if (this.config.request('has:form_section', "expenses_ht")){
+            this.showExpenseHtBlock();
         }
 
         view = new TotalView({model: totalmodel});

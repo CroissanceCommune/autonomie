@@ -12,7 +12,6 @@ import Mn from 'backbone.marionette';
 import DiscountModel from '../models/DiscountModel.js';
 import DiscountCollectionView from './DiscountCollectionView.js';
 import DiscountFormPopupView from './DiscountFormPopupView.js';
-import ExpenseView from './ExpenseView.js';
 import ErrorView from './ErrorView.js';
 import {displayServerSuccess, displayServerError} from '../../backbone-tools.js';
 
@@ -23,7 +22,6 @@ const DiscountBlockView = Mn.View.extend({
     regions: {
         'lines': '.lines',
         'modalRegion': '.modalregion',
-        'expenses_ht': '.expenses_ht',
         'errors': ".block-errors",
     },
     ui: {
@@ -101,17 +99,9 @@ const DiscountBlockView = Mn.View.extend({
         this.collection.insert_percent(model);
         this.getChildView('modalRegion').triggerMethod('modal:close')
     },
-    isMoreSet: function(){
-        var value = this.model.get('expenses_ht');
-        if (value && (value != '0')){
-            return true;
-        }
-        return false;
-    },
     templateContext: function(){
         return {
             not_empty: ! this.isEmpty(),
-            is_more_set: this.isMoreSet(),
         }
     },
     onRender: function(){
@@ -121,11 +111,6 @@ const DiscountBlockView = Mn.View.extend({
                 new DiscountCollectionView({collection: this.collection})
             );
         }
-        this.showChildView(
-            'expenses_ht',
-            new ExpenseView({model: this.model})
-        );
-
     }
 });
 export default DiscountBlockView;

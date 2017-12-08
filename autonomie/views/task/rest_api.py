@@ -125,6 +125,7 @@ class TaskRestView(BaseRestView):
             'general': {'edit': True},
             'common': {'edit': True},
             'tasklines': {'edit': True},
+            'expenses_ht': {'edit': True},
         }
         if hasattr(self, '_more_form_sections'):
             sections = self._more_form_sections(sections)

@@ -174,7 +174,7 @@ def get_company_customers(kw):
     request = kw['request']
     company_id = request.context.get_company_id()
     customers = Customer.label_query()
-    customers.filter_by(company_id=company_id).all()
+    customers = customers.filter_by(company_id=company_id).all()
     return customers
 
 

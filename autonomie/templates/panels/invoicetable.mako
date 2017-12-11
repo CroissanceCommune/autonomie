@@ -57,7 +57,6 @@
         % if records:
             % for document in records:
                 <% id_ = document.id %>
-                <% description = document.description %>
                 <% internal_number = document.internal_number %>
                 <% name = document.name %>
                 <% ht = document.ht %>
@@ -102,6 +101,7 @@
                     ${internal_number} (<small>${name}</small>)
                 </a>
                 % if not is_admin_view:
+                    <% description = document.description %>
                     <small>
                         ${format_text(description)}
                     </small>
@@ -153,16 +153,17 @@
             </td>
               <td>
                   ${format_filelist(document)}
-                  % if hasattr(document, 'estimation') and document.estimation_id is not None:
+                % if hasattr(document, 'estimation_id') and document.estimation_id is not None:
                     ${format_filelist(document.estimation)}
-                % elif hasattr(document, 'invoice') and document.invoice_id is not None:
+                % elif hasattr(document, 'invoice_id') and document.invoice_id is not None:
                     ${format_filelist(document.invoice)}
-                  % endif
-                  <a class='btn btn-default'
-                     href="${request.route_path('/%ss/{id}/addfile' % type_, id=id_)}"
+                % endif
+                <% url = request.route_path('/%ss/{id}/addfile' % type_, id=id_)  %>
+                  <button class='btn btn-default'
+                     onclick="openPopup('${url}')"
                       title="Attacher un fichier">
                       <i class='glyphicon glyphicon-plus'></i>
-                  </a>
+                  </button>
               </td>
         </tr>
         % endfor

@@ -23,7 +23,7 @@
       margin: 8px 0px; }
 
 .totals {
-  font-size: 1.1em; }
+  font-size: 1em; }
 
 @media print {
   @page {
@@ -53,10 +53,10 @@
   .container, .container-fluid {
     width: 100% !important; }
   body, html, td, div {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
     color: #000 !important; }
   table td {
-    font-size: 0.9rem !important; }
+    font-size: 0.85rem !important; }
   h1 {
     font-size: 1.2rem !important; }
   h2 {

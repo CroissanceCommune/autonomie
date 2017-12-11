@@ -47,6 +47,7 @@ url = request.route_path('customers.csv', id=request.context.id, _query=args)
             Ajouter un client
         </button>
         <a class='btn btn-default' href="${request.route_path('company_customers_import_step1', id=request.context.id)}">
+            <i class='fa fa-download'></i>
             Importer des clients
         </a>
 

@@ -29,12 +29,14 @@
             <a
                 class='btn btn-primary primary-action'
                 href="${request.route_path('userdatas', _query=dict(action='new'))}">
+                <i class='glyphicon glyphicon-plus-sign'></i>
                 Nouvelle entrée gestion sociale
             </a>
         % if api.has_permission('admin'):
             <a
                 class='btn btn-default secondary-action'
                 href="${request.route_path('import_step1')}">
+                <i class='fa fa-download'></i>
                 Importer des données
             </a>
         % endif

@@ -278,8 +278,10 @@ class LoginView(BaseView):
 
         if 'submit' in self.request.params:
             controls = self.request.params.items()
-            log.info(u"Authenticating : '{0}'".format(
-                self.request.params.get('login'))
+            log.info(u"Authenticating : '{0}' (xhr : {1})".format(
+                self.request.params.get('login'),
+                self.request.is_xhr
+            )
             )
             try:
                 form_datas = form.validate(controls)
@@ -345,18 +347,11 @@ def includeme(config):
         xhr=True,
         permission=NO_PERMISSION_REQUIRED,
         renderer='json',
+        layout="default",
     )
 
     # API v1
     config.add_route('apiloginv1', '/api/v1/login')
-    config.add_view(
-        api_login_post_view,
-        route_name='apiloginv1',
-        permission=NO_PERMISSION_REQUIRED,
-        xhr=True,
-        renderer='json',
-        request_method='POST',
-    )
     config.add_view(
         api_login_get_view,
         route_name='apiloginv1',
@@ -364,4 +359,12 @@ def includeme(config):
         xhr=True,
         renderer='json',
         request_method='GET',
+    )
+    config.add_view(
+        api_login_post_view,
+        route_name='apiloginv1',
+        permission=NO_PERMISSION_REQUIRED,
+        xhr=True,
+        renderer='json',
+        request_method='POST',
     )

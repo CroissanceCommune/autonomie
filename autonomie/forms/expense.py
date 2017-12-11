@@ -33,7 +33,6 @@ import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.utils import strings
 from autonomie.models import user
 from autonomie.models.task.invoice import get_invoice_years
 from .custom_types import AmountType
@@ -170,6 +169,7 @@ def get_list_schema():
         widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
         validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
         missing='all',
+        default='all',
     ))
 
     schema.insert(0, forms.year_select_node(
@@ -181,18 +181,22 @@ def get_list_schema():
     schema.insert(0, forms.month_select_node(
         title=u"Mois",
         missing=-1,
+        default=-1,
         name='month',
         widget_options={'default_val': (-1, '')},
     ))
 
-    schema.insert(0, user.user_node(
-        title=u"Utilisateur",
-        missing=-1,
-        name=u'owner_id',
-        widget_options={
-            'default_option': (-1, ''),
-            'placeholder': u"Sélectionner un entrepreneur"},
-    ))
+    schema.insert(
+        0,
+        user.user_node(
+            title=u"Utilisateur",
+            missing=colander.drop,
+            name=u'owner_id',
+            widget_options={
+                'default_option': ('', ''),
+                'placeholder': u"Sélectionner un entrepreneur"},
+        )
+    )
 
     return schema
 

@@ -150,7 +150,8 @@ def get_customers_from_request(request):
     else:
         company_id = request.current_company
         from autonomie.models.customer import Customer
-        customers = Customer.query().filter_by(company_id=company_id).all()
+        customers = Customer.label_query()
+        customers.filter_by(company_id=company_id).all()
 
     return customers
 
@@ -172,7 +173,9 @@ def get_company_customers(kw):
     from autonomie.models.customer import Customer
     request = kw['request']
     company_id = request.context.get_company_id()
-    return Customer.query().filter_by(company_id=company_id).all()
+    customers = Customer.label_query()
+    customers.filter_by(company_id=company_id).all()
+    return customers
 
 
 @colander.deferred

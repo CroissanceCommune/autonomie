@@ -43,6 +43,7 @@
     padding: 0px !important;
   }
   table.opa.table-bordered.table-condensed{
+    margin-bottom: 2px;
     thead tr th, tfoot tr td{
       background-color: #ddd !important;
       -webkit-print-color-adjust: exact;
@@ -50,7 +51,7 @@
     }
     td, th{
       padding: 0px !important;
-      font-size: 0.9rem !important;
+      font-size: 0.85rem !important;
     }
     tbody td, tbody tr{
       border: 0px !important;
@@ -81,7 +82,7 @@
 		font-size: 1.2rem !important;
 	}
 	h2{
-		font-size: 1.15rem !important;
+		font-size: 1.12rem !important;
 	}
 	h3{
 		font-size: 1.1rem !important;

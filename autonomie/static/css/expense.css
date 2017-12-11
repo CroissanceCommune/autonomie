@@ -34,15 +34,17 @@
   .well {
     margin: 0px !important;
     padding: 0px !important; }
-  table.opa.table-bordered.table-condensed thead tr th, table.opa.table-bordered.table-condensed tfoot tr td {
-    background-color: #ddd !important;
-    -webkit-print-color-adjust: exact;
-    padding: 1px !important; }
-  table.opa.table-bordered.table-condensed td, table.opa.table-bordered.table-condensed th {
-    padding: 0px !important;
-    font-size: 0.9rem !important; }
-  table.opa.table-bordered.table-condensed tbody td, table.opa.table-bordered.table-condensed tbody tr {
-    border: 0px !important; }
+  table.opa.table-bordered.table-condensed {
+    margin-bottom: 2px; }
+    table.opa.table-bordered.table-condensed thead tr th, table.opa.table-bordered.table-condensed tfoot tr td {
+      background-color: #ddd !important;
+      -webkit-print-color-adjust: exact;
+      padding: 1px !important; }
+    table.opa.table-bordered.table-condensed td, table.opa.table-bordered.table-condensed th {
+      padding: 0px !important;
+      font-size: 0.85rem !important; }
+    table.opa.table-bordered.table-condensed tbody td, table.opa.table-bordered.table-condensed tbody tr {
+      border: 0px !important; }
   form, .hidden-print, a.btn, button, .nav, .help-block {
     display: none !important; }
   .tab-pane {
@@ -61,7 +63,7 @@
   h1 {
     font-size: 1.2rem !important; }
   h2 {
-    font-size: 1.15rem !important; }
+    font-size: 1.12rem !important; }
   h3 {
     font-size: 1.1rem !important; }
   h4 {

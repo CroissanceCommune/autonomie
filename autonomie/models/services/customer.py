@@ -22,6 +22,8 @@
 """
 Customer query service
 """
+from sqlalchemy.orm import load_only
+
 from autonomie_base.models.base import DBSESSION
 from autonomie.utils.formatters import format_civilite
 
@@ -105,3 +107,21 @@ class CustomerService(object):
         return DBSESSION().query(ProjectCustomer).filter_by(
             project_id=project_id).filter_by(
                 customer_id=customer_id).count() > 0
+
+    @classmethod
+    def label_query(cls, customer_class):
+        """
+        Return a query loading datas needed to compile Customer label
+        """
+        query = customer_class.query()
+        query = query.options(load_only(
+            "id",
+            "name",
+            "type_",
+            "firstname",
+            "lastname",
+            "code",
+            "civilite",
+            "company_id",
+        ))
+        return query

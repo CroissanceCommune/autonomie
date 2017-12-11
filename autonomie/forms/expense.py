@@ -193,7 +193,7 @@ def get_list_schema():
             missing=colander.drop,
             name=u'owner_id',
             widget_options={
-                'default_option': ('', ''),
+                'default_option': ('', u'Tous les entrepreneurs'),
                 'placeholder': u"Sélectionner un entrepreneur"},
         )
     )

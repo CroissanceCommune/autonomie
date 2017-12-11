@@ -50,6 +50,7 @@
     }
     td, th{
       padding: 0px !important;
+      font-size: 0.9rem !important;
     }
     tbody td, tbody tr{
       border: 0px !important;
@@ -69,12 +70,12 @@
 	.container, .container-fluid{
 		width: 100% !important;
 	}
-	body, html, td, div{
+	body, html, div{
 		font-size: 0.9rem !important;
     color: #000 !important;
 	}
-  table td{
-    font-size: 0.85rem !important;
+  td{
+    color: #000 !important;
   }
 	h1{
 		font-size: 1.2rem !important;
@@ -106,10 +107,10 @@
     }
 	}
   .totals{
-    font-size: 1rem;
+    font-size: 1rem !important;
     div{
-      font-size: 1rem !important;
-      font-weight: bold;
+      font-size: 0.9rem !important;
+      font-weight: normal;
     }
   }
 }

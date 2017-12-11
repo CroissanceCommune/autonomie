@@ -39,7 +39,8 @@
     -webkit-print-color-adjust: exact;
     padding: 1px !important; }
   table.opa.table-bordered.table-condensed td, table.opa.table-bordered.table-condensed th {
-    padding: 0px !important; }
+    padding: 0px !important;
+    font-size: 0.9rem !important; }
   table.opa.table-bordered.table-condensed tbody td, table.opa.table-bordered.table-condensed tbody tr {
     border: 0px !important; }
   form, .hidden-print, a.btn, button, .nav, .help-block {
@@ -52,11 +53,11 @@
     font-size: 1rem !important; }
   .container, .container-fluid {
     width: 100% !important; }
-  body, html, td, div {
+  body, html, div {
     font-size: 0.9rem !important;
     color: #000 !important; }
-  table td {
-    font-size: 0.85rem !important; }
+  td {
+    color: #000 !important; }
   h1 {
     font-size: 1.2rem !important; }
   h2 {
@@ -78,7 +79,7 @@
       margin: 0px !important;
       padding: 0px !important; }
   .totals {
-    font-size: 1rem; }
+    font-size: 1rem !important; }
     .totals div {
-      font-size: 1rem !important;
-      font-weight: bold; } }
+      font-size: 0.9rem !important;
+      font-weight: normal; } }

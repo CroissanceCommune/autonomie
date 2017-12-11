@@ -24,6 +24,6 @@
 
 from .migrate import migrate
 from .autonomie_admin import autonomie_admin_cmd
-from .fake_database import populate_fake
+from .fake_database import autonomie_fake_cmd
 from .cache import cache_cmd
 from .export import export_cmd

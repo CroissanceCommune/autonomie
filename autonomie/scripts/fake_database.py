@@ -35,7 +35,6 @@ from autonomie.models.project import Phase
 from autonomie.models.customer import Customer
 from autonomie.models.payments import PaymentMode
 from autonomie.models.tva import Tva
-from autonomie.scripts.utils import command
 from autonomie.models.task.unity import WorkUnit
 from autonomie.models.expense.types import (
     ExpenseKmType,
@@ -47,6 +46,9 @@ from autonomie.models.activity import (
     ActivityMode,
     ActivityAction,
 )
+
+from autonomie.scripts.utils import command
+from autonomie.scripts.anonymize import anonymize_database
 
 
 def add_user(login, password, group, firstname="", lastname="", email=""):
@@ -194,7 +196,7 @@ def add_activity_action(label, **kw):
     return a
 
 
-def set_configuration():
+def set_configuration(args, env):
     print("Adding configuration elements")
     add_payment_mode(u"par chèque")
     add_payment_mode(u"par virement")
@@ -235,7 +237,7 @@ commercial, économique et social", parent=a)
 
 
 
-def fake_database_fill():
+def fake_database_fill(args, env):
 
     # Adding admins
     add_simple_admin("admin1")
@@ -262,14 +264,19 @@ def fake_database_fill():
         city=u"Dijon"
     )
     project = add_project(customer, company, u"Vitrine rue Neuve", "VRND")
-    phase = add_phase(project, u"Default")
+    add_phase(project, u"Default")
 
 
-def populate_fake():
+def autonomie_fake_cmd():
     """Populate the database with fake datas
     Usage:
         autonomie-fake <config_uri> populate
         autonomie-fake <config_uri> populate_conf
+        autonomie-fake <config_uri> anonymize
+
+    o populate: Add sample datas
+    o populate_conf: Add sample configuration datas
+    o anonymize: Anonymize current database datas
 
     Options:
         -h --help     Show this screen.
@@ -279,11 +286,13 @@ def populate_fake():
             func = fake_database_fill
         elif arguments['populate_conf']:
             func = set_configuration
+        elif arguments['anonymize']:
+            func = anonymize_database
         else:
-            print populate_fake.__doc__
+            print autonomie_fake_cmd.__doc__
             sys.exit(1)
-        return func()
+        return func(arguments, env)
     try:
-        return command(callback, populate_fake.__doc__)
+        return command(callback, autonomie_fake_cmd.__doc__)
     finally:
         pass

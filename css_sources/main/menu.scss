@@ -17,6 +17,7 @@
 	box-shadow: 0 1px 5px 0 rgba(0,0,0,0.3);
   border: none;
   li a{
+    font-size: 0.95rem;
     font-weight: 100;
     color: #fff;
   }
@@ -43,7 +44,7 @@
     background-color: $bkg-color;
   }
   li a{
-    font-size: 12px;
+    font-size: 0.875rem;
     color: $font-grey2;
     i{
       color: #1ab394;

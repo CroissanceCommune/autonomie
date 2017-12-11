@@ -9,7 +9,7 @@
  *
  */
 html{
-  font-size: 11px;
+  font-size: 12pt;
 }
 .addressblock{
   position:relative;
@@ -32,13 +32,13 @@ html{
   margin-bottom:33px;
   thead tr{
     background-color:#f6f6f6;
-    font-size:12px;
+    font-size: 0.95rem;
   }
   thead tr.group-description{
     background-color:#fff;
   }
   h3{
-    font-size: 13px;
+    font-size: 1rem;
     font-weight: 400;
     padding: 4px 0px;
   }
@@ -59,7 +59,7 @@ html{
   .tva{
     text-align:right;
     width: 2cm;
-    font-size: 9px;
+    font-size: 0.8rem;
   }
   .quantity{
     text-align:center;
@@ -79,12 +79,12 @@ html{
   padding-top:3px;
   background-color:#f6f6f6;
   font-weight:bold;
-  font-size:11px;
+  font-size: 0.9rem;
   border: 0.01cm solid #cdcdcd;
   -pdf-keep-with-next:true;
 }
 .content{
-  font-size:9px;
+  font-size: 0.8rem;
   padding:3px;
   border: 0.01cm solid #cdcdcd;
   padding-bottom:4px;
@@ -95,10 +95,10 @@ html{
   color:#000;
   text-align:center;
   padding:5px;
-  font-size: 9px;
+  font-size: 0.8rem;
 }
 #cgv p{
-  font-size:8px;
+  font-size: 0.8rem;
   padding:0px;
   margin:0px;
 }
@@ -106,13 +106,13 @@ html{
   margin: 2px;
 }
 .text12{
-font-size: 12px;
+font-size: 0.85rem;
 }
 .text9{
-font-size: 9px;
+font-size: 0.75rem;
 }
 .text14{
-font-size: 14px;
+font-size: 0.875rem;
 }
 .upper{
 text-transform: uppercase;
@@ -123,7 +123,7 @@ text-transform: uppercase;
 .description li, .description p, .description div{
   margin: 0px;
   padding: 0px;
-  font-size: 11px;
+  font-size: 0.85rem;
   line-height: 1.2;
   vertical-align: middle;
 }
@@ -141,4 +141,7 @@ text-transform: uppercase;
 }
 div{
   margin: 0px;
+}
+footer{
+  display:none;
 }

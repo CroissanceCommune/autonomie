@@ -24,6 +24,7 @@
   box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.3);
   border: none; }
   .headmenu.menu li a {
+    font-size: 0.95rem;
     font-weight: 100;
     color: #fff; }
   .headmenu.menu li .company-search a {
@@ -44,8 +45,8 @@
   .headmenu.submenu .dropdown-menu .active a {
     background-color: #f5f5f6; }
   .headmenu.submenu li a {
-    font-size: 12px;
-    color: #566676; }
+    font-size: 0.875rem;
+    color: #344454; }
     .headmenu.submenu li a i {
       color: #1ab394; }
 
@@ -77,10 +78,10 @@ nav.sidebar-menu .subnav li {
   border-radius: 0px; }
   .panel .panel-heading {
     border-radius: 0px;
-    font-size: 1.2em;
-    color: #7f888f; }
+    font-size: 1.15rem;
+    color: #566676; }
     .panel .panel-heading .help-text {
-      font-size: 0.75em; }
+      font-size: 0.8rem; }
   .panel.panel-default {
     border-color: #e7eaec;
     border-top: 2px solid #d7dadc;
@@ -122,10 +123,10 @@ nav.sidebar-menu .subnav li {
 
 /* Table related css classes */
 table {
-  font-size: 13px; }
+  font-size: 0.875rem; }
   table caption {
     font-weight: bold;
-    font-size: 17px;
+    font-size: 1.2rem;
     text-align: left;
     padding: 15px; }
   table td.actions, table th.actions {
@@ -203,9 +204,9 @@ form textarea.tinymce {
   margin-bottom: 0px; }
   .deform label {
     font-weight: normal;
-    font-size: 16px; }
+    font-size: 0.95rem; }
   .deform legend {
-    font-size: 1.4em;
+    font-size: 1.4rem;
     font-weight: bold; }
   .deform fieldset {
     border: none;
@@ -241,12 +242,12 @@ ul.form-tabs li.error a {
   width: 15px; }
 
 .btn {
-  font-size: 1em;
+  font-size: 0.95rem;
   border-radius: 0px; }
 
 .btn.primary-action {
   padding: 6px 18px;
-  font-size: 16px;
+  font-size: 1.1rem;
   margin-bottom: 2px; }
 
 .btn-primary.primary-action {
@@ -269,7 +270,7 @@ ul.form-tabs li.error a {
     background-color: rgba(255, 255, 255, 0.1); }
 
 .login-dialog .modal-body .icon {
-  font-size: 100px;
+  font-size: 8rem;
   color: #999;
   text-align: center; }
 
@@ -295,11 +296,11 @@ ul.form-tabs li.error a {
     text-align: center; }
     .loginbox #authentication label {
       font-weight: normal;
-      font-size: 15px; }
+      font-size: 0.9rem; }
     .loginbox #authentication button {
       display: block;
       width: 100%;
-      font-size: 16px; }
+      font-size: 1rem; }
     .loginbox #authentication .checkbox {
       margin-top: 0px; }
     .loginbox #authentication #req-deformField4 {
@@ -311,10 +312,12 @@ ul.form-tabs li.error a {
     .loginbox #authentication input[type=password] {
       margin-bottom: 4px; }
 
+html {
+  font-size: 16px; }
+
 body {
   padding: 0px;
-  overflow: auto;
-  font-size: 14px; }
+  overflow: auto; }
 
 .pagetitle {
   padding: 25px 0 30px 40px;
@@ -325,7 +328,7 @@ body {
   color: #7f888f; }
   .pagetitle h2 {
     float: left;
-    font-size: 24px;
+    font-size: 1.5rem;
     line-height: 15px;
     margin: 0px;
     font-family: "sans serif"; }
@@ -345,7 +348,7 @@ body {
   background-color: #fff; }
 
 blockquote {
-  font-size: 0.9em; }
+  font-size: 0.9rem; }
 
 .estimation-view .page-content-wrapper {
   background-color: #f8f8f8; }
@@ -363,7 +366,7 @@ footer#page-footer-block {
 
 .primary-text-lg {
   color: #2196f3;
-  font-size: 63px;
+  font-size: 4rem;
   font-weight: 100;
   font-stretch: semi-condensed; }
 
@@ -380,13 +383,13 @@ footer#page-footer-block {
   text-align: center; }
 
 .help-block {
-  font-size: 11px;
+  font-size: 0.8rem;
   font-style: italic; }
 
 /* Project page */
 .section-header {
   padding: 6px 2px;
-  font-size: 12px; }
+  font-size: 0.9rem; }
   .section-header a {
     padding-left: 10px;
     padding-bottom: 2px;
@@ -394,7 +397,7 @@ footer#page-footer-block {
     color: #111;
     font-weight: normal;
     vertical-align: middle;
-    font-size: 16px;
+    font-size: 1rem;
     text-transform: capitalize; }
   .section-header a:hover {
     text-decoration: none;
@@ -409,7 +412,7 @@ footer#page-footer-block {
   border-left: 2px solid #d1d1d1; }
 
 h3.floatted {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 100; }
 
 /* Box used to display ajax calls success or errors */
@@ -493,7 +496,7 @@ header .navbar .nav > li > a {
   z-index: 1500;
   opacity: 0.7;
   background-color: #000;
-  font-size: 8em;
+  font-size: 8rem;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
   color: #fff;
   text-align: center;
@@ -509,7 +512,7 @@ header .navbar .nav > li > a {
 
 /* Custom close button class */
 .large-close {
-  font-size: 40px;
+  font-size: 3rem;
   opacity: 0.4; }
 
 /* Project view */

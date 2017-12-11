@@ -49,22 +49,24 @@
     visibility: visible !important;
     padding: 0px !important; }
   body, table caption, .lead {
-    font-size: 7pt !important; }
+    font-size: 1rem !important; }
   .container, .container-fluid {
     width: 100% !important; }
   body, html, td, div {
-    font-size: 7pt !important;
+    font-size: 1rem !important;
     color: #000 !important; }
+  table td {
+    font-size: 0.9rem !important; }
   h1 {
-    font-size: 12pt !important; }
+    font-size: 1.2rem !important; }
   h2 {
-    font-size: 11pt !important; }
+    font-size: 1.15rem !important; }
   h3 {
-    font-size: 10pt !important; }
+    font-size: 1.1rem !important; }
   h4 {
-    font-size: 9pt !important; }
+    font-size: 1rem !important; }
   h5 {
-    font-size: 8pt !important; }
+    font-size: 1rem !important; }
   .col-print-12 {
     width: 100% !important; }
   .form-section {
@@ -76,7 +78,7 @@
       margin: 0px !important;
       padding: 0px !important; }
   .totals {
-    font-size: 1em; }
+    font-size: 1rem; }
     .totals div {
-      font-size: 8pt !important;
+      font-size: 1rem !important;
       font-weight: bold; } }

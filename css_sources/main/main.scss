@@ -8,6 +8,7 @@
  * License: http://www.gnu.org/licenses/gpl-3.0.txt
  *
  */
+@import 'consts.scss';
 @import 'colors.scss';
 @import 'menu.scss';
 @import 'sidebar.scss';
@@ -18,10 +19,12 @@
 @import 'button.scss';
 @import 'login.scss';
 
+html{
+  font-size: $base_fontsize;
+}
 body{
   padding:0px;
   overflow: auto;
-  font-size: 14px;
 }
 .pagetitle{
   padding: 25px 0 30px 40px;
@@ -32,7 +35,7 @@ body{
   color: #7f888f;
   h2{
     float:left;
-    font-size: 24px;
+    font-size: 1.5rem;
     line-height: 15px;
     margin: 0px;
     // font-weight: 100;
@@ -54,7 +57,7 @@ body{
   background-color: #fff;
 }
 blockquote{
-  font-size: 0.9em;
+  font-size: 0.9rem;
 }
 .estimation-view{
   .page-content-wrapper{
@@ -74,7 +77,7 @@ footer#page-footer-block{
 }
 .primary-text-lg{
   color: $font-blue1;
-  font-size: 63px;
+  font-size: 4rem;
   font-weight: 100;
   font-stretch: semi-condensed;
 }
@@ -92,13 +95,13 @@ footer#page-footer-block{
   text-align: center;
 }
 .help-block{
-  font-size:11px;
+  font-size: 0.8rem;
   font-style:italic;
 }
 /* Project page */
 .section-header{
   padding: 6px 2px;
-  font-size: 12px;
+  font-size: 0.9rem;
   a{
       padding-left:10px;
       padding-bottom:2px;
@@ -106,7 +109,7 @@ footer#page-footer-block{
       color:#111;
       font-weight:normal;
       vertical-align:middle;
-      font-size:16px;
+      font-size: 1rem;
       text-transform:capitalize;
   }
   a:hover {
@@ -123,7 +126,7 @@ footer#page-footer-block{
     border-left:2px solid #d1d1d1;
 }
 h3.floatted{
-    font-size:16px;
+    font-size: 1rem;
     font-weight:100;
 }
 /* Box used to display ajax calls success or errors */
@@ -207,7 +210,7 @@ header .navbar .nav > li > a{
   z-index: 1500;
   opacity: 0.7;
   background-color: #000;
-  font-size: 8em;
+  font-size: 8rem;
   text-shadow:  2px 2px 2px rgba(0,0,0,0.5);
   color: #fff;
   text-align: center;
@@ -224,7 +227,7 @@ header .navbar .nav > li > a{
 }
 /* Custom close button class */
 .large-close{
-  font-size: 40px;
+  font-size: 3rem;
   opacity: 0.4;
 }
 /* Project view */

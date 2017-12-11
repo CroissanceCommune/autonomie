@@ -36,14 +36,14 @@
         class='btn btn-primary primary-action'
         href="${request.route_path('userdatas', _query=dict(action='new'))}"
         >
-        <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un entrepreneur
+        <i class='fa fa-user-plus'></i>&nbsp;Ajouter un entrepreneur
     </a>
     % endif
     % if request.has_permission('add_user'):
     <a class='btn btn-default secondary-action'
     href="${request.route_path('users', _query=dict(action='new'))}"
     >
-    <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un permanent
+    <i class='fa fa-user-plus'></i>&nbsp;Ajouter un permanent
     </a>
     % endif
 </div>

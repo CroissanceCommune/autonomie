@@ -198,18 +198,15 @@ class Invoice(Task, InvoiceCompute):
         group='edit'
     )
     # Common with only cancelinvoices
-    financial_year = deferred(
-        Column(
-            Integer,
-            info={
-                'colanderalchemy': {
-                    'title': u"Année fiscale de référence",
-                    'widget': deform.widget.TextInputWidget(mask='9999'),
-                }
-            },
-            default=0
-        ),
-        group='edit'
+    financial_year = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'title': u"Année fiscale de référence",
+                'widget': deform.widget.TextInputWidget(mask='9999'),
+            }
+        },
+        default=0
     )
     exported = deferred(
         Column(
@@ -475,18 +472,15 @@ class CancelInvoice(Task, TaskCompute):
         default=None
     )
 
-    financial_year = deferred(
-        Column(
-            Integer,
-            info={
-                'colanderalchemy': {
-                    'title': u"Année fiscale de référence",
-                    'widget': deform.widget.TextInputWidget(mask='9999'),
-                }
-            },
-            default=0
-        ),
-        group='edit'
+    financial_year = Column(
+        Integer,
+        info={
+            'colanderalchemy': {
+                'title': u"Année fiscale de référence",
+                'widget': deform.widget.TextInputWidget(mask='9999'),
+            }
+        },
+        default=0
     )
     exported = deferred(
         Column(

@@ -143,6 +143,7 @@ class InvoiceListTools(object):
         query = query.with_polymorphic([Invoice, CancelInvoice])
         query = query.outerjoin(Invoice.payments)
         query = query.outerjoin(Task.customer)
+        query = query.outerjoin(Task.company)
         query = query.options(
             contains_eager(Invoice.payments).load_only(
                 Payment.id, Payment.date, Payment.mode
@@ -150,9 +151,36 @@ class InvoiceListTools(object):
         )
         query = query.options(
             contains_eager(Task.customer).load_only(
-                Customer.name, Customer.code, Customer.id
+                Customer.name, Customer.code, Customer.id,
+                Customer.firstname, Customer.lastname, Customer.civilite,
+                Customer.type_,
             )
         )
+        query = query.options(
+            contains_eager(Task.company).load_only(
+                Company.name,
+                Company.id,
+            )
+        )
+        query = query.options(
+            load_only(
+                "_acl",
+                "name",
+                "date",
+                "id",
+                "ht",
+                "tva",
+                "ttc",
+                "company_id",
+                "customer_id",
+                "official_number",
+                "internal_number",
+                "prefix",
+                "status",
+                Invoice.paid_status,
+            )
+        )
+
         query = query.filter(Task.status == 'valid')
         return query
 

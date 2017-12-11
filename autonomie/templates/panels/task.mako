@@ -144,7 +144,7 @@
                         </td>
                         % if display_tvas_column:
                             <td class='tva'>
-                                ${api.format_amount(task.expenses_tva, precision=5)|n}&nbsp;%
+                                ${api.format_amount(task.expenses_tva, precision=2)|n}&nbsp;%
                             </td>
                         % endif
                     </tr>

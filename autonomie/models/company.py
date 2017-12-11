@@ -43,6 +43,7 @@ from sqlalchemy.orm import (
     relationship,
     deferred,
     backref,
+    load_only,
 )
 
 from autonomie import forms
@@ -470,12 +471,14 @@ def company_node(**kw):
 @colander.deferred
 def deferred_fullcustomer_list_widget(node, kw):
     from autonomie.models.project import build_customer_values
+    from autonomie.models.customer import Customer
     values = [('', u"Tous les clients")]
-    for comp in Company.query():
+    for comp in Company.query().options(load_only("id", "name")):
+        customers = Customer.label_query().filter_by(company_id=comp.id)
         values.append(
             deform.widget.OptGroup(
                 comp.name,
-                *build_customer_values(comp.customers, default=False)
+                *build_customer_values(customers, default=False)
             )
         )
     return deform.widget.Select2Widget(

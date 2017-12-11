@@ -91,7 +91,7 @@ class PhaseAddFormView(BaseFormView):
 
 
 class PhaseEditFormView(BaseFormView):
-    title = u"Édition du dossier"
+    title = u"Modification du dossier"
     schema = PhaseSchema()
 
     def before(self, form):

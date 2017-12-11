@@ -27,7 +27,7 @@
 % if 'popup' in request.GET:
 <div class='text-center'>
     <h2>
-    Édition du client ${request.context.label}
+    Modification du client ${request.context.label}
     <br />
     <small>Activité : ${request.context.company.name}</small>
     </h2>

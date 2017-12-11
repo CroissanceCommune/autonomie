@@ -9,7 +9,7 @@
  *
  */
 html {
-  font-size: 12pt; }
+  font-size: 11px; }
 
 .addressblock {
   position: relative;
@@ -33,11 +33,11 @@ html {
   margin-bottom: 33px; }
   .lines thead tr {
     background-color: #f6f6f6;
-    font-size: 0.95rem; }
+    font-size: 12px; }
   .lines thead tr.group-description {
     background-color: #fff; }
   .lines h3 {
-    font-size: 1rem;
+    font-size: 13px;
     font-weight: 400;
     padding: 4px 0px; }
   .lines td, .lines th {
@@ -54,7 +54,7 @@ html {
   .lines .tva {
     text-align: right;
     width: 2cm;
-    font-size: 0.8rem; }
+    font-size: 9px; }
   .lines .quantity {
     text-align: center;
     width: 3cm; }
@@ -70,12 +70,12 @@ html {
   padding-top: 3px;
   background-color: #f6f6f6;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 11px;
   border: 0.01cm solid #cdcdcd;
   -pdf-keep-with-next: true; }
 
 .content {
-  font-size: 0.8rem;
+  font-size: 9px;
   padding: 3px;
   border: 0.01cm solid #cdcdcd;
   padding-bottom: 4px;
@@ -86,10 +86,10 @@ html {
   color: #000;
   text-align: center;
   padding: 5px;
-  font-size: 0.8rem; }
+  font-size: 9px; }
 
 #cgv p {
-  font-size: 0.8rem;
+  font-size: 8px;
   padding: 0px;
   margin: 0px; }
 
@@ -97,13 +97,13 @@ html {
   margin: 2px; }
 
 .text12 {
-  font-size: 0.85rem; }
+  font-size: 12px; }
 
 .text9 {
-  font-size: 0.75rem; }
+  font-size: 9px; }
 
 .text14 {
-  font-size: 0.875rem; }
+  font-size: 14px; }
 
 .upper {
   text-transform: uppercase; }
@@ -114,7 +114,7 @@ html {
 .description li, .description p, .description div {
   margin: 0px;
   padding: 0px;
-  font-size: 0.85rem;
+  font-size: 11px;
   line-height: 1.2;
   vertical-align: middle; }
 
@@ -132,6 +132,3 @@ html {
 
 div {
   margin: 0px; }
-
-footer {
-  display: none; }

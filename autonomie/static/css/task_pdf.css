@@ -9,6 +9,9 @@
  *
  * Extends the pdf.css stylesheet to set px values instead of cm
  */
+html {
+  font-size: 16px !important; }
+
 .addressblock {
   position: relative;
   padding-left: 50%;

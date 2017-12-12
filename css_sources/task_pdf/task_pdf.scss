@@ -9,6 +9,10 @@
  *
  * Extends the pdf.css stylesheet to set px values instead of cm
  */
+@import '../main/consts.scss';
+html{
+  font-size: $base_fontsize !important;
+}
 .addressblock{
   position:relative;
   padding-left: 50%;  /* + margin 1cm */

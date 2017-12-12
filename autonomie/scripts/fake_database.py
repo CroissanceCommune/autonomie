@@ -272,11 +272,12 @@ def autonomie_fake_cmd():
     Usage:
         autonomie-fake <config_uri> populate
         autonomie-fake <config_uri> populate_conf
-        autonomie-fake <config_uri> anonymize
+        autonomie-fake <config_uri> anonymize [--method=<method>]
 
     o populate: Add sample datas
     o populate_conf: Add sample configuration datas
-    o anonymize: Anonymize current database datas
+    o anonymize: Anonymize current database datas (method : name of the method
+        to launch)
 
     Options:
         -h --help     Show this screen.

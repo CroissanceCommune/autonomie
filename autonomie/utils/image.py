@@ -25,7 +25,12 @@
 """
     utilities for image handling
 """
-from PIL import Image
+import pkg_resources
+from PIL import (
+    Image,
+    ImageDraw,
+    ImageFont,
+)
 from StringIO import StringIO
 
 
@@ -71,3 +76,26 @@ class ImageResizer(object):
             layer.save(mybuffer, format="PNG")
             mybuffer.seek(0)
             return mybuffer
+
+
+def build_header(text, size=(1000, 250)):
+    """
+    Build a header image containing text
+
+    :param str text: The text to write
+    :returns: The header image
+    :rtype: Image instance
+    """
+    img = Image.new('RGB', size, (255, 255, 255))
+    fontpath = pkg_resources.resource_filename(
+        'autonomie',
+        'static/fonts/playfair_display_regular.ttf'
+    )
+    font = ImageFont.truetype(fontpath, 30)
+
+    d = ImageDraw.Draw(img)
+    d.text((100, 100), text, font=font, fill=(0, 0, 0))
+    mybuffer = StringIO()
+    img.save(mybuffer, 'PNG')
+    mybuffer.seek(0)
+    return mybuffer

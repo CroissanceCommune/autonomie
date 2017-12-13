@@ -20,6 +20,13 @@ html {
   padding-top: 10px;
   font-size: 14px; }
 
+.lines thead tr {
+  background-color: #f6f6f6;
+  font-size: 12px; }
+
+.lines thead tr.group-description {
+  background-color: #fff; }
+
 .lines .tva {
   width: 5%; }
 
@@ -36,3 +43,26 @@ h3 {
 table thead tr.group-description td {
   line-height: 1;
   font-size: 9px; }
+
+.pdf_footer {
+  background-color: #efefef;
+  color: #000;
+  text-align: center;
+  padding: 5px;
+  font-size: 9px; }
+
+.content {
+  font-size: 9px;
+  padding: 3px;
+  border: 0.01cm solid #cdcdcd;
+  padding-bottom: 4px;
+  margin-bottom: 12px; }
+
+.title {
+  padding: 3px;
+  padding-top: 3px;
+  background-color: #f6f6f6;
+  font-weight: bold;
+  font-size: 11px;
+  border: 0.01cm solid #cdcdcd;
+  -pdf-keep-with-next: true; }

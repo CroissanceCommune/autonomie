@@ -84,7 +84,7 @@ def build_header(text, size=(1000, 250)):
 
     :param str text: The text to write
     :returns: The header image
-    :rtype: Image instance
+    :rtype: StrinIO instance populated with the image datas in PNG Format
     """
     img = Image.new('RGB', size, (255, 255, 255))
     fontpath = pkg_resources.resource_filename(

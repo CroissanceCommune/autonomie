@@ -96,7 +96,7 @@
     <div class='col-md-8'>
             <div class='panel panel-default page-block'>
             <div class='panel-heading'>
-                Configuraiton du rendez-vous
+                Configuration du rendez-vous
             </div>
             <div class='panel-body'>
                 <% items = (\

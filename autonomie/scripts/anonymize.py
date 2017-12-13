@@ -127,6 +127,7 @@ l'annexe II du code général des impôts""")
 000 000 000 00 - Code naf 0000Z TVA INTRACOM : FR0000000. Siège social : 10 \
 rue vieille 23200 Aubusson"""
         Config.set('coop_pdffootercontent', footer)
+        Config.set('coop_pdffootertext', footer)
         Config.set('coop_invoicepayment', u"""Par chèque libellé à l'ordre de : \
 MA CAE/ %ENTREPRENEUR%
 à envoyer à l'adresse suivante :

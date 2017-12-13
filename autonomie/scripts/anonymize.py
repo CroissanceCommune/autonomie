@@ -13,6 +13,7 @@ import inspect
 import itertools
 import logging
 import pkg_resources
+import os
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.utils.image import build_header
@@ -37,7 +38,6 @@ class Anonymizer(object):
         self.faker = Faker('fr_FR')
         self.logger = logger
         self.session = DBSESSION()
-        self.counter = itertools.count()
 
     def _zipcode(self):
         if hasattr(self.faker, 'zipcode'):
@@ -268,19 +268,23 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             CompanyDatas,
             AntenneOption,
         )
-        for u in self.session.query(User).filter_by(active=True):
-            index = self.counter.next()
+        counter = itertools.count()
+        found_contractor = False
+        for u in self.session.query(User).filter_by(active='Y'):
+            index = counter.next()
             if index == 1:
                 u.login = u"admin1"
-                u.groups = 'admin'
+                u.groups = ['admin']
 
             elif index == 2:
                 u.login = u"manager1"
-                u.groups = "manager"
+                u.groups = ["manager"]
 
-            elif index == 3:
+            elif not found_contractor and "contractor" in u.groups:
                 u.login = u"entrepreneur1"
-                u.groups = u"contractor"
+                found_contractor = True
+            else:
+                u.login = u"user_{0}".format(index)
 
             u.lastname = self.faker.last_name()
             u.firstname = self.faker.first_name()
@@ -291,9 +295,9 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
                 u.userdatas.coordonnees_firstname = u.firstname
                 u.userdatas.coordonnees_email1 = u.email
 
-        for u in self.session.query(User).filter_by(active=False):
-            index = self.counter.next()
-            u.login = u"utilisateur_{0}".format(index)
+        for u in self.session.query(User).filter_by(active='N'):
+            index = counter.next()
+            u.login = u"user_{0}".format(index)
             u.lastname = self.faker.last_name()
             u.firstname = self.faker.first_name()
             u.email = self.faker.ascii_safe_email()
@@ -328,6 +332,24 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
 
         for a in AntenneOption.query():
             a.label = u"Antenne : {0}".format(self.faker.city())
+
+    def _an_files(self):
+        from autonomie.models.files import File
+        for file_ in self.session.query(File):
+            self.session.delete(file_)
+
+        from autonomie.models.files import Template
+
+        sample_tmpl_path = os.path.abspath(
+            pkg_resources.resource_filename('autonomie', 'sample_templates')
+        )
+        for filename in os.listdir(sample_tmpl_path):
+            filepath = os.path.join(sample_tmpl_path, filename)
+            print("Filepath : %s" % filepath)
+            with open(filepath, 'r') as fbuf:
+                tmpl = Template(name=filename, description=filename)
+                tmpl.data = fbuf.read()
+                self.session.add(tmpl)
 
     def run(self, module_key=None):
         if module_key is not None:

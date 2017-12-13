@@ -352,6 +352,11 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
                 tmpl.data = fbuf.read()
                 self.session.add(tmpl)
 
+    def _an_celery_jobs(self):
+        from autonomie_celery.models import Job
+        for job in self.session.query(Job):
+            self.session.delete(job)
+
     def run(self, module_key=None):
         if module_key is not None:
             if not module_key.startswith('_an_'):

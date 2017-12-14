@@ -296,7 +296,12 @@ def project_archive(request):
             u"Le projet '{0}' a été désarchivé".format(project.name)
         )
     request.dbsession.merge(project)
-    return HTTPFound(request.referer)
+    if request.referer is not None:
+        return HTTPFound(request.referer)
+    else:
+        return HTTPFound(
+            request.route_path("company_projects", id=context.company_id)
+        )
 
 
 def project_delete(request):
@@ -304,12 +309,18 @@ def project_delete(request):
         Delete the current project
     """
     project = request.context
+    cid = project.company_id
     log.info(u"Project {0} deleted".format(project))
     request.dbsession.delete(project)
     request.session.flash(
         u"Le projet '{0}' a bien été supprimé".format(project.name)
     )
-    return HTTPFound(request.referer)
+    if request.referer is not None:
+        return HTTPFound(request.referer)
+    else:
+        return HTTPFound(
+            request.route_path("company_projects", id=cid)
+        )
 
 
 def get_color(index):

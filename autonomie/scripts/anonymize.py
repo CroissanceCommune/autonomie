@@ -14,6 +14,7 @@ import itertools
 import logging
 import pkg_resources
 import os
+import transaction
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.utils.image import build_header
@@ -89,6 +90,7 @@ class Anonymizer(object):
                 u"{0}\n {1} - {2}".format(comp.name, comp.phone, comp.email)
             )
             comp.header = {'name': 'header.png', 'data': header}
+        self.session.execute(u"update company set cgv=''")
 
     def _an_competence(self):
         from autonomie.models.competence import (
@@ -197,6 +199,7 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
     def _an_project(self):
         from autonomie.models.project import Project, Phase
         for p in self.session.query(Project):
+            p.name = self.faker.sentence(nb_words=5)
             p.definition = self.faker.text()
 
         for p in self.session.query(Phase):
@@ -243,6 +246,8 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             task.description = self.faker.text()
             task.address = task.customer.full_address
             task.workplace = self.faker.address()
+            task.payment_conditions = u"Par chèque ou virement à réception de "
+            u"facture"
         for line in self.session.query(DiscountLine):
             line.description = self.faker.text()
 
@@ -262,13 +267,27 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             if estimation.exclusions:
                 estimation.exclusions = self.faker.text()
 
+    def _an_task_config(self):
+        from autonomie.models.task import (
+            PaymentConditions,
+        )
+        for i in self.session.query(PaymentConditions):
+            self.session.delete(i)
+
+        for index, label in enumerate(
+            [u"30 jours fin de mois", u"À réception de facture"]
+        ):
+            condition = PaymentConditions(label=label)
+            if index == 0:
+                condition.default = True
+
+            self.session.add(condition)
+
     def _an_user(self):
         from autonomie.models.user import (
             User,
-            UserDatas,
-            CompanyDatas,
-            AntenneOption,
         )
+        self.session.execute("Update accounts set session_datas='{}'")
         counter = itertools.count()
         found_contractor = False
         for u in self.session.query(User).filter_by(active='Y'):
@@ -308,6 +327,12 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
                 u.userdatas.coordonnees_firstname = u.firstname
                 u.userdatas.coordonnees_email1 = u.email
 
+    def _an_userdatas(self):
+        from autonomie.models.user import (
+            UserDatas,
+            CompanyDatas,
+            AntenneOption,
+        )
         for u in self.session.query(UserDatas):
             if u.user_id is None:
                 u.coordonnees_lastname = self.faker.last_name()
@@ -346,16 +371,16 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
         )
         for filename in os.listdir(sample_tmpl_path):
             filepath = os.path.join(sample_tmpl_path, filename)
-            print("Filepath : %s" % filepath)
             with open(filepath, 'r') as fbuf:
                 tmpl = Template(name=filename, description=filename)
                 tmpl.data = fbuf.read()
                 self.session.add(tmpl)
 
     def _an_celery_jobs(self):
-        from autonomie_celery.models import Job
-        for job in self.session.query(Job):
-            self.session.delete(job)
+        self.session.execute("delete from mailing_job")
+        self.session.execute("delete from file_generation_job")
+        self.session.execute("delete from csv_import_job")
+        self.session.execute("delete from job")
 
     def run(self, module_key=None):
         if module_key is not None:
@@ -374,8 +399,10 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             keys = methods.keys()
             keys.sort()
         for key in keys:
-            print(key)
+            self.logger.debug(u"Step : {0}".format(key))
             methods[key]()
+            transaction.commit()
+            transaction.begin()
 
 
 def anonymize_database(args, env):

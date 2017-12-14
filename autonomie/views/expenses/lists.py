@@ -91,8 +91,8 @@ class ExpenseList(BaseListView):
         return query
 
     def filter_owner(self, query, appstruct):
-        user_id = appstruct['owner_id']
-        if user_id and user_id not in (-1, colander.null):
+        user_id = appstruct.get('owner_id', None)
+        if user_id and user_id not in ('', -1, colander.null):
             query = query.filter(ExpenseSheet.user_id == user_id)
         return query
 

@@ -362,7 +362,7 @@ def set_task_colors(phases):
 
     for phase in phases:
         for invoice in phase.invoices:
-            if invoice.estimation:
+            if invoice.estimation and hasattr(invoice.estimation, 'color'):
                 invoice.color = invoice.estimation.color
             else:
                 invoice.color = get_color(index)
@@ -370,7 +370,7 @@ def set_task_colors(phases):
 
     for phase in phases:
         for cancelinvoice in phase.cancelinvoices:
-            if cancelinvoice.invoice:
+            if cancelinvoice.invoice and hasattr(cancelinvoice.invoice, 'color'):
                 cancelinvoice.color = cancelinvoice.invoice.color
             else:
                 cancelinvoice.color = get_color(index)

@@ -25,7 +25,11 @@
 """
     Handle the states of the objects
 """
+import logging
 from autonomie.exception import Forbidden
+
+
+logger = logging.getLogger(__name__)
 
 
 class State(object):
@@ -126,7 +130,7 @@ class StateMachine(object):
         """
         state = getattr(model, self.status_attr)
 
-        print("Looking for a new object : %s -> %s" % (state, new_state))
+        logger.debug("Looking for a new object : %s -> %s" % (state, new_state))
         state_obj = self.get_transition(state, new_state)
         if state_obj is None:
             raise Forbidden(

@@ -92,7 +92,7 @@ class AccountingOperation(DBBASE):
     general_account = Column(
         String(20),
         info={
-            'colanderalchemy': {'title': u"Compte analytique de l'entreprise"}
+            'colanderalchemy': {'title': u"Compte général de l'opération"}
         }
     )
     label = Column(

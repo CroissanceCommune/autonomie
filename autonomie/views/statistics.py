@@ -121,7 +121,8 @@ def statistic_sheet_add_edit_view(context, request):
     """
     View for adding editing statistics sheets
     """
-    if 'title' in request.POST:
+    post_datas = request.POST or request.json_body
+    if 'title' in post_datas:
         schema = SQLAlchemySchemaNode(StatisticSheet, includes=('title',))
 
         try:

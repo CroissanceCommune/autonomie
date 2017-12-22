@@ -307,8 +307,14 @@ function showLoader(){
 // Expects a redirect value to be returned with the 302 code
 function setupJsonRedirect() {
   $(document).ajaxComplete(
-    function( data, xhr, settings ) {
-        let json_resp = xhr.responseJSON;
+    function( event, xhr, settings ) {
+        var json_resp;
+        if (! _.isUndefined(xhr.responseJSON)){
+            json_resp = xhr.responseJSON;
+        } else {
+            json_resp = $.parseJSON(xhr.responseText);
+        }
+
         if (!_.isUndefined(json_resp) && ( json_resp.redirect )){
             window.location.href = json_resp.redirect;
         }

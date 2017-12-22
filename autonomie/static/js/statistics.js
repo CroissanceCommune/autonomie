@@ -868,6 +868,7 @@ function StatisticsPageInit(options){
     var input = form_container.find('input');
     $('button.btn-add').on('click', function(){
       form_container.fadeIn();
+      input.focus();
     });
     form.off('submit');
     form.on("submit", function(event){
@@ -877,12 +878,7 @@ function StatisticsPageInit(options){
         showError(input, "Requis");
       } else {
         hideFormError(form_container);
-        $.ajax({
-          url: AppOptions['submiturl'],
-          method: 'POST',
-          dataType: 'json',
-          data: {title: title}
-        });
+        var ajax_req = ajax_call( AppOptions['submiturl'], {title: title});
       }
     });
   }

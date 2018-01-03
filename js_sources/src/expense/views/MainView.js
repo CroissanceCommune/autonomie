@@ -173,7 +173,7 @@ const MainView = Mn.View.extend({
             'get:options',
             'expensekm_types',
        );
-       if (km_type_options.length !== 0){
+       if (!_.isEmpty(km_type_options)){
            collection = this.facade.request(
                'get:collection',
                'kmlines'
@@ -206,7 +206,7 @@ const MainView = Mn.View.extend({
             'get:options',
             'expensekm_types',
        );
-       if (km_type_options.length !== 0){
+       if (!_.isEmpty(km_type_options)){
            collection = this.facade.request(
                'get:collection',
                'kmlines'

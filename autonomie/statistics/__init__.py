@@ -149,7 +149,10 @@ class MissingDatasError(Exception):
     """
     Custom exception raised when some datas is missing for filtering
     """
-    pass
+    def __init__(self, message, *args, **kwargs):
+        Exception.__init__(self, message, *args)
+        for key, value in kwargs:
+            setattr(self, key, value)
 
 
 class SheetQueryFactory(object):

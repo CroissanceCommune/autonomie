@@ -127,7 +127,7 @@ class InvoiceService(object):
         :param obj task: The task object
         """
         if task.official_number is None:
-            official_number = self._get_next_official_number()
+            official_number = self._get_next_official_number(task.date.year)
             task.official_number = official_number
 
 

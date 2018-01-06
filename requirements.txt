@@ -47,14 +47,14 @@ pyramid-layout==1.0
 pyramid-mailer==0.14.1
 pyramid-mako==1.0.2
 pyramid_services
-pyramid-tm==0.5
+pyramid-tm==2.2
 pytest==2.6.4
 reportlab==3.1.44
 repoze.lru==0.6
 simplejson==3.3.1
 sqla_inspect==0.4.2
 SQLAlchemy==1.0.8
-transaction==1.4.3
+transaction==2.1.2
 translationstring==1.2
 Unidecode==0.04.17
 venusian==1.0

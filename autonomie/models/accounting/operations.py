@@ -36,6 +36,14 @@ class AccountingOperationUpload(DBBASE):
         default=datetime.datetime.now,
         info={"colanderalchemy": {'title': u"Heure et date de création"}}
     )
+    filetype = Column(
+        String(),
+        info={
+            'colanderalchemy': {
+                'title': u"Type de fichier (analytical_balance/general_ledger)"
+            }
+        }
+    )
     filename = Column(
         String(100),
         info={"colanderalchemy": {'title': u"Nom du fichier"}}

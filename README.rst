@@ -86,3 +86,10 @@ Puis créer un compte administrateur
 .. code-block:: console
 
     autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
+    
+N.B : pour un administrateur, préciser 
+    
+.. code-block:: console
+
+    --group=admin
+    

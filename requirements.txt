@@ -1,6 +1,6 @@
 alembic==0.8.2
-autonomie_base==4.0.8
-autonomie_celery==4.0.11
+autonomie_base==4.1.0a
+autonomie_celery==4.1.0a
 Beaker==1.6.4
 bleach==1.4.1
 Chameleon

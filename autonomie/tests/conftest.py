@@ -207,6 +207,7 @@ def connection(request, settings):
         """
             drop the test database
         """
+        print("DROPPING DB")
         if __current_test_ini_file().endswith('travis.ini'):
             return
         db_settings = get_test_options_from_settings(settings)
@@ -244,8 +245,12 @@ def dbsession(config, content, connection, request):
     """
     from transaction import abort
     trans = connection.begin()          # begin a non-orm transaction
-    request.addfinalizer(trans.rollback)
-    request.addfinalizer(abort)
+    def rollback():
+        print("ROLLING BACK")
+        trans.rollback()
+        print("ABORTING")
+        abort()
+    request.addfinalizer(rollback)
     from autonomie_base.models.base import DBSESSION
     return DBSESSION()
 
@@ -405,6 +410,7 @@ def company(dbsession, user):
     company = Company(
         name=u"Company",
         email=u"company@c.fr",
+        code_compta="0USER",
     )
     company.employees = [user]
     dbsession.add(company)

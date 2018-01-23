@@ -37,7 +37,7 @@ class AccountingOperationUpload(DBBASE):
         info={"colanderalchemy": {'title': u"Heure et date de création"}}
     )
     filetype = Column(
-        String(),
+        String(50),
         info={
             'colanderalchemy': {
                 'title': u"Type de fichier (analytical_balance/general_ledger)"

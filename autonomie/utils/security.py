@@ -348,6 +348,7 @@ def get_company_acl(self):
                 "edit_commercial_handling",
                 "list_expenses",
                 "add.expense",
+                "add.expensesheet",
                 "list_sale_products",
                 "add_sale_product",
                 "list_treasury_files",

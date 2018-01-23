@@ -98,7 +98,7 @@ from autonomie.models.tva import Tva
 from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
 )
-from autonomie.models.accounting.measures import (
+from autonomie.models.accounting.treasury_measures import (
     TreasuryMeasureGrid,
     TreasuryMeasureType,
 )

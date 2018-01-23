@@ -10,7 +10,7 @@ Admin view for Treasury measure configuration
 import logging
 from sqlalchemy import asc
 
-from autonomie.models.accounting.measures import (
+from autonomie.models.accounting.treasury_measures import (
     TreasuryMeasureType,
 )
 from autonomie.forms.admin import (

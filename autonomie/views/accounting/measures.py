@@ -7,7 +7,7 @@ import logging
 import colander
 from sqlalchemy import extract
 
-from autonomie.models.accounting.measures import (
+from autonomie.models.accounting.treasury_measures import (
     TreasuryMeasureGrid,
 )
 from autonomie.models.config import Config

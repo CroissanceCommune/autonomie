@@ -5,7 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 
 def test_treasury_measure_type():
-    from autonomie.models.accounting.measures import TreasuryMeasureType
+    from autonomie.models.accounting.treasury_measures import TreasuryMeasureType
 
     type_ = TreasuryMeasureType(label=u"Test", account_prefix="11,22,33")
     assert type_.match("1122334455")

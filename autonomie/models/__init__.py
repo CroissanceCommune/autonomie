@@ -50,7 +50,8 @@ import user
 import task
 import workshop
 from .accounting import operations
-from .accounting import measures
+from .accounting import treasury_measures
+from .accounting import general_ledger_measures
 from .expense import sheet
 from .expense import types
 from .expense import payment

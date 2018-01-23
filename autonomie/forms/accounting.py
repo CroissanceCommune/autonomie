@@ -12,7 +12,7 @@ from sqlalchemy import distinct
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.accounting.operations import AccountingOperation
-from autonomie.models.accounting.measures import TreasuryMeasureGrid
+from autonomie.models.accounting.treasury_measures import TreasuryMeasureGrid
 from autonomie.models.company import Company
 from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema

@@ -13,37 +13,101 @@ def test_get_file_path_from_pool():
     )
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
     result = _get_file_path_from_pool(path)
-    assert os.path.basename(result).startswith('2017_09_21_balance')
+    assert os.path.basename(result).startswith('2017_09_')
     result = _get_file_path_from_pool(os.path.join(path, 'unnexistingdir'))
     assert result is None
 
 
-def test_parser(content):
+def test__get_parser():
     from autonomie_celery.tasks.accounting_parser import (
-        _get_file_path_from_pool,
-        Parser,
+        _get_parser,
+        AnalyticalBalanceParser,
+        GeneralLedgerParser
     )
-    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
-    filepath = _get_file_path_from_pool(path)
-    parser = Parser(filepath)
-    file_datas = parser._get_datas_from_file_path()
-    assert file_datas['date'] == datetime.date(2017, 9, 21)
-    assert file_datas['extension'] in ('csv', 'slk')  # We don't know which
 
-    # csv file is utf-8, slk file is cp1252 (default encoding used by the
-    # parser)
-    if file_datas['extension'] == 'csv':
-        parser.encoding = 'utf-8'
-    num_operations = len(file(filepath, 'rb').read().strip().splitlines())
-    assert len(parser._fill_db(file_datas)[0].operations) == num_operations
+    assert _get_parser("2017_09_21_balance_analytique.csv") == \
+        AnalyticalBalanceParser
+    assert _get_parser("2017_09_grand_livre.csv") == GeneralLedgerParser
 
-    if file_datas['extension'] == 'csv':
-        parser.file_path = u"%s.slk" % parser.file_path[:-4]
-        file_datas['extension'] = 'slk'
 
-    elif file_datas['extension'] == 'slk':
-        parser.file_path = u"%s.csv" % parser.file_path[:-4]
-        file_datas['extension'] = 'csv'
+class TestAccountingParser(object):
+    def get_parser(self, extension='csv'):
+        from autonomie_celery.tasks.accounting_parser import (
+            AccountingDataParser,
+        )
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
+        filepath = os.path.join(path, '2017_09_21_balance_analytique.%s' % (
+            extension
+        ))
+        return AccountingDataParser(filepath)
 
-    assert len(parser._fill_db(file_datas)[0].operations) == num_operations
+    def test__collect_main_file_infos(self):
+        parser = self.get_parser()
+        assert parser._file_datas['extension'] == 'csv'
+        assert parser._file_datas['md5sum'] == \
+            '8ff373bbe9d80e132495b6dad047845b'
+        assert parser._file_datas['basename'] == '2017_09_21_balance_analytique'
 
+    def test__stream_datas(self):
+        parser = self.get_parser()
+        assert parser._stream_datas().next() == [
+            u"0USER", u"USER1", u"218200", u"Transporté", u"5100", u" ", u"5100"
+        ]
+        parser = self.get_parser('slk')
+        assert parser._stream_datas().next() == [
+            u"0USER", u"USER1", u"218200", u"Transporté", u"5100", u" ", u"5100"
+        ]
+
+
+class TestAnalyticalBalanceParser(object):
+    def get_parser(self):
+        from autonomie_celery.tasks.accounting_parser import (
+            AnalyticalBalanceParser,
+        )
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
+        filepath = os.path.join(path, '2017_09_21_balance_analytique.csv')
+        return AnalyticalBalanceParser(filepath)
+
+    def test__collect_specific_file_infos(self):
+        parser = self.get_parser()
+        assert parser._file_datas['date'] == datetime.date(2017, 9, 21)
+
+    def test__build_operations(self, dbsession, company):
+        parser = self.get_parser()
+        num_lines = len(file(parser.file_path, 'rb').read().splitlines())
+
+        operations, missed = parser._build_operations()
+        assert len(operations) == num_lines
+
+    def test__build_operation_upload_object(self, dbsession, company):
+        parser = self.get_parser()
+        assert parser._build_operation_upload_object().date == datetime.date(
+            2017, 9, 21
+        )
+
+
+class TestGeneralLedgerParser(object):
+    def get_parser(self):
+        from autonomie_celery.tasks.accounting_parser import (
+            GeneralLedgerParser,
+        )
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
+        filepath = os.path.join(path, '2017_09_grand_livre.csv')
+        return GeneralLedgerParser(filepath)
+
+    def test__collect_specific_file_infos(self):
+        parser = self.get_parser()
+        assert parser._file_datas['date'] == datetime.date(2017, 9, 1)
+
+    def test__build_operations(self, dbsession, company):
+        parser = self.get_parser()
+        num_lines = len(file(parser.file_path, 'rb').read().splitlines())
+
+        operations, missed = parser._build_operations()
+        assert len(operations) == num_lines
+
+    def test__build_operation_upload_object(self, dbsession, company):
+        parser = self.get_parser()
+        assert parser._build_operation_upload_object().date == datetime.date(
+            2017, 9, 1
+        )

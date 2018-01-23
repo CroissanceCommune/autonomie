@@ -1,2 +1,3 @@
 mock==1.0.1
 WebTest==2.0.16
+Faker==0.8.7

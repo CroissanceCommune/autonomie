@@ -27,7 +27,7 @@ class TreasuryMeasureGridService(object):
 
     @classmethod
     def measure_by_internal_id(cls, instance, internal_id):
-        from autonomie.models.accounting.measures import (
+        from autonomie.models.accounting.treasury_measures import (
             TreasuryMeasure,
             TreasuryMeasureType,
         )
@@ -40,3 +40,7 @@ class TreasuryMeasureGridService(object):
         else:
             result = None
         return result
+
+
+class GeneralLedgerMeasureGridService(object):
+    pass

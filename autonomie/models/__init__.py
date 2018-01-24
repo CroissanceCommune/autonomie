@@ -51,7 +51,7 @@ import task
 import workshop
 from .accounting import operations
 from .accounting import treasury_measures
-from .accounting import general_ledger_measures
+from .accounting import income_statement_measures
 from .expense import sheet
 from .expense import types
 from .expense import payment

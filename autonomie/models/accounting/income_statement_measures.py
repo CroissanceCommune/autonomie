@@ -4,6 +4,8 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import datetime
+import colander
+import deform
 
 from sqlalchemy import (
     Column,
@@ -12,10 +14,10 @@ from sqlalchemy import (
     ForeignKey,
     Float,
     DateTime,
-    Date,
     Boolean,
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import func
 
 from autonomie_base.models.base import (
     DBBASE,
@@ -24,30 +26,32 @@ from autonomie_base.models.base import (
 )
 from autonomie.forms import get_deferred_select
 from autonomie.models.company import Company
-from autonomie.models.accounting.services import GeneralLedgerMeasureGridService
+from autonomie.models.accounting.services import (
+    IncomeStatementMeasureGridService,
+)
 
 
 CATEGORIES = [
     "Produits",
     "Achats",
     "Charges",
-    "Salaire Brut",
+    "Salaires et Cotisations",
 ]
-CATEGORY_NUMBERS = tuple(range(len(CATEGORIES)))  # 0,1,2,3,4
 
 
-class GeneralLedgerMeasureType(DBBASE):
+class IncomeStatementMeasureType(DBBASE):
     """
-    GeneralLedger measure type (a limited number of measure types should exist
+    IncomeStatement measure type (a limited number of measure types should exist
     """
-    __tablename__ = 'general_ledger_measure_type'
+    __tablename__ = 'income_statement_measure_type'
     __table_args__ = default_table_args
     __colanderalchemy_config__ = {
         "help_msg": u"""Les indicateurs de comptes résultats permettent de
-        regrouper Charges, Produits ou Achats sous un même libellé.<br />
-        Ils permettent d'assembler les comptes de résultatsdes entrepreneurs.<br />
-        Vous pouvez définir ici les préfixes de comptes généraux pour indiquer
-        quelles écritures doivent être utilisées pour calculer cet indicateur.
+        regrouper des écritures sous un même libellé.<br />
+        Ils permettent d'assembler les comptes de résultats des entrepreneurs.
+        <br />Vous pouvez définir ici les préfixes de comptes généraux pour
+        indiquer quelles écritures doivent être utilisées pour calculer cet
+        indicateur.
         <br />
         Si nécessaire vous pourrez alors recalculer les derniers indicateurs
         générés.
@@ -58,14 +62,13 @@ class GeneralLedgerMeasureType(DBBASE):
         primary_key=True,
         info={'colanderalchemy': {'exclude': True}}
     )
-    internal_id = Column(
-        Integer,
+    category = Column(
+        String(50),
         info={
             'colanderalchemy': {
-                'exclude': True,
-                'title': u"Identifiant utilisé en interne pour le regroupement "
-                u"par catégorie"
+                'title': u"Nom de la catégorie de l'indicateur"
                 u"(voir ci-dessus pour le détail)",
+                "widget": deform.widget.HiddenWidget(),
             }
         },
         default=-1
@@ -76,7 +79,8 @@ class GeneralLedgerMeasureType(DBBASE):
             'colanderalchemy': {
                 'title': u"Libellé de cet indicateur",
             }
-        }
+        },
+        nullable=False,
     )
     account_prefix = Column(
         String(255),
@@ -90,6 +94,7 @@ class GeneralLedgerMeasureType(DBBASE):
                 u"séparant par des virgules (ex : 42,43), un préfixe peut "
                 u"être exclu en plaçant le signe '-' devant (ex: 42,-425 "
                 u"incluera tous les comptes 42... sauf les comptes 425...)",
+                "missing": colander.required,
             }
         },
     )
@@ -106,7 +111,7 @@ class GeneralLedgerMeasureType(DBBASE):
         info={
             'colanderalchemy': {
                 'title': u"Ordre au sein de la catégorie",
-                "exclude": True,
+                "widget": deform.widget.HiddenWidget(),
             }
         }
     )
@@ -132,9 +137,28 @@ class GeneralLedgerMeasureType(DBBASE):
                     res = True
         return res
 
+    def move_up(self):
+        """
+        Move the current instance up in the category's order
+        """
+        order = self.order
+        print("Old order : %s" % order)
+        if order > 0:
+            new_order = order - 1
+            IncomeStatementMeasureType.insert(self, new_order)
+
+    def move_down(self):
+        """
+        Move the current instance down in the category's order
+        """
+        order = self.order
+        print("Old order : %s" % order)
+        new_order = order + 1
+        IncomeStatementMeasureType.insert(self, new_order)
+
     @classmethod
-    def get_by_internal_id(cls, internal_id):
-        query = DBSESSION().query(cls.id).filter_by(internal_id=internal_id)
+    def get_by_category(cls, category):
+        query = DBSESSION().query(cls.id).filter_by(category=category)
         query = query.first()
 
         if query is not None:
@@ -143,13 +167,56 @@ class GeneralLedgerMeasureType(DBBASE):
             result = None
         return result
 
+    @classmethod
+    def get_next_order_by_category(cls, category):
+        query = DBSESSION().query(func.max(cls.order)).filter_by(
+            category=category
+        ).filter_by(active=True)
+        query = query.first()
+        if query is not None:
+            result = query[0] + 1
+        else:
+            result = 0
+        return result
 
-class GeneralLedgerMeasureGrid(DBBASE):
+    @classmethod
+    def insert(cls, item, new_order):
+        items = DBSESSION().query(
+            cls
+        ).filter_by(
+            category=item.category
+        ).filter_by(
+            active=True
+        ).filter(cls.id != item.id).order_by(cls.order).all()
+
+        items.insert(new_order, item)
+
+        for index, item in enumerate(items):
+            item.order = index
+            DBSESSION().merge(item)
+
+    @classmethod
+    def reorder(cls, category):
+        """
+        Regenerate order attributes
+        """
+        items = DBSESSION().query(
+            cls
+        ).filter_by(
+            category=category
+        ).filter_by(active=True).order_by(cls.order).all()
+
+        for index, item in enumerate(items):
+            item.order = index
+            DBSESSION().merge(item)
+
+
+class IncomeStatementMeasureGrid(DBBASE):
     """
     A grid of measures, one grid per month/year couple
 
     """
-    __tablename__ = 'general_ledger_measure_grid'
+    __tablename__ = 'income_statement_measure_grid'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     datetime = Column(
@@ -179,22 +246,23 @@ class GeneralLedgerMeasureGrid(DBBASE):
     )
     upload = relationship('AccountingOperationUpload')
     measures = relationship(
-        "GeneralLedgerMeasure",
-        primaryjoin="GeneralLedgerMeasureGrid.id==GeneralLedgerMeasure.grid_id",
+        "IncomeStatementMeasure",
+        primaryjoin="IncomeStatementMeasureGrid.id=="
+        "IncomeStatementMeasure.grid_id",
         cascade="all,delete,delete-orphan",
     )
 
-    _autonomie_service = GeneralLedgerMeasureGridService
+    _autonomie_service = IncomeStatementMeasureGridService
 
     def get_company_id(self):
         return self.company_id
 
 
-class GeneralLedgerMeasure(DBBASE):
+class IncomeStatementMeasure(DBBASE):
     """
-    Stores a general_ledger measure associated to a given company
+    Stores a income_statement measure associated to a given company
     """
-    __tablename__ = 'general_ledger_measure'
+    __tablename__ = 'income_statement_measure'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
     label = Column(
@@ -207,20 +275,21 @@ class GeneralLedgerMeasure(DBBASE):
         info={"colanderalchemy": {'title': u"Montant"}},
     )
     measure_type_id = Column(
-        ForeignKey('general_ledger_measure_type.id'),
+        ForeignKey('income_statement_measure_type.id'),
         info={
             "colanderalchemy": {
                 'title': u"Type d'indicateur",
-                "widget": get_deferred_select(GeneralLedgerMeasureType),
+                "widget": get_deferred_select(IncomeStatementMeasureType),
             }
         }
     )
     measure_type = relationship(
-        GeneralLedgerMeasureType,
-        primaryjoin="GeneralLedgerMeasureType.id==GeneralLedgerMeasure.measure_type_id",
+        IncomeStatementMeasureType,
+        primaryjoin="IncomeStatementMeasureType.id=="
+        "IncomeStatementMeasure.measure_type_id",
         info={"colanderalchemy": {'exclude': True}},
     )
-    grid_id = Column(ForeignKey('general_ledger_measure_grid.id'))
+    grid_id = Column(ForeignKey('income_statement_measure_grid.id'))
 
     def __todict__(self, request):
         return {

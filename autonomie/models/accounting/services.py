@@ -42,5 +42,5 @@ class TreasuryMeasureGridService(object):
         return result
 
 
-class GeneralLedgerMeasureGridService(object):
+class IncomeStatementMeasureGridService(object):
     pass

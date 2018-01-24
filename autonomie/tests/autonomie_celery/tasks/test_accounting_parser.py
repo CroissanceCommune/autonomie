@@ -18,16 +18,16 @@ def test_get_file_path_from_pool():
     assert result is None
 
 
-def test__get_parser():
+def test__get_parser_factory():
     from autonomie_celery.tasks.accounting_parser import (
-        _get_parser,
+        _get_parser_factory,
         AnalyticalBalanceParser,
         GeneralLedgerParser
     )
 
-    assert _get_parser("2017_09_21_balance_analytique.csv") == \
+    assert _get_parser_factory("2017_09_21_balance_analytique.csv") == \
         AnalyticalBalanceParser
-    assert _get_parser("2017_09_grand_livre.csv") == GeneralLedgerParser
+    assert _get_parser_factory("2017_09_grand_livre.csv") == GeneralLedgerParser
 
 
 class TestAccountingParser(object):

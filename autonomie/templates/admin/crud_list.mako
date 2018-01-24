@@ -107,8 +107,14 @@
                                     Actions <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right">
-                                    % for url, label, title, icon in stream_actions(item):
-                                        ${dropdown_item(url, label, title, icon=icon)}
+                                    % for action in stream_actions(item):
+                                        <% url, label, title, icon = action[:4] %>
+                                        % if len(action) >= 5:
+                                        <% onclick = action[4] %>
+                                        % else:
+                                        <% onclick = None %>
+                                        % endif
+                                        ${dropdown_item(url, label, title, icon=icon, onclick=onclick)}
                                     % endfor
                                 </ul>
                             </div>

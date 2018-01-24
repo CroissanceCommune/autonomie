@@ -38,7 +38,6 @@ from pyramid_deform import (
     FormView,
     CSRFSchema,
 )
-from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 from js.tinymce import tinymce
 
@@ -518,12 +517,11 @@ class BaseFormView(FormView):
         else:
             self.request = request
             self.context = context
-        FormView.__init__(self, request)
-        self.context = request.context
+        FormView.__init__(self, self.request)
         self.dbsession = self.request.dbsession
         self.session = self.request.session
         self.logger = logging.getLogger("autonomie.views.__init__")
-        if has_permission('manage', request.context, request):
+        if self.request.has_permission('manage'):
             tinymce.need()
 
     def __call__(self):

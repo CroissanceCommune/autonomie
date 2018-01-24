@@ -510,7 +510,14 @@ class BaseFormView(FormView):
     buttons = (submit_btn,)
     use_csrf_token = False
 
-    def __init__(self, request):
+    def __init__(self, context, request=None):
+        if request is None:
+            # Needed for manually called views
+            self.request = context
+            self.context = self.request.context
+        else:
+            self.request = request
+            self.context = context
         FormView.__init__(self, request)
         self.context = request.context
         self.dbsession = self.request.dbsession
@@ -669,6 +676,37 @@ class DisableView(BaseView):
     """
     Main view for enabling/disabling elements
 
+    Support following attributes/methods
+
+    Attributes
+
+        enable_msg
+
+                Message flashed when enabled
+
+        disable_msg
+
+                Message flashed when disabled
+
+        redirect_route
+
+                The name of a route to redirect to
+
+    Methods
+
+        redirect
+
+            Return a dynamicallay created HTTPFound instance
+
+        on_disable
+
+            Launched on item disable
+
+        on_enable
+
+            Launched on item enable
+
+
     class MyDisableView(DisableView):
         enable_msg = u"Has been enabled"
         disabled_msg = u"Has been disabled"
@@ -680,17 +718,20 @@ class DisableView(BaseView):
 
     def __call__(self):
         if self.context.active:
-            if self.disable_msg is None:
-                raise Exception("Add a disable_msg attribute")
             self.context.active = False
             self.request.dbsession.merge(self.context)
-            self.request.session.flash(self.disable_msg)
+            if hasattr(self, "on_disable"):
+                self.on_disable()
+
+            if self.disable_msg is not None:
+                self.request.session.flash(self.disable_msg)
         else:
-            if self.enable_msg is None:
-                raise Exception("Add a enable_msg attribute")
             self.context.active = True
             self.request.dbsession.merge(self.context)
-            self.request.session.flash(self.enable_msg)
+            if hasattr(self, "on_enable"):
+                self.on_enable()
+            if self.enable_msg is not None:
+                self.request.session.flash(self.enable_msg)
 
         if hasattr(self, 'redirect'):
             return self.redirect()
@@ -713,6 +754,9 @@ class DeleteView(BaseView):
     def __call__(self):
         self.request.dbsession.delete(self.context)
         self.request.session.flash(self.delete_msg)
+
+        if hasattr(self, "on_delete"):
+            self.on_delete()
 
         if hasattr(self, 'redirect'):
             return self.redirect()
@@ -770,6 +814,9 @@ generation")
         self.request.dbsession.add(item)
         # We need an id
         self.request.dbsession.flush()
+        if hasattr(self, "on_duplicate"):
+            self.on_duplicate(item)
+
         self.request.session.flash(self._message(item))
         return self.redirect(item)
 

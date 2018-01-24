@@ -23,6 +23,13 @@ def admin_accounting_index_view(request):
             u"indicateurs de trésorerie",
             "fa fa-braille",
         ),
+        (
+            u"Configuration des indicateurs de comptes de résultat",
+            "/admin/accounting/income_statement_measure_types",
+            u"Définition des libellés et codes comptables utilisés "
+            u"pour le calcul des indicateurs de trésorerie",
+            "fa fa-braille",
+        ),
     ):
         menus.append(
             dict(label=label, route_name=route, title=title, icon=icon)

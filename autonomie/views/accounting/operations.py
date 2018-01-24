@@ -226,12 +226,8 @@ def compile_measures_view(context, request):
         request.session.flash(msg, 'error')
         return HTTPFound(request.referrer)
     logger.debug(u"Compiling measures for upload {0}".format(context.id))
-    query = request.dbsession.query(AccountingOperation.id)
-    operation_ids = query.filter_by(upload_id=context.id).all()
+    celery_job = compile_measures_task.delay(context.id)
 
-    celery_job = compile_measures_task.delay(
-        context.filetype, context.id, operation_ids
-    )
     logger.info(
         u"The Celery Task {0} has been delayed, see celery logs for "
         u"details".format(

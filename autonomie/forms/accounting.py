@@ -29,6 +29,22 @@ def get_upload_list_schema():
 
     schema.insert(
         0,
+        colander.SchemaNode(
+            colander.String(),
+            name='filetype',
+            widget=deform.widget.SelectWidget(
+                values=(
+                    ('all', u'Tous les types de fichier'),
+                    ('general_ledger', u"Grand livre"),
+                    ('analytical_balance', u"Balance analytique"),
+                )
+            ),
+            default='all',
+            missing=colander.drop,
+        )
+    )
+    schema.insert(
+        0,
         YearPeriodSchema(
             name='period',
             widget=CleanMappingWidget(),

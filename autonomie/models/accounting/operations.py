@@ -24,6 +24,12 @@ from autonomie.forms import get_deferred_select
 from autonomie.models.company import Company
 
 
+FILETYPE_LABELS = {
+    'general_ledger': u"Grand livre",
+    'analytical_balance': u"Balance analytique",
+}
+
+
 class AccountingOperationUpload(DBBASE):
     """
     Represent a newly parsed file
@@ -80,6 +86,10 @@ class AccountingOperationUpload(DBBASE):
             }
         }
     )
+
+    @property
+    def filetype_label(self):
+        return FILETYPE_LABELS.get(self.filetype)
 
 
 class AccountingOperation(DBBASE):

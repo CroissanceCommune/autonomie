@@ -42,7 +42,7 @@ def category_list_view(request):
     )
 
     for category in CATEGORIES:
-        label = u'Indicateurs de type %s' % category
+        label = u'Configuration des indicateurs de type %s' % category
         url = request.route_path(
             "/admin/accounting/income_statement_measure_types/{category}",
             category=category,
@@ -50,13 +50,13 @@ def category_list_view(request):
         menus.append(dict(label=label, url=url, icon="fa fa-braille"))
 
     return dict(
-        title=u"Configuration des indicateurs de Comptes de résultat",
+        title=u"Configuration des indicateurs de Compte de résultat",
         help_message=u"""Les indicateurs de comptes de résultat permettent de
         regrouper les écritures comptables derrière un même libellé afin de les
         regrouper au sein d'un tableau annuel présentant le compte de résultat
         de chaque entreprise.<br />Chaque catégorie (Produits, Achats, Charges,
-        Salaires et Cotisations) sont composées de plusieurs indicateurs et sont
-        suivis dans la grille finale d'un total permettant par exemple de
+        Salaires et Cotisations) est composée de plusieurs indicateurs et est
+        suivie dans la grille finale d'un total permettant par exemple de
         visualiser la somme des produits ou la Marge disponible avant
         salaire.<br />Depuis cette interface, vous pouvez configurer, par
         catégorie, l'ensemble des indicateurs qui composeront les comptes de

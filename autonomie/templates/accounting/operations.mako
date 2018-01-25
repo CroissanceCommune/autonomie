@@ -85,7 +85,7 @@
         <li>Les écritures qui n'ont pas pu être associées à des entreprises dans Autonomie</li>
         </ul>
         <br />
-        Si vous avez apporter des modifications à la configuration des indicateurs de trésorerie, vous pouvez :
+        Si vous avez apporter des modifications à la configuration des indicateurs, vous pouvez :
         <ul>
         <li>
             Recalculer les indicateurs en prenant en compte la nouvelle configuration : les indicateurs issus des écritures ci-dessous seront mis à jour

@@ -120,10 +120,10 @@ devis, factures / avoir)"
 différents comptes analytiques liés au module notes de dépense et à leur export"
     ),
     dict(
-        label=u"Configuration du module Fichiers de trésorerie",
+        label=u"Configuration du module Fichiers comptables",
         route_name="/admin/accounting",
-        title=u"Configuration des indicateurs de trésorerie générés "
-        u"depuis les fichiers provenant du logiciel comptable."
+        title=u"Configuration des indicateurs de trésorerie et de compte de "
+        u"résultat générés depuis les fichiers provenant du logiciel comptable."
     ),
     dict(
         label=u"Configuration du module Accompagnement",

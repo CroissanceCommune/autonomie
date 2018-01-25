@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class UploadListView(BaseListView):
-    title = u"Liste des fichiers de trésorerie traités par Autonomie"
+    title = u"Liste des fichiers comptables traités par Autonomie"
     add_template_vars = (
         'stream_actions',
     )
@@ -115,6 +115,7 @@ class UploadListView(BaseListView):
                 AccountingOperationUpload.created_at,
                 AccountingOperationUpload.date,
                 AccountingOperationUpload.filename,
+                AccountingOperationUpload.filetype,
             )
         )
 
@@ -135,6 +136,16 @@ class UploadListView(BaseListView):
                 query = query.filter(
                     AccountingOperationUpload.date >= end_date
                 )
+        return query
+
+    def filter_filetype(self, query, appstruct):
+        """
+        Filter uploads by filetype
+        """
+        filetype = appstruct.get('filetype', None)
+        if filetype not in ('all', None, colander.null):
+            query = query.filter(AccountingOperationUpload.filetype == filetype)
+
         return query
 
 

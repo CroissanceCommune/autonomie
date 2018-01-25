@@ -27,7 +27,7 @@ def admin_accounting_index_view(request):
             u"Configuration des indicateurs de comptes de résultat",
             "/admin/accounting/income_statement_measure_types",
             u"Définition des libellés et codes comptables utilisés "
-            u"pour le calcul des indicateurs de trésorerie",
+            u"pour le calcul des indicateurs de compte de résultat",
             "fa fa-braille",
         ),
     ):

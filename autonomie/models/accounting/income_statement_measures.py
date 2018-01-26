@@ -16,7 +16,10 @@ from sqlalchemy import (
     DateTime,
     Boolean,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import (
+    relationship,
+    load_only,
+)
 from sqlalchemy.sql.expression import func
 
 from autonomie_base.models.base import (
@@ -115,6 +118,14 @@ class IncomeStatementMeasureType(DBBASE):
             }
         }
     )
+    is_total = Column(
+        Boolean(),
+        default=False,
+        info={'colanderalchemy': {
+            "title": u"Cet indicateur correspond-il à un total (il sera mis en "
+            u"évidence dans l'interface) ?",
+        }}
+    )
 
     def match(self, account):
         """
@@ -142,7 +153,6 @@ class IncomeStatementMeasureType(DBBASE):
         Move the current instance up in the category's order
         """
         order = self.order
-        print("Old order : %s" % order)
         if order > 0:
             new_order = order - 1
             IncomeStatementMeasureType.insert(self, new_order)
@@ -152,20 +162,16 @@ class IncomeStatementMeasureType(DBBASE):
         Move the current instance down in the category's order
         """
         order = self.order
-        print("Old order : %s" % order)
         new_order = order + 1
         IncomeStatementMeasureType.insert(self, new_order)
 
     @classmethod
-    def get_by_category(cls, category):
-        query = DBSESSION().query(cls.id).filter_by(category=category)
-        query = query.first()
-
-        if query is not None:
-            result = query[0]
-        else:
-            result = None
-        return result
+    def get_by_category(cls, category, key=None):
+        query = DBSESSION().query(cls)
+        if key is not None:
+            query = query.options(load_only(key))
+        query = query.filter_by(category=category)
+        return query.all()
 
     @classmethod
     def get_next_order_by_category(cls, category):

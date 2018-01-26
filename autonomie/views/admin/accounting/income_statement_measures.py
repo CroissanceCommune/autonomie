@@ -67,7 +67,8 @@ def category_list_view(request):
 
 class MeasureTypeListView(BaseView):
     columns = [
-        u"Libellé de l'indicateur", u"Comptes commençant par "
+        u"Libellé de l'indicateur", u"Comptes commençant par",
+        u"Correspond à un total",
     ]
     title = u"Configuration des indicateurs de compte de résultat"
     factory = IncomeStatementMeasureType
@@ -90,6 +91,10 @@ class MeasureTypeListView(BaseView):
         """
         yield measure_type.label
         yield measure_type.account_prefix
+        if measure_type.is_total:
+            yield "<div class='text-center'><i class='fa fa-check'></i></div>"
+        else:
+            yield "<div class='text-center'><i class='fa fa-close'></i></div>"
 
     def _get_item_url(self, measure_type, action=None):
         """
@@ -174,11 +179,11 @@ class MeasureTypeListView(BaseView):
         """
         Hook allowing to add datas to the templating context
         """
-        result['help_msg'] = (
-            u"Les définitions ci-dessous indiquent quelles écritures sont "
-            u"utilisées pour le calcul des "
-            u"indicateurs de la section %s des comptes de résultat des "
-            u"entrepreneurs." % self.category
+        result['help_msg'] = u"""Les définitions ci-dessous indiquent quelles
+        écritures sont utilisées pour le calcul des indicateurs de la section
+        %s des comptes de résultat des entrepreneurs.<br />Certains indicateurs
+        sont des totaux, ils sont alors mis en évidence dans l'interface""" % (
+            self.category,
         )
         return result
 
@@ -200,7 +205,22 @@ class MeasureTypeListView(BaseView):
 
         :rtype: list
         """
-        return []
+        yield (
+            self.addurl + "?is_total=1",
+            u"Ajouter un total",
+            u"Ajouter un indicateur de type total qui sera mis en évidence "
+            u"dans l'interface",
+            u"fa fa-plus-circle",
+            u"btn btn-default secondary-action",
+        )
+
+    @property
+    def addurl(self):
+        return self.request.route_path(
+            '/admin/accounting/income_statement_measure_types/'
+            '{category}/add',
+            category=self.category,
+        )
 
     def __call__(self):
         menus = self._get_menus()
@@ -215,11 +235,7 @@ class MeasureTypeListView(BaseView):
             title=self.title,
             menus=menus,
             actions=self._get_actions(items),
-            addurl=self.request.route_path(
-                '/admin/accounting/income_statement_measure_types/'
-                '{category}/add',
-                category=self.category,
-            )
+            addurl=self.addurl,
         )
         self._more_template_vars(result)
 
@@ -242,12 +258,23 @@ class MeasureTypeAddView(BaseAddView):
 
         :param obj form: The form object
         """
-        form.set_appstruct(
-            {
-                'category': self.category,
-                'order': self.factory.get_next_order_by_category(self.category),
-            }
-        )
+        pre_filled = {
+            'category': self.category,
+            'order': self.factory.get_next_order_by_category(self.category),
+        }
+
+        if 'is_total' in self.request.GET:
+            types = self.factory.get_by_category(
+                self.category,
+                'account_prefix'
+            )
+            # We join all account prefixes for this total
+            account_prefix = ",".join([t.account_prefix for t in types])
+            pre_filled['account_prefix'] = account_prefix
+            pre_filled['is_total'] = True
+            pre_filled['label'] = u"Total %s" % (self.category, )
+
+        form.set_appstruct(pre_filled)
 
     def redirect(self, new_model=None):
         return HTTPFound(self._redirect_url())

@@ -263,6 +263,10 @@ class IncomeStatementMeasureGrid(DBBASE):
     def get_company_id(self):
         return self.company_id
 
+    @classmethod
+    def get_years(cls, company_id):
+        return cls._autonomie_service.get_years(cls, company_id)
+
 
 class IncomeStatementMeasure(DBBASE):
     """

@@ -104,6 +104,7 @@ from autonomie.models.accounting.treasury_measures import (
 )
 from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureType,
+    IncomeStatementMeasureGrid,
 )
 
 DEFAULT_PERM = [
@@ -171,6 +172,11 @@ class RootFactory(dict):
             'treasury_measure_types',
             'treasury_measure_type',
             TreasuryMeasureType,
+        ),
+        (
+            'income_statement_measure_grids',
+            'income_statement_measure_grid',
+            IncomeStatementMeasureGrid,
         ),
         (
             'income_statement_measure_types',
@@ -801,9 +807,10 @@ def get_competence_acl(self):
     return acl
 
 
-def get_treasury_measure_acl(self):
+def get_accounting_measure_acl(self):
     """
-    Compile the default acl for TreasuryMeasureGrid objects
+    Compile the default acl for TreasuryMeasureGrid and
+    IncomeStatementMeasureGrid objects
     """
     if self.company is not None:
         return self.company.__acl__
@@ -848,8 +855,9 @@ def set_models_acl():
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
-    TreasuryMeasureGrid.__acl__ = property(get_treasury_measure_acl)
+    TreasuryMeasureGrid.__acl__ = property(get_accounting_measure_acl)
     TreasuryMeasureType.__acl__ = property(get_base_acl)
+    IncomeStatementMeasureGrid.__acl__ = property(get_accounting_measure_acl)
     IncomeStatementMeasureType.__acl__ = property(get_base_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)

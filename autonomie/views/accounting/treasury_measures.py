@@ -18,7 +18,7 @@ from autonomie.views import BaseListView
 logger = logging.getLogger(__name__)
 
 
-class CompanyAccountingMeasuresListView(BaseListView):
+class CompanyTreasuryMeasuresListView(BaseListView):
     title = u"État de trésorerie"
     schema = get_treasury_measures_list_schema()
     add_template_vars = (
@@ -122,13 +122,13 @@ def add_routes(config):
 
 def add_views(config):
     config.add_view(
-        CompanyAccountingMeasuresListView,
+        CompanyTreasuryMeasuresListView,
         route_name="/companies/{id}/accounting/treasury_measure_grids",
         permission="view.accounting",
         renderer="/accounting/measures.mako",
     )
     config.add_view(
-        CompanyAccountingMeasuresListView,
+        CompanyTreasuryMeasuresListView,
         route_name="/treasury_measure_grids/{id}",
         permission="view.accounting",
         renderer="/accounting/measures.mako",

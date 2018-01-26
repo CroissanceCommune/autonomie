@@ -1,3 +1,3 @@
 def includeme(config):
     config.include('.operations')
-    config.include('.measures')
+    config.include('.treasury_measures')

@@ -82,7 +82,7 @@ PAID_STATES = (
 ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
 
 
-def get_available_years():
+def get_available_years(*args, **kwargs):
     """
     Return the available years for ExpenseSheet creation
     """
@@ -776,7 +776,7 @@ class Communication(DBBASE):
     )
 
 
-def get_expense_years():
+def get_expense_years(kw):
     """
     Return the list of years that there were some expense configured
     """

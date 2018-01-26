@@ -13,6 +13,9 @@ from sqlalchemy import distinct
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.accounting.operations import AccountingOperation
 from autonomie.models.accounting.treasury_measures import TreasuryMeasureGrid
+from autonomie.models.accounting.income_statement_measures import (
+    IncomeStatementMeasureGrid,
+)
 from autonomie.models.company import Company
 from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
@@ -157,8 +160,33 @@ def get_treasury_measures_list_schema():
     schema = BaseListsSchema().clone()
     del schema['search']
 
-    def get_year_options():
+    def get_year_options(kw):
         return TreasuryMeasureGrid.get_years()
+
+    node = forms.year_select_node(
+        name='year',
+        query_func=get_year_options,
+        missing=-1,
+        description=u"Année de dépôt"
+    )
+
+    schema.insert(0, node)
+    return schema
+
+
+def get_income_statement_measures_list_schema():
+    """
+    Build the schema used to list treasury measures
+
+    :returns: A form schema
+    :rtype: colander.Schema
+    """
+    schema = BaseListsSchema().clone()
+    del schema['search']
+
+    def get_year_options(kw):
+        cid = kw['request'].context.get_company_id()
+        return IncomeStatementMeasureGrid.get_years(company_id=cid)
 
     node = forms.year_select_node(
         name='year',

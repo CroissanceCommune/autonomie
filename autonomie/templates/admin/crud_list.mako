@@ -56,13 +56,13 @@
     % if warn_msg is not UNDEFINED and warn_msg is not None:
     <div class="alert alert-danger">
         <i class='fa fa-warning'></i>
-        ${warn_msg}
+        ${warn_msg|n}
     </div>
     % endif
     % if help_msg is not UNDEFINED and help_msg is not None:
     <div class="alert alert-info">
         <i class='fa fa-help'></i>
-        ${help_msg}
+        ${help_msg|n}
     </div>
     % endif
 </div>

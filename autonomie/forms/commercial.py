@@ -34,7 +34,7 @@ from .custom_types import AmountType
 
 
 def get_years(kw):
-    years = invoice.get_invoice_years()
+    years = invoice.get_invoice_years(kw)
     next_year = datetime.date.today().year + 1
     if next_year not in years:
         years.append(next_year)

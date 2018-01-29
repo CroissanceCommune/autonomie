@@ -125,13 +125,13 @@ def add_views(config):
         CompanyTreasuryMeasuresListView,
         route_name="/companies/{id}/accounting/treasury_measure_grids",
         permission="view.accounting",
-        renderer="/accounting/measures.mako",
+        renderer="/accounting/treasury_measures.mako",
     )
     config.add_view(
         CompanyTreasuryMeasuresListView,
         route_name="/treasury_measure_grids/{id}",
         permission="view.accounting",
-        renderer="/accounting/measures.mako",
+        renderer="/accounting/treasury_measures.mako",
     )
 
 

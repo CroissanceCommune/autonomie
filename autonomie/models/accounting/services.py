@@ -48,7 +48,6 @@ class IncomeStatementMeasureGridService(object):
     def get_type_measure(cls, grid_id, measure_type_id):
         from autonomie.models.accounting.income_statement_measures import (
             IncomeStatementMeasure,
-            IncomeStatementMeasureType,
         )
         query = DBSESSION().query(IncomeStatementMeasure)
         query = query.filter_by(grid_id=grid_id)
@@ -57,7 +56,7 @@ class IncomeStatementMeasureGridService(object):
 
     @classmethod
     def get_years(cls, grid_class, company_id=None):
-        query = DBSESSION().query(distinct(extract('year', grid_class.date)))
+        query = DBSESSION().query(distinct(grid_class.year))
 
         if company_id is not None:
             query = query.filter_by(company_id=company_id)

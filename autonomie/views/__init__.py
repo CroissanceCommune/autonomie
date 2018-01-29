@@ -108,6 +108,7 @@ class BaseListClass(BaseView):
     sort_columns = {'name': 'name'}
     default_direction = 'asc'
     grid = None
+    filter_button_label = u"Filtrer"
 
     def __init__(self, request):
         BaseView.__init__(self, request)
@@ -188,6 +189,20 @@ class BaseListClass(BaseView):
             form.widget.template = "searchform.pt"
         return form
 
+    def get_filter_button(self):
+        """
+        Return the definition of the filter button
+        """
+        self.logger.debug(
+            "Building the filter button : %s" % self.filter_button_label
+        )
+        return deform.Button(
+            title=self.filter_button_label,
+            name='submit',
+            type='submit',
+            css_class='btn btn-primary'
+        )
+
     def get_form(self, schema):
         """
         Return the search form that should be used for this view
@@ -203,14 +218,7 @@ class BaseListClass(BaseView):
             method='GET'
         )
         form = self.set_form_widget(form)
-        form.buttons = (
-            deform.Button(
-                title='Filtrer',
-                name='submit',
-                type='submit',
-                css_class='btn btn-primary'
-            ),
-        )
+        form.buttons = (self.get_filter_button(), )
         return form
 
     def _collect_appstruct(self):
@@ -294,6 +302,7 @@ class BaseListView(BaseListClass):
     """
     add_template_vars = ()
     grid = None
+    use_paginate = True
 
     def _get_current_page(self, appstruct):
         """
@@ -306,26 +315,30 @@ class BaseListView(BaseListClass):
         """
             wraps the current SQLA query with pagination
         """
-        # Url builder for page links
-        from functools import partial
-        page_url = partial(get_page_url, request=self.request)
+        if self.use_paginate:
+            # Url builder for page links
+            from functools import partial
+            page_url = partial(get_page_url, request=self.request)
 
-        current_page = self._get_current_page(appstruct)
-        items_per_page = convert_to_int(appstruct['items_per_page'])
-        self.logger.debug(
-            " + Page : %s, items per page : %s" % (
-                current_page, items_per_page
+            current_page = self._get_current_page(appstruct)
+            items_per_page = convert_to_int(appstruct['items_per_page'])
+
+            self.logger.debug(
+                " + Page : %s, items per page : %s" % (
+                    current_page, items_per_page
+                )
             )
-        )
-        self.logger.debug(query)
-        page = paginate.Page(
-            query,
-            current_page,
-            url=page_url,
-            items_per_page=items_per_page
-        )
-        self.logger.debug(page)
-        return page
+            self.logger.debug(query)
+            page = paginate.Page(
+                query,
+                current_page,
+                url=page_url,
+                items_per_page=items_per_page
+            )
+            self.logger.debug(page)
+            return page
+        else:
+            return query
 
     def more_template_vars(self, response_dict):
         """
@@ -353,9 +366,13 @@ class BaseListView(BaseListClass):
         if query is None:
             records = None
         else:
-            records = self._paginate(query, appstruct)
+            if self.use_paginate:
+                records = self._paginate(query, appstruct)
+            else:
+                records = query
 
-        result = dict(records=records)
+        result = dict(records=records, use_paginate=self.use_paginate)
+
         if self.error is not None:
             result['form_object'] = self.error
             result['form'] = self.error.render()

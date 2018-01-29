@@ -22,6 +22,19 @@
 
 
     <div>
-    <button type="submit" class="btn btn-primary">Filtrer</button>
+      <tal:loop tal:repeat="button field.buttons">
+        <button
+              tal:define="btn_disposition repeat.button.start and 'btn-primary' or 'btn-default';
+              btn_icon button.icon|None"
+              tal:attributes="disabled button.disabled if button.disabled else None"
+              id="${field.formid+button.name}"
+              name="${button.name}"
+              type="${button.type}"
+              class="btn ${button.css_class or btn_disposition}"
+              value="${button.value}">
+          <i tal:condition="btn_icon" class="${btn_icon}"> </i>
+          ${button.title}
+        </button>
+      </tal:loop>
     </div>
 </form>

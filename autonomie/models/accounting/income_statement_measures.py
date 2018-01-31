@@ -40,6 +40,14 @@ CATEGORIES = [
     "Charges",
     "Salaires et Cotisations",
 ]
+INPUT_CATEGORIES = [
+    "Produits",
+]
+OUTPUT_CATEGORIES = [
+    "Achats",
+    "Charges",
+    "Salaires et Cotisations",
+]
 
 
 class IncomeStatementMeasureType(DBBASE):
@@ -123,8 +131,15 @@ class IncomeStatementMeasureType(DBBASE):
         default=False,
         info={'colanderalchemy': {
             "title": u"Cet indicateur correspond-il à un total (il sera mis en "
-            u"évidence dans l'interface) ?",
+            u"évidence dans l'interface et ne sera pas utilisé pour le calcul "
+            u"des totaux globaux) ?",
         }}
+    )
+    measures = relationship(
+        "IncomeStatementMeasure",
+        primaryjoin="IncomeStatementMeasure.measure_type_id"
+        "==IncomeStatementMeasureType.id",
+        cascade='all,delete,delete-orphan',
     )
 
     def match(self, account):
@@ -267,6 +282,11 @@ class IncomeStatementMeasureGrid(DBBASE):
     def get_years(cls, company_id):
         return cls._autonomie_service.get_years(cls, company_id)
 
+    def get_measure_by_type(self, measure_type_id):
+        return self._autonomie_service.get_measure_by_type(
+            self, measure_type_id
+        )
+
 
 class IncomeStatementMeasure(DBBASE):
     """
@@ -305,6 +325,14 @@ class IncomeStatementMeasure(DBBASE):
         return {
             "id": self.id,
             "label": self.label,
-            "value": self.value,
+            "value": self.get_value(),
             "measure_type_id": self.measure_type_id
         }
+
+    def get_value(self):
+        return -1 * self.value
+        # if self.measure_type.category in OUTPUT_CATEGORIES:
+        #     result = -1 * self.value
+        # else:
+        #     result = self.value
+        # return result

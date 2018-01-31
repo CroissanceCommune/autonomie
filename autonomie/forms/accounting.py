@@ -9,16 +9,20 @@ Accounting module related schemas
 import datetime
 import colander
 import deform
+from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import distinct
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.accounting.operations import AccountingOperation
 from autonomie.models.accounting.treasury_measures import TreasuryMeasureGrid
 from autonomie.models.accounting.income_statement_measures import (
+    CATEGORIES,
     IncomeStatementMeasureGrid,
+    IncomeStatementMeasureType,
 )
 from autonomie.models.company import Company
 from autonomie import forms
+from autonomie.forms.custom_types import CsvTuple
 from autonomie.forms.lists import BaseListsSchema
 from autonomie.forms.widgets import CleanMappingWidget
 from autonomie.forms.fields import YearPeriodSchema
@@ -202,4 +206,29 @@ def get_income_statement_measures_list_schema():
     )
 
     schema.insert(0, node)
+    return schema
+
+
+def get_admin_income_statement_measure_schema(total=False):
+    """
+    Build the schema for income statement measure schema
+
+    Total types compile all measures value from a category (or more than one)
+    """
+    if total:
+        schema = SQLAlchemySchemaNode(
+            IncomeStatementMeasureType,
+            includes=("category", 'label', "categories", 'is_total'),
+        )
+        schema['categories'].typ = CsvTuple()
+        schema['categories'].widget = deform.widget.CheckboxChoiceWidget(
+            values=zip(CATEGORIES, CATEGORIES)
+        )
+        schema['categories'].validator = colander.Length(min=1)
+        schema['is_total'].widget = deform.widget.HiddenWidget()
+    else:
+        schema = SQLAlchemySchemaNode(
+            IncomeStatementMeasureType,
+            excludes=('is_total', "categories", "measures")
+        )
     return schema

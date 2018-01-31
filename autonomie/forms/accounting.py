@@ -229,6 +229,6 @@ def get_admin_income_statement_measure_schema(total=False):
     else:
         schema = SQLAlchemySchemaNode(
             IncomeStatementMeasureType,
-            excludes=('is_total', "categories", "measures")
+            excludes=('is_total', "categories")
         )
     return schema

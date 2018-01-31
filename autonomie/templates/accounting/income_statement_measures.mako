@@ -47,47 +47,26 @@
     <div class='panel-heading'>
     </div>
     <div class='panel-body'>
-    % if records is not None:
+    % if not grid.is_void:
         <div class='table-responsive'>
         <table class='table table-bordered table-condensed'>
             <thead>
-            <th></th>
-            % for index, month in month_names_dict.items():
-            <th>${month}</th>
+            % for header in grid.stream_headers():
+            <th>${header}</th>
             % endfor
-            <th>Total</th>
-            <th>% CA</th>
             </thead>
             <tbody>
-            % for type_ in types:
-            <% sum = 0 %>
+            % for type_, row in grid.rows:
             <tr
             % if type_.is_total:
             class='highlighted'
             % endif
             >
-            <td>${type_.label}</td>
-
-            % for month_index, month in month_names_dict.items():
-            <td>
-                <% value = month_cell_factory(type_.id, month_index, grids) %>
-                % if value is not None:
-                <% sum += value %>
-                ${value}
-                % else:
-                -
-                % endif
-            </td>
-            % endfor
-
-            <td>${sum}</td>
-            <td>
-            % if turnover:
-            ${api.format_amount(10000 * sum / turnover, precision=2) } %
-            % else:
-            0 %
-            % endif
-            </td>
+                % for cell in row:
+                <td>
+                ${cell | n}
+                </td>
+                % endfor
             </tr>
             % endfor
             </tbody>

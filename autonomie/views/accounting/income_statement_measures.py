@@ -5,22 +5,160 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
 import datetime
-from sqlalchemy import (
-    or_,
-)
+from collections import OrderedDict
 from sqlalchemy.orm import (
     joinedload,
 )
 
-from autonomie.utils.strings import month_name
+from autonomie.compute import math_utils
+from autonomie.utils.strings import (
+    month_name,
+    format_float,
+)
 from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureGrid,
     IncomeStatementMeasureType,
+    CATEGORIES,
 )
 from autonomie.forms.accounting import get_income_statement_measures_list_schema
 from autonomie.views import BaseListView
 
 logger = logging.getLogger(__name__)
+
+
+class YearGlobalGrid(object):
+    """
+    Abstract class used to modelize the income statement and group all stuff
+    """
+    def __init__(self, grids, types, turnover):
+        if not grids:
+            self.is_void = True
+        else:
+            self.is_void = False
+        self.grids = self._grid_by_month(grids)
+        self.types = self._type_by_category(types)
+        self.turnover = turnover
+        self.category_totals = self._get_default_category_totals()
+
+        self.rows = self.compile_rows()
+
+    @staticmethod
+    def _get_default_category_totals():
+        month_dict = dict((month, 0) for month in range(1, 13))
+        month_dict['total'] = 0
+        return dict(
+            (category, month_dict.copy()) for category in CATEGORIES
+        )
+
+    @staticmethod
+    def _grid_by_month(month_grids):
+        """
+        Store month grids by month
+        """
+        result = OrderedDict((month, None) for month in range(1, 13))
+        for grid in month_grids:
+            result[grid.month] = grid
+        return result
+
+    @staticmethod
+    def _type_by_category(types):
+        result = dict((category, []) for category in CATEGORIES)
+        for type_ in types:
+            result[type_.category].append(type_)
+        return result
+
+    def _sum_category_totals(self, categories, month_number):
+        """
+        Sum total for the given categories
+
+        Sums are compiled while collecting rows and are stored as a dict matrix
+        :
+
+                        month_number
+            category    <value>
+
+        Here, for a given column, we sum category totals
+        """
+        result = 0
+        for category in categories:
+            result += self.category_totals[category][month_number]
+
+        return result
+
+    def compile_rows(self):
+        """
+        Pre-compute all row datas
+        """
+        result = []
+        result = list(self.compute_rows())
+
+        # After having collected all rows, we compile totals
+        for type_, datas in result:
+            if type_.is_total:
+                for month in range(1, 13):
+                    month_total = self._sum_category_totals(
+                        type_.get_categories(),
+                        month
+                    )
+                    datas[month] = format_float(month_total, precision=2)
+
+                total = self._sum_category_totals(
+                    type_.get_categories(),
+                    'total'
+                )
+                datas[-2] = format_float(total, precision=2)
+                percent = math_utils.percent(total, self.turnover, 0)
+                datas[-1] = format_float(percent, precision=2)
+        return result
+
+    def _get_month_cell(self, grid, type_id):
+        """
+        Return the value to display in month related cells
+        """
+        result = 0
+
+        if grid is not None:
+            measure = grid.get_measure_by_type(type_id)
+            if measure is not None:
+                result = measure.get_value()
+
+        return result
+
+    def stream_headers(self):
+        yield ""
+        for i in range(1, 13):
+            yield month_name(i)
+        yield "Total"
+        yield "% CA"
+
+    def compute_rows(self):
+        for category in CATEGORIES:
+            for type_ in self.types[category]:
+                    row = [type_.label]
+                    if not type_.is_total:
+                        sum = 0
+                        for month, grid in self.grids.items():
+                            value = self._get_month_cell(grid, type_.id)
+                            sum += value
+                            str_value = format_float(value, precision=2)
+                            row.append(str_value)
+                            self.category_totals[category][month] += value
+                        self.category_totals[category]['total'] += sum
+
+                        str_sum = format_float(sum, precision=2)
+                        row.append(str_sum)
+                        percent = math_utils.percent(sum, self.turnover, 0)
+                        str_percent = format_float(percent, precision=2)
+                        row.append(str_percent)
+
+                    elif not type_.categories:
+                        # Invalid entry (we ignore)
+                        continue
+
+                    else:
+                        row.extend([0 for i in range(1, 15)])
+
+                    yield type_, row
 
 
 class CompanyIncomeStatementMeasuresListView(BaseListView):
@@ -32,18 +170,14 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
 
     title = u"Compte de résultat"
 
-    def get_types(self, ids):
+    def get_types(self):
         """
-        Collect measure types
-
-        * Active ones
-        * For which we have measures
+        Collect active income statement measure types
         """
-        clause = or_(
-            IncomeStatementMeasureType.active == True,
-            IncomeStatementMeasureType.id.in_(ids)
-        )
-        return IncomeStatementMeasureType.query().filter(clause).all()
+        clause = IncomeStatementMeasureType.active == True
+        return IncomeStatementMeasureType.query().filter(clause).order_by(
+            IncomeStatementMeasureType.order
+        ).all()
 
     def query(self):
         """
@@ -70,46 +204,18 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         )
         return query
 
-    def _get_month_cell(self, type_id, month, grids):
-        """
-        Return the value to display in month related cells
-        """
-        grid = grids[month]
-        result = None
-
-        if grid is not None:
-            measure = grid.get_measure_by_type(type_id)
-            if measure is not None:
-                result = measure.get_value()
-
-        return result
-
-    def _grid_by_month(self, month_grids):
-        """
-        """
-        result = dict((month, None) for month in range(1, 13))
-        for grid in month_grids:
-            result[grid.month] = grid
-        return result
-
     def more_template_vars(self, response_dict):
         """
         Add template datas in the response dictionnary
         """
-        records = response_dict['records']
-        response_dict['types'] = self.get_types(
-            [rec.id for rec in records]
-        )
+        month_grids = response_dict['records']
+        types = self.get_types()
+        year_turnover = self.context.get_turnover(self.year)
 
-        response_dict['month_names_dict'] = dict(
-            (i, month_name(i)) for i in range(1, 13)
-        )
+        grid = YearGlobalGrid(month_grids,  types, year_turnover)
+        response_dict['grid'] = grid
         response_dict['current_year'] = datetime.date.today().year
         response_dict['selected_year'] = int(self.year)
-        response_dict['grids'] = self._grid_by_month(records)
-        response_dict['month_cell_factory'] = self._get_month_cell
-
-        response_dict['turnover'] = self.context.get_turnover(self.year)
         return response_dict
 
 

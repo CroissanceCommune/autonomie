@@ -284,13 +284,14 @@ def add_trailing_zeros(amount):
     return amount
 
 
-def format_amount(amount, trim=True, grouping=True, precision=2):
+def format_amount(amount, trim=True, grouping=True, precision=2, dividor=None):
     """
         return a pretty printable amount
     """
     resp = u""
     if amount is not None:
-        dividor = 10.0 ** precision
+        if dividor is None:
+            dividor = 10.0 ** precision
 
         # Limit to 2 trailing zeros
         if isinstance(amount, float) and precision <= 2:
@@ -318,6 +319,32 @@ def format_amount(amount, trim=True, grouping=True, precision=2):
     if grouping:
         resp = resp.replace(' ', '&nbsp;')
     return resp
+
+
+def format_float(value, precision=None, grouping=True, html=True):
+    """
+    Format a float value :
+        * Localized version with grouped values
+        * trim datas to precision if asked for
+
+    :param float value: The value to format
+    :param int precision: If set, the value will be trimmed to that precision
+    :param bool grouping: Should the datas be grouped (by thousands)
+    :param bool html: Should the resulting string be html-friendly (using
+    &nbsp;)
+    :returns: A formatted string that can be used in html outputs
+    :rtype: str
+    """
+    if isinstance(value, (float, int)):
+        if precision is not None:
+            formatter = "%.{0}f".format(precision)
+        else:
+            formatter = "%s"
+        value = locale.format(formatter, value, grouping=grouping)
+
+        if html:
+            value = value.replace(" ", "&nbsp;")
+    return value
 
 
 def format_paymentmode(paymentmode):

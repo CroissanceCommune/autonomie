@@ -109,6 +109,16 @@ class IncomeStatementMeasureType(DBBASE):
             }
         },
     )
+    categories = Column(
+        String(255),
+        info={
+            "colanderalchemy": {
+                "title": u"Somme des catégories",
+                "descriptoin": u"Ce total présentera la somme des indicateurs "
+                u"des catégories sélectionnées",
+            }
+        },
+    )
     active = Column(
         Boolean(),
         default=True,
@@ -140,6 +150,9 @@ class IncomeStatementMeasureType(DBBASE):
         primaryjoin="IncomeStatementMeasure.measure_type_id"
         "==IncomeStatementMeasureType.id",
         cascade='all,delete,delete-orphan',
+        info={
+            "colanderalchemy": {"exclude": True}
+        }
     )
 
     def match(self, account):
@@ -153,6 +166,8 @@ class IncomeStatementMeasureType(DBBASE):
         """
         res = False
         for prefix in self.account_prefix.split(','):
+            if not prefix:
+                continue
             if prefix.startswith('-'):
                 prefix = prefix[1:].strip()
                 if account.startswith(prefix):
@@ -179,6 +194,12 @@ class IncomeStatementMeasureType(DBBASE):
         order = self.order
         new_order = order + 1
         IncomeStatementMeasureType.insert(self, new_order)
+
+    def get_categories(self):
+        """
+        Return the categories configured in case of a total type
+        """
+        return self.categories.split(',')
 
     @classmethod
     def get_by_category(cls, category, key=None):

@@ -95,6 +95,9 @@ class TreasuryMeasureType(DBBASE):
         primaryjoin="TreasuryMeasure.measure_type_id"
         "==TreasuryMeasureType.id",
         cascade='all,delete,delete-orphan',
+        info={
+            "colanderalchemy": {"exclude": True}
+        }
     )
 
     def match(self, account):
@@ -108,6 +111,8 @@ class TreasuryMeasureType(DBBASE):
         """
         res = False
         for prefix in self.account_prefix.split(','):
+            if not prefix:
+                continue
             if prefix.startswith('-'):
                 prefix = prefix[1:].strip()
                 if account.startswith(prefix):

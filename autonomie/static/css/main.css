@@ -190,7 +190,7 @@ table.opa tfoot td {
   background-color: #f0ad4e;
   color: #fff; }
 
-.table .tr_highlighted {
+.table tr.highlighted {
   font-weight: bold;
   background-color: #efffef !important; }
 

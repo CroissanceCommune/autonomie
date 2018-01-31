@@ -90,6 +90,12 @@ class TreasuryMeasureType(DBBASE):
             'title': u"Indicateur actif ?", "exclude": True
         }}
     )
+    measures = relationship(
+        "TreasuryMeasure",
+        primaryjoin="TreasuryMeasure.measure_type_id"
+        "==TreasuryMeasureType.id",
+        cascade='all,delete,delete-orphan',
+    )
 
     def match(self, account):
         """

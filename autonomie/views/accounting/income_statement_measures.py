@@ -4,9 +4,10 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
-import colander
-from sqlalchemy import extract
+import datetime
+from sqlalchemy import or_
 
+from autonomie.utils.strings import month_name
 from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureGrid,
     IncomeStatementMeasureType,
@@ -14,9 +15,19 @@ from autonomie.models.accounting.income_statement_measures import (
 from autonomie.forms.accounting import get_income_statement_measures_list_schema
 from autonomie.views import BaseListView
 
-class CompanyIncomeStatementMeasuresListView(BaseListView):
+logger = logging.getLogger(__name__)
 
-    def get_types(self):
+
+class CompanyIncomeStatementMeasuresListView(BaseListView):
+    schema = get_income_statement_measures_list_schema()
+    use_paginate = False
+    default_sort = 'month'
+    sort_columns = {'month': 'month'}
+    filter_button_label = u"Changer"
+
+    title = u"Compte de résultat"
+
+    def get_types(self, ids):
         """
         Collect measure types
 
@@ -29,11 +40,70 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         )
         return IncomeStatementMeasureType.query().filter(clause).all()
 
-    def get_grids(self):
+    def query(self):
         """
         Collect the grids we present in the output
         """
-        pass
+        query = self.request.dbsession.query(IncomeStatementMeasureGrid)
+        query = query.join(IncomeStatementMeasureGrid.measures)
+        query = query.filter(
+            IncomeStatementMeasureGrid.company_id == self.context.id
+        )
+        return query
+
+    def filter_year(self, query, appstruct):
+        """
+        Filter the current query by a given year
+        """
+        self.year = year = appstruct['year']
+        logger.debug("Filtering by year : %s" % year)
+
+        query = query.filter(
+            IncomeStatementMeasureGrid.year == year
+        )
+        return query
+
+    def _get_month_cell(self, type_id, month, grids):
+        """
+        Return the value to display in month related cells
+        """
+        grid = grids[month]
+        result = None
+
+        if grid is not None:
+            measure = grid.get_measure_by_type(type_id)
+            if measure is not None:
+                result = measure.get_value()
+
+        return result
+
+    def _grid_by_month(self, month_grids):
+        """
+        """
+        result = dict((month, None) for month in range(1, 13))
+        for grid in month_grids:
+            result[grid.month] = grid
+        return result
+
+    def more_template_vars(self, response_dict):
+        """
+        Add template datas in the response dictionnary
+        """
+        records = response_dict['records']
+        response_dict['types'] = self.get_types(
+            [rec.id for rec in records]
+        )
+
+        response_dict['month_names_dict'] = dict(
+            (i, month_name(i)) for i in range(1, 13)
+        )
+        response_dict['current_year'] = datetime.date.today().year
+        response_dict['selected_year'] = int(self.year)
+        response_dict['grids'] = self._grid_by_month(records)
+        response_dict['month_cell_factory'] = self._get_month_cell
+
+        response_dict['ca'] = 15000
+        return response_dict
 
 
 def add_routes(config):
@@ -42,11 +112,6 @@ def add_routes(config):
         "/companies/{id}/accounting/income_statement_measure_grids",
         traverse="/companies/{id}",
     )
-    config.add_route(
-        "/income_statement_measure_grids/{id}",
-        "/income_statement_measure_grids/{id}",
-        traverse="/income_statement_measure_grids/{id}",
-    )
 
 
 def add_views(config):
@@ -54,13 +119,7 @@ def add_views(config):
         CompanyIncomeStatementMeasuresListView,
         route_name="/companies/{id}/accounting/income_statement_measure_grids",
         permission="view.accounting",
-        renderer="/accounting/measures.mako",
-    )
-    config.add_view(
-        CompanyStatementMeasuresListView,
-        route_name="/income_statement_measure_grids/{id}",
-        permission="view.accounting",
-        renderer="/accounting/measures.mako",
+        renderer="/accounting/income_statement_measures.mako",
     )
 
 

@@ -11,8 +11,8 @@ from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureType,
     CATEGORIES,
 )
-from autonomie.forms.admin import (
-    get_admin_schema,
+from autonomie.forms.accounting import (
+    get_admin_income_statement_measure_schema,
 )
 from autonomie.views import (
     BaseView,
@@ -54,11 +54,16 @@ def category_list_view(request):
         help_message=u"""Les indicateurs de comptes de résultat permettent de
         regrouper les écritures comptables derrière un même libellé afin de les
         regrouper au sein d'un tableau annuel présentant le compte de résultat
-        de chaque entreprise.<br />Chaque catégorie (Produits, Achats, Charges,
-        Salaires et Cotisations) est composée de plusieurs indicateurs et est
-        suivie dans la grille finale d'un total permettant par exemple de
-        visualiser la somme des produits ou la Marge disponible avant
-        salaire.<br />Depuis cette interface, vous pouvez configurer, par
+        de chaque entreprise.<br />
+        Les indicateurs sont divisés en 4 catégories (dans l'ordre de
+        présentation )<br />
+        <ul>
+        <li>Produits</li>
+        <li>Achats</li>
+        <li>Charges</li>
+        <li>Salaires et Cotisations</li>
+        </ul>
+        Depuis cette interface, vous pouvez configurer, par
         catégorie, l'ensemble des indicateurs qui composeront les comptes de
         résultat de vos entrepreneurs.""",
         menus=menus
@@ -67,7 +72,7 @@ def category_list_view(request):
 
 class MeasureTypeListView(BaseView):
     columns = [
-        u"Libellé de l'indicateur", u"Comptes commençant par",
+        u"Libellé de l'indicateur", u"Regroupe",
         u"Correspond à un total",
     ]
     title = u"Configuration des indicateurs de compte de résultat"
@@ -90,7 +95,12 @@ class MeasureTypeListView(BaseView):
         :rtype: generator
         """
         yield measure_type.label
-        yield measure_type.account_prefix
+        if measure_type.is_total:
+            yield u"La somme des indicateurs des catégories %s" % (
+                measure_type.categories
+            )
+        else:
+            yield u"Les comptes : %s" % measure_type.account_prefix
         if measure_type.is_total:
             yield "<div class='text-center'><i class='fa fa-check'></i></div>"
         else:
@@ -181,8 +191,10 @@ class MeasureTypeListView(BaseView):
         """
         result['help_msg'] = u"""Les définitions ci-dessous indiquent quelles
         écritures sont utilisées pour le calcul des indicateurs de la section
-        %s des comptes de résultat des entrepreneurs.<br />Certains indicateurs
-        sont des totaux, ils sont alors mis en évidence dans l'interface""" % (
+        %s des comptes de résultat des entrepreneurs.<br />
+        Les indicateurs seront présentés dans l'ordre.<br />
+        Certains indicateurs sont des totaux, ils seront alors mis en évidence
+        dans l'interface""" % (
             self.category,
         )
         return result
@@ -245,12 +257,30 @@ class MeasureTypeListView(BaseView):
 class MeasureTypeAddView(BaseAddView):
     add_template_vars = ('menus', 'help_msg')
     factory = IncomeStatementMeasureType
-    schema = get_admin_schema(IncomeStatementMeasureType)
     title = u"Ajouter"
+    _schema = None
 
     def __init__(self, *args, **kwargs):
         BaseAddView.__init__(self, *args, **kwargs)
         self.category = self.request.matchdict['category']
+
+    def is_total_form(self):
+        return "is_total" in self.request.GET
+
+    @property
+    def schema(self):
+        if self._schema is None:
+            if self.is_total_form():
+                self._schema = get_admin_income_statement_measure_schema(
+                    total=True
+                )
+            else:
+                self._schema = get_admin_income_statement_measure_schema()
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        self._schema = value
 
     def before(self, form):
         """
@@ -264,13 +294,7 @@ class MeasureTypeAddView(BaseAddView):
         }
 
         if 'is_total' in self.request.GET:
-            types = self.factory.get_by_category(
-                self.category,
-                'account_prefix'
-            )
-            # We join all account prefixes for this total
-            account_prefix = ",".join([t.account_prefix for t in types])
-            pre_filled['account_prefix'] = account_prefix
+            pre_filled['account_prefix'] = self.category
             pre_filled['is_total'] = True
             pre_filled['label'] = u"Total %s" % (self.category, )
 
@@ -298,12 +322,30 @@ class MeasureTypeAddView(BaseAddView):
 
 class MeasureTypeEditView(BaseEditView):
     add_template_vars = ('menus', 'help_msg')
-    schema = get_admin_schema(IncomeStatementMeasureType)
+    _schema = None
     factory = IncomeStatementMeasureType
 
     def __init__(self, *args, **kwargs):
         BaseEditView.__init__(self, *args, **kwargs)
         self.category = self.request.matchdict['category']
+
+    def is_total_form(self):
+        return self.context.is_total
+
+    @property
+    def schema(self):
+        if self._schema is None:
+            if self.is_total_form():
+                self._schema = get_admin_income_statement_measure_schema(
+                    total=True
+                )
+            else:
+                self._schema = get_admin_income_statement_measure_schema()
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        self._schema = value
 
     @property
     def title(self):

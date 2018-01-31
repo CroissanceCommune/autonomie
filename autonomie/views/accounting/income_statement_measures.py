@@ -5,7 +5,12 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
 import datetime
-from sqlalchemy import or_
+from sqlalchemy import (
+    or_,
+)
+from sqlalchemy.orm import (
+    joinedload,
+)
 
 from autonomie.utils.strings import month_name
 from autonomie.models.accounting.income_statement_measures import (
@@ -45,7 +50,9 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         Collect the grids we present in the output
         """
         query = self.request.dbsession.query(IncomeStatementMeasureGrid)
-        query = query.join(IncomeStatementMeasureGrid.measures)
+        query = query.options(
+            joinedload(IncomeStatementMeasureGrid.measures, innerjoin=True)
+        )
         query = query.filter(
             IncomeStatementMeasureGrid.company_id == self.context.id
         )
@@ -102,7 +109,7 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         response_dict['grids'] = self._grid_by_month(records)
         response_dict['month_cell_factory'] = self._get_month_cell
 
-        response_dict['ca'] = 15000
+        response_dict['turnover'] = self.context.get_turnover(self.year)
         return response_dict
 
 

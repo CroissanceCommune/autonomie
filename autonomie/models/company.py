@@ -46,21 +46,22 @@ from sqlalchemy.orm import (
     load_only,
 )
 
-from autonomie import forms
-from autonomie_base.models.types import (
-    PersistentACLMixin,
-)
-from autonomie.models.options import (
-    ConfigurableOption,
-    get_id_foreignkey_col,
-)
-from autonomie.models.services.company import CompanyService
-
 from autonomie_base.models.base import (
     DBBASE,
     DBSESSION,
     default_table_args,
 )
+from autonomie_base.models.types import (
+    PersistentACLMixin,
+)
+
+from autonomie import forms
+from autonomie.compute import math_utils
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
+from autonomie.models.services.company import CompanyService
 
 log = logging.getLogger(__name__)
 
@@ -430,6 +431,15 @@ class Company(DBBASE, PersistentACLMixin):
         Return the next cancelinvoice index
         """
         return self._autonomie_service.get_next_cancelinvoice_index(self)
+
+    def get_turnover(self, year):
+        """
+        Retrieve the annual turnover for the current company
+
+        :param int year: The current year
+        """
+        ca = self._autonomie_service.get_turnover(self, year)
+        return math_utils.integer_to_amount(ca, precision=5)
 
 
 # Company node related tools

@@ -6,6 +6,7 @@
 """
 Accounting module related schemas
 """
+import datetime
 import colander
 import deform
 from sqlalchemy import distinct
@@ -183,16 +184,21 @@ def get_income_statement_measures_list_schema():
     """
     schema = BaseListsSchema().clone()
     del schema['search']
+    del schema['page']
+    del schema['items_per_page']
 
     def get_year_options(kw):
         cid = kw['request'].context.get_company_id()
-        return IncomeStatementMeasureGrid.get_years(company_id=cid)
+        years = IncomeStatementMeasureGrid.get_years(company_id=cid)
+        current_year = datetime.date.today().year
+        if current_year not in years:
+            years.append(current_year)
+        return years
 
     node = forms.year_select_node(
         name='year',
         query_func=get_year_options,
-        missing=-1,
-        description=u"Année de dépôt"
+        title=u"Année"
     )
 
     schema.insert(0, node)

@@ -85,6 +85,58 @@ def populate_accounting_treasury_measure_types(session):
         session.flush()
 
 
+def populate_accounting_income_statement_measure_types(session):
+    """
+    Populate the database with treasury measure types
+    """
+    from autonomie.models.accounting.income_statement_measures import (
+        IncomeStatementMeasureType,
+    )
+    if IncomeStatementMeasureType.query().count() == 0:
+        category = "Produits"
+        for label, prefix in (
+            (u"Prestations en interne", u"706010"),
+            (u"Prestations de service 20%", u"706,-706010"),
+            (u"Ventes de marchandises 20%", u"707"),
+            (u"Autres produits", u"7,-706,-707,-706010"),
+        ):
+            session.add(
+                IncomeStatementMeasureType(
+                    category=category,
+                    account_prefix=prefix,
+                    label=label,
+                )
+            )
+        session.add(
+            IncomeStatementMeasureType(
+                category=category,
+                account_prefix="7",
+                label=u"Produits",
+                is_total=True,
+            )
+        )
+        category = u"Achats"
+        session.add(
+            IncomeStatementMeasureType(
+                category=category,
+                account_prefix="601,607",
+                label=u"Achats et sous-traitances",
+                is_total=True,
+            )
+        )
+        category = u"Charges"
+        session.add(
+            IncomeStatementMeasureType(
+                category=category,
+                account_prefix="606",
+                label=u"Autres achats et frais",
+                is_total=True,
+            )
+        )
+
+        session.flush()
+
+
 def populate_database():
     """
     Populate the database with default values
@@ -95,6 +147,7 @@ def populate_database():
         populate_situation_options,
         populate_groups,
         populate_accounting_treasury_measure_types,
+        populate_accounting_income_statement_measure_types,
     ):
         try:
             func(session)

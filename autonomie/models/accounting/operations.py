@@ -96,10 +96,10 @@ class AccountingOperation(DBBASE):
     __tablename__ = 'accounting_operation'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    datetime = Column(
-        DateTime(),
-        default=datetime.datetime.now,
-        info={"colanderalchemy": {'title': u"Heure et date de création"}}
+    date = Column(
+        Date(),
+        default=datetime.date.today,
+        info={"colanderalchemy": {'title': u"Date de l'écriture"}},
     )
     analytical_account = Column(
         String(20),
@@ -153,6 +153,7 @@ class AccountingOperation(DBBASE):
         return dict(
             analytical_account=self.analytical_account,
             general_account=self.general_account,
+            date=self.date,
             label=self.label,
             debit=self.debit,
             credit=self.credit,

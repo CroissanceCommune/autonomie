@@ -71,6 +71,7 @@ def buffer_pdf(html):
                       result,
                       link_callback=fetch_resource,
                       encoding='utf-8', html_encoding="utf-8")
+    result.seek(0)
     return result
 
 

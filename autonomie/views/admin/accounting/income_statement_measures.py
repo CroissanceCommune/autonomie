@@ -294,13 +294,14 @@ class MeasureTypeAddView(BaseAddView):
         }
 
         if 'is_total' in self.request.GET:
-            pre_filled['account_prefix'] = self.category
             pre_filled['is_total'] = True
             pre_filled['label'] = u"Total %s" % (self.category, )
+            pre_filled['categories'] = self.category
+            pre_filled['total_type'] = u"categories"
 
         form.set_appstruct(pre_filled)
 
-    def redirect(self, new_model=None):
+    def redirect(self, model=None):
         return HTTPFound(self._redirect_url())
 
     def _redirect_url(self):
@@ -308,6 +309,21 @@ class MeasureTypeAddView(BaseAddView):
             "/admin/accounting/income_statement_measure_types/{category}",
             category=self.category,
         )
+
+    def merge_appstruct(self, appstruct, model):
+        """
+        Handle specific form keys when setting the new model's datas
+
+        Regarding the type of total we manage (category total or operation
+        specific total), we want to set some attributes
+        """
+        model = BaseAddView.merge_appstruct(self, appstruct, model)
+        if 'total_type' in appstruct:
+            if appstruct['total_type'] == 'categories':
+                model.account_prefix = ''
+            else:
+                model.categories = ''
+        return model
 
     @property
     def menus(self):
@@ -361,6 +377,30 @@ class MeasureTypeEditView(BaseEditView):
             "/admin/accounting/income_statement_measure_types/{category}",
             category=self.category,
         )
+
+    def get_default_appstruct(self):
+        result = BaseEditView.get_default_appstruct(self)
+        if self.is_total_form():
+            if self.context.account_prefix:
+                result['total_type'] = 'account_prefix'
+            else:
+                result['total_type'] = 'categories'
+        return result
+
+    def merge_appstruct(self, appstruct, model):
+        """
+        Handle specific form keys when setting the new model's datas
+
+        Regarding the type of total we manage (category total or operation
+        specific total), we want to set some attributes
+        """
+        model = BaseEditView.merge_appstruct(self, appstruct, model)
+        if 'total_type' in appstruct:
+            if appstruct['total_type'] == 'categories':
+                model.account_prefix = ''
+            else:
+                model.categories = ''
+        return model
 
     @property
     def menus(self):

@@ -9,6 +9,7 @@ Accounting module related schemas
 import datetime
 import colander
 import deform
+import deform_extensions
 from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import distinct
 
@@ -213,12 +214,21 @@ def get_admin_income_statement_measure_schema(total=False):
     """
     Build the schema for income statement measure schema
 
-    Total types compile all measures value from a category (or more than one)
+    Total types are more complex and can be :
+
+        * The sum of categories
+        * A list of account prefix (like the common type of measure_types)
     """
     if total:
         schema = SQLAlchemySchemaNode(
             IncomeStatementMeasureType,
-            includes=("category", 'label', "categories", 'is_total'),
+            includes=(
+                "category",
+                'label',
+                "categories",
+                "account_prefix",
+                'is_total'
+            ),
         )
         schema['categories'].typ = CsvTuple()
         schema['categories'].widget = deform.widget.CheckboxChoiceWidget(
@@ -226,6 +236,30 @@ def get_admin_income_statement_measure_schema(total=False):
         )
         schema['categories'].validator = colander.Length(min=1)
         schema['is_total'].widget = deform.widget.HiddenWidget()
+        schema.add_before(
+            'categories',
+            colander.SchemaNode(
+                colander.String(),
+                name="total_type",
+                title=u"Cet indicateur est il définit comme :",
+                widget=deform_extensions.RadioChoiceToggleWidget(
+                    values=(
+                        (
+                            "categories",
+                            u"la somme des indicateurs de une ou plusieurs "
+                            u"catégories ?",
+                            "categories",
+                        ),
+                        (
+                            "account_prefix",
+                            u"un groupement d'écritures ?",
+                            "account_prefix",
+                        ),
+                    )
+                ),
+                missing=colander.drop,
+            )
+        )
     else:
         schema = SQLAlchemySchemaNode(
             IncomeStatementMeasureType,

@@ -21,7 +21,7 @@ def admin_accounting_index_view(request):
             "/admin/accounting/income_statement_measures",
             u"Les comptes de résultat sont générés depuis les grands livres "
             u"déposés dans Autonomie",
-            "fa fa-cog",
+            "fa fa-table",
         ),
     ):
         menus.append(

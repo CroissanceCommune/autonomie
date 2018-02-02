@@ -24,6 +24,31 @@ from autonomie.views import (
 
 logger = logging.getLogger(__name__)
 
+BASE_URL = u"/admin/accounting/income_statement_measures"
+TYPE_URL = BASE_URL + "/types"
+CATEGORY_URL = TYPE_URL + "/{category}"
+ITEM_URL = CATEGORY_URL + "/{id}"
+
+
+def index_view(request):
+    menus = []
+    for label, route, title, icon in (
+        (u"Retour", "/admin/accounting", "", "fa fa-step-backward"),
+        (
+            u"Configuration des indicateurs de Comptes de résultat",
+            TYPE_URL,
+            u"Définition des codes comptables utilisés pour le calcul des "
+            u"Comptes de résultat",
+            "fa fa-braille",
+        ),
+    ):
+        menus.append(
+            dict(label=label, route_name=route, title=title, icon=icon)
+        )
+    return dict(
+        title=u"Configuration de la génération des États de trésorerie",
+        menus=menus
+    )
 
 def category_list_view(request):
     """
@@ -35,7 +60,7 @@ def category_list_view(request):
     menus.append(
         {
             'label': u"Retour",
-            "route_name": "/admin/accounting",
+            "route_name": BASE_URL,
             "title": "",
             "icon": "fa fa-step-backward",
         }
@@ -44,7 +69,7 @@ def category_list_view(request):
     for category in CATEGORIES:
         label = u'Configuration des indicateurs de type %s' % category
         url = request.route_path(
-            "/admin/accounting/income_statement_measure_types/{category}",
+            CATEGORY_URL,
             category=category,
         )
         menus.append(dict(label=label, url=url, icon="fa fa-braille"))
@@ -115,7 +140,7 @@ class MeasureTypeListView(BaseView):
             query['action'] = action
 
         return self.request.route_path(
-            "/admin/accounting/income_statement_measure_types/{category}/{id}",
+            ITEM_URL,
             id=measure_type.id,
             category=measure_type.category,
             _query=query,
@@ -206,7 +231,7 @@ class MeasureTypeListView(BaseView):
         return [
             dict(
                 label=u"Retour",
-                route_name="/admin/accounting/income_statement_measure_types",
+                route_name=TYPE_URL,
                 icon="fa fa-step-backward"
             )
         ]
@@ -229,8 +254,7 @@ class MeasureTypeListView(BaseView):
     @property
     def addurl(self):
         return self.request.route_path(
-            '/admin/accounting/income_statement_measure_types/'
-            '{category}/add',
+            CATEGORY_URL + '/add',
             category=self.category,
         )
 
@@ -306,7 +330,7 @@ class MeasureTypeAddView(BaseAddView):
 
     def _redirect_url(self):
         return self.request.route_path(
-            "/admin/accounting/income_statement_measure_types/{category}",
+            CATEGORY_URL,
             category=self.category,
         )
 
@@ -374,7 +398,7 @@ class MeasureTypeEditView(BaseEditView):
 
     def _redirect_url(self):
         return self.request.route_path(
-            "/admin/accounting/income_statement_measure_types/{category}",
+            CATEGORY_URL,
             category=self.category,
         )
 
@@ -422,7 +446,7 @@ class MeasureDisableView(DisableView):
 
     def _redirect_url(self):
         return self.request.route_path(
-            "/admin/accounting/income_statement_measure_types/{category}",
+            CATEGORY_URL,
             category=self.context.category,
         )
 
@@ -486,21 +510,13 @@ def add_routes(config):
     """
     Add routes related to this module
     """
+    config.add_route(BASE_URL, BASE_URL)
+    config.add_route(TYPE_URL, TYPE_URL)
+    config.add_route(CATEGORY_URL, CATEGORY_URL)
+    config.add_route(CATEGORY_URL + "/add", CATEGORY_URL + "/add")
     config.add_route(
-        "/admin/accounting/income_statement_measure_types",
-        "/admin/accounting/income_statement_measure_types",
-    )
-    config.add_route(
-        "/admin/accounting/income_statement_measure_types/{category}",
-        "/admin/accounting/income_statement_measure_types/{category}",
-    )
-    config.add_route(
-        "/admin/accounting/income_statement_measure_types/{category}/add",
-        "/admin/accounting/income_statement_measure_types/{category}/add",
-    )
-    config.add_route(
-        "/admin/accounting/income_statement_measure_types/{category}/{id}",
-        "/admin/accounting/income_statement_measure_types/{category}/{id}",
+        ITEM_URL,
+        ITEM_URL,
         traverse="income_statement_measure_types/{id}",
     )
 
@@ -510,44 +526,41 @@ def add_views(config):
     Add views defined in this module
     """
     config.add_admin_view(
+        index_view, route_name=BASE_URL, renderer="admin/index.mako"
+    )
+    config.add_admin_view(
         category_list_view,
-        route_name="/admin/accounting/income_statement_measure_types",
+        route_name=TYPE_URL,
         renderer="admin/index.mako",
     )
     config.add_admin_view(
         MeasureTypeListView,
-        route_name="/admin/accounting/income_statement_measure_types/"
-        "{category}",
+        route_name=CATEGORY_URL,
         renderer="admin/crud_list.mako",
     )
     config.add_admin_view(
         MeasureTypeAddView,
-        route_name="/admin/accounting/income_statement_measure_types/"
-        "{category}/add",
+        route_name=CATEGORY_URL + "/add",
         renderer="admin/crud_add_edit.mako",
     )
     config.add_admin_view(
         MeasureTypeEditView,
-        route_name="/admin/accounting/income_statement_measure_types/"
-        "{category}/{id}",
+        route_name=ITEM_URL,
         renderer="admin/crud_add_edit.mako",
     )
     config.add_admin_view(
         MeasureDisableView,
-        route_name="/admin/accounting/income_statement_measure_types/"
-        "{category}/{id}",
+        route_name=ITEM_URL,
         request_param="action=disable",
     )
     config.add_admin_view(
         MeasureDeleteView,
-        route_name="/admin/accounting/income_statement_measure_types/"
-        "{category}/{id}",
+        route_name=ITEM_URL,
         request_param="action=delete",
     )
     config.add_admin_view(
         move_view,
-        route_name="/admin/accounting/income_statement_measure_types/"
-        "{category}/{id}",
+        route_name=ITEM_URL,
         request_param='action=move',
     )
 

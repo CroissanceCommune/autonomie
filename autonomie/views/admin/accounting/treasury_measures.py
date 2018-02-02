@@ -30,13 +30,44 @@ from autonomie.views import (
 logger = logging.getLogger(__name__)
 
 
+BASE_URL = "/admin/accounting/treasury_measures"
+
+
+def index_view(request):
+    menus = []
+    for label, route, title, icon in (
+        (u"Retour", "/admin/accounting", "", "fa fa-step-backward"),
+        (
+            u"Configuration de l'interface entrepreneur",
+            BASE_URL + "/ui",
+            u"Configuration des priorités d'affichage dans l'interface de "
+            u"l'entrepreneur",
+            "fa fa-tv",
+        ),
+        (
+            u"Configuration des indicateurs de trésorerie",
+            BASE_URL + "/types",
+            u"Définition des codes comptables utilisés pour le calcul des "
+            u"indicateurs de trésorerie",
+            "fa fa-braille",
+        ),
+    ):
+        menus.append(
+            dict(label=label, route_name=route, title=title, icon=icon)
+        )
+    return dict(
+        title=u"Configuration de la génération des États de trésorerie",
+        menus=menus
+    )
+
+
 class TreasuryMeasureUiView(BaseConfigView):
     title = u"Configuration de l'interface entrepreneur"
     description = (
         u"Configuration des priorités d'affichage dans l'interface"
         u" de l'entrepreneur"
     )
-    redirect_route_name = "/admin/accounting"
+    redirect_route_name = BASE_URL
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = ('treasury_measure_ui',)
     schema = get_config_schema(keys)
@@ -72,7 +103,7 @@ class TreasuryMeasureTypeListView(BaseView):
             query['action'] = action
 
         return self.request.route_path(
-            "/admin/accounting/treasury_measure_types/{id}",
+            BASE_URL + "/types/{id}",
             id=measure_type.id,
             _query=query,
         )
@@ -116,7 +147,7 @@ class TreasuryMeasureTypeListView(BaseView):
         return [
             dict(
                 label=u"Retour",
-                route_name="/admin/accounting",
+                route_name=BASE_URL,
                 icon="fa fa-step-backward"
             )
         ]
@@ -161,7 +192,7 @@ class TreasuryMeasureTypeEditView(BaseEditView):
 
     @property
     def redirect_route(self):
-        return "/admin/accounting/treasury_measure_types"
+        return BASE_URL + "/types"
 
     @property
     def menus(self):
@@ -178,18 +209,18 @@ def add_routes(config):
     """
     Add the routes related to the current module
     """
+    config.add_route(BASE_URL, BASE_URL)
+
+    types_url = BASE_URL + "/types"
+    config.add_route(types_url, types_url)
     config.add_route(
-        "/admin/accounting/treasury_measure_types",
-        "/admin/accounting/treasury_measure_types",
-    )
-    config.add_route(
-        "/admin/accounting/treasury_measure_types/{id}",
-        "/admin/accounting/treasury_measure_types/{id}",
+        types_url + "/{id}",
+        types_url + "/{id}",
         traverse="treasury_measure_types/{id}",
     )
     config.add_route(
-        '/admin/accounting/treasury_measure_ui',
-        '/admin/accounting/treasury_measure_ui',
+        BASE_URL + "/ui",
+        BASE_URL + "/ui"
     )
 
 
@@ -198,18 +229,21 @@ def add_views(config):
     Add views defined in this module
     """
     config.add_admin_view(
+        index_view, route_name=BASE_URL, renderer="admin/index.mako"
+    )
+    config.add_admin_view(
         TreasuryMeasureUiView,
-        route_name="/admin/accounting/treasury_measure_ui",
+        route_name=BASE_URL + "/ui",
         renderer="admin/main.mako",
     )
     config.add_admin_view(
         TreasuryMeasureTypeListView,
-        route_name="/admin/accounting/treasury_measure_types",
+        route_name=BASE_URL + "/types",
         renderer="admin/crud_list.mako",
     )
     config.add_admin_view(
         TreasuryMeasureTypeEditView,
-        route_name="/admin/accounting/treasury_measure_types/{id}",
+        route_name=BASE_URL + "/types/{id}",
         renderer="admin/crud_add_edit.mako",
     )
 

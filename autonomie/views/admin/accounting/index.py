@@ -10,25 +10,18 @@ def admin_accounting_index_view(request):
     for label, route, title, icon in (
         (u"Retour", "admin_index", "", "fa fa-step-backward"),
         (
-            u"Configuration de l'interface entrepreneur",
-            "/admin/accounting/treasury_measure_ui",
-            u"Configuration des priorités d'affichage dans l'interface de "
-            u"l'entrepreneur",
-            "fa fa-tv",
+            u"Configurer les États de Trésorerie",
+            "/admin/accounting/treasury_measures",
+            u"Les états de trésorerie sont générés depuis les balances "
+            u"analytiques déposées dans Autonomie",
+            "fa fa-money",
         ),
         (
-            u"Configuration des indicateurs de trésorerie",
-            "/admin/accounting/treasury_measure_types",
-            u"Définition des codes comptables utilisés pour le calcul des "
-            u"indicateurs de trésorerie",
-            "fa fa-braille",
-        ),
-        (
-            u"Configuration des indicateurs de comptes de résultat",
-            "/admin/accounting/income_statement_measure_types",
-            u"Définition des libellés et codes comptables utilisés "
-            u"pour le calcul des indicateurs de compte de résultat",
-            "fa fa-braille",
+            u"Configurer les Comptes de résultat",
+            "/admin/accounting/income_statement_measures",
+            u"Les comptes de résultat sont générés depuis les grands livres "
+            u"déposés dans Autonomie",
+            "fa fa-cog",
         ),
     ):
         menus.append(

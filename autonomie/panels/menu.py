@@ -192,6 +192,15 @@ def get_company_menu(request, cid, css=None):
         icon="fa fa-money",
         href=href
     )
+    href = request.route_path(
+        "/companies/{id}/accounting/income_statement_measure_grids",
+        id=cid
+    )
+    gestion.add_item(
+        u"Compte de résultat",
+        icon="fa fa-table",
+        href=href
+    )
 
     menu.add(gestion)
 

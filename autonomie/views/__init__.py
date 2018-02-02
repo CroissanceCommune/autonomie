@@ -637,9 +637,20 @@ class BaseAddView(BaseFormView):
             raise Exception("Missing mandatory 'factory' attribute")
         return self.factory()
 
+    def merge_appstruct(self, appstruct, model):
+        """
+        Merge the appstruct with the newly create model
+
+        :param dict appstruct: Validated form datas
+        :param obj model: A new instance of the object we create
+        :returns: The model this view is supposed to add
+        """
+        model = self.schema.objectify(appstruct, model)
+        return model
+
     def submit_success(self, appstruct):
         new_model = self.create_instance()
-        new_model = self.schema.objectify(appstruct, new_model)
+        new_model = self.merge_appstruct(appstruct, new_model)
         self.dbsession.add(new_model)
         self.dbsession.flush()
         if self.msg:
@@ -671,11 +682,25 @@ class BaseEditView(BaseFormView):
             calchemy_dict = {}
         return calchemy_dict.get('help_msg', '')
 
+    def get_default_appstruct(self):
+        return self.schema.dictify(self.context)
+
     def before(self, form):
-        form.set_appstruct(self.schema.dictify(self.context))
+        form.set_appstruct(self.get_default_appstruct())
+
+    def merge_appstruct(self, appstruct, model):
+        """
+        Merge the appstruct with the newly create model
+
+        :param dict appstruct: Validated form datas
+        :param obj model: A new instance of the object we create
+        :returns: The model this view is supposed to add
+        """
+        model = self.schema.objectify(appstruct, model)
+        return model
 
     def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct, self.context)
+        model = self.merge_appstruct(appstruct, self.context)
         self.dbsession.merge(model)
         self.dbsession.flush()
         if self.msg:

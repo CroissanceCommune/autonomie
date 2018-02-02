@@ -247,6 +247,11 @@ class TreasuryMeasureGrid(DBBASE):
     def get_company_id(self):
         return self.company_id
 
+    def get_measure_by_type(self, measure_type_id):
+        return self._autonomie_service.get_measure_by_type(
+            self, measure_type_id
+        )
+
 
 class TreasuryMeasure(DBBASE):
     """

@@ -41,6 +41,15 @@ class TreasuryMeasureGridService(object):
             result = None
         return result
 
+    @classmethod
+    def get_measure_by_type(cls, grid, measure_type_id):
+        result = None
+        for measure in grid.measures:
+            if measure.measure_type_id == measure_type_id:
+                result = measure
+                break
+        return result
+
 
 class IncomeStatementMeasureGridService(object):
 

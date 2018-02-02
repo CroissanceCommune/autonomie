@@ -260,6 +260,7 @@ def get_admin_income_statement_measure_schema(total=False):
                 missing=colander.drop,
             )
         )
+        schema['account_prefix'].missing = ""
     else:
         schema = SQLAlchemySchemaNode(
             IncomeStatementMeasureType,

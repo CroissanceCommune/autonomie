@@ -52,7 +52,7 @@ pytest==2.6.4
 reportlab==3.1.44
 repoze.lru==0.6
 simplejson==3.3.1
-sqla_inspect==0.4.2
+sqla_inspect==0.4.3
 SQLAlchemy==1.0.8
 transaction==2.1.2
 translationstring==1.2

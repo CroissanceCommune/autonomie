@@ -44,7 +44,8 @@ def add_translation(event):
     request = event.get('req')
     if not request:
         request = get_current_request()
-    event['_'] = request.translate
+    if hasattr(request, 'translate'):
+        event['_'] = request.translate
 
 
 def add_api(event):

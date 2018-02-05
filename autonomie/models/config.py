@@ -164,6 +164,17 @@ class Config(DBBASE):
         return result
 
     @classmethod
+    def get_value(cls, keyname, default=None):
+        config = cls.get(keyname)
+        result = None
+
+        if config is not None:
+            result = config.value
+        elif default:
+            result = default
+        return result
+
+    @classmethod
     def query(cls):
         query = super(Config, cls).query()
         return query.filter(Config.app == 'autonomie')

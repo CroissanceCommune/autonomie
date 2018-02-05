@@ -61,6 +61,7 @@ from autonomie.models.tva import Product
 from .interfaces import (
     IMoneyTask,
 )
+from autonomie.models.config import Config
 from .invoice import (
     Invoice,
 )
@@ -420,6 +421,7 @@ class Estimation(Task, EstimationCompute):
         inv.address = self.address
         inv.workplace = self.workplace
         inv.mentions = self.mentions
+        inv.prefix = Config.get_value('invoice_prefix', '')
         return inv
 
     def gen_invoices(self, user):

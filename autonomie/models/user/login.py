@@ -163,7 +163,8 @@ class Login(DBBASE):
         if login_id:
             query = query.filter(not_(cls.id == login_id))
 
-        return query.filter(cls.login == login).count() == 0
+        count = query.filter(cls.login == login).count()
+        return count == 0
 
     @classmethod
     def unique_user_id(cls, user_id, login_id=None):

@@ -58,7 +58,6 @@ Téléchargement et installation de l'application
 
     git clone https://github.com/CroissanceCommune/autonomie.git
     cd autonomie
-    pip install -r requirements.txt --allow-external PIL --allow-unverified PIL
     python setup.py install
     cp development.ini.sample development.ini
 
@@ -86,3 +85,19 @@ Puis créer un compte administrateur
 .. code-block:: console
 
     autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
+
+
+Développement
+-------------
+
+Dans un contexte de développement, installez autonomie avec les commandes
+suivantes
+
+.. code-block:: console
+
+    git clone https://github.com/CroissanceCommune/autonomie.git
+    cd autonomie
+    pip install pyramid_debugtoolbar
+    # Ici on install autonomie en mode developpement
+    python setup.py develop
+    cp development.ini.sample development.ini

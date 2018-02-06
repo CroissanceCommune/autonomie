@@ -10,6 +10,7 @@ pyramid.debug_routematch = false
 pyramid.debug_templates = true
 pyramid.default_locale_name = fr_FR
 pyramid.includes =
+                    autonomie_celery
                     pyramid_tm
                     pyramid_services
                     pyramid_mailer
@@ -19,7 +20,6 @@ pyramid.includes =
                     pyramid_celery
                     js.deform
                     deform_extensions
-                    autonomie_celery
 
 ####  MAIL FROM WITHIN THE APPLICATION ####
 # Add this one to pyramid.includes if you configured a mailbox
@@ -41,7 +41,7 @@ pyramid.includes =
 #### DATABASE ACCESS CONFIGURATION ####
 sqlalchemy.url = mysql://autonomie:autonomie@localhost/autonomie?charset=utf8
 sqlalchemy.echo=False
-sqlalchemy.encoding=UTF8
+#sqlalchemy.encoding=UTF8
 # Those variables should be improved to fit your configuration
 sqlalchemy.pool_recycle=7200
 sqlalchemy.pool_size=100
@@ -77,15 +77,15 @@ autonomie.assets=/tmp/
 # is accessible as a static directory
 autonomie.static_tmp=autonomie:tmp
 # treasury related docs upload
-autonomie.ftpdir=%(here)/tmp/filesystem
+autonomie.ftpdir=%(here)s/tmp/filesystem
 # Max filesize for file attachment (in Bytes)
 autonomie.maxfilesize=2000000
 # The instance name
 autonomie.instance_name=intranet.local.fr
 # The depot path for storing files locally
-autonomie.depot_path =~/tmp/filedepot
+autonomie.depot_path = %(here)s/tmp/filedepot
 # Tempdir for file upload (should exist)
-pyramid_deform.tempdir=/tmp/tempdir
+pyramid_deform.tempdir= %(here)s/tmp/tempdir
 # Pyramid services configuration (allow to override default behaviour for some
 # interfaces)
 # autonomie.services.treasury_invoice_writer=mypackage.InvoiceWriter
@@ -134,7 +134,7 @@ default_shell = ipython
 keys = root, sqlalchemy, alembic, celery
 
 [handlers]
-keys = console, file, sqlfile
+keys = console, file, sqlfile, celery_file
 
 [formatters]
 keys = generic, sqlfile

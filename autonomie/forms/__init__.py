@@ -403,7 +403,7 @@ def get_hidden_field_conf(title=None):
     return res
 
 
-def get_deferred_select_validator(model, id_key='id'):
+def get_deferred_select_validator(model, id_key='id', filters=[]):
     """
     Return a deferred validator based on the given model
 
@@ -414,13 +414,22 @@ def get_deferred_select_validator(model, id_key='id'):
         id_key
 
             The model attr used to store the related object in db (mostly id)
+
+        filters
+
+            list of 2-uples allowing to filter the model query
+            (attr/value)
     """
     @colander.deferred
     def deferred_validator(binding_datas, request):
         """
         The deferred function that will be fired on schema binding
         """
-        return colander.OneOf([getattr(m, id_key) for m in model.query()])
+        query = model.query()
+        for key, value in filters:
+            query = query.filter(getattr(model, key) == value)
+
+        return colander.OneOf([getattr(m, id_key) for m in query])
     return deferred_validator
 
 
@@ -634,3 +643,26 @@ def get_sequence_child_item(
             validator=get_deferred_select_validator(model)
         )
     ]
+
+
+def customize_field(schema, field_name, widget=None, validator=None, **kw):
+    """
+    Customize a form schema field
+
+    :param obj schema: the colander form schema
+    :param str field_name: The name of the field to customize
+    :param obj widget: a custom widget
+    :param obj validator: A custom validator
+    :param dict kw: Keyword args set as attributes on the schema field
+
+    """
+    if field_name in schema:
+        if widget is not None:
+            schema[field_name].widget = widget
+
+        if validator is not None:
+            schema[field_name].validator = validator
+
+        for attr, value in kw.items():
+            setattr(schema[field_name], attr, value)
+    return schema

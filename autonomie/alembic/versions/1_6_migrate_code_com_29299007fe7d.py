@@ -15,10 +15,10 @@ from alembic import op
 import sqlalchemy as sa
 
 from autonomie_base.models.base import DBSESSION
-from autonomie.models.user import User
 
 
 def upgrade():
+    from autonomie.models.user import User
     logger = logging.getLogger("alembic.migrate_code_compta")
     op.add_column("company", sa.Column("code_compta", sa.String(30), default=0))
     dbsession = DBSESSION()

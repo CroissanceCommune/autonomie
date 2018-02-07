@@ -142,13 +142,13 @@ def _deferred_group_widget(node, kw):
     )
 
 
-def _get_unique_user_id_validator(user_id=None):
+def _get_unique_user_id_validator(login_id=None):
     """
     Build a unique user_id validator to ensure a user is linked to only one user
     :param int user_id: optionnal user_id (in case of edit)
     """
     def unique_user_id(node, value):
-        if not Login.unique_user_id(value, user_id):
+        if not Login.unique_user_id(login_id, value):
             message = u"Ce compte possède déjà des identifiants.".format(
                                                             value
             )
@@ -163,10 +163,12 @@ def _deferred_user_id_validator(node, kw):
     """
     context = kw['request'].context
     if isinstance(context, Login):
-        user_id = kw['request'].context.user_id
+        login_id = kw['request'].context.id
+    elif isinstance(context, User):
+        login_id = kw['request'].context.login.id
     else:
-        user_id = kw['request'].context.id
-    return _get_unique_user_id_validator(user_id)
+        raise Exception(u"Invalid context for this validator")
+    return _get_unique_user_id_validator(login_id)
 
 
 def set_widgets(schema):

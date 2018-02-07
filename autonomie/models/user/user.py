@@ -22,9 +22,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""
-    User models
-"""
 import logging
 
 
@@ -60,10 +57,6 @@ from autonomie.utils.strings import (
     format_name,
 )
 from autonomie.models.tools import get_excluded_colanderalchemy
-
-
-# We need to store this datas here (before we find a solution to place a
-# hashbang in an alembic migratino script)
 
 
 COMPANY_EMPLOYEE = Table(
@@ -207,16 +200,45 @@ class User(DBBASE, PersistentACLMixin):
         }
     )
 
+    @classmethod
+    def find_user(cls, value, *args, **kw):
+        """
+        Try to find a user instance based on the given value
+
+        :param str value: The value that should match a user
+        """
+        result = cls.query().join(cls.login).filter_by(login=value).first()
+
+        if result is None:
+            value = value.split(' ')
+            if len(value) >= 2:
+                firstname = value[-1]
+                lastname = " ".join(value[:-1])
+                try:
+                    query = cls.query()
+                    query = query.filter_by(lastname=lastname)
+                    query = query.filter_by(firstname=firstname)
+                    result = query.one()
+                except:
+                    result = None
+        return result
+
     def get_company(self, cid):
         """
-            Return the company
+        Retrieve the user's company with id cid
+
+        :param int cid: The user's company id
+        :returns: A Company instance
+        :raises: `sqlalchemy.orm.exc.NoResultFound` if no company can be found
         """
+        from autonomie.models.company import Company
         if not isinstance(cid, int):
             cid = int(cid)
-        for company in self.companies:
-            if company.id == cid:
-                return company
-        raise KeyError
+
+        query = DBSESSION().query(Company)
+        query = query.filter(Company.employees.any(User.id == self.id))
+        query = query.filter(Company.id == cid)
+        return query.one()
 
     def has_userdatas(self):
         """
@@ -254,23 +276,26 @@ class User(DBBASE, PersistentACLMixin):
 
 
 # Registering event handlers to keep datas synchronized
-def sync_user_to_userdatas(key):
+def sync_user_to_userdatas(source_key, userdatas_key):
     def handler(target, value, oldvalue, initiator):
-        if target.userdatas is not None:
-            log.debug(u"Updating the {0} with {1}".format(key, value))
-            setattr(target.userdatas, key, value)
+        if source_key == initiator.key:
+            if target.userdatas is not None:
+                setattr(target.userdatas, userdatas_key, value)
     return handler
 
 
-def sync_userdatas_to_user(key):
-    def handler(target, value, oldvalue, initiator):
-        raise Exception()
-        if target.user is not None:
-            log.debug(u"Updating the {0} with {1}".format(key, value))
-            setattr(target.user, key, value)
-    return handler
-
-
-listen(User.firstname, 'set', sync_user_to_userdatas('coordonnees_firstname'))
-listen(User.lastname, 'set', sync_user_to_userdatas('coordonnees_lastname'))
-listen(User.email, 'set', sync_user_to_userdatas('coordonnees_email1'))
+listen(
+    User.firstname,
+    'set',
+    sync_user_to_userdatas('firstname', 'coordonnees_firstname')
+)
+listen(
+    User.lastname,
+    'set',
+    sync_user_to_userdatas('lastname', 'coordonnees_lastname')
+)
+listen(
+    User.email,
+    'set',
+    sync_user_to_userdatas('email', 'coordonnees_email1')
+)

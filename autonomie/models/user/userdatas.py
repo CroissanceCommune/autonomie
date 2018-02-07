@@ -459,7 +459,7 @@ class UserDatas(Node):
                 'label': u"Conseiller",
             },
             'import': {
-#                'related_retriever': User.find_user
+                'related_retriever': User.find_user
             }
         }
     )
@@ -1372,26 +1372,25 @@ SocialStatusOption.id',
         """
         from autonomie.models.company import Company
         companies = []
-        if self.situation_situation.is_integration:
-            if self.user_id is None:
-                for data in self.activity_companydatas:
-                    # Try to retrieve an existing company (and avoid duplicates)
-                    company = Company.query().filter(
-                        Company.name == data.name
-                    ).first()
-                    if company is None:
-                        company = Company(
-                            name=data.name,
-                            goal=data.title,
-                            email=self.coordonnees_email1,
-                            phone=self.coordonnees_tel,
-                            mobile=self.coordonnees_mobile,
-                        )
-                        if data.activity is not None:
-                            company.activities.append(data.activity)
-                    companies.append(company)
-            else:
-                pass
+        for data in self.activity_companydatas:
+            # Try to retrieve an existing company (and avoid duplicates)
+            company = Company.query().filter(
+                Company.name == data.name
+            ).first()
+
+            if company is None:
+                company = Company(
+                    name=data.name,
+                    goal=data.title,
+                    email=self.coordonnees_email1,
+                    phone=self.coordonnees_tel,
+                    mobile=self.coordonnees_mobile,
+                )
+                if data.activity is not None:
+                    company.activities.append(data.activity)
+
+            company.employees.append(self.user)
+            companies.append(company)
         return companies
 
 
@@ -1809,3 +1808,30 @@ def add_situation_change_handler(target, value, oldvalue, initiator):
 
 
 listen(UserDatas.situation_situation_id, "set", add_situation_change_handler)
+
+
+def sync_userdatas_to_user(source_key, user_key):
+    def handler(target, value, oldvalue, initiator):
+        if initiator.key == source_key:
+            if hasattr(target, 'user') and target.user is not None:
+                if value != oldvalue:
+                    setattr(target.user, user_key, value)
+    return handler
+
+
+# Problem with infinite loops here
+# listen(
+#     UserDatas.coordonnees_firstname,
+#     'set',
+#     sync_userdatas_to_user('coordonnees_firstname', 'firstname')
+# )
+# listen(
+#     UserDatas.coordonnees_lastname,
+#     'set',
+#     sync_userdatas_to_user('coordonnees_lastname', 'lastname')
+# )
+# listen(
+#     UserDatas.coordonnees_email1,
+#     'set',
+#     sync_userdatas_to_user('coordonnees_email1', 'email')
+# )

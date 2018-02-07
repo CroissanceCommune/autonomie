@@ -43,36 +43,33 @@ def get_userdatas(option):
     result.situation_situation_id = option.id
     return result
 
+
 @pytest.fixture
-def situation_option(dbsession):
+def integre_cae_situation_option(dbsession):
     option = CaeSituationOption(label="Integre", is_integration=True)
     dbsession.add(option)
     dbsession.flush()
     return option
 
-@pytest.fixture
-def userdatas(dbsession, situation_option):
-    model = get_userdatas(situation_option)
-    dbsession.add(model)
-    dbsession.flush()
-    return model
 
-
-def test_get_company(dbsession, user, company):
-    company = user.get_company(company.id)
-    assert company.name == company.name
-    with pytest.raises(KeyError):
-        user.get_company(company.id + 1)
-
-
-def test_gen_existing_company(dbsession, userdatas, situation_option):
+def test_gen_company(dbsession, userdatas):
     companies = userdatas.gen_companies()
     company = companies[0]
     assert company.id is None
     dbsession.add(company)
     dbsession.flush()
 
-    userdatas2 = get_userdatas(situation_option)
+
+def test_company_existing(
+    dbsession, userdatas, cae_situation_option
+):
+    companies = userdatas.gen_companies()
+    company = companies[0]
+    assert company.id is None
+    dbsession.add(company)
+    dbsession.flush()
+
+    userdatas2 = get_userdatas(cae_situation_option)
     dbsession.add(userdatas2)
     dbsession.flush()
     companies = userdatas2.gen_companies()
@@ -106,16 +103,16 @@ def test_salary_compute(dbsession, userdatas):
     assert userdatas.parcours_salary == 0
 
 
-def test_add_situation_change_handler(dbsession, userdatas):
+def test_add_situation_change_handler(
+    dbsession, userdatas, integre_cae_situation_option
+):
     import datetime
-    new_opt = CaeSituationOption(label=u"Sortie", is_integration=True)
-    dbsession.add(new_opt)
-    dbsession.flush()
     assert len(userdatas.situation_history) == 1
-    userdatas.situation_situation_id = new_opt.id
+    userdatas.situation_situation_id = integre_cae_situation_option.id
     dbsession.merge(userdatas)
     dbsession.flush()
     today = datetime.date.today()
     assert len(userdatas.situation_history) == 2
-    assert userdatas.situation_history[-1].situation_id == new_opt.id
+    assert userdatas.situation_history[-1].situation_id == \
+        integre_cae_situation_option.id
     assert userdatas.situation_history[-1].date == today

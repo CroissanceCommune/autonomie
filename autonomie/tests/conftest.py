@@ -233,6 +233,9 @@ def content(connection, settings):
     adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
+    from autonomie.models import populate
+    populate.populate_database()
+
     commit()
 
 
@@ -245,6 +248,7 @@ def dbsession(config, content, connection, request):
     """
     from transaction import abort
     trans = connection.begin()          # begin a non-orm transaction
+
     def rollback():
         print("ROLLING BACK")
         trans.rollback()
@@ -391,17 +395,27 @@ def bank(dbsession):
 
 @fixture
 def user(dbsession):
-    from autonomie.models.user import User
+    from autonomie.models.user.user import User
     user = User(
-        login=u"login",
         lastname=u"Lastname",
         firstname=u"Firstname",
         email="login@c.fr",
     )
-    user.set_password('password')
     dbsession.add(user)
     dbsession.flush()
     return user
+
+
+@fixture
+def login(dbsession, user):
+    from autonomie.models.user.login import Login
+    login = Login(login=u"login", user_id=user.id)
+    login.set_password('pwd')
+    dbsession.add(login)
+    dbsession.flush()
+    login.user = user
+    user.login = login
+    return login
 
 
 @fixture
@@ -464,7 +478,7 @@ def phase(dbsession, project):
 
 @fixture
 def cae_situation_option(dbsession):
-    from autonomie.models.user import (CaeSituationOption,)
+    from autonomie.models.user.userdatas import (CaeSituationOption,)
     option = CaeSituationOption(
         is_integration=False,
         label=u"CaeSituationOption",
@@ -472,3 +486,29 @@ def cae_situation_option(dbsession):
     dbsession.add(option)
     dbsession.flush()
     return option
+
+
+@fixture
+def userdatas(dbsession, user, cae_situation_option):
+    from autonomie.models.user.userdatas import (
+        UserDatas,
+        CompanyDatas,
+    )
+    result = UserDatas(
+        situation_situation=cae_situation_option,
+        coordonnees_lastname="Userdatas",
+        coordonnees_firstname="userdatas",
+        coordonnees_email1="userdatas@test.fr",
+        activity_companydatas=[
+            CompanyDatas(
+                title='test entreprise',
+                name='test entreprise',
+            )
+        ],
+        user_id=user.id
+    )
+    result.situation_situation_id = cae_situation_option.id
+    dbsession.add(result)
+    dbsession.flush()
+    user.userdatas = result
+    return result

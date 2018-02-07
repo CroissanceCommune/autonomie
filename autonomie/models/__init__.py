@@ -46,7 +46,6 @@ import sale_product
 import statistics
 import treasury
 import tva
-import user
 import task
 import workshop
 from .accounting import operations
@@ -55,6 +54,10 @@ from .accounting import income_statement_measures
 from .expense import sheet
 from .expense import types
 from .expense import payment
+from .user import user
+from .user import login
+from .user import group
+from .user import userdatas
 from autonomie_celery import models
 
 
@@ -65,7 +68,7 @@ def adjust_for_engine(engine):
     """
     if engine.dialect.name == 'mysql':
         # Mysql does case unsensitive comparison by default
-        user.User.__table__.c.login.type.collation = 'utf8_bin'
+        login.Login.__table__.c.login.type.collation = 'utf8_bin'
 
 
 __author__ = "Arezki Feth, Miotte Julien, Pettier Gabriel and Tjebbes Gaston"

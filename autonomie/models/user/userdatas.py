@@ -23,6 +23,7 @@ from sqlalchemy.orm import (
     backref,
 )
 from sqlalchemy.event import listen
+from sqlalchemy.orm.base import NO_VALUE
 
 from autonomie_base.consts import (
     SEX_OPTIONS,
@@ -1365,35 +1366,6 @@ SocialStatusOption.id',
             years -= 1
         return years
 
-    def gen_user_account(self):
-        """
-        Generate a user account for the given model
-        """
-        from autonomie_base.utils.ascii import gen_random_string
-        from autonomie.forms.user.user import User
-        if self.situation_situation.is_integration:
-            if self.user_id is None:
-                login = self.coordonnees_email1
-                index = 0
-                # Fix #165: check login on account generation
-                while User.query().filter(User.login == login).count() > 0:
-                    login = u"{0}_{1}".format(index, login)
-                    index += 1
-
-                password = gen_random_string(6)
-                user = User(
-                    login=login,
-                    firstname=self.coordonnees_firstname,
-                    lastname=self.coordonnees_lastname,
-                    email=self.coordonnees_email1,
-                )
-                user.set_password(password)
-                self.user = user
-                return user, login, password
-            else:
-                return self.user, self.user.login, None
-        return None, None, None
-
     def gen_companies(self):
         """
         Generate companies as expected
@@ -1826,13 +1798,14 @@ def add_situation_change_handler(target, value, oldvalue, initiator):
     """
     Handler for the situation Change handling
     """
-    if isinstance(value, int) and value != oldvalue:
-        target.situation_history.append(
-            CaeSituationChange(
-                date=datetime.date.today(),
-                situation_id=value,
+    if value != oldvalue:
+        if value is not NO_VALUE and value is not None:
+            target.situation_history.append(
+                CaeSituationChange(
+                    date=datetime.date.today(),
+                    situation_id=value,
+                )
             )
-        )
 
 
 listen(UserDatas.situation_situation_id, "set", add_situation_change_handler)

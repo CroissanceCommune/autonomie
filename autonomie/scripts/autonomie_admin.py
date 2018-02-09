@@ -32,7 +32,7 @@ from autonomie.scripts.utils import (
     get_value,
 )
 from autonomie_base.models.base import DBSESSION
-from autonomie.models.user import User
+from autonomie.forms.user.user import User
 
 
 PWD_LENGTH = 10

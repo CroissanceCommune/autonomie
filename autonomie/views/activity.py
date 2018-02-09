@@ -65,10 +65,8 @@ from autonomie.models.activity import (
     Activity,
     Attendance,
     )
-from autonomie.models import (
-    user,
-    company,
-)
+from autonomie.models import company
+from autonomie.models.user import user
 from autonomie.forms.activity import (
     CreateActivitySchema,
     NewActivitySchema,
@@ -79,7 +77,6 @@ from autonomie.export.utils import write_file_to_request
 from autonomie.views import render_api
 
 log = logging.getLogger(__name__)
-
 
 CONSEILLER = aliased(user.User)
 

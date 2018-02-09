@@ -43,6 +43,7 @@ from autonomie.utils.strings import (
     format_activity_status,
     format_expense_status,
     format_account,
+    format_civilite,
     format_name,
     format_paymentmode,
     format_task_type,
@@ -153,6 +154,7 @@ class Api(object):
     format_expense_status = staticmethod(format_expense_status)
     format_activity_status = staticmethod(format_activity_status)
     format_account = staticmethod(format_account)
+    format_civilite = staticmethod(format_civilite)
     format_name = staticmethod(format_name)
     format_paymentmode = staticmethod(format_paymentmode)
     format_short_date = staticmethod(format_short_date)

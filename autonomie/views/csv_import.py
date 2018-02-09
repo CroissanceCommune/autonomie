@@ -365,7 +365,7 @@ d'Autonomie correspondant</li>"
         """
         # We initialize a job record in the database
         job = CsvImportJob()
-        job.set_owner(self.request.user.login)
+        job.set_owner(self.request.user.login.login)
         DBSESSION().add(job)
         DBSESSION().flush()
         return job

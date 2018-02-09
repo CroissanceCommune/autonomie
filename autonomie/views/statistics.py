@@ -32,7 +32,7 @@ from sqla_inspect import csv
 from autonomie.statistics import inspect
 
 from autonomie.resources import statistics_js
-from autonomie.models.user import UserDatas
+from autonomie.models.user.userdatas import UserDatas
 from autonomie.models.statistics import (
     StatisticSheet,
     StatisticEntry,

@@ -5,7 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 
 
-def test_avatar(dbsession, config, get_csrf_request, user):
+def test_avatar(dbsession, config, get_csrf_request, user, login):
     from autonomie.utils.avatar import get_avatar
     config.testing_securitypolicy(userid="login")
     request = get_csrf_request()

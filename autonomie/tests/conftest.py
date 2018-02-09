@@ -51,7 +51,7 @@ def launch_cmd(cmd):
     return os.system(cmd)
 
 
-def test_connect(settings):
+def mysql_test_connect(settings):
     """
         test the db connection
     """
@@ -113,7 +113,7 @@ def initialize_test_database(settings):
         return
     options = get_test_options_from_settings(settings)
     os.putenv('SHELL', '/bin/bash')
-    test_connect(options)
+    mysql_test_connect(options)
     create_sql_user(options)
     launch_cmd(options['drop'])
     create_test_db(options)

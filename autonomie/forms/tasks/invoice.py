@@ -25,6 +25,7 @@
 """
     form schemas for invoices related views
 """
+import functools
 import colander
 import deform
 import deform_extensions
@@ -41,20 +42,19 @@ from autonomie.models.tva import (
     Product,
     Tva,
 )
-
-from autonomie.models.task import (
+from autonomie.models.payments import (
+    BankAccount,
+    PaymentMode,
+)
+from autonomie.models.task.invoice import (
     Invoice,
     CancelInvoice,
     Payment,
+    INVOICE_STATES,
 )
-from autonomie.models.payments import BankAccount
 
 from autonomie.utils.strings import format_amount
 from autonomie import forms
-from autonomie.forms.tasks.lists import (
-    PeriodSchema,
-    AmountRangeSchema,
-)
 from autonomie.forms.custom_types import (
     AmountType,
 )
@@ -68,6 +68,11 @@ from autonomie.forms.payments import (
     deferred_bank_widget,
     deferred_bank_validator,
 )
+from autonomie.forms.tasks.lists import (
+    PeriodSchema,
+    AmountRangeSchema,
+)
+from autonomie.forms.tasks.task import get_add_edit_task_schema
 
 
 STATUS_OPTIONS = (("both", u"Filtrer par statut de paiement", ),
@@ -84,46 +89,6 @@ AMOUNT_PRECISION = 5
 # 5€ => 500000 in db format
 PAYMENT_EPSILON = 5 * 10 ** AMOUNT_PRECISION
 PAYMENT_SUM_EPSILON = 0.1 * 10 ** AMOUNT_PRECISION
-
-
-def validate_invoice(invoice_object, request):
-    """
-    Globally validate an invoice_object
-
-    :param obj invoice_object: An instance of Invoice
-    :param obj request: The pyramid request
-    :raises: colander.Invalid
-
-    try:
-        validate_invoice(est, self.request)
-    except colander.Invalid as err:
-        error_messages = err.messages
-    """
-    schema = SQLAlchemySchemaNode(Invoice)
-    schema = schema.bind(request=request)
-    appstruct = invoice_object.__json__(request)
-    cstruct = schema.deserialize(appstruct)
-    return cstruct
-
-
-def validate_cancelinvoice(cancelinvoice_object, request):
-    """
-    Globally validate an cancelinvoice_object
-
-    :param obj cancelinvoice_object: An instance of CancelInvoice
-    :param obj request: The pyramid request
-    :raises: colander.Invalid
-
-    try:
-        validate_cancelinvoice(est, self.request)
-    except colander.Invalid as err:
-        error_messages = err.messages
-    """
-    schema = SQLAlchemySchemaNode(CancelInvoice)
-    schema = schema.bind(request=request)
-    appstruct = cancelinvoice_object.__json__(request)
-    cstruct = schema.deserialize(appstruct)
-    return cstruct
 
 
 def get_product_choices():
@@ -663,3 +628,152 @@ class EstimationAttachSchema(colander.Schema):
         missing=colander.drop,
         title=u"Devis à rattacher à cette facture",
     )
+
+
+def _customize_invoice_schema(schema):
+    """
+    Add form schema customization to the given Invoice edition schema
+
+    :param obj schema: The schema to edit
+    """
+    customize = functools.partial(forms.customize_field, schema)
+    customize(
+        "paid_status",
+        widget=deform.widget.SelectWidget(values=INVOICE_STATES),
+        validator=colander.OneOf(dict(INVOICE_STATES).keys())
+    )
+    customize(
+        'financial_year',
+        widget=deform.widget.TextInputWidget(mask='9999')
+    )
+    customize('estimation_id', missing=colander.drop)
+    return schema
+
+
+def _customize_cancelinvoice_schema(schema):
+    """
+    Add form schema customization to the given Invoice edition schema
+
+    :param obj schema: The schema to edit
+    """
+    customize = functools.partial(forms.customize_field, schema)
+    customize('invoice_id', missing=colander.required)
+    customize(
+        'financial_year',
+        widget=deform.widget.TextInputWidget(mask='9999')
+    )
+    return schema
+
+
+def _customize_payment_schema(schema):
+    """
+    Add form schema customization to the given payment edition schema
+
+    :param obj schema: The schema to edit
+    """
+    customize = functools.partial(forms.customize_field, schema)
+    customize(
+        "mode",
+        validator=forms.get_deferred_select_validator(
+            PaymentMode, id_key='label'
+        ),
+        missing=colander.required
+    )
+    customize("amount", typ=AmountType(5), missing=colander.required)
+    customize("remittance_amount", missing=colander.required)
+    customize("date", missing=colander.required)
+    customize("task_id", missing=colander.required)
+    customize(
+        "bank_id",
+        validator=forms.get_deferred_select_validator(BankAccount),
+        missing=colander.required,
+    )
+    customize(
+        "tva_id",
+        validator=forms.get_deferred_select_validator(Tva),
+        missing=colander.drop,
+    )
+    customize("user_id", missing=colander.required)
+    return schema
+
+
+def get_add_edit_invoice_schema(isadmin=False, includes=None):
+    """
+    Return add edit schema for Invoice edition
+
+    :param bool isadmin: Are we asking for an admin schema ?
+    :param tuple includes: Field that should be included in the schema
+    :rtype: `colanderalchemy.SQLAlchemySchemaNode`
+    """
+    schema = get_add_edit_task_schema(
+        Invoice, isadmin=isadmin, includes=includes
+    )
+    schema = _customize_invoice_schema(schema)
+    return schema
+
+
+def get_add_edit_cancelinvoice_schema(isadmin=False, includes=None):
+    """
+    Return add edit schema for CancelInvoice edition
+
+    :param bool isadmin: Are we asking for an admin schema ?
+    :param tuple includes: Field that should be included in the schema
+    :rtype: `colanderalchemy.SQLAlchemySchemaNode`
+    """
+    schema = get_add_edit_task_schema(
+        CancelInvoice, isadmin=isadmin, includes=includes
+    )
+    schema = _customize_cancelinvoice_schema(schema)
+    return schema
+
+
+def get_add_edit_payment_schema(includes=None):
+    """
+    Return add edit schema for Payment edition
+
+    :param tuple includes: Field that should be included in the schema
+    :rtype: `colanderalchemy.SQLAlchemySchemaNode`
+    """
+    schema = SQLAlchemySchemaNode(Payment, includes=includes)
+    schema = _customize_payment_schema(schema)
+    return schema
+
+
+def validate_invoice(invoice_object, request):
+    """
+    Globally validate an invoice_object
+
+    :param obj invoice_object: An instance of Invoice
+    :param obj request: The pyramid request
+    :raises: colander.Invalid
+
+    try:
+        validate_invoice(est, self.request)
+    except colander.Invalid as err:
+        error_messages = err.messages
+    """
+    schema = SQLAlchemySchemaNode(Invoice)
+    schema = schema.bind(request=request)
+    appstruct = invoice_object.__json__(request)
+    cstruct = schema.deserialize(appstruct)
+    return cstruct
+
+
+def validate_cancelinvoice(cancelinvoice_object, request):
+    """
+    Globally validate an cancelinvoice_object
+
+    :param obj cancelinvoice_object: An instance of CancelInvoice
+    :param obj request: The pyramid request
+    :raises: colander.Invalid
+
+    try:
+        validate_cancelinvoice(est, self.request)
+    except colander.Invalid as err:
+        error_messages = err.messages
+    """
+    schema = SQLAlchemySchemaNode(CancelInvoice)
+    schema = schema.bind(request=request)
+    appstruct = cancelinvoice_object.__json__(request)
+    cstruct = schema.deserialize(appstruct)
+    return cstruct

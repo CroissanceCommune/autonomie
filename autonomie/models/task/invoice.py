@@ -27,8 +27,6 @@
 """
 import datetime
 import logging
-import deform
-import colander
 
 from zope.interface import implementer
 from beaker.cache import cache_region
@@ -60,19 +58,13 @@ from autonomie_base.models.base import (
     default_table_args,
 )
 from autonomie import forms
-from autonomie.forms.custom_types import (AmountType, )
 from autonomie.compute import math_utils
 from autonomie.compute.task import (
     TaskCompute,
     InvoiceCompute,
 )
 from autonomie.models.tva import (
-    Tva,
     Product,
-)
-from autonomie.models.payments import (
-    PaymentMode,
-    BankAccount,
 )
 from .interfaces import (
     IMoneyTask,
@@ -156,38 +148,13 @@ class Invoice(Task, InvoiceCompute):
     __tablename__ = 'invoice'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'invoice', }
-    id = Column(
-        ForeignKey('task.id'),
-        primary_key=True,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.HiddenWidget(),
-                'missing': colander.drop,
-            }
-        },
-    )
+    id = Column(ForeignKey('task.id'), primary_key=True)
     paid_status = Column(
         String(10),
         default='waiting',
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.SelectWidget(values=INVOICE_STATES),
-                'title': u'Statut de la facture',
-                "validator": colander.OneOf(dict(INVOICE_STATES).keys()),
-            }
-        }
+        info={'colanderalchemy': {'title': u'Statut de la facture', }},
     )
 
-    # seems it's not used anymore
-    deposit = deferred(
-        Column(
-            Integer,
-            nullable=False,
-            info={'colanderalchemy': {'exclude': True}},
-            default=0
-        ),
-        group='edit',
-    )
     # Common with only estimations
     course = deferred(
         Column(
@@ -201,24 +168,19 @@ class Invoice(Task, InvoiceCompute):
     # Common with only cancelinvoices
     financial_year = Column(
         Integer,
-        info={
-            'colanderalchemy': {
-                'title': u"Année fiscale de référence",
-                'widget': deform.widget.TextInputWidget(mask='9999'),
-            }
-        },
+        info={'colanderalchemy': {'title': u"Année fiscale de référence"}},
         default=0
     )
     exported = deferred(
         Column(
             Boolean(),
             info={'colanderalchemy': {'title': u"A déjà été exportée ?"}},
-            default=False), group="edit")
-
-    estimation_id = Column(
-        ForeignKey('estimation.id'),
-        info={'colanderalchemy': {'missing': colander.drop}},
+            default=False
+        ),
+        group="edit"
     )
+
+    estimation_id = Column(ForeignKey('estimation.id'))
 
     estimation = relationship(
         "Estimation",
@@ -397,7 +359,6 @@ class Invoice(Task, InvoiceCompute):
         invoice.description = self.description
 
         invoice.payment_conditions = self.payment_conditions
-        invoice.deposit = self.deposit
         invoice.course = self.course
         invoice.display_units = self.display_units
         invoice.expenses_ht = self.expenses_ht
@@ -421,7 +382,6 @@ class Invoice(Task, InvoiceCompute):
 
         datas.update(
             dict(
-                deposit=self.deposit,
                 course=self.course,
                 financial_year=self.financial_year,
                 exported=self.exported,
@@ -455,11 +415,7 @@ class CancelInvoice(Task, TaskCompute):
     __tablename__ = 'cancelinvoice'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
-    id = Column(
-        Integer,
-        ForeignKey('task.id'),
-        info={'colanderalchemy': forms.get_hidden_field_conf()},
-        primary_key=True)
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
     invoice_id = Column(
         Integer,
@@ -467,7 +423,6 @@ class CancelInvoice(Task, TaskCompute):
         info={
             'colanderalchemy': {
                 'title': u"Identifiant de la facture associée",
-                'missing': colander.required,
             }
         },
         default=None
@@ -475,22 +430,13 @@ class CancelInvoice(Task, TaskCompute):
 
     financial_year = Column(
         Integer,
-        info={
-            'colanderalchemy': {
-                'title': u"Année fiscale de référence",
-                'widget': deform.widget.TextInputWidget(mask='9999'),
-            }
-        },
+        info={'colanderalchemy': {'title': u"Année fiscale de référence"}},
         default=0
     )
     exported = deferred(
         Column(
             Boolean(),
-            info={
-                'colanderalchemy': {
-                    "title": "A déjà été exportée ?",
-                }
-            },
+            info={'colanderalchemy': {"title": "A déjà été exportée ?"}},
             default=False
         ),
         group="edit"
@@ -588,87 +534,41 @@ class Payment(DBBASE, PersistentACLMixin):
 
     mode = Column(
         String(50),
-        info={
-            'colanderalchemy': {
-                'title': u"Mode de paiement",
-                'validator': forms.get_deferred_select_validator(
-                    PaymentMode, id_key='label'
-                ),
-                'missing': colander.required,
-            }
-        }
+        info={'colanderalchemy': {'title': u"Mode de paiement"}}
     )
     amount = Column(
         BigInteger(),
-        info={
-            'colanderalchemy': {
-                "title": u"Montant",
-                'missing': colander.required,
-                "typ": AmountType(5)
-            }
-        },
+        info={'colanderalchemy': {"title": u"Montant"}},
 
     )
     remittance_amount = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Identifiant de remise en banque",
-                'missing': colander.required,
-            }
-        },
+        info={'colanderalchemy': {'title': u"Identifiant de remise en banque"}},
     )
     date = Column(
         DateTime(),
-        info={
-            'colanderalchemy': {
-                'title': u"Date de remise",
-                'missing': colander.required,
-            }
-        },
+        info={'colanderalchemy': {'title': u"Date de remise"}},
         default=datetime.datetime.now,
     )
     exported = Column(Boolean(), default=False)
     task_id = Column(
         Integer,
         ForeignKey('task.id', ondelete="cascade"),
-        info={
-            'colanderalchemy': {
-                'title': u"Identifiant du document",
-                'missing': colander.required,
-            }
-        }
+        info={'colanderalchemy': {'title': u"Identifiant du document"}},
     )
     bank_id = Column(
         ForeignKey('bank_account.id'),
-        info={
-            'colanderalchemy': {
-                'title': u"Compte en banque",
-                'missing': colander.required,
-                'validator': forms.get_deferred_select_validator(BankAccount),
-            }
-        }
+        info={'colanderalchemy': {'title': u"Compte en banque"}},
     )
     tva_id = Column(
         ForeignKey('tva.id'),
-        info={
-            'colanderalchemy': {
-                'title': u"Tva associée à ce paiement",
-                'validator': forms.get_deferred_select_validator(Tva),
-                'missing': colander.drop,
-            }
-        },
+        info={'colanderalchemy': {'title': u"Tva associée à ce paiement"}},
         nullable=True
     )
 
     user_id = Column(
         ForeignKey('accounts.id'),
-        info={
-            'colanderalchemy': {
-                'title': u"Utilisateur",
-                'missing': colander.required,
-            }
-        },
+        info={'colanderalchemy': {'title': u"Utilisateur"}},
     )
 
     user = relationship(

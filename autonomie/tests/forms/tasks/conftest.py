@@ -104,3 +104,27 @@ def invoice(
     dbsession.add(invoice)
     dbsession.flush()
     return invoice
+
+
+@pytest.fixture
+def cancelinvoice(
+    dbsession,
+    tva,
+    unity,
+    project,
+    customer,
+    company,
+    user,
+    phase,
+):
+    from autonomie.models.task.invoice import CancelInvoice
+    cancelinvoice = CancelInvoice(
+        company=company,
+        project=project,
+        customer=customer,
+        phase=phase,
+        user=user,
+    )
+    dbsession.add(cancelinvoice)
+    dbsession.flush()
+    return cancelinvoice

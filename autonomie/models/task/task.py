@@ -59,11 +59,10 @@ from autonomie_base.models.base import (
 from autonomie import forms
 from autonomie.forms.custom_types import (AmountType, QuantityType,)
 from autonomie.forms.tasks.base import (
-    taskline_after_bind,
     task_after_bind,
 )
 
-from autonomie.models.user import get_deferred_user_choice
+#from autonomie.forms.user import get_deferred_user_choice
 
 from autonomie.utils.strings import (
     format_status_string,
@@ -159,41 +158,24 @@ class Task(Node):
     id = Column(
         Integer,
         ForeignKey('node.id'),
-        info={
-            'colanderalchemy': {
-                'exclude': deform.widget.HiddenWidget()
-            },
-            'export': forms.EXCLUDED
-        },
+        info={'export': forms.EXCLUDED},
         primary_key=True,
     )
     phase_id = Column(
         ForeignKey('phase.id'),
-        info={
-            'colanderalchemy': forms.EXCLUDED,
-            "export": forms.EXCLUDED,
-        },
+        info={"export": forms.EXCLUDED},
     )
     status = Column(
         String(10),
         info={
-            'colanderalchemy': {
-                'title': u"Statut",
-                'widget': deform.widget.SelectWidget(
-                    values=zip(ALL_STATES, ALL_STATES)
-                ),
-                "validator": colander.OneOf(ALL_STATES),
-            },
+            'colanderalchemy': {'title': u"Statut"},
             'export': forms.EXCLUDED
         }
     )
     status_comment = Column(
         Text,
         info={
-            "colanderalchemy": {
-                "title": u"Commentaires",
-                'widget': deform.widget.TextAreaWidget()
-            },
+            "colanderalchemy": {"title": u"Commentaires"},
             'export': forms.EXCLUDED
         },
         default="",
@@ -203,7 +185,6 @@ class Task(Node):
         info={
             'colanderalchemy': {
                 "title": u"Dernier utilisateur à avoir modifié le document",
-                'widget': get_deferred_user_choice()
             },
             "export": forms.EXCLUDED,
         },
@@ -220,39 +201,23 @@ class Task(Node):
     )
     date = Column(
         Date(),
-        info={
-            "colanderalchemy": {
-                "title": u"Date du document",
-                "missing": colander.required
-            }
-        },
+        info={"colanderalchemy": {"title": u"Date du document"}},
         default=datetime.date.today
     )
     owner_id = Column(
         ForeignKey('accounts.id'),
         info={
-            'colanderalchemy': forms.EXCLUDED,
             "export": forms.EXCLUDED,
         },
     )
     description = Column(
         Text,
-        info={
-            'colanderalchemy': {
-                "title": u"Objet",
-                'widget': deform.widget.TextAreaWidget(),
-                'validator': forms.textarea_node_validator,
-                'missing': colander.required,
-            }
-        },
+        info={'colanderalchemy': {"title": u"Objet"}},
     )
     ht = Column(
         BigInteger(),
         info={
-            'colanderalchemy': {
-                "title": u"Montant HT (cache)",
-                "typ": AmountType(5),
-            },
+            'colanderalchemy': {"title": u"Montant HT (cache)"},
             'export': forms.EXCLUDED,
         },
         default=0
@@ -260,10 +225,7 @@ class Task(Node):
     tva = Column(
         BigInteger(),
         info={
-            'colanderalchemy': {
-                "title": u"Montant TVA (cache)",
-                "typ": AmountType(5),
-            },
+            'colanderalchemy': {"title": u"Montant TVA (cache)"},
             'export': forms.EXCLUDED,
         },
         default=0
@@ -271,10 +233,7 @@ class Task(Node):
     ttc = Column(
         BigInteger(),
         info={
-            'colanderalchemy': {
-                "title": u"Montant TTC (cache)",
-                "typ": AmountType(5),
-            },
+            'colanderalchemy': {"title": u"Montant TTC (cache)"},
             'export': forms.EXCLUDED,
         },
         default=0
@@ -283,7 +242,6 @@ class Task(Node):
         Integer,
         ForeignKey('company.id'),
         info={
-            'colanderalchemy': forms.EXCLUDED,
             'export': forms.EXCLUDED,
         },
     )
@@ -291,7 +249,6 @@ class Task(Node):
         Integer,
         ForeignKey('project.id'),
         info={
-            'colanderalchemy': forms.EXCLUDED,
             'export': forms.EXCLUDED,
         },
     )
@@ -299,7 +256,6 @@ class Task(Node):
         Integer,
         ForeignKey('customer.id'),
         info={
-            'colanderalchemy': forms.EXCLUDED,
             'export': forms.EXCLUDED,
         },
     )
@@ -367,27 +323,11 @@ class Task(Node):
         group='edit'
     )
 
-    # Not used in latest invoices
-    expenses = deferred(
-        Column(
-            BigInteger(),
-            info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': forms.EXCLUDED,
-            },
-            default=0
-        ),
-        group='edit'
-    )
-
     expenses_ht = deferred(
         Column(
             BigInteger(),
             info={
-                'colanderalchemy': {
-                    'typ': AmountType(5),
-                    'title': u'Frais',
-                },
+                'colanderalchemy': {'title': u'Frais'},
                 'export': forms.EXCLUDED,
             },
             default=0
@@ -399,12 +339,7 @@ class Task(Node):
             Text,
             default="",
             info={
-                'colanderalchemy': {
-                    'title': u'Adresse',
-                    'widget': deform.widget.TextAreaWidget(),
-                    'validator': forms.textarea_node_validator,
-                    'missing': colander.required,
-                },
+                'colanderalchemy': {'title': u'Adresse'},
                 'export': forms.EXCLUDED,
             },
         ),
@@ -415,10 +350,7 @@ class Task(Node):
             Text,
             default='',
             info={
-                'colanderalchemy': {
-                    'title': u"Lieu d'éxécution des travaux",
-                    'widget': deform.widget.TextAreaWidget(),
-                }
+                'colanderalchemy': {'title': u"Lieu d'éxécution des travaux"},
             }
         )
     )
@@ -428,9 +360,6 @@ class Task(Node):
             info={
                 'colanderalchemy': {
                     "title": u"Conditions de paiement",
-                    'widget': deform.widget.TextAreaWidget(),
-                    'validator': forms.textarea_node_validator,
-                    'missing': colander.required,
                 },
                 'export': forms.EXCLUDED,
             },
@@ -574,12 +503,7 @@ class Task(Node):
         secondary=TASK_MENTION,
         order_by="TaskMention.order",
         back_populates="tasks",
-        info={
-            'colanderalchemy': {
-                'children': forms.get_sequence_child_item(TaskMention),
-            },
-            'export': forms.EXCLUDED,
-        },
+        info={'export': forms.EXCLUDED},
     )
 
     line_groups = relationship(
@@ -611,6 +535,18 @@ class Task(Node):
             'colanderalchemy': forms.EXCLUDED,
             'export': forms.EXCLUDED,
         }
+    )
+
+    # Not used in latest invoices
+    expenses = deferred(
+        Column(
+            BigInteger(),
+            info={
+                'export': forms.EXCLUDED,
+            },
+            default=0
+        ),
+        group='edit'
     )
 
     _name_tmpl = u"Task {}"
@@ -813,7 +749,6 @@ class DiscountLine(DBBASE, DiscountLineCompute):
         Integer,
         primary_key=True,
         nullable=False,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
     )
     task_id = Column(
         Integer,
@@ -825,7 +760,6 @@ class DiscountLine(DBBASE, DiscountLineCompute):
         info={
             'colanderalchemy': {
                 'title': u"Identifiant du document",
-                'missing': colander.required,
             }
         }
     )
@@ -943,18 +877,13 @@ class TaskLineGroup(DBBASE, GroupCompute):
     Group of lines
     """
     __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
-    )
+    id = Column(Integer, primary_key=True)
     task_id = Column(
         Integer,
         ForeignKey('task.id', ondelete="cascade"),
         info={
             'colanderalchemy': {
                 'title': u"Identifiant du document",
-                'missing': colander.required,
             }
         }
     )
@@ -976,10 +905,6 @@ class TaskLineGroup(DBBASE, GroupCompute):
         info={
             'colanderalchemy': {
                 'title': u"Prestations",
-                'validator': colander.Length(
-                    min=1,
-                    min_err=u"Une prestation au moins doit être incluse",
-                )
             }
         }
     )
@@ -1026,30 +951,10 @@ class TaskLineGroup(DBBASE, GroupCompute):
         return result
 
 
-def tva_product_validator(node, value):
-    product_id = value.get('product_id')
-    if product_id is not None:
-        tva_id = value.get('tva_id')
-        if tva_id is not None:
-            tva = Tva.get(tva_id)
-            if product_id not in [p.id for p in tva.products]:
-                exc = colander.Invalid(
-                    node,
-                    u"Ce produit ne correspond pas à la TVA configurée"
-                )
-                exc['product_id'] = u"Le code produit doit correspondre à la \
-                    TVA configurée pour cette prestation"
-                raise exc
-
-
 class TaskLine(DBBASE, LineCompute):
     """
         Estimation/Invoice/CancelInvoice lines
     """
-    __colanderalchemy_config__ = {
-        'validator': tva_product_validator,
-        'after_bind': taskline_after_bind,
-    }
     __table_args__ = default_table_args
     id = Column(
         Integer,
@@ -1062,27 +967,12 @@ class TaskLine(DBBASE, LineCompute):
         info={'colanderalchemy': forms.EXCLUDED}
     )
     order = Column(Integer, default=1,)
-    description = Column(
-        Text,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.RichTextWidget(
-                    options={
-                        'language': "fr_FR",
-                        'content_css': "/fanstatic/fanstatic/css/richtext.css",
-                    },
-                ),
-                'validator': forms.textarea_node_validator,
-            }
-        },
-    )
+    description = Column(Text)
     cost = Column(
         BigInteger(),
         info={
             'colanderalchemy': {
-                'typ': AmountType(5),
                 'title': 'Montant',
-                'missing': colander.required,
             }
         },
         default=0,
@@ -1090,50 +980,23 @@ class TaskLine(DBBASE, LineCompute):
     quantity = Column(
         Float(),
         info={
-            'colanderalchemy': {
-                "title": u"Quantité",
-                'typ': QuantityType(),
-                'missing': colander.required,
-            }
+            'colanderalchemy': {"title": u"Quantité"}
         },
         default=1
     )
     unity = Column(
         String(100),
         info={
-            'colanderalchemy': {
-                'title': u"Unité",
-                'validator': forms.get_deferred_select_validator(
-                    WorkUnit, id_key='label',
-                ),
-                'missing': colander.drop,
-            }
+            'colanderalchemy': {'title': u"Unité"}
         },
     )
     tva = Column(
         Integer,
-        info={
-            'colanderalchemy': {
-                'typ': AmountType(2),
-                'title': 'Tva (en %)',
-                'validator': forms.get_deferred_select_validator(
-                    Tva, id_key='value'
-                ),
-                'missing': colander.required
-            }
-        },
+        info={'colanderalchemy': {'title': 'Tva (en %)'}},
         nullable=False,
         default=2000
     )
-    product_id = Column(
-        Integer,
-        info={
-            'colanderalchemy': {
-                'validator': forms.get_deferred_select_validator(Product),
-                'missing': colander.drop,
-            }
-        }
-    )
+    product_id = Column(Integer)
     group = relationship(
         TaskLineGroup,
         primaryjoin="TaskLine.group_id==TaskLineGroup.id",

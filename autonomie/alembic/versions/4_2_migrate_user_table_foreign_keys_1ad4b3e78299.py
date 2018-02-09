@@ -116,6 +116,7 @@ def clean_database():
     op.drop_column("accounts", "login")
     op.drop_column("accounts", "password")
     op.drop_column("accounts", "active")
+    op.drop_column('invoice', 'deposit')
 
 
 def upgrade():

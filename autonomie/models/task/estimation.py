@@ -111,22 +111,13 @@ class Estimation(Task, EstimationCompute):
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
-        info={
-            'colanderalchemy': {
-                "exclude": True,
-                'widget': deform.widget.HiddenWidget(),
-                "missing": colander.drop,
-            }
-        },
     )
     signed_status = Column(
         String(10),
         default='waiting',
         info={
             'colanderalchemy': {
-                'widget': deform.widget.SelectWidget(values=ESTIMATION_STATES),
                 'title': u'Statut du devis',
-                "validator": colander.OneOf([i[0] for i in ESTIMATION_STATES])
             }
         }
     )
@@ -134,9 +125,7 @@ class Estimation(Task, EstimationCompute):
         Boolean(),
         default=False,
         info={
-            'colanderalchemy': {
-                "title": u"Factures générées ?",
-            }
+            'colanderalchemy': {"title": u"Factures générées ?"},
         }
     )
 
@@ -144,15 +133,7 @@ class Estimation(Task, EstimationCompute):
     deposit = Column(
         Integer,
         info={
-            'colanderalchemy': {
-                'title': u'Accompte (en %)',
-                "validator": colander.Range(
-                    0,
-                    100,
-                    min_err=u"Ce nombre n'est pas compris en 0 et 100",
-                    max_err=u"Ce nombre n'est pas compris en 0 et 100",
-                )
-            }
+            'colanderalchemy': {'title': u'Accompte (en %)'},
         },
         default=0
     )
@@ -161,9 +142,7 @@ class Estimation(Task, EstimationCompute):
             Integer,
             nullable=False,
             info={
-                'colanderalchemy': {
-                    'title': u"Concerne une formation ?"
-                }
+                'colanderalchemy': {'title': u"Concerne une formation ?"}
             },
             default=0
         ),
@@ -194,14 +173,7 @@ class Estimation(Task, EstimationCompute):
         Column(
             String(20),
             info={
-                'colanderalchemy': {
-                    'title': u"Affichage des paiements",
-                    'widget': deform.widget.SelectWidget(
-                        values=PAYMENTDISPLAYCHOICES),
-                    'validator': colander.OneOf(
-                        [i[0] for i in PAYMENTDISPLAYCHOICES]
-                    )
-                }
+                'colanderalchemy': {'title': u"Affichage des paiements"},
             },
             default=PAYMENTDISPLAYCHOICES[0][0]
         ),
@@ -214,14 +186,7 @@ class Estimation(Task, EstimationCompute):
         back_populates='task',
         collection_class=ordering_list('order'),
         info={
-            'colanderalchemy': {
-                'title': u"Échéances de paiement",
-                "validator": colander.Length(
-                    min=1,
-                    min_err="Au moins un paiement est requis"
-                ),
-                "missing": colander.required,
-            },
+            'colanderalchemy': {'title': u"Échéances de paiement"},
         }
     )
     invoices = relationship(
@@ -563,7 +528,6 @@ class PaymentLine(DBBASE):
         Integer,
         primary_key=True,
         nullable=False,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}}
     )
     task_id = Column(
         Integer,
@@ -571,7 +535,6 @@ class PaymentLine(DBBASE):
         info={
             'colanderalchemy': {
                 'title': u"Identifiant du document",
-                'missing': colander.required,
             }
         },
     )
@@ -582,30 +545,15 @@ class PaymentLine(DBBASE):
     )
     description = Column(
         Text,
-        info={
-            'colanderalchemy': {
-                'title': u"Description",
-                'validator': forms.textarea_node_validator,
-            }
-        },
+        info={'colanderalchemy': {'title': u"Description"}},
     )
     amount = Column(
         BigInteger(),
-        info={
-            'colanderalchemy': {
-                'title': u"Montant",
-                'typ': AmountType(5),
-                'missing': colander.required,
-            }
-        },
+        info={'colanderalchemy': {'title': u"Montant"}},
     )
     date = Column(
         Date(),
-        info={
-            'colanderalchemy': {
-                "title": u"Date",
-            }
-        },
+        info={'colanderalchemy': {"title": u"Date"}},
         default=datetime.date.today
     )
     task = relationship(

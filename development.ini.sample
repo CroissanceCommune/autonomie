@@ -98,8 +98,8 @@ pyramid_deform.tempdir= %(here)s/tmp/tempdir
 [celery]
 BROKER_URL = redis://localhost:6379/0
 CELERY_IMPORTS =
-    autonomie.celery.tasks.export
-    autonomie.celery.schedulers
+    autonomie_celery.tasks.export
+    autonomie_celery.schedulers
 
 CELERY_TASK_SERIALIZER = json
 #CELERYD_HIJACK_ROOT_LOGGER = False

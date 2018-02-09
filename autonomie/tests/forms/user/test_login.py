@@ -27,7 +27,7 @@ def test_password_change_schema(login, pyramid_request):
         )
 
 
-def test_add_schema(dbsession, pyramid_request, login):
+def test_add_schema(dbsession, pyramid_request, login, groups):
     import colander
     from autonomie.forms.user.login import get_add_edit_schema
 
@@ -74,7 +74,7 @@ def test_add_schema(dbsession, pyramid_request, login):
         )
 
 
-def test_edit_schema(dbsession, pyramid_request, login, user):
+def test_edit_schema(dbsession, pyramid_request, login, user, groups):
     import colander
     from autonomie.forms.user.login import get_add_edit_schema
     from autonomie.models.user.login import Login

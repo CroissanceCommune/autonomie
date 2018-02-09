@@ -233,9 +233,6 @@ def content(connection, settings):
     adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
-    from autonomie.models import populate
-    populate.populate_database()
-
     commit()
 
 
@@ -334,6 +331,18 @@ def app(wsgi_app):
 
 
 # Common Models fixtures
+@fixture
+def groups(dbsession):
+    from autonomie.models.user.group import Group
+    groups = []
+    for name in ('contractor', 'manager', 'admin'):
+        group = Group(name=name, label=name)
+        dbsession.add(group)
+        dbsession.flush()
+        groups.append(group)
+    return groups
+
+
 @fixture
 def tva(dbsession):
     from autonomie.models.tva import Tva

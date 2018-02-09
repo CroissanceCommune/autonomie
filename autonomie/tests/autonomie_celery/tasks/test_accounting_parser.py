@@ -13,7 +13,7 @@ def test_get_file_path_from_pool():
     )
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
     result = _get_file_path_from_pool(path)
-    assert result is not None
+    assert os.path.basename(result).startswith('analytical_balance_') or os.path.basename(result).startswith('general_ledger_')
     result = _get_file_path_from_pool(os.path.join(path, 'unnexistingdir'))
     assert result is None
 

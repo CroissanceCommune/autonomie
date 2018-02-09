@@ -382,7 +382,7 @@ class WorkshopListTools(object):
         Filter the workshops for which timeslots have not been filled
         """
         notfilled = appstruct.get('notfilled')
-        if notfilled not in (None, colander.null):
+        if notfilled not in (None, colander.null, False):
             logger.debug(u"Filtering the workshop that where not filled")
             attendance_query = DBSESSION().query(distinct(Attendance.event_id))
             attendance_query = attendance_query.filter(

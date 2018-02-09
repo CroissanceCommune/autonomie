@@ -49,7 +49,7 @@ setup(
     install_requires=install_reqs,
     tests_require=['pytest', 'WebTest', "Mock"],
     extras_require={
-        'dev': ['libsass', 'sphinx'],
+        'dev': ['libsass', 'sphinx', 'pyramid_debugtoolbar'],
     },
     setup_requires=[],
     test_suite="autonomie.tests",

@@ -325,8 +325,11 @@ class RestExpenseSheetView(BaseRestView):
         query = query.filter_by(year=self.context.year)
 
         if self.context.user.vehicle and '-' in self.context.user.vehicle:
-            label, code = self.context.user.vehicle.split('-')
-            query = query.filter_by(label=label).filter_by(code=code)
+            splitted = self.context.user.vehicle.split('-')
+            label = splitted[0]
+            if len(splitted) > 1:
+                code = "-".join(splitted[1:])
+                query = query.filter_by(label=label).filter_by(code=code)
 
         return [i[0] for i in query]
 

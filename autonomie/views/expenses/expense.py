@@ -26,16 +26,13 @@
     Expense handling view
 """
 import logging
-import colander
-
 from pyramid.httpexceptions import (
     HTTPFound,
 )
 
 from autonomie.forms.expense import (
-    PeriodSelectSchema,
     ExpensePaymentSchema,
-    get_new_expense_schema,
+    get_add_edit_sheet_schema,
 )
 from autonomie.utils import strings
 from autonomie.models.company import Company
@@ -72,20 +69,6 @@ from autonomie.views.files import (
 
 
 logger = logging.getLogger(__name__)
-
-
-def get_period(request):
-    """
-        Return the period configured in the current request
-    """
-    schema = PeriodSelectSchema().bind(request=request)
-    try:
-        appstruct = schema.deserialize(request.GET)
-    except colander.Invalid:
-        appstruct = schema.deserialize({})
-    year = appstruct['year']
-    month = appstruct['month']
-    return year, month
 
 
 def get_expense_sheet(year, month, cid, uid):
@@ -173,7 +156,7 @@ class ExpenseSheetAddView(BaseFormView):
     """
     A simple expense sheet add view
     """
-    schema = get_new_expense_schema()
+    schema = get_add_edit_sheet_schema()
 
     def before(self, form):
         populate_actionmenu(self.request)
@@ -215,7 +198,6 @@ class ExpenseSheetAddView(BaseFormView):
     def submit_failure(self, e):
         errors = e.error.asdict()
         if 'month' in errors and 'year' in errors:
-            print("Trying to find the datas")
             appstruct = self.request.POST
             sheet = self._find_existing(appstruct)
             if sheet is not None:
@@ -299,7 +281,7 @@ class ExpenseSheetDeleteView(BaseView):
 
 class ExpenseSheetDuplicateView(BaseFormView):
     form_options = (('formid', 'duplicate_form'),)
-    schema = get_new_expense_schema()
+    schema = get_add_edit_sheet_schema()
 
     @property
     def title(self):

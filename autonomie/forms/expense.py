@@ -28,13 +28,27 @@
     * period selection
     * expenseline configuration
 """
+import datetime
 import colander
 import deform
+import functools
 
+from sqlalchemy import distinct
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.models import user
-from autonomie.models.task.invoice import get_invoice_years
+from autonomie.utils import strings
+from autonomie.models.expense.sheet import (
+    ExpenseSheet,
+    get_expense_years,
+    ExpenseLine,
+    ExpenseKmLine,
+)
+
+from autonomie.models.expense.types import (
+    ExpenseType,
+    ExpenseKmType
+)
+from autonomie.forms.user import user_node
 from .custom_types import AmountType
 from autonomie import forms
 from autonomie.forms.payments import (
@@ -61,144 +75,55 @@ STATUS_OPTIONS = (
 @colander.deferred
 def deferred_type_id_validator(node, kw):
     """
-        Return a validator for the expensetype
+    deferred Expensetype id validator
     """
     from autonomie.models.expense.types import ExpenseType
     ids = [t.id for t in ExpenseType.query()]
     return colander.OneOf(ids)
 
 
-class PeriodSelectSchema(colander.MappingSchema):
-    year = forms.year_select_node(query_func=get_invoice_years)
-    month = forms.month_select_node(title=u'')
-
-
-class ExpenseStatusSchema(colander.MappingSchema):
-    comment = colander.SchemaNode(
-        colander.String(),
-        widget=deform.widget.TextAreaWidget(cols=80, rows=2),
-        title=u"Communication avec la CAE",
-        description=u"Message à destination des membres de la CAE qui \
-        valideront votre feuille de notes de dépense",
-        missing=colander.drop,
-        default=u"",
-    )
-
-
-class BaseLineSchema(colander.MappingSchema):
+@colander.deferred
+def deferred_unique_expense(node, kw):
     """
-        Base Expenseline schema
+    Return a validator to check if the expense is unique
     """
-    date = forms.today_node(missing=forms.deferred_today)
-    category = colander.SchemaNode(
-        colander.String(),
-        validator=colander.OneOf(('1', '2'))
-        )
-    description = colander.SchemaNode(colander.String(), missing=u'')
-    valid = colander.SchemaNode(colander.Boolean(), missing=False)
-    type_id = colander.SchemaNode(
-        colander.Integer(),
-        validator=deferred_type_id_validator,
-        )
+    from autonomie.models.expense.sheet import ExpenseSheet
+    request = kw['request']
+    if isinstance(request.context, ExpenseSheet):
+        company_id = request.context.company_id
+        user_id = request.context.user_id
+    else:
+        if 'uid' in request.matchdict:
+            user_id = request.matchdict['uid']
+        else:
+            user_id = request.user.id
 
+        company_id = request.context.id
 
-class ExpenseKmLineSchema(BaseLineSchema):
-    """
-        Expense line schema for kilometric fees
-    """
-    start = colander.SchemaNode(colander.String(), missing=u"")
-    end = colander.SchemaNode(colander.String(), missing=u"")
-    km = colander.SchemaNode(AmountType())
+    def validator(node, value):
+        """
+        The validator
+        """
+        month = value['month']
+        year = value['year']
 
-
-class ExpenseLineSchema(BaseLineSchema):
-    """
-        Expense line schema, validates the different expense line schemes
-    """
-    ht = colander.SchemaNode(AmountType())
-    tva = colander.SchemaNode(AmountType())
-
-
-class ExpenseLineSchemaAddon(ExpenseLineSchema):
-    id = colander.SchemaNode(colander.Integer())
-
-
-class ExpenseLinesSchema(colander.SequenceSchema):
-    line = ExpenseLineSchemaAddon()
-
-
-class ExpenseKmLineSchemaAddon(ExpenseKmLineSchema):
-    id = colander.SchemaNode(colander.Integer())
-
-
-class ExpenseKmLinesSchema(colander.SequenceSchema):
-    line = ExpenseKmLineSchemaAddon()
-
-
-class ExpenseSheetSchema(ExpenseStatusSchema):
-    lines = ExpenseLinesSchema()
-    kmlines = ExpenseKmLinesSchema()
-
-
-class BookMarkSchema(colander.MappingSchema):
-    """
-        Schema for bookmarks
-    """
-    type_id = colander.SchemaNode(
-        colander.Integer(),
-        validator=deferred_type_id_validator
-    )
-    description = colander.SchemaNode(
-        colander.String(),
-        missing=u"",
-    )
-    ht = colander.SchemaNode(colander.Float())
-    tva = colander.SchemaNode(colander.Float())
-
-
-def get_list_schema():
-    from autonomie.models.expense.sheet import get_expense_years
-
-    schema = forms.lists.BaseListsSchema().clone()
-
-    schema['search'].description = u"Identifiant du document"
-
-    schema.insert(0, colander.SchemaNode(
-        colander.String(),
-        name=u'status',
-        widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
-        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
-        missing='all',
-        default='all',
-    ))
-
-    schema.insert(0, forms.year_select_node(
-        name='year',
-        title=u"Année",
-        query_func=get_expense_years,
-    ))
-
-    schema.insert(0, forms.month_select_node(
-        title=u"Mois",
-        missing=-1,
-        default=-1,
-        name='month',
-        widget_options={'default_val': (-1, '')},
-    ))
-
-    schema.insert(
-        0,
-        user.user_node(
-            title=u"Utilisateur",
-            missing=colander.drop,
-            name=u'owner_id',
-            widget_options={
-                'default_option': ('', u'Tous les entrepreneurs'),
-                'placeholder': u"Sélectionner un entrepreneur"},
-        )
-    )
-
-    return schema
+        query = ExpenseSheet.query().filter_by(month=month)
+        query = query.filter_by(year=year)
+        query = query.filter_by(user_id=user_id)
+        query = query.filter_by(company_id=company_id)
+        if query.count() > 0:
+            exc = colander.Invalid(
+                node,
+                u"Une note de dépense pour la période {0} {1} existe "
+                u"déjà".format(
+                    strings.month_name(month),
+                    year,
+                )
+            )
+            exc['month'] = u"Une note de dépense existe"
+            exc['year'] = u"Une note de dépense existe"
+            raise exc
+    return validator
 
 
 @colander.deferred
@@ -259,14 +184,157 @@ montant de feuille de notes de dépense celle-ci est soldée automatiquement""",
     )
 
 
-def get_new_expense_schema():
+def customize_schema(schema):
     """
-    Return a schema for expense add
+    Add custom field configuration to the schema
+
+    :param obj schema: colander Schema
+    """
+    schema.validator = deferred_unique_expense
+    customize = functools.partial(forms.customize_field, schema)
+    customize(
+        'month',
+        widget=forms.get_month_select_widget({}),
+        validator=colander.OneOf(range(1, 13)),
+        default=forms.default_month,
+        missing=colander.required,
+    )
+    customize(
+        'year',
+        widget=forms.get_year_select_deferred(
+            query_func=get_expense_years
+        ),
+        validator=colander.Range(
+            min=0, min_err=u"Veuillez saisir une année valide"
+        ),
+        default=forms.default_year,
+        missing=colander.required,
+    )
+
+
+def get_add_edit_sheet_schema():
+    """
+    Return a schema for expense add/edit
+
+    Only month and year are available for edition
 
     :rtype: colanderalchemy.SQLAlchemySchemaNode
     """
     from autonomie.models.expense.sheet import ExpenseSheet
-    return SQLAlchemySchemaNode(
+    schema = SQLAlchemySchemaNode(
         ExpenseSheet,
         includes=('month', 'year'),
     )
+    customize_schema(schema)
+    return schema
+
+
+def get_add_edit_line_schema(factory):
+    """
+    Build a schema for expense line
+
+    :param class model: The model for which we want to generate the schema
+    :rerturns: A SQLAlchemySchemaNode schema
+    """
+    excludes = ('sheet_id',)
+    schema = SQLAlchemySchemaNode(factory, excludes=excludes)
+
+    if factory == ExpenseLine:
+        forms.customize_field(
+            schema,
+            'type_id',
+            validator=forms.get_deferred_select_validator(
+                ExpenseType,
+                filters=[('type', 'expense')]
+            ),
+            missing=colander.required,
+        )
+    elif factory == ExpenseKmLine:
+        forms.customize_field(
+            schema,
+            'type_id',
+            validator=forms.get_deferred_select_validator(
+                ExpenseKmType,
+                filters=[('year', datetime.date.today().year)]
+            ),
+            missing=colander.required,
+        )
+
+    forms.customize_field(
+        schema,
+        'ht',
+        missing=colander.required,
+    )
+    forms.customize_field(
+        schema,
+        'tva',
+        missing=colander.required,
+    )
+    forms.customize_field(
+        schema,
+        'km',
+        missing=colander.required,
+    )
+    return schema
+
+
+class BookMarkSchema(colander.MappingSchema):
+    """
+        Schema for bookmarks
+    """
+    type_id = colander.SchemaNode(
+        colander.Integer(),
+        validator=deferred_type_id_validator
+    )
+    description = colander.SchemaNode(
+        colander.String(),
+        missing=u"",
+    )
+    ht = colander.SchemaNode(colander.Float())
+    tva = colander.SchemaNode(colander.Float())
+
+
+def get_list_schema():
+    """
+    Build a form schema for expensesheet listing
+    """
+    schema = forms.lists.BaseListsSchema().clone()
+
+    schema['search'].description = u"Identifiant du document"
+
+    schema.insert(0, colander.SchemaNode(
+        colander.String(),
+        name=u'status',
+        widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
+        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+        missing='all',
+        default='all',
+    ))
+
+    schema.insert(0, forms.year_select_node(
+        name='year',
+        title=u"Année",
+        query_func=get_expense_years,
+    ))
+
+    schema.insert(0, forms.month_select_node(
+        title=u"Mois",
+        missing=-1,
+        default=-1,
+        name='month',
+        widget_options={'default_val': (-1, '')},
+    ))
+
+    schema.insert(
+        0,
+        user_node(
+            title=u"Utilisateur",
+            missing=colander.drop,
+            name=u'owner_id',
+            widget_options={
+                'default_option': ('', u'Tous les entrepreneurs'),
+                'placeholder': u"Sélectionner un entrepreneur"},
+        )
+    )
+
+    return schema

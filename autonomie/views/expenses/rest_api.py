@@ -11,7 +11,6 @@ import traceback
 from sqlalchemy import (
     or_,
 )
-from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.httpexceptions import (
     HTTPForbidden,
 )
@@ -34,6 +33,8 @@ from autonomie.utils.rest import (
 )
 from autonomie.forms.expense import (
     BookMarkSchema,
+    get_add_edit_sheet_schema,
+    get_add_edit_line_schema,
 )
 
 from autonomie.events.expense import StatusChanged as ExpenseStatusChanged
@@ -55,29 +56,12 @@ class RestExpenseSheetView(BaseRestView):
 
     def get_schema(self, submitted):
         """
-        Return the schema for TaskLineGroup add/edition
+        Return the schema for ExpenseSheet add
 
         :param dict submitted: The submitted datas
         :returns: A colander.Schema
         """
-        if self.factory is None:
-            raise Exception("Child class should provide a factory attribute")
-        excludes = (
-            'status',
-            'status_user_id',
-            'user',
-            'company',
-            'children',
-            'parent',
-            'user_id',
-            'company_id',
-            "name"
-        )
-        schema = SQLAlchemySchemaNode(
-            self.factory,
-            excludes=excludes
-        )
-        return schema
+        return get_add_edit_sheet_schema()
 
     def post_format(self, entry, edit, attributes):
         """
@@ -425,9 +409,7 @@ class RestExpenseLineView(BaseRestView):
     Base rest view for expense line handling
     """
     def get_schema(self, submitted):
-        excludes = ('sheet_id',)
-        schema = SQLAlchemySchemaNode(ExpenseLine, excludes=excludes)
-        return schema
+        return get_add_edit_line_schema(ExpenseLine)
 
     def collection_get(self):
         return self.context.lines
@@ -467,8 +449,7 @@ class RestExpenseKmLineView(BaseRestView):
     Base rest view for expense line handling
     """
     def get_schema(self, submitted):
-        excludes = ('sheet_id',)
-        schema = SQLAlchemySchemaNode(ExpenseKmLine, excludes=excludes)
+        schema = get_add_edit_line_schema(ExpenseKmLine)
         return schema
 
     def collection_get(self):

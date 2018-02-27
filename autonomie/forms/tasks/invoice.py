@@ -752,7 +752,7 @@ def validate_invoice(invoice_object, request):
     except colander.Invalid as err:
         error_messages = err.messages
     """
-    schema = SQLAlchemySchemaNode(Invoice)
+    schema = get_add_edit_invoice_schema()
     schema = schema.bind(request=request)
     appstruct = invoice_object.__json__(request)
     cstruct = schema.deserialize(appstruct)
@@ -772,7 +772,7 @@ def validate_cancelinvoice(cancelinvoice_object, request):
     except colander.Invalid as err:
         error_messages = err.messages
     """
-    schema = SQLAlchemySchemaNode(CancelInvoice)
+    schema = get_add_edit_cancelinvoice_schema()
     schema = schema.bind(request=request)
     appstruct = cancelinvoice_object.__json__(request)
     cstruct = schema.deserialize(appstruct)

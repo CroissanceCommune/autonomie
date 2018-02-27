@@ -243,7 +243,7 @@ def validate_estimation(estimation_object, request):
     except colander.Invalid as err:
         error_messages = err.messages
     """
-    schema = get_add_edit_estimation_schema(Estimation)
+    schema = get_add_edit_estimation_schema()
     schema = schema.bind(request=request)
     appstruct = estimation_object.__json__(request)
     cstruct = schema.deserialize(appstruct)

@@ -12,7 +12,7 @@ from collections import OrderedDict
 from sqlalchemy import distinct, desc
 
 from autonomie_base.models.base import DBSESSION
-from autonomie.models.user import User
+from autonomie.models.user.user import User
 from autonomie.models.expense.sheet import ExpenseSheet
 from autonomie.models.expense.types import (
     ExpenseType,
@@ -25,7 +25,6 @@ from autonomie.utils.widgets import (
 from autonomie.resources import admin_expense_js
 from autonomie.forms.expense import (
     get_list_schema,
-    PeriodSelectSchema,
 )
 
 from autonomie.views import (

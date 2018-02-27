@@ -19,6 +19,8 @@ from autonomie.models.task import (
 from autonomie.forms.tasks.invoice import (
     validate_invoice,
     validate_cancelinvoice,
+    get_add_edit_invoice_schema,
+    get_add_edit_cancelinvoice_schema,
 )
 from autonomie.views.task.rest_api import (
     TaskRestView,
@@ -37,6 +39,16 @@ logger = logging.getLogger(__name__)
 
 class InvoiceRestView(TaskRestView):
     factory = Invoice
+
+    def get_schema(self, submitted):
+        """
+        Return the schema for Invoice add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('status', 'children', 'parent',)
+        return get_add_edit_invoice_schema(excludes=excludes)
 
     def _more_form_sections(self, sections):
         """
@@ -103,6 +115,16 @@ class InvoiceRestView(TaskRestView):
 
 class CancelInvoiceRestView(TaskRestView):
     factory = CancelInvoice
+
+    def get_schema(self, submitted):
+        """
+        Return the schema for CancelInvoice add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('status', 'children', 'parent',)
+        return get_add_edit_cancelinvoice_schema(excludes=excludes)
 
     def _more_form_sections(self, sections):
         """

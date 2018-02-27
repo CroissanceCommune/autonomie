@@ -19,6 +19,10 @@ from autonomie.models.sale_product import (
     SaleProductGroup,
     SaleProduct,
 )
+from autonomie.forms.tasks.task import (
+    get_add_edit_tasklinegroup_schema,
+    get_add_edit_taskline_schema,
+)
 from autonomie.views import BaseRestView
 from autonomie.views.task.utils import (
     json_tvas,
@@ -65,19 +69,12 @@ class TaskRestView(BaseRestView):
 
     def get_schema(self, submitted):
         """
-        Return the schema for TaskLineGroup add/edition
+        Return the schema for Task add/edition
 
         :param dict submitted: The submitted datas
         :returns: A colander.Schema
         """
-        if self.factory is None:
-            raise Exception("Child class should provide a factory attribute")
-        excludes = ('status', 'children', 'parent',)
-        schema = SQLAlchemySchemaNode(
-            self.factory,
-            excludes=excludes
-        )
-        return schema
+        raise Exception("Should be implemented in subclass")
 
     def form_config(self):
         """
@@ -258,8 +255,7 @@ class TaskLineGroupRestView(BaseRestView):
         :returns: A colander.Schema
         """
         excludes = ('task_id',)
-        schema = SQLAlchemySchemaNode(TaskLineGroup, excludes=excludes)
-        return schema
+        return get_add_edit_tasklinegroup_schema(excludes=excludes)
 
     def collection_get(self):
         """
@@ -334,8 +330,7 @@ class TaskLineRestView(BaseRestView):
         :returns: A colander.Schema
         """
         excludes = ('group_id',)
-        schema = SQLAlchemySchemaNode(TaskLine, excludes=excludes)
-        return schema
+        return get_add_edit_taskline_schema(excludes=excludes)
 
     def collection_get(self):
         return self.context.lines

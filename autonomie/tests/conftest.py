@@ -463,6 +463,25 @@ def customer(dbsession, company):
 
 
 @fixture
+def individual_customer(dbsession, company):
+    from autonomie.models.customer import Customer
+    customer = Customer(
+        code=u"CUST",
+        type_='individual',
+        civilite=u"mr&mme",
+        lastname=u"Lastname",
+        firstname=u"Firstname",
+        address=u"1th street",
+        zip_code=u"01234",
+        city=u"City",
+    )
+    customer.company = company
+    dbsession.add(customer)
+    dbsession.flush()
+    return customer
+
+
+@fixture
 def project(dbsession, company, customer):
     from autonomie.models.project import Project
     project = Project(name=u"Project")

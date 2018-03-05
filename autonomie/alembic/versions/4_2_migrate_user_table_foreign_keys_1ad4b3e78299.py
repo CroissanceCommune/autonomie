@@ -46,7 +46,7 @@ def update_database_structure():
     op.add_column(
         'user_groups',
         sa.Column(
-            'login_id', sa.Integer, sa.ForeignKey('Login.id')
+            'login_id', sa.Integer, sa.ForeignKey('login.id')
         )
     )
     op.add_column(

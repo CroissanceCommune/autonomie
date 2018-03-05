@@ -46,7 +46,7 @@ from autonomie.models.company import (
     Company,
     CompanyActivity,
 )
-from autonomie.models.user import User
+from autonomie.models.user.user import User
 from autonomie.utils.widgets import (
     ViewLink,
 )
@@ -91,60 +91,10 @@ def company_view(request):
     """
     company = request.context
     populate_actionmenu(request)
-    link_list = []
-    link_list.append(
-        ViewLink(
-            u"Voir les clients",
-            "view_company",
-            path="company_customers",
-            id=company.id,
-            icon='arrow-right'
-        )
+    return dict(
+        title=company.name.title(),
+        company=company,
     )
-
-    link_list.append(
-        ViewLink(
-            u"Voir les projets",
-            "view_company",
-            path="company_projects",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
-
-    link_list.append(
-        ViewLink(
-            u"Voir les factures",
-            "view_company",
-            path="company_invoices",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
-
-    link_list.append(
-        ViewLink(
-            u"Liste des rendez-vous",
-            "view_company",
-            path="company_activities",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
-
-    link_list.append(
-        ViewLink(
-            u"Liste des ateliers",
-            "manage",
-            path="company_workshops",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
-
-    return dict(title=company.name.title(),
-                company=company,
-                link_list=link_list)
 
 
 ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
@@ -389,7 +339,7 @@ def get_list_view_btn():
     """
         Return a link to the CAE's directory
     """
-    return ViewLink(u"Annuaire", "visit", path="users")
+    return ViewLink(u"Annuaire", "visit", path="/users")
 
 
 def get_view_btn(company_id):
@@ -397,6 +347,7 @@ def get_view_btn(company_id):
         Return a link to the view page
     """
     return ViewLink(u"Voir", "visit", path="company", id=company_id)
+
 
 def company_remove_employee_view(context, request):
     """

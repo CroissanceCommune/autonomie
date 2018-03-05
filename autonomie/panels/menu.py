@@ -226,7 +226,10 @@ def get_company_menu(request, cid, css=None):
 
     # C'est un entrepreneur
     if request.user.has_userdatas():
-        href = request.route_path('mydocuments', id=request.user.id)
+        href = request.route_path(
+            '/users/{id}/userdatas/mydocuments',
+            id=request.user.id
+        )
         docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
 
     menu.add(docs)
@@ -343,7 +346,7 @@ def get_admin_menus(request):
     menu.add(accompagnement)
 
     gestion_sociale = DropDown(label=u"Gestion sociale")
-    href = request.route_path('userdatas')
+    href = request.route_path('/userdatas')
     gestion_sociale.add_item(u"Consulter", href=href, icon="fa fa-users")
 
     href = request.route_path('statistics')
@@ -391,7 +394,10 @@ def get_usermenu(request):
         Return the user menu (My account, holidays ...)
     """
     menu = Menu()
-    href = request.route_path('account', id=request.user.id)
+    href = request.route_path(
+        '/users/{id}',
+        id=request.user.id,
+    )
     menu.add_item(u"Mon compte", icon='fa fa-cog', href=href)
 
     href = request.route_path('user_holidays', id=request.user.id)
@@ -428,7 +434,7 @@ def menu_panel(context, request):
             menu.insert(company_choice(request, companies, cid))
 
     if menu is not None:
-        href = request.route_path("users")
+        href = request.route_path("/users")
         menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
 
     return {

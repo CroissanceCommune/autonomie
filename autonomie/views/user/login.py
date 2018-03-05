@@ -49,6 +49,9 @@ class LoginAddView(BaseFormView):
     def submit_success(self, appstruct):
         password = appstruct.pop('pwd_hash')
         model = self.schema.objectify(appstruct)
+        groups = appstruct.pop('groups')
+        model.groups = groups
+
         model.user_id = self.context.id
         model.set_password(password)
         self.dbsession.add(model)
@@ -93,6 +96,8 @@ class LoginEditView(BaseFormView):
     def submit_success(self, appstruct):
         password = appstruct.pop('pwd_hash', None)
         model = self.schema.objectify(appstruct, self.current())
+        groups = appstruct.pop('groups')
+        model.groups = groups
         if password:
             model.set_password(password)
         self.dbsession.merge(model)
@@ -216,6 +221,7 @@ def add_views(config):
         route_name="/logins/{id}",
         request_param="action=activate",
         permission="edit.login",
+        layout='user'
     )
     config.add_view(
         LoginDeleteView,

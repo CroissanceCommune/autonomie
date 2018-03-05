@@ -53,7 +53,8 @@ class TestLoginAddView():
 
         appstruct = {
             'pwd_hash': 'password',
-            'login': 'test1@email.fr'
+            'login': 'test1@email.fr',
+            'groups': ['contractor'],
         }
 
         view = LoginAddView(req)
@@ -62,6 +63,7 @@ class TestLoginAddView():
         assert result.code == 302
         assert result.location == '/users/{0}'.format(user.id)
 
+        assert new_login.groups == ['contractor']
         assert new_login.auth('password')
 
     def test_submit_success_next_step(

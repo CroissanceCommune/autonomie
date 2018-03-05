@@ -393,7 +393,6 @@ class UserDatas(Node):
     )
     situation_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
-        nullable=False,
         info={
             'colanderalchemy':
             {

@@ -41,7 +41,7 @@ from autonomie.models.activity import (
 from autonomie.models.workshop import (
     Timeslot,
 )
-from autonomie.models.user import User
+from autonomie.forms.user.user import User
 
 from autonomie import resources
 

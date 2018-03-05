@@ -66,7 +66,7 @@ from autonomie.views import (
     DuplicateView,
     BaseRestView,
 )
-from autonomie.views.user import UserDatasCsvView
+from autonomie.views.userdatas.lists import UserDatasCsvView
 from autonomie.export.utils import write_file_to_request
 
 

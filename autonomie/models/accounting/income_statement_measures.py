@@ -215,7 +215,7 @@ class IncomeStatementMeasureType(DBBASE):
             category=category
         ).filter_by(active=True)
         query = query.first()
-        if query is not None:
+        if query is not None and query[0] is not None:
             result = query[0] + 1
         else:
             result = 0

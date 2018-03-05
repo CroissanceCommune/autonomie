@@ -17,9 +17,9 @@ from autonomie_base.models.base import DBSESSION
 from autonomie.models.accounting.operations import AccountingOperation
 from autonomie.models.accounting.treasury_measures import TreasuryMeasureGrid
 from autonomie.models.accounting.income_statement_measures import (
-    CATEGORIES,
     IncomeStatementMeasureGrid,
     IncomeStatementMeasureType,
+    IncomeStatementMeasureTypeCategory,
 )
 from autonomie.models.company import Company
 from autonomie import forms
@@ -210,9 +210,19 @@ def get_income_statement_measures_list_schema():
     return schema
 
 
+@colander.deferred
+def deferred_categories_widget(node, kw):
+    query = DBSESSION().query(
+        IncomeStatementMeasureTypeCategory.id,
+        IncomeStatementMeasureTypeCategory.label,
+    )
+    choices = query.filter_by(active=True).all()
+    return deform.widget.CheckboxChoiceWidget(values=choices)
+
+
 def get_admin_income_statement_measure_schema(total=False):
     """
-    Build the schema for income statement measure schema
+    Build the schema for income statement measure type edit/add
 
     Total types are more complex and can be :
 
@@ -223,7 +233,7 @@ def get_admin_income_statement_measure_schema(total=False):
         schema = SQLAlchemySchemaNode(
             IncomeStatementMeasureType,
             includes=(
-                "category",
+                "category_id",
                 'label',
                 "categories",
                 "account_prefix",
@@ -231,9 +241,7 @@ def get_admin_income_statement_measure_schema(total=False):
             ),
         )
         schema['categories'].typ = CsvTuple()
-        schema['categories'].widget = deform.widget.CheckboxChoiceWidget(
-            values=zip(CATEGORIES, CATEGORIES)
-        )
+        schema['categories'].widget = deferred_categories_widget
         schema['categories'].validator = colander.Length(min=1)
         schema['is_total'].widget = deform.widget.HiddenWidget()
         schema.add_before(
@@ -267,3 +275,13 @@ def get_admin_income_statement_measure_schema(total=False):
             excludes=('is_total', "categories")
         )
     return schema
+
+
+def get_admin_income_statement_category_schema():
+    """
+    Build the schema for income statement measure type category edition
+    """
+    return SQLAlchemySchemaNode(
+        IncomeStatementMeasureTypeCategory,
+        includes=("label", "order")
+    )

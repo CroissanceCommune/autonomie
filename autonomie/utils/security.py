@@ -103,6 +103,7 @@ from autonomie.models.accounting.treasury_measures import (
 )
 from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureType,
+    IncomeStatementMeasureTypeCategory,
     IncomeStatementMeasureGrid,
 )
 
@@ -182,6 +183,11 @@ class RootFactory(dict):
             'income_statement_measure_types',
             'income_statement_measure_type',
             IncomeStatementMeasureType,
+        ),
+        (
+            'income_statement_measure_categories',
+            'income_statement_measure_category',
+            IncomeStatementMeasureTypeCategory,
         ),
         ('timeslots', 'timeslot', Timeslot, ),
         ('tvas', 'tva', Tva,),
@@ -892,6 +898,7 @@ def set_models_acl():
     TreasuryMeasureType.__acl__ = property(get_base_acl)
     IncomeStatementMeasureGrid.__acl__ = property(get_accounting_measure_acl)
     IncomeStatementMeasureType.__acl__ = property(get_base_acl)
+    IncomeStatementMeasureTypeCategory.__acl__ = property(get_base_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     Workshop.__default_acl__ = property(get_event_acl)

@@ -24,12 +24,14 @@ import sys
 from pytest import fixture
 from paste.deploy.loadwsgi import appconfig
 from pyramid import testing
+from pyramid.interfaces import IRoutesMapper
 from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
 from autonomie import models
 
 from autonomie.utils.widgets import ActionMenu
+from autonomie.tests.tools import DummyRouteContext, DummyRoute
 
 HERE = os.path.dirname(__file__)
 DATASDIR = os.path.join(HERE, 'datas')
@@ -257,14 +259,17 @@ def dbsession(config, content, connection, request):
 
 
 @fixture
-def get_csrf_request(pyramid_request):
+def get_csrf_request(config, pyramid_request):
     """
     Build a testing request builder with a csrf token
 
     :returns: a function to be called with params/cookies/post optionnal
     arguments
     """
-    def func(params=None, cookies=None, post=None):
+    def func(
+        params=None, cookies=None, post=None,
+        current_route_name=None, current_route_path=None
+    ):
         params = params or {}
         post = post or {}
         params.update(post)
@@ -277,11 +282,25 @@ def get_csrf_request(pyramid_request):
         pyramid_request.json_body = post
         pyramid_request.cookies = cookies
         pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
-        pyramid_request.config = {}
+        pyramid_request.config = config
+        pyramid_request.registry = config.registry
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
+
+        if current_route_path:
+            if not current_route_name:
+                current_route_name = current_route_path
+
+            route = DummyRoute(
+                name=current_route_name, result=current_route_path
+            )
+            mapper = DummyRouteContext(route=route)
+            pyramid_request.matched_dict = {}
+            pyramid_request.matched_route = route
+            pyramid_request.registry.registerUtility(mapper, IRoutesMapper)
+
         return pyramid_request
     return func
 
@@ -294,7 +313,10 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
     :returns: a function to be called with params/cookies/post optionnal
     arguments
     """
-    def func(params=None, cookies=None, post=None):
+    def func(
+        params=None, cookies=None, post=None,
+        current_route_name=None, current_route_path=None
+    ):
         cookies = cookies or {}
         params = params or {}
         post = post or {}
@@ -313,6 +335,18 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         csrf_token.return_value = def_csrf
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
+
+        if current_route_path:
+            if not current_route_name:
+                current_route_name = current_route_path
+
+            route = DummyRoute(
+                name=current_route_name, result=current_route_path
+            )
+            mapper = DummyRouteContext(route=route)
+            pyramid_request.matched_dict = {}
+            pyramid_request.matched_route = route
+            pyramid_request.registry.registerUtility(mapper, IRoutesMapper)
         return pyramid_request
     return func
 
@@ -540,3 +574,15 @@ def userdatas(dbsession, user, cae_situation_option):
     dbsession.flush()
     user.userdatas = result
     return result
+
+
+@fixture
+def social_doctypes(dbsession):
+    from autonomie.models.user.userdatas import SocialDocTypeOption
+    options = []
+    for i in "Rib", "Permis":
+        option = SocialDocTypeOption(label=i)
+        dbsession.add(option)
+        dbsession.flush()
+        options.append(option)
+    return options

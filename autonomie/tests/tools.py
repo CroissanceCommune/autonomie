@@ -17,6 +17,19 @@ class Dummy(object):
             setattr(self, key, value)
 
 
+class DummyRoute(Dummy):
+    pregenerator = None
+
+    def generate(self, kw):
+        self.kw = kw
+        return self.result
+
+
+class DummyRouteContext(Dummy):
+    def get_route(self, route_name):
+        return self.route
+
+
 def check_acl(acl, permission, principals=()):
     """
     Test if the given acl list in the form

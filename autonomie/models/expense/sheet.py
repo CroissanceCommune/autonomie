@@ -21,8 +21,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import datetime
 import logging
-import colander
-import deform
 
 from beaker.cache import cache_region
 from sqlalchemy import (
@@ -46,7 +44,6 @@ from autonomie_base.models.base import (
     DBSESSION,
     default_table_args,
 )
-from autonomie.models.expense.types import ExpenseType
 from autonomie.models.expense.payment import ExpensePayment
 from autonomie.utils import strings
 from autonomie import forms
@@ -67,7 +64,6 @@ from autonomie.models.action_manager import (
     Action,
     ActionManager,
 )
-from autonomie.models.user import get_deferred_user_choice
 from autonomie.models.node import Node
 
 
@@ -80,21 +76,6 @@ PAID_STATES = (
     ('resulted', u"Payée"),
 )
 ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
-
-
-def get_available_years(*args, **kwargs):
-    """
-    Return the available years for ExpenseSheet creation
-    """
-    from autonomie.models.expense.sheet import ExpenseSheet
-    years = [i[0] for i in DBSESSION().query(distinct(ExpenseSheet.year))]
-    today = datetime.date.today()
-    for i in (today.year - 1, today.year, today.year + 1):
-        if i not in years:
-            years.append(i)
-
-    years.sort()
-    return years
 
 
 def _build_action_manager():
@@ -182,50 +163,6 @@ def _build_justified_state_manager():
     return manager
 
 
-@colander.deferred
-def deferred_unique_expense(node, kw):
-    """
-    Return a validator to check if the expense is unique
-    """
-    from autonomie.models.expense.sheet import ExpenseSheet
-    request = kw['request']
-    if isinstance(request.context, ExpenseSheet):
-        company_id = request.context.company_id
-        user_id = request.context.user_id
-    else:
-        if 'uid' in request.matchdict:
-            user_id = request.matchdict['uid']
-        else:
-            user_id = request.user.id
-
-        company_id = request.context.id
-
-    def validator(node, value):
-        """
-        The validator
-        """
-        month = value['month']
-        year = value['year']
-
-        query = ExpenseSheet.query().filter_by(month=month)
-        query = query.filter_by(year=year)
-        query = query.filter_by(user_id=user_id)
-        query = query.filter_by(company_id=company_id)
-        if query.count() > 0:
-            exc = colander.Invalid(
-                node,
-                u"Une note de dépense pour la période {0} {1} existe "
-                u"déjà".format(
-                    strings.month_name(month),
-                    year,
-                )
-            )
-            exc['month'] = u"Une note de dépense existe"
-            exc['year'] = u"Une note de dépense existe"
-            raise exc
-    return validator
-
-
 class ExpenseSheet(Node, ExpenseCompute):
     """
         Model representing a whole ExpenseSheet
@@ -243,9 +180,6 @@ class ExpenseSheet(Node, ExpenseCompute):
     __tablename__ = 'expense_sheet'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'expensesheet'}
-    __colanderalchemy_config__ = {
-        "validator": deferred_unique_expense
-    }
     id = Column(
         ForeignKey('node.id'),
         primary_key=True,
@@ -256,8 +190,6 @@ class ExpenseSheet(Node, ExpenseCompute):
         info={
             "colanderalchemy": {
                 "title": u"Mois",
-                "widget": forms.get_month_select_widget({}),
-                "validator": colander.OneOf(range(1, 13)),
                 "default": forms.default_month,
             }
         }
@@ -267,13 +199,6 @@ class ExpenseSheet(Node, ExpenseCompute):
         info={
             'colanderalchemy': {
                 "title": u"Année",
-                "widget": forms.get_year_select_deferred(
-                    query_func=get_available_years
-                ),
-                "validator": colander.Range(
-                    min=0, min_err=u"Veuillez saisir une année valide"
-                ),
-                "default": forms.default_year,
             }
         }
     )
@@ -283,8 +208,6 @@ class ExpenseSheet(Node, ExpenseCompute):
         info={
             'colanderalchemy': {
                 "title": u"Statut du paiement de la note de dépense",
-                'widget': deform.widget.SelectWidget(values=PAID_STATES),
-                'validator': colander.OneOf(dict(PAID_STATES).keys())
             }
         }
     )
@@ -305,10 +228,6 @@ class ExpenseSheet(Node, ExpenseCompute):
         info={
             'colanderalchemy': {
                 "title": u"Statut de la note de dépense",
-                'validator': colander.OneOf(ALL_STATES),
-                'widget': deform.widget.SelectWidget(
-                    values=zip(ALL_STATES, ALL_STATES)
-                ),
             }
         }
     )
@@ -318,7 +237,6 @@ class ExpenseSheet(Node, ExpenseCompute):
         info={
             'colanderalchemy': {
                 "title": u"Dernier utilisateur à avoir modifié le document",
-                'widget': get_deferred_user_choice()
             },
             "export": forms.EXCLUDED,
         }
@@ -579,8 +497,6 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
         Integer,
         info={
             'colanderalchemy': {
-                'validator': forms.get_deferred_select_validator(ExpenseType),
-                'missing': colander.required,
                 "title": u"Type de dépense",
             }
         }
@@ -631,7 +547,6 @@ class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
             'colanderalchemy': {
                 'typ': AmountType(2),
                 'title': 'Montant HT',
-                'missing': colander.required,
             }
         },
     )
@@ -641,7 +556,6 @@ class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
             'colanderalchemy': {
                 'typ': AmountType(2),
                 'title': 'Montant de la TVA',
-                'missing': colander.required,
             }
         },
     )
@@ -704,7 +618,6 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
             'colanderalchemy': {
                 'typ': AmountType(2),
                 'title': 'Nombre de kilomètres',
-                'missing': colander.required,
             }
         },
     )

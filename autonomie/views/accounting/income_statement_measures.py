@@ -17,8 +17,7 @@ from autonomie.utils.strings import (
 )
 from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureGrid,
-    IncomeStatementMeasureType,
-    CATEGORIES,
+    IncomeStatementMeasureTypeCategory,
 )
 from autonomie.forms.accounting import get_income_statement_measures_list_schema
 from autonomie.views import BaseListView
@@ -38,16 +37,17 @@ class YearGlobalGrid(object):
         self.grids = self._grid_by_month(grids)
         self.types = self._type_by_category(types)
         self.turnover = turnover
+        self.categories = IncomeStatementMeasureTypeCategory.get_categories()
         self.category_totals = self._get_default_category_totals()
 
         self.rows = self.compile_rows()
 
-    @staticmethod
-    def _get_default_category_totals():
+    def _get_default_category_totals(self):
         month_dict = dict((month, 0) for month in range(1, 13))
         month_dict['total'] = 0
         return dict(
-            (category, month_dict.copy()) for category in CATEGORIES
+            (category, month_dict.copy())
+            for category in self.categories
         )
 
     @staticmethod
@@ -60,9 +60,8 @@ class YearGlobalGrid(object):
             result[grid.month] = grid
         return result
 
-    @staticmethod
-    def _type_by_category(types):
-        result = dict((category, []) for category in CATEGORIES)
+    def _type_by_category(self,types):
+        result = dict((category, []) for category in self.categories)
         for type_ in types:
             result[type_.category].append(type_)
         return result
@@ -132,7 +131,7 @@ class YearGlobalGrid(object):
         yield "% CA"
 
     def compute_rows(self):
-        for category in CATEGORIES:
+        for category in self.categories:
             for type_ in self.types[category]:
                     row = [type_.label]
                     if not type_.is_total:

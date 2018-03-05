@@ -34,20 +34,121 @@ from autonomie.models.accounting.services import (
 )
 
 
-CATEGORIES = [
-    "Produits",
-    "Achats",
-    "Charges",
-    "Salaires et Cotisations",
-]
-INPUT_CATEGORIES = [
-    "Produits",
-]
-OUTPUT_CATEGORIES = [
-    "Achats",
-    "Charges",
-    "Salaires et Cotisations",
-]
+class IncomeStatementMeasureTypeCategory(DBBASE):
+    """
+    Categories joining the Differente measure types
+    """
+    __tablename__ = 'income_statement_measure_type_category'
+    __table_args__ = default_table_args
+    __colanderalchemy_config__ = {
+        "help_msg": u"""Les catégories permettent de regrouper les types
+        d'indicateurs afin d'en faciliter la configuration.
+        Ils peuvent ensuite être utilisé pour calculer des totaux.<br />
+        """
+    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'exclude': True}}
+    )
+    label = Column(
+        String(255),
+        info={
+            'colanderalchemy': {
+                'title': u"Libellé de cette catégorie (seulement visible dans "
+                u"l'interface de configuration)",
+            }
+        },
+        nullable=False,
+    )
+    active = Column(
+        Boolean(),
+        default=True,
+        info={'colanderalchemy': {
+            'title': u"Indicateur actif ?", "exclude": True
+        }}
+    )
+    order = Column(
+        Integer,
+        default=1,
+        info={
+            'colanderalchemy': {
+                'title': u"Ordre au sein de la catégorie",
+                "widget": deform.widget.HiddenWidget(),
+            }
+        }
+    )
+
+    attached_types = relationship(
+        "IncomeStatementMeasureType",
+        back_populates="category",
+        cascade='all,delete,delete-orphan',
+        info={'colanderalchemy': {'exclude': True}},
+    )
+
+    def move_up(self):
+        """
+        Move the current instance up in the category's order
+        """
+        order = self.order
+        if order > 0:
+            new_order = order - 1
+            IncomeStatementMeasureTypeCategory.insert(self, new_order)
+
+    def move_down(self):
+        """
+        Move the current instance down in the category's order
+        """
+        order = self.order
+        new_order = order + 1
+        IncomeStatementMeasureTypeCategory.insert(self, new_order)
+
+    @classmethod
+    def get_categories(cls, active=True):
+        return DBSESSION().query(cls).filter_by(
+            active=active
+        ).order_by(cls.order).all()
+
+    @classmethod
+    def get(cls, id_, active=True):
+        return DBSESSION().query(cls).filter_by(
+            active=active
+        ).filter_by(id=id_).first()
+
+    @classmethod
+    def get_next_order(cls):
+        query = DBSESSION().query(func.max(cls.order)).filter_by(active=True)
+        query = query.first()
+        if query is not None and query[0] is not None:
+            result = query[0] + 1
+        else:
+            result = 0
+        return result
+
+    @classmethod
+    def insert(cls, item, new_order):
+        items = DBSESSION().query(
+            cls
+        ).filter_by(
+            active=True
+        ).filter(cls.id != item.id).order_by(cls.order).all()
+
+        items.insert(new_order, item)
+
+        for index, item in enumerate(items):
+            item.order = index
+            DBSESSION().merge(item)
+
+    @classmethod
+    def reorder(cls):
+        """
+        Regenerate order attributes
+        """
+        items = cls.get_categories()
+
+        for index, item in enumerate(items):
+            item.order = index
+            DBSESSION().merge(item)
 
 
 class IncomeStatementMeasureType(DBBASE):
@@ -73,12 +174,10 @@ class IncomeStatementMeasureType(DBBASE):
         primary_key=True,
         info={'colanderalchemy': {'exclude': True}}
     )
-    category = Column(
-        String(50),
+    category_id = Column(
+        ForeignKey(IncomeStatementMeasureTypeCategory.id),
         info={
             'colanderalchemy': {
-                'title': u"Nom de la catégorie de l'indicateur"
-                u"(voir ci-dessus pour le détail)",
                 "widget": deform.widget.HiddenWidget(),
             }
         },
@@ -145,11 +244,16 @@ class IncomeStatementMeasureType(DBBASE):
             u"des totaux globaux) ?",
         }}
     )
+    category = relationship(
+        "IncomeStatementMeasureTypeCategory",
+        info={
+            "colanderalchemy": {"exclude": True}
+        }
+    )
     measures = relationship(
         "IncomeStatementMeasure",
         primaryjoin="IncomeStatementMeasure.measure_type_id"
         "==IncomeStatementMeasureType.id",
-        cascade='all,delete,delete-orphan',
         info={
             "colanderalchemy": {"exclude": True}
         }
@@ -198,21 +302,36 @@ class IncomeStatementMeasureType(DBBASE):
     def get_categories(self):
         """
         Return the categories configured in case of a total type
+
+        :rtype: list of IncomeStatementMeasureTypeCategory instances
         """
-        return self.categories.split(',')
+        category_ids = self.categories.split(',')
+        result = []
+        for i in category_ids:
+            category = IncomeStatementMeasureTypeCategory.get(i)
+            if category is not None:
+                result.append(category)
+        return result
+
+    def get_categories_labels(self):
+        """
+        Return the labels of the categories attached to this instance
+        :rtype: list
+        """
+        return [c.label for c in self.get_categories()]
 
     @classmethod
-    def get_by_category(cls, category, key=None):
+    def get_by_category(cls, category_id, key=None):
         query = DBSESSION().query(cls)
         if key is not None:
             query = query.options(load_only(key))
-        query = query.filter_by(category=category)
+        query = query.filter_by(category_id=category_id)
         return query.all()
 
     @classmethod
-    def get_next_order_by_category(cls, category):
+    def get_next_order_by_category(cls, category_id):
         query = DBSESSION().query(func.max(cls.order)).filter_by(
-            category=category
+            category_id=category_id
         ).filter_by(active=True)
         query = query.first()
         if query is not None and query[0] is not None:
@@ -226,7 +345,7 @@ class IncomeStatementMeasureType(DBBASE):
         items = DBSESSION().query(
             cls
         ).filter_by(
-            category=item.category
+            category_id=item.category_id
         ).filter_by(
             active=True
         ).filter(cls.id != item.id).order_by(cls.order).all()
@@ -238,14 +357,14 @@ class IncomeStatementMeasureType(DBBASE):
             DBSESSION().merge(item)
 
     @classmethod
-    def reorder(cls, category):
+    def reorder(cls, category_id):
         """
         Regenerate order attributes
         """
         items = DBSESSION().query(
             cls
         ).filter_by(
-            category=category
+            category_id=category_id
         ).filter_by(active=True).order_by(cls.order).all()
 
         for index, item in enumerate(items):
@@ -352,8 +471,3 @@ class IncomeStatementMeasure(DBBASE):
 
     def get_value(self):
         return -1 * self.value
-        # if self.measure_type.category in OUTPUT_CATEGORIES:
-        #     result = -1 * self.value
-        # else:
-        #     result = self.value
-        # return result

@@ -17,6 +17,7 @@ from autonomie.utils.strings import (
 )
 from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureGrid,
+    IncomeStatementMeasureType,
     IncomeStatementMeasureTypeCategory,
 )
 from autonomie.forms.accounting import get_income_statement_measures_list_schema
@@ -34,10 +35,10 @@ class YearGlobalGrid(object):
             self.is_void = True
         else:
             self.is_void = False
+        self.categories = IncomeStatementMeasureTypeCategory.get_categories()
         self.grids = self._grid_by_month(grids)
         self.types = self._type_by_category(types)
         self.turnover = turnover
-        self.categories = IncomeStatementMeasureTypeCategory.get_categories()
         self.category_totals = self._get_default_category_totals()
 
         self.rows = self.compile_rows()
@@ -60,7 +61,7 @@ class YearGlobalGrid(object):
             result[grid.month] = grid
         return result
 
-    def _type_by_category(self,types):
+    def _type_by_category(self, types):
         result = dict((category, []) for category in self.categories)
         for type_ in types:
             result[type_.category].append(type_)
@@ -93,7 +94,7 @@ class YearGlobalGrid(object):
 
         # After having collected all rows, we compile totals
         for type_, datas in result:
-            if type_.is_total:
+            if type_.is_total and not type_.account_prefix:
                 for month in range(1, 13):
                     month_total = self._sum_category_totals(
                         type_.get_categories(),
@@ -134,7 +135,7 @@ class YearGlobalGrid(object):
         for category in self.categories:
             for type_ in self.types[category]:
                     row = [type_.label]
-                    if not type_.is_total:
+                    if type_.account_prefix:
                         sum = 0
                         for month, grid in self.grids.items():
                             value = self._get_month_cell(grid, type_.id)

@@ -147,6 +147,7 @@ class RootFactory(dict):
         ('files', 'file', File, ),
         ('invoices', 'invoice', Invoice, ),
         ('jobs', 'job', Job, ),
+        ('logins', 'login', Login, ),
         ('payments', 'payment', Payment, ),
         ('payment_lines', 'payment_line', PaymentLine,),
         ('phases', 'phase', Phase, ),

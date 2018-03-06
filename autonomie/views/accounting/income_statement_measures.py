@@ -47,7 +47,7 @@ class YearGlobalGrid(object):
         month_dict = dict((month, 0) for month in range(1, 13))
         month_dict['total'] = 0
         return dict(
-            (category, month_dict.copy())
+            (category.id, month_dict.copy())
             for category in self.categories
         )
 
@@ -62,44 +62,54 @@ class YearGlobalGrid(object):
         return result
 
     def _type_by_category(self, types):
-        result = dict((category, []) for category in self.categories)
+        result = dict((category.id, []) for category in self.categories)
         for type_ in types:
             result[type_.category].append(type_)
         return result
 
-    def _sum_category_totals(self, categories, month_number):
+    def _collect_values_for_compilation(self, categories, month_number):
         """
-        Sum total for the given categories
+        Collect total for the given categories and the given month number
 
         Sums are compiled while collecting rows and are stored as a dict matrix
-        :
 
-                        month_number
-            category    <value>
 
-        Here, for a given column, we sum category totals
+                           month_number
+            category_id    <value>
+
+        Here, for a given column, we collect all values by category
+
+        :param list categories: List of IncomeStatementMeasureTypeCategory
+        :param int month_number: The month number
+        :returns: totals stored by category id
+        :rtype: dict
         """
-        result = 0
+        result = {}
         for category in categories:
-            result += self.category_totals[category][month_number]
+            total = self.category_totals[category.id][month_number]
+            result[category.label] = total
 
         return result
 
     def compile_rows(self):
         """
         Pre-compute all row datas
+
+        First collect datas collected from the general ledger file
+        Then compile totals
         """
         result = []
         result = list(self.compute_rows())
 
         # After having collected all rows, we compile totals
         for type_, datas in result:
-            if type_.is_total and not type_.account_prefix:
+            if type_.compiled_total:
                 for month in range(1, 13):
-                    month_total = self._sum_category_totals(
+                    values = self._collect_values_for_compilation(
                         type_.get_categories(),
                         month
                     )
+                    month_total = type_.compile_total(values)
                     datas[month] = format_float(month_total, precision=2)
 
                 total = self._sum_category_totals(
@@ -135,7 +145,7 @@ class YearGlobalGrid(object):
         for category in self.categories:
             for type_ in self.types[category]:
                     row = [type_.label]
-                    if type_.account_prefix:
+                    if not type_.computed_total:
                         sum = 0
                         for month, grid in self.grids.items():
                             value = self._get_month_cell(grid, type_.id)

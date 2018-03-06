@@ -3,6 +3,7 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import logging
 import datetime
 import colander
 import deform
@@ -32,6 +33,9 @@ from autonomie.models.company import Company
 from autonomie.models.accounting.services import (
     IncomeStatementMeasureGridService,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class IncomeStatementMeasureTypeCategory(DBBASE):
@@ -104,19 +108,38 @@ class IncomeStatementMeasureTypeCategory(DBBASE):
         IncomeStatementMeasureTypeCategory.insert(self, new_order)
 
     @classmethod
-    def get_categories(cls, active=True):
-        return DBSESSION().query(cls).filter_by(
-            active=active
-        ).order_by(cls.order).all()
+    def get_categories(cls, active=True, keys=()):
+        """
+        :param bool active: Only load active categories
+        :param tuple keys: The keys to load (list of str)
+        :returns: IncomeStatementMeasureTypeCategory ordered by order key
+        :rtype: list
+        """
+        query = DBSESSION().query(cls)
+        if keys:
+            query = query.options(load_only(*keys))
+        query = query.filter_by(active=active).order_by(cls.order)
+        return query.all()
 
     @classmethod
     def get(cls, id_, active=True):
+        """
+        :param int id_: The id to retrieve
+        :param bool active: Only check in active items
+
+        :returns: An IncomeStatementMeasureTypeCategory or None
+        :rtype: class or None
+        """
         return DBSESSION().query(cls).filter_by(
             active=active
         ).filter_by(id=id_).first()
 
     @classmethod
     def get_next_order(cls):
+        """
+        :returns: The next available order
+        :rtype: int
+        """
         query = DBSESSION().query(func.max(cls.order)).filter_by(active=True)
         query = query.first()
         if query is not None and query[0] is not None:
@@ -127,6 +150,12 @@ class IncomeStatementMeasureTypeCategory(DBBASE):
 
     @classmethod
     def insert(cls, item, new_order):
+        """
+        Place the item at the given index
+
+        :param obj item: The item to move
+        :param int new_order: The new index of the item
+        """
         items = DBSESSION().query(
             cls
         ).filter_by(
@@ -208,16 +237,6 @@ class IncomeStatementMeasureType(DBBASE):
             }
         },
     )
-    categories = Column(
-        String(255),
-        info={
-            "colanderalchemy": {
-                "title": u"Somme des catégories",
-                "descriptoin": u"Ce total présentera la somme des indicateurs "
-                u"des catégories sélectionnées",
-            }
-        },
-    )
     active = Column(
         Boolean(),
         default=True,
@@ -244,6 +263,17 @@ class IncomeStatementMeasureType(DBBASE):
             u"des totaux globaux) ?",
         }}
     )
+    total_type = Column(
+        String(20),
+        info={
+            "colanderalchemy": {
+                "title": u"Type d'indicateurs "
+                u"(account_prefix/complex_total/categories)",
+                'exclude': True,
+            }
+        }
+    )
+
     category = relationship(
         "IncomeStatementMeasureTypeCategory",
         info={
@@ -258,6 +288,16 @@ class IncomeStatementMeasureType(DBBASE):
             "colanderalchemy": {"exclude": True}
         }
     )
+
+    @property
+    def compiled_total(self):
+        """
+        :returns: True if this type is a computed total (mix of other values)
+        :rtype: bool
+        """
+        return self.is_total and self.total_type in (
+            'complex_total', 'categories'
+        )
 
     def match(self, account):
         """
@@ -305,7 +345,14 @@ class IncomeStatementMeasureType(DBBASE):
 
         :rtype: list of IncomeStatementMeasureTypeCategory instances
         """
-        category_ids = self.categories.split(',')
+        try:
+            category_ids = [int(i) for i in self.account_prefix.split(',')]
+        except ValueError:
+            logger.exception(
+                u"Invalid account_prefix : %s" % self.account_prefix
+            )
+            category_ids = []
+
         result = []
         for i in category_ids:
             category = IncomeStatementMeasureTypeCategory.get(i)
@@ -322,6 +369,13 @@ class IncomeStatementMeasureType(DBBASE):
 
     @classmethod
     def get_by_category(cls, category_id, key=None):
+        """
+        Collect IncomeStatementMeasureType associated to the given category
+
+        :param int category_id: The id to check for
+        :param str key: The key to load (if we want to restrict the query
+        :rtype: list
+        """
         query = DBSESSION().query(cls)
         if key is not None:
             query = query.options(load_only(key))
@@ -330,6 +384,11 @@ class IncomeStatementMeasureType(DBBASE):
 
     @classmethod
     def get_next_order_by_category(cls, category_id):
+        """
+        :param int category_id: The id of the category to check for
+        :returns: The next order available in types from the given category
+        :rtype: int
+        """
         query = DBSESSION().query(func.max(cls.order)).filter_by(
             category_id=category_id
         ).filter_by(active=True)
@@ -342,6 +401,13 @@ class IncomeStatementMeasureType(DBBASE):
 
     @classmethod
     def insert(cls, item, new_order):
+        """
+        Place the item at the given index in the hierarchy of items of the same
+        category
+
+        :param obj item: The item to place
+        :param int new_order: The index where to place the item
+        """
         items = DBSESSION().query(
             cls
         ).filter_by(
@@ -360,6 +426,7 @@ class IncomeStatementMeasureType(DBBASE):
     def reorder(cls, category_id):
         """
         Regenerate order attributes
+        :param int category_id: The category to manage
         """
         items = DBSESSION().query(
             cls

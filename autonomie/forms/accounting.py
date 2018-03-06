@@ -220,6 +220,16 @@ def deferred_categories_widget(node, kw):
     return deform.widget.CheckboxChoiceWidget(values=choices)
 
 
+@colander.deferred
+def deferred_complexe_total_description(node, kw):
+    query = IncomeStatementMeasureTypeCategory.get_categories(keys=('label',))
+    return u"""
+Combiner plusieurs catégories au travers d'opérations arithmétiques.
+Les noms des catégories doivent être encadrés de {}.
+Exemple : {Salaires et Cotisations} + {Charges} / 100.
+Liste des catégories : %s""" % ",".join([i.label for i in query])
+
+
 def get_admin_income_statement_measure_schema(total=False):
     """
     Build the schema for income statement measure type edit/add
@@ -235,17 +245,13 @@ def get_admin_income_statement_measure_schema(total=False):
             includes=(
                 "category_id",
                 'label',
-                "categories",
                 "account_prefix",
-                'is_total'
+                'is_total',
             ),
         )
-        schema['categories'].typ = CsvTuple()
-        schema['categories'].widget = deferred_categories_widget
-        schema['categories'].validator = colander.Length(min=1)
         schema['is_total'].widget = deform.widget.HiddenWidget()
         schema.add_before(
-            'categories',
+            'account_prefix',
             colander.SchemaNode(
                 colander.String(),
                 name="total_type",
@@ -263,12 +269,40 @@ def get_admin_income_statement_measure_schema(total=False):
                             u"un groupement d'écritures ?",
                             "account_prefix",
                         ),
+                        (
+                            "complex_total",
+                            u"une combinaison complexe de la somme de "
+                            u"plusieurs catégories ?",
+                            "complex_total",
+                        ),
                     )
                 ),
                 missing=colander.drop,
             )
         )
         schema['account_prefix'].missing = ""
+
+        schema.add(
+            colander.SchemaNode(
+                colander.String(),
+                name="complex_total",
+                title=u"Combinaison complexe de catégories",
+                description=deferred_complexe_total_description,
+                validator=colander.Length(max=255),
+                missing=""
+            )
+        )
+
+        schema.add(
+            colander.SchemaNode(
+                CsvTuple(),
+                name="categories",
+                title=u"Somme des catégories",
+                description=u"Représentera la somme des catégories "
+                u"sélectionnées",
+                widget=deferred_categories_widget,
+            )
+        )
     else:
         schema = SQLAlchemySchemaNode(
             IncomeStatementMeasureType,

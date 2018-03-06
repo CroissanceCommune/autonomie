@@ -374,10 +374,15 @@ class MeasureTypeListView(BaseView):
         :rtype: generator
         """
         yield measure_type.label
-        if measure_type.is_total:
-            yield u"La somme des indicateurs des catégories %s" % (
-                ", ".join(measure_type.get_categories_labels())
-            )
+        if measure_type.compiled_total:
+            if measure_type.total_type == 'categories':
+                yield u"La somme des indicateurs des catégories %s" % (
+                    ", ".join(measure_type.get_categories_labels())
+                )
+            elif measure_type.total_type == 'complex_total':
+                yield u"Le résultat de l'opération : '%s'" % (
+                    measure_type.account_prefix
+                )
         else:
             yield u"Les comptes : %s" % measure_type.account_prefix
         if measure_type.is_total:
@@ -576,6 +581,8 @@ class MeasureTypeAddView(BaseAddView):
             pre_filled['categories'] = "%s" % self.context.id
             pre_filled['total_type'] = u"categories"
 
+        print(pre_filled)
+
         form.set_appstruct(pre_filled)
 
     def redirect(self, model=None):
@@ -596,10 +603,9 @@ class MeasureTypeAddView(BaseAddView):
         """
         model = BaseAddView.merge_appstruct(self, appstruct, model)
         if 'total_type' in appstruct:
-            if appstruct['total_type'] == 'categories':
-                model.account_prefix = ''
-            else:
-                model.categories = ''
+            total_type = appstruct['total_type']
+            model.account_prefix = appstruct[total_type]
+
         return model
 
     @property
@@ -657,10 +663,9 @@ class MeasureTypeEditView(BaseEditView):
     def get_default_appstruct(self):
         result = BaseEditView.get_default_appstruct(self)
         if self.is_total_form():
-            if self.context.account_prefix:
-                result['total_type'] = 'account_prefix'
-            else:
-                result['total_type'] = 'categories'
+            result['total_type'] = self.context.total_type
+            result['account_prefix'] = ''
+            result[self.context.total_type] = self.context.account_prefix
         return result
 
     def merge_appstruct(self, appstruct, model):
@@ -672,10 +677,9 @@ class MeasureTypeEditView(BaseEditView):
         """
         model = BaseEditView.merge_appstruct(self, appstruct, model)
         if 'total_type' in appstruct:
-            if appstruct['total_type'] == 'categories':
-                model.account_prefix = ''
-            else:
-                model.categories = ''
+            total_type = appstruct['total_type']
+            model.account_prefix = appstruct[total_type]
+
         return model
 
     @property

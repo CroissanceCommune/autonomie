@@ -29,6 +29,7 @@ from autonomie_base.models.base import (
     DBSESSION,
 )
 from autonomie.forms import get_deferred_select
+from autonomie.compute.parser import NumericStringParser
 from autonomie.models.company import Company
 from autonomie.models.accounting.services import (
     IncomeStatementMeasureGridService,
@@ -122,9 +123,9 @@ class IncomeStatementMeasureTypeCategory(DBBASE):
         return query.all()
 
     @classmethod
-    def get(cls, id_, active=True):
+    def get_by_label(cls, label, active=True):
         """
-        :param int id_: The id to retrieve
+        :param str label: The label to retrieve
         :param bool active: Only check in active items
 
         :returns: An IncomeStatementMeasureTypeCategory or None
@@ -132,7 +133,7 @@ class IncomeStatementMeasureTypeCategory(DBBASE):
         """
         return DBSESSION().query(cls).filter_by(
             active=active
-        ).filter_by(id=id_).first()
+        ).filter_by(label=label).first()
 
     @classmethod
     def get_next_order(cls):
@@ -339,23 +340,63 @@ class IncomeStatementMeasureType(DBBASE):
         new_order = order + 1
         IncomeStatementMeasureType.insert(self, new_order)
 
+    def compile_total(self, category_totals):
+        """
+        Compile a total value based on the given category totals
+
+        :param dict category_totals: Totals stored by category labels
+        :returns: The compiled total
+        :rtype: int
+        """
+        result = 0
+        if self.total_type == 'categories':
+            result = self._compute_categories_total(category_totals)
+        elif self.total_type == 'complex_total':
+            result = self._compute_complex_total(category_totals)
+        return result
+
+    def _compute_categories_total(self, all_category_totals):
+        """
+        Compute the sum of the current's item categories picking them in the
+        all_category_totals dict
+
+        :param dict all_category_totals: Totals stored by category labels
+        :returns: The compiled total
+        :rtype: int
+        """
+        result = 0
+        for category in self.account_prefix.split(','):
+            if category in all_category_totals:
+                result += all_category_totals[category]
+        return result
+
+    def _compute_complex_total(self, all_category_totals):
+        """
+        Compile the arithmetic operation configure in the current item, using
+        datas coming from the all_category_totals dict
+
+        :param dict all_category_totals: Totals stored by category labels
+        :returns: The compiled total
+        :rtype: int
+        """
+        try:
+            operation = self.account_prefix.format(**all_category_totals)
+        except KeyError:
+            operation = "0"
+        parser = NumericStringParser()
+        return parser.eval(operation)
+
     def get_categories(self):
         """
         Return the categories configured in case of a total type
 
         :rtype: list of IncomeStatementMeasureTypeCategory instances
         """
-        try:
-            category_ids = [int(i) for i in self.account_prefix.split(',')]
-        except ValueError:
-            logger.exception(
-                u"Invalid account_prefix : %s" % self.account_prefix
-            )
-            category_ids = []
+        category_labels = self.account_prefix.split(',')
 
         result = []
-        for i in category_ids:
-            category = IncomeStatementMeasureTypeCategory.get(i)
+        for label in category_labels:
+            category = IncomeStatementMeasureTypeCategory.get_by_label(label)
             if category is not None:
                 result.append(category)
         return result

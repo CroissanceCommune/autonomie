@@ -377,11 +377,11 @@ class MeasureTypeListView(BaseView):
         if measure_type.compiled_total:
             if measure_type.total_type == 'categories':
                 yield u"La somme des indicateurs des catégories %s" % (
-                    ", ".join(measure_type.get_categories_labels())
+                    measure_type.account_prefix,
                 )
             elif measure_type.total_type == 'complex_total':
                 yield u"Le résultat de l'opération : '%s'" % (
-                    measure_type.account_prefix
+                    measure_type.account_prefix,
                 )
         else:
             yield u"Les comptes : %s" % measure_type.account_prefix
@@ -578,10 +578,8 @@ class MeasureTypeAddView(BaseAddView):
         if 'is_total' in self.request.GET:
             pre_filled['is_total'] = True
             pre_filled['label'] = u"Total %s" % (self.context.label, )
-            pre_filled['categories'] = "%s" % self.context.id
+            pre_filled['categories'] = "%s" % self.context.label
             pre_filled['total_type'] = u"categories"
-
-        print(pre_filled)
 
         form.set_appstruct(pre_filled)
 

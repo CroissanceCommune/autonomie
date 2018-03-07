@@ -36,20 +36,17 @@ class YearGlobalGrid(object):
         else:
             self.is_void = False
         self.categories = IncomeStatementMeasureTypeCategory.get_categories()
+        # Month grids stored by month number
         self.grids = self._grid_by_month(grids)
+
+        # Types by category id
         self.types = self._type_by_category(types)
         self.turnover = turnover
+
+        # Totals by category_id, by month
         self.category_totals = self._get_default_category_totals()
 
         self.rows = self.compile_rows()
-
-    def _get_default_category_totals(self):
-        month_dict = dict((month, 0) for month in range(1, 13))
-        month_dict['total'] = 0
-        return dict(
-            (category.id, month_dict.copy())
-            for category in self.categories
-        )
 
     @staticmethod
     def _grid_by_month(month_grids):
@@ -61,13 +58,35 @@ class YearGlobalGrid(object):
             result[grid.month] = grid
         return result
 
+    def _get_default_category_totals(self):
+        """
+        Build default dict used to store category totals
+
+        :returns: A dict in the form
+        {'category_id': {'month_number': 0, 'total': 0}}
+        """
+        month_dict = dict((month, 0) for month in range(1, 13))
+        month_dict['total'] = 0
+        return dict(
+            (category.id, month_dict.copy())
+            for category in self.categories
+        )
+
     def _type_by_category(self, types):
+        """
+        Stores IncomeStatementMeasureType by category (to keep the display
+        order)
+
+        :param list types: List of IncomeStatementMeasureType
+        :returns: A dict {'category.id': [IncomeStatementMeasureType]}
+        :rtype: dict
+        """
         result = dict((category.id, []) for category in self.categories)
         for type_ in types:
-            result[type_.category].append(type_)
+            result[type_.category.id].append(type_)
         return result
 
-    def _collect_values_for_compilation(self, categories, month_number):
+    def _collect_values_for_computation(self, month_number):
         """
         Collect total for the given categories and the given month number
 
@@ -79,13 +98,12 @@ class YearGlobalGrid(object):
 
         Here, for a given column, we collect all values by category
 
-        :param list categories: List of IncomeStatementMeasureTypeCategory
         :param int month_number: The month number
         :returns: totals stored by category id
         :rtype: dict
         """
         result = {}
-        for category in categories:
+        for category in self.categories:
             total = self.category_totals[category.id][month_number]
             result[category.label] = total
 
@@ -103,22 +121,21 @@ class YearGlobalGrid(object):
 
         # After having collected all rows, we compile totals
         for type_, datas in result:
-            if type_.compiled_total:
+            if type_.computed_total:
+                total = 0
                 for month in range(1, 13):
-                    values = self._collect_values_for_compilation(
-                        type_.get_categories(),
+                    values = self._collect_values_for_computation(
                         month
                     )
-                    month_total = type_.compile_total(values)
-                    datas[month] = format_float(month_total, precision=2)
+                    print(values)
+                    print(type_.account_prefix)
+                    month_total = type_.compute_total(values)
+                    total += month_total
+                    datas[month - 1] = month_total
 
-                total = self._sum_category_totals(
-                    type_.get_categories(),
-                    'total'
-                )
-                datas[-2] = format_float(total, precision=2)
+                datas[-2] = total
                 percent = math_utils.percent(total, self.turnover, 0)
-                datas[-1] = format_float(percent, precision=2)
+                datas[-1] = percent
         return result
 
     def _get_month_cell(self, grid, type_id):
@@ -142,33 +159,44 @@ class YearGlobalGrid(object):
         yield "% CA"
 
     def compute_rows(self):
+        """
+        Compute the main rows of the grid corresponding to the datas retrieved
+        by celery
+        also fill rows of computed_totals with 0
+
+        :returns: generator yielding 2-uple (type, row) where type is a
+        IncomeStatementMeasureType instance and row contains the datas of the
+        grid row for the given type (15 columns).
+        :rtype: tuple
+        """
         for category in self.categories:
-            for type_ in self.types[category]:
-                    row = [type_.label]
+            for type_ in self.types[category.id]:
+                    row = []
                     if not type_.computed_total:
                         sum = 0
                         for month, grid in self.grids.items():
                             value = self._get_month_cell(grid, type_.id)
                             sum += value
-                            str_value = format_float(value, precision=2)
-                            row.append(str_value)
-                            self.category_totals[category][month] += value
-                        self.category_totals[category]['total'] += sum
+                            row.append(value)
+                            self.category_totals[category.id][month] += value
+                        self.category_totals[category.id]['total'] += sum
 
-                        str_sum = format_float(sum, precision=2)
-                        row.append(str_sum)
+                        row.append(sum)
                         percent = math_utils.percent(sum, self.turnover, 0)
-                        str_percent = format_float(percent, precision=2)
-                        row.append(str_percent)
-
-                    elif not type_.categories:
-                        # Invalid entry (we ignore)
-                        continue
+                        row.append(percent)
 
                     else:
-                        row.extend([0 for i in range(1, 15)])
+                        row.extend([0 for i in range(0, 14)])
 
                     yield type_, row
+
+    def format_datas(self):
+        """
+        Format all numeric datas to strings in localized formats
+        """
+        for row in self.rows:
+            for data in row[1]:
+                row[1] = format_float(data, precision=2)
 
 
 class CompanyIncomeStatementMeasuresListView(BaseListView):
@@ -222,7 +250,8 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         types = self.get_types()
         year_turnover = self.context.get_turnover(self.year)
 
-        grid = YearGlobalGrid(month_grids,  types, year_turnover)
+        grid = YearGlobalGrid(month_grids, types, year_turnover)
+        grid.format_datas()
         response_dict['grid'] = grid
         response_dict['current_year'] = datetime.date.today().year
         response_dict['selected_year'] = int(self.year)

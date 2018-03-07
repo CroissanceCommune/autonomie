@@ -62,6 +62,7 @@
             class='highlighted'
             % endif
             >
+            <td>type_.label</td>
                 % for cell in row:
                 <td>
                 ${cell | n}

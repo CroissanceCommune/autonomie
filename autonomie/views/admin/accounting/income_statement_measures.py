@@ -374,7 +374,7 @@ class MeasureTypeListView(BaseView):
         :rtype: generator
         """
         yield measure_type.label
-        if measure_type.compiled_total:
+        if measure_type.computed_total:
             if measure_type.total_type == 'categories':
                 yield u"La somme des indicateurs des catégories %s" % (
                     measure_type.account_prefix,

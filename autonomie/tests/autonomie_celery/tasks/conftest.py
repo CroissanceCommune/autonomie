@@ -8,26 +8,45 @@ import datetime
 
 
 @pytest.fixture
-def income_measure_types(dbsession):
+def income_measure_type_categories(dbsession):
+    from autonomie.models.accounting.income_statement_measures import (
+        IncomeStatementMeasureTypeCategory,
+    )
+    result = []
+    for i in (u"Produits", u"Achats"):
+        cat = IncomeStatementMeasureTypeCategory(label=i)
+        dbsession.add(cat)
+        result.append(cat)
+    dbsession.flush()
+    return result
+
+
+@pytest.fixture
+def income_measure_types(dbsession, income_measure_type_categories):
     from autonomie.models.accounting.income_statement_measures import (
         IncomeStatementMeasureType,
     )
     types = []
-    for label, category, account_prefix, categories, is_total in (
-        ('Label 1', u"Produits", u"701", u"", False),
-        ('Label 2', u"Produits", u"701,702", u"", False),
-        ('Label 3', u"Achats", u"601", u"", False),
-        ('Total partiel autres achats', u"Achats", u"6,-601", "", False),
-        ('Total produits et achats', u"Achats", u"", u"Produits,Achats", True),
+    for (
+        label, category_index, account_prefix, is_total, total_type
+    ) in (
+        ('Label 1', 0, u"701", False, ""),
+        ('Label 2', 0, u"701,702", False, ""),
+        ('Label 3', 1, u"601", False, ""),
+        ('Total partiel autres achats', 1, u"6,-601", True, "account_prefix"),
+        ('Total produits et achats', 1, u"Produits,Achats", True, "categories"),
+        ('Ratio produits et achats', 1, u"{Achats} * 100 / {Produits}", True,
+         "categories"),
     ):
         typ = IncomeStatementMeasureType(
             label=label,
-            category=category,
+            category_id=income_measure_type_categories[category_index].id,
             account_prefix=account_prefix,
-            categories=categories,
             is_total=is_total,
+            total_type=total_type,
         )
         dbsession.add(typ)
+        typ.category = income_measure_type_categories[category_index]
         types.append(typ)
     return types
 

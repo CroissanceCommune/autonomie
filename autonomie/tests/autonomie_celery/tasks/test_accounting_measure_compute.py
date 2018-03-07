@@ -27,7 +27,7 @@ def test_income_statement_measure_compiler(
         IncomeStatementMeasureCompiler,
     )
     compiler = IncomeStatementMeasureCompiler(general_upload, general_operations)
-    assert compiler.measure_types.count() == len(income_measure_types) - 1
+    assert compiler.measure_types.count() == len(income_measure_types) - 2
 
     grids = compiler.process_datas()
     grids = grids.values()

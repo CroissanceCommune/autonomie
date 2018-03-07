@@ -131,7 +131,7 @@ class TestIncomeStatementMeasureType:
         dbsession.flush()
         return types_
 
-    def test_compiled_total(self):
+    def test_computed_total(self):
         from autonomie.models.accounting.income_statement_measures import (
             IncomeStatementMeasureType,
         )
@@ -139,19 +139,19 @@ class TestIncomeStatementMeasureType:
             is_total=True,
             total_type="account_prefix"
         )
-        assert not type_.compiled_total
+        assert not type_.computed_total
 
         type_ = IncomeStatementMeasureType(
             is_total=True,
             total_type="complex_total"
         )
-        assert type_.compiled_total
+        assert type_.computed_total
 
         type_ = IncomeStatementMeasureType(
             is_total=True,
             total_type="categories"
         )
-        assert type_.compiled_total
+        assert type_.computed_total
 
     def test_match(self):
         from autonomie.models.accounting.income_statement_measures import (
@@ -181,7 +181,7 @@ class TestIncomeStatementMeasureType:
         assert types_[2].order == 3
         assert types_[3].order == 2
 
-    def test_compile_total(
+    def test_compute_total(
         self, dbsession, income_statement_measure_type_category
     ):
         from autonomie.models.accounting.income_statement_measures import (
@@ -193,18 +193,19 @@ class TestIncomeStatementMeasureType:
             total_type="complex_total",
         )
         # - 3.33333
-        assert 3.34 + type_.compile_total(
+        assert 3.34 + type_.compute_total(
             {'Salaires et Cotisations': 30, 'other': 2}
         ) < 0.01
 
-        assert type_.compile_total({'other': 2}) == 0
+        assert type_.compute_total({'other': 2}) == 0
+        assert type_.compute_total({'Salaires et Cotisations': 0}) == 0
 
         type_ = IncomeStatementMeasureType(
             account_prefix="Achats,Produits,Salaires",
             is_total=True,
             total_type="categories",
         )
-        assert type_.compile_total(
+        assert type_.compute_total(
             {'Achats': 30, 'Produits': 50, 'other': 2}
         ) == 80
 

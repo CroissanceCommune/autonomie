@@ -291,7 +291,7 @@ class IncomeStatementMeasureType(DBBASE):
     )
 
     @property
-    def compiled_total(self):
+    def computed_total(self):
         """
         :returns: True if this type is a computed total (mix of other values)
         :rtype: bool
@@ -340,7 +340,7 @@ class IncomeStatementMeasureType(DBBASE):
         new_order = order + 1
         IncomeStatementMeasureType.insert(self, new_order)
 
-    def compile_total(self, category_totals):
+    def compute_total(self, category_totals):
         """
         Compile a total value based on the given category totals
 
@@ -379,12 +379,18 @@ class IncomeStatementMeasureType(DBBASE):
         :returns: The compiled total
         :rtype: int
         """
+        result = 0
         try:
             operation = self.account_prefix.format(**all_category_totals)
         except KeyError:
             operation = "0"
+
         parser = NumericStringParser()
-        return parser.eval(operation)
+        try:
+            result = parser.eval(operation)
+        except ZeroDivisionError:
+            result = 0
+        return result
 
     def get_categories(self):
         """

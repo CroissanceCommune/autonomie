@@ -54,3 +54,11 @@ def check_acl(acl, permission, principals=()):
                 else:
                     return False
     return False
+
+
+class DummyForm:
+    def __init__(self, *args, **kwargs):
+        self.appstruct = None
+
+    def set_appstruct(self, datas):
+        self.appstruct = datas

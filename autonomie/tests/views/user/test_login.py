@@ -4,7 +4,7 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import pytest
-
+from autonomie.tests.tools import DummyForm
 
 @pytest.fixture(scope="module")
 def groups(dbsession):
@@ -16,14 +16,6 @@ def groups(dbsession):
         groups.append(group)
     dbsession.flush()
     return groups
-
-
-class DummyForm:
-    def __init__(self, *args, **kwargs):
-        self.appstruct = None
-
-    def set_appstruct(self, datas):
-        self.appstruct = datas
 
 
 class TestLoginAddView():

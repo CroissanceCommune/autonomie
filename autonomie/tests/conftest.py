@@ -21,6 +21,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
+import tempfile
 from pytest import fixture
 from paste.deploy.loadwsgi import appconfig
 from pyramid import testing

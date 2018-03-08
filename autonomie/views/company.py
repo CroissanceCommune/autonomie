@@ -233,7 +233,11 @@ def fetch_activities_objects(appstruct):
 
 class CompanyAdd(BaseFormView):
     """
-        View class for company add
+    View class for company add
+
+    Have support for a user_id request param that allows to add the user
+    directly on company creation
+
     """
     add_template_vars = ('title',)
     title = u"Ajouter une entreprise"
@@ -246,12 +250,20 @@ class CompanyAdd(BaseFormView):
         """
         populate_actionmenu(self.request)
         if 'user_id' in self.request.params:
-            form.set_appstruct(dict(user_id=self.request.params['user_id']))
+            appstruct = {"user_id": self.request.params['user_id']}
+
+            come_from = self.request.referrer
+            if come_from:
+                appstruct['come_from'] = come_from
+
+            form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
         """
         Edit the database entry and return redirect
         """
+        print("Success")
+        come_from = appstruct.pop('come_from', None)
         user_id = appstruct.get('user_id')
         company = Company()
         company.activities = fetch_activities_objects(appstruct)
@@ -260,11 +272,16 @@ class CompanyAdd(BaseFormView):
             user_account = User.get(user_id)
             if user_account is not None:
                 company.employees.append(user_account)
+
         self.dbsession.add(company)
         self.dbsession.flush()
         message = u"L'entreprise '{0}' a bien été ajoutée".format(company.name)
         self.session.flash(message)
-        return HTTPFound(self.request.route_path("company", id=company.id))
+
+        if come_from is not None:
+            return HTTPFound(come_from)
+        else:
+            return HTTPFound(self.request.route_path("company", id=company.id))
 
 
 class CompanyEdit(BaseFormView):

@@ -210,6 +210,8 @@ comptabilité",
             title=u'IBAN',
             missing=u'')
 
+    come_from = forms.come_from_node()
+
 
 COMPANYSCHEMA = CompanySchema(after_bind=remove_admin_fields)
 

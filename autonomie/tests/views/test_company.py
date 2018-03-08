@@ -21,28 +21,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-import pytest
+from autonomie.tests.tools import DummyForm
 from autonomie.models.company import Company
 
-APPSTRUCT = {
+DATAS = {
     'name': u"Compané $& test",
     "goal": u"Be the best",
-    "contribution": 80,
-        }
-
-
-@pytest.fixture
-def company_add(config, get_csrf_request_with_db):
-    from autonomie.views.company import CompanyAdd
-    config.add_route('company', '/')
-    view = CompanyAdd(get_csrf_request_with_db())
-    view.submit_success(APPSTRUCT)
-    return getOne()
-
-
-def getOne():
-    return Company.query().filter(Company.name == APPSTRUCT['name']).first()
+    "contribution": "80",
+    "submit": "submit",
+}
 
 
 def test_company_index(config, content, get_csrf_request_with_db, user,
@@ -58,20 +45,81 @@ def test_company_index(config, content, get_csrf_request_with_db, user,
     assert user.companies[0].name == response['company'].name
 
 
-def test_add(company_add):
-    for key, val in APPSTRUCT.items():
-        assert getattr(company_add, key) == val
+class TestCompanyAdd:
+
+    def test_before(self, get_csrf_request_with_db):
+        pyramid_request = get_csrf_request_with_db()
+        pyramid_request.params['user_id'] = 1
+        pyramid_request.referrer = "/test"
+        from autonomie.views.company import CompanyAdd
+
+        view = CompanyAdd(pyramid_request)
+        form = DummyForm()
+        view.before(form)
+        assert form.appstruct['user_id'] == 1
+        assert form.appstruct['come_from'] == "/test"
+
+    def test_add(self, config, get_csrf_request_with_db):
+        from autonomie.views.company import CompanyAdd
+
+        config.add_route('company', 'company')
+
+        post = DATAS.copy()
+        req = get_csrf_request_with_db(post=post)
+        view = CompanyAdd(req)
+        view.__call__()
+
+        company = Company.query().filter_by(name=u"Compané $& test").first()
+        assert company is not None
+        assert company.goal == u"Be the best"
+        assert company.contribution == 80
+
+    def test_come_from(self, config, get_csrf_request_with_db, user):
+        from autonomie.views.company import CompanyAdd
+
+        post = DATAS.copy()
+        post['come_from'] = "/test"
+        req = get_csrf_request_with_db(post=post)
+        req.referrer = "/test"
+
+        view = CompanyAdd(req)
+        result = view.__call__()
+
+        assert result.location == "/test"
+
+        company = Company.query().filter_by(name=u"Compané $& test").first()
+        assert company is not None
+        assert company.goal == u"Be the best"
+        assert company.contribution == 80
+
+    def test_user_id(self, config, get_csrf_request_with_db, user):
+        from autonomie.views.company import CompanyAdd
+
+        post = DATAS.copy()
+        post['user_id'] = str(user.id)
+        req = get_csrf_request_with_db(post=post)
+        req.referrer = "/test"
+
+        view = CompanyAdd(req)
+        view.__call__()
+
+        company = Company.query().filter_by(name=u"Compané $& test").first()
+        assert company is not None
+        assert user in company.employees
 
 
-def test_success(company_add, get_csrf_request_with_db):
-    from autonomie.views.company import CompanyEdit
-    req = get_csrf_request_with_db()
-    req.context = company_add
-    appstruct = APPSTRUCT.copy()
-    appstruct['phone'] = "+33 0606060606"
-    appstruct['contribution'] = 70
-    view = CompanyEdit(req)
-    view.submit_success(appstruct)
-    company = getOne()
-    assert company.phone == "+33 0606060606"
-    assert company.contribution == 70
+class TestCompanyEdit:
+    def test_edit(self, config, company, get_csrf_request_with_db):
+        config.add_route('company', 'company')
+        from autonomie.views.company import CompanyEdit
+        appstruct = DATAS.copy()
+        appstruct['phone'] = "+33 0606060606"
+        appstruct['contribution'] = "70"
+        req = get_csrf_request_with_db(post=appstruct)
+        req.context = company
+
+        view = CompanyEdit(req)
+        view.__call__()
+
+        assert company.phone == "+33 0606060606"
+        assert company.contribution == 70

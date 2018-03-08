@@ -3,6 +3,19 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import pytest
+
+
+@pytest.fixture(scope="module")
+def groups(dbsession):
+    from autonomie.models.user.group import Group
+    groups = []
+    for i in 'contractor', 'admin', 'manager':
+        group = Group(name=i, label=i)
+        dbsession.add(group)
+        groups.append(group)
+    dbsession.flush()
+    return groups
 
 
 class DummyForm:
@@ -42,7 +55,7 @@ class TestLoginAddView():
         assert form.appstruct['groups'] == ['contractor']
 
     def test_submit_success(
-        self, config, get_csrf_request_with_db, user
+        self, config, get_csrf_request_with_db, user, groups,
     ):
         from autonomie.views.user.login import LoginAddView
         from autonomie.models.user.login import Login
@@ -67,7 +80,7 @@ class TestLoginAddView():
         assert new_login.auth('password')
 
     def test_submit_success_next_step(
-        self, config, get_csrf_request_with_db, user
+        self, config, get_csrf_request_with_db, user, groups,
     ):
         from autonomie.views.user.login import LoginAddView
         from autonomie.models.user.login import Login
@@ -97,7 +110,7 @@ class TestLoginAddView():
 
 class TestLoginEditView():
 
-    def test_before(self, get_csrf_request_with_db, user, login):
+    def test_before(self, get_csrf_request_with_db, user, groups, login):
         from autonomie.views.user.login import LoginEditView
         req = get_csrf_request_with_db()
         req.context = login
@@ -109,7 +122,7 @@ class TestLoginEditView():
         assert form.appstruct['user_id'] == user.id
 
     def test_submit_success(
-        self, config, get_csrf_request_with_db, user, login
+        self, config, get_csrf_request_with_db, user, groups, login
     ):
         from autonomie.views.user.login import LoginEditView
         config.add_route('/users/{id}/login', '/users/{id}/login')
@@ -130,7 +143,7 @@ class TestLoginEditView():
         assert login.auth('new_password')
 
     def test_submit_success_no_password(
-        self, config, get_csrf_request_with_db, user, login
+        self, config, get_csrf_request_with_db, user, groups, login
     ):
         from autonomie.views.user.login import LoginEditView
         config.add_route('/users/{id}/login', '/users/{id}/login')
@@ -192,7 +205,7 @@ class TestLoginPasswordView:
 
 class TestUserLoginEditView:
     def test_submit_success(
-        self, config, get_csrf_request_with_db, user, login
+        self, config, get_csrf_request_with_db, user, groups, login
     ):
         from autonomie.views.user.login import UserLoginEditView
         config.add_route('/users/{id}/login', '/users/{id}/login')
@@ -228,7 +241,7 @@ class TestLoginDisableView:
 
 
 class TestLoginDeleteView:
-    def test_delete(self, config, user, login, get_csrf_request_with_db):
+    def test_delete(self, config, user, groups, login, get_csrf_request_with_db):
         from autonomie.views.user.login import LoginDeleteView
         from autonomie.models.user.login import Login
         config.add_route('/users/{id}', '/users/{id}')

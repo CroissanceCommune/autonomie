@@ -47,15 +47,17 @@ class LoginAddView(BaseFormView):
         )
 
     def submit_success(self, appstruct):
-        password = appstruct.pop('pwd_hash')
+        password = appstruct.pop('pwd_hash', None)
         model = self.schema.objectify(appstruct)
-        groups = appstruct.pop('groups')
-        model.groups = groups
+        groups = appstruct.pop('groups', None)
+        if groups:
+            model.groups = groups
 
         model.user_id = self.context.id
         model.set_password(password)
         self.dbsession.add(model)
         self.dbsession.flush()
+        print(model.login)
 
         next_step = self.form_config.get_next_step()
         if next_step is not None:
@@ -96,8 +98,9 @@ class LoginEditView(BaseFormView):
     def submit_success(self, appstruct):
         password = appstruct.pop('pwd_hash', None)
         model = self.schema.objectify(appstruct, self.current())
-        groups = appstruct.pop('groups')
-        model.groups = groups
+        groups = appstruct.pop('groups', None)
+        if groups is not None:
+            model.groups = groups
         if password:
             model.set_password(password)
         self.dbsession.merge(model)

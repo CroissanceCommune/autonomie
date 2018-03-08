@@ -213,7 +213,7 @@ def get_income_statement_measures_list_schema():
 @colander.deferred
 def deferred_categories_widget(node, kw):
     query = DBSESSION().query(
-        IncomeStatementMeasureTypeCategory.id,
+        IncomeStatementMeasureTypeCategory.label,
         IncomeStatementMeasureTypeCategory.label,
     )
     choices = query.filter_by(active=True).all()
@@ -247,6 +247,7 @@ def get_admin_income_statement_measure_schema(total=False):
                 'label',
                 "account_prefix",
                 'is_total',
+                'order',
             ),
         )
         schema['is_total'].widget = deform.widget.HiddenWidget()

@@ -262,7 +262,6 @@ class CompanyAdd(BaseFormView):
         """
         Edit the database entry and return redirect
         """
-        print("Success")
         come_from = appstruct.pop('come_from', None)
         user_id = appstruct.get('user_id')
         company = Company()

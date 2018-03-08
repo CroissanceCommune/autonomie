@@ -35,30 +35,10 @@ from colanderalchemy import SQLAlchemySchemaNode
 from autonomie_base.consts import CIVILITE_OPTIONS
 
 from autonomie.models.user.user import User
-from autonomie.models.company import Company
 from autonomie.models.expense.types import ExpenseKmType
 from autonomie import forms
 
 logger = log = logging.getLogger(__name__)
-
-
-def get_companies_choices():
-    """
-        Return companies choices for autocomplete
-    """
-    return [comp.name for comp in Company.query([Company.name]).all()]
-
-
-@colander.deferred
-def deferred_company_input(node, kw):
-    """
-        Deferred company autocomplete input widget
-    """
-    companies = get_companies_choices()
-    wid = deform.widget.AutocompleteInputWidget(
-        values=companies,
-    )
-    return wid
 
 
 @colander.deferred
@@ -84,13 +64,6 @@ def deferred_company_disable_default(node, kw):
         if len(company.employees) > 1:
             return False
     return True
-
-
-class CompanySchema(colander.SequenceSchema):
-    company = colander.SchemaNode(
-        colander.String(),
-        title=u"Nom de l'entreprise",
-        widget=deferred_company_input)
 
 
 class UserDisableSchema(colander.MappingSchema):
@@ -185,26 +158,6 @@ def get_list_schema():
         )
     )
     schema.after_bind = remove_admin_list_fields
-    return schema
-
-
-def get_company_association_schema():
-    """
-    Return the schema used to associate a user to an existing company
-    """
-    schema = colander.Schema()
-    schema.add(
-        CompanySchema(
-            name='companies',
-            title=u"Entreprise(s)",
-            widget=deform.widget.SequenceWidget(
-                add_subitem_text_template=u"Ajouter une entreprise",
-                min_len=1,
-            ),
-            description=u"Taper les premières lettres du nom \
-d'une entreprise existante"
-        )
-    )
     return schema
 
 

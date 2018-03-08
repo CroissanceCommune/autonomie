@@ -62,7 +62,7 @@
             class='highlighted'
             % endif
             >
-            <td>type_.label</td>
+            <td>${type_.label |n }</td>
                 % for cell in row:
                 <td>
                 ${cell | n}

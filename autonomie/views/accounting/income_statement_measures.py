@@ -127,8 +127,6 @@ class YearGlobalGrid(object):
                     values = self._collect_values_for_computation(
                         month
                     )
-                    print(values)
-                    print(type_.account_prefix)
                     month_total = type_.compute_total(values)
                     total += month_total
                     datas[month - 1] = month_total
@@ -195,8 +193,8 @@ class YearGlobalGrid(object):
         Format all numeric datas to strings in localized formats
         """
         for row in self.rows:
-            for data in row[1]:
-                row[1] = format_float(data, precision=2)
+            for index, data in enumerate(row[1]):
+                row[1][index] = format_float(data, precision=2)
 
 
 class CompanyIncomeStatementMeasuresListView(BaseListView):

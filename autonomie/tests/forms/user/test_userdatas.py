@@ -48,12 +48,3 @@ def test_add_edit_schema(content, dbsession, pyramid_request):
                 "coordonnees_email1": u"email1@email.fr",
             }
         )
-
-    with pytest.raises(colander.Invalid):
-        schema.deserialize(
-            {
-                'coordonnees_firstname': u"firstname",
-                'coordonnees_lastname': u"lastname",
-                "coordonnees_email1": u"email1@email.fr",
-            }
-        )

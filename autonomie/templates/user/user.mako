@@ -23,73 +23,113 @@
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
 % if request.has_permission('edit.login'):
+<div class='row'>
+<div class='col-md-2'>
+<i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
+</div>
+<div class='col-md-10'>
+
 % if user.login:
-<i class='fa fa-key'></i>
     % if user.login.active:
-    <h4 class='text-success'>Ce compte dispose d'identifiants <span class='help-text'>l'utilisateur peut se connecter à Autonomie</span></h4>
+    <span class='text-success'>
+        Ce compte dispose d'identifiants
+        <b>l'utilisateur peut se connecter à Autonomie</b>
+    </span>
     % else:
-    <h4 class='text-error'>Les identifiants de ce compte sont désactivés <span class='help-text'>l'utilisateur ne peut pas se connecter à Autonomie</span></h4>
+    <span class='text-warning'>
+        Les identifiants de ce compte sont désactivés
+        <b>
+        l'utilisateur ne peut pas se connecter à Autonomie
+        </b>
+    </span>
     % endif
+    <a class='btn btn-default'
+        href="${request.route_path('/users/{id}/login', id=user.id)}"
+        >
+        <i class='fa fa-search'></i>&nbsp;Voir
+    </a>
 % else:
-<h4 class='text-warn'>Ce compte ne dispose pas d'identifiants</h4>
-<a
+    <em>Ce compte ne dispose pas d'identifiants</em><&nbsp;
+    <a
     class='btn btn-primary'
     href="${request.route_path('/users/{id}/login', id=user.id, _query={'action': 'add'})}"
     >
-    <i class='fa fa-plus-circle'></i>&nbsp;Créer des identifiants
-</a>
+        <i class='fa fa-plus-circle'></i>&nbsp;Créer des identifiants
+    </a>
 % endif
-<hr />
-% endif
-% if request.has_permission('view.userdatas'):
-% if user.userdatas:
-<h4>Une fiche de gestion sociale est associée à ce compte</h4>
-<a class='btn btn-success'
-    href="${request.route_path('/users/{id}/userdatas/edit', id=user.id)}"
-    >
-    <i class='fa fa-search'></i>&nbsp;Voir
-</a>
-% else:
-<h4>Aucune fiche de gestion sociale n'est associée à ce compte</h4>
-<a
-    class='btn btn-primary'
-    href="${request.route_path('/users/{id}/userdatas/add', id=user.id)}"
-    >
-    <i class='fa fa-address-card'></i><i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche de gestion sociale
-</a>
-% endif
+</div>
+</div>
 <hr />
 % endif
 
+
+% if request.has_permission('edit.company'):
+<div class='row'>
+<div class='col-md-2'>
+<i class='fa fa-building fa-3x fa-border' style='vertical-align:middle'></i>
+</div>
+<div class='col-md-10'>
 % if user.companies:
     % if len(user.companies) == 1:
-        <h4>Ce compte est rattaché à l'entreprise
+        <span>Ce compte est rattaché à l'entreprise
         <a
             href="${request.route_path('company', id=user.companies[0].id)}"
             title="Voir l'entreprise">
         ${user.companies[0].name}
         </a>
-        </h4>
+        </span>
     % else:
         Ce compte est rattaché aux entreprises suivantes
         <ul>
         % for company in user.companies:
-        % if company.enabled():
         <li>
-            <h4>
             <a
                 href='${request.route_path('company', id=company.id)}'
                 title="Voir l'entreprise"
             >
                 ${company.name}
             </a>
-            </h4>
+            % if not company.enabled():
+            <span class='text-warning'>cette entreprise est désactivée</span>
+            % endif
         </li>
-        % endif
         % endfor
         </ul>
     % endif
 % else:
     Ce compte n'est rattaché à aucune entreprise
+% endif
+</div>
+</div>
+<hr />
+% endif
+
+
+% if request.has_permission('view.userdatas'):
+<div class='row'>
+<div class='col-md-2'>
+<i class='fa fa-address-card fa-3x fa-border' style='vertical-align:middle'></i>
+</div>
+<div class='col-md-10'>
+
+    % if user.userdatas:
+    <span class='text-success'>Une fiche de gestion sociale est associée à ce compte</span>&nbsp;
+    <a class='btn btn-default'
+        href="${request.route_path('/users/{id}/userdatas/edit', id=user.id)}"
+        >
+        <i class='fa fa-search'></i>&nbsp;Voir
+    </a>
+    % else:
+    <em>Aucune fiche de gestion sociale n'est associée à ce compte</em>&nbsp;
+    <a
+        class='btn btn-primary'
+        href="${request.route_path('/users/{id}/userdatas/add', id=user.id)}"
+        >
+        <i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche de gestion sociale
+    </a>
+    % endif
+</div>
+</div>
+<hr />
 % endif
 </%block>

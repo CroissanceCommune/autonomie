@@ -30,6 +30,7 @@
 <div class='col-md-10'>
 
 % if user.login:
+    <div>
     % if user.login.active:
     <span class='text-success'>
         Ce compte dispose d'identifiants
@@ -43,6 +44,7 @@
         </b>
     </span>
     % endif
+    </div>
     <a class='btn btn-default'
         href="${request.route_path('/users/{id}/login', id=user.id)}"
         >
@@ -79,7 +81,7 @@
         </a>
         </span>
     % else:
-        Ce compte est rattaché aux entreprises suivantes
+        Ce compte est rattaché aux entreprises suivantes&nbsp;
         <ul>
         % for company in user.companies:
         <li>
@@ -90,11 +92,16 @@
                 ${company.name}
             </a>
             % if not company.enabled():
-            <span class='text-warning'>cette entreprise est désactivée</span>
+            <span class='text-danger'><i class='fa fa-warning'></i>&nbsp;cette entreprise est désactivée</span>
             % endif
         </li>
         % endfor
         </ul>
+        <a class='btn btn-default'
+            href="${request.route_path('/users/{id}/companies', id=user.id)}"
+            >
+            <i class='fa fa-search'></i>&nbsp;Voir
+        </a>
     % endif
 % else:
     Ce compte n'est rattaché à aucune entreprise
@@ -113,7 +120,7 @@
 <div class='col-md-10'>
 
     % if user.userdatas:
-    <span class='text-success'>Une fiche de gestion sociale est associée à ce compte</span>&nbsp;
+    <div class='text-success'>Une fiche de gestion sociale est associée à ce compte</div>
     <a class='btn btn-default'
         href="${request.route_path('/users/{id}/userdatas/edit', id=user.id)}"
         >

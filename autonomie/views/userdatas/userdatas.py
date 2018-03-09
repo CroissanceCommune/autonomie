@@ -12,12 +12,17 @@ from pyramid.httpexceptions import HTTPFound
 from deform_extensions import AccordionFormWidget
 from js.deform import auto_need
 from genshi.template.eval import UndefinedError
-from sqlalchemy.orm import load_only
+from sqlalchemy.orm import (
+    load_only,
+    Load,
+    joinedload,
+)
 
 from autonomie.models.user.userdatas import (
     UserDatas,
     SocialDocTypeOption,
     UserDatasSocialDocTypes,
+    CaeSituationChange,
 )
 from autonomie.models import files
 from autonomie.forms.user.userdatas import (
@@ -50,7 +55,7 @@ USERDATAS_MENU = AttrMenuDropdown(
     name='userdatas',
     label=u'Gestion sociale',
     default_route=u'/users/{id}/userdatas',
-    icon=u'fa fa-id-card',
+    icon=u'fa fa-id-card-o',
     model_attribute='userdatas',
     perm='view.userdatas',
 )
@@ -58,28 +63,35 @@ USERDATAS_MENU.add_item(
     name="userdatas_view",
     label=u'Voir',
     route_name=u'/users/{id}/userdatas/edit',
-    icon=u'fa fa-file-o',
+    icon=u'fa fa-user-circle-o',
     perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_doctypes",
     label=u'Documents sociaux',
     route_name=u'/users/{id}/userdatas/doctypes',
-    icon=u'fa fa-file-o',
+    icon=u'fa fa-check-square-o',
     perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_py3o",
     label=u'Génération de documents',
     route_name=u'/users/{id}/userdatas/py3o',
-    icon=u'fa fa-file-o',
+    icon=u'fa fa-puzzle-piece',
     perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_filelist",
     label=u'Portefeuille de documents',
     route_name=u'/users/{id}/userdatas/filelist',
-    icon=u'fa fa-file-o',
+    icon=u'fa fa-briefcase',
+    perm='view.userdatas',
+)
+USERDATAS_MENU.add_item(
+    name="userdatas_history",
+    label=u'Historique',
+    route_name=u'/users/{id}/userdatas/history',
+    icon=u'fa fa-history',
     perm='view.userdatas',
 )
 
@@ -315,7 +327,7 @@ votre administrateur",
                 "error"
             )
 
-        return HTTPFound(self.request.current_route_path())
+        return HTTPFound(self.request.current_route_path(_query={}))
 
     def __call__(self):
         doctemplate_id = self.request.GET.get('template_id')
@@ -364,6 +376,43 @@ class UserUserDatasFileList(UserDatasFileList):
         return self.context.userdatas
 
 
+class UserDatasHistory(BaseView):
+    @property
+    def current_userdatas(self):
+        return self.context
+
+    def __call__(self):
+        status_query = CaeSituationChange.query()
+        status_query = status_query.options(
+            Load(CaeSituationChange).load_only("date", "id"),
+            joinedload("situation").load_only("label"),
+        )
+        status_query = status_query.filter_by(
+            userdatas_id=self.current_userdatas.id
+        )
+        template_query = files.TemplatingHistory.query()
+        template_query = template_query.options(
+            Load(files.TemplatingHistory).load_only('id', 'created_at'),
+            joinedload("user").load_only('firstname', 'lastname'),
+            joinedload('template').load_only('name'),
+        )
+        template_query = template_query.filter_by(
+            userdatas_id=self.current_userdatas.id
+        )
+
+        return dict(
+            status_history=status_query.all(),
+            user=self.current_userdatas.user,
+            template_history=template_query.all(),
+        )
+
+
+class UserUserDatasHistory(UserDatasHistory):
+    @property
+    def current_userdatas(self):
+        return self.context.userdatas
+
+
 def mydocuments_view(context, request):
     """
     View callable collecting datas for showing the social docs associated to the
@@ -402,7 +451,9 @@ def add_routes(config):
         traverse='/userdatas/{id}',
     )
 
-    for view in ('edit', 'doctypes', 'py3o', 'mydocuments', "filelist"):
+    for view in (
+        'edit', 'doctypes', 'py3o', 'mydocuments', "filelist", "history"
+    ):
         config.add_route(
             '/userdatas/{id}/%s' % view,
             '/userdatas/{id}/%s' % view,
@@ -494,6 +545,20 @@ def add_views(config):
         route_name="/users/{id}/userdatas/filelist",
         permission="view.userdatas",
         renderer="/userdatas/filelist.mako",
+        layout="user"
+    )
+    config.add_view(
+        UserDatasHistory,
+        route_name="/userdatas/{id}/history",
+        permission="view.userdatas",
+        renderer="/userdatas/history.mako",
+        layout="user"
+    )
+    config.add_view(
+        UserUserDatasHistory,
+        route_name="/users/{id}/userdatas/history",
+        permission="view.userdatas",
+        renderer="/userdatas/history.mako",
         layout="user"
     )
     config.add_view(

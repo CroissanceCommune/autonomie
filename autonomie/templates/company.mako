@@ -60,7 +60,7 @@
         <div class='panel-heading'>
         Informations générales
         % if not company.enabled():
-            <span class='label label-warning'>Cette entreprise a été désactivée</span>
+            <span class='text-danger'><i class='fa fa-warning'></i>&nbsp;cette entreprise a été désactivée</span>
         % endif
         </div>
         <div class='panel-body'>
@@ -89,7 +89,7 @@
     </div>
     <div class='panel panel-default page-block'>
         <div class='panel-heading'>
-        Employé(s
+        Employé(s)
         </div>
         <div class='panel-body'>
         % for user in company.employees:
@@ -97,6 +97,11 @@
                 href="${request.route_path('/users/{id}', id=user.id)}"
                 title='Voir ce compte'>
                 <i class='glyphicon glyphicon-user'></i>&nbsp;${api.format_account(user)}
+                % if hasattr(user, 'login') and not user.login.active:
+                <span class='text-danger'>
+                <i class='fa fa-warning'></i>&nbsp;ses identifiants sont désactivés
+                </span>
+                % endif
             </a>
             <br />
         % endfor

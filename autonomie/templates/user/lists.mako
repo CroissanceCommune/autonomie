@@ -27,6 +27,8 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
+<%namespace file="/base/utils.mako" import="company_disabled_msg"/>
+<%namespace file="/base/utils.mako" import="login_disabled_msg"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='afteractionmenu'>
@@ -110,7 +112,7 @@
                             ${api.format_account(user)}
                             </a>
                             % if not user.login.active:
-                            <span class='label label-warning pull-right'>Désactivé</span>
+                            ${login_disabled_msg()}
                             % endif
                             </td>
                             <td><a href="${url}">${user.email}</a></td>
@@ -121,10 +123,8 @@
                                         <li>
                                         <a href="${company_url}">${company.name} (<small>${company.goal}</small>)</a>
                                             % if request.has_permission('admin_company', company):
-                                                % if company.enabled():
-                                                    <%doc> -- <span class='label label-success pull-right'>Cette entreprise est active</span> </%doc>
-                                                % else:
-                                                    <span class='label label-warning pull-right'>Désactivée</span>
+                                                % if not company.enabled():
+                                                    ${company_disabled_msg()}
                                                 % endif
                                             % endif
                                         </li>

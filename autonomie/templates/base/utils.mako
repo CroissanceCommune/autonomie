@@ -286,4 +286,9 @@
         % endfor
     </dl>
 </%def>
-
+<%def name="company_disabled_msg()">
+&nbsp;<span class='text-danger'><i class='fa fa-warning'>&nbsp;</i>désactivée</span>
+</%def>
+<%def name="login_disabled_msg()">
+&nbsp;<span class='text-danger'><i class='fa fa-warning'>&nbsp;</i>désactivé</span>
+</%def>

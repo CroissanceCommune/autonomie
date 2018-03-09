@@ -22,6 +22,7 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="table_btn"/>
+<%namespace file="/base/utils.mako" import="company_disabled_msg" />
 <%block name="mainblock">
     <table class="table table-striped table-condensed table-hover">
         <thead>
@@ -42,10 +43,7 @@
                     <td onclick="${onclick}" class="rowlink">
                         ${company.name} ( ${company.code_compta} )
                         % if not company.enabled():
-                        <span class='text-danger'>
-                        <i class='fa fa-warning'></i>&nbsp;
-                               cette entreprise est désactivée
-                                </span>
+                        ${company_disabled_msg()}
                         % endif
                     </td>
                     <td onclick="${onclick}" class="rowlink">

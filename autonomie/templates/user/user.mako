@@ -21,27 +21,32 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
+<%namespace file="/base/utils.mako" import="company_disabled_msg" />
 <%block name="mainblock">
 % if request.has_permission('edit.login'):
 <div class='row'>
-<div class='col-md-2'>
-<i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
-</div>
-<div class='col-md-10'>
 
 % if user.login:
     <div>
     % if user.login.active:
+    <div class='col-md-2'>
+    <i class='fa fa-lock fa-3x fa-border text-success' style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
     <span class='text-success'>
         Ce compte dispose d'identifiants
-        <b>l'utilisateur peut se connecter à Autonomie</b>
+        <strong>l'utilisateur peut se connecter à Autonomie</strong>
     </span>
     % else:
-    <span class='text-warning'>
+    <div class='col-md-2'>
+    <i class='fa fa-lock fa-3x fa-border text-danger' style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
+    <span class='text-danger'>
         Les identifiants de ce compte sont désactivés
-        <b>
+        <strong>
         l'utilisateur ne peut pas se connecter à Autonomie
-        </b>
+        </strong>
     </span>
     % endif
     </div>
@@ -51,6 +56,10 @@
         <i class='fa fa-search'></i>&nbsp;Voir
     </a>
 % else:
+    <div class='col-md-2'>
+    <i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
     <em>Ce compte ne dispose pas d'identifiants</em><&nbsp;
     <a
     class='btn btn-primary'
@@ -92,7 +101,7 @@
                 ${company.name}
             </a>
             % if not company.enabled():
-            <span class='text-danger'><i class='fa fa-warning'></i>&nbsp;cette entreprise est désactivée</span>
+            ${company_disabled_msg()}
             % endif
         </li>
         % endfor
@@ -114,12 +123,13 @@
 
 % if request.has_permission('view.userdatas'):
 <div class='row'>
-<div class='col-md-2'>
-<i class='fa fa-id-card-o fa-3x fa-border' style='vertical-align:middle'></i>
-</div>
-<div class='col-md-10'>
-
     % if user.userdatas:
+    <div class='col-md-2'>
+        <i
+            class='fa fa-id-card-o fa-3x fa-border text-success'
+            style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
     <div class='text-success'>Une fiche de gestion sociale est associée à ce compte</div>
     <a class='btn btn-default'
         href="${request.route_path('/users/{id}/userdatas/edit', id=user.id)}"
@@ -127,13 +137,19 @@
         <i class='fa fa-search'></i>&nbsp;Voir
     </a>
     % else:
-    <em>Aucune fiche de gestion sociale n'est associée à ce compte</em>&nbsp;
-    <a
-        class='btn btn-primary'
-        href="${request.route_path('/users/{id}/userdatas/add', id=user.id)}"
-        >
-        <i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche de gestion sociale
-    </a>
+    <div class='col-md-2'>
+        <i
+            class='fa fa-id-card-o fa-3x fa-border'
+            style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
+        <em>Aucune fiche de gestion sociale n'est associée à ce compte</em>&nbsp;
+        <a
+            class='btn btn-primary'
+            href="${request.route_path('/users/{id}/userdatas/add', id=user.id)}"
+            >
+            <i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche de gestion sociale
+        </a>
     % endif
 </div>
 </div>

@@ -284,13 +284,16 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             self.session.add(condition)
 
     def _an_user(self):
-        from autonomie.models.user import (
+        from autonomie.models.user.login import (
+            Login,
+        )
+        from autonomie.models.user.user import (
             User,
         )
         self.session.execute("Update accounts set session_datas='{}'")
         counter = itertools.count()
         found_contractor = False
-        for u in self.session.query(User).filter_by(active='Y'):
+        for u in self.session.query(Login).join(User).filter_by(active=True):
             index = counter.next()
             if index == 1:
                 u.login = u"admin1"
@@ -306,26 +309,26 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             else:
                 u.login = u"user_{0}".format(index)
 
-            u.lastname = self.faker.last_name()
-            u.firstname = self.faker.first_name()
-            u.email = self.faker.ascii_safe_email()
+            u.user.lastname = self.faker.last_name()
+            u.user.firstname = self.faker.first_name()
+            u.user.email = self.faker.ascii_safe_email()
             u.set_password(u.login)
-            if u.has_userdatas():
-                u.userdatas.coordonnees_lastname = u.lastname
-                u.userdatas.coordonnees_firstname = u.firstname
-                u.userdatas.coordonnees_email1 = u.email
+            if u.user.has_userdatas():
+                u.user.userdatas.coordonnees_lastname = u.user.lastname
+                u.user.userdatas.coordonnees_firstname = u.user.firstname
+                u.user.userdatas.coordonnees_email1 = u.email
 
-        for u in self.session.query(User).filter_by(active='N'):
+        for u in self.session.query(Login).join(User).filter_by(active=False):
             index = counter.next()
             u.login = u"user_{0}".format(index)
-            u.lastname = self.faker.last_name()
-            u.firstname = self.faker.first_name()
-            u.email = self.faker.ascii_safe_email()
+            u.user.lastname = self.faker.last_name()
+            u.user.firstname = self.faker.first_name()
+            u.user.email = self.faker.ascii_safe_email()
             u.set_password(u.login)
-            if u.has_userdatas():
-                u.userdatas.coordonnees_lastname = u.lastname
-                u.userdatas.coordonnees_firstname = u.firstname
-                u.userdatas.coordonnees_email1 = u.email
+            if u.user.has_userdatas():
+                u.user.userdatas.coordonnees_lastname = u.lastname
+                u.user.userdatas.coordonnees_firstname = u.firstname
+                u.user.userdatas.coordonnees_email1 = u.email
 
     def _an_userdatas(self):
         from autonomie.models.user import (

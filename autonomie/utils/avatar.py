@@ -27,6 +27,8 @@
 """
 import logging
 
+from pyramid.httpexceptions import HTTPFound
+from pyramid.security import forget
 from sqlalchemy.orm import (
     load_only,
     contains_eager,
@@ -55,7 +57,10 @@ def get_avatar(request):
         query = query.options(load_only("firstname", "lastname"))
         query = query.options(contains_eager(User.login).load_only('login'))
         query = query.filter(Login.login == login)
-        result = query.one()
+        result = query.first()
+        if result is None:
+            forget(request)
+            raise HTTPFound("/")
     else:
         logger.info("  + No user found")
     return result

@@ -173,8 +173,10 @@ class CompanyList(BaseListView):
 
     def filter_active(self, query, appstruct):
         active = appstruct.get('active', False)
+
         if active in (False, colander.null):
-            query = query.filter_by(active='Y')
+            query = query.filter_by(active=True)
+
         return query
 
     def filter_search(self, query, appstruct):

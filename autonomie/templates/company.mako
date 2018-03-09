@@ -59,7 +59,7 @@
     <div class='panel panel-default page-block'>
         <div class='panel-heading'>
         Informations générales
-        % if not company.enabled():
+        % if not company.active:
             <span class='text-danger'><i class='fa fa-warning'></i>&nbsp;cette entreprise a été désactivée</span>
         % endif
         </div>

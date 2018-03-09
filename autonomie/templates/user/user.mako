@@ -100,7 +100,7 @@
             >
                 ${company.name}
             </a>
-            % if not company.enabled():
+            % if not company.active:
             ${company_disabled_msg()}
             % endif
         </li>

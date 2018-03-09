@@ -123,7 +123,7 @@
                                         <li>
                                         <a href="${company_url}">${company.name} (<small>${company.goal}</small>)</a>
                                             % if request.has_permission('admin_company', company):
-                                                % if not company.enabled():
+                                                % if not company.active:
                                                     ${company_disabled_msg()}
                                                 % endif
                                             % endif

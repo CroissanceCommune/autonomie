@@ -58,6 +58,13 @@ def update_database_structure():
     for index in ('egw_accounts_account_lid', 'login', 'uq_accounts_login'):
         op.execute('ALTER TABLE accounts DROP INDEX IF EXISTS %s' % index)
 
+    op.alter_column(
+        "company", "active", new_column_name="old_active", type_=sa.String(1)
+    )
+    op.add_column('company', sa.Column('active', sa.Boolean()))
+    op.execute("UPDATE company set active='1' where old_active='Y'")
+    op.execute("UPDATE company set active='0' where old_active='N'")
+
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION

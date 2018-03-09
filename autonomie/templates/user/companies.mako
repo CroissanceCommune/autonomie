@@ -35,14 +35,14 @@
             % for company in companies:
                 <% url = request.route_path('company', id=company.id) %>
                 <% onclick = "document.location='{url}'".format(url=url) %>
-                % if not company.enabled():
+                % if not company.active:
                     <tr class="danger">
                 % else:
                     <tr>
                 % endif
                     <td onclick="${onclick}" class="rowlink">
                         ${company.name} ( ${company.code_compta} )
-                        % if not company.enabled():
+                        % if not company.active:
                         ${company_disabled_msg()}
                         % endif
                     </td>
@@ -78,7 +78,7 @@
 
                         % endif
 
-                        % if company.enabled():
+                        % if company.active:
                             <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
                             <% msg = u"Cette entreprise n\\'apparaîtra plus dans les listings de factures. Êtes-vous sûr de vouloir continuer ?" %>
                             ${table_btn(url, \

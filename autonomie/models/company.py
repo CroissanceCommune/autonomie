@@ -26,8 +26,6 @@
     Company model
 """
 import logging
-import colander
-import deform
 import datetime
 
 from sqlalchemy import (
@@ -38,12 +36,12 @@ from sqlalchemy import (
     Text,
     ForeignKey,
     Date,
+    Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
     deferred,
     backref,
-    load_only,
 )
 
 from autonomie_base.models.base import (
@@ -55,7 +53,6 @@ from autonomie_base.models.types import (
     PersistentACLMixin,
 )
 
-from autonomie import forms
 from autonomie.compute import math_utils
 from autonomie.models.options import (
     ConfigurableOption,
@@ -149,12 +146,7 @@ class Company(DBBASE, PersistentACLMixin):
             nullable=False,
         )
     )
-    active = deferred(
-        Column(
-            "active",
-            String(1),
-            default="Y")
-    )
+    active = deferred(Column(Boolean(), default=True))
     RIB = deferred(
         Column(
             "RIB",
@@ -182,7 +174,7 @@ class Company(DBBASE, PersistentACLMixin):
         backref=backref(
             "company",
             info={
-                'colanderalchemy': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
                 "export": {'exclude': True}
             }
         ),
@@ -193,7 +185,7 @@ class Company(DBBASE, PersistentACLMixin):
         order_by='Task.date',
         back_populates="company",
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         },
     )
@@ -212,7 +204,10 @@ class Company(DBBASE, PersistentACLMixin):
 
     header_id = Column(
         ForeignKey('file.id'),
-        info={'colanderalchemy': forms.EXCLUDED, 'export': {'exclude': True}},
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        },
     )
     header_file = relationship(
         "File",
@@ -222,7 +217,10 @@ class Company(DBBASE, PersistentACLMixin):
 
     logo_id = Column(
         ForeignKey('file.id'),
-        info={'colanderalchemy': forms.EXCLUDED, 'export': {'exclude': True}},
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        },
     )
     logo_file = relationship(
         "File",
@@ -239,13 +237,16 @@ class Company(DBBASE, PersistentACLMixin):
         secondary=COMPANY_ACTIVITY,
         backref=backref(
             'companies',
-            info={'colanderalchemy': forms.EXCLUDED, 'export': forms.EXCLUDED},
+            info={
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
+            },
         ),
         info={
             'colanderalchemy': {
                 'title': u'Activités',
             },
-            'export': forms.EXCLUDED
+            'export': {'exclude': True},
         },
     )
 
@@ -300,27 +301,27 @@ class Company(DBBASE, PersistentACLMixin):
         else:
             query = super(Company, cls).query()
         if active:
-            query = query.filter(cls.active == "Y")
+            query = query.filter(cls.active == True)
         return query.order_by(cls.name)
 
     def disable(self):
         """
             Disable the current company
         """
-        self.active = "N"
+        self.active = False
 
     def enable(self):
         """
             enable a company
         """
-        self.active = "Y"
+        self.active = True
 
     def enabled(self):
-        return self.active == 'Y'
+        return self.active
 
     @property
     def archived(self):
-        return self.active != 'Y'
+        return not self.active
 
     def todict(self):
         """
@@ -440,106 +441,3 @@ class Company(DBBASE, PersistentACLMixin):
         """
         ca = self._autonomie_service.get_turnover(self, year)
         return math_utils.integer_to_amount(ca, precision=5)
-
-
-# Company node related tools
-def get_deferred_company_choices(widget_options):
-    """
-    Build a deferred for company selection widget
-    """
-    default_entry = widget_options.pop('default', None)
-
-    @colander.deferred
-    def deferred_company_choices(node, kw):
-        """
-        return a deferred company selection widget
-        """
-        values = [(comp.id, comp.name) for comp in Company.query()]
-        if default_entry is not None:
-            values.insert(0, default_entry)
-        return deform.widget.Select2Widget(
-            values=values,
-            placeholder=u"Sélectionner une entreprise",
-            **widget_options
-            )
-    return deferred_company_choices
-
-
-def company_node(**kw):
-    """
-    Return a schema node for company selection
-    """
-    widget_options = kw.pop('widget_options', {})
-    return colander.SchemaNode(
-        colander.Integer(),
-        widget=get_deferred_company_choices(widget_options),
-        **kw
-    )
-
-
-# Customer node related tools
-@colander.deferred
-def deferred_fullcustomer_list_widget(node, kw):
-    from autonomie.models.project import build_customer_values
-    from autonomie.models.customer import Customer
-    values = [('', u"Tous les clients")]
-    for comp in Company.query().options(load_only("id", "name")):
-        customers = Customer.label_query().filter_by(company_id=comp.id)
-        values.append(
-            deform.widget.OptGroup(
-                comp.name,
-                *build_customer_values(customers, default=False)
-            )
-        )
-    return deform.widget.Select2Widget(
-        values=values,
-        placeholder=u"Sélectionner un client"
-    )
-
-
-@colander.deferred
-def deferred_customer_list_widget(node, kw):
-    values = [('', u'Tous les clients'), ]
-    company = kw['request'].context
-    for cust in company.customers:
-        values.append(
-            (cust.id, u"%s (%s)" % (cust.name, cust.code))
-        )
-    return deform.widget.Select2Widget(
-        values=values,
-        placeholder=u'Sélectionner un client',
-    )
-
-
-@colander.deferred
-def deferred_company_customer_validator(node, kw):
-    """
-    Ensure we don't query customers from other companies
-    """
-    company = kw['request'].context
-    values = [customer.id for customer in company.customers]
-    return colander.OneOf(values)
-
-
-def customer_node(is_admin=False):
-    """
-    return a customer selection node
-
-        is_admin
-
-            is the associated view restricted to company's invoices
-    """
-    if is_admin:
-        deferred_customer_widget = deferred_fullcustomer_list_widget
-        deferred_customer_validator = None
-    else:
-        deferred_customer_widget = deferred_customer_list_widget
-        deferred_customer_validator = deferred_company_customer_validator
-
-    return colander.SchemaNode(
-        colander.Integer(),
-        name='customer_id',
-        widget=deferred_customer_widget,
-        validator=deferred_customer_validator,
-        missing=colander.drop,
-    )

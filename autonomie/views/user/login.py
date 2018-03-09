@@ -141,6 +141,18 @@ class UserLoginPasswordView(UserLoginEditView):
 
 class LoginDisableView(DisableView):
 
+    def on_disable(self):
+        for company in self.context.user.companies:
+            active_employees = [
+                emp
+                for emp in company.employees
+                if hasattr(emp, 'login') and emp.login.active and
+                emp.id != self.context.user.id
+            ]
+            if company.enabled and not active_employees:
+                company.disable()
+                self.request.dbsession.merge(company)
+
     def redirect(self):
         return HTTPFound(
             self.request.route_path(

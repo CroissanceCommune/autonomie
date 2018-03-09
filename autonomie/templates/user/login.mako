@@ -64,7 +64,9 @@ pour se connecter à Autonomie
         </a>
         % endif
         <div>
-        <h5>Nom d'utilisateur : ${login.login}</h5>
+        <hr />
+        Nom d'utilisateur <strong>${login.login}</strong>
+        <hr />
         Fait partie des groupes
         <ul>
         % for group in login._groups:

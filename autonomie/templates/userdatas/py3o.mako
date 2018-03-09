@@ -22,69 +22,30 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-<div class="col-md-6">
-    <h3>${title}</h3>
+<h3>${title}</h3>
+<hr />
 % for template in templates:
-    <% url = request.current_route_path(_query=dict(template_id=template.id)) %>
-        <li>
-            <a href="${url}">
-                <i class="fa fa-file fa-1x"></i>
-                ${template.description} ( ${template.name} )
-            </a>
-        </li>
-% endfor
-    </ul>
-    <div class='alert alert-info'>
-    % if templates == []:
-        <i class='fa fa-question-circle fa-2x'></i>
-        Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
-            <br />
-    % endif
-    % if request.has_permission('admin'):
-        <a class='btn btn-success'
-            href="${request.route_path('templates')}">
-        <i class="glyphicon glyphicon-plus"></i>
-            Déposer de nouveau modèle de document
+<% url = request.current_route_path(_query=dict(template_id=template.id)) %>
+    <li>
+        <a href="${url}">
+            <i class="fa fa-file fa-1x"></i>
+            ${template.description} ( ${template.name} )
         </a>
-    % endif
-    </div>
+    </li>
+% endfor
+</ul>
+<div class='alert alert-info'>
+% if templates == []:
+    <i class='fa fa-question-circle fa-2x'></i>
+    Vous devez déposer des modèles de document dans Autonomie pour pouvoir accéder à cet outil.
+        <br />
+% endif
+% if request.has_permission('admin'):
+    <a class='btn btn-success'
+        href="${request.route_path('templates')}">
+    <i class="glyphicon glyphicon-plus"></i>
+        Déposer de nouveau modèle de document
+    </a>
+% endif
 </div>
-            <div class='col-md-6'>
-                <h3>Historique des documents générés depuis Autonomie</h3>
-                <span class='help-block'>
-                    <i class='fa fa-question-circle fa-2x'></i>
-                    Chaque fois qu'un utilisateur génère un document depuis cette page, une entrée est ajoutée à l'historique.<br />
-                    Si nécessaire, pour rendre plus pertinente cette liste, vous pouvez supprimer certaines entrées.
-                </span>
-                <table class='table table-stripped table-condensed'>
-                    <thead>
-                        <th>Nom du document</th>
-                        <th>Généré par</th>
-                        <th>Date</th>
-                        <th class='text-right'>Actions</th>
-                    </thead>
-                    <tbody>
-                        % for history in current_userdatas.template_history:
-                            % if history.template is not None:
-                                <tr>
-                                    <td>${history.template.description}</td>
-                                    <td>${api.format_account(histor6user)}</td>
-                                    <td>${api.format_datetime(history.created_at)}</td>
-                                    <td class='text-right'>
-                                        <% url = request.route_path('templatinghistory', id=history.id, _query=dict(action='delete')) %>
-                                        ${table_btn(url, \
-                                        u"Supprimer cette entrée",\
-                                        u"Supprimer cette entrée de l'historique", \
-                                        icon='trash', \
-                                        css_class="btn-danger")}
-                                    </td>
-                                </tr>
-                            % endif
-                        % endfor
-                        % if len(current_userdatas.template_history) == 0:
-                            <tr><td colspan='4'>Aucun document n'a été généré</td></tr>
-                        % endif
-                    </tbody>
-                </table>
-            </div>
 </%block>

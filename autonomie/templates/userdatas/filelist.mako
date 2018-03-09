@@ -23,21 +23,20 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_filetable" />
 <%block name="mainblock">
-<div class='col-md-12'>
-    <h4>Liste des documents disponibles</h4>
-    <div class='alert alert-info'>
-        <i class='fa fa-question-circle fa-2x'></i>
-        Cette liste présente l'ensemble des documents déposés dans Autonomie ainsi que l'ensemble des documents générés depuis l'onglet Génération de documents.<br />
-        Ces documents sont visibles par l'entrepreneur.
-        <br />
-        <br />
-        <a class='btn btn-success'
-        href="${request.route_path('/users/{id}/userdatas', id=current_userdatas.user.id, _query=dict(action='attach_file'))}"
-        title="Déposer un document dans autonomie">
-        <i class="glyphicon glyphicon-plus"></i>
-        Déposer un document
-    </a>
-    </div>
-    ${format_filetable(current_userdatas.children)}
+<h3>Liste des documents rattachés à cette fiche de gestion sociale</h3>
+<hr />
+<div class='alert alert-info'>
+    <i class='fa fa-question-circle fa-2x'></i>
+    Cette liste présente l'ensemble des documents déposés dans Autonomie ainsi que l'ensemble des documents générés depuis l'onglet Génération de documents.<br />
+    Ces documents sont visibles par l'entrepreneur.
+    <br />
+    <br />
+    <a class='btn btn-success'
+    href="${request.route_path('/users/{id}/userdatas', id=current_userdatas.user.id, _query=dict(action='attach_file'))}"
+    title="Déposer un document dans autonomie">
+    <i class="glyphicon glyphicon-plus"></i>
+    Déposer un document
+</a>
 </div>
+${format_filetable(current_userdatas.children)}
 </%block>

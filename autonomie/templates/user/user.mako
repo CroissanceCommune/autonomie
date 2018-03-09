@@ -115,7 +115,7 @@
 % if request.has_permission('view.userdatas'):
 <div class='row'>
 <div class='col-md-2'>
-<i class='fa fa-address-card fa-3x fa-border' style='vertical-align:middle'></i>
+<i class='fa fa-id-card-o fa-3x fa-border' style='vertical-align:middle'></i>
 </div>
 <div class='col-md-10'>
 

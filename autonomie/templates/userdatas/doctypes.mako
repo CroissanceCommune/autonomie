@@ -23,10 +23,10 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_filetable" />
 <%block name="mainblock">
-<div class="col-md-12">
+<h3>${title}</h3>
+<hr />
 <div class='alert alert-info'>
 Cochez ici les documents sociaux que l'entrepreneur a déjà transmis
 </div>
-    ${form|n}
-</div>
+${form|n}
 </%block>

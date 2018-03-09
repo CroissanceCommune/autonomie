@@ -58,6 +58,7 @@ from autonomie.views import (
     submit_btn,
     BaseListView,
     add_panel_view,
+    DisableView,
 )
 from autonomie.views.render_api import format_account
 from autonomie.forms.company import (
@@ -68,6 +69,13 @@ from autonomie.forms.company import (
 
 
 log = logging.getLogger(__name__)
+
+
+ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
+DISABLE_MSG = u"L'entreprise {0} a été désactivée."
+
+ENABLE_ERR_MSG = u"Erreur à l'activation de l'entreprise {0}."
+DISABLE_ERR_MSG = u"Erreur à la désactivation de l'entreprise {0}."
 
 
 def company_index(request):
@@ -95,13 +103,6 @@ def company_view(request):
         title=company.name.title(),
         company=company,
     )
-
-
-ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
-DISABLE_MSG = u"L'entreprise {0} a été désactivée."
-
-ENABLE_ERR_MSG = u"Erreur à l'activation de l'entreprise {0}."
-DISABLE_ERR_MSG = u"Erreur à la désactivation de l'entreprise {0}."
 
 
 def company_toggle_active(request, company, action):
@@ -154,6 +155,33 @@ def company_enable(request, company=None):
     """
     action = "enable"
     return company_toggle_active(request, company, action)
+
+
+class CompanyDisableView(DisableView):
+    def on_disable(self):
+        """
+        Disable logins of users that are only attached to this company
+        """
+        for user in self.context.employees:
+            other_enabled_companies = [
+                company
+                for company in user.companies
+                if company.active and company.id != self.context.id
+            ]
+            if hasattr(user, 'login') and user.login.active and \
+                    len(other_enabled_companies) == 0:
+                user.login.active = False
+                self.request.dbsession.merge(user.login)
+                user_url = self.request.route_path(
+                    '/users/{id}/login', id=user.id
+                )
+                self.request.flash(
+                    u"Les identifiants de <a href='{0}'>{1}</a> ont été \
+                    désactivés".format(user_url, user.label)
+                )
+
+    def redirect(self):
+        return HTTPFound(self.request.referrer)
 
 
 class CompanyList(BaseListView):

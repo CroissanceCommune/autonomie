@@ -9,7 +9,6 @@ import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.models import company
 from autonomie.models.task.estimation import (
     Estimation,
     PaymentLine,
@@ -22,6 +21,10 @@ from autonomie.models.task.invoice import (
 )
 
 from autonomie import forms
+from autonomie.forms.company import (
+    company_node,
+    customer_node,
+)
 from autonomie.forms.custom_types import AmountType
 from autonomie.forms.tasks.lists import (
     PeriodSchema,
@@ -51,12 +54,12 @@ def get_list_schema(is_global=False):
 
     del schema['search']
 
-    schema.insert(0, company.customer_node(is_global))
+    schema.insert(0, customer_node(is_global))
 
     if is_global:
         schema.insert(
             0,
-            company.company_node(
+            company_node(
                 name='company_id',
                 missing=colander.drop,
                 widget_options={'default': ('', u'Toutes les entreprises')}

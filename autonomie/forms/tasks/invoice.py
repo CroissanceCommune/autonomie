@@ -33,7 +33,6 @@ import deform_extensions
 from colanderalchemy import SQLAlchemySchemaNode
 from pyramid.security import has_permission
 
-from autonomie.models import company
 from autonomie.models.task import (
     invoice,
     Estimation,
@@ -55,6 +54,10 @@ from autonomie.models.task.invoice import (
 
 from autonomie.utils.strings import format_amount
 from autonomie import forms
+from autonomie.forms.company import (
+    customer_node,
+    company_node,
+)
 from autonomie.forms.custom_types import (
     AmountType,
 )
@@ -276,12 +279,12 @@ def get_list_schema(is_admin=False):
         )
     )
 
-    schema.insert(0, company.customer_node(is_admin))
+    schema.insert(0, customer_node(is_admin))
 
     if is_admin:
         schema.insert(
             0,
-            company.company_node(
+            company_node(
                 name='company_id',
                 missing=colander.drop,
                 widget_options={'default': ('', u'Toutes les entreprises')},

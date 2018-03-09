@@ -38,7 +38,7 @@ from autonomie.models.activity import (
     ATTENDANCE_STATUS_SEARCH,
 )
 from autonomie.forms.user import user_node
-from autonomie.models import company
+from autonomie.forms.company import company_node
 from autonomie.models.task.invoice import get_invoice_years
 
 from autonomie import forms
@@ -133,7 +133,7 @@ class CompanySequence(colander.SequenceSchema):
     """
     schema for the list of attached companies
     """
-    company_id = company.company_node(title=u"une entreprise")
+    company_id = company_node(title=u"une entreprise")
 
 
 class CreateActivitySchema(colander.MappingSchema):

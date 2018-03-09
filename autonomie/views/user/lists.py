@@ -93,6 +93,8 @@ class GeneralUserList(BaseListView):
         active = appstruct.get('active')
         if active == 'Y':
             query = query.filter(Login.active == True)
+        elif active == "N":
+            query = query.filter(Login.active == False)
         return query
 
 

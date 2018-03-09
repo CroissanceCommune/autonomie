@@ -105,58 +105,6 @@ def company_view(request):
     )
 
 
-def company_toggle_active(request, company, action):
-    """
-    Toggle compay enabled/disabled
-    """
-    if company is None:
-        company = request.context
-
-    try:
-        if action == 'disable' and company.enabled():
-            company.disable()
-            message = DISABLE_MSG.format(company.name)
-            log.info(message)
-            request.session.flash(message)
-        elif action == 'enable' and not company.enabled():
-            company.enable()
-            request.dbsession.merge(company)
-            message = ENABLE_MSG.format(company.name)
-            log.info(message)
-            request.session.flash(message)
-    except:
-        if action == "disable":
-            err_message = DISABLE_ERR_MSG.format(company.name)
-        else:
-            err_message = ENABLE_ERR_MSG.format(company.name)
-        log.exception(err_message)
-        request.session.flash(err_message, "error")
-
-    if request.context.__name__ != 'company':
-        # We don't want to raise a redirect if the view code is called from
-        # another view
-        return
-    else:
-        come_from = request.referer
-        return HTTPFound(come_from)
-
-
-def company_disable(request, company=None):
-    """
-    Disable a company
-    """
-    action = "disable"
-    return company_toggle_active(request, company, action)
-
-
-def company_enable(request, company=None):
-    """
-    Ensable a company
-    """
-    action = "enable"
-    return company_toggle_active(request, company, action)
-
-
 class CompanyDisableView(DisableView):
     def on_disable(self):
         """
@@ -221,13 +169,14 @@ class CompanyList(BaseListView):
             'pencil',
             {}
         )
-        if not company.archived:
+        url = self.request.route_path(
+            'company',
+            id=company.id,
+            _query=dict(action="disable")
+        )
+        if company.active:
             yield (
-                self.request.route_path(
-                    'company',
-                    id=company.id,
-                    _query=dict(action="disable")
-                ),
+                url,
                 u"Archiver",
                 u"Archiver l'entreprise",
                 'book',
@@ -235,11 +184,7 @@ class CompanyList(BaseListView):
             )
         else:
             yield (
-                self.request.route_path(
-                    'company',
-                    id=company.id,
-                    _query=dict(action="enable")
-                ),
+                url,
                 u"Désarchiver",
                 u"Désarchiver l'entreprise",
                 'book',
@@ -475,13 +420,7 @@ def includeme(config):
         permission="edit_company",
     )
     config.add_view(
-        company_enable,
-        route_name='company',
-        request_param='action=enable',
-        permission="admin_company",
-    )
-    config.add_view(
-        company_disable,
+        CompanyDisableView,
         route_name='company',
         request_param='action=disable',
         permission="admin_company",

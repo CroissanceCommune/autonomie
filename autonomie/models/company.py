@@ -304,25 +304,6 @@ class Company(DBBASE, PersistentACLMixin):
             query = query.filter(cls.active == True)
         return query.order_by(cls.name)
 
-    def disable(self):
-        """
-            Disable the current company
-        """
-        self.active = False
-
-    def enable(self):
-        """
-            enable a company
-        """
-        self.active = True
-
-    def enabled(self):
-        return self.active
-
-    @property
-    def archived(self):
-        return not self.active
-
     def todict(self):
         """
             return a dict representation

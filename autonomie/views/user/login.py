@@ -149,7 +149,7 @@ class LoginDisableView(DisableView):
                 if hasattr(emp, 'login') and emp.login.active and
                 emp.id != self.context.user.id
             ]
-            if company.enabled and not active_employees:
+            if company.active and not active_employees:
                 company.disable()
                 self.request.dbsession.merge(company)
 

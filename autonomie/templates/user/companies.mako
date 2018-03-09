@@ -78,8 +78,8 @@
 
                         % endif
 
+                        <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
                         % if company.active:
-                            <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
                             <% msg = u"Cette entreprise n\\'apparaîtra plus dans les listings de factures. Êtes-vous sûr de vouloir continuer ?" %>
                             ${table_btn(url, \
                             u"Désactiver", \
@@ -88,7 +88,6 @@
                             onclick="return confirm('%s');" % msg,
                             css_class="btn-danger")}
                         % else:
-                            <% url = request.route_path('company', id=company.id, _query=dict(action="enable")) %>
                             ${table_btn(url, \
                             u"Activer", \
                             u"Activer l'entreprise", \

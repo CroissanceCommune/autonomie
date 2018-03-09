@@ -41,16 +41,14 @@
     </a>
 % endif
 % if request.has_permission('admin_company'):
-    % if request.context.archived:
-    <% _query = dict(action="enable") %>
+    % if request.context.active:
     <% label = u"Désarchiver" %>
     % else :
-    <% _query = dict(action="disable") %>
     <% label = u"Archiver" %>
     % endif
     <a
         class='btn btn-default btn-block'
-        href="${request.route_path('company', id=request.context.id, _query=_query)}"
+        href="${request.route_path('company', id=request.context.id, _query={'action': 'disable'})}"
         ><i class='glyphicon glyphicon-book'></i>&nbsp;${label}
     </a>
 % endif

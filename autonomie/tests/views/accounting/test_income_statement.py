@@ -66,3 +66,7 @@ class TestYearGlobalGrid:
             income_measure_types[5],
             [0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15, -0.15]
         )
+        assert global_grid.rows[6] == (
+            income_measure_types[6],
+            [0, 0, 9000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9000, 90]
+        )

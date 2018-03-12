@@ -37,6 +37,13 @@ def income_measure_types(dbsession, income_measure_type_categories):
         ('Total produits et achats', 1, u"Produits,Achats", True, "categories"),
         ('Ratio produits et achats', 1, u"{Achats} * 100 / {Produits}", True,
          "complex_total"),
+        (
+            'Formule de test',
+            1,
+            u"({Label 1} + {Label 2} + {Label 3})",
+            True,
+            "complex_total"
+        ),
     ):
         typ = IncomeStatementMeasureType(
             label=label,

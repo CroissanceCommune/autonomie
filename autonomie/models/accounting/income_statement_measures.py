@@ -392,7 +392,6 @@ class IncomeStatementMeasureType(DBBASE):
             result = 0
         except Exception:
             logger.exception(u"Error while parsing : %s" % operation)
-            print(operation)
             result = 0
         return result
 
@@ -489,6 +488,14 @@ class IncomeStatementMeasureType(DBBASE):
             item.order = index
             DBSESSION().merge(item)
 
+    @classmethod
+    def get_types(cls, active=True, keys=()):
+        query = DBSESSION().query(cls)
+        if keys:
+            query = query.options(load_only(*keys))
+        if active:
+            query = query.filter_by(active=True)
+        return query
 
 class IncomeStatementMeasureGrid(DBBASE):
     """

@@ -120,7 +120,7 @@ def remove_admin_list_fields(schema, kw):
     :param dict kw: The bind parameters
     """
     if not kw['request'].has_permission('admin_users'):
-        del schema['active']
+        del schema['login_filter']
 
 
 def get_list_schema():
@@ -144,15 +144,16 @@ def get_list_schema():
     schema.add(
         colander.SchemaNode(
             colander.String(),
-            name='active',
+            name='login_filter',
             widget=deform.widget.SelectWidget(
                 values=(
-                    ('Y', u"Seulement les comptes actifs"),
-                    ('N', u"Seulement les comptes désactivés"),
-                    ('', u"Afficher tous les comptes"),
+                    ('active_login', u"Seulement les comptes actifs"),
+                    ('unactive_login', u"Seulement les comptes désactivés"),
+                    ('with_login', u"Tous les comptes avec identiants"),
+                    ('no_login', u"Inclure les comptes sans identifiants"),
                 )
             ),
-            default='Y',
+            default='active_login',
             missing=colander.drop,
             title=""
         )

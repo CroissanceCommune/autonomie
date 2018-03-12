@@ -111,8 +111,10 @@
                             <a href="${url}">
                             ${api.format_account(user)}
                             </a>
-                            % if not user.login.active:
-                            ${login_disabled_msg()}
+                            % if user.login is None:
+                                <span class='text-warning'>ce compte ne dispose pas d'identifiants</span>
+                            % elif not user.login.active:
+                                ${login_disabled_msg()}
                             % endif
                             </td>
                             <td><a href="${url}">${user.email}</a></td>

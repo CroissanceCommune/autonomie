@@ -29,6 +29,86 @@ from autonomie.views import BaseListView
 logger = logging.getLogger(__name__)
 
 
+class GeneralAccountList(BaseListView):
+    """
+    List the User models with Login attached to them
+
+    Allows to filter on :
+
+        * Active/unactive Login
+        * Company name or User lastname/firstname
+        * Company acivity
+
+    Sort on:
+        * User.lastname
+        * User.email
+    """
+    title = u"Annuaire des utilisateurs"
+    # The schema used to validate our search/filter form
+    schema = get_list_schema()
+    # The columns that allow sorting
+    sort_columns = dict(
+        name=User.lastname,
+        email=User.email,
+    )
+
+    def query(self):
+        """
+            Return the main query for our list view
+        """
+        logger.debug("Queryiing")
+        query = DBSESSION().query(distinct(User.id), User)
+        return query.outerjoin(User.companies)
+
+    def filter_name_search(self, query, appstruct):
+        """
+            filter the query with the provided search argument
+        """
+        logger.debug("Filtering name")
+        search = appstruct['search']
+        if search:
+            query = query.filter(
+                or_(
+                    User.lastname.like("%" + search + "%"),
+                    User.firstname.like("%" + search + "%"),
+                    User.companies.any(Company.name.like("%" + search + "%")),
+                    User.companies.any(Company.goal.like("%" + search + "%"))
+                )
+            )
+
+        return query
+
+    def filter_activity_id(self, query, appstruct):
+        """
+        filter the query with company activities
+        """
+        logger.debug("Filtering by activity id")
+        logger.debug(appstruct)
+        activity_id = appstruct.get('activity_id')
+        if activity_id:
+            query = query.filter(
+                User.companies.any(
+                    Company.activities.any(
+                        CompanyActivity.id == activity_id
+                    )
+                )
+            )
+            logger.debug(query)
+        return query
+
+    def filter_login_filter(self, query, appstruct):
+        login_filter = appstruct.get('login_filter')
+        logger.debug("Filtering login : %s" % login_filter)
+        if login_filter != 'no_login':
+            query = query.join(Login)
+            if login_filter == 'active_login':
+                logger.debug("Adding a filter on Login.active")
+                query = query.filter(Login.active == True)
+            elif login_filter == "unactive_login":
+                query = query.filter(Login.active == False)
+        return query
+
+
 class GeneralUserList(BaseListView):
     """
         List the users
@@ -113,7 +193,7 @@ def add_views(config):
     Add module related views
     """
     config.add_view(
-        GeneralUserList,
+        GeneralAccountList,
         route_name='/users',
         renderer='/user/lists.mako',
         permission='visit'

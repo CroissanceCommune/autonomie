@@ -224,19 +224,16 @@ def deferred_categories_widget(node, kw):
 
 @colander.deferred
 def deferred_complexe_total_description(node, kw):
-    categories = "".join(
-        [i[0] for i in
-        DBSESSION().query(
-            IncomeStatementMeasureTypeCategory.label
-        ).filter_by(active=True)
+    categories = ",".join(
+        [i.label for i in
+         IncomeStatementMeasureTypeCategory.get_categories(keys=('label',))
          ]
     )
     types = ",".join((
         i[0]
-        for i in DBSESSION().query(
-            IncomeStatementMeasureType.label
-        ).filter_by(active=True)
+        for i in IncomeStatementMeasureType.get_types(keys=('label',))
     ))
+
     return u"""
 Combiner plusieurs catégories et indicateurs au travers d'opérations
 arithmétiques.

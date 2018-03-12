@@ -390,6 +390,10 @@ class IncomeStatementMeasureType(DBBASE):
             result = parser.eval(operation)
         except ZeroDivisionError:
             result = 0
+        except Exception:
+            logger.exception(u"Error while parsing : %s" % operation)
+            print(operation)
+            result = 0
         return result
 
     def get_categories(self):

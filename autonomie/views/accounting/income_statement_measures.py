@@ -45,6 +45,8 @@ class YearGlobalGrid(object):
 
         # Totals by category_id, by month
         self.category_totals = self._get_default_category_totals()
+        # Totals by type_ id, by month
+        self.type_totals = self._get_default_type_totals()
 
         self.rows = self.compile_rows()
 
@@ -71,6 +73,21 @@ class YearGlobalGrid(object):
             (category.id, month_dict.copy())
             for category in self.categories
         )
+
+    def _get_default_type_totals(self):
+        """
+        Build default dict used to store type totals
+
+        :returns: A dict in the form
+        {'type_id': {'month_number': 0, 'total': 0}}
+        """
+        month_dict = dict((month, 0) for month in range(1, 13))
+        month_dict['total'] = 0
+        result = {}
+        for types in self.types.values():
+            for typ in types:
+                result[typ.id] = month_dict.copy()
+        return result
 
     def _type_by_category(self, types):
         """
@@ -106,6 +123,11 @@ class YearGlobalGrid(object):
         for category in self.categories:
             total = self.category_totals[category.id][month_number]
             result[category.label] = total
+
+        for types in self.types.values():
+            for typ in types:
+                total = self.type_totals[typ.id][month_number]
+                result[typ.label] = total
 
         return result
 
@@ -176,7 +198,11 @@ class YearGlobalGrid(object):
                             value = self._get_month_cell(grid, type_.id)
                             sum += value
                             row.append(value)
+
+                            self.type_totals[type_.id][month] = value
                             self.category_totals[category.id][month] += value
+
+                        self.type_totals[type_.id]['total'] = sum
                         self.category_totals[category.id]['total'] += sum
 
                         row.append(sum)

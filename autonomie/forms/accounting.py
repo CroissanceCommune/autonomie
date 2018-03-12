@@ -230,7 +230,7 @@ def deferred_complexe_total_description(node, kw):
          ]
     )
     types = ",".join((
-        i[0]
+        i.label
         for i in IncomeStatementMeasureType.get_types(keys=('label',))
     ))
 

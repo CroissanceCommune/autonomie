@@ -6,6 +6,7 @@
 """
 Accounting module related schemas
 """
+import re
 import datetime
 import colander
 import deform
@@ -14,6 +15,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import distinct
 
 from autonomie_base.models.base import DBSESSION
+from autonomie.compute.parser import NumericStringParser
 from autonomie.models.accounting.operations import AccountingOperation
 from autonomie.models.accounting.treasury_measures import TreasuryMeasureGrid
 from autonomie.models.accounting.income_statement_measures import (
@@ -230,6 +232,75 @@ Exemple : {Salaires et Cotisations} + {Charges} / 100.
 Liste des catégories : %s""" % ",".join([i.label for i in query])
 
 
+@colander.deferred
+def deferred_label_validator(node, kw):
+    """
+    Deffered label validator, check whether a type or a category has the same
+    label
+    """
+    context = kw['request'].context
+
+    category_query = DBSESSION().query(IncomeStatementMeasureTypeCategory.label)
+    category_query.filter_by(active=True)
+
+    if isinstance(context, IncomeStatementMeasureTypeCategory):
+        category_query = category_query.filter(
+            IncomeStatementMeasureTypeCategory.id != context.id
+        )
+    category_labels = [i[0] for i in category_query]
+
+    type_query = DBSESSION().query(IncomeStatementMeasureType.label)
+    type_query.filter_by(active=True)
+
+    if isinstance(context, IncomeStatementMeasureType):
+        type_query = type_query.filter(
+            IncomeStatementMeasureType.id != context.id
+        )
+    type_labels = [i[0] for i in type_query]
+
+    def label_validator(node, value):
+        if ':' in value or '!' in value:
+            raise colander.Invalid(
+                u"Erreur de syntax (les caractères ':' et '!' sont interdits"
+            )
+
+        if value in category_labels:
+            raise colander.Invalid(
+                u"Une catégories porte déjà ce nom"
+            )
+        if value in type_labels:
+            raise colander.Invalid(u"Un type d'indicateurs porte déjà ce nom")
+    return label_validator
+
+
+BRACES_REGEX = re.compile(r'\{([^}]+)\}\s?')
+
+
+def complex_total_validator(node, value):
+    """
+    Validate the complex total syntax
+    """
+    if len(value) > 254:
+        raise colander.Invalid(u"Ce champ est limité à 255 caractères")
+
+    if value.count('{') != value.count('}'):
+        raise colander.Invalid(u"Erreur de syntaxe")
+
+    fields = BRACES_REGEX.findall(value)
+
+    format_dict = dict((field, 1) for field in fields)
+    try:
+        temp = value.format(**format_dict)
+    except Exception as err:
+        raise colander.Invalid(u"Erreur de syntaxe : {0}".format(err.message))
+
+    parser = NumericStringParser()
+    try:
+        temp = parser.eval(temp)
+    except Exception as err:
+        raise colander.Invalid(u"Erreur de syntaxe : {0}".format(err.message))
+
+
 def get_admin_income_statement_measure_schema(total=False):
     """
     Build the schema for income statement measure type edit/add
@@ -250,6 +321,7 @@ def get_admin_income_statement_measure_schema(total=False):
                 'order',
             ),
         )
+        schema['label'].validator = deferred_label_validator
         schema['is_total'].widget = deform.widget.HiddenWidget()
         schema.add_before(
             'account_prefix',
@@ -289,7 +361,7 @@ def get_admin_income_statement_measure_schema(total=False):
                 name="complex_total",
                 title=u"Combinaison complexe de catégories",
                 description=deferred_complexe_total_description,
-                validator=colander.Length(max=255),
+                validator=complex_total_validator,
                 missing=""
             )
         )
@@ -309,6 +381,7 @@ def get_admin_income_statement_measure_schema(total=False):
             IncomeStatementMeasureType,
             excludes=('is_total', "categories")
         )
+        schema['label'].validator = deferred_label_validator
     return schema
 
 
@@ -316,7 +389,9 @@ def get_admin_income_statement_category_schema():
     """
     Build the schema for income statement measure type category edition
     """
-    return SQLAlchemySchemaNode(
+    schema = SQLAlchemySchemaNode(
         IncomeStatementMeasureTypeCategory,
         includes=("label", "order")
     )
+    schema['label'].validator = deferred_label_validator
+    return schema

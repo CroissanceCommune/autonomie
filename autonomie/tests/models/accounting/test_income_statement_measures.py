@@ -188,17 +188,25 @@ class TestIncomeStatementMeasureType:
             IncomeStatementMeasureType,
         )
         type_ = IncomeStatementMeasureType(
-            account_prefix="-100 / {Salaires et Cotisations}",
+            account_prefix="-100 / {Salaires (et Cotisations)}",
             is_total=True,
             total_type="complex_total",
         )
         # - 3.33333
         assert 3.34 + type_.compute_total(
-            {'Salaires et Cotisations': 30, 'other': 2}
+            {'Salaires (et Cotisations)': 30, 'other': 2}
         ) < 0.01
 
         assert type_.compute_total({'other': 2}) == 0
-        assert type_.compute_total({'Salaires et Cotisations': 0}) == 0
+        assert type_.compute_total({'Salaires (et Cotisations)': 0}) == 0
+
+        type_ = IncomeStatementMeasureType(
+            account_prefix="-100 / {Salaires:Cotisations}",
+            is_total=True,
+            total_type="complex_total",
+        )
+        # Wrong syntax
+        assert type_.compute_total({'Salaires:Cotisations': 15}) == 0
 
         type_ = IncomeStatementMeasureType(
             account_prefix="Achats,Produits,Salaires",

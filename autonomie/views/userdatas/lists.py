@@ -147,7 +147,7 @@ class UserDatasXlsView(UserDatasListClass, BaseListView):
             return self.request.response
 
         job = FileGenerationJob()
-        job.set_owner(self.request.user.login)
+        job.set_owner(self.request.user.login.login)
         self.request.dbsession.add(job)
         self.request.dbsession.flush()
         celery_job = export_to_file.delay(

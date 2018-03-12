@@ -44,7 +44,12 @@ def get_users_options(roles=None):
     """
     query = DBSESSION().query(User).options(
         load_only('id', 'firstname', 'lastname')
-    ).join(Login).filter(Login.active == True)
+    )
+
+    # Only User accounts with logins
+    query = query.join(Login).filter(Login.active == True)
+
+    query = query.order_by(User.lastname)
 
     if roles and not hasattr(roles, "__iter__"):
         roles = [roles]

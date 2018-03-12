@@ -70,5 +70,6 @@ def test_get_companies(config, pyramid_request):
     config.testing_securitypolicy(userid="test", permissive=False)
     pyramid_request.user = get_user()
     pyramid_request.context = get_context()
-    assert get_companies(pyramid_request) == pyramid_request.user.active_companies
+    assert get_companies(pyramid_request, -1) == \
+        pyramid_request.user.active_companies
 

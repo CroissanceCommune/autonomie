@@ -27,24 +27,43 @@
 """
 import logging
 
-from sqlalchemy.orm import undefer_group
+from pyramid.httpexceptions import HTTPFound
+from pyramid.security import forget
+from sqlalchemy.orm import (
+    load_only,
+    contains_eager,
+)
 
-from autonomie.models.user import User
+from autonomie.models.user.user import User
+from autonomie.models.user.login import Login
 
-log = logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 
 
 def get_avatar(request):
     """
         Returns the current User object
     """
-    log.info("Get avatar")
+    logger.info("Get avatar")
     login = request.unauthenticated_userid
+    logger.info(u"  + Login : %s" % login)
+    result = None
     if login is not None:
-        log.info("  + Returning the user")
-        query = request.dbsession.query(User).options(undefer_group('edit'))
-        user = query.filter_by(login=login).first()
-        return user
+        logger.info("  + Returning the user")
+        query = request.dbsession.query(User)
+        query = query.join(Login)
+        query = query.outerjoin(Login._groups)
+        query = query.options(load_only("firstname", "lastname"))
+        query = query.options(contains_eager(User.login).load_only('login'))
+        query = query.filter(Login.login == login)
+        result = query.first()
+        if result is None:
+            forget(request)
+            raise HTTPFound("/")
+    else:
+        logger.info("  + No user found")
+    return result
 
 
 def get_current_company(request):

@@ -29,6 +29,8 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_company" />
+<%namespace file="/base/utils.mako" import="company_disabled_msg" />
+<%namespace file="/base/utils.mako" import="login_disabled_msg" />
 <%block name='content'>
 <div class='row'>
 <div class='col-md-3 col-xs-12'>
@@ -41,16 +43,14 @@
     </a>
 % endif
 % if request.has_permission('admin_company'):
-    % if request.context.archived:
-    <% _query = dict(action="enable") %>
+    % if request.context.active:
     <% label = u"Désarchiver" %>
     % else :
-    <% _query = dict(action="disable") %>
     <% label = u"Archiver" %>
     % endif
     <a
         class='btn btn-default btn-block'
-        href="${request.route_path('company', id=request.context.id, _query=_query)}"
+        href="${request.route_path('company', id=request.context.id, _query={'action': 'disable'})}"
         ><i class='glyphicon glyphicon-book'></i>&nbsp;${label}
     </a>
 % endif
@@ -59,31 +59,47 @@
     <div class='panel panel-default page-block'>
         <div class='panel-heading'>
         Informations générales
+        % if not company.active:
+            ${company_disabled_msg()}
+        % endif
         </div>
         <div class='panel-body'>
-        ${format_company(company)}
-        % if not company.enabled():
-            <span class='label label-warning'>Cette entreprise a été désactivée</span>
-        % endif
-    %for link in link_list:
-        <p>${link.render(request)|n}</p>
-    %endfor
+            <div class='row'>
+                <div class='col-md-6 col-xs-12'>
+                    ${format_company(company)}
+                    </div><div class='col-md-6 col-xs-12'>
+                    % for route, label in ( \
+                    ('company_estimations', u"Voir les devis"),\
+                    ('company_invoices', u"Voir les factures"),\
+                    ('commercial_handling', u"Voir la gestion commerciale"), \
+                    ('/companies/{id}/accounting/treasury_measure_grids', u"Voir les états de trésorerie"), \
+                    ('company_activities', u"Voir les rendez-vous"),\
+                    ('company_workshops', u"Voir les ateliers"),\
+                    ):
+                    <p>
+                        <a
+                            href="${request.route_path(route, id=_context.id)}">
+                            <i class='fa fa-arrow-right'></i>&nbsp;${label}
+                        </a>
+                    </p>
+                    % endfor
+                </div>
+            </div>
         </div>
     </div>
     <div class='panel panel-default page-block'>
         <div class='panel-heading'>
-        Employé(s
+        Employé(s)
         </div>
         <div class='panel-body'>
         % for user in company.employees:
-            % if getattr(user, 'userdatas', None) and api.has_permission('view_userdatas', request.context):
-                <% url = request.route_path('userdata', id=user.userdatas.id) %>
-            % else:
-                <% url = request.route_path('user', id=user.id) %>
-            % endif
-
-            <a href="${url}" title='Voir ce compte'>
+            <a
+                href="${request.route_path('/users/{id}', id=user.id)}"
+                title='Voir ce compte'>
                 <i class='glyphicon glyphicon-user'></i>&nbsp;${api.format_account(user)}
+                % if user.login is not None and not user.login.active:
+                ${login_disabled_msg()}
+                % endif
             </a>
             <br />
         % endfor

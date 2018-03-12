@@ -79,8 +79,18 @@ AUTONOMIE_MODULES = (
     "autonomie.views.statistics",
     "autonomie.views.tests",
     "autonomie.views.treasury_files",
-    "autonomie.views.user",
+    "autonomie.views.user.user",
+    "autonomie.views.user.login",
+    "autonomie.views.user.company",
+    "autonomie.views.user.lists",
+    "autonomie.views.userdatas.userdatas",
+    "autonomie.views.userdatas.lists",
     "autonomie.views.workshop",
+)
+
+AUTONOMIE_LAYOUTS_MODULES = (
+    "autonomie.default_layouts",
+    "autonomie.views.user.layout",
 )
 
 AUTONOMIE_PANELS_MODULES = (
@@ -89,7 +99,7 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.company",
     "autonomie.panels.invoicetable",
     'autonomie.panels.files',
-
+    'autonomie.panels.sidebar',
 )
 
 AUTONOMIE_EVENT_MODULES = (
@@ -163,12 +173,18 @@ def get_groups(login, request):
     """
         return the current user's groups
     """
+    import logging
+    logger = logging.getLogger(__name__)
     user = request.user
     if user is None:
-        return None
-    res = []
-    for group in user.groups:
-        res.append('group:{0}'.format(group))
+        logger.debug("User is None")
+        res = None
+    else:
+        res = []
+        for group in user.login.groups:
+            res.append('group:{0}'.format(group))
+
+    logger.debug("Groups : %s" % res)
 
     return res
 
@@ -287,11 +303,13 @@ def base_configure(config, dbsession, **settings):
 
     add_static_views(config, settings)
 
-    config.include('autonomie.layouts')
     for module in AUTONOMIE_REQUEST_SUBSCRIBERS:
         config.include(module)
 
     for module in AUTONOMIE_MODULES:
+        config.include(module)
+
+    for module in AUTONOMIE_LAYOUTS_MODULES:
         config.include(module)
 
     for module in AUTONOMIE_PANELS_MODULES:

@@ -176,7 +176,7 @@ def _export_userdatas_command(args, env):
     :param dict args: The arguments coming from the command line
     :param dict env: The environment bootstraped when setting up the pyramid app
     """
-    from autonomie.models.user import UserDatas
+    from autonomie.forms.user.user import UserDatas
 
     logger = logging.getLogger(__name__)
     fields = get_value(args, "fields", "").split(',')

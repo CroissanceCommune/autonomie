@@ -34,6 +34,9 @@ from pyramid.security import (
 )
 from sqlalchemy.orm import undefer_group
 
+from autonomie_celery.models import (
+    Job,
+)
 from autonomie.models.config import ConfigFiles
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
@@ -77,13 +80,9 @@ from autonomie.models.expense.sheet import (
 from autonomie.models.expense.payment import ExpensePayment
 from autonomie.models.expense.types import ExpenseType
 
-from autonomie.models.user import (
-    User,
-    UserDatas,
-)
-from autonomie_celery.models import (
-    Job,
-)
+from autonomie.models.user.login import Login
+from autonomie.models.user.user import User
+from autonomie.models.user.userdatas import UserDatas
 from autonomie.models.statistics import (
     StatisticSheet,
     StatisticEntry,
@@ -149,6 +148,7 @@ class RootFactory(dict):
         ('files', 'file', File, ),
         ('invoices', 'invoice', Invoice, ),
         ('jobs', 'job', Job, ),
+        ('logins', 'login', Login, ),
         ('payments', 'payment', Payment, ),
         ('payment_lines', 'payment_line', PaymentLine,),
         ('phases', 'phase', Phase, ),
@@ -352,7 +352,7 @@ def get_company_acl(self):
     acl.extend(
         [(
             Allow,
-            user.login,
+            user.login.login,
             (
                 "view_company",
                 "edit_company",
@@ -386,18 +386,22 @@ def get_user_acl(self):
         Get acl for user account edition
     """
     acl = DEFAULT_PERM[:]
-    if self.enabled():
+    if self.login and self.login.active:
         acl.append(
             (
                 Allow,
-                self.login,
+                self.login.login,
                 (
-                    "view_user",
-                    "edit_user",
-                    'list_holidays',
-                    'add_holiday',
-                    'edit_holiday',
-                    'list_competences',
+                    "view.user",
+                    "edit.user",
+                    "view.login",
+                    "view.company",
+                    "edit.company",
+                    "set_password.login",
+                    'list.holidays',
+                    'add.holiday',
+                    'edit.holiday',
+                    'list.competences',
                 )
             )
         )
@@ -757,6 +761,34 @@ def get_project_acl(self):
     return acl
 
 
+def get_login_acl(self):
+    """
+    Compute acl for a login object
+    """
+    acl = DEFAULT_PERM_NEW[:]
+    admin_aces = (
+        'view.login',
+        'edit.login',
+        'delete.login',
+        "set_password.login",
+    )
+    acl.append((Allow, 'group:admin', admin_aces))
+    acl.append((Allow, 'group:manager', admin_aces))
+
+    if self.active:
+        acl.append(
+            (
+                Allow,
+                self.login,
+                (
+                    "view.login",
+                    "set_password.login",
+                )
+            )
+        )
+    return acl
+
+
 def get_file_acl(self):
     """
     Compute the acl for a file object
@@ -846,6 +878,7 @@ def set_models_acl():
     File.__default_acl__ = property(get_file_acl)
     Invoice.__default_acl__ = property(get_invoice_default_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
+    Login.__acl__ = property(get_login_acl)
     Payment.__default_acl__ = property(get_payment_default_acl)
     PaymentLine.__acl__ = property(get_payment_line_acl)
     Phase.__acl__ = property(get_phase_acl)

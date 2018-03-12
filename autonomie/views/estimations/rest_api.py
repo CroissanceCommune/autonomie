@@ -11,7 +11,6 @@ Estimation rest views :
 """
 import logging
 import colander
-from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.utils.rest import (
     Apiv1Resp,
@@ -22,10 +21,13 @@ from autonomie.compute.math_utils import (
 )
 from autonomie.models.task import (
     Estimation,
-    PaymentLine,
 )
 from autonomie.events.tasks import StatusChanged
-from autonomie.forms.tasks.estimation import validate_estimation
+from autonomie.forms.tasks.estimation import (
+    validate_estimation,
+    get_add_edit_estimation_schema,
+    get_add_edit_paymentline_schema,
+)
 from autonomie.views import BaseRestView
 from autonomie.views.task.rest_api import (
     TaskRestView,
@@ -97,6 +99,16 @@ PAYMENT_TIMES_OPTIONS = (
 
 class EstimationRestView(TaskRestView):
     factory = Estimation
+
+    def get_schema(self, submitted):
+        """
+        Return the schema for Estimation add/edition
+
+        :param dict submitted: The submitted datas
+        :returns: A colander.Schema
+        """
+        excludes = ('status', 'children', 'parent',)
+        return get_add_edit_estimation_schema(excludes=excludes)
 
     def pre_format(self, appstruct):
         """
@@ -239,8 +251,7 @@ class PaymentLineRestView(BaseRestView):
         :returns: A colander.Schema
         """
         excludes = ('task_id',)
-        schema = SQLAlchemySchemaNode(PaymentLine, excludes=excludes)
-        return schema
+        return get_add_edit_paymentline_schema(excludes=excludes)
 
     def collection_get(self):
         """

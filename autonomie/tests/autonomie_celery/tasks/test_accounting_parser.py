@@ -25,9 +25,10 @@ def test__get_parser_factory():
         GeneralLedgerParser
     )
 
-    assert _get_parser_factory("analytical_balance_2017_09_21_balance_analytique.csv") == \
+    assert _get_parser_factory("analytical_balance_2017_09_21_test.csv") == \
         AnalyticalBalanceParser
-    assert _get_parser_factory("general_ledger_2017_09_grand_livre.csv") == GeneralLedgerParser
+    assert _get_parser_factory("general_ledger_2017_09_grand_livre.csv") == \
+        GeneralLedgerParser
 
 
 class TestAccountingParser(object):
@@ -36,9 +37,12 @@ class TestAccountingParser(object):
             AccountingDataParser,
         )
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
-        filepath = os.path.join(path, 'analytical_balance_2017_09_21_balance_analytique.%s' % (
-            extension
-        ))
+        filepath = os.path.join(
+            path,
+            'analytical_balance_2017_09_21_balance_analytique.%s' % (
+                extension
+            )
+        )
         return AccountingDataParser(filepath)
 
     def test__collect_main_file_infos(self):
@@ -46,7 +50,8 @@ class TestAccountingParser(object):
         assert parser._file_datas['extension'] == 'csv'
         assert parser._file_datas['md5sum'] == \
             '8ff373bbe9d80e132495b6dad047845b'
-        assert parser._file_datas['basename'] == 'analytical_balance_2017_09_21_balance_analytique'
+        assert parser._file_datas['basename'] == \
+            'analytical_balance_2017_09_21_balance_analytique'
 
     def test__stream_datas(self):
         parser = self.get_parser()
@@ -65,7 +70,10 @@ class TestAnalyticalBalanceParser(object):
             AnalyticalBalanceParser,
         )
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
-        filepath = os.path.join(path, 'analytical_balance_2017_09_21_balance_analytique.csv')
+        filepath = os.path.join(
+            path,
+            'analytical_balance_2017_09_21_balance_analytique.csv'
+        )
         return AnalyticalBalanceParser(filepath)
 
     def test__collect_specific_file_infos(self):
@@ -92,7 +100,10 @@ class TestGeneralLedgerParser(object):
             GeneralLedgerParser,
         )
         path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'datas')
-        filepath = os.path.join(path, 'general_ledger_2017_09_grand_livre.csv')
+        filepath = os.path.join(
+            path,
+            'general_ledger_2017_09_grand_livre.csv'
+        )
         return GeneralLedgerParser(filepath)
 
     def test__collect_specific_file_infos(self):

@@ -24,6 +24,7 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="dropdown_item"/>
+<%namespace file="/base/utils.mako" import="company_disabled_msg"/>
 <%block name="content">
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
@@ -79,8 +80,8 @@
                     <tr>
                         <td onclick="${onclick}" class="rowlink">
                             ${company.name}
-                            % if company.archived:
-                            <span class='label label-warning'>Cette entreprise a été archivée</span>
+                            % if not company.active:
+                            ${company_disabled_msg()}
                             % endif
                         </td>
                         <td onclick="${onclick}" class="rowlink">

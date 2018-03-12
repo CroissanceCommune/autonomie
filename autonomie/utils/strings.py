@@ -392,3 +392,21 @@ def human_readable_filesize(size):
 
 def format_task_type(task):
     return TASKTYPES_LABEL.get(task.type_)
+
+
+def format_civilite(civilite_str):
+    """
+    Shorten the civilite string
+
+    :param str civilite_str: Monsieur/Madame
+    :returns: Mr/Mme
+    :rtype: str
+    """
+    res = civilite_str
+    if civilite_str.lower() == u'monsieur':
+        res = u"M."
+    elif civilite_str.lower() == u'madame':
+        res = u"Mme"
+    elif civilite_str.lower() == u'mr&mme':
+        res = u"M. et Mme"
+    return res

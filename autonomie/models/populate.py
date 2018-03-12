@@ -30,7 +30,7 @@ def populate_situation_options(session):
     """
     Populate the CAE situation options
     """
-    from autonomie.models.user import CaeSituationOption
+    from autonomie.models.user.userdatas import CaeSituationOption
     query = session.query(CaeSituationOption)
     if query.filter(CaeSituationOption.is_integration == True).count() == 0:
         session.add(CaeSituationOption(
@@ -53,7 +53,7 @@ def populate_groups(session):
     """
     Populate the groups in the database
     """
-    from autonomie.models.user import Group
+    from autonomie.models.user.group import Group
     for name, label in GROUPS:
         if session.query(Group.id).filter(Group.name == name).count() == 0:
             session.add(Group(name=name, label=label))

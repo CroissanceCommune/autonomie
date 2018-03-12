@@ -52,7 +52,7 @@ $form-subblock-bgcolor: #fbfbfb;
 }
 
 .sticky-footer{
-  background-color: #000;
+  background-color: #555;
   color: #f5f5f5;
   position: fixed;
   height: 15vh;
@@ -60,15 +60,21 @@ $form-subblock-bgcolor: #fbfbfb;
   width: 100vw;
   bottom: 0px;
   border-top: 1px solid #555;
-  padding: 10px 5px;
+  padding: 0px;
   .btn{
-    height: 80%;
+    height: 100%;
     border-radius: 0;
-    padding: 12 12;
+    margin: 0px;
+    &.btn-primary, &.btn-default, &.btn-success{
+      background-color: none !important;
+      &:hover{
+        background-color: none !important;
+      }
+    }
   }
-}
-.sticky-footer:hover{
-  color: #fff;
+  &:hover{
+    color: #fff;
+  }
 }
 .paymentamount{
   text-align:right;

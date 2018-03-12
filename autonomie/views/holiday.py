@@ -231,14 +231,14 @@ def includeme(config):
         AdminHolidayView,
         route_name="holidays",
         renderer="holidays.mako",
-        permission="admin_holidays",
+        permission="admin.holidays",
     )
     # User views
     config.add_view(
         user_holidays_index,
         route_name="user_holidays",
         renderer="user_holidays.mako",
-        permission="list_holidays",
+        permission="list.holidays",
     )
 
     config.add_view(
@@ -246,16 +246,16 @@ def includeme(config):
         route_name='user_holidays',
         xhr=True,
         renderer="json",
-        permission='list_holidays',
+        permission='list.holidays',
     )
     add_rest_views(
         config,
         "user_holiday",
         RestHoliday,
-        edit_rights="edit_holiday",
-        view_rights='list_holidays',
-        add_rights='add_holiday',
-        delete_rights="edit_holiday",
+        edit_rights="edit.holiday",
+        view_rights='list.holidays',
+        add_rights='add.holiday',
+        delete_rights="edit.holiday",
     )
     config.add_view(
         make_redirect_view("user_holidays"),

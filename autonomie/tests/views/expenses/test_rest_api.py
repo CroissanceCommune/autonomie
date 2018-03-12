@@ -122,3 +122,216 @@ def test_edit_line(
     assert expense_line.tva == 1100
     assert expense_line.category == "2"
     assert expense_line.description == u"Test Modify"
+
+
+def test_add_kmline(
+    dbsession,
+    get_csrf_request_with_db,
+    full_expense_sheet,
+    expense_kmtype,
+):
+    from autonomie.views.expenses.rest_api import RestExpenseKmLineView
+    request = get_csrf_request_with_db(post={
+        'description': u"Test",
+        "category": "1",
+        "start": "Start point",
+        "end": "End point",
+        "km": "50",
+        "type_id": expense_kmtype.id,
+    })
+    request.context = full_expense_sheet
+    view = RestExpenseKmLineView(request)
+    line = view.post()
+
+    assert line.km == 5000
+    assert line.category == "1"
+    assert line.description == u"Test"
+    assert line.start == u"Start point"
+    assert line.end == u"End point"
+
+
+def test_edit_kmline(
+    dbsession,
+    get_csrf_request_with_db,
+    expense_kmline,
+):
+    from autonomie.views.expenses.rest_api import RestExpenseKmLineView
+    request = get_csrf_request_with_db(post={
+        'description': u"Test Modify",
+        "category": "2",
+        "km": "55",
+    })
+    request.context = expense_kmline
+    view = RestExpenseKmLineView(request)
+    view.put()
+
+    assert expense_kmline.km == 5500
+    assert expense_kmline.category == "2"
+    assert expense_kmline.description == u"Test Modify"
+    assert expense_kmline.start == u"Dijon"
+
+
+def test_line_type_required(
+    dbsession,
+    get_csrf_request_with_db,
+    full_expense_sheet,
+    expense_kmtype,
+):
+    from autonomie.views.expenses.rest_api import RestExpenseKmLineView
+    from autonomie.utils.rest import RestError
+    request = get_csrf_request_with_db(post={
+        'description': u"Test",
+        "category": "1",
+        "start": "Start point",
+        "end": "End point",
+        "km": "50",
+        "type_id": -1,
+    })
+    request.context = full_expense_sheet
+    view = RestExpenseKmLineView(request)
+    with pytest.raises(RestError) as exc:
+        view.post()
+    assert exc.value.code == 400
+
+
+def test_bookmark_view(
+    dbsession,
+    get_csrf_request_with_db,
+    expense_type,
+    user
+):
+    from autonomie.views.expenses.rest_api import RestBookMarkView
+    request = get_csrf_request_with_db(
+        post={
+            'type_id': expense_type.id,
+            "tva": "20",
+            "ht": "100",
+            "description": u"Bookmark"
+        }
+    )
+    request.user = user
+    view = RestBookMarkView(request)
+    view.post()
+    bookmarks = user.session_datas['expense']['bookmarks']
+    bookmark = bookmarks[1]
+    assert bookmark['ht'] == 100
+    assert bookmark['tva'] == 20
+    assert bookmark['description'] == "Bookmark"
+    assert bookmark['type_id'] == expense_type.id
+    assert bookmark['id'] == 1
+
+
+def test_forbidden_sheet_status(
+    config,
+    user,
+    dbsession,
+    get_csrf_request_with_db,
+    full_expense_sheet,
+):
+    from autonomie.utils.rest import RestError
+    from autonomie.views.expenses.rest_api import RestExpenseSheetStatusView
+    config.add_route('/expenses/{id}', '/{id}')
+    config.testing_securitypolicy(
+        userid="test",
+        groupids=('admin',),
+        permissive=False,
+    )
+    request = get_csrf_request_with_db(
+        post={
+            "submit": "valid",
+            "comment": "Test status comment",
+        }
+    )
+    request.context = full_expense_sheet
+    request.user = user
+    request.is_xhr = True
+
+    view = RestExpenseSheetStatusView(request)
+    with pytest.raises(RestError) as forbidden_exc:
+        view.__call__()
+    assert forbidden_exc.value.code == 403
+
+
+def test_sheet_status_valid(
+    config,
+    dbsession,
+    get_csrf_request_with_db,
+    full_expense_sheet,
+    user,
+):
+    from autonomie.views.expenses.rest_api import RestExpenseSheetStatusView
+    config.add_route('/expenses/{id}', '/{id}')
+    config.testing_securitypolicy(
+        userid="test",
+        groupids=('admin',),
+        permissive=True,
+    )
+    request = get_csrf_request_with_db(
+        post={
+            "submit": "valid",
+            "comment": "Test status comment",
+        }
+    )
+    request.context = full_expense_sheet
+    request.user = user
+    request.is_xhr = True
+
+    view = RestExpenseSheetStatusView(request)
+    result = view.__call__()
+    assert result == {'redirect': u'/{0}'.format(full_expense_sheet.id)}
+    assert full_expense_sheet.status == 'valid'
+    assert full_expense_sheet.communications[0].content == \
+        u"Test status comment"
+    assert full_expense_sheet.communications[0].user_id == user.id
+
+
+def test_sheet_justified(
+    config,
+    dbsession,
+    get_csrf_request_with_db,
+    full_expense_sheet,
+    user,
+):
+    from autonomie.views.expenses.rest_api import (
+        RestExpenseSheetJustifiedStatusView,
+    )
+    config.testing_securitypolicy(
+        userid="test",
+        groupids=('admin',),
+        permissive=True,
+    )
+    request = get_csrf_request_with_db(
+        post={
+            "submit": "true",
+            "comment": "Test status comment",
+        }
+    )
+    request.context = full_expense_sheet
+    request.user = user
+    request.is_xhr = True
+
+    view = RestExpenseSheetJustifiedStatusView(request)
+    result = view.__call__()
+    assert result['status'] == 'success'
+    assert result['datas']['justified'] == True
+    assert full_expense_sheet.justified
+    assert full_expense_sheet.communications[0].content == \
+        u"Test status comment"
+    assert full_expense_sheet.communications[0].user_id == user.id
+    request = get_csrf_request_with_db(
+        post={
+            "submit": "false",
+            "comment": "2nd Test status comment",
+        }
+    )
+    request.context = full_expense_sheet
+    request.user = user
+    request.is_xhr = True
+
+    result = view.__call__()
+    assert result['status'] == 'success'
+    assert result['datas']['justified'] == False
+    assert not full_expense_sheet.justified
+    assert full_expense_sheet.communications[1].content == \
+        u"2nd Test status comment"
+    assert full_expense_sheet.communications[1].user_id == user.id

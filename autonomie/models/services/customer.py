@@ -25,7 +25,7 @@ Customer query service
 from sqlalchemy.orm import load_only
 
 from autonomie_base.models.base import DBSESSION
-from autonomie.utils.formatters import format_civilite
+from autonomie.utils.strings import format_civilite
 
 
 class CustomerService(object):

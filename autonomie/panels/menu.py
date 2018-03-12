@@ -33,6 +33,8 @@
 """
 import logging
 
+from sqlalchemy import or_
+from sqlalchemy.orm import load_only
 from webhelpers.html import tags
 from webhelpers.html import HTML
 from pyramid.security import has_permission
@@ -131,13 +133,25 @@ def get_cid(request, submenu=False):
     return cid
 
 
-def get_companies(request):
+def get_companies(request, cid):
     """
-        Retrieve the companies the current user has access to
+    Retrieve the companies the current user has access to
+
+    :param obj request: The current pyramid request
+    :param int cid: The current company id
+    :returns: The list of companies
+    :rtype: list
     """
     companies = []
     if request.has_permission('manage'):
-        companies = Company.query().all()
+        companies = request.dbsession.query(Company).options(
+            load_only('id', 'name', 'active')
+        ).filter(
+            or_(
+                Company.active == True,
+                Company.id == cid
+            )
+        ).all()
     else:
         companies = request.user.active_companies
     return companies
@@ -226,7 +240,10 @@ def get_company_menu(request, cid, css=None):
 
     # C'est un entrepreneur
     if request.user.has_userdatas():
-        href = request.route_path('mydocuments', id=request.user.id)
+        href = request.route_path(
+            '/users/{id}/userdatas/mydocuments',
+            id=request.user.id
+        )
         docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
 
     menu.add(docs)
@@ -343,7 +360,7 @@ def get_admin_menus(request):
     menu.add(accompagnement)
 
     gestion_sociale = DropDown(label=u"Gestion sociale")
-    href = request.route_path('userdatas')
+    href = request.route_path('/userdatas')
     gestion_sociale.add_item(u"Consulter", href=href, icon="fa fa-users")
 
     href = request.route_path('statistics')
@@ -357,6 +374,13 @@ def get_admin_menus(request):
 
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)
+
+    annuaire = DropDown(label=u"Annuaire")
+    href = request.route_path("/users")
+    annuaire.add_item(u"Utilisateurs", icon="fa fa-users", href=href)
+    href = request.route_path("companies")
+    annuaire.add_item(u"Entreprises", icon="fa fa-building", href=href)
+    menu.add(annuaire)
     return menu
 
 
@@ -364,18 +388,23 @@ def company_choice(request, companies, cid):
     """
         Add the company choose menu
     """
-    if request.context.__name__ == 'company':
-        options = (
-            (request.current_route_path(id=company.id),
-             company.name) for company in companies
-        )
-        default = request.current_route_path(id=cid)
-    else:
-        options = (
-            (request.route_path("company", id=company.id),
-             company.name) for company in companies
-        )
-        default = request.route_path("company", id=cid)
+    if cid and cid in [c.id for c in companies]:
+        companies.insert(0, request.context)
+
+    options = []
+    for company in companies:
+        if request.context.__name__ == 'company':
+            url = request.current_route_path(id=company.id)
+        else:
+            url = request.route_path("company", id=company.id)
+
+        name = company.name
+        if not company.active:
+            name += u" (désactivée)"
+
+        options.append((url, name))
+
+    default = request.route_path("company", id=cid)
     html_attrs = {
         'class': 'company-search',
         'id': "company-select-menu",
@@ -391,7 +420,10 @@ def get_usermenu(request):
         Return the user menu (My account, holidays ...)
     """
     menu = Menu()
-    href = request.route_path('account', id=request.user.id)
+    href = request.route_path(
+        '/users/{id}',
+        id=request.user.id,
+    )
     menu.add_item(u"Mon compte", icon='fa fa-cog', href=href)
 
     href = request.route_path('user_holidays', id=request.user.id)
@@ -421,14 +453,13 @@ def menu_panel(context, request):
 
     elif cid:
         menu = get_company_menu(request, cid)
-        companies = get_companies(request)
+        companies = get_companies(request, cid)
         # If there is more than 1 company accessible for the current user, we
         # provide a usefull dropdown menu
         if len(companies) > 1:
             menu.insert(company_choice(request, companies, cid))
 
-    if menu is not None:
-        href = request.route_path("users")
+        href = request.route_path("/users")
         menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
 
     return {
@@ -455,7 +486,7 @@ def submenu_panel(context, request):
 
     submenu = get_company_menu(request, cid, "nav-pills")
     if submenu:
-        companies = get_companies(request)
+        companies = get_companies(request, cid)
         if len(companies) > 1:
             submenu.insert(company_choice(request, companies, cid))
 

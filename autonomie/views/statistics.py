@@ -32,7 +32,7 @@ from sqla_inspect import csv
 from autonomie.statistics import inspect
 
 from autonomie.resources import statistics_js
-from autonomie.models.user import UserDatas
+from autonomie.models.user.userdatas import UserDatas
 from autonomie.models.statistics import (
     StatisticSheet,
     StatisticEntry,
@@ -66,7 +66,7 @@ from autonomie.views import (
     DuplicateView,
     BaseRestView,
 )
-from autonomie.views.user import UserDatasCsvView
+from autonomie.views.userdatas.lists import UserDatasCsvView
 from autonomie.export.utils import write_file_to_request
 
 

@@ -25,7 +25,7 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
-from autonomie.models import user
+from autonomie.forms.user import user_node
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie import forms
 from autonomie.forms import lists, activity
@@ -181,13 +181,16 @@ def get_list_schema(company=False):
             ))
 
     if not company:
-        schema.insert(0, user.user_node(
-            missing=colander.drop,
-            name='participant_id',
-            widget_options={
-                'default_option': ('', u"- Sélectionner un participant -"),
-                }
-        ))
+        schema.insert(
+            0,
+            user_node(
+                missing=colander.drop,
+                name='participant_id',
+                widget_options={
+                    'default_option': ('', u"- Sélectionner un participant -"),
+                    }
+            )
+        )
         notfilled_node = colander.SchemaNode(
             colander.Boolean(),
             name='notfilled',

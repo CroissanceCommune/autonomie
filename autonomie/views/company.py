@@ -46,7 +46,7 @@ from autonomie.models.company import (
     Company,
     CompanyActivity,
 )
-from autonomie.models.user import User
+from autonomie.models.user.user import User
 from autonomie.utils.widgets import (
     ViewLink,
 )
@@ -58,6 +58,7 @@ from autonomie.views import (
     submit_btn,
     BaseListView,
     add_panel_view,
+    DisableView,
 )
 from autonomie.views.render_api import format_account
 from autonomie.forms.company import (
@@ -68,6 +69,13 @@ from autonomie.forms.company import (
 
 
 log = logging.getLogger(__name__)
+
+
+ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
+DISABLE_MSG = u"L'entreprise {0} a été désactivée."
+
+ENABLE_ERR_MSG = u"Erreur à l'activation de l'entreprise {0}."
+DISABLE_ERR_MSG = u"Erreur à la désactivation de l'entreprise {0}."
 
 
 def company_index(request):
@@ -91,119 +99,37 @@ def company_view(request):
     """
     company = request.context
     populate_actionmenu(request)
-    link_list = []
-    link_list.append(
-        ViewLink(
-            u"Voir les clients",
-            "view_company",
-            path="company_customers",
-            id=company.id,
-            icon='arrow-right'
-        )
+    return dict(
+        title=company.name.title(),
+        company=company,
     )
 
-    link_list.append(
-        ViewLink(
-            u"Voir les projets",
-            "view_company",
-            path="company_projects",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
 
-    link_list.append(
-        ViewLink(
-            u"Voir les factures",
-            "view_company",
-            path="company_invoices",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
+class CompanyDisableView(DisableView):
+    def on_disable(self):
+        """
+        Disable logins of users that are only attached to this company
+        """
+        for user in self.context.employees:
+            other_enabled_companies = [
+                company
+                for company in user.companies
+                if company.active and company.id != self.context.id
+            ]
+            if hasattr(user, 'login') and user.login.active and \
+                    len(other_enabled_companies) == 0:
+                user.login.active = False
+                self.request.dbsession.merge(user.login)
+                user_url = self.request.route_path(
+                    '/users/{id}/login', id=user.id
+                )
+                self.request.flash(
+                    u"Les identifiants de <a href='{0}'>{1}</a> ont été \
+                    désactivés".format(user_url, user.label)
+                )
 
-    link_list.append(
-        ViewLink(
-            u"Liste des rendez-vous",
-            "view_company",
-            path="company_activities",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
-
-    link_list.append(
-        ViewLink(
-            u"Liste des ateliers",
-            "manage",
-            path="company_workshops",
-            id=company.id,
-            icon='arrow-right'
-        )
-    )
-
-    return dict(title=company.name.title(),
-                company=company,
-                link_list=link_list)
-
-
-ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
-DISABLE_MSG = u"L'entreprise {0} a été désactivée."
-
-ENABLE_ERR_MSG = u"Erreur à l'activation de l'entreprise {0}."
-DISABLE_ERR_MSG = u"Erreur à la désactivation de l'entreprise {0}."
-
-
-def company_toggle_active(request, company, action):
-    """
-    Toggle compay enabled/disabled
-    """
-    if company is None:
-        company = request.context
-
-    try:
-        if action == 'disable' and company.enabled():
-            company.disable()
-            message = DISABLE_MSG.format(company.name)
-            log.info(message)
-            request.session.flash(message)
-        elif action == 'enable' and not company.enabled():
-            company.enable()
-            request.dbsession.merge(company)
-            message = ENABLE_MSG.format(company.name)
-            log.info(message)
-            request.session.flash(message)
-    except:
-        if action == "disable":
-            err_message = DISABLE_ERR_MSG.format(company.name)
-        else:
-            err_message = ENABLE_ERR_MSG.format(company.name)
-        log.exception(err_message)
-        request.session.flash(err_message, "error")
-
-    if request.context.__name__ != 'company':
-        # We don't want to raise a redirect if the view code is called from
-        # another view
-        return
-    else:
-        come_from = request.referer
-        return HTTPFound(come_from)
-
-
-def company_disable(request, company=None):
-    """
-    Disable a company
-    """
-    action = "disable"
-    return company_toggle_active(request, company, action)
-
-
-def company_enable(request, company=None):
-    """
-    Ensable a company
-    """
-    action = "enable"
-    return company_toggle_active(request, company, action)
+    def redirect(self):
+        return HTTPFound(self.request.referrer)
 
 
 class CompanyList(BaseListView):
@@ -223,8 +149,10 @@ class CompanyList(BaseListView):
 
     def filter_active(self, query, appstruct):
         active = appstruct.get('active', False)
+
         if active in (False, colander.null):
-            query = query.filter_by(active='Y')
+            query = query.filter_by(active=True)
+
         return query
 
     def filter_search(self, query, appstruct):
@@ -241,13 +169,14 @@ class CompanyList(BaseListView):
             'pencil',
             {}
         )
-        if not company.archived:
+        url = self.request.route_path(
+            'company',
+            id=company.id,
+            _query=dict(action="disable")
+        )
+        if company.active:
             yield (
-                self.request.route_path(
-                    'company',
-                    id=company.id,
-                    _query=dict(action="disable")
-                ),
+                url,
                 u"Archiver",
                 u"Archiver l'entreprise",
                 'book',
@@ -255,11 +184,7 @@ class CompanyList(BaseListView):
             )
         else:
             yield (
-                self.request.route_path(
-                    'company',
-                    id=company.id,
-                    _query=dict(action="enable")
-                ),
+                url,
                 u"Désarchiver",
                 u"Désarchiver l'entreprise",
                 'book',
@@ -283,7 +208,11 @@ def fetch_activities_objects(appstruct):
 
 class CompanyAdd(BaseFormView):
     """
-        View class for company add
+    View class for company add
+
+    Have support for a user_id request param that allows to add the user
+    directly on company creation
+
     """
     add_template_vars = ('title',)
     title = u"Ajouter une entreprise"
@@ -296,12 +225,19 @@ class CompanyAdd(BaseFormView):
         """
         populate_actionmenu(self.request)
         if 'user_id' in self.request.params:
-            form.set_appstruct(dict(user_id=self.request.params['user_id']))
+            appstruct = {"user_id": self.request.params['user_id']}
+
+            come_from = self.request.referrer
+            if come_from:
+                appstruct['come_from'] = come_from
+
+            form.set_appstruct(appstruct)
 
     def submit_success(self, appstruct):
         """
         Edit the database entry and return redirect
         """
+        come_from = appstruct.pop('come_from', None)
         user_id = appstruct.get('user_id')
         company = Company()
         company.activities = fetch_activities_objects(appstruct)
@@ -310,11 +246,16 @@ class CompanyAdd(BaseFormView):
             user_account = User.get(user_id)
             if user_account is not None:
                 company.employees.append(user_account)
+
         self.dbsession.add(company)
         self.dbsession.flush()
         message = u"L'entreprise '{0}' a bien été ajoutée".format(company.name)
         self.session.flash(message)
-        return HTTPFound(self.request.route_path("company", id=company.id))
+
+        if come_from is not None:
+            return HTTPFound(come_from)
+        else:
+            return HTTPFound(self.request.route_path("company", id=company.id))
 
 
 class CompanyEdit(BaseFormView):
@@ -389,7 +330,7 @@ def get_list_view_btn():
     """
         Return a link to the CAE's directory
     """
-    return ViewLink(u"Annuaire", "visit", path="users")
+    return ViewLink(u"Annuaire", "visit", path="/users")
 
 
 def get_view_btn(company_id):
@@ -397,6 +338,7 @@ def get_view_btn(company_id):
         Return a link to the view page
     """
     return ViewLink(u"Voir", "visit", path="company", id=company_id)
+
 
 def company_remove_employee_view(context, request):
     """
@@ -478,13 +420,7 @@ def includeme(config):
         permission="edit_company",
     )
     config.add_view(
-        company_enable,
-        route_name='company',
-        request_param='action=enable',
-        permission="admin_company",
-    )
-    config.add_view(
-        company_disable,
+        CompanyDisableView,
         route_name='company',
         request_param='action=disable',
         permission="admin_company",

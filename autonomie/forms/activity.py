@@ -37,8 +37,8 @@ from autonomie.models.activity import (
     ATTENDANCE_STATUS,
     ATTENDANCE_STATUS_SEARCH,
 )
-from autonomie.models import user
-from autonomie.models import company
+from autonomie.forms.user import user_node
+from autonomie.forms.company import company_node
 from autonomie.models.task.invoice import get_invoice_years
 
 from autonomie import forms
@@ -116,14 +116,14 @@ class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
     """
-    participant_id = user.user_node(title=u"un participant", )
+    participant_id = user_node(title=u"un participant", )
 
 
 class ConseillerSequence(colander.SequenceSchema):
     """
     Schema for the list of conseiller
     """
-    conseiller_id = user.user_node(
+    conseiller_id = user_node(
         title=u"un conseiller",
         roles=['manager', 'admin'],
     )
@@ -133,7 +133,7 @@ class CompanySequence(colander.SequenceSchema):
     """
     schema for the list of attached companies
     """
-    company_id = company.company_node(title=u"une entreprise")
+    company_id = company_node(title=u"une entreprise")
 
 
 class CreateActivitySchema(colander.MappingSchema):
@@ -317,7 +317,7 @@ def get_list_schema(is_admin=False):
         missing=colander.drop))
 
     if is_admin:
-        schema.insert(0, user.user_node(
+        schema.insert(0, user_node(
             missing=colander.drop,
             name='participant_id',
             widget_options={
@@ -326,7 +326,7 @@ def get_list_schema(is_admin=False):
             )
         )
 
-        schema.insert(0, user.user_node(
+        schema.insert(0, user_node(
             roles=['manager', 'admin'],
             missing=colander.drop,
             name='conseiller_id',

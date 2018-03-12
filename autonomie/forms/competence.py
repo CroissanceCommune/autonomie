@@ -21,7 +21,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import colander
 
-from autonomie.models.user import user_node
+from autonomie.forms.user import user_node
 from autonomie.models.competence import CompetenceDeadline
 
 

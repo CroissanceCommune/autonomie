@@ -45,7 +45,7 @@ from autonomie.models.workshop import WorkshopAction
 from autonomie.models.company import (
     CompanyActivity,
 )
-from autonomie.models.user import (
+from autonomie.models.user.userdatas import (
     ZoneOption,
     ZoneQualificationOption,
     StudyLevelOption,

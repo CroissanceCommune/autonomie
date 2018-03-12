@@ -34,7 +34,7 @@ from sqlalchemy import func
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.utils import widgets
-from autonomie.models.user import (
+from autonomie.forms.user import (
     get_users_options,
 )
 from autonomie.models.competence import (

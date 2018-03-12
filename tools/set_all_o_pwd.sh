@@ -20,4 +20,4 @@ else
     fi
 fi
 
-echo "update accounts set password=MD5('o');" | ${MYSQLCMD} ${DBNAME}
+echo "update login set pwd_hash=MD5('o');" | ${MYSQLCMD} ${DBNAME}

@@ -3,6 +3,7 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import datetime
 from pytest import fixture
 
 
@@ -31,7 +32,8 @@ def expense_kmtype(dbsession):
         code_tva="KM_TVA",
         compte_tva="KM_COMPTE_TVA",
         contribution=False,
-        amount=1.254
+        amount=1.254,
+        year=datetime.date.today().year
     )
     dbsession.add(item)
     dbsession.flush()

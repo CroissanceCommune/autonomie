@@ -21,15 +21,18 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
+import tempfile
 from pytest import fixture
 from paste.deploy.loadwsgi import appconfig
 from pyramid import testing
+from pyramid.interfaces import IRoutesMapper
 from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
 from autonomie import models
 
 from autonomie.utils.widgets import ActionMenu
+from autonomie.tests.tools import DummyRouteContext, DummyRoute
 
 HERE = os.path.dirname(__file__)
 DATASDIR = os.path.join(HERE, 'datas')
@@ -51,7 +54,7 @@ def launch_cmd(cmd):
     return os.system(cmd)
 
 
-def test_connect(settings):
+def mysql_test_connect(settings):
     """
         test the db connection
     """
@@ -113,7 +116,7 @@ def initialize_test_database(settings):
         return
     options = get_test_options_from_settings(settings)
     os.putenv('SHELL', '/bin/bash')
-    test_connect(options)
+    mysql_test_connect(options)
     create_sql_user(options)
     launch_cmd(options['drop'])
     create_test_db(options)
@@ -245,6 +248,7 @@ def dbsession(config, content, connection, request):
     """
     from transaction import abort
     trans = connection.begin()          # begin a non-orm transaction
+
     def rollback():
         print("ROLLING BACK")
         trans.rollback()
@@ -256,14 +260,17 @@ def dbsession(config, content, connection, request):
 
 
 @fixture
-def get_csrf_request(pyramid_request):
+def get_csrf_request(config, pyramid_request):
     """
     Build a testing request builder with a csrf token
 
     :returns: a function to be called with params/cookies/post optionnal
     arguments
     """
-    def func(params=None, cookies=None, post=None):
+    def func(
+        params=None, cookies=None, post=None,
+        current_route_name=None, current_route_path=None
+    ):
         params = params or {}
         post = post or {}
         params.update(post)
@@ -276,11 +283,25 @@ def get_csrf_request(pyramid_request):
         pyramid_request.json_body = post
         pyramid_request.cookies = cookies
         pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
-        pyramid_request.config = {}
+        pyramid_request.config = config
+        pyramid_request.registry = config.registry
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
+
+        if current_route_path:
+            if not current_route_name:
+                current_route_name = current_route_path
+
+            route = DummyRoute(
+                name=current_route_name, result=current_route_path
+            )
+            mapper = DummyRouteContext(route=route)
+            pyramid_request.matched_dict = {}
+            pyramid_request.matched_route = route
+            pyramid_request.registry.registerUtility(mapper, IRoutesMapper)
+
         return pyramid_request
     return func
 
@@ -293,7 +314,10 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
     :returns: a function to be called with params/cookies/post optionnal
     arguments
     """
-    def func(params=None, cookies=None, post=None):
+    def func(
+        params=None, cookies=None, post=None,
+        current_route_name=None, current_route_path=None
+    ):
         cookies = cookies or {}
         params = params or {}
         post = post or {}
@@ -312,6 +336,18 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         csrf_token.return_value = def_csrf
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
+
+        if current_route_path:
+            if not current_route_name:
+                current_route_name = current_route_path
+
+            route = DummyRoute(
+                name=current_route_name, result=current_route_path
+            )
+            mapper = DummyRouteContext(route=route)
+            pyramid_request.matched_dict = {}
+            pyramid_request.matched_route = route
+            pyramid_request.registry.registerUtility(mapper, IRoutesMapper)
         return pyramid_request
     return func
 
@@ -330,6 +366,18 @@ def app(wsgi_app):
 
 
 # Common Models fixtures
+@fixture
+def groups(dbsession):
+    from autonomie.models.user.group import Group
+    groups = []
+    for name in ('contractor', 'manager', 'admin'):
+        group = Group(name=name, label=name)
+        dbsession.add(group)
+        dbsession.flush()
+        groups.append(group)
+    return groups
+
+
 @fixture
 def tva(dbsession):
     from autonomie.models.tva import Tva
@@ -391,17 +439,27 @@ def bank(dbsession):
 
 @fixture
 def user(dbsession):
-    from autonomie.models.user import User
+    from autonomie.models.user.user import User
     user = User(
-        login=u"login",
         lastname=u"Lastname",
         firstname=u"Firstname",
         email="login@c.fr",
     )
-    user.set_password('password')
     dbsession.add(user)
     dbsession.flush()
     return user
+
+
+@fixture
+def login(dbsession, user):
+    from autonomie.models.user.login import Login
+    login = Login(login=u"login", user_id=user.id)
+    login.set_password('pwd')
+    dbsession.add(login)
+    dbsession.flush()
+    login.user = user
+    user.login = login
+    return login
 
 
 @fixture
@@ -440,6 +498,25 @@ def customer(dbsession, company):
 
 
 @fixture
+def individual_customer(dbsession, company):
+    from autonomie.models.customer import Customer
+    customer = Customer(
+        code=u"CUST",
+        type_='individual',
+        civilite=u"mr&mme",
+        lastname=u"Lastname",
+        firstname=u"Firstname",
+        address=u"1th street",
+        zip_code=u"01234",
+        city=u"City",
+    )
+    customer.company = company
+    dbsession.add(customer)
+    dbsession.flush()
+    return customer
+
+
+@fixture
 def project(dbsession, company, customer):
     from autonomie.models.project import Project
     project = Project(name=u"Project")
@@ -464,7 +541,7 @@ def phase(dbsession, project):
 
 @fixture
 def cae_situation_option(dbsession):
-    from autonomie.models.user import (CaeSituationOption,)
+    from autonomie.models.user.userdatas import (CaeSituationOption,)
     option = CaeSituationOption(
         is_integration=False,
         label=u"CaeSituationOption",
@@ -472,3 +549,41 @@ def cae_situation_option(dbsession):
     dbsession.add(option)
     dbsession.flush()
     return option
+
+
+@fixture
+def userdatas(dbsession, user, cae_situation_option):
+    from autonomie.models.user.userdatas import (
+        UserDatas,
+        CompanyDatas,
+    )
+    result = UserDatas(
+        situation_situation=cae_situation_option,
+        coordonnees_lastname="Userdatas",
+        coordonnees_firstname="userdatas",
+        coordonnees_email1="userdatas@test.fr",
+        activity_companydatas=[
+            CompanyDatas(
+                title='test entreprise',
+                name='test entreprise',
+            )
+        ],
+        user_id=user.id
+    )
+    result.situation_situation_id = cae_situation_option.id
+    dbsession.add(result)
+    dbsession.flush()
+    user.userdatas = result
+    return result
+
+
+@fixture
+def social_doctypes(dbsession):
+    from autonomie.models.user.userdatas import SocialDocTypeOption
+    options = []
+    for i in "Rib", "Permis":
+        option = SocialDocTypeOption(label=i)
+        dbsession.add(option)
+        dbsession.flush()
+        options.append(option)
+    return options

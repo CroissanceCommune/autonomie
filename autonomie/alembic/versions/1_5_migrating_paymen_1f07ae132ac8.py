@@ -13,11 +13,11 @@ down_revision = '1cc9ff114346'
 
 from alembic import op
 import sqlalchemy as sa
-from autonomie.models.task.invoice import PaymentMode, Payment
 from autonomie_base.models.base import DBSESSION
 
 
 def upgrade():
+    from autonomie.models.task.invoice import PaymentMode, Payment
     for payment in Payment.query():
         if payment.mode in (u"cheque", u"CHEQUE"):
             payment.mode = u"par chèque"
@@ -35,6 +35,7 @@ def upgrade():
 
 
 def downgrade():
+    from autonomie.models.task.invoice import PaymentMode, Payment
     for p in PaymentMode.query():
         DBSESSION().delete(p)
     for p in Payment.query():

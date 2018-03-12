@@ -315,3 +315,7 @@ expense_js = get_resource(
     bottom=True,
 )
 expense_resources = Group([expense_js, expense_css])
+
+# User page related resources
+user_css = get_resource('css/user.css', depends=(main_css, ))
+user_resources = Group([user_css, main_group])

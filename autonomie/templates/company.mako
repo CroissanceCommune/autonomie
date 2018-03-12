@@ -29,6 +29,8 @@
 <%namespace file="/base/utils.mako" import="format_mail" />
 <%namespace file="/base/utils.mako" import="format_phone" />
 <%namespace file="/base/utils.mako" import="format_company" />
+<%namespace file="/base/utils.mako" import="company_disabled_msg" />
+<%namespace file="/base/utils.mako" import="login_disabled_msg" />
 <%block name='content'>
 <div class='row'>
 <div class='col-md-3 col-xs-12'>
@@ -58,7 +60,7 @@
         <div class='panel-heading'>
         Informations générales
         % if not company.active:
-            <span class='text-danger'><i class='fa fa-warning'></i>&nbsp;cette entreprise a été désactivée</span>
+            ${company_disabled_msg()}
         % endif
         </div>
         <div class='panel-body'>
@@ -95,10 +97,8 @@
                 href="${request.route_path('/users/{id}', id=user.id)}"
                 title='Voir ce compte'>
                 <i class='glyphicon glyphicon-user'></i>&nbsp;${api.format_account(user)}
-                % if hasattr(user, 'login') and not user.login.active:
-                <span class='text-danger'>
-                <i class='fa fa-warning'></i>&nbsp;ses identifiants sont désactivés
-                </span>
+                % if user.login is not None and not user.login.active:
+                ${login_disabled_msg()}
                 % endif
             </a>
             <br />

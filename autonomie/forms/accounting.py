@@ -224,22 +224,19 @@ def deferred_categories_widget(node, kw):
 
 @colander.deferred
 def deferred_complexe_total_description(node, kw):
-    category_query = IncomeStatementMeasureTypeCategory.get_categories(
+    categories = "".join(IncomeStatementMeasureTypeCategory.get_categories(
         keys=('label',)
-    )
-    type_query = [
+    ))
+    types = ",".join((
         i[0]
         for i in DBSESSION().query(IncomeStatementMeasureType.label)
-    ]
+    ))
     return u"""
 Combiner plusieurs catégories et indicateurs au travers d'opérations
 arithmétiques.
 Les noms des variables (catégories ou indicateurs) doivent être encadrés de {}.
 Exemple : {Salaires et Cotisations} + {Charges} / 100.
-Liste des catégories : %s. Liste des indicateurs : %s""" % (
-    ",".join([i.label for i in category_query]),
-    ','.join([i.label for i in type_query]),
-)
+Liste des catégories : %s. Liste des indicateurs : %s""" % (categories, types)
 
 
 @colander.deferred
@@ -354,8 +351,8 @@ def get_admin_income_statement_measure_schema(total=False):
                         ),
                         (
                             "complex_total",
-                            u"une combinaison complexe de la somme de "
-                            u"plusieurs catégories ?",
+                            u"le résultat d'une formule arithmétique basée sur "
+                            u"les catégories et les indicateurs ?",
                             "complex_total",
                         ),
                     )

@@ -271,15 +271,20 @@ def deferred_label_validator(node, kw):
     def label_validator(node, value):
         if ':' in value or '!' in value:
             raise colander.Invalid(
+                node,
                 u"Erreur de syntax (les caractères ':' et '!' sont interdits"
             )
 
         if value in category_labels:
             raise colander.Invalid(
+                node,
                 u"Une catégories porte déjà ce nom"
             )
         if value in type_labels:
-            raise colander.Invalid(u"Un type d'indicateurs porte déjà ce nom")
+            raise colander.Invalid(
+                node,
+                u"Un type d'indicateurs porte déjà ce nom"
+            )
     return label_validator
 
 
@@ -291,10 +296,16 @@ def complex_total_validator(node, value):
     Validate the complex total syntax
     """
     if len(value) > 254:
-        raise colander.Invalid(u"Ce champ est limité à 255 caractères")
+        raise colander.Invalid(
+            node,
+            u"Ce champ est limité à 255 caractères"
+        )
 
     if value.count('{') != value.count('}'):
-        raise colander.Invalid(u"Erreur de syntaxe")
+        raise colander.Invalid(
+            node,
+            u"Erreur de syntaxe"
+        )
 
     fields = BRACES_REGEX.findall(value)
 
@@ -302,13 +313,19 @@ def complex_total_validator(node, value):
     try:
         temp = value.format(**format_dict)
     except Exception as err:
-        raise colander.Invalid(u"Erreur de syntaxe : {0}".format(err.message))
+        raise colander.Invalid(
+            node,
+            u"Erreur de syntaxe : {0}".format(err.message)
+        )
 
     parser = NumericStringParser()
     try:
         temp = parser.eval(temp)
     except Exception as err:
-        raise colander.Invalid(u"Erreur de syntaxe : {0}".format(err.message))
+        raise colander.Invalid(
+            node,
+            u"Erreur de syntaxe : {0}".format(err.message)
+        )
 
 
 def get_admin_income_statement_measure_schema(total=False):

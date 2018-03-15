@@ -41,6 +41,11 @@ userdatas_helper = sa.Table(
 
 
 def update_database_structure():
+    op.execute("set foreign_key_checks=0;")
+    op.execute(
+        "ALTER TABLE user_datas MODIFY situation_situation_id int(11);"
+    )
+    op.execute("set foreign_key_checks=1;")
     # Migrate the foreignkey
     op.drop_constraint('fk_user_groups_user_id', 'user_groups', type_='foreignkey')
     op.add_column(

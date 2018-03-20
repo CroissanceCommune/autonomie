@@ -30,6 +30,9 @@ from autonomie.forms.user.userdatas import (
     USERDATAS_FORM_GRIDS,
     get_doctypes_schema,
 )
+from autonomie.utils.strings import (
+    format_account,
+)
 from autonomie.utils.menu import (
     AttrMenuDropdown,
 )
@@ -171,7 +174,9 @@ class UserDatasEditView(BaseFormView):
 
     @property
     def title(self):
-        pass
+        return u"Fiche de gestion sociale de {0}".format(
+            format_account(self.current_userdatas.user)
+        )
 
     @property
     def current_userdatas(self):
@@ -377,6 +382,7 @@ class UserUserDatasFileList(UserDatasFileList):
 
 
 class UserDatasHistory(BaseView):
+
     @property
     def current_userdatas(self):
         return self.context
@@ -404,6 +410,7 @@ class UserDatasHistory(BaseView):
             status_history=status_query.all(),
             user=self.current_userdatas.user,
             template_history=template_query.all(),
+            title=u"Historique"
         )
 
 

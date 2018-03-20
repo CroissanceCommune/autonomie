@@ -518,7 +518,19 @@ class CompanyWorkshopListView(WorkshopListView):
         query = query.filter(
             models.Workshop.participants.any(
                 user.User.id.in_(employees_id)
-                ))
+            )
+        )
+        return query
+
+
+class UserWorkshopListView(CompanyWorkshopListView):
+    def filter_participant(self, query, appstruct):
+        user_id = self.context.id
+        query = query.filter(
+            models.Workshop.participants.any(
+                user.User.id == user_id
+            )
+        )
         return query
 
 
@@ -667,6 +679,11 @@ def add_routes(config):
         "/workshops/{id:\d+}",
         traverse='/workshops/{id}',
     )
+    config.add_route(
+        "/users/{id}/workshops",
+        "/users/{id}/workshops",
+        traverse="/users/{id}",
+    )
 
     config.add_route(
         'workshop.pdf',
@@ -692,11 +709,7 @@ def add_routes(config):
         )
 
 
-def includeme(config):
-    """
-    Add view to the pyramid registry
-    """
-    add_routes(config)
+def add_views(config):
     config.add_view(
         WorkshopAddView,
         route_name='workshops',
@@ -717,6 +730,14 @@ def includeme(config):
         route_name='company_workshops',
         permission='list_workshops',
         renderer="/accompagnement/workshops.mako",
+    )
+
+    config.add_view(
+        UserWorkshopListView,
+        route_name='/users/{id}/workshops',
+        permission='view.workshops',
+        renderer="/accompagnement/user_workshops.mako",
+        layout="user",
     )
 
     config.add_view(
@@ -784,3 +805,11 @@ def includeme(config):
         route_name='workshop.pdf',
         permission="view_workshop",
     )
+
+
+def includeme(config):
+    """
+    Add view to the pyramid registry
+    """
+    add_routes(config)
+    add_views(config)

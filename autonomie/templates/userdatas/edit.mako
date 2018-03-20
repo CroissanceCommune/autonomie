@@ -61,10 +61,9 @@
 </div>
 % endif
 <div class="col-md-12">
-    <h3>${title}</h3>
     <button
         type="button"
-        class="btn btn-default"
+        class="btn btn-info primary-action"
         onclick="javascript:enableForm('#deform');$(this).hide();"
         style="margin-bottom: 15px"
         >

@@ -23,8 +23,6 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_filetable" />
 <%block name="mainblock">
-<h3>Liste des documents rattachés à cette fiche de gestion sociale</h3>
-<hr />
 <div class='alert alert-info'>
     <i class='fa fa-question-circle fa-2x'></i>
     Cette liste présente l'ensemble des documents déposés dans Autonomie ainsi que l'ensemble des documents générés depuis l'onglet Génération de documents.<br />

@@ -175,7 +175,7 @@ def login_view(context, request):
     """
     Return the login view datas
     """
-    return dict(login=context.login)
+    return dict(login=context.login, title=u"Identifiants rattachés au compte")
 
 
 def add_routes(config):

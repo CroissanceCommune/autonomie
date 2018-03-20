@@ -22,8 +22,6 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-<h3>Historiques</h3>
-<hr/>
 <h4>Changements de situation</h4>
 <table class='table table-condensed'>
     <thead><tr><th>Date</th><th>Situation</th></tr></thead>

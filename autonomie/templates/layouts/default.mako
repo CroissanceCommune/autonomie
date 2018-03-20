@@ -48,7 +48,7 @@
         ${request.layout_manager.render_panel('menu')}
         ${request.layout_manager.render_panel('submenu')}
         <%block name="headtitle">
-        % if title is not UNDEFINED:
+        % if title is not UNDEFINED and title is not None:
         <div class='pagetitle visible-lg hidden-print hidden-sm'>
           <h2 >
             ${title}

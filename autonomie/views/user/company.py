@@ -19,6 +19,8 @@ class UserCompaniesView(BaseView):
     """
     Collect datas for the company display view
     """
+    title = u"Entreprises"
+
     @property
     def current_user(self):
         return self.context

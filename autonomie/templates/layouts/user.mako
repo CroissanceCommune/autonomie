@@ -22,6 +22,8 @@
 </%doc>
 <%inherit file="/layouts/default.mako" />
 <%namespace file="/base/utils.mako" import="format_mail" />
+<%block name="headtitle">
+</%block>
 <%block name='content'>
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
@@ -44,6 +46,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class='col-md-9 hidden-xs'>
+            <%block name='usertitle'>
+            % if title is not UNDEFINED and title is not None:
+            <h3>${title}</h3>
+            % endif
+            </%block>
             </div>
         </div>
     </div>

@@ -44,7 +44,8 @@ from autonomie.utils.filedepot import (
 
 
 AUTONOMIE_MODULES = (
-    "autonomie.views.activity",
+    "autonomie.views.accompagnement.activity",
+    "autonomie.views.accompagnement.workshop",
     "autonomie.views.accounting",
     "autonomie.views.auth",
     "autonomie.views.commercial",
@@ -85,7 +86,6 @@ AUTONOMIE_MODULES = (
     "autonomie.views.user.lists",
     "autonomie.views.userdatas.userdatas",
     "autonomie.views.userdatas.lists",
-    "autonomie.views.workshop",
 )
 
 AUTONOMIE_LAYOUTS_MODULES = (
@@ -303,13 +303,13 @@ def base_configure(config, dbsession, **settings):
 
     add_static_views(config, settings)
 
+    for module in AUTONOMIE_LAYOUTS_MODULES:
+        config.include(module)
+
     for module in AUTONOMIE_REQUEST_SUBSCRIBERS:
         config.include(module)
 
     for module in AUTONOMIE_MODULES:
-        config.include(module)
-
-    for module in AUTONOMIE_LAYOUTS_MODULES:
         config.include(module)
 
     for module in AUTONOMIE_PANELS_MODULES:

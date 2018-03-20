@@ -22,8 +22,6 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-<h3>${title}</h3>
-<hr />
 % for template in templates:
 <% url = request.current_route_path(_query=dict(template_id=template.id)) %>
     <li>

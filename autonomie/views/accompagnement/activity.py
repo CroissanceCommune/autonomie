@@ -52,6 +52,9 @@ from autonomie.utils.pdf import (
     render_html,
     write_pdf,
 )
+from autonomie.utils.menu import (
+    AttrMenuDropdown,
+)
 from autonomie.views import (
     BaseListView,
     BaseFormView,
@@ -121,6 +124,30 @@ USER_SEARCH_GRID_FORM = (
         ('date_range_start', 3), ('date_range_end', 3), ('items_per_page', 3),
         ('direction', 1), ('sort', 1), ('page', 1),
     ),
+)
+
+
+ACCOMPAGNEMENT_MENU = AttrMenuDropdown(
+    name="accompagnement",
+    label=u"Accompagnement",
+    default_route="/users/{id}/activities",
+    icon=u"fa fa-users",
+    model_attribute='login',
+    perm="view.activities",
+)
+ACCOMPAGNEMENT_MENU.add_item(
+    name="activity_view",
+    label=u"Rendez-vous",
+    route_name=u'/users/{id}/activities',
+    icon=u"fa fa-calendar",
+    perm="view.activities",
+)
+ACCOMPAGNEMENT_MENU.add_item(
+    name="workshop_view",
+    label=u"Ateliers",
+    icon=u"fa fa-slideshare",
+    route_name=u'/users/{id}/workshops',
+    perm="view.activities",
 )
 
 
@@ -505,7 +532,7 @@ class ActivityRecordView(BaseFormView):
 
 
 class ActivityList(BaseListView):
-    title = u"Rendez-vous"
+    title = u"Liste des rendez-vous"
     schema = get_list_schema(is_admin=True)
     sort_columns = dict(
         datetime=Activity.datetime,
@@ -598,7 +625,7 @@ class ActivityList(BaseListView):
         return query
 
 
-class ActivityListContractor(ActivityList):
+class CompanyActivityListView(ActivityList):
     """
     Activity list but for contractors
     """
@@ -628,6 +655,17 @@ class ActivityListContractor(ActivityList):
         query = query.filter(
             Activity.attendances.any(
                 Attendance.account_id.in_(participants_ids)
+            )
+        )
+        return query
+
+
+class UserActivityListView(CompanyActivityListView):
+    def filter_participant(self, query, appstruct):
+        user_id = self.context.id
+        query = query.filter(
+            Activity.attendances.any(
+                Attendance.account_id == user_id
             )
         )
         return query
@@ -833,6 +871,11 @@ def add_routes(config):
     Add module related routes
     """
     config.add_route(
+        "/users/{id}/activities",
+        "/users/{id}/activities",
+        traverse="/users/{id}",
+    )
+    config.add_route(
         'activity',
         "/activities/{id:\d+}",
         traverse='/activities/{id}',
@@ -857,11 +900,7 @@ def add_routes(config):
     )
 
 
-def includeme(config):
-    """
-    Add view to the pyramid registry
-    """
-    add_routes(config)
+def add_views(config):
     config.add_view(
         NewActivityView,
         route_name='activities',
@@ -910,10 +949,18 @@ def includeme(config):
     )
 
     config.add_view(
-        ActivityListContractor,
+        CompanyActivityListView,
         route_name='company_activities',
         permission='list_activities',
         renderer="/accompagnement/activities.mako",
+    )
+
+    config.add_view(
+        UserActivityListView,
+        route_name="/users/{id}/activities",
+        permission='view.activities',
+        renderer="/accompagnement/user_activities.mako",
+        layout="user"
     )
 
     config.add_view(
@@ -955,3 +1002,18 @@ def includeme(config):
         permission='admin_activity',
         request_param='action=attach_file',
     )
+
+
+def register_menus():
+    from autonomie.views.user.layout import UserMenu
+    UserMenu.add_after('companies', ACCOMPAGNEMENT_MENU)
+
+
+def includeme(config):
+    """
+    Add view to the pyramid registry
+    """
+    add_routes(config)
+    add_views(config)
+
+    register_menus()

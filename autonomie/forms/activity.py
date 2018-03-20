@@ -335,8 +335,18 @@ def get_list_schema(is_admin=False):
             }
             )
         )
-    year = forms.year_select_node(get_invoice_years)
-    year.name = 'year'
+
+    def get_year_options(kw):
+        values = get_invoice_years(kw)
+        values.insert(0, u'')
+        return values
+
+    year = forms.year_select_node(
+        name='year',
+        query_func=get_year_options,
+        missing=colander.null,
+        description=u"Année"
+    )
     schema.insert(0, year)
 
     del schema['search']

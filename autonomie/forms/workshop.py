@@ -199,8 +199,18 @@ def get_list_schema(company=False):
             missing=colander.drop,
         )
         schema.insert(1, notfilled_node)
-    year = forms.year_select_node(get_invoice_years)
-    year.name = 'year'
+
+    def get_year_options(kw):
+        values = get_invoice_years(kw)
+        values.insert(0, u'')
+        return values
+
+    year = forms.year_select_node(
+        name='year',
+        query_func=get_year_options,
+        missing=colander.null,
+        description=u"Année"
+    )
     schema.insert(0, year)
 
     schema['search'].description = u"Intitulé de l'atelier"

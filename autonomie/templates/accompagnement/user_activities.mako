@@ -36,6 +36,21 @@
     <i class="glyphicon glyphicon-plus"></i>&nbsp;Prendre un rendez-vous
 </a>
 % endif
+
+% if last_closed_event is not UNDEFINED and last_closed_event is not None:
+    <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+        Dernières préconisations
+        </div>
+        <div class='panel-body'>
+            <blockquote>
+                ${api.clean_html(last_closed_event.action)|n}
+                <footer>le ${api.format_date(last_closed_event.datetime)}</footer>
+            </blockquote>
+        </div>
+    </div>
+% endif
+
 <div class='panel panel-default'>
 <div class='panel-heading'>
 <a  href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
@@ -64,19 +79,6 @@
     </div>
 </div>
 </div>
-% if last_closed_event is not UNDEFINED and last_closed_event is not None:
-    <div class='panel panel-default page-block'>
-        <div class='panel-heading'>
-        Dernières préconisations
-        </div>
-        <div class='panel-body'>
-            <blockquote>
-                ${api.clean_html(last_closed_event.action)|n}
-                <footer>le ${api.format_date(last_closed_event.datetime)}</footer>
-            </blockquote>
-        </div>
-    </div>
-% endif
 
 <div class='panel panel-default page-block'>
 <div class='panel-heading'>

@@ -642,7 +642,11 @@ class CompanyActivityListView(ActivityList):
         query = self.filter_participant(query, None)
         query = query.filter_by(status='closed')
         query = query.order_by(desc(Activity.datetime))
-        return query.first()
+        last = query.first()
+        if last is not None:
+            if not last.action.strip():
+                last = None
+        return last
 
     def _get_conseiller_id(self, appstruct):
         return None

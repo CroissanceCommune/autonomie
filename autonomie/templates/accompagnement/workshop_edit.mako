@@ -104,7 +104,7 @@
                             % for attendance in timeslot.sorted_attendances:
                                 <input type="hidden" name="__start__" value="attendance:mapping" />
                                 <% participant = attendance.user %>
-                                <% participant_url = request.route_path('user', id=participant.id) %>
+                                <% participant_url = request.route_path('/users/{id}', id=participant.id) %>
                                 <% status = attendance.status %>
 
                                <% tag_id = "presence_%s_%s" % (timeslot.id, participant.id) %>

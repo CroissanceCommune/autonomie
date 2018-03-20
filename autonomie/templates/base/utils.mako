@@ -90,7 +90,7 @@
         Render an email address
     </%doc>
     % if mail is not UNDEFINED and mail is not None:
-        <a href="mailto:${mail}">${mail}&nbsp;<i class="glyphicon glyphicon-envelope"></i></a>
+        ${mail}&nbsp;<a href="mailto:${mail}"><i class="glyphicon glyphicon-envelope"></i></a>
     % endif
 </%def>
 <%def name="format_phone(phone)">

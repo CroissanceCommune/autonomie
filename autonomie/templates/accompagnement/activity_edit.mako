@@ -50,7 +50,9 @@
                 <ul>
                 % for participant in activity.participants:
                     <li>
-                    ${api.format_account(participant)} : ${ format_mail(participant.email) }
+                    <% url = request.route_path("/users/{id}", id=participant.id) %>
+                    <a href='#' onclick="openPopup('${url}');" >
+                    ${api.format_account(participant)}</a> : ${ format_mail(participant.email) }
                     </li>
                     % for company in participant.companies:
                         <% companies.add(company) %>
@@ -69,7 +71,7 @@
                             ):
                             <li>
                                 <% url = request.route_path(route, id=company.id) %>
-                                <a href='#' onclick='window.open("${url}", "${label}");'>${label}</a>
+                                <a href='#' onclick='openPopup("${url}");'>${label}</a>
                             </li>
                         % endfor
                         </ul>

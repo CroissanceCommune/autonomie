@@ -353,8 +353,8 @@ class WorkshopListTools(object):
         search = appstruct['search']
         if search not in (None, colander.null, ''):
             query = query.filter(
-                or_(models.Workshop.name.like('%{0}%'.format(search)),
-                    models.Workshop.leaders.like('%{0}%'.format(search))
+                or_(models.Workshop.name.like(u'%{0}%'.format(search)),
+                    models.Workshop.leaders.like(u'%{0}%'.format(search))
                     ))
         return query
 

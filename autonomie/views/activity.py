@@ -260,7 +260,9 @@ def populate_actionmenu(request):
         "admin_activity",
         path="activity",
         id=request.context.id,
-        _query=dict(action="attach_file")
+        _query=dict(action="attach_file"),
+        confirm=u"En quittant cette page, vous perdrez toutes "
+        u"modifications non enregistrées. Voulez-vous continuer ?"
     )
     request.actionmenu.add(link)
 

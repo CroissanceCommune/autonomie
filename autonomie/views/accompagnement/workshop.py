@@ -368,7 +368,7 @@ class WorkshopListTools(object):
                 )
             )
         # Only filter by year if no date filter is set
-        elif year not in (None, colander.null):
+        elif year not in (None, colander.null, -1):
             query = query.filter(
                 models.Workshop.timeslots.any(
                     func.extract('YEAR', models.Timeslot.start_time) == year

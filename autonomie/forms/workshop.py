@@ -200,14 +200,10 @@ def get_list_schema(company=False):
         )
         schema.insert(1, notfilled_node)
 
-    def get_year_options(kw):
-        values = get_invoice_years(kw)
-        values.insert(0, u'')
-        return values
-
     year = forms.year_select_node(
         name='year',
-        query_func=get_year_options,
+        query_func=get_invoice_years,
+        widget_options={'default_val': (-1, u"Toutes les années")},
         missing=colander.null,
         description=u"Année"
     )

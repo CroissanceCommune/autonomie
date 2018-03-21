@@ -617,7 +617,7 @@ class ActivityList(BaseListView):
             )
 
         if (
-            year not in (None, colander.null) and
+            year not in (None, colander.null, -1) and
             date_range_start in (None, colander.null) and
             date_range_end in (None, colander.null)
         ):

@@ -283,7 +283,10 @@ class TreasuryMeasure(DBBASE):
         primaryjoin="TreasuryMeasureType.id==TreasuryMeasure.measure_type_id",
         info={"colanderalchemy": {'exclude': True}},
     )
-    grid_id = Column(ForeignKey('treasury_measure_grid.id'))
+    grid_id = Column(
+        ForeignKey('treasury_measure_grid.id'),
+        ondelete="cascade",
+    )
 
     def __todict__(self, request):
         return {

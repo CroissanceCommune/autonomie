@@ -122,6 +122,7 @@
         <tr>
             <th class="visible-lg">${sortable(u"Compte analytique", "analytical_account")}</th>
             <th class="visible-lg">${sortable(u"Compte général", "general_account")}</th>
+            <th>Date</th>
             <th>Libellé</th>
             <th>Débit</th>
             <th>Crédit</th>
@@ -136,6 +137,7 @@
                     ${entry.analytical_account}
                     </td>
                     <td>${entry.general_account}</td>
+                    <td>${api.format_date(entry.date)}</td>
                     <td>${entry.label}</td>
                     <td>${api.format_amount(entry.debit, precision=0)|n} €</td>
                     <td>${api.format_amount(entry.credit, precision=0)|n} €</td>

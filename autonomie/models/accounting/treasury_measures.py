@@ -284,8 +284,7 @@ class TreasuryMeasure(DBBASE):
         info={"colanderalchemy": {'exclude': True}},
     )
     grid_id = Column(
-        ForeignKey('treasury_measure_grid.id'),
-        ondelete="cascade",
+        ForeignKey('treasury_measure_grid.id', ondelete="cascade")
     )
 
     def __todict__(self, request):

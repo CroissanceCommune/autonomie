@@ -584,7 +584,10 @@ class IncomeStatementMeasure(DBBASE):
         "IncomeStatementMeasure.measure_type_id",
         info={"colanderalchemy": {'exclude': True}},
     )
-    grid_id = Column(ForeignKey('income_statement_measure_grid.id'))
+    grid_id = Column(
+        ForeignKey('income_statement_measure_grid.id'),
+        ondelete="cascade",
+    )
 
     def __todict__(self, request):
         return {

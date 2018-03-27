@@ -7,7 +7,7 @@ import logging
 import colander
 from sqlalchemy import extract
 
-from autonomie.models.accounting.measures import (
+from autonomie.models.accounting.treasury_measures import (
     TreasuryMeasureGrid,
 )
 from autonomie.models.config import Config
@@ -18,7 +18,7 @@ from autonomie.views import BaseListView
 logger = logging.getLogger(__name__)
 
 
-class CompanyAccountingMeasuresListView(BaseListView):
+class CompanyTreasuryMeasuresListView(BaseListView):
     title = u"État de trésorerie"
     schema = get_treasury_measures_list_schema()
     add_template_vars = (
@@ -122,16 +122,16 @@ def add_routes(config):
 
 def add_views(config):
     config.add_view(
-        CompanyAccountingMeasuresListView,
+        CompanyTreasuryMeasuresListView,
         route_name="/companies/{id}/accounting/treasury_measure_grids",
         permission="view.accounting",
-        renderer="/accounting/measures.mako",
+        renderer="/accounting/treasury_measures.mako",
     )
     config.add_view(
-        CompanyAccountingMeasuresListView,
+        CompanyTreasuryMeasuresListView,
         route_name="/treasury_measure_grids/{id}",
         permission="view.accounting",
-        renderer="/accounting/measures.mako",
+        renderer="/accounting/treasury_measures.mako",
     )
 
 

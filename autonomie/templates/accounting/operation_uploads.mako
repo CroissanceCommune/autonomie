@@ -66,7 +66,7 @@
     </div>
     <div class='panel-body'>
         <div class='alert alert-info'>
-            Vous trouverez ci-dessous la liste des fichiers de trésorerie traités par Autonomie.
+            Vous trouverez ci-dessous la liste des fichiers comptables traités par Autonomie.
             <br />
             Lors du dépôt d'un fichier:
             <ul>
@@ -74,13 +74,19 @@
             Le fichier est traité par un automate en "tâche de fond"
             </li>
             <li>
-            Après l'import, des indicateurs sont générés depuis les écritures et en fonction de la configuration
-            (<a
+            Après l'import, des indicateurs sont générés depuis les écritures et en fonction de la configuration <br />
+            <a
                 class='link'
                 onclick="openPopup('/admin/accounting/treasury_measure_types');"
                 href='#'>
-                Configuration-> Configuration du module Fichiers de trésorerie -> Configuration des indicateurs de trésorerie
-            </a>)
+                Configuration-> Configuration du module Fichiers comptables -> Configuration des indicateurs de trésorerie
+            </a>&nbsp;Pour les États de trésorerie (générés depuis la balance analytique)<br />
+            <a
+                class='link'
+                onclick="openPopup('/admin/accounting/treasury_measure_types');"
+                href='#'>
+                Configuration-> Configuration du module Fichiers comptables -> Configuration des indicateurs de compte de résultat
+            </a>&nbsp;Pour les Comptes de résultat (générés depuis le grand livre)
             </li>
             </ul>
             <br />
@@ -106,8 +112,9 @@
 <table class="table table-striped table-condensed table-hover">
     <thead>
         <tr>
+            <th>Type du fichier</th>
             <th class="visible-lg">${sortable(u"Traité le", "created_at")}</th>
-            <th class="visible-lg">${sortable(u"Date", "date")}</th>
+            <th class="visible-lg">${sortable(u"Date d'export", "date")}</th>
             <th>${sortable(u"Nom du fichier", "filename")}</th>
             <th class="actions">Actions</th>
         </tr>
@@ -116,6 +123,9 @@
         % if records:
             % for entry in records:
                 <tr class='tableelement' id='${entry.id}'>
+                    <td>
+                        <i class='fa fa-book'></i> ${entry.filetype_label}
+                    </td>
                     <td>${api.format_datetime(entry.created_at)}</td>
                     <td>${api.format_date(entry.date)}</td>
                     <td>
@@ -142,7 +152,7 @@
             % endfor
         % else:
             <tr>
-                <td colspan='4'>
+                <td colspan='5'>
                     Aucun fichier n'a été traité
                 </td>
             </tr>

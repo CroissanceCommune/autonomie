@@ -6,6 +6,7 @@
 import logging
 import json
 import datetime
+import os
 
 from autonomie.scripts.utils import (
     command,
@@ -35,7 +36,7 @@ def _get_query(model, where):
         criterion_factory = CRITERION_MODELS[criterion_dict['type']]
         entry.criteria.append(criterion_factory(**criterion_dict))
 
-    inspector = get_inspector()
+    inspector = get_inspector(model)
     query_factory = EntryQueryFactory(model, entry, inspector)
     return query_factory.query()
 
@@ -144,7 +145,10 @@ def _stream_csv_rows(model, query, fields):
         if item.parcours_start_date:
             if item.parcours_start_date >= refdate:
                 this_year = "Oui"
-            elif not item.parcours_end_date or item.parcours_end_date >= refdate:
+            elif (
+                not item.parcours_end_date or
+                item.parcours_end_date >= refdate
+            ):
                 start_year = "Oui"
 
         datas.append(start_year)
@@ -154,7 +158,7 @@ def _stream_csv_rows(model, query, fields):
     print(writer.render().read())
 
 
-def _export_user_datas(args, env):
+def _export_userdatas_command(args, env):
     """
     Export userdatas as csv format
 
@@ -196,28 +200,96 @@ def _export_user_datas(args, env):
     _stream_csv_rows(UserDatas, query, fields)
 
 
-def _export_cpe(args, env):
+def _write_invoice_on_disk(request, document, destdir, prefix, key):
     """
-    Generate the cpe export
+    Write an invoice on disk
+
+    :param obj request: The current env request instance
+    :param obj document: The document instance (invoice/cancelinvoice)
+    :param str destdir: An existing dest directory
+    :param str prefix: The prefix to add before dest file name
+    :param str key: A key used to make the name unique
+    """
+    from autonomie.views.task.views import (
+        html,
+    )
+    from autonomie.utils.pdf import buffer_pdf
+    from pyramid_layout.config import create_layout_manager
+    class A:
+        def __init__(self, req):
+            self.request = req
+
+    logger = logging.getLogger(__name__)
+    dest_file = u"%s_%s_%s.pdf" % (prefix, document.official_number, key)
+    filepath = os.path.join(destdir, dest_file)
+    logger.debug("Writing : %s" % filepath)
+    request.context = document
+    create_layout_manager(A(request))
+
+    html_str = html(request, tasks=[document], bulk=True)
+    with file(filepath, 'wb') as fbuf:
+        fbuf.write(buffer_pdf(html_str).read())
 
 
-    :param dict args: The arguments coming from the command line
-    :param dict env: The environment bootstraped when setting up the pyramid app
+def _invoices_pdf_command(args, env):
     """
-    pass
+    export pdf of the documents matching the given parameters
+    """
+    request = env['request']
+    from autonomie.models.task import (
+        Invoice, CancelInvoice,
+    )
+    logger = logging.getLogger(__name__)
+    destdir = get_value(args, "destdir")
+    if not os.path.isdir(destdir):
+        raise Exception(u"Le répertoire de destination n'existe pas")
+
+    where_str = get_value(args, "where")
+    if not where_str:
+        raise Exception(u"L'argument de recherche where est requis")
+    try:
+        where = json.loads(where_str)
+        if isinstance(where, dict):
+            where = [where]
+    except:
+        logger.exception("Where should be in json format")
+        where = []
+
+    invoice_query = _get_query(Invoice, where)
+    cinvoice_query = _get_query(CancelInvoice, where)
+    invoice_query = invoice_query.filter_by(status='valid')
+    cinvoice_query = cinvoice_query.filter_by(status='valid')
+    logger.debug(u"Exporting %s invoices to pdf" % invoice_query.count())
+    logger.debug(u"Exporting %s cancelinvoices to pdf" % cinvoice_query.count())
+    index = 0
+    for invoice in invoice_query:
+        _write_invoice_on_disk(
+            request, invoice[1], destdir, prefix=u"facture", key=str(index)
+        )
+        index += 1
+    for cinvoice in cinvoice_query:
+        _write_invoice_on_disk(
+            request, cinvoice[1], destdir, prefix=u"avoir", key=str(index)
+        )
+        index += 1
+    logger.debug(u"Export has finished, check %s" % destdir)
 
 
 def export_cmd():
     """Export utilitiy tool, stream csv datas in stdout
     Usage:
         autonomie-export <config_uri> userdatas [--fields=<fields>] [--where=<where>]
+        autonomie-export <config_uri> invoices_pdf [--destdir=<destdir>] [--where=<where>]
 
     Options:
         -h --help             Show this screen
         --fields=<fields>     Export the comma separated list of fields
-        --where=<where>       Query parameters in json format
+        --where=<where>       Query parameters in json format descrbing
+        statistic options
+        --destdir=<destdir>   The directory where we output the datas
 
-    o userdatas : Export userdatas as csv format
+    o userdatas     : Export userdatas as csv format
+    o invoices_pdf  : Export Invoices and CancelInvoices in pdf format
 
     Streams the output in stdout
 
@@ -229,10 +301,14 @@ def export_cmd():
     --where='[{"key":"created_at","method":"dr","type":"date",\
         "search1":"1999-01-01","search2":"2016-12-31"}]'\
     > /tmp/toto.csv
+
+    autonomie-export
     """
     def callback(arguments, env):
         if arguments['userdatas']:
-            func = _export_user_datas
+            func = _export_userdatas_command
+        elif arguments['invoices_pdf']:
+            func = _invoices_pdf_command
         return func(arguments, env)
 
     try:

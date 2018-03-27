@@ -711,7 +711,7 @@ class Payment(DBBASE, PersistentACLMixin):
 
 
 # Usefull queries
-def get_invoice_years():
+def get_invoice_years(kw):
     """
         Return a cached query for the years we have invoices configured
     """

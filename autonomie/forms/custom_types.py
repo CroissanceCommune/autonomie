@@ -100,3 +100,25 @@ class Integer(colander.Number):
                 node,
                 u"'${val}' n'est pas un nombre".format(val=appstruct)
             )
+
+
+class CsvTuple(colander.SchemaType):
+    def serialize(self, node, appstruct):
+        if appstruct in (colander.null, None):
+            return colander.null
+        return tuple((a for a in appstruct.split(',') if a))
+
+    def deserialize(self, node, cstruct):
+        if cstruct is colander.null:
+            return colander.null
+
+        if not colander.is_nonstr_iter(cstruct):
+            raise colander.Invalid(
+                node,
+                colander._(
+                    '${cstruct} is not iterable',
+                    mapping={'cstruct': cstruct}
+                )
+            )
+
+        return ",".join(cstruct)

@@ -140,7 +140,7 @@ class ExpenseTypeListView(BaseView):
             yield (
                 self._get_item_url(expense_type, action='disable'),
                 u"Activer",
-                u"La TVA apparaitra plus dans l'interface",
+                u"La TVA apparaitra dans l'interface",
                 u"",
             )
 

@@ -1,14 +1,14 @@
 alembic==0.8.2
-autonomie_base==4.0.8
-autonomie_celery==4.0.11
+autonomie_base==4.1.0b
+autonomie_celery==4.1.0b3
 Beaker==1.6.4
 bleach==1.4.1
 Chameleon
-colander==1.3.2
+colander==1.4
 ColanderAlchemy
 Cython==0.18
 deform==2.0.4
-deform_extensions==0.2.5
+deform_extensions==0.3.1
 docopt==0.5.0
 fanstatic==1.0a5
 filedepot==0.1.2
@@ -37,6 +37,7 @@ peppercorn==0.4
 Pillow==2.9.0
 py3o.template==0.9.9
 pyjwkest==1.3.6
+pyparsing==2.2.0
 pyramid==1.8.3
 pyramid-beaker==0.8
 pyramid-chameleon==0.3
@@ -52,7 +53,7 @@ pytest==2.6.4
 reportlab==3.1.44
 repoze.lru==0.6
 simplejson==3.3.1
-sqla_inspect==0.4.2
+sqla_inspect==0.4.3
 SQLAlchemy==1.0.8
 transaction==2.1.2
 translationstring==1.2

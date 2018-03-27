@@ -139,7 +139,7 @@
                     % for record in records:
                         <tr
                         % if record.id == current_grid['id']:
-                        class="tr_highlighted"
+                        class="highlighted"
                         % endif
                         >
                             <% url = request.route_path("/treasury_measure_grids/{id}", id=record.id) %>

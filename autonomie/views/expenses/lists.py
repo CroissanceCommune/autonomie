@@ -9,7 +9,9 @@ import deform
 import logging
 
 from collections import OrderedDict
+from sqlalchemy import distinct, desc
 
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.user import User
 from autonomie.models.expense.sheet import ExpenseSheet
 from autonomie.models.expense.types import (
@@ -135,15 +137,18 @@ def get_period_form(request, action_url=""):
     return form
 
 
-def get_expensesheet_years(expenses):
+def get_expensesheet_years(company):
     """
-        List of years an expensesheet has been retrieved for
+    List of years an expensesheet has been retrieved for
     """
-    years = list(set([exp.year for exp in expenses]))
-    if not years:
-        years = [datetime.date.today().year]
+    query = DBSESSION().query(distinct(ExpenseSheet.year)).filter_by(
+        company_id=company.id
+    )
+    years = [data[0] for data in query.order_by(desc(ExpenseSheet.year))]
 
-    years.sort(reverse=True)
+    today = datetime.date.today()
+    if today.year not in years:
+        years.insert(0, today.year)
     return years
 
 
@@ -152,12 +157,13 @@ def get_expensesheet_by_year(company):
         Return expenses stored by year and users for display purpose
     """
     result = OrderedDict()
-    for year in get_expensesheet_years(company.expenses):
+    for year in get_expensesheet_years(company):
         result[year] = []
         for user in company.employees:
             expenses = [exp for exp in user.expenses
                         if exp.year == year and exp.company_id == company.id]
             result[year].append((user, expenses))
+
     return result
 
 
@@ -179,7 +185,8 @@ accessible."
     return dict(
         title=title,
         expense_sheets=expense_sheets,
-        current_year=datetime.date.today().year
+        current_year=datetime.date.today().year,
+        several_users=len(request.context.employees) > 1,
     )
 
 

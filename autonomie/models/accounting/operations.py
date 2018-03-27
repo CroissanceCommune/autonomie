@@ -24,6 +24,12 @@ from autonomie.forms import get_deferred_select
 from autonomie.models.company import Company
 
 
+FILETYPE_LABELS = {
+    'general_ledger': u"Grand livre",
+    'analytical_balance': u"Balance analytique",
+}
+
+
 class AccountingOperationUpload(DBBASE):
     """
     Represent a newly parsed file
@@ -37,7 +43,7 @@ class AccountingOperationUpload(DBBASE):
         info={"colanderalchemy": {'title': u"Heure et date de création"}}
     )
     filetype = Column(
-        String(),
+        String(50),
         info={
             'colanderalchemy': {
                 'title': u"Type de fichier (analytical_balance/general_ledger)"
@@ -81,15 +87,19 @@ class AccountingOperationUpload(DBBASE):
         }
     )
 
+    @property
+    def filetype_label(self):
+        return FILETYPE_LABELS.get(self.filetype)
+
 
 class AccountingOperation(DBBASE):
     __tablename__ = 'accounting_operation'
     __table_args__ = default_table_args
     id = Column(Integer, primary_key=True)
-    datetime = Column(
-        DateTime(),
-        default=datetime.datetime.now,
-        info={"colanderalchemy": {'title': u"Heure et date de création"}}
+    date = Column(
+        Date(),
+        default=datetime.date.today,
+        info={"colanderalchemy": {'title': u"Date de l'écriture"}},
     )
     analytical_account = Column(
         String(20),
@@ -143,6 +153,7 @@ class AccountingOperation(DBBASE):
         return dict(
             analytical_account=self.analytical_account,
             general_account=self.general_account,
+            date=self.date,
             label=self.label,
             debit=self.debit,
             credit=self.credit,

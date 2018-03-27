@@ -56,13 +56,13 @@
     % if warn_msg is not UNDEFINED and warn_msg is not None:
     <div class="alert alert-danger">
         <i class='fa fa-warning'></i>
-        ${warn_msg}
+        ${warn_msg|n}
     </div>
     % endif
     % if help_msg is not UNDEFINED and help_msg is not None:
     <div class="alert alert-info">
         <i class='fa fa-help'></i>
-        ${help_msg}
+        ${help_msg|n}
     </div>
     % endif
 </div>
@@ -107,8 +107,14 @@
                                     Actions <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right">
-                                    % for url, label, title, icon in stream_actions(item):
-                                        ${dropdown_item(url, label, title, icon=icon)}
+                                    % for action in stream_actions(item):
+                                        <% url, label, title, icon = action[:4] %>
+                                        % if len(action) >= 5:
+                                        <% onclick = action[4] %>
+                                        % else:
+                                        <% onclick = None %>
+                                        % endif
+                                        ${dropdown_item(url, label, title, icon=icon, onclick=onclick)}
                                     % endfor
                                 </ul>
                             </div>

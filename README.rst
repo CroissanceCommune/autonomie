@@ -44,7 +44,7 @@ Sous Fedora:
 
 .. code-block:: console
 
-    yum install virtualenvwrapper mardiadb-devel python-devel libxslt-devel libxml2-devel libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel gcc redis-server
+    dnf install virtualenvwrapper mardiadb-devel python-devel libxslt-devel libxml2-devel libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel gcc redis-server
 
 Création d'un environnement virtuel Python.
 
@@ -58,7 +58,6 @@ Téléchargement et installation de l'application
 
     git clone https://github.com/CroissanceCommune/autonomie.git
     cd autonomie
-    pip install -r requirements.txt --allow-external PIL --allow-unverified PIL
     python setup.py install
     cp development.ini.sample development.ini
 
@@ -71,11 +70,16 @@ Puis lancer l'application web
 
     pserve development.ini
 
-Ainsi que le service d'éxécution des tâches asynchrones
+Éxécution des tâches asynchrones
+---------------------------------
 
-.. code-block:: console
+Un service de tâches asynchrones basé sur celery et redis est en charge de
+l'éxécution des tâches les plus longues.
 
-    celery worker -A pyramid_celery.celery_app --ini development.ini
+Voir :
+https://github.com/CroissanceCommune/autonomie_celery
+
+pour plus d'informations.
 
 .. note::
 
@@ -86,10 +90,26 @@ Puis créer un compte administrateur
 .. code-block:: console
 
     autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
+
     
 N.B : pour un administrateur, préciser 
     
 .. code-block:: console
 
     --group=admin
-    
+
+
+Développement
+-------------
+
+Dans un contexte de développement, installez autonomie avec les commandes
+suivantes
+
+.. code-block:: console
+
+    git clone https://github.com/CroissanceCommune/autonomie.git
+    cd autonomie
+    pip install pyramid_debugtoolbar
+    # Ici on install autonomie en mode developpement
+    python setup.py develop
+    cp development.ini.sample development.ini

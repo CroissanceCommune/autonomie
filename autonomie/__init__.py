@@ -45,8 +45,7 @@ from autonomie.utils.filedepot import (
 
 AUTONOMIE_MODULES = (
     "autonomie.views.activity",
-    "autonomie.views.accounting.measures",
-    "autonomie.views.accounting.operations",
+    "autonomie.views.accounting",
     "autonomie.views.auth",
     "autonomie.views.commercial",
     "autonomie.views.company",

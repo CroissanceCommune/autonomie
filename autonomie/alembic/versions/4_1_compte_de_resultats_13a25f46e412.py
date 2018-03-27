@@ -18,6 +18,11 @@ def update_database_structure():
     op.add_column(
         "accounting_operation_upload", sa.Column("filetype", sa.String(50))
     )
+    op.add_column(
+        "accounting_operation", sa.Column("date", sa.Date())
+    )
+    op.drop_column('accounting_operation', 'datetime')
+
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION

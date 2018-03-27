@@ -351,8 +351,8 @@ def get_list_schema(is_admin=False):
         )
     )
 
-    def get_year_options():
-        values = invoice.get_invoice_years()
+    def get_year_options(kw):
+        values = invoice.get_invoice_years(kw)
         values.insert(0, u'')
         return values
 

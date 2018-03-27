@@ -1,4 +1,4 @@
-"0USER","USER1","218200","Transport","5100"," ","5100"
+"0USER","USER1","218200","Transporté","5100"," ","5100"
 "0USER","USER1","275000","Caution","1600"," ","1600"
 "0USER","USER1","281820","Amort Materiel","1700","3914.72","-2214.72"
 "0USER","USER1","401100","Fournisseurs ","2609.4","1759.01","850.39"
@@ -71,5 +71,3 @@
 "0USER","USER1","706010","Presta interne"," ","110","-110"
 "0USER","USER1","706012","Prestations de services 20 %"," ","9801.2","-9801.2"
 "0USER","USER1","771800","Produits excep. / PP","3088.45"," ","3088.45"
-
-

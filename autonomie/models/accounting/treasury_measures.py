@@ -90,6 +90,15 @@ class TreasuryMeasureType(DBBASE):
             'title': u"Indicateur actif ?", "exclude": True
         }}
     )
+    measures = relationship(
+        "TreasuryMeasure",
+        primaryjoin="TreasuryMeasure.measure_type_id"
+        "==TreasuryMeasureType.id",
+        cascade='all,delete,delete-orphan',
+        info={
+            "colanderalchemy": {"exclude": True}
+        }
+    )
 
     def match(self, account):
         """
@@ -102,6 +111,8 @@ class TreasuryMeasureType(DBBASE):
         """
         res = False
         for prefix in self.account_prefix.split(','):
+            if not prefix:
+                continue
             if prefix.startswith('-'):
                 prefix = prefix[1:].strip()
                 if account.startswith(prefix):
@@ -235,6 +246,11 @@ class TreasuryMeasureGrid(DBBASE):
 
     def get_company_id(self):
         return self.company_id
+
+    def get_measure_by_type(self, measure_type_id):
+        return self._autonomie_service.get_measure_by_type(
+            self, measure_type_id
+        )
 
 
 class TreasuryMeasure(DBBASE):

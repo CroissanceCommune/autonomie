@@ -21,9 +21,30 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
+<%doc>
+Company expense sheet list
+
+context : company
+</%doc>
 
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%inherit file="${context['main_template'].uri}" />
+<%block name='afteractionmenu'>
+<div class='page-header-block'>
+<%doc>
+Only show create button if one user is part of this company
+</%doc>
+% if not several_users and api.has_permission('add.expensesheet') and conf_msg is UNDEFINED and request.context.employees:
+    <a
+    class='btn btn-primary primary-action'
+    href='${request.route_path("user_expenses", id=request.context.id, uid=request.context.employees[0].id)}'
+    title="Ajouter une nouvelle note de dépenses"
+    >
+    <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter une feuille de notes de dépense
+    </a>
+% endif
+</div>
+</%block>
 <%block name="content">
 % if conf_msg is not UNDEFINED:
     <br /><br />
@@ -56,13 +77,15 @@
                         Feuille de notes de dépense de ${api.format_account(user)}
                         </div>
                         <div class='panel-body'>
-                            <a
-                            class='btn btn-primary primary-action'
-                            href='${request.route_path("user_expenses", id=request.context.id, uid=user.id)}'
-                            title="Ajouter un nouvelle note de dépenses"
-                            >
-                            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Créer
-                            </a>
+                        % if several_users and api.has_permission('add.expensesheet'):
+                        <a
+                        class='btn btn-primary primary-action'
+                        href='${request.route_path("user_expenses", id=request.context.id, uid=user.id)}'
+                        title="Ajouter une nouvelle note de dépenses"
+                        >
+                        <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter
+                        </a>
+                        % endif
                     <table class="table table-condensed table-stripped">
                     <thead>
                         <th>Période</th>

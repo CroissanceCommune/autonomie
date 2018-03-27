@@ -98,11 +98,15 @@ from autonomie.models.tva import Tva
 from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
 )
-from autonomie.models.accounting.measures import (
+from autonomie.models.accounting.treasury_measures import (
     TreasuryMeasureGrid,
     TreasuryMeasureType,
 )
-
+from autonomie.models.accounting.income_statement_measures import (
+    IncomeStatementMeasureType,
+    IncomeStatementMeasureTypeCategory,
+    IncomeStatementMeasureGrid,
+)
 
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS, ),
@@ -169,6 +173,21 @@ class RootFactory(dict):
             'treasury_measure_types',
             'treasury_measure_type',
             TreasuryMeasureType,
+        ),
+        (
+            'income_statement_measure_grids',
+            'income_statement_measure_grid',
+            IncomeStatementMeasureGrid,
+        ),
+        (
+            'income_statement_measure_types',
+            'income_statement_measure_type',
+            IncomeStatementMeasureType,
+        ),
+        (
+            'income_statement_measure_categories',
+            'income_statement_measure_category',
+            IncomeStatementMeasureTypeCategory,
         ),
         ('timeslots', 'timeslot', Timeslot, ),
         ('tvas', 'tva', Tva,),
@@ -348,6 +367,7 @@ def get_company_acl(self):
                 "edit_commercial_handling",
                 "list_expenses",
                 "add.expense",
+                "add.expensesheet",
                 "list_sale_products",
                 "add_sale_product",
                 "list_treasury_files",
@@ -793,9 +813,10 @@ def get_competence_acl(self):
     return acl
 
 
-def get_treasury_measure_acl(self):
+def get_accounting_measure_acl(self):
     """
-    Compile the default acl for TreasuryMeasureGrid objects
+    Compile the default acl for TreasuryMeasureGrid and
+    IncomeStatementMeasureGrid objects
     """
     if self.company is not None:
         return self.company.__acl__
@@ -840,8 +861,11 @@ def set_models_acl():
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
-    TreasuryMeasureGrid.__acl__ = property(get_treasury_measure_acl)
+    TreasuryMeasureGrid.__acl__ = property(get_accounting_measure_acl)
     TreasuryMeasureType.__acl__ = property(get_base_acl)
+    IncomeStatementMeasureGrid.__acl__ = property(get_accounting_measure_acl)
+    IncomeStatementMeasureType.__acl__ = property(get_base_acl)
+    IncomeStatementMeasureTypeCategory.__acl__ = property(get_base_acl)
     User.__default_acl__ = property(get_user_acl)
     UserDatas.__default_acl__ = property(get_userdatas_acl)
     Workshop.__default_acl__ = property(get_event_acl)

@@ -55,7 +55,7 @@ class CompanyService(object):
         query = DBSESSION().query(Estimation)
         query = query.filter(Estimation.company_id == instance.id)
         if valid:
-            query = query.filter(Estimation.status=='valid')
+            query = query.filter(Estimation.status == 'valid')
 
         return query
 
@@ -171,3 +171,23 @@ class CompanyService(object):
         """
         from autonomie.models.task import CancelInvoice
         return cls.get_next_index(company, CancelInvoice)
+
+    @classmethod
+    def get_turnover(cls, company, year):
+        """
+        Compute the annual turnover for a given company
+        """
+        from autonomie.models.task import (
+            Task,
+        )
+        query = DBSESSION.query(func.sum(Task.ht))
+        query = query.filter(Task.company_id == company.id)
+        query = query.filter(func.year(Task.date) == year)
+        query = query.filter(Task.status == 'valid')
+
+        invoice_sum = query.filter(
+            Task.type_.in_(('invoice', 'cancelinvoice'))
+        ).first()[0]
+        if invoice_sum is None:
+            invoice_sum = 0
+        return invoice_sum

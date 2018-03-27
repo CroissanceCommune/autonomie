@@ -65,7 +65,7 @@ def populate_accounting_treasury_measure_types(session):
     Populate the database with treasury measure types
     """
     from autonomie.models.config import Config
-    from autonomie.models.accounting.measures import TreasuryMeasureType
+    from autonomie.models.accounting.treasury_measures import TreasuryMeasureType
     if TreasuryMeasureType.query().count() == 0:
         for internal_id, start, label in (
             (1, '5', u"Trésorerie du jour",),
@@ -85,6 +85,28 @@ def populate_accounting_treasury_measure_types(session):
         session.flush()
 
 
+def populate_accounting_income_statement_measure_types(session):
+    """
+    Populate the database with treasury measure types
+    """
+    from autonomie.models.accounting.income_statement_measures import (
+        IncomeStatementMeasureTypeCategory,
+    )
+
+    if IncomeStatementMeasureTypeCategory.query().count() == 0:
+        for order, category in enumerate((
+            u"Produits",
+            u"Achats",
+            u"Charges",
+            u"Salaires et Cotisations"
+        )):
+            session.add(
+                IncomeStatementMeasureTypeCategory(label=category, order=order)
+            )
+
+        session.flush()
+
+
 def populate_database():
     """
     Populate the database with default values
@@ -95,6 +117,7 @@ def populate_database():
         populate_situation_options,
         populate_groups,
         populate_accounting_treasury_measure_types,
+        populate_accounting_income_statement_measure_types,
     ):
         try:
             func(session)

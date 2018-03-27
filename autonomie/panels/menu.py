@@ -192,6 +192,15 @@ def get_company_menu(request, cid, css=None):
         icon="fa fa-money",
         href=href
     )
+    href = request.route_path(
+        "/companies/{id}/accounting/income_statement_measure_grids",
+        id=cid
+    )
+    gestion.add_item(
+        u"Compte de résultat",
+        icon="fa fa-table",
+        href=href
+    )
 
     menu.add(gestion)
 
@@ -313,7 +322,7 @@ def get_admin_menus(request):
 
         href = request.route_path("/accounting/operation_uploads")
         treasury.add_item(
-            u"Fichiers d'états de trésorerie",
+            u"Fichiers comptables déposés",
             icon="fa fa-money",
             href=href
         )

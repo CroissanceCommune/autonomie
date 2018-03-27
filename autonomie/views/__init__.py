@@ -38,7 +38,6 @@ from pyramid_deform import (
     FormView,
     CSRFSchema,
 )
-from pyramid.security import has_permission
 from pyramid.httpexceptions import HTTPFound
 from js.tinymce import tinymce
 
@@ -109,6 +108,7 @@ class BaseListClass(BaseView):
     sort_columns = {'name': 'name'}
     default_direction = 'asc'
     grid = None
+    filter_button_label = u"Filtrer"
 
     def __init__(self, request):
         BaseView.__init__(self, request)
@@ -189,6 +189,20 @@ class BaseListClass(BaseView):
             form.widget.template = "searchform.pt"
         return form
 
+    def get_filter_button(self):
+        """
+        Return the definition of the filter button
+        """
+        self.logger.debug(
+            "Building the filter button : %s" % self.filter_button_label
+        )
+        return deform.Button(
+            title=self.filter_button_label,
+            name='submit',
+            type='submit',
+            css_class='btn btn-primary'
+        )
+
     def get_form(self, schema):
         """
         Return the search form that should be used for this view
@@ -204,14 +218,7 @@ class BaseListClass(BaseView):
             method='GET'
         )
         form = self.set_form_widget(form)
-        form.buttons = (
-            deform.Button(
-                title='Filtrer',
-                name='submit',
-                type='submit',
-                css_class='btn btn-primary'
-            ),
-        )
+        form.buttons = (self.get_filter_button(), )
         return form
 
     def _collect_appstruct(self):
@@ -295,6 +302,7 @@ class BaseListView(BaseListClass):
     """
     add_template_vars = ()
     grid = None
+    use_paginate = True
 
     def _get_current_page(self, appstruct):
         """
@@ -307,26 +315,30 @@ class BaseListView(BaseListClass):
         """
             wraps the current SQLA query with pagination
         """
-        # Url builder for page links
-        from functools import partial
-        page_url = partial(get_page_url, request=self.request)
+        if self.use_paginate:
+            # Url builder for page links
+            from functools import partial
+            page_url = partial(get_page_url, request=self.request)
 
-        current_page = self._get_current_page(appstruct)
-        items_per_page = convert_to_int(appstruct['items_per_page'])
-        self.logger.debug(
-            " + Page : %s, items per page : %s" % (
-                current_page, items_per_page
+            current_page = self._get_current_page(appstruct)
+            items_per_page = convert_to_int(appstruct['items_per_page'])
+
+            self.logger.debug(
+                " + Page : %s, items per page : %s" % (
+                    current_page, items_per_page
+                )
             )
-        )
-        self.logger.debug(query)
-        page = paginate.Page(
-            query,
-            current_page,
-            url=page_url,
-            items_per_page=items_per_page
-        )
-        self.logger.debug(page)
-        return page
+            self.logger.debug(query)
+            page = paginate.Page(
+                query,
+                current_page,
+                url=page_url,
+                items_per_page=items_per_page
+            )
+            self.logger.debug(page)
+            return page
+        else:
+            return query
 
     def more_template_vars(self, response_dict):
         """
@@ -354,9 +366,13 @@ class BaseListView(BaseListClass):
         if query is None:
             records = None
         else:
-            records = self._paginate(query, appstruct)
+            if self.use_paginate:
+                records = self._paginate(query, appstruct)
+            else:
+                records = query
 
-        result = dict(records=records)
+        result = dict(records=records, use_paginate=self.use_paginate)
+
         if self.error is not None:
             result['form_object'] = self.error
             result['form'] = self.error.render()
@@ -510,13 +526,19 @@ class BaseFormView(FormView):
     buttons = (submit_btn,)
     use_csrf_token = False
 
-    def __init__(self, request):
-        FormView.__init__(self, request)
-        self.context = request.context
+    def __init__(self, context, request=None):
+        if request is None:
+            # Needed for manually called views
+            self.request = context
+            self.context = self.request.context
+        else:
+            self.request = request
+            self.context = context
+        FormView.__init__(self, self.request)
         self.dbsession = self.request.dbsession
         self.session = self.request.session
         self.logger = logging.getLogger("autonomie.views.__init__")
-        if has_permission('manage', request.context, request):
+        if self.request.has_permission('manage'):
             tinymce.need()
 
     def __call__(self):
@@ -615,9 +637,20 @@ class BaseAddView(BaseFormView):
             raise Exception("Missing mandatory 'factory' attribute")
         return self.factory()
 
+    def merge_appstruct(self, appstruct, model):
+        """
+        Merge the appstruct with the newly create model
+
+        :param dict appstruct: Validated form datas
+        :param obj model: A new instance of the object we create
+        :returns: The model this view is supposed to add
+        """
+        model = self.schema.objectify(appstruct, model)
+        return model
+
     def submit_success(self, appstruct):
         new_model = self.create_instance()
-        new_model = self.schema.objectify(appstruct, new_model)
+        new_model = self.merge_appstruct(appstruct, new_model)
         self.dbsession.add(new_model)
         self.dbsession.flush()
         if self.msg:
@@ -649,11 +682,25 @@ class BaseEditView(BaseFormView):
             calchemy_dict = {}
         return calchemy_dict.get('help_msg', '')
 
+    def get_default_appstruct(self):
+        return self.schema.dictify(self.context)
+
     def before(self, form):
-        form.set_appstruct(self.schema.dictify(self.context))
+        form.set_appstruct(self.get_default_appstruct())
+
+    def merge_appstruct(self, appstruct, model):
+        """
+        Merge the appstruct with the newly create model
+
+        :param dict appstruct: Validated form datas
+        :param obj model: A new instance of the object we create
+        :returns: The model this view is supposed to add
+        """
+        model = self.schema.objectify(appstruct, model)
+        return model
 
     def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct, self.context)
+        model = self.merge_appstruct(appstruct, self.context)
         self.dbsession.merge(model)
         self.dbsession.flush()
         if self.msg:
@@ -669,6 +716,37 @@ class DisableView(BaseView):
     """
     Main view for enabling/disabling elements
 
+    Support following attributes/methods
+
+    Attributes
+
+        enable_msg
+
+                Message flashed when enabled
+
+        disable_msg
+
+                Message flashed when disabled
+
+        redirect_route
+
+                The name of a route to redirect to
+
+    Methods
+
+        redirect
+
+            Return a dynamicallay created HTTPFound instance
+
+        on_disable
+
+            Launched on item disable
+
+        on_enable
+
+            Launched on item enable
+
+
     class MyDisableView(DisableView):
         enable_msg = u"Has been enabled"
         disabled_msg = u"Has been disabled"
@@ -680,17 +758,20 @@ class DisableView(BaseView):
 
     def __call__(self):
         if self.context.active:
-            if self.disable_msg is None:
-                raise Exception("Add a disable_msg attribute")
             self.context.active = False
             self.request.dbsession.merge(self.context)
-            self.request.session.flash(self.disable_msg)
+            if hasattr(self, "on_disable"):
+                self.on_disable()
+
+            if self.disable_msg is not None:
+                self.request.session.flash(self.disable_msg)
         else:
-            if self.enable_msg is None:
-                raise Exception("Add a enable_msg attribute")
             self.context.active = True
             self.request.dbsession.merge(self.context)
-            self.request.session.flash(self.enable_msg)
+            if hasattr(self, "on_enable"):
+                self.on_enable()
+            if self.enable_msg is not None:
+                self.request.session.flash(self.enable_msg)
 
         if hasattr(self, 'redirect'):
             return self.redirect()
@@ -713,6 +794,9 @@ class DeleteView(BaseView):
     def __call__(self):
         self.request.dbsession.delete(self.context)
         self.request.session.flash(self.delete_msg)
+
+        if hasattr(self, "on_delete"):
+            self.on_delete()
 
         if hasattr(self, 'redirect'):
             return self.redirect()
@@ -770,6 +854,9 @@ generation")
         self.request.dbsession.add(item)
         # We need an id
         self.request.dbsession.flush()
+        if hasattr(self, "on_duplicate"):
+            self.on_duplicate(item)
+
         self.request.session.flash(self._message(item))
         return self.redirect(item)
 

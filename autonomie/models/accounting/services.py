@@ -27,7 +27,7 @@ class TreasuryMeasureGridService(object):
 
     @classmethod
     def measure_by_internal_id(cls, instance, internal_id):
-        from autonomie.models.accounting.measures import (
+        from autonomie.models.accounting.treasury_measures import (
             TreasuryMeasure,
             TreasuryMeasureType,
         )
@@ -39,4 +39,36 @@ class TreasuryMeasureGridService(object):
             result = query.first()
         else:
             result = None
+        return result
+
+    @classmethod
+    def get_measure_by_type(cls, grid, measure_type_id):
+        result = None
+        for measure in grid.measures:
+            if measure.measure_type_id == measure_type_id:
+                result = measure
+                break
+        return result
+
+
+class IncomeStatementMeasureGridService(object):
+
+    @classmethod
+    def get_measure_by_type(cls, grid, measure_type_id):
+        result = None
+        for measure in grid.measures:
+            if measure.measure_type_id == measure_type_id:
+                result = measure
+                break
+        return result
+
+    @classmethod
+    def get_years(cls, grid_class, company_id=None):
+        query = DBSESSION().query(distinct(grid_class.year))
+
+        if company_id is not None:
+            query = query.filter_by(company_id=company_id)
+
+        result = [a[0] for a in query.all()]
+        result.sort()
         return result

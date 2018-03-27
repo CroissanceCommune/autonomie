@@ -204,11 +204,12 @@ def default_year(node, kw):
 def get_year_select_deferred(query_func, default_val=None):
     """
     return a deferred widget for year selection
-    :param query_func: the query function returning a list of years
+    :param query_func: the query function returning a list of years (taks kw as
+    parameters)
     """
     @colander.deferred
     def deferred_widget(node, kw):
-        years = query_func()
+        years = query_func(kw)
         values = zip(years, years)
         if default_val is not None and default_val not in years:
             values.insert(0, default_val)

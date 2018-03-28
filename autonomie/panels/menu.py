@@ -34,7 +34,6 @@
 import logging
 
 from sqlalchemy import or_
-from sqlalchemy.orm import load_only
 from webhelpers.html import tags
 from webhelpers.html import HTML
 from pyramid.security import has_permission
@@ -144,9 +143,7 @@ def get_companies(request, cid):
     """
     companies = []
     if request.has_permission('manage'):
-        companies = request.dbsession.query(Company).options(
-            load_only('id', 'name', 'active')
-        ).filter(
+        companies = Company.label_query().filter(
             or_(
                 Company.active == True,
                 Company.id == cid
@@ -388,9 +385,6 @@ def company_choice(request, companies, cid):
     """
         Add the company choose menu
     """
-    if cid and cid in [c.id for c in companies]:
-        companies.insert(0, request.context)
-
     options = []
     for company in companies:
         if request.context.__name__ == 'company':

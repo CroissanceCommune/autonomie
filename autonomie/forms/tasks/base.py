@@ -63,10 +63,16 @@ import colander
 import deform
 
 from autonomie.models.project import (
-    build_customer_values,
     Project,
 )
+from autonomie.models.task import (
+    Task,
+    TaskLine,
+    TaskLineGroup,
+)
+from autonomie.models.customer import Customer
 from autonomie.forms import today_node
+from autonomie.forms.customer import get_customer_select_node
 
 
 logger = logging.getLogger(__name__)
@@ -130,8 +136,6 @@ def get_customers_from_request(request):
     :returns: A list of customers
     :rtype: list
     """
-    from autonomie.models.customer import Customer
-    from autonomie.models.task import Task
     customers = []
     context = request.context
 
@@ -149,41 +153,20 @@ def get_customers_from_request(request):
 
     else:
         company_id = request.current_company
-        from autonomie.models.customer import Customer
         customers = Customer.label_query()
         customers.filter_by(company_id=company_id).all()
 
     return customers
 
 
-@colander.deferred
-def deferred_customer_widget(node, kw):
-    request = kw['request']
-    customers = get_customers_from_request(request)
-    return deform.widget.SelectWidget(
-        values=build_customer_values(customers, default=False),
-        placeholder=u"Sélectionner un client",
-    )
-
-
-def get_company_customers(kw):
+def get_company_customers(request):
     """
     Retrieve all customers attached to a context's company
     """
-    from autonomie.models.customer import Customer
-    request = kw['request']
     company_id = request.context.get_company_id()
     customers = Customer.label_query()
     customers = customers.filter_by(company_id=company_id).all()
     return customers
-
-
-@colander.deferred
-def deferred_company_customer_widget(node, kw):
-    return deform.widget.SelectWidget(
-        values=build_customer_values(get_company_customers(kw), default=False),
-        placeholder=u"Sélectionner un client",
-    )
 
 
 @colander.deferred
@@ -371,13 +354,7 @@ class NewTaskSchema(colander.Schema):
         default=deferred_default_name,
         missing="",
     )
-    customer_id = colander.SchemaNode(
-        colander.Integer(),
-        title=u"Choix du client",
-        widget=deferred_customer_widget,
-        validator=deferred_customer_validator,
-        default=deferred_default_customer,
-    )
+    customer_id = get_customer_select_node(title=u"Choix du client")
     project_id = colander.SchemaNode(
         colander.Integer(),
         title=u"Projet dans lequel insérer le document",
@@ -406,7 +383,6 @@ def validate_customer_project_phase(form, value):
     :param obj form: The form object
     :param dict value: The submitted values
     """
-    from autonomie.models.project import Project
     customer_id = value['customer_id']
     project_id = value['project_id']
     phase_id = value['phase_id']
@@ -415,7 +391,6 @@ def validate_customer_project_phase(form, value):
         exc = colander.Invalid(form, u"Projet et dossier ne correspondent pas")
         exc['phase_id'] = u"Ne correspond pas au projet ci-dessus"
         raise exc
-    from autonomie.models.customer import Customer
     if not Customer.check_project_id(customer_id, project_id):
         exc = colander.Invalid(form, u"Client et projet ne correspondent pas")
         exc['project_id'] = u"Ne correspond pas au client ci-dessus"
@@ -466,11 +441,9 @@ class DuplicateSchema(NewTaskSchema):
     """
     schema used to duplicate a task
     """
-    customer_id = colander.SchemaNode(
-        colander.Integer(),
+    customer_id = get_customer_select_node(
         title=u"Choix du client",
-        widget=deferred_company_customer_widget,
-        validator=deferred_company_customer_validator,
+        query_func=get_company_customers,
         default=deferred_default_customer,
     )
 
@@ -491,10 +464,6 @@ def get_task_from_context(context):
     :param obj context: Instance of Task/TaskLine/TaskLineGroup
     :returns: The associated Task object
     """
-    from autonomie.models.task.task import (
-        TaskLine,
-        TaskLineGroup,
-    )
     result = context
     if isinstance(context, (TaskLine, TaskLineGroup)):
         result = context.task

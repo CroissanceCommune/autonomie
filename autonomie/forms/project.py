@@ -34,11 +34,9 @@ from colanderalchemy import SQLAlchemySchemaNode
 from autonomie.models.customer import Customer
 from autonomie.models.project import (
     Project,
-    deferred_customer_select,
-    deferred_customer_validator,
-    deferred_default_customer,
 )
-from autonomie import forms
+from autonomie.forms.lists import BaseListsSchema
+from autonomie.forms.customer import get_customer_select_node
 
 log = logging.getLogger(__name__)
 
@@ -79,23 +77,19 @@ def get_project_schema():
     schema['name'].missing = colander.required
 
     # Add a custom node to be able to associate existing customers
-    customer_id_node = colander.SchemaNode(
-        colander.Integer(),
-        widget=deferred_customer_select,
-        validator=deferred_customer_validator,
-        default=deferred_default_customer,
-        name='un client'
-    )
+    customer_id_node = get_customer_select_node(name="un client")
     customer_id_node.objectify = customer_objectify
     customer_id_node.dictify = customer_dictify
 
-    schema.insert(3,
+    schema.insert(
+        3,
         colander.SchemaNode(
-        colander.Sequence(),
-        customer_id_node,
-        widget=deform.widget.SequenceWidget(min_len=1),
-        title=u"Clients",
-        name='customers')
+            colander.Sequence(),
+            customer_id_node,
+            widget=deform.widget.SequenceWidget(min_len=1),
+            title=u"Clients",
+            name='customers'
+        )
     )
 
     return schema
@@ -117,7 +111,6 @@ def get_list_schema():
     Return the schema for the project search form
     :rtype: colander.Schema
     """
-    from autonomie.forms.lists import BaseListsSchema
     schema = BaseListsSchema().clone()
 
     schema['search'].description = u"Projet ou nom du client"

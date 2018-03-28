@@ -25,41 +25,36 @@
 
 import colander
 from deform import widget
+from autonomie.models.project import Project, Phase
+from autonomie.models.customer import Customer
 from autonomie import forms
+from autonomie.forms.customer import (
+    get_customers_from_request,
+    get_customer_select_node,
+)
 
 
-def get_customers_from_request(request):
-    project = request.context.project
-    company = project.company
-    return company.customers
+def get_current_customer_id_from_request(request):
+    """
+    Return the current customer from the given request
 
-
-def get_customer_options(request):
-    customers = get_customers_from_request(request)
-    return [(cli.id, u"%s (%s)" % (cli.name, cli.code)) for cli in customers]
-
-
-@colander.deferred
-def deferred_customer_choice(node, kw):
-    request = kw['request']
-    customers = get_customer_options(request)
-    return widget.SelectWidget(values=customers)
-
-
-def get_current_customer_from_request(request):
-    return request.context.customer
+    context is a Task here, so it has a customer_id
+    """
+    return request.context.customer_id
 
 
 @colander.deferred
 def deferred_default_customer(node, kw):
     request = kw['request']
-    return get_current_customer_from_request(request).id
+    return get_current_customer_id_from_request(request)
 
 
 def get_project_options(request):
-    customer = get_current_customer_from_request(request)
-    return [(pro.id, u"%s (%s)" % (pro.name, pro.code))
-            for pro in customer.projects]
+    customer_id = get_current_customer_id_from_request(request)
+    projects = Project.label_query().filter_by(customer_id=customer_id)
+    return [
+        (pro.id, u"%s (%s)" % (pro.name, pro.code)) for pro in projects
+    ]
 
 
 @colander.deferred
@@ -95,19 +90,14 @@ def deferred_default_phase(node, kw):
     return request.context.phase.id
 
 
-@colander.deferred
-def deferred_customer_validator(node, kw):
-    customers = get_customer_options(kw['request'])
-    return colander.OneOf([cli[0] for cli in customers])
-
-
 def get_all_projects(request):
-    customers = get_customers_from_request(request)
-    all_projects = []
-    for customer in customers:
-        for project in customer.projects:
-            all_projects.append(project)
-    return all_projects
+    query = Project.label_query()
+    customer_ids = [c.id for c in get_customers_from_request(request)]
+
+    projects = query.filter(
+        Project.customers.any(Customer.id.in_(customer_ids))
+    )
+    return projects.all()
 
 
 @colander.deferred
@@ -117,12 +107,8 @@ def deferred_project_validator(node, kw):
 
 
 def get_all_phases(request):
-    customers = get_customers_from_request(request)
-    all_phases = []
-    for customer in customers:
-        for project in customer.projects:
-            all_phases.extend(project.phases)
-    return all_phases
+    project_ids = [p.id for p in get_all_projects(request)]
+    return Phase.query().filter(Phase.project_id.in_(project_ids)).all()
 
 
 @colander.deferred
@@ -135,12 +121,11 @@ class DuplicateSchema(colander.MappingSchema):
     """
     colander schema for duplication recording
     """
-    customer = colander.SchemaNode(
-        colander.Integer(),
+    customer = get_customer_select_node(
         title=u"Client",
-        widget=deferred_customer_choice,
         default=deferred_default_customer,
-        validator=deferred_customer_validator)
+        with_default=False,
+    )
     project = colander.SchemaNode(
         colander.Integer(),
         title=u"Projet",

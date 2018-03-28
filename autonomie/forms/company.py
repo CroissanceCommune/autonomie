@@ -39,11 +39,11 @@ from autonomie.models.company import (
     Company,
 )
 
-from autonomie.models.project import build_customer_values
 from autonomie.models.customer import Customer
 
 from autonomie.forms.validators import validate_image_mime
 from autonomie import forms
+from autonomie.forms.customer import build_customer_values
 from autonomie.forms import (
     files,
     lists,

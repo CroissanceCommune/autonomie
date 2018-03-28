@@ -23,13 +23,15 @@
 #
 
 """
-    Customer handling forms schemas
+Customer handling forms schemas and related widgets
 """
 import colander
 import deform
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie_base.consts import CIVILITE_OPTIONS as ORIG_CIVILITE_OPTIONS
+from autonomie.models.customer import Customer
+from autonomie.compute.math_utils import convert_to_int
 from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
 
@@ -113,7 +115,6 @@ def get_company_customer_schema():
     """
     return the schema for user add/edit regarding the current user's role
     """
-    from autonomie.models.customer import Customer
     schema = SQLAlchemySchemaNode(Customer)
     schema = add_common_widgets(schema)
     schema['name'].missing = colander.required
@@ -125,7 +126,6 @@ def get_individual_customer_schema():
     """
     return the schema for user add/edit regarding the current user's role
     """
-    from autonomie.models.customer import Customer
     excludes = ('name', 'tva_intracomm', 'function',)
     schema = SQLAlchemySchemaNode(Customer, excludes=excludes)
     schema = add_common_widgets(schema)
@@ -134,3 +134,198 @@ def get_individual_customer_schema():
     schema['civilite'].missing = colander.required
     schema.after_bind = customer_after_bind
     return schema
+
+
+def _build_customer_select_value(customer=None):
+    """
+        return the tuple for building customer select
+    """
+    if customer:
+        label = customer.get_label()
+        if customer.code:
+            label += u" ({0})".format(customer.code)
+        return (customer.id, label)
+    else:
+        return ("", u"Sélectionnez")
+
+
+def build_customer_values(customers, default=True):
+    """
+        Build human understandable customer labels
+        allowing efficient discrimination
+    """
+    options = []
+    if default:
+        options.append(_build_customer_select_value())
+    options.extend(
+        [_build_customer_select_value(customer) for customer in customers]
+    )
+    return options
+
+
+def get_customers_from_request(request):
+    """
+    Extract a customers list from the request object
+
+    :param obj request: The pyramid request object
+    :returns: A list of customers
+    :rtype: list
+    """
+    if request.context.__name__ == 'project':
+        company_id = request.context.company.id
+    elif request.context.__name__ == 'company':
+        company_id = request.context.id
+    else:
+        return []
+
+    customers = Customer.label_query()
+    customers = customers.filter_by(company_id=company_id)
+    customers = customers.filter_by(archived=False)
+
+    return customers.order_by(Customer.name).all()
+
+
+def get_current_customer_id_from_request(request):
+    """
+    Return the current customer from the request object
+
+    :param obj request: The current pyramid request object
+    """
+    result = None
+    if 'customer' in request.params:
+        result = convert_to_int(request.params.get('customer'))
+    return result
+
+
+def get_deferred_customer_select(
+    query_func=get_customers_from_request,
+    with_default=True,
+    **widget_options
+):
+    """
+    Dynamically build a deferred customer select with (or without) a void
+    default value
+
+    """
+    @colander.deferred
+    def deferred_customer_select(node, kw):
+        """
+        Collecting customer select datas from the given request's context
+
+        :param dict kw: Binding dict containing a request key
+        :returns: A deform.widget.Select2Widget
+        """
+        request = kw['request']
+        customers = query_func(request)
+        return deform.widget.Select2Widget(
+            values=build_customer_values(customers, default=with_default),
+            placeholder=u'Sélectionner un client',
+            **widget_options
+        )
+    return deferred_customer_select
+
+
+@colander.deferred
+def deferred_default_customer(node, kw):
+    """
+    Collect the default customer value from a request's context
+
+    :param dict kw: Binding dict containing a request key
+    :returns: The current customer or colander.null
+    """
+    request = kw['request']
+    customer_id = get_current_customer_id_from_request(request)
+    result = colander.null
+    if customer_id is not None:
+        # On checke pour éviter de se faire avoir si le customer est passé en
+        # paramètre
+        customers = get_customers_from_request(request)
+        if customer_id in [c.id for c in customers]:
+            result = customer_id
+    return result
+
+
+def get_deferred_customer_select_validator(
+    query_func=get_customers_from_request
+):
+    @colander.deferred
+    def deferred_customer_validator(node, kw):
+        """
+        Build a customer option validator based on the request's context
+
+        :param dict kw: Binding dict containing a request key
+        :returns: A colander validator
+        """
+        request = kw['request']
+        customers = query_func(request)
+        customer_ids = [customer.id for customer in customers]
+
+        def customer_oneof(value):
+            if value in ("0", 0):
+                return u"Veuillez choisir un client"
+            elif value not in customer_ids:
+                return u"Entrée invalide"
+            return True
+
+        return colander.Function(customer_oneof)
+
+
+def get_customer_select_node(**kw):
+    """
+    Shortcut used to build a colander schema node
+
+    all arguments are optionnal
+
+    Allow following options :
+
+        any key under kw
+
+            colander.SchemaNode options :
+
+                * title,
+                * description,
+                * default,
+                * missing
+                * ...
+
+        widget_options
+
+            deform.widget.Select2Widget options as a dict
+
+        with_default
+
+            Should the select provide a default void value ?
+
+        query_func
+
+            A callable expecting the request parameter and returning the current
+            customer that should be selected
+
+    e.g:
+
+        >>> get_customers_from_request(
+            title=u"Client",
+            query_func=get_customers_list,
+            default=get_current_customer,
+            widget_options={}
+        )
+
+
+    """
+    title = kw.pop('title', u'')
+    with_default = kw.pop('with_default', True)
+    default = kw.pop('default', deferred_default_customer)
+    query_func = kw.pop('query_func', get_customers_from_request)
+    widget_options = kw.pop('widget_options', {})
+    return colander.SchemaNode(
+        colander.Integer(),
+        title=title,
+        default=default,
+        widget=get_deferred_customer_select(
+            query_func=query_func,
+            with_default=with_default,
+            **widget_options
+        ),
+        validator=get_deferred_customer_select_validator(query_func),
+        **kw
+    )

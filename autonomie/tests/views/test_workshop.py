@@ -25,7 +25,7 @@ from autonomie.models import (
     workshop,
 )
 
-from autonomie.views.workshop import (
+from autonomie.views.accompagnement.workshop import (
     WorkshopAddView,
     WorkshopEditView,
     workshop_view,

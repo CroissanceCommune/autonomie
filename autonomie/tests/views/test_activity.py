@@ -62,7 +62,7 @@ def query():
 
 
 def test_new_activity_success(config, activitytype, get_csrf_request_with_db):
-    from autonomie.views.activity import NewActivityView
+    from autonomie.views.accompagnement.activity import NewActivityView
     config.add_route('toto', '/toto')
     config.add_route('activity', '/activity/{id}')
     now = datetime.now().replace(microsecond=0)
@@ -81,7 +81,7 @@ def test_new_activity_success(config, activitytype, get_csrf_request_with_db):
 
 
 def test_newactivity_ajax_success(config, activitytype, get_csrf_request_with_db):
-    from autonomie.views.activity import (
+    from autonomie.views.accompagnement.activity import (
         NewActivityAjaxView,
         ACTIVITY_SUCCESS_MSG,
     )
@@ -105,7 +105,7 @@ def test_newactivity_ajax_success(config, activitytype, get_csrf_request_with_db
 
 
 def test_activity_record_success(config, get_csrf_request_with_db, activity):
-    from autonomie.views.activity import ActivityRecordView
+    from autonomie.views.accompagnement.activity import ActivityRecordView
     req = get_csrf_request_with_db()
     req.context = activity
     config.add_route('activity', '/activity/{id}')
@@ -123,7 +123,7 @@ def test_activity_record_success(config, get_csrf_request_with_db, activity):
 
 
 def test_activity_edit_success(config, get_csrf_request_with_db, dbsession, activity):
-    from autonomie.views.activity import ActivityEditView
+    from autonomie.views.accompagnement.activity import ActivityEditView
     req = get_csrf_request_with_db()
     req.context = activity
     config.add_route('activity', '/activity/{id}')
@@ -142,7 +142,7 @@ def test_activity_edit_success(config, get_csrf_request_with_db, dbsession, acti
 
 
 def test_activity_view_only_view(config, activity, get_csrf_request_with_db):
-    from autonomie.views.activity import activity_view_only_view
+    from autonomie.views.accompagnement.activity import activity_view_only_view
     config.add_route('activity', '/activity/{id}')
     request = get_csrf_request_with_db()
     result = activity_view_only_view(activity, request)
@@ -152,7 +152,7 @@ def test_activity_view_only_view(config, activity, get_csrf_request_with_db):
 
 
 def test_activity_delete_view(config, activity, get_csrf_request_with_db):
-    from autonomie.views.activity import activity_delete_view
+    from autonomie.views.accompagnement.activity import activity_delete_view
     config.add_route('activities', '/activities')
     request = get_csrf_request_with_db()
     request.referer = None
@@ -163,7 +163,7 @@ def test_activity_delete_view(config, activity, get_csrf_request_with_db):
     assert query() == None
 
 def test_activity_delete_view_redirect(config, activity, get_csrf_request_with_db):
-    from autonomie.views.activity import activity_delete_view
+    from autonomie.views.accompagnement.activity import activity_delete_view
     config.add_route('activities', '/activities')
     request = get_csrf_request_with_db()
     request.referer = "/titi"
@@ -174,7 +174,7 @@ def test_activity_delete_view_redirect(config, activity, get_csrf_request_with_d
 
 
 def test_activity_pdf_view(config, activity, get_csrf_request_with_db):
-    from autonomie.views.activity import activity_pdf_view
+    from autonomie.views.accompagnement.activity import activity_pdf_view
     config.add_subscriber(add_api, BeforeRender)
     config.add_static_view("static", "autonomie:static")
     request = get_csrf_request_with_db()

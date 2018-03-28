@@ -52,7 +52,7 @@ from autonomie.utils.widgets import (
 )
 from autonomie.forms.project import (
     get_list_schema,
-    get_project_schema,
+    get_add_edit_project_schema,
     PhaseSchema,
 )
 from autonomie.forms import (

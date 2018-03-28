@@ -44,7 +44,6 @@ from autonomie_base.models.base import DBSESSION
 from autonomie.models.project import (
     Project,
     Phase,
-    FORM_GRID,
 )
 from autonomie.models.customer import Customer
 from autonomie.utils.colors import COLORS_SET
@@ -70,6 +69,25 @@ from autonomie.views.files import (
 )
 
 log = logger = logging.getLogger(__name__)
+FORM_GRID = (
+    (
+        ('code', 6),
+    ),
+    (
+        ('name', 4),
+        ('type', 4),
+    ),
+    (
+        ('customers', 8),
+    ),
+    (
+        ('starting_date', 4),
+        ('ending_date', 4),
+    ),
+    (
+        ('definition', 10),
+    )
+)
 
 
 class PhaseAddFormView(BaseFormView):
@@ -300,7 +318,10 @@ def project_archive(request):
         return HTTPFound(request.referer)
     else:
         return HTTPFound(
-            request.route_path("company_projects", id=context.company_id)
+            request.route_path(
+                "company_projects",
+                id=request.context.company_id
+            )
         )
 
 
@@ -370,7 +391,8 @@ def set_task_colors(phases):
 
     for phase in phases:
         for cancelinvoice in phase.cancelinvoices:
-            if cancelinvoice.invoice and hasattr(cancelinvoice.invoice, 'color'):
+            if cancelinvoice.invoice and \
+                    hasattr(cancelinvoice.invoice, 'color'):
                 cancelinvoice.color = cancelinvoice.invoice.color
             else:
                 cancelinvoice.color = get_color(index)

@@ -26,8 +26,6 @@
     Project model
 """
 import datetime
-import colander
-import deform
 
 from sqlalchemy import (
     Table,
@@ -45,10 +43,6 @@ from sqlalchemy.orm import (
     backref,
 )
 
-from autonomie import forms
-from autonomie_base.models.types import (
-    PersistentACLMixin,
-)
 from autonomie_base.models.base import (
     default_table_args,
     DBBASE,
@@ -67,41 +61,6 @@ ProjectCustomer = Table(
 )
 
 
-def check_begin_end_date(form, value):
-    """
-    Check the project beginning date preceeds the end date
-    """
-    ending = value.get('ending_date')
-    starting = value.get('starting_date')
-
-    if ending is not None and starting is not None:
-        if not ending >= starting:
-            exc = colander.Invalid(
-                form,
-                u"La date de début doit précéder la date de fin du projet"
-            )
-            exc['starting_date'] = u"Doit précéder la date de fin"
-            raise exc
-
-
-def get_projects_from_request(request):
-    """
-    Return the projects of the current company (we fetch the company from the
-    request context)
-    """
-    if request.context.__name__ == 'project':
-        # Edition (we don't want the current project)
-        projects = [project for project in request.context.company.projects
-                    if project.id != request.context.id]
-    elif request.context.__name__ == 'company':
-        projects = request.context.projects
-    else:
-        raise Exception("We can't retrieve the projects from something that's \
-not a a project itself or a company")
-
-    return projects
-
-
 class Project(Node):
     """
         The project model
@@ -110,12 +69,10 @@ class Project(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'project'}
 
-    __colanderalchemy_config__ = {'validator': check_begin_end_date}
-
     id = Column(
         ForeignKey('node.id'),
         primary_key=True,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     code = Column(
@@ -136,7 +93,7 @@ class Project(Node):
         ForeignKey('company.id'),
         info={
             'options': {'csv_exclude': True},
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
         }
     )
 
@@ -171,12 +128,7 @@ class Project(Node):
             Text,
             info={
                 'label': u"Définition",
-                'colanderalchemy': {
-                    'title': u"Définition",
-                    'widget': deform.widget.TextAreaWidget(
-                        css_class="col-md-10"
-                    ),
-                }
+                'colanderalchemy': {'title': u"Définition"}
             },
 
         ),
@@ -186,7 +138,7 @@ class Project(Node):
     archived = Column(
         Boolean(),
         default=False,
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     customers = relationship(
@@ -194,7 +146,7 @@ class Project(Node):
         secondary=ProjectCustomer,
         backref=backref(
             'projects',
-            info={'colanderalchemy': forms.EXCLUDED},
+            info={'colanderalchemy': {'exclude': True}},
         ),
         info={
             'colanderalchemy': {
@@ -211,7 +163,7 @@ class Project(Node):
         back_populates="project",
         order_by='Task.date',
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         }
     )
@@ -220,7 +172,7 @@ class Project(Node):
         primaryjoin="Estimation.project_id==Project.id",
         order_by='Estimation.date',
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         }
     )
@@ -229,7 +181,7 @@ class Project(Node):
         primaryjoin="Invoice.project_id==Project.id",
         order_by='Invoice.date',
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         }
     )
@@ -238,7 +190,7 @@ class Project(Node):
         primaryjoin="CancelInvoice.project_id==Project.id",
         order_by='Invoice.date',
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         }
     )
@@ -255,7 +207,7 @@ class Project(Node):
         return self.archived and not self.has_tasks()
 
     def get_company_id(self):
-        return self.company.id
+        return self.company_id
 
     def get_next_estimation_index(self):
         return self._autonomie_service.get_next_estimation_index(self)

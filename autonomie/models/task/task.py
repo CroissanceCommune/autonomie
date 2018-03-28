@@ -56,13 +56,6 @@ from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
-from autonomie import forms
-from autonomie.forms.custom_types import (AmountType, QuantityType,)
-from autonomie.forms.tasks.base import (
-    task_after_bind,
-)
-
-#from autonomie.forms.user import get_deferred_user_choice
 
 from autonomie.utils.strings import (
     format_status_string,
@@ -79,12 +72,9 @@ from autonomie.compute.math_utils import (
 from autonomie.models.node import Node
 from autonomie.models.task.mentions import (
     TASK_MENTION,
-    TaskMention,
 )
-from autonomie.models.task.unity import WorkUnit
 from autonomie.models.tva import (
     Tva,
-    Product,
 )
 
 
@@ -151,32 +141,29 @@ class Task(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'task'}
     _autonomie_service = TaskService
-    __colanderalchemy_config__ = {
-        'after_bind': task_after_bind,
-    }
 
     id = Column(
         Integer,
         ForeignKey('node.id'),
-        info={'export': forms.EXCLUDED},
+        info={'export': {'exclude': True}},
         primary_key=True,
     )
     phase_id = Column(
         ForeignKey('phase.id'),
-        info={"export": forms.EXCLUDED},
+        info={"export": {'exclude': True}},
     )
     status = Column(
         String(10),
         info={
             'colanderalchemy': {'title': u"Statut"},
-            'export': forms.EXCLUDED
+            'export': {'exclude': True}
         }
     )
     status_comment = Column(
         Text,
         info={
             "colanderalchemy": {"title": u"Commentaires"},
-            'export': forms.EXCLUDED
+            'export': {'exclude': True}
         },
         default="",
     )
@@ -186,7 +173,7 @@ class Task(Node):
             'colanderalchemy': {
                 "title": u"Dernier utilisateur à avoir modifié le document",
             },
-            "export": forms.EXCLUDED,
+            "export": {'exclude': True},
         },
     )
     status_date = Column(
@@ -196,7 +183,7 @@ class Task(Node):
             'colanderalchemy': {
                 "title": u"Date du dernier changement de statut",
             },
-            'export': forms.EXCLUDED
+            'export': {'exclude': True}
         }
     )
     date = Column(
@@ -207,7 +194,7 @@ class Task(Node):
     owner_id = Column(
         ForeignKey('accounts.id'),
         info={
-            "export": forms.EXCLUDED,
+            "export": {'exclude': True},
         },
     )
     description = Column(
@@ -218,7 +205,7 @@ class Task(Node):
         BigInteger(),
         info={
             'colanderalchemy': {"title": u"Montant HT (cache)"},
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
         default=0
     )
@@ -226,7 +213,7 @@ class Task(Node):
         BigInteger(),
         info={
             'colanderalchemy': {"title": u"Montant TVA (cache)"},
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
         default=0
     )
@@ -234,7 +221,7 @@ class Task(Node):
         BigInteger(),
         info={
             'colanderalchemy': {"title": u"Montant TTC (cache)"},
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
         default=0
     )
@@ -242,21 +229,21 @@ class Task(Node):
         Integer,
         ForeignKey('company.id'),
         info={
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
     )
     project_id = Column(
         Integer,
         ForeignKey('project.id'),
         info={
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
     )
     customer_id = Column(
         Integer,
         ForeignKey('customer.id'),
         info={
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
     )
     project_index = deferred(
@@ -266,7 +253,7 @@ class Task(Node):
                 'colanderalchemy': {
                     "title": u"Index dans le projet",
                 },
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
         ),
         group='edit',
@@ -278,7 +265,7 @@ class Task(Node):
                 'colanderalchemy': {
                     "title": u"Index du document à l'échelle de l'entreprise",
                 },
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
         ),
         group='edit',
@@ -302,7 +289,7 @@ class Task(Node):
                 'colanderalchemy': {
                     "title": u"Identifiant du document dans la CAE",
                 },
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             }
         ),
         group='edit'
@@ -316,7 +303,7 @@ class Task(Node):
                     "title": u"Afficher le détail ?",
                     "validator": colander.OneOf((0, 1))
                 },
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
             default=0
         ),
@@ -328,7 +315,7 @@ class Task(Node):
             BigInteger(),
             info={
                 'colanderalchemy': {'title': u'Frais'},
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
             default=0
         ),
@@ -340,7 +327,7 @@ class Task(Node):
             default="",
             info={
                 'colanderalchemy': {'title': u'Adresse'},
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
         ),
         group='edit',
@@ -361,7 +348,7 @@ class Task(Node):
                 'colanderalchemy': {
                     "title": u"Conditions de paiement",
                 },
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
         ),
         group='edit',
@@ -375,7 +362,7 @@ class Task(Node):
                     'exlude': True,
                     'title': u"Méthode d'arrondi 'à l'ancienne' ? (floor)"
                 },
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             }
         ),
         group='edit',
@@ -387,7 +374,7 @@ class Task(Node):
             "colanderalchemy": {
                 'title': u"Préfixe du numéro de facture",
             },
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         }
     )
 
@@ -398,13 +385,13 @@ class Task(Node):
         backref=backref(
             "taskStatuses",
             info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
         },
     )
     owner = relationship(
@@ -413,13 +400,13 @@ class Task(Node):
         backref=backref(
             "ownedTasks",
             info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
         },
     )
 
@@ -430,13 +417,13 @@ class Task(Node):
             "tasks",
             order_by='Task.date',
             info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
         },
     )
 
@@ -444,7 +431,7 @@ class Task(Node):
         "Company",
         primaryjoin="Task.company_id==Company.id",
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'related_key': "name", "label": "Entreprise"},
         },
     )
@@ -453,8 +440,8 @@ class Task(Node):
         "Project",
         primaryjoin="Task.project_id==Project.id",
         info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
         },
     )
 
@@ -465,12 +452,12 @@ class Task(Node):
             'tasks',
             order_by='Task.date',
             info={
-                'colanderalchemy': forms.EXCLUDED,
-                "export": forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
+                "export": {'exclude': True},
             },
         ),
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'related_key': 'label', 'label': u"Client"},
         },
     )
@@ -479,7 +466,7 @@ class Task(Node):
         "DiscountLine",
         info={
             'colanderalchemy': {'title': u"Remises"},
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
         order_by='DiscountLine.tva',
         cascade="all, delete-orphan",
@@ -490,8 +477,8 @@ class Task(Node):
         "Payment",
         primaryjoin="Task.id==Payment.task_id",
         info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
         },
         order_by='Payment.date',
         cascade="all, delete-orphan",
@@ -503,7 +490,7 @@ class Task(Node):
         secondary=TASK_MENTION,
         order_by="TaskMention.order",
         back_populates="tasks",
-        info={'export': forms.EXCLUDED},
+        info={'export': {'exclude': True}},
     )
 
     line_groups = relationship(
@@ -520,7 +507,7 @@ class Task(Node):
                 ),
                 "missing": colander.required
             },
-            'export': forms.EXCLUDED,
+            'export': {'exclude': True},
         },
         primaryjoin="TaskLineGroup.task_id==Task.id",
         back_populates='task',
@@ -532,8 +519,8 @@ class Task(Node):
         cascade="all, delete-orphan",
         back_populates='task',
         info={
-            'colanderalchemy': forms.EXCLUDED,
-            'export': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
         }
     )
 
@@ -542,7 +529,7 @@ class Task(Node):
         Column(
             BigInteger(),
             info={
-                'export': forms.EXCLUDED,
+                'export': {'exclude': True},
             },
             default=0
         ),
@@ -763,43 +750,16 @@ class DiscountLine(DBBASE, DiscountLineCompute):
             }
         }
     )
-    description = Column(
-        Text,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.TextAreaWidget(),
-                'validator': forms.textarea_node_validator,
-            }
-        }
-    )
+    description = Column(Text)
     amount = Column(
         BigInteger(),
-        info={
-            'colanderalchemy': {
-                'typ': AmountType(5),
-                'title': 'Montant',
-                'missing': colander.required,
-            }
-        },
+        info={'colanderalchemy': {'title': 'Montant'}}
     )
-    tva = Column(
-        Integer,
-        nullable=False,
-        default=196,
-        info={
-            "colanderalchemy": {
-                "typ": AmountType(2),
-                "validator": forms.get_deferred_select_validator(
-                    Tva, id_key='value'
-                ),
-                "missing": colander.required
-            }
-        }
-    )
+    tva = Column(Integer, nullable=False, default=0)
     task = relationship(
         "Task",
         uselist=False,
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     def __json__(self, request):
@@ -854,8 +814,8 @@ class TaskStatus(DBBASE):
         backref=backref(
             "task_statuses",
             info={
-                'colanderalchemy': forms.EXCLUDED,
-                'export': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
             },
         )
     )
@@ -894,7 +854,7 @@ class TaskLineGroup(DBBASE, GroupCompute):
     task = relationship(
         "Task",
         primaryjoin="TaskLineGroup.task_id==Task.id",
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
     lines = relationship(
         "TaskLine",
@@ -964,7 +924,7 @@ class TaskLine(DBBASE, LineCompute):
     group_id = Column(
         Integer,
         ForeignKey('task_line_group.id', ondelete="cascade"),
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
     order = Column(Integer, default=1,)
     description = Column(Text)
@@ -1000,14 +960,14 @@ class TaskLine(DBBASE, LineCompute):
     group = relationship(
         TaskLineGroup,
         primaryjoin="TaskLine.group_id==TaskLineGroup.id",
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
     product = relationship(
         "Product",
         primaryjoin="Product.id==TaskLine.product_id",
         uselist=False,
         foreign_keys=product_id,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def duplicate(self):

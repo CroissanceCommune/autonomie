@@ -28,6 +28,7 @@
 import colander
 import logging
 import deform
+import functools
 
 from colanderalchemy import SQLAlchemySchemaNode
 
@@ -35,6 +36,7 @@ from autonomie.models.customer import Customer
 from autonomie.models.project import (
     Project,
 )
+from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
 from autonomie.forms.customer import get_customer_select_node
 
@@ -68,13 +70,36 @@ def customer_dictify(obj):
     return obj.id
 
 
-def get_project_schema():
+def check_begin_end_date(form, value):
     """
-    Return the project Edition/add form schema
+    Check the project beginning date preceeds the end date
     """
-    schema = SQLAlchemySchemaNode(Project, excludes=('_acl',))
+    ending = value.get('ending_date')
+    starting = value.get('starting_date')
 
-    schema['name'].missing = colander.required
+    if ending is not None and starting is not None:
+        if not ending >= starting:
+            exc = colander.Invalid(
+                form,
+                u"La date de début doit précéder la date de fin du projet"
+            )
+            exc['starting_date'] = u"Doit précéder la date de fin"
+            raise exc
+
+
+def _customize_project_schema(schema):
+    """
+    Customize the project schema to add widgets/validators ...
+
+    :param obj schema: a colander.SchemaNode instance
+    """
+    schema.validator = check_begin_end_date
+    customize = functools.partial(forms.customize_field, schema)
+    customize('name', missing=colander.required)
+    customize(
+        'definition',
+        widget=deform.widget.TextAreaWidget(css_class='col-md-10')
+    )
 
     # Add a custom node to be able to associate existing customers
     customer_id_node = get_customer_select_node(name="un client")
@@ -91,7 +116,15 @@ def get_project_schema():
             name='customers'
         )
     )
+    return schema
 
+
+def get_add_edit_project_schema():
+    """
+    Return the project Edition/add form schema
+    """
+    schema = SQLAlchemySchemaNode(Project, excludes=('_acl',))
+    schema = _customize_project_schema(schema)
     return schema
 
 

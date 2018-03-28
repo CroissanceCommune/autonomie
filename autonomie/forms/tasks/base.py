@@ -354,7 +354,11 @@ class NewTaskSchema(colander.Schema):
         default=deferred_default_name,
         missing="",
     )
-    customer_id = get_customer_select_node(title=u"Choix du client")
+    customer_id = get_customer_select_node(
+        title=u"Choix du client",
+        default=deferred_default_customer,
+        query_func=get_company_customers,
+    )
     project_id = colander.SchemaNode(
         colander.Integer(),
         title=u"Projet dans lequel insérer le document",

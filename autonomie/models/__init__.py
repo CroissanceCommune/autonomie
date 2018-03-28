@@ -41,7 +41,6 @@ import holiday
 import node
 import options
 import payments
-import project
 import sale_product
 import statistics
 import treasury
@@ -54,6 +53,8 @@ from .accounting import income_statement_measures
 from .expense import sheet
 from .expense import types
 from .expense import payment
+from .project import project
+from .project import phase
 from .user import user
 from .user import login
 from .user import group

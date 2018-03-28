@@ -26,7 +26,10 @@ from autonomie.forms.custom_types import (
     QuantityType,
 )
 from autonomie.forms.user import get_deferred_user_choice
-from autonomie.forms.tasks.base import taskline_after_bind
+from autonomie.forms.tasks.base import (
+    taskline_after_bind,
+    task_after_bind,
+)
 
 
 def tva_product_validator(node, value):
@@ -145,6 +148,7 @@ def _customize_task_fields(schema):
 
     :param obj schema: The schema to modify
     """
+    schema.after_bind = task_after_bind
     customize = functools.partial(forms.customize_field, schema)
     customize("id", widget=deform.widget.HiddenWidget(), missing=colander.drop)
 

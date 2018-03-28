@@ -22,8 +22,9 @@
 """
 Query service related to projects
 """
-from autonomie_base.models.base import DBSESSION
+from sqlalchemy.orm import load_only
 from sqlalchemy.sql.expression import func
+from autonomie_base.models.base import DBSESSION
 
 
 class ProjectService(object):
@@ -109,3 +110,10 @@ class ProjectService(object):
         from autonomie.models.project import Phase
         return DBSESSION().query(Phase.id).filter_by(
             id=phase_id).filter_by(project_id=project_id).count() > 0
+
+    @classmethod
+    def label_query(cls, project_class):
+        """
+        Only load columns used to build project labels
+        """
+        return project_class.query().options(load_only('id', 'name', 'code'))

@@ -191,3 +191,9 @@ class CompanyService(object):
         if invoice_sum is None:
             invoice_sum = 0
         return invoice_sum
+
+    @classmethod
+    def label_query(cls, company_class):
+        query = company_class.query()
+        query = query.options(load_only('id', 'name', 'active'))
+        return query

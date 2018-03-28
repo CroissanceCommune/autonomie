@@ -422,3 +422,7 @@ class Company(DBBASE, PersistentACLMixin):
         """
         ca = self._autonomie_service.get_turnover(self, year)
         return math_utils.integer_to_amount(ca, precision=5)
+
+    @classmethod
+    def label_query(cls):
+        return cls._autonomie_service.label_query(cls)

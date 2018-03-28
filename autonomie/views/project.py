@@ -152,7 +152,7 @@ def get_project_form(request):
     """
     Returns the project add/edit form
     """
-    schema = get_project_schema().bind(request=request)
+    schema = get_add_edit_project_schema().bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
     form.widget = GridFormWidget(named_grid=FORM_GRID)
     return form
@@ -449,7 +449,7 @@ def project_view(request):
 class ProjectAdd(BaseFormView):
     add_template_vars = ('title', 'projects', )
     title = u"Ajout d'un nouveau projet"
-    schema = get_project_schema()
+    schema = get_add_edit_project_schema()
     buttons = (submit_btn,)
     validation_msg = u"Le projet a été ajouté avec succès"
 

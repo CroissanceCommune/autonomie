@@ -28,7 +28,6 @@
 import logging
 
 from pyramid.httpexceptions import HTTPFound
-from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie_base.utils.date import format_date
 
@@ -39,6 +38,7 @@ from autonomie.models.task import (
 from autonomie.resources import (
     task_html_pdf_css,
 )
+from autonomie.forms.tasks.invoice import get_add_edit_cancelinvoice_schema
 from autonomie.views import (
     BaseEditView,
     add_panel_page_view,
@@ -88,11 +88,7 @@ class CancelInvoicePdfView(TaskPdfView):
 
 class CancelInvoiceAdminView(BaseEditView):
     factory = CancelInvoice
-    schema = SQLAlchemySchemaNode(
-        CancelInvoice,
-        title=u"Formulaire d'édition forcée de devis/factures/avoirs",
-        help_msg=u"Les montants sont *10^5   10 000==1€",
-    )
+    schema = get_add_edit_cancelinvoice_schema(isadmin=True)
 
 
 class CancelInvoiceSetTreasuryiew(BaseEditView):
@@ -108,8 +104,7 @@ class CancelInvoiceSetTreasuryiew(BaseEditView):
         set_treasury.invoice
     """
     factory = CancelInvoice
-    schema = SQLAlchemySchemaNode(
-        CancelInvoice,
+    schema = get_add_edit_cancelinvoice_schema(
         includes=('prefix', 'financial_year',),
         title=u"Modifier l'année fiscale de référence et le préfixe "
         u"du numéro de facture",

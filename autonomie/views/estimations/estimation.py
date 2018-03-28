@@ -54,8 +54,6 @@ Estimation payment edition
 """
 import logging
 
-from colanderalchemy import SQLAlchemySchemaNode
-
 from pyramid.httpexceptions import HTTPFound
 from autonomie.forms.tasks.estimation import InvoiceAttachSchema
 from autonomie.models.task import (
@@ -68,6 +66,7 @@ from autonomie.resources import (
     estimation_signed_status_js,
     task_html_pdf_css,
 )
+from autonomie.forms.tasks.estimation import get_add_edit_estimation_schema
 from autonomie.views import (
     BaseEditView,
     BaseFormView,
@@ -148,11 +147,7 @@ class EstimationDeleteView(TaskDeleteView):
 
 class EstimationAdminView(BaseEditView):
     factory = Estimation
-    schema = SQLAlchemySchemaNode(
-        Estimation,
-        title=u"Formulaire d'édition forcée de devis/factures/avoirs",
-        help_msg=u"Les montants sont *10^5   10 000==1€",
-    )
+    schema = get_add_edit_estimation_schema(isadmin=True)
 
 
 class EstimationHtmlView(TaskHtmlView):

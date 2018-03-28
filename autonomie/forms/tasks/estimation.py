@@ -212,7 +212,8 @@ def get_add_edit_paymentline_schema(includes=None, excludes=None):
     return schema
 
 
-def get_add_edit_estimation_schema(isadmin=False, includes=None, excludes=None):
+def get_add_edit_estimation_schema(isadmin=False, includes=None, excludes=None,
+                                   **kw):
     """
     Return add edit schema for Estimation edition
 
@@ -228,6 +229,7 @@ def get_add_edit_estimation_schema(isadmin=False, includes=None, excludes=None):
         isadmin=isadmin,
         includes=includes,
         excludes=excludes,
+        **kw
     )
     schema = _customize_estimation_schema(schema)
     return schema

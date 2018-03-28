@@ -283,7 +283,7 @@ def get_add_edit_tasklinegroup_schema(includes=None, excludes=None):
 
 
 def get_add_edit_task_schema(
-    factory, isadmin=False, includes=None, excludes=None
+    factory, isadmin=False, includes=None, excludes=None, **kw
 ):
     """
     Return a schema for task edition
@@ -306,6 +306,11 @@ def get_add_edit_task_schema(
         if not isadmin:
             excludes = excludes + ('status',)
 
-    schema = SQLAlchemySchemaNode(factory, excludes=excludes, includes=includes)
+    schema = SQLAlchemySchemaNode(
+        factory,
+        excludes=excludes,
+        includes=includes,
+        **kw
+    )
     schema = _customize_task_fields(schema)
     return schema

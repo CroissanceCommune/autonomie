@@ -45,6 +45,7 @@ from autonomie.utils.widgets import ViewLink
 from autonomie.forms.tasks.invoice import (
     get_payment_schema,
     EstimationAttachSchema,
+    get_add_edit_invoice_schema,
 )
 from autonomie.resources import (
     task_html_pdf_css,
@@ -180,8 +181,7 @@ class InvoiceSetTreasuryiew(BaseEditView):
         set_treasury.invoice
     """
     factory = Invoice
-    schema = SQLAlchemySchemaNode(
-        Invoice,
+    schema = get_add_edit_invoice_schema(
         includes=('prefix', 'financial_year',),
         title=u"Modifier l'année fiscale de référence et le préfixe "
         u"du numéro de facture",
@@ -399,8 +399,7 @@ class InvoiceAdminView(BaseEditView):
     Vue accessible aux utilisateurs admin
     """
     factory = Invoice
-    schema = SQLAlchemySchemaNode(
-        Invoice,
+    schema = get_add_edit_invoice_schema(
         title=u"Formulaire d'édition forcée de devis/factures/avoirs",
         help_msg=u"Les montants sont *10^5   10 000==1€",
     )

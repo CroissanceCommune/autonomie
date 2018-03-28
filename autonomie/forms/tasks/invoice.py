@@ -700,7 +700,7 @@ def _customize_payment_schema(schema):
     return schema
 
 
-def get_add_edit_invoice_schema(isadmin=False, includes=None):
+def get_add_edit_invoice_schema(isadmin=False, includes=None, **kw):
     """
     Return add edit schema for Invoice edition
 
@@ -709,13 +709,13 @@ def get_add_edit_invoice_schema(isadmin=False, includes=None):
     :rtype: `colanderalchemy.SQLAlchemySchemaNode`
     """
     schema = get_add_edit_task_schema(
-        Invoice, isadmin=isadmin, includes=includes
+        Invoice, isadmin=isadmin, includes=includes, **kw
     )
     schema = _customize_invoice_schema(schema)
     return schema
 
 
-def get_add_edit_cancelinvoice_schema(isadmin=False, includes=None):
+def get_add_edit_cancelinvoice_schema(isadmin=False, includes=None, **kw):
     """
     Return add edit schema for CancelInvoice edition
 
@@ -724,7 +724,7 @@ def get_add_edit_cancelinvoice_schema(isadmin=False, includes=None):
     :rtype: `colanderalchemy.SQLAlchemySchemaNode`
     """
     schema = get_add_edit_task_schema(
-        CancelInvoice, isadmin=isadmin, includes=includes
+        CancelInvoice, isadmin=isadmin, includes=includes, **kw
     )
     schema = _customize_cancelinvoice_schema(schema)
     return schema

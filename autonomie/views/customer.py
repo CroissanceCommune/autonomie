@@ -28,7 +28,6 @@
 import logging
 import colander
 
-from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import (
     or_,
     not_,
@@ -53,6 +52,7 @@ from autonomie.forms.customer import (
     get_list_schema,
     get_company_customer_schema,
     get_individual_customer_schema,
+    get_add_edit_customer_schema,
 )
 from deform_extensions import GridFormWidget
 from autonomie.views import (
@@ -533,7 +533,7 @@ class CustomerRestView(BaseRestView):
                 schema = get_individual_customer_schema()
         else:
             excludes = ('company_id',)
-            schema = SQLAlchemySchemaNode(Customer, excludes=excludes)
+            schema = get_add_edit_customer_schema(excludes=excludes)
         return schema
 
     def collection_get(self):

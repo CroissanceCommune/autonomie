@@ -4,7 +4,6 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import logging
-from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.compute.math_utils import (
     percentage,
@@ -22,6 +21,7 @@ from autonomie.models.sale_product import (
 from autonomie.forms.tasks.task import (
     get_add_edit_tasklinegroup_schema,
     get_add_edit_taskline_schema,
+    get_add_edit_discountline_schema,
 )
 from autonomie.views import BaseRestView
 from autonomie.views.task.utils import (
@@ -404,7 +404,7 @@ class DiscountLineRestView(BaseRestView):
         :returns: A colander.Schema
         """
         excludes = ('task_id',)
-        schema = SQLAlchemySchemaNode(DiscountLine, excludes=excludes)
+        schema = get_add_edit_discountline_schema(excludes=excludes)
         return schema
 
     def collection_get(self):

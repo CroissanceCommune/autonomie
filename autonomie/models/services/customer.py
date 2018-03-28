@@ -103,7 +103,7 @@ class CustomerService(object):
         """
         Check that the given customer is attached to the given project
         """
-        from autonomie.models.project import ProjectCustomer
+        from autonomie.models.project.project import ProjectCustomer
         return DBSESSION().query(ProjectCustomer).filter_by(
             project_id=project_id).filter_by(
                 customer_id=customer_id).count() > 0

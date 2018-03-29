@@ -1,0 +1,19 @@
+<div class='btn-group'>
+  <button
+      type="button"
+      class="btn btn-default dropdown-toggle"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false">
+    ${label} <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right">
+    <tal:repeat>
+    <li
+        tal:attributes="class 'disabled' and link.disabled"
+        tal:repeat="link links"
+        tal:content="panel(link.panel_name, context=link)">
+    </li>
+  </ul>
+</div>
+

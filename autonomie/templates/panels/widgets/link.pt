@@ -1,0 +1,6 @@
+<a
+  href="${link.url}"
+  tal:attributes="onclick link.js is not None and link.js; class link.css is not None and link.css"
+  title="${link.title}">
+  <i tal:condition="link.icon is not None" class="${link.icon}"></i>&nbsp;${structure:link.label}
+</a>

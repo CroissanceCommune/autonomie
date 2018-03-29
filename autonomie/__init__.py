@@ -100,6 +100,7 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.invoicetable",
     'autonomie.panels.files',
     'autonomie.panels.sidebar',
+    "autonomie.panels.widgets",
 )
 
 AUTONOMIE_EVENT_MODULES = (

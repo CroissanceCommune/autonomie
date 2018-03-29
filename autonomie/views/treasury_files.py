@@ -423,6 +423,8 @@ class AdminTreasuryView(BaseView):
         result = {}
         for type_ in self.filetypes:
             type_dir = os.path.join(self.root_directory, type_)
+            if not os.path.isdir(type_dir):
+                continue
             for year, year_dir in digit_subdirs(type_dir):
                 result[year] = {}
                 for month, month_dir in digit_subdirs(year_dir, 12):

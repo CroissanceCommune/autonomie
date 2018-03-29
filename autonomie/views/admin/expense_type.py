@@ -13,6 +13,8 @@ from autonomie.models.expense.types import (
     ExpenseTelType,
 )
 
+from autonomie.utils.widgets import Link
+
 from autonomie.views import (
     BaseView,
     DisableView,
@@ -23,6 +25,10 @@ from autonomie.forms.admin.expense_type import (
     get_expense_type_schema,
     get_expense_kmtype_schema,
     get_expense_teltype_schema,
+)
+
+from autonomie.views.admin.tools import (
+    BaseCrudAdminListView,
 )
 
 
@@ -83,7 +89,7 @@ class ExpenseKmTypesIndexView(BaseView):
         )
 
 
-class ExpenseTypeListView(BaseView):
+class ExpenseTypeListView(BaseCrudAdminListView):
     columns = [
         u"Libellé", u"Compte de charge"
     ]
@@ -127,25 +133,23 @@ class ExpenseTypeListView(BaseView):
         :param obj expense_type: ExpenseType instance
         :returns: List of 4-uples (url, label, title, icon,)
         """
-        yield (
+        yield Link(
             self._get_item_url(expense_type),
             u"Voir/Modifier",
-            u"Voir/Modifier",
-            u"pencil",
+            icon=u"pencil",
         )
         if expense_type.active:
-            yield (
+            yield Link(
                 self._get_item_url(expense_type, action='disable'),
                 u"Désactiver",
-                u"La TVA n'apparaitra plus dans l'interface",
-                u"remove",
+                title=u"La TVA n'apparaitra plus dans l'interface",
+                icon=u"remove",
             )
         else:
-            yield (
+            yield Link(
                 self._get_item_url(expense_type, action='disable'),
                 u"Activer",
-                u"La TVA apparaitra dans l'interface",
-                u"",
+                title=u"La TVA apparaitra dans l'interface",
             )
 
     def _load_items(self, year=None):
@@ -158,20 +162,14 @@ class ExpenseTypeListView(BaseView):
         ).order_by(desc(self.factory.active)).order_by(self.factory.id)
         return items
 
-    def _more_template_vars(self, result):
-        """
-        Hook allowing to add datas to the templating context
-        """
-        return result
-
     def _get_menus(self):
         """
         Return the menu entries
         """
         return [
-            dict(
+            Link(
+                self.request.route_path("admin_expense"),
                 label=u"Retour",
-                route_name="admin_expense",
                 icon="fa fa-step-backward"
             )
         ]
@@ -192,33 +190,6 @@ class ExpenseTypeListView(BaseView):
             **self.request.matchdict
         )
 
-    def _get_actions(self, items):
-        """
-        Return the description of additionnal main actions buttons
-
-        :rtype: list
-        """
-        return []
-
-    def __call__(self):
-        menus = self._get_menus()
-
-        items = self._load_items()
-
-        result = dict(
-            items=items,
-            columns=self.columns,
-            stream_columns=self.stream_columns,
-            stream_actions=self.stream_actions,
-            title=self.title,
-            menus=menus,
-            actions=self._get_actions(items),
-            addurl=self._get_add_url()
-        )
-        self._more_template_vars(result)
-
-        return result
-
 
 class ExpenseKmTypeListView(ExpenseTypeListView):
     columns = [
@@ -234,9 +205,9 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         Return the menu entries
         """
         return [
-            dict(
+            Link(
+                self.request.route_path("/admin/expenses/expensekm/"),
                 label=u"Retour",
-                route_name="/admin/expenses/expensekm/",
                 icon="fa fa-step-backward"
             ),
         ]
@@ -293,24 +264,22 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
 
         # if we've got datas and we're not in the last year
         if items.count() > 0 and year != current_year + 1:
-            yield (
+            yield Link(
                 self._get_duplicate_url(),
-                u"Dupliquer cette grille vers l'année suivante "
+                label=u"Dupliquer cette grille vers l'année suivante "
                 u"(%s)" % (year + 1),
-                "",
-                u"fa fa-copy",
-                u"btn btn-default"
+                icon=u"fa fa-copy",
+                css=u"btn btn-default"
             )
 
         # If previous year there were some datas configured
         if self._load_items(year - 1).count() > 0:
-            yield (
+            yield Link(
                 self._get_duplicate_from_previous_url(),
-                u"Recopier la grille de l'année précédente "
+                label=u"Recopier la grille de l'année précédente "
                 u"(%s)" % (year - 1),
-                "",
-                u"fa fa-copy",
-                u"btn btn-default"
+                icon=u"fa fa-copy",
+                css=u"btn btn-default"
             )
 
 
@@ -379,9 +348,11 @@ class ExpenseTypeAddView(BaseAddView):
     @property
     def menus(self):
         return [
-            dict(
+            Link(
+                self.request.route_path(
+                    "/admin/expenses/%s" % (self.get_type()),
+                ),
                 label=u"Retour",
-                route_name="/admin/expenses/%s" % (self.get_type()),
                 icon="fa fa-step-backward"
             )
         ]
@@ -410,7 +381,7 @@ class ExpenseKmTypeAddView(ExpenseTypeAddView):
     @property
     def menus(self):
         return [
-            dict(
+            Link(
                 label=u"Retour",
                 url=self.request.route_path(
                     "/admin/expenses/expensekm",
@@ -443,9 +414,11 @@ class ExpenseTypeEditView(BaseEditView):
     @property
     def menus(self):
         return [
-            dict(
+            Link(
                 label=u"Retour",
-                route_name="/admin/expenses/%s" % (self.get_type()),
+                url=self.request.route_path(
+                    "/admin/expenses/%s" % (self.get_type()),
+                ),
                 icon="fa fa-step-backward"
             )
         ]
@@ -466,7 +439,7 @@ class ExpenseKmTypeEditView(ExpenseTypeEditView):
     @property
     def menus(self):
         return [
-            dict(
+            Link(
                 label=u"Retour",
                 icon="fa fa-step-backward",
                 url=self.request.route_path(

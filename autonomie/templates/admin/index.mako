@@ -46,7 +46,7 @@
     Message
     </div>
     <div class='panel-body'>
-        <div class="alert alert-warn">
+        <div class="alert alert-warning">
             <i class='fa fa-warning'></i>
             ${warn_message|n}
         </div>
@@ -66,7 +66,7 @@
     </div>
 </div>
 % endif
-${request.layout_manager.render_panel('admin_nav', menus)}
+${request.layout_manager.render_panel('admin_nav', context=menus)}
 <%block name='afteradminmenu'>
 </%block>
 </div>

@@ -49,15 +49,15 @@
     % endfor
     % endif
     % if warn_msg is not UNDEFINED and warn_msg is not None:
+    <br />
+    <br />
     <div class="alert alert-danger">
-        <i class='fa fa-warning'></i>
-        ${warn_msg|n}
+        <i class='fa fa-warning'></i>&nbsp;${warn_msg|n}
     </div>
     % endif
     % if help_msg is not UNDEFINED and help_msg is not None:
     <div class="alert alert-info">
-        <i class='fa fa-help'></i>
-        ${help_msg|n}
+        <i class='fa fa-help'></i>&nbsp;${help_msg|n}
     </div>
     % endif
 </div>

@@ -11,17 +11,18 @@ from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureType,
     IncomeStatementMeasureTypeCategory,
 )
+from autonomie.utils.widgets import Link
 from autonomie.forms.accounting import (
     get_admin_income_statement_measure_schema,
     get_admin_income_statement_category_schema
 )
 from autonomie.views import (
-    BaseView,
     BaseEditView,
     BaseAddView,
     DisableView,
     DeleteView,
 )
+from autonomie.views.admin.tools import AdminCrudListView
 
 logger = logging.getLogger(__name__)
 
@@ -107,13 +108,14 @@ def type_category_list_view(request):
     )
 
 
-class CategoryListView(BaseView):
+class CategoryListView(AdminCrudListView):
     columns = [u"Libellé de la catégorie", ]
     title = u"Configuration des catégories d'indicateurs de compte de résultat"
     factory = IncomeStatementMeasureTypeCategory
+    back_route = BASE_URL
 
     def __init__(self, *args, **kwargs):
-        BaseView.__init__(self, *args, **kwargs)
+        AdminCrudListView.__init__(self, *args, **kwargs)
         self.max_order = IncomeStatementMeasureTypeCategory.get_next_order() - 1
 
     def stream_columns(self, measure_type):
@@ -148,55 +150,54 @@ class CategoryListView(BaseView):
         :returns: List of 4-uples (url, label, title, icon,)
         """
         if category.active:
-            yield (
+            yield Link(
                 self._get_item_url(category),
                 u"Voir/Modifier",
-                u"Voir/Modifier",
-                u"pencil",
+                icon=u"pencil",
             )
             move_url = self._get_item_url(category, action="move")
             if category.order > 0:
-                yield (
+                yield Link(
                     move_url + "&direction=up",
                     u"Remonter",
-                    u"Remonter dans l'ordre des catégories",
-                    u"fa fa-arrow-circle-o-up"
+                    title=u"Remonter dans l'ordre des catégories",
+                    icon=u"arrow-circle-o-up"
                 )
             if category.order < self.max_order:
-                yield (
+                yield Link(
                     move_url + "&direction=down",
                     u"Redescendre",
-                    u"Redescendre dans l'ordre des catégories",
-                    u"fa fa-arrow-circle-o-down"
+                    title=u"Redescendre dans l'ordre des catégories",
+                    icon=u"arrow-circle-o-down"
                 )
 
-            yield (
+            yield Link(
                 self._get_item_url(category, action='disable'),
                 u"Désactiver",
-                u"Les informations associés aux indicateur de cette catégorie "
-                u"ne seront plus affichées",
-                u"remove",
+                title=u"Les informations associés aux indicateur de cette "
+                u"catégorie ne seront plus affichées",
+                icon=u"remove",
             )
         else:
-            yield (
+            yield Link(
                 self._get_item_url(category, action='disable'),
                 u"Activer",
-                u"Les informations générés depuis les indicateurs de cette "
-                u"catégorie seront affichées",
-                u"fa fa-check-square-o",
+                title=u"Les informations générés depuis les indicateurs de "
+                u"cette catégorie seront affichées",
+                icon=u"check-square-o",
             )
-            yield(
+            yield Link(
                 self._get_item_url(category, action='delete'),
                 u"Supprimer",
-                u"Supprimer cet indicateurs et les entrées associées",
-                u"fa fa-trash",
-                u"return window.confirm('Êtes-vous sûr de vouloir supprimer "
+                title=u"Supprimer cet indicateurs et les entrées associées",
+                icon=u"trash",
+                confirm=u"Êtes-vous sûr de vouloir supprimer "
                 u"cet élément ? Tous les éléments dans les comptes de résultat "
                 u"ayant été générés depuis des indicateurs seront  également "
-                u"supprimés.')",
+                u"supprimés.",
             )
 
-    def _load_items(self, year=None):
+    def load_items(self):
         """
         Return the sqlalchemy models representing current queried elements
         :rtype: SQLAlchemy.Query object
@@ -205,7 +206,7 @@ class CategoryListView(BaseView):
         items = items.order_by(asc(self.factory.order))
         return items
 
-    def _more_template_vars(self, result):
+    def more_template_vars(self, result):
         """
         Hook allowing to add datas to the templating context
         """
@@ -214,41 +215,10 @@ class CategoryListView(BaseView):
         des entrepreneurs. Elles permettent la configuration de totaux."""
         return result
 
-    def _get_menus(self):
-        """
-        Return the menu entries
-        """
-        return [
-            dict(
-                label=u"Retour",
-                route_name=BASE_URL,
-                icon="fa fa-step-backward"
-            )
-        ]
-
-    @property
-    def addurl(self):
+    def get_addurl(self):
         return self.request.route_path(
             CATEGORY_CONFIG_URL, _query={'action': "add"}
         )
-
-    def __call__(self):
-        menus = self._get_menus()
-
-        items = self._load_items()
-
-        result = dict(
-            items=items,
-            columns=self.columns,
-            stream_columns=self.stream_columns,
-            stream_actions=self.stream_actions,
-            title=self.title,
-            menus=menus,
-            addurl=self.addurl,
-        )
-        self._more_template_vars(result)
-
-        return result
 
 
 class CategoryDisableView(DisableView):
@@ -350,16 +320,17 @@ class CategoryEditView(BaseEditView):
         ]
 
 
-class MeasureTypeListView(BaseView):
+class MeasureTypeListView(AdminCrudListView):
     columns = [
         u"Libellé de l'indicateur", u"Regroupe",
         u"Correspond à un total",
     ]
     title = u"Configuration des indicateurs de compte de résultat"
     factory = IncomeStatementMeasureType
+    back_route = TYPE_URL
 
     def __init__(self, *args, **kwargs):
-        BaseView.__init__(self, *args, **kwargs)
+        AdminCrudListView.__init__(self, *args, **kwargs)
         self.max_order = IncomeStatementMeasureType.get_next_order_by_category(
             self.context.id
         ) - 1
@@ -412,55 +383,54 @@ class MeasureTypeListView(BaseView):
         :returns: List of 4-uples (url, label, title, icon,)
         """
         if measure_type.active:
-            yield (
+            yield Link(
                 self._get_item_url(measure_type),
                 u"Voir/Modifier",
-                u"Voir/Modifier",
-                u"pencil",
+                icon=u"pencil",
             )
             move_url = self._get_item_url(measure_type, action="move")
             if measure_type.order > 0:
-                yield (
+                yield Link(
                     move_url + "&direction=up",
                     u"Remonter",
-                    u"Remonter dans l'ordre des indicateurs",
-                    u"fa fa-arrow-circle-o-up"
+                    title=u"Remonter dans l'ordre des indicateurs",
+                    icon=u"arrow-circle-o-up"
                 )
             if measure_type.order < self.max_order:
-                yield (
+                yield Link(
                     move_url + "&direction=down",
                     u"Redescendre",
-                    u"Redescendre dans l'ordre des indicateurs",
-                    u"fa fa-arrow-circle-o-down"
+                    title=u"Redescendre dans l'ordre des indicateurs",
+                    icon=u"arrow-circle-o-down"
                 )
 
-            yield (
+            yield Link(
                 self._get_item_url(measure_type, action='disable'),
                 u"Désactiver",
-                u"Les informations associés à cet indicateur ne seront "
+                title=u"Les informations associés à cet indicateur ne seront "
                 u"plus affichées",
-                u"remove",
+                icon=u"remove",
             )
         else:
-            yield (
+            yield Link(
                 self._get_item_url(measure_type, action='disable'),
                 u"Activer",
-                u"Les informations générés depuis cet indicateur seront "
+                title=u"Les informations générés depuis cet indicateur seront "
                 u"affichées",
-                u"fa fa-check-square-o",
+                icon=u"check-square-o",
             )
-            yield(
+            yield Link(
                 self._get_item_url(measure_type, action='delete'),
                 u"Supprimer",
-                u"Supprimer cet indicateurs et les entrées associées",
-                u"fa fa-trash",
-                u"return window.confirm('Êtes-vous sûr de vouloir supprimer "
+                title=u"Supprimer cet indicateurs et les entrées associées",
+                icon=u"trash",
+                confirm=u"Êtes-vous sûr de vouloir supprimer "
                 u"cet élément ? Tous les éléments dans les comptes de résultat "
                 u"ayant été générés depuis cet indicateur seront  également "
-                u"supprimés.')",
+                u"supprimés.",
             )
 
-    def _load_items(self, year=None):
+    def load_items(self, year=None):
         """
         Return the sqlalchemy models representing current queried elements
         :rtype: SQLAlchemy.Query object
@@ -469,7 +439,7 @@ class MeasureTypeListView(BaseView):
         items = items.order_by(asc(self.factory.order))
         return items
 
-    def _more_template_vars(self, result):
+    def more_template_vars(self, result):
         """
         Hook allowing to add datas to the templating context
         """
@@ -483,58 +453,26 @@ class MeasureTypeListView(BaseView):
         )
         return result
 
-    def _get_menus(self):
-        """
-        Return the menu entries
-        """
-        return [
-            dict(
-                label=u"Retour",
-                route_name=TYPE_URL,
-                icon="fa fa-step-backward"
-            )
-        ]
-
-    def _get_actions(self, items):
+    def get_actions(self, items):
         """
         Return the description of additionnal main actions buttons
 
         :rtype: list
         """
-        yield (
-            self.addurl + "?is_total=1",
+        yield Link(
+            self.get_addurl() + "?is_total=1",
             u"Ajouter un total",
-            u"Ajouter un indicateur de type total qui sera mis en évidence "
-            u"dans l'interface",
-            u"fa fa-plus-circle",
-            u"btn btn-default secondary-action",
+            title=u"Ajouter un indicateur de type total qui sera mis en "
+            u"évidence dans l'interface",
+            icon=u"plus-circle",
+            css=u"btn btn-default secondary-action",
         )
 
-    @property
-    def addurl(self):
+    def get_addurl(self):
         return self.request.route_path(
             TYPE_CATEGORY_URL + '/add',
             category_id=self.context.id,
         )
-
-    def __call__(self):
-        menus = self._get_menus()
-
-        items = self._load_items()
-
-        result = dict(
-            items=items,
-            columns=self.columns,
-            stream_columns=self.stream_columns,
-            stream_actions=self.stream_actions,
-            title=self.title,
-            menus=menus,
-            actions=self._get_actions(items),
-            addurl=self.addurl,
-        )
-        self._more_template_vars(result)
-
-        return result
 
 
 class MeasureTypeAddView(BaseAddView):

@@ -487,11 +487,11 @@ def submenu_panel(context, request):
     return {"submenu": submenu}
 
 
-def admin_nav_panel(context, request, menus):
+def admin_nav_panel(context, request):
     """
     A panel to render the navigation inside the administration interface
     """
-    return dict(menus=menus)
+    return dict(menus=context)
 
 
 def includeme(config):

@@ -51,8 +51,6 @@ from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
-from autonomie import forms
-from autonomie.forms.custom_types import AmountType
 from autonomie.compute.task import (
     EstimationCompute,
 )

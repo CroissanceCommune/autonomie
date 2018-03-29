@@ -17,12 +17,12 @@ from autonomie.forms.admin import (
     get_admin_schema,
     get_config_schema,
 )
-
+from autonomie.utils.widgets import Link
 from autonomie.views.admin.tools import (
     BaseConfigView,
+    AdminCrudListView,
 )
 from autonomie.views import (
-    BaseView,
     BaseEditView,
 )
 
@@ -75,12 +75,13 @@ class TreasuryMeasureUiView(BaseConfigView):
         avant dans l'interface de l'entrepreneur"""
 
 
-class TreasuryMeasureTypeListView(BaseView):
+class TreasuryMeasureTypeListView(AdminCrudListView):
     columns = [
         u"Libellé de l'indicateur", u"Comptes commençant par "
     ]
     title = u"Configuration des indicateurs de trésorerie"
     factory = TreasuryMeasureType
+    back_route = BASE_URL
 
     def stream_columns(self, measure_type):
         """
@@ -114,14 +115,13 @@ class TreasuryMeasureTypeListView(BaseView):
         :param obj measure_type: TreasuryMeasureType instance
         :returns: List of 4-uples (url, label, title, icon,)
         """
-        yield (
+        yield Link(
             self._get_item_url(measure_type),
             u"Voir/Modifier",
-            u"Voir/Modifier",
-            u"pencil",
+            icon=u"pencil",
         )
 
-    def _load_items(self, year=None):
+    def load_items(self):
         """
         Return the sqlalchemy models representing current queried elements
         :rtype: SQLAlchemy.Query object
@@ -129,7 +129,7 @@ class TreasuryMeasureTypeListView(BaseView):
         items = self.factory.query().order_by(asc(self.factory.internal_id))
         return items
 
-    def _more_template_vars(self, result):
+    def more_template_vars(self, result):
         """
         Hook allowing to add datas to the templating context
         """
@@ -138,44 +138,6 @@ class TreasuryMeasureTypeListView(BaseView):
             u"utilisées pour le calcul des "
             u"indicateurs du tableau de bord trésorerie des entrepreneurs."
         )
-        return result
-
-    def _get_menus(self):
-        """
-        Return the menu entries
-        """
-        return [
-            dict(
-                label=u"Retour",
-                route_name=BASE_URL,
-                icon="fa fa-step-backward"
-            )
-        ]
-
-    def _get_actions(self, items):
-        """
-        Return the description of additionnal main actions buttons
-
-        :rtype: list
-        """
-        return []
-
-    def __call__(self):
-        menus = self._get_menus()
-
-        items = self._load_items()
-
-        result = dict(
-            items=items,
-            columns=self.columns,
-            stream_columns=self.stream_columns,
-            stream_actions=self.stream_actions,
-            title=self.title,
-            menus=menus,
-            actions=self._get_actions(items),
-        )
-        self._more_template_vars(result)
-
         return result
 
 

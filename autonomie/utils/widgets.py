@@ -359,3 +359,31 @@ class ActionMenu(Menu):
         Represent the ActionMenu
     """
     template = "base/actionmenu.mako"
+
+
+class Link(object):
+    panel_name = "link"
+
+    def __init__(self, url, label, title=None, js=None, icon="", css="",
+                 disabled=False, confirm=None):
+        self.label = label
+        self.url = url
+        self.title = title or self.label
+        if confirm:
+            self.js = u"return confirm('{0}')".format(
+                confirm.replace("'", "\\'")
+            )
+        else:
+            self.js = js
+        self.icon = self.format_icon(icon)
+        self.css = css
+        self.disabled = disabled
+
+    def format_icon(self, icon):
+        """
+        Transform icon in fontawesome icon if needed
+        """
+        if icon is not None:
+            if not icon.startswith('fa ') and not icon.startswith('glyphicon'):
+                icon = "fa fa-%s" % icon
+        return icon

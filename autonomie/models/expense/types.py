@@ -45,19 +45,14 @@ les formulaires de saisie",
     id = Column(
         Integer,
         primary_key=True,
-        info={
-            "colanderalchemy": forms.get_hidden_field_conf()
-        }
     )
     type = Column(
         String(30),
         nullable=False,
-        info={'colanderalchemy': forms.EXCLUDED}
     )
     active = Column(
         Boolean(),
         default=True,
-        info={'colanderalchemy': forms.EXCLUDED}
     )
     label = Column(
         String(50),
@@ -140,9 +135,6 @@ utilisables dans les notes de dépense",
         Integer,
         ForeignKey('expense_type.id'),
         primary_key=True,
-        info={
-            "colanderalchemy": forms.get_hidden_field_conf()
-        }
     )
     amount = Column(
         Float(precision=4),
@@ -215,18 +207,9 @@ utilisables dans les notes de dépense",
         Integer,
         ForeignKey('expense_type.id'),
         primary_key=True,
-        info={
-            "colanderalchemy": forms.get_hidden_field_conf()
-        }
     )
     percentage = Column(
         Integer,
-        info={
-            'colanderalchemy': {
-                'title': u"Pourcentage remboursé",
-                'missing': colander.required
-            }
-        },
         nullable=False,
     )
     initialize = Column(

@@ -33,12 +33,10 @@ import colander
 import deform
 import functools
 
-from sqlalchemy import distinct
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.utils import strings
 from autonomie.models.expense.sheet import (
-    ExpenseSheet,
     get_expense_years,
     ExpenseLine,
     ExpenseKmLine,
@@ -46,7 +44,7 @@ from autonomie.models.expense.sheet import (
 
 from autonomie.models.expense.types import (
     ExpenseType,
-    ExpenseKmType
+    ExpenseKmType,
 )
 from autonomie.forms.user import user_node
 from .custom_types import AmountType
@@ -263,16 +261,19 @@ def get_add_edit_line_schema(factory):
     forms.customize_field(
         schema,
         'ht',
+        typ=AmountType(2),
         missing=colander.required,
     )
     forms.customize_field(
         schema,
         'tva',
+        typ=AmountType(2),
         missing=colander.required,
     )
     forms.customize_field(
         schema,
         'km',
+        typ=AmountType(2),
         missing=colander.required,
     )
     return schema

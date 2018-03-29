@@ -19,7 +19,11 @@ from autonomie.views import (
     BaseAddView,
     BaseEditView,
 )
-from autonomie.forms.admin import get_admin_schema
+from autonomie.forms.admin.expense_type import (
+    get_expense_type_schema,
+    get_expense_kmtype_schema,
+    get_expense_teltype_schema,
+)
 
 
 def _get_year_from_request(request):
@@ -151,7 +155,7 @@ class ExpenseTypeListView(BaseView):
         """
         items = self.factory.query().filter(
             self.factory.type == self.get_type()
-        ).order_by(desc(self.factory.active))
+        ).order_by(desc(self.factory.active)).order_by(self.factory.id)
         return items
 
     def _more_template_vars(self, result):
@@ -361,7 +365,7 @@ class ExpenseTelTypeDisableView(ExpenseTypeDisableView):
 class ExpenseTypeAddView(BaseAddView):
     add_template_vars = ('menus', 'help_msg')
     factory = ExpenseType
-    schema = get_admin_schema(ExpenseType)
+    schema = get_expense_type_schema()
     title = u"Ajouter"
 
     @classmethod
@@ -390,7 +394,7 @@ class ExpenseKmTypeAddView(ExpenseTypeAddView):
     form
     """
     factory = ExpenseKmType
-    schema = get_admin_schema(ExpenseKmType)
+    schema = get_expense_kmtype_schema()
 
     def before(self, form):
         form.set_appstruct({'year': _get_year_from_request(self.request)})
@@ -419,12 +423,12 @@ class ExpenseKmTypeAddView(ExpenseTypeAddView):
 
 class ExpenseTelTypeAddView(ExpenseTypeAddView):
     factory = ExpenseTelType
-    schema = get_admin_schema(ExpenseTelType)
+    schema = get_expense_teltype_schema()
 
 
 class ExpenseTypeEditView(BaseEditView):
     add_template_vars = ('menus', 'help_msg')
-    schema = get_admin_schema(ExpenseType)
+    schema = get_expense_type_schema()
     factory = ExpenseType
     title = u"Modifier"
 
@@ -449,7 +453,7 @@ class ExpenseTypeEditView(BaseEditView):
 
 class ExpenseKmTypeEditView(ExpenseTypeEditView):
     factory = ExpenseKmType
-    schema = get_admin_schema(ExpenseKmType)
+    schema = get_expense_kmtype_schema()
 
     def redirect(self):
         """
@@ -475,7 +479,7 @@ class ExpenseKmTypeEditView(ExpenseTypeEditView):
 
 class ExpenseTelTypeEditView(ExpenseTypeEditView):
     factory = ExpenseTelType
-    schema = get_admin_schema(ExpenseTelType)
+    schema = get_expense_teltype_schema()
 
 
 class ExpenseKmTypesDuplicateView(BaseView):

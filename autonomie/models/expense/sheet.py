@@ -46,10 +46,6 @@ from autonomie_base.models.base import (
 )
 from autonomie.models.expense.payment import ExpensePayment
 from autonomie.utils import strings
-from autonomie import forms
-from autonomie.forms.custom_types import (
-    AmountType,
-)
 from autonomie.compute.expense import (
     ExpenseCompute,
     ExpenseLineCompute,
@@ -183,14 +179,13 @@ class ExpenseSheet(Node, ExpenseCompute):
     id = Column(
         ForeignKey('node.id'),
         primary_key=True,
-        info={"colanderalchemy": forms.EXCLUDED},
+        info={"colanderalchemy": {'exclude': True}},
     )
     month = Column(
         Integer,
         info={
             "colanderalchemy": {
                 "title": u"Mois",
-                "default": forms.default_month,
             }
         }
     )
@@ -238,7 +233,7 @@ class ExpenseSheet(Node, ExpenseCompute):
             'colanderalchemy': {
                 "title": u"Dernier utilisateur à avoir modifié le document",
             },
-            "export": forms.EXCLUDED,
+            "export": {'exclude': True},
         }
     )
     status_date = Column(
@@ -271,7 +266,7 @@ class ExpenseSheet(Node, ExpenseCompute):
         Integer,
         ForeignKey("company.id", ondelete="cascade"),
         info={
-            "colanderalchemy": forms.EXCLUDED
+            "colanderalchemy": {'exclude': True}
         }
     )
 
@@ -279,7 +274,7 @@ class ExpenseSheet(Node, ExpenseCompute):
         Integer,
         ForeignKey("accounts.id"),
         info={
-            "colanderalchemy": forms.EXCLUDED
+            "colanderalchemy": {'exclude': True}
         }
     )
 
@@ -314,13 +309,13 @@ class ExpenseSheet(Node, ExpenseCompute):
         "User",
         primaryjoin="ExpenseSheet.user_id==User.id",
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
         },
         backref=backref(
             "expenses",
             order_by="ExpenseSheet.month",
             info={
-                'colanderalchemy': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
                 'export': {'exclude': True},
             },
             cascade="all, delete-orphan"
@@ -330,7 +325,7 @@ class ExpenseSheet(Node, ExpenseCompute):
         "User",
         primaryjoin="ExpenseSheet.status_user_id==User.id",
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
         }
     )
     communications = relationship(
@@ -339,7 +334,7 @@ class ExpenseSheet(Node, ExpenseCompute):
         order_by="desc(Communication.date)",
         cascade="all, delete-orphan",
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
         }
     )
     state_manager = _build_action_manager()
@@ -469,12 +464,12 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
     id = Column(
         Integer,
         primary_key=True,
-        info={"colanderalchemy": forms.EXCLUDED},
+        info={"colanderalchemy": {'exclude': True}},
     )
     type = Column(
         String(30),
         nullable=False,
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
     date = Column(
         Date(),
@@ -505,7 +500,7 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
     sheet_id = Column(
         Integer,
         ForeignKey("expense_sheet.id", ondelete="cascade"),
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     type_object = relationship(
@@ -513,7 +508,7 @@ class BaseExpenseLine(DBBASE, PersistentACLMixin):
         primaryjoin='BaseExpenseLine.type_id==ExpenseType.id',
         uselist=False,
         foreign_keys=type_id,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def __json__(self, request):
@@ -539,13 +534,12 @@ class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
         Integer,
         ForeignKey('baseexpense_line.id'),
         primary_key=True,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
     ht = Column(
         Integer,
         info={
             'colanderalchemy': {
-                'typ': AmountType(2),
                 'title': 'Montant HT',
             }
         },
@@ -554,7 +548,6 @@ class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
         Integer,
         info={
             'colanderalchemy': {
-                'typ': AmountType(2),
                 'title': 'Montant de la TVA',
             }
         },
@@ -562,7 +555,7 @@ class ExpenseLine(BaseExpenseLine, ExpenseLineCompute):
     sheet = relationship(
         "ExpenseSheet",
         uselist=False,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def __json__(self, request):
@@ -600,7 +593,7 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
         Integer,
         ForeignKey('baseexpense_line.id'),
         primary_key=True,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
     start = Column(
         String(150),
@@ -616,7 +609,6 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
         Integer,
         info={
             'colanderalchemy': {
-                'typ': AmountType(2),
                 'title': 'Nombre de kilomètres',
             }
         },
@@ -624,7 +616,7 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
     sheet = relationship(
         "ExpenseSheet",
         uselist=False,
-        info={'colanderalchemy': forms.EXCLUDED}
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def __json__(self, request):
@@ -682,7 +674,7 @@ class Communication(DBBASE):
             order_by="Communication.date",
             cascade="all, delete-orphan",
             info={
-                'colanderalchemy': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
                 'export': {'exclude': True},
             },
         )

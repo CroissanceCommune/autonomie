@@ -14,15 +14,19 @@ from autonomie.views import (
     BaseAddView,
     BaseEditView,
 )
+from autonomie.utils.widgets import Link
 from autonomie.views import render_api
+from autonomie.views.admin.tools import AdminCrudListView
 from autonomie.forms.admin import get_tva_edit_schema
 
 
-class TvaListView(BaseView):
+class TvaListView(AdminCrudListView):
     """
     List of tva entries
     """
     title = u"Configuration comptable des produits et TVA collectés"
+    columns = [u"Libellé", u"Valeur", u"Compte CG de TVA", u"Défaut ?"]
+    back_route = "admin_vente"
 
     def stream_columns(self, tva):
         """
@@ -48,77 +52,64 @@ Tva par défaut"
         :param obj tva: Tva instance
         :returns: List of 5-uples (url, label, title, icon, disable)
         """
-        yield (
+        yield Link(
             self.request.route_path(
                 "/admin/vente/tvas/",
                 id=tva.id
             ),
             u"Voir/Modifier",
-            u"Voir/Modifier",
-            u"pencil",
+            icon=u"pencil",
         )
         if tva.active:
-            yield (
+            yield Link(
                 self.request.route_path(
                     "/admin/vente/tvas/",
                     id=tva.id,
                     _query=dict(action='disable'),
                 ),
-                u"Désactiver",
-                u"La TVA n'apparaitra plus dans l'interface",
-                u"remove",
+                label=u"Désactiver",
+                title=u"La TVA n'apparaitra plus dans l'interface",
+                icon=u"remove",
             )
             if not tva.default:
-                yield (
+                yield Link(
                     self.request.route_path(
                         "/admin/vente/tvas/",
                         id=tva.id,
                         _query=dict(action='set_default'),
                     ),
-                    u"Définir comme Taux de Tva par défaut",
-                    u"La TVA sera sélectionnée par défaut dans les formulaires",
-                    u"",
+                    label=u"Définir comme Taux de Tva par défaut",
+                    title=u"La TVA sera sélectionnée par défaut dans les "
+                    u"formulaires",
                 )
         else:
-            yield (
+            yield Link(
                 self.request.route_path(
                     "/admin/vente/tvas/",
                     id=tva.id,
                     _query=dict(action='disable'),
                 ),
                 u"Activer",
-                u"La TVA apparaitra plus dans l'interface",
-                u"",
+                title=u"La TVA apparaitra plus dans l'interface",
             )
 
-    def __call__(self):
-        menus = [dict(label=u"Retour", route_name="admin_vente",
-                      icon="fa fa-step-backward")]
-        columns = [
-            u"Libellé", u"Valeur", u"Compte CG de TVA", u"Défaut ?"
-        ]
+    def load_items(self):
+        return Tva.query(include_inactive=True).all()
 
-        items = Tva.query(include_inactive=True).all()
-
-        warn_msg = None
-        if items:
+    def more_template_vars(self, result):
+        if result['items']:
             if Tva.get_default() is None:
-                warn_msg = (u"Aucun taux de TVA par défaut n'a été configuré."
-                            u"Des problèmes peuvent être rencontré lors de "
-                            u"l'édition de devis/factures")
+                result['warn_msg'] = (
+                    u"Aucun taux de TVA par défaut n'a été configuré. "
+                    u"Des problèmes peuvent être rencontrés lors de "
+                    u"l'édition de devis/factures."
+                )
+        return result
 
-        return dict(
-            items=items,
-            warn_msg=warn_msg,
-            columns=columns,
-            stream_columns=self.stream_columns,
-            stream_actions=self.stream_actions,
-            title=self.title,
-            menus=menus,
-            addurl=self.request.route_path(
-                '/admin/vente/tvas',
-                _query=dict(action="new")
-            ),
+    def get_addurl(self):
+        return self.request.route_path(
+            '/admin/vente/tvas',
+            _query=dict(action="new")
         )
 
 

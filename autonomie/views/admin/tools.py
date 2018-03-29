@@ -32,6 +32,7 @@ from autonomie.forms.admin import (
 from autonomie_base.utils.ascii import (
     camel_case_to_name,
 )
+from autonomie.utils.widgets import Link
 from autonomie.views import (
     BaseFormView,
     BaseView,
@@ -292,20 +293,31 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
     return myview
 
 
-class BaseCrudAdminListView(BaseView):
+class AdminCrudListView(BaseView):
     title = "Missing title"
     columns = []
 
-    def _get_headlinks(self):
+    back_route = None
+
+    def get_nav(self):
         """
         Return navigation links that are displayed in the head of the page
 
         :returns: An iterator providing autonomie.utils.widgets.Link instances
         :rtype: iterator
         """
-        return []
+        result = []
+        if self.back_route is not None:
+            result.append(
+                Link(
+                    self.request.route_path(self.back_route),
+                    label=u"Retour",
+                    icon="step-backward",
+                )
+            )
+        return result
 
-    def _get_actions(self, items):
+    def get_actions(self, items):
         """
         Return additionnal list related actions (other than add)
 
@@ -315,7 +327,7 @@ class BaseCrudAdminListView(BaseView):
         """
         return []
 
-    def _get_addurl(self):
+    def get_addurl(self):
         """
         Build the url to the add form
 
@@ -335,22 +347,41 @@ class BaseCrudAdminListView(BaseView):
         """
         raise NotImplemented()
 
+    def load_items(self):
+        """
+        Perform the listing query and return the result
+
+        :returns: List of SQLAlchemy object to present in the UI
+        :rtype: obj
+        """
+        raise NotImplemented()
+
+    def more_template_vars(self, result):
+        """
+        Add template vars to the result
+
+        :param dict result: The currently built dict that will be returned as
+        templating context
+        :returns: The templating context for the given view
+        :rtype: dict
+        """
+        return result
+
     def __call__(self):
-        items = self._load_items()
+        items = self.load_items()
 
         result = dict(
-            menus=self._get_menus(),
+            menus=self.get_nav(),
             title=self.title,
-            headlinks=self._get_headlinks(),
-            addurl=self._get_addurl(),
+            addurl=self.get_addurl(),
             columns=self.columns,
             items=items,
             stream_columns=self.stream_columns,
             stream_actions=self.stream_actions,
         )
-        result['actions'] = self._get_actions(items)
+        result['actions'] = self.get_actions(items)
 
-        if hasattr(self, "_more_template_vars"):
-            self._more_template_vars(result)
+        if hasattr(self, "more_template_vars"):
+            self.more_template_vars(result)
 
         return result

@@ -28,7 +28,7 @@ from autonomie.forms.admin.expense_type import (
 )
 
 from autonomie.views.admin.tools import (
-    BaseCrudAdminListView,
+    AdminCrudListView,
 )
 
 
@@ -89,12 +89,13 @@ class ExpenseKmTypesIndexView(BaseView):
         )
 
 
-class ExpenseTypeListView(BaseCrudAdminListView):
+class ExpenseTypeListView(AdminCrudListView):
     columns = [
         u"Libellé", u"Compte de charge"
     ]
     title = u"Configuration des types de dépenses"
     factory = ExpenseType
+    back_route = "admin_expense"
 
     def stream_columns(self, expense_type):
         """
@@ -152,7 +153,7 @@ class ExpenseTypeListView(BaseCrudAdminListView):
                 title=u"La TVA apparaitra dans l'interface",
             )
 
-    def _load_items(self, year=None):
+    def load_items(self, year=None):
         """
         Return the sqlalchemy models representing current queried elements
         :rtype: SQLAlchemy.Query object
@@ -162,19 +163,7 @@ class ExpenseTypeListView(BaseCrudAdminListView):
         ).order_by(desc(self.factory.active)).order_by(self.factory.id)
         return items
 
-    def _get_menus(self):
-        """
-        Return the menu entries
-        """
-        return [
-            Link(
-                self.request.route_path("admin_expense"),
-                label=u"Retour",
-                icon="fa fa-step-backward"
-            )
-        ]
-
-    def _get_add_url(self):
+    def get_addurl(self):
         """
         Return the url for the add view
 
@@ -199,18 +188,7 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
     ]
 
     factory = ExpenseKmType
-
-    def _get_menus(self):
-        """
-        Return the menu entries
-        """
-        return [
-            Link(
-                self.request.route_path("/admin/expenses/expensekm/"),
-                label=u"Retour",
-                icon="fa fa-step-backward"
-            ),
-        ]
+    back_route = "/admin/expenses/expensekm/"
 
     @property
     def title(self):
@@ -220,13 +198,13 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         )
         return title
 
-    def _load_items(self, year=None):
+    def load_items(self, year=None):
         """
         Load the items we will display
 
         :returns: A SQLAlchemy query
         """
-        query = ExpenseTypeListView._load_items(self)
+        query = ExpenseTypeListView.load_items(self)
         if year is None:
             year = _get_year_from_request(self.request)
         query = query.filter_by(year=year)
@@ -253,7 +231,7 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
             _query={'action': 'duplicate', 'from_previous': '1'}
         )
 
-    def _get_actions(self, items):
+    def get_actions(self, items):
         """
         Return the description of additionnal main actions buttons
 
@@ -273,7 +251,7 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
             )
 
         # If previous year there were some datas configured
-        if self._load_items(year - 1).count() > 0:
+        if self.load_items(year - 1).count() > 0:
             yield Link(
                 self._get_duplicate_from_previous_url(),
                 label=u"Recopier la grille de l'année précédente "
@@ -464,7 +442,7 @@ class ExpenseKmTypesDuplicateView(BaseView):
 
         from previous (if 'from_previous' is set in the GET params
     """
-    def _load_items(self, year):
+    def load_items(self, year):
         query = ExpenseKmType.query().filter_by(active=True)
         return query.filter_by(year=year)
 
@@ -481,7 +459,7 @@ class ExpenseKmTypesDuplicateView(BaseView):
                 u"l'année %s" % (new_year,)
             )
 
-        for item in self._load_items(year):
+        for item in self.load_items(year):
             new_item = item.duplicate(new_year)
             self.request.dbsession.merge(new_item)
         self.request.session.flash(msg)

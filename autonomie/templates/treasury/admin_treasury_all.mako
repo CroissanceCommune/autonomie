@@ -26,47 +26,49 @@
     <% keys = datas.keys() %>
     <% keys.sort() %>
     % for year in keys:
-        <% months = datas[year] %>
-        <div class='panel panel-default page-block'>
-            <div class='panel-heading'>
-                <a href="#" data-toggle='collapse' data-target='#year_${year}'>
-                    <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
-                </a>
-            </div>
-            <div class='panel-body'>
+    <% months = datas[year] %>
+    <div class='panel panel-default page-block'>
+        <div class='panel-heading'>
+            <a href="#" data-toggle='collapse' data-target='#year_${year}'>
+                <i style="vertical-align:middle" class="glyphicon glyphicon-folder-open"></i>&nbsp;${year}
+            </a>
+        </div>
+        <div class='panel-body'>
         % if year in current_years:
             <div class="section-content in collapse" id='year_${year}'>
         %else:
             <div class="section-content collapse" id='year_${year}'>
         %endif
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <th>Mois</th>
-                    <th>Nombre de fichiers</th>
-                    <th>Actions</th>
-                </thead>
-                <tbody>
-                <% month_names = months.keys() %>
-                <% month_names.sort(key=lambda m:int(m)) %>
-                % for month in month_names:
-                    <% month_datas = months[month] %>
-                    <tr>
-                        <td>${month_datas['label']}</td>
-                        <td>${month_datas['nbfiles']} fichier(s)</td>
-                        <td><a href="${month_datas['url']}">Administrer</a></td>
-                    </tr>
-                % endfor
-            % if not months:
-                <tr><td colspan='5'>Aucun document n'est disponible</td></tr>
-            % endif
-                </tbody>
-            </table>
-        </div>
-    % endfor
-    % if not keys:
-        <div>Aucun document n'est disponible</div>
-    % endif
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <th>Mois</th>
+                        <th>Nombre de fichiers</th>
+                        <th>Actions</th>
+                    </thead>
+                    <tbody>
+                    <% month_names = months.keys() %>
+                    <% month_names.sort(key=lambda m:int(m)) %>
+                    % for month in month_names:
+                        <% month_datas = months[month] %>
+                        <tr>
+                            <td>${month_datas['label']}</td>
+                            <td>${month_datas['nbfiles']} fichier(s)</td>
+                            <td><a href="${month_datas['url']}">Administrer</a></td>
+                        </tr>
+                    % endfor
+                % if not months:
+                    <tr><td colspan='5'>Aucun document n'est disponible</td></tr>
+                % endif
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    % endfor
+    % if not keys:
+    <div class='panel panel-default page-block'>
+        <div class='panel-body'>Aucun document n'est disponible</div>
+    </div>
+    % endif
 </div>
 </%block>

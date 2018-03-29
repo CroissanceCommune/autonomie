@@ -72,7 +72,9 @@
         </div>
     % endfor
     % if not keys:
-        <div>Aucun document n'est disponible</div>
+    <div class='panel panel-default page-block'>
+        <div class='panel-body'>Aucun document n'est disponible</div>
+    </div>
     % endif
 </div>
 </%block>

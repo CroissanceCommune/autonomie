@@ -34,6 +34,7 @@ from autonomie_base.utils.ascii import (
 )
 from autonomie.views import (
     BaseFormView,
+    BaseView,
 )
 logger = logging.getLogger(__name__)
 
@@ -289,3 +290,67 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
             menus.append(dict(label=view.title, route_name=route_name,))
         return dict(title=title, menus=menus)
     return myview
+
+
+class BaseCrudAdminListView(BaseView):
+    title = "Missing title"
+    columns = []
+
+    def _get_headlinks(self):
+        """
+        Return navigation links that are displayed in the head of the page
+
+        :returns: An iterator providing autonomie.utils.widgets.Link instances
+        :rtype: iterator
+        """
+        return []
+
+    def _get_actions(self, items):
+        """
+        Return additionnal list related actions (other than add)
+
+        :returns: An iterator providing autonomie.utils.widgets.Link instances
+
+        :rtype: iterator
+        """
+        return []
+
+    def _get_addurl(self):
+        """
+        Build the url to the add form
+
+        :returns: An url string
+        :rtype: str
+        """
+        return None
+
+    def stream_columns(self, item):
+        """
+        Each item is a row in a table, here we stream the different columns for
+        the given row except the actions column
+
+        :param obj item: A SQLAlchemy model instance
+        :returns: an iterator (can be used in a for loop) of column contents
+        :rtype: iterator
+        """
+        raise NotImplemented()
+
+    def __call__(self):
+        items = self._load_items()
+
+        result = dict(
+            menus=self._get_menus(),
+            title=self.title,
+            headlinks=self._get_headlinks(),
+            addurl=self._get_addurl(),
+            columns=self.columns,
+            items=items,
+            stream_columns=self.stream_columns,
+            stream_actions=self.stream_actions,
+        )
+        result['actions'] = self._get_actions(items)
+
+        if hasattr(self, "_more_template_vars"):
+            self._more_template_vars(result)
+
+        return result

@@ -39,15 +39,19 @@ Each item could provide:
 </%doc>
 <%def name="render_item(elem)">
     <li>
-    % if 'route_name' in elem:
-    <% url = request.route_path(elem['route_name']) %>
+    % if isinstance(elem, dict):
+        % if 'route_name' in elem:
+        <% url = request.route_path(elem['route_name']) %>
+        % else:
+        <% url = elem['url'] %>
+        % endif
+        <a title='${elem.get("title")}' href="${url}">
+            <i class="${elem.get('icon') or 'fa fa-cogs'}"></i>
+            ${elem.get('label', "")} <span class='help-block'>${elem.get('title', '')}</span>
+        </a>
     % else:
-    <% url = elem['url'] %>
+        ${request.layout_manager.render_panel(elem.panel_name, context=elem)}
     % endif
-    <a title='${elem.get("title")}' href="${url}">
-        <i class="${elem.get('icon') or 'fa fa-cogs'}"></i>
-        ${elem.get('label', "")} <span class='help-block'>${elem.get('title', '')}</span>
-    </a>
     </li>
 </%def>
 % if menus is not UNDEFINED and len(menus) > 0:

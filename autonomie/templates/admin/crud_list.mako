@@ -44,14 +44,9 @@
     </a>
     % endif
     % if actions is not UNDEFINED:
-        % for url, label, title, icon, css in actions:
-            <a class="${css or 'btn btn-default'}"
-                href="${url}"
-                title="${title}"
-                >
-                <i class='${icon}'></i>&nbsp;${label}
-            </a>
-        % endfor
+    % for link in actions:
+        ${request.layout_manager.render_panel(link.panel_name, context=link)}
+    % endfor
     % endif
     % if warn_msg is not UNDEFINED and warn_msg is not None:
     <div class="alert alert-danger">
@@ -97,27 +92,7 @@
                             </td>
                         % endfor
                         <td class='text-right'>
-                            <div class='btn-group'>
-                                <button
-                                    type="button"
-                                    class="btn btn-default dropdown-toggle"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false">
-                                    Actions <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right">
-                                    % for action in stream_actions(item):
-                                        <% url, label, title, icon = action[:4] %>
-                                        % if len(action) >= 5:
-                                        <% onclick = action[4] %>
-                                        % else:
-                                        <% onclick = None %>
-                                        % endif
-                                        ${dropdown_item(url, label, title, icon=icon, onclick=onclick)}
-                                    % endfor
-                                </ul>
-                            </div>
+                        ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(item))}
                         </td>
                     </tr>
                 % endfor

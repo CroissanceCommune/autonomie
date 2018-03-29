@@ -53,8 +53,9 @@ from .accounting import income_statement_measures
 from .expense import sheet
 from .expense import types
 from .expense import payment
-from .project import project
 from .project import phase
+from .project import project
+from .project import types
 from .user import user
 from .user import login
 from .user import group

@@ -141,6 +141,8 @@ class Project(Node):
         info={'colanderalchemy': {'exclude': True}},
     )
 
+    project_type_id = Column(ForeignKey('project_type.id'))
+
     customers = relationship(
         "Customer",
         secondary=ProjectCustomer,
@@ -194,6 +196,7 @@ class Project(Node):
             'export': {'exclude': True},
         }
     )
+    project_type = relationship("ProjectType")
 
     _autonomie_service = ProjectService
 

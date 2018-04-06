@@ -92,6 +92,18 @@ nav.sidebar-menu .subnav li {
     .panel.panel-default .panel-body {
       background-color: #fff;
       padding: 10px 15px; }
+.deform-seq .panel-body {
+  padding: 0px !important; }
+.deform-seq .panel-body .deform-seq-item {
+  margin-bottom: 0;
+  padding: 10px 10px 0px;
+  border-left: 0px;
+  border-right: 0px;
+  border-top: 0px; }
+.deform-seq .panel-footer {
+  padding: 0px !important; }
+.deform-seq .panel-footer a:before {
+  content: '+ '; }
 
 .breadcrumb {
   padding: 7px 14px;

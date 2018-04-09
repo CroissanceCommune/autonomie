@@ -19,4 +19,32 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
+from autonomie.views.admin.tools import BaseAdminIndexView
 
+BASE_URL = u"/admin"
+
+
+class AdminIndexView(BaseAdminIndexView):
+    title = u"Configuration de votre instance Autonomie"
+    route_name = BASE_URL
+    children = []
+
+
+def add_admin_view(config, *args, **kwargs):
+    if 'renderer' not in kwargs:
+        kwargs['renderer'] = 'autonomie:templates/admin/base_view.mako'
+    if 'permission' not in kwargs:
+        kwargs['permission'] = 'admin'
+
+    if 'layout' not in kwargs:
+        kwargs['layout'] = 'admin'
+    config.add_view(*args, **kwargs)
+
+
+def includeme(config):
+    config.include('.layout')
+    config.add_directive('add_admin_view', add_admin_view)
+    config.add_route(BASE_URL, BASE_URL)
+    config.add_admin_view(AdminIndexView, route_name=BASE_URL)
+
+    config.include(".main")

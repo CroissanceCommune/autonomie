@@ -40,8 +40,85 @@ from autonomie.views import (
 logger = logging.getLogger(__name__)
 
 
-class BaseAdminFormView(BaseFormView):
-    add_template_vars = ('menus', 'message')
+class AdminTreeMixin:
+    """
+    Mixin adding tree structure to admin views
+
+
+    class MyAdminView(BaseView, AdminTreeMixin):
+        children = []
+        parent = ParentView
+        route_name = "/admin/myadminview"
+
+    children
+
+        class attribute in list format registering all view children
+
+    parent
+
+        weakref to the parent view
+
+    route_name
+
+        current route_name
+    """
+    children = []
+    route_name = None
+    parent_view = None
+    description = ""
+    title = ""
+
+    @classmethod
+    def get_url(cls, request):
+        return request.route_path(cls.route_name)
+
+    @classmethod
+    def get_breadcrumb(cls, request):
+        if cls.parent_view is not None:
+            for title, url in cls.parent_view.get_breadcrumb(request):
+                yield title, url
+        yield cls.title, cls.get_url(request)
+
+    @classmethod
+    def get_back_url(cls, request):
+        if cls.parent_view is not None:
+            return cls.parent_view.get_url(request)
+        else:
+            return None
+
+    @classmethod
+    def get_navigation(cls, request):
+        result = []
+        for child in cls.children:
+            result.append(
+                dict(
+                    label=child.title,
+                    route_name=child.route_name,
+                    title=child.description,
+                )
+            )
+        return result
+
+    @property
+    def navigation(self):
+        return self.get_navigation(self.request)
+
+    @property
+    def breadcrumb(self):
+        return self.get_breadcrumb(self.request)
+
+    @property
+    def back_link(self):
+        return self.get_back_url(self.request)
+
+    @classmethod
+    def add_child(cls, view_class):
+        cls.children.append(view_class)
+        view_class.parent_view = cls
+
+
+class BaseAdminFormView(BaseFormView, AdminTreeMixin):
+    add_template_vars = ('message', 'breadcrumb', 'navigation', 'back_link')
     redirect_route_name = "admin_index"
     info_message = ""
 
@@ -384,4 +461,34 @@ class AdminCrudListView(BaseView):
         if hasattr(self, "more_template_vars"):
             self.more_template_vars(result)
 
+        return result
+
+
+class BaseAdminIndexView(BaseView, AdminTreeMixin):
+    """
+    Base admin view
+
+    Used to manage Admin view hierachies
+
+
+    add_template_vars
+
+        property or attribute names to add to the templating context dict
+
+    """
+    add_template_vars = ()
+
+    def more_template_vars(self, result):
+        for propname in self.add_template_vars:
+            result.update(getattr(self, propname))
+        return result
+
+    def __call__(self):
+        result = dict(
+            title=self.title,
+            navigation=self.navigation,
+            breadcrumb=self.breadcrumb,
+            back_link=self.back_link,
+        )
+        result = self.more_template_vars(result)
         return result

@@ -280,7 +280,7 @@ def get_admin_menus(request):
     menu = Menu()
 
     if has_permission("admin", request.context, request):
-        href = request.route_path("admin_index")
+        href = request.route_path("/admin")
         menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
 
     documents = DropDown(label=u"Documents")

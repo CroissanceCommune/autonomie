@@ -112,16 +112,6 @@ AUTONOMIE_REQUEST_SUBSCRIBERS = (
     "autonomie.subscribers.before_render",
 )
 
-AUTONOMIE_ADMIN_MODULES = (
-    "autonomie.views.admin.main",
-    "autonomie.views.admin.competence",
-    "autonomie.views.admin.expense",
-    "autonomie.views.admin.expense_type",
-    "autonomie.views.admin.vente",
-    "autonomie.views.admin.tva",
-    "autonomie.views.admin.accounting",
-)
-
 AUTONOMIE_SERVICE_FACTORIES = (
     (
         "services.treasury_invoice_producer",
@@ -293,15 +283,6 @@ def base_configure(config, dbsession, **settings):
         reify=True
     )
 
-    def add_admin_view(config, *args, **kwargs):
-        if 'renderer' not in kwargs:
-            kwargs['renderer'] = 'admin/main.mako'
-        if 'permission' not in kwargs:
-            kwargs['permission'] = 'admin'
-        config.add_view(*args, **kwargs)
-
-    config.add_directive('add_admin_view', add_admin_view)
-
     add_static_views(config, settings)
 
     for module in AUTONOMIE_LAYOUTS_MODULES:
@@ -320,8 +301,12 @@ def base_configure(config, dbsession, **settings):
     for module in AUTONOMIE_EVENT_MODULES:
         config.include(module)
 
-    for module in AUTONOMIE_ADMIN_MODULES:
-        config.include(module)
+    # On register le module views.admin car il contient des outils spécifiques
+    # pour les vues administrateurs (Ajout autonomatisé d'une arborescence,
+    # ajout de la directive config.add_admin_view
+    # Il s'occupe également d'intégrer toutes les vues, layouts... spécifiques à
+    # l'administration
+    config.include("autonomie.views.admin")
 
     setup_services(config, settings)
 

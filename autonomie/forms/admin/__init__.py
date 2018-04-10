@@ -926,11 +926,15 @@ def get_sequence_model_admin(model, title=u"", excludes=(), **kw):
     )
     node_schema.name = 'data'
 
+    colanderalchemy_config = getattr(model, '__colanderalchemy_config__', {})
+
     default_widget_options = dict(
         orderable=True,
         min_len=1,
     )
-    widget_options = kw.get('widget_options', {})
+    widget_options = colanderalchemy_config.get('seq_widget_options', {})
+    widget_options.update(kw.get('widget_options', {}))
+
     for key, value in widget_options.items():
         default_widget_options[key] = value
 

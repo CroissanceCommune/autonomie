@@ -40,10 +40,10 @@ Each item could provide:
 <%def name="render_item(elem)">
     <li>
     % if isinstance(elem, dict):
-        % if 'route_name' in elem:
+        % if 'route_name' in elem and elem['route_name']:
         <% url = request.route_path(elem['route_name']) %>
         % else:
-        <% url = elem['url'] %>
+        <% url = elem.get('url', "") %>
         % endif
         <a title='${elem.get("title")}' href="${url}">
             <i class="${elem.get('icon') or 'fa fa-cogs'}"></i>

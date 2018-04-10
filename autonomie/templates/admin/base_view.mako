@@ -25,6 +25,7 @@
     Admin common page template
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
+<%namespace file="/base/utils.mako" import="format_text"/>
 <%block name="afteradminmenu">
 % if not message is UNDEFINED and message:
     <div class='alert alert-info'>

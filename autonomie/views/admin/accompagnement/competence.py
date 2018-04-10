@@ -20,6 +20,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+import os
+
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.competence import (
     CompetenceScale,
@@ -35,27 +37,36 @@ from autonomie.forms.admin import (
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseAdminFormView,
+    BaseAdminIndexView,
 )
+from autonomie.views.admin.accompagnement import (
+    ACCOMPAGNEMENT_URL,
+    AccompagnementIndexView,
+)
+
+
+COMPETENCE_URL = os.path.join(ACCOMPAGNEMENT_URL, 'competences')
+COMPETENCE_PRINT_URL = os.path.join(COMPETENCE_URL, "print")
 
 
 logger = logging.getLogger(__name__)
 
 
-(
-    main_admin_class,
-    COMPETENCE_OPTION_ROUTE,
-    COMPETENCE_OPTION_TMPL,
-) = get_model_admin_view(
+BaseCompetenceOptionView = get_model_admin_view(
     CompetenceOption,
-    r_path='admin_competences',
+    r_path=COMPETENCE_URL,
 )
-(
-    req_admin_class,
-    COMPETENCE_REQ_ROUTE,
-    COMPETENCE_REQ_TMPL,
-) = get_model_admin_view(
+BaseCompetenceRequirementView = get_model_admin_view(
     CompetenceRequirement,
-    r_path='admin_competences',
+    r_path=COMPETENCE_URL,
+)
+CompetenceScaleView = get_model_admin_view(
+    CompetenceScale,
+    r_path=COMPETENCE_URL
+)
+CompetenceDeadlineView = get_model_admin_view(
+    CompetenceDeadline,
+    r_path=COMPETENCE_URL
 )
 
 
@@ -78,38 +89,40 @@ def get_requirement_admin_schema():
     return schema
 
 
-class AdminCompetenceOption(main_admin_class):
+class CompetenceOptionView(BaseCompetenceOptionView):
     """
     competence and subcompetence configuration
     """
-    redirect_route_name = "admin_competences"
     _schema = get_sequence_model_admin(
         CompetenceOption,
         excludes=('requirements',),
     )
 
 
-class AdminCompetenceRequirement(req_admin_class):
+class CompetenceRequirementView(BaseCompetenceRequirementView):
     """
     Requirements configuration
     """
-    redirect_route_name = "admin_competences"
     _schema = get_requirement_admin_schema()
 
     def before(self, form):
         if CompetenceScale.query().count() == 0:
             self.session.flash(
-                u"Les barêmes doivent être configurer avant \
+                u"Les barêmes doivent être configurés avant \
 la grille de compétences."
             )
-            raise HTTPFound(self.request.route_path("admin_competence_scale"))
+            raise HTTPFound(
+                self.request.route_path(
+                    os.path.join(COMPETENCE_URL, "competence_scale")
+                )
+            )
         if CompetenceOption.query().count() == 0:
             self.session.flash(
                 u"La grille de compétence doit être configurée avant les \
 barêmes"
             )
             raise HTTPFound(self.request.route_path("admin_competence_option"))
-        req_admin_class.before(self, form)
+        BaseCompetenceRequirementView.before(self, form)
 
     def get_appstruct(self):
         """
@@ -149,11 +162,11 @@ barêmes"
             self.dbsession.merge(comp_req)
 
 
-class AdminCompetencePrintOutput(BaseAdminFormView):
+class CompetencePrintOutputView(BaseAdminFormView):
     title = u"Configuration de la sortie imprimable"
+    route_name = COMPETENCE_PRINT_URL
     validation_msg = u"Vos données ont bien été enregistrées"
     schema = CompetencePrintConfigSchema(title=u"")
-    redirect_route_name = "admin_competences"
 
     def before(self, form):
         appstruct = {}
@@ -179,87 +192,26 @@ class AdminCompetencePrintOutput(BaseAdminFormView):
             ConfigFiles.set(file_name, file_datas)
 
 
-def admin_competence_index_view(request):
-    menus = []
-    for label, route, icon in (
-        (u"Retour", "admin_accompagnement", "fa fa-step-backward"),
-        (u"Configuration des barêmes", "admin_competence_scale", ""),
-        (u"Configuration des échéances", "admin_competence_deadline", ""),
-        (
-            u"Configuration de la grille de compétences",
-            "admin_competence_option", ""
-        ),
-        (
-            u"Configuration des niveux de référence de la grille de compétences",
-            "admin_competence_requirement", ""
-        ),
-        (
-            u"Configuration de la sortie imprimable",
-            'admin_competence_print', ""
-        )
-    ):
-        menus.append(dict(label=label, route_name=route, icon=icon))
-    return dict(title=u"Configuration du module Compétences", menus=menus)
+class CompetenceIndexView(BaseAdminIndexView):
+    title = u"Configuration du module Compétences"
+    route_name = COMPETENCE_URL
 
 
 def includeme(config):
     """
     Include views and routes
     """
-    config.add_route("admin_competences", "admin/competences")
-    config.add_route("admin_competence_print", "admin/competences/print")
-    config.add_view(
-        admin_competence_index_view,
-        route_name="admin_competences",
-        renderer="admin/index.mako",
-        permission="admin",
-    )
-    config.add_view(
-        AdminCompetencePrintOutput,
-        route_name="admin_competence_print",
-        renderer="admin/main.mako",
-        permission='admin',
-    )
+    config.add_route(COMPETENCE_URL, COMPETENCE_URL)
+    config.add_admin_view(CompetenceIndexView, parent=AccompagnementIndexView)
 
-    for model in (CompetenceScale, CompetenceDeadline):
-        view, route_name, tmpl = get_model_admin_view(
-            model,
-            r_path='admin_competences',
+    for view in (
+        CompetenceRequirementView,
+        CompetenceDeadlineView,
+        CompetenceOptionView,
+        CompetenceScaleView,
+        CompetencePrintOutputView,
+    ):
+        config.add_route(
+            view.route_name, view.route_name
         )
-        config.add_route(route_name, "admin/competences/" + route_name)
-        config.add_view(
-            view,
-            route_name=route_name,
-            renderer=tmpl,
-            permission="admin",
-        )
-
-    config.add_route(
-        COMPETENCE_OPTION_ROUTE,
-        "admin/competences/" + COMPETENCE_OPTION_ROUTE,
-    )
-    config.add_view(
-        AdminCompetenceOption,
-        route_name=COMPETENCE_OPTION_ROUTE,
-        renderer=COMPETENCE_OPTION_TMPL,
-        permission='admin',
-    )
-
-    config.add_route(
-        COMPETENCE_REQ_ROUTE,
-        "admin/competences/" + COMPETENCE_REQ_ROUTE,
-    )
-    config.add_view(
-        AdminCompetenceRequirement,
-        route_name=COMPETENCE_REQ_ROUTE,
-        renderer=COMPETENCE_REQ_TMPL,
-        permission='admin',
-    )
-
-#    config.add_route("admin_competence_grid", "admin/competences/grid")
-#    config.add_view(
-#        AdminCompetences,
-#        route_name="admin_competence_grid",
-#        renderer="admin/main.mako",
-#        permission="admin",
-#    )
+        config.add_admin_view(view, parent=CompetenceIndexView)

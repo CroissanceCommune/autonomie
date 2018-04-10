@@ -20,6 +20,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+import os
 
 from pyramid.httpexceptions import HTTPFound
 
@@ -38,6 +39,36 @@ from autonomie.views import (
     BaseView,
 )
 logger = logging.getLogger(__name__)
+
+
+class TreeMixinMetaClass(type):
+    """
+    Metaclasse qui attache un attribut children spécifique à chaque classe fille
+    créée
+
+
+    LE problème d'origine :
+
+        class A:
+            children = []
+
+        class B(A):
+            pass
+
+        B.children.append('o')
+        A.children
+        ['o']
+
+    Avec cette métaclasse
+
+    A.children = []
+    """
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(TreeMixinMetaClass, cls).__new__(
+            cls, clsname, bases, attrs
+        )
+        newclass.children = []
+        return newclass
 
 
 class AdminTreeMixin:
@@ -62,7 +93,7 @@ class AdminTreeMixin:
 
         current route_name
     """
-    children = []
+    __metaclass__ = TreeMixinMetaClass
     route_name = None
     parent_view = None
     description = ""
@@ -125,11 +156,6 @@ class BaseAdminFormView(BaseFormView, AdminTreeMixin):
     @property
     def message(self):
         return self.info_message
-
-    @property
-    def menus(self):
-        return [dict(label=u"Retour", route_name=self.redirect_route_name,
-                     icon="fa fa-step-backward")]
 
 
 class BaseConfigView(BaseAdminFormView):
@@ -208,13 +234,15 @@ class AdminOption(BaseAdminFormView):
             schema by, for example, adding a global validator
     """
     title = u""
-    add_template_vars = ('message', 'menus',)
     validation_msg = u""
     factory = None
     disable = True
-    _schema = None
     js_resources = []
     widget_options = {}
+
+    def __init__(self, *args, **kwargs):
+        BaseAdminFormView.__init__(self, *args, **kwargs)
+        self._schema = None
 
     def customize_schema(self, schema):
         return schema
@@ -332,17 +360,20 @@ def get_model_admin_view(model, js_requirements=[], r_path="admin_userdatas"):
     infos = model.__colanderalchemy_config__
     view_title = infos.get('title', u'Titre inconnu')
 
+    subroute_name = camel_case_to_name(model.__name__)
+    view_route_name = os.path.join(r_path, subroute_name)
+
     class MyView(AdminOption):
         title = view_title
+        description = infos.get('description', u'')
+        route_name = view_route_name
+
         validation_msg = infos.get('validation_msg', u'')
         factory = model
         redirect_route_name = r_path
         js_resources = js_requirements
-    return (
-        MyView,
-        u"admin_%s" % camel_case_to_name(model.__name__),
-        '/admin/main.mako',
-    )
+
+    return MyView
 
 
 def make_enter_point_view(parent_route, views_to_link_to, title=u""):

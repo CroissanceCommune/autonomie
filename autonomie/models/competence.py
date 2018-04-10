@@ -58,10 +58,13 @@ EPSILON = 0.01
 
 class CompetenceDeadline(ConfigurableOption):
     __colanderalchemy_config__ = {
-        'title': u"une échéance",
+        'title': u"Échéances d'évaluation",
         'validation_msg': u"Les échéances ont bien été configurées",
         "help_msg": u"Configurer les échéances à laquelle les compétences des \
 entrepreneurs seront évaluées",
+        "seq_widget_options": {
+            'add_subitem_text_template': u"Ajouter une échéance",
+        }
     }
     id = get_id_foreignkey_col('configurable_option.id')
 
@@ -79,10 +82,14 @@ entrepreneurs seront évaluées",
 
 class CompetenceScale(ConfigurableOption):
     __colanderalchemy_config__ = {
-        'title': u"un niveau à l'échelle d'évaluation",
+        "title": u"Barêmes",
         'validation_msg': u"Les barêmes ont bien été configurés",
         "help_msg": u"Configurer les échelles d'évaluation des compétences. \
 <br />Dans la grille de compétence, chaque valeur correspondra à une colonne.",
+        "seq_widget_options": {
+            'add_subitem_text_template': u"Ajouter un niveau à l'échelle "
+            u"d'évaluation",
+        }
     }
     id = get_id_foreignkey_col('configurable_option.id')
     value = Column(
@@ -118,7 +125,10 @@ class CompetenceOption(ConfigurableOption):
     """
     __table_args__ = default_table_args
     __colanderalchemy_config__ = {
-        "title": u"une compétence",
+        "title": u"Grille de compétences",
+        "seq_widget_options": {
+            "add_subitem_text_template": u"Ajouter une compétence",
+        },
         "validation_msg": u"La grille de compétences a bien été configurée",
         "help_msg": u"Définissez des compétences, celles-ci sont \
 composées: <ul><li>D'un libellé</li>\
@@ -210,11 +220,14 @@ class CompetenceSubOption(ConfigurableOption):
 
 class CompetenceRequirement(DBBASE):
     __colanderalchemy_config__ = {
-        "title": u"un niveau de référence",
+        "title": u"Niveau de référence de la grille de compétence",
         "validation_msg": u"Les niveaux de référence de la grille de \
 compétences ont bien été configurés",
         "help_msg": u"Pour chaque compétence, définissez les niveaux de \
-référence à chaque échéance."
+référence à chaque échéance.",
+        "seq_widget_options": {
+            "add_subitem_text_template": u"Ajouter un niveau de référence",
+        },
     }
     competence_id = Column(
         ForeignKey('competence_option.id'),

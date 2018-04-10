@@ -38,6 +38,15 @@ def add_admin_view(config, *args, **kwargs):
 
     if 'layout' not in kwargs:
         kwargs['layout'] = 'admin'
+
+    if 'parent' in kwargs:
+        parent = kwargs.pop('parent')
+        print(parent)
+        parent.add_child(args[0])
+
+    if 'route_name' not in kwargs:
+        kwargs['route_name'] = args[0].route_name
+
     config.add_view(*args, **kwargs)
 
 
@@ -45,6 +54,7 @@ def includeme(config):
     config.include('.layout')
     config.add_directive('add_admin_view', add_admin_view)
     config.add_route(BASE_URL, BASE_URL)
-    config.add_admin_view(AdminIndexView, route_name=BASE_URL)
+    config.add_admin_view(AdminIndexView)
 
     config.include(".main")
+    config.include(".accompagnement")

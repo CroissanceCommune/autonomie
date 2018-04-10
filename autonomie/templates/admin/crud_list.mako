@@ -31,7 +31,7 @@
 :param str warn_msg: An optionnal warning message
 :param str help_msg: An optionnal help message
 </%doc>
-<%inherit file="/admin/index.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%block name='afteradminmenu'>
 <div class='page-header-block'>

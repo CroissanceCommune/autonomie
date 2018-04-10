@@ -34,7 +34,7 @@
 % endif
 </%block>
 <%block name='content'>
-% if not message is UNDEFINED and not form is UNDEFINED:
+% if  not form is UNDEFINED:
 <div class='row'>
     <div class="col-md-10 col-md-offset-1">
         <div class='page-block panel panel-default'>

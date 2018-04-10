@@ -33,6 +33,7 @@ class AdminIndexView(BaseAdminIndexView):
 def add_admin_view(config, *args, **kwargs):
     if 'renderer' not in kwargs:
         kwargs['renderer'] = 'autonomie:templates/admin/base_view.mako'
+
     if 'permission' not in kwargs:
         kwargs['permission'] = 'admin'
 
@@ -41,7 +42,6 @@ def add_admin_view(config, *args, **kwargs):
 
     if 'parent' in kwargs:
         parent = kwargs.pop('parent')
-        print(parent)
         parent.add_child(args[0])
 
     if 'route_name' not in kwargs:
@@ -58,3 +58,4 @@ def includeme(config):
 
     config.include(".main")
     config.include(".accompagnement")
+    config.include(".userdatas")

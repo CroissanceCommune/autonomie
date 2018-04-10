@@ -33,7 +33,6 @@ from autonomie.forms.admin import (
 from autonomie_base.utils.ascii import (
     camel_case_to_name,
 )
-from autonomie.utils.widgets import Link
 from autonomie.views import (
     BaseFormView,
     BaseView,
@@ -101,14 +100,28 @@ class AdminTreeMixin:
 
     @classmethod
     def get_url(cls, request):
-        return request.route_path(cls.route_name)
+        if getattr(cls, 'route_name', None) is not None:
+            if isinstance(cls.route_name, property):
+                return cls(request).route_name
+            else:
+                return request.route_path(cls.route_name)
+        else:
+            return ""
+
+    @classmethod
+    def get_title(cls, request):
+        if isinstance(cls.title, property):
+            return cls(request).title
+        else:
+            return cls.title
 
     @classmethod
     def get_breadcrumb(cls, request):
         if cls.parent_view is not None:
             for title, url in cls.parent_view.get_breadcrumb(request):
                 yield title, url
-        yield cls.title, cls.get_url(request)
+
+        yield cls.get_title(request), cls.get_url(request)
 
     @classmethod
     def get_back_url(cls, request):
@@ -121,13 +134,14 @@ class AdminTreeMixin:
     def get_navigation(cls, request):
         result = []
         for child in cls.children:
-            result.append(
-                dict(
-                    label=child.title,
-                    route_name=child.route_name,
-                    title=child.description,
+            if getattr(child, 'route_name', None) is not None:
+                result.append(
+                    dict(
+                        label=child.title,
+                        route_name=child.route_name,
+                        title=child.description,
+                    )
                 )
-            )
         return result
 
     @property
@@ -401,29 +415,9 @@ def make_enter_point_view(parent_route, views_to_link_to, title=u""):
     return myview
 
 
-class AdminCrudListView(BaseView):
+class AdminCrudListView(BaseView, AdminTreeMixin):
     title = "Missing title"
     columns = []
-
-    back_route = None
-
-    def get_nav(self):
-        """
-        Return navigation links that are displayed in the head of the page
-
-        :returns: An iterator providing autonomie.utils.widgets.Link instances
-        :rtype: iterator
-        """
-        result = []
-        if self.back_route is not None:
-            result.append(
-                Link(
-                    self.request.route_path(self.back_route),
-                    label=u"Retour",
-                    icon="step-backward",
-                )
-            )
-        return result
 
     def get_actions(self, items):
         """
@@ -479,7 +473,9 @@ class AdminCrudListView(BaseView):
         items = self.load_items()
 
         result = dict(
-            menus=self.get_nav(),
+            navigation=self.navigation,
+            breadcrumb=self.breadcrumb,
+            back_link=self.back_link,
             title=self.title,
             addurl=self.get_addurl(),
             columns=self.columns,

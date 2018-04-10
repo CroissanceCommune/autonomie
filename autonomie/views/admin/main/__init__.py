@@ -96,9 +96,7 @@ devis, factures / avoir)"
 
 def includeme(config):
     config.add_route(MAIN_URL, MAIN_URL)
-
-    AdminIndexView.add_child(AdminMainView)
     config.add_admin_view(
         AdminMainView,
-        route_name=MAIN_URL,
+        parent=AdminIndexView,
     )

@@ -23,150 +23,23 @@
 #
 import pytest
 
-pytest.mark.usefixtures("config")
-
-from autonomie.models import tva
-from autonomie.models.payments import PaymentMode
-from autonomie.models.task import WorkUnit
 from autonomie.models.config import (
     get_config,
-    Config,
 )
+pytest.mark.usefixtures("config")
 
 
 def test_main_config_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin.main import AdminMain
-    config.add_route('admin_main', '/')
+    from autonomie.views.admin.main import (
+        AdminMainView,
+        MAIN_URL,
+    )
+    config.add_route(MAIN_URL, '/')
     appstruct = {
         "site": {'welcome': 'testvalue'},
         "document": {'footertitle': 'testvalue2'}
     }
-    view = AdminMain(get_csrf_request_with_db())
+    view = AdminMainView(get_csrf_request_with_db())
     view.submit_success(appstruct)
     assert get_config()['welcome'] == u'testvalue'
     assert get_config()['coop_pdffootertitle'] == u'testvalue2'
-
-
-def test_tva_add_view_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin.tva import TvaAddView
-    config.add_route('/admin/vente/tvas', '/')
-
-    appstruct = {
-        'name': "test",
-        'value': 0,
-        "default": True,
-        "mention" : "Test",
-        "products": []
-    }
-    view = TvaAddView(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-
-    assert dbsession.query(tva.Tva).filter(tva.Tva.name == 'test').count() == 1
-
-
-def test_tva_edit_view_success(config, get_csrf_request_with_db, dbsession, tva):
-    config.add_route('/admin/vente/tvas', '/')
-    from autonomie.views.admin.tva import TvaEditView
-    appstruct = {
-        'name':"21%", 'value':2100, "default": True, 'products': []
-    }
-    request = get_csrf_request_with_db()
-    request.context = tva
-    view = TvaEditView(request)
-    view.submit_success(appstruct)
-
-    assert tva.name == '21%'
-
-def test_tva_disable_view_sucess(config, get_csrf_request_with_db, dbsession, tva):
-    config.add_route('/admin/vente/tvas', '/')
-    from autonomie.views.admin.tva import TvaDisableView
-    request = get_csrf_request_with_db()
-    request.context = tva
-    view = TvaDisableView(request)
-    view.__call__()
-    assert not tva.active
-
-
-def test_payment_mode_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente.vente import PaymentModeAdmin
-    config.add_route('admin_vente', '/')
-    appstruct = {'datas': [
-        {'label': u"Chèque"},
-        {'label': u"Expèce"},
-    ]}
-    view = PaymentModeAdmin(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-    assert dbsession.query(PaymentMode).count() == 2
-    appstruct = {'datas': [
-        {'label': u"Chèque"},
-    ]}
-    view.submit_success(appstruct)
-    assert dbsession.query(PaymentMode).count() == 1
-
-
-def test_workunit_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente.vente import WorkUnitAdmin
-    config.add_route('admin_vente', '/')
-    appstruct = {'datas': [
-        {'label': u"Semaines"},
-        {'label': u"Jours",}
-    ]}
-    view = WorkUnitAdmin(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-    assert dbsession.query(WorkUnit).count() == 2
-    appstruct = {'datas': [
-        {'label': u"Semaines"},
-    ]}
-    view.submit_success(appstruct)
-    assert dbsession.query(WorkUnit).count() == 1
-
-
-class DummyForm(object):
-    def set_appstruct(self, appstruct):
-        self.appstruct = appstruct
-
-def test_base_config_view(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.tools import BaseConfigView
-    from autonomie.forms.admin import get_config_schema
-
-    class TestView(BaseConfigView):
-        title = u"Test",
-        keys = ('test_key1', 'test_key2')
-        schema = get_config_schema(keys)
-        validation_msg = u"Ok"
-        redirect_route_name = "test"
-
-    config.add_route(TestView.redirect_route_name, '/')
-
-    appstruct = {'test_key1': 'test1', 'test_wrong_key': 'test error'}
-
-    view = TestView(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-
-    assert Config.get('test_key1').value == 'test1'
-    assert Config.get('test_wrong_key') == None
-
-
-def test_config_cae_success(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.vente.accounting import AdminVenteTreasuryMain
-    config.add_route('admin_vente_treasury', '/')
-    appstruct = {'compte_cg_contribution':"00000668",
-            'compte_rrr':"000009558"}
-    view = AdminVenteTreasuryMain(get_csrf_request_with_db())
-    view.submit_success(appstruct)
-    config = get_config()
-    for key, value in appstruct.items():
-        assert config[key] == value
-
-def test_admin_activities_get_edited_elements(config, dbsession, get_csrf_request_with_db):
-    from autonomie.views.admin.main import AdminActivities
-    obj = AdminActivities(get_csrf_request_with_db())
-    datas = {'tests':
-        [
-            {'id':5},
-            {'id':4},
-            {},
-        ]
-        }
-    res = obj.get_edited_elements(datas, 'tests')
-    assert set(res.keys()) == set([5,4])

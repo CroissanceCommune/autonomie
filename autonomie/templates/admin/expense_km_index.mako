@@ -20,7 +20,7 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%inherit file="/admin/index.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name='afteradminmenu'>
     <div class='alert alert-info'>
     Les grilles de frais kilométriques sont configurées de manière annuelle.<br />

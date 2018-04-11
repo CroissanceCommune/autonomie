@@ -26,7 +26,7 @@
     :param str warn_msg: optionnal warning message
     :param str help_msg: optionnal help message
 </%doc>
-<%inherit file="/admin/index.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name='content'>
         <div class='row'>
             <div class='col-md-8 col-md-offset-2'>

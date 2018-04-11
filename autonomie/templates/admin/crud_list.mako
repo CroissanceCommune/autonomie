@@ -35,7 +35,7 @@
 <%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%block name='afteradminmenu'>
 <div class='page-header-block'>
-    % if addurl is not UNDEFINED:
+    % if addurl is not UNDEFINED and addurl is not None:
     <a class='btn btn-primary primary-action'
         href="${addurl}"
         title="Ajouter un élément à la liste"

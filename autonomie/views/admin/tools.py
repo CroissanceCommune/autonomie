@@ -36,6 +36,10 @@ from autonomie_base.utils.ascii import (
 from autonomie.views import (
     BaseFormView,
     BaseView,
+    BaseAddView,
+    BaseEditView,
+    DisableView,
+    DeleteView,
 )
 logger = logging.getLogger(__name__)
 
@@ -100,7 +104,9 @@ class AdminTreeMixin:
 
     @classmethod
     def get_url(cls, request):
-        if getattr(cls, 'route_name', None) is not None:
+        if getattr(cls, 'url', None) is not None:
+            return cls(request).url
+        elif getattr(cls, 'route_name', None) is not None:
             if isinstance(cls.route_name, property):
                 return cls(request).route_name
             else:
@@ -116,15 +122,26 @@ class AdminTreeMixin:
             return cls.title
 
     @classmethod
-    def get_breadcrumb(cls, request):
+    def get_breadcrumb(cls, request, local=False):
+        """
+        Collect breadcrumb entries
+
+        :param obj request: The Pyramid request
+        :param bool local: Is the breadcrumb for local use
+        :returns: A generator of 2-uples (title, url)
+        """
         if cls.parent_view is not None:
             for title, url in cls.parent_view.get_breadcrumb(request):
                 yield title, url
 
-        yield cls.get_title(request), cls.get_url(request)
+        if not local:
+            yield cls.get_title(request), cls.get_url(request)
+        else:
+            yield cls.get_title(request), ""
 
     @classmethod
     def get_back_url(cls, request):
+        logger.debug(u"Asking for the parent url : {0}".format(cls))
         if cls.parent_view is not None:
             return cls.parent_view.get_url(request)
         else:
@@ -142,6 +159,16 @@ class AdminTreeMixin:
                         title=child.description,
                     )
                 )
+            else:
+                url = child.get_url(request)
+                if url:
+                    result.append(
+                        dict(
+                            label=child.title,
+                            title=child.description,
+                            url=url,
+                        )
+                    )
         return result
 
     @property
@@ -150,7 +177,7 @@ class AdminTreeMixin:
 
     @property
     def breadcrumb(self):
-        return self.get_breadcrumb(self.request)
+        return self.get_breadcrumb(self.request, local=True)
 
     @property
     def back_link(self):
@@ -205,10 +232,7 @@ class BaseConfigView(BaseAdminFormView):
             logger.debug(u"{0} : {1}".format(key, value))
 
         self.request.session.flash(self.validation_msg)
-        if self.redirect_route_name is not None:
-            return HTTPFound(self.request.route_path(self.redirect_route_name))
-        else:
-            return HTTPFound(self.request.current_route_path())
+        return HTTPFound(self.back_link)
 
 
 class AdminOption(BaseAdminFormView):
@@ -419,6 +443,33 @@ class AdminCrudListView(BaseView, AdminTreeMixin):
     title = "Missing title"
     columns = []
 
+    def _get_item_url(self, item, action=None):
+        """
+        Build an url to an item's action
+
+        Usefull from inside the stream_actions method
+
+        :param obj item: An instance with an id
+        :param str action: The name of the action
+        (duplicate/disable/edit...)
+
+        :returns: An url
+        :rtype: str
+        """
+        if not hasattr(self, 'item_route_name'):
+            raise Exception(u"Un attribut item_route_name doit être défini")
+
+        query = dict(self.request.GET)
+        if action is not None:
+            query['action'] = action
+
+        return self.request.route_path(
+            self.item_route_name,
+            id=item.id,
+            _query=query,
+            **self.request.matchdict
+        )
+
     def get_actions(self, items):
         """
         Return additionnal list related actions (other than add)
@@ -436,7 +487,9 @@ class AdminCrudListView(BaseView, AdminTreeMixin):
         :returns: An url string
         :rtype: str
         """
-        return None
+        return self.request.route_path(
+            self.route_name, _query={'action': 'add'}
+        )
 
     def stream_columns(self, item):
         """
@@ -473,7 +526,6 @@ class AdminCrudListView(BaseView, AdminTreeMixin):
         items = self.load_items()
 
         result = dict(
-            navigation=self.navigation,
             breadcrumb=self.breadcrumb,
             back_link=self.back_link,
             title=self.title,
@@ -519,3 +571,27 @@ class BaseAdminIndexView(BaseView, AdminTreeMixin):
         )
         result = self.more_template_vars(result)
         return result
+
+
+class BaseAdminAddView(BaseAddView, AdminTreeMixin):
+    add_template_vars = ('help_msg', 'breadcrumb', 'back_link')
+
+    def redirect(self, model=None):
+        return HTTPFound(self.back_link)
+
+
+class BaseAdminEditView(BaseEditView, AdminTreeMixin):
+    add_template_vars = ('help_msg', 'breadcrumb', 'back_link')
+
+    def redirect(self):
+        return HTTPFound(self.back_link)
+
+
+class BaseAdminDisableView(DisableView, AdminTreeMixin):
+    def redirect(self):
+        return HTTPFound(self.back_link)
+
+
+class BaseAdminDeleteView(DeleteView, AdminTreeMixin):
+    def redirect(self):
+        return HTTPFound(self.back_link)

@@ -130,8 +130,9 @@
                   function(){window.location = $(this).val();}
                 );
             }
+            $('.deform-seq').prev('label').hide();
         });
-      <%block name='footerjs' />
+        <%block name='footerjs' />
     </script>
   </body>
 </html>

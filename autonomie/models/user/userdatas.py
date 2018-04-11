@@ -783,50 +783,35 @@ class UserDatas(Node):
     )
 
     # STATUT
-    statut_social_status_id = Column(
-        ForeignKey('social_status_option.id'),
+    social_statuses = relationship(
+        "SocialStatusDatas",
+        cascade="all, delete-orphan",
+        primaryjoin="and_(UserDatas.id==SocialStatusDatas.userdatas_id, "
+                        "SocialStatusDatas.step=='entry')",
+        order_by="SocialStatusDatas.id",
         info={
             'colanderalchemy':
             {
                 'title': u"Statut social à l'entrée",
                 'section': u'Statut',
-            }
+            },
+            'export': {'label': u"Statut social à l'entrée"}
         }
     )
-
-    statut_social_status = relationship(
-        'SocialStatusOption',
-        primaryjoin='UserDatas.statut_social_status_id==SocialStatusOption.id',
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(
-                u"Statut social à l'entrée"
-            ),
-            'export': {'related_key': 'label'},
-        },
-    )
-
-    statut_social_status_today_id = Column(
-        ForeignKey('social_status_option.id'),
+    today_social_statuses = relationship(
+        "SocialStatusDatas",
+        cascade="all, delete-orphan",
+        primaryjoin="and_(UserDatas.id==SocialStatusDatas.userdatas_id, "
+                        "SocialStatusDatas.step=='today')",
+        order_by="SocialStatusDatas.id",
         info={
             'colanderalchemy':
             {
                 'title': u"Statut social actuel",
                 'section': u'Statut',
             },
+            'export': {'label': u"Statut social actuel"}
         }
-    )
-    statut_social_status_today = relationship(
-        'SocialStatusOption',
-        primaryjoin='UserDatas.statut_social_status_today_id==\
-SocialStatusOption.id',
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(
-                u"Statut social actuel"
-            ),
-            'export': {
-                'related_key': 'label',
-            },
-        },
     )
 
     statut_handicap_allocation_expiration = Column(
@@ -1771,6 +1756,74 @@ class ContractHistory(DBBASE):
                 "label": u"Historique des avenants",
                 "stats": {'exclude': True},
             }
+        }
+    )
+
+
+class SocialStatusDatas(DBBASE):
+    """
+    Used to store multiple social status
+    """
+    __tablename__ = 'social_status_datas'
+    __table_args__ = default_table_args
+    __colanderalchemy_config__ = {
+        'title': u"un statut social",
+    }
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={
+            'colanderalchemy': {
+                'widget': deform.widget.HiddenWidget(),
+                'missing': None
+            },
+            'export': {'exclude': True},
+        }
+    )
+    # Is the status relative to 'entry' or 'today'
+    step = Column(
+        String(15),
+        info={
+            'export': {'exclude': True}
+        }
+    )
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {
+                'label': u"Identifiant autonomie",
+                'stats': {'exclude': True},
+            }
+        }
+    )
+    userdatas = relationship(
+        "UserDatas",
+        back_populates='social_statuses',
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {
+                'related_key': u"export_label",
+                "keep_key": True,
+                "label": u"Statuts sociaux",
+                "stats": {'exclude': False},
+            }
+        }
+    )
+    social_status_id = Column(
+        ForeignKey("social_status_option.id"),
+        nullable=False,
+        info={
+            'colanderalchemy': {'title': u"Statut social"}
+        }
+    )
+    social_status = relationship(
+        "SocialStatusOption",
+        info={
+            'colanderalchemy': get_excluded_colanderalchemy(
+                u"Statut social"
+            ),
+            'export': {'related_key': 'label'}
         }
     )
 

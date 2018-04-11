@@ -17,8 +17,9 @@ USERDATAS_URL = os.path.join(BASE_URL, 'userdatas')
 
 class UserDatasIndexView(BaseAdminIndexView):
     route_name = USERDATAS_URL
-    title = u"Configuration de la gestion sociale"
-    description = u"Typologie des données, modèles de documents"
+    title = u"Module Gestion sociale"
+    description = u"Module de gestion des données sociales : Configurer les \
+typologies des données, les modèles de documents"
 
 
 def includeme(config):

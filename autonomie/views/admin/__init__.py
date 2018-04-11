@@ -57,5 +57,8 @@ def includeme(config):
     config.add_admin_view(AdminIndexView)
 
     config.include(".main")
+    config.include(".sale")
+    config.include(".expense")
     config.include(".accompagnement")
     config.include(".userdatas")
+    config.include(".accounting")

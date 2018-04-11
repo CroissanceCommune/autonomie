@@ -31,7 +31,7 @@ ACCOMPAGNEMENT_URL = os.path.join(BASE_URL, 'accompagnement')
 
 class AccompagnementIndexView(BaseAdminIndexView):
     route_name = ACCOMPAGNEMENT_URL
-    title = u"Configuration du module Accompagnement"
+    title = u"Module Accompagnement"
     description = u"Ateliers, Rendez-vous, Compétences"
 
 

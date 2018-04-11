@@ -3,6 +3,8 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import os
+
 import logging
 
 from autonomie.models.treasury import CustomInvoiceBookEntryModule
@@ -11,22 +13,32 @@ from autonomie.forms.admin import get_config_schema
 from autonomie.views.admin.tools import (
     get_model_admin_view,
     BaseConfigView,
+    BaseAdminIndexView,
+)
+from autonomie.views.admin.sale import (
+    SALE_URL,
+    SaleIndexView,
 )
 
 
 logger = logging.getLogger(__name__)
+ACCOUNTING_URL = os.path.join(SALE_URL, 'accounting')
+ACCOUNTING_CONFIG_URL = os.path.join(ACCOUNTING_URL, 'config')
 
-(
-    custom_treasury_admin_class,
-    custom_treasury_admin_route,
-    custom_treasury_admin_tmpl,
-) = get_model_admin_view(
+
+BaseSaleAccountingCustomView = get_model_admin_view(
     CustomInvoiceBookEntryModule,
-    r_path='admin_vente_treasury',
+    r_path=ACCOUNTING_URL,
 )
 
 
-class AdminVenteTreasuryMain(BaseConfigView):
+class SaleAccountingIndex(BaseAdminIndexView):
+    title = u"Configuration comptables du module Vente"
+    description = u"Configurer la génération des écritures de vente"
+    route_name = ACCOUNTING_URL
+
+
+class SaleAccountingConfigView(BaseConfigView):
     """
         Cae information configuration
     """
@@ -34,7 +46,8 @@ class AdminVenteTreasuryMain(BaseConfigView):
 modules prédéfinis"
     description = u"Configuration du code journal et des modules prédéfinis \
 (Export des factures, contribution à la CAE, RG Externe, RG Interne)"
-    redirect_route_name = "admin_vente_treasury"
+    route_name = ACCOUNTING_CONFIG_URL
+
     validation_msg = u"Les informations ont bien été enregistrées"
     keys = (
         'code_journal',
@@ -78,10 +91,11 @@ Configurez les champs relatifs aux frais et remises:\
     """
 
 
-class AdminVenteTreasuryCustom(custom_treasury_admin_class):
-    title = u"Configuration des modules de contribution personnalisés"
-    description = u"Ajouter des modules de contribution personnalisés aux \
-exports de factures"
+class SaleAccountingCustomView(BaseSaleAccountingCustomView):
+    title = u"Modules de contribution personnalisés"
+    description = u"Configurer des écritures personnalisées pour les exports \
+de factures"
+
     widget_options = {
         'add_subitem_text_template': u"Ajouter un module de contribution \
 personnalisé",
@@ -92,50 +106,17 @@ personnalisé",
         return self.factory.query().filter_by(active=True).all()
 
 
-def admin_vente_treasury_index_view(request):
-    menus = []
-    for label, route, title, icon in (
-        (u"Retour", "admin_vente", "", "fa fa-step-backward"),
-        (
-            AdminVenteTreasuryMain.title,
-            "admin_vente_treasury_main",
-            AdminVenteTreasuryMain.description,
-            ""
-        ),
-        (
-            AdminVenteTreasuryCustom.title,
-            "admin_vente_treasury_custom",
-            AdminVenteTreasuryCustom.description,
-            ""
-        ),
-    ):
-        menus.append(
-            dict(label=label, route_name=route, title=title, icon=icon)
-        )
-    return dict(title=u"Configuration comptable du module Ventes", menus=menus)
-
-
 def add_routes(config):
-    config.add_route("admin_vente_treasury", "admin/vente/treasury")
-    config.add_route("admin_vente_treasury_main", "admin/vente/treasury/main")
+    config.add_route(ACCOUNTING_URL, ACCOUNTING_URL)
+    config.add_route(ACCOUNTING_CONFIG_URL, ACCOUNTING_CONFIG_URL)
     config.add_route(
-        "admin_vente_treasury_custom",
-        "admin/vente/treasury/custom"
+        SaleAccountingCustomView.route_name,
+        SaleAccountingCustomView.route_name,
     )
 
 
 def includeme(config):
     add_routes(config)
-    config.add_admin_view(
-        admin_vente_treasury_index_view,
-        route_name="admin_vente_treasury",
-    )
-    config.add_admin_view(
-        AdminVenteTreasuryMain,
-        route_name='admin_vente_treasury_main',
-    )
-
-    config.add_admin_view(
-        AdminVenteTreasuryCustom,
-        route_name='admin_vente_treasury_custom',
-    )
+    config.add_admin_view(SaleAccountingIndex, parent=SaleIndexView)
+    config.add_admin_view(SaleAccountingConfigView, parent=SaleAccountingIndex)
+    config.add_admin_view(SaleAccountingCustomView, parent=SaleAccountingIndex)

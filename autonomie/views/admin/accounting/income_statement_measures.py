@@ -3,6 +3,7 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import os
 import logging
 from sqlalchemy import asc
 from pyramid.httpexceptions import HTTPFound
@@ -16,103 +17,46 @@ from autonomie.forms.accounting import (
     get_admin_income_statement_measure_schema,
     get_admin_income_statement_category_schema
 )
-from autonomie.views import (
-    BaseEditView,
-    BaseAddView,
-    DisableView,
-    DeleteView,
+from autonomie.views.admin.accounting import (
+    AccountingIndexView,
+    ACCOUNTING_URL,
 )
-from autonomie.views.admin.tools import AdminCrudListView
+from autonomie.views import (
+    BaseView,
+)
+from autonomie.views.admin.tools import (
+    AdminCrudListView,
+    BaseAdminIndexView,
+    AdminTreeMixin,
+    BaseAdminEditView,
+    BaseAdminAddView,
+    BaseAdminDisableView,
+    BaseAdminDeleteView,
+)
 
 logger = logging.getLogger(__name__)
 
-BASE_URL = u"/admin/accounting/income_statement_measures"
+BASE_URL = os.path.join(ACCOUNTING_URL, "income_statement_measures")
 
-CATEGORY_CONFIG_URL = BASE_URL + "/categories"
-CATEGORY_URL = CATEGORY_CONFIG_URL + "/{id}"
+CATEGORY_URL = BASE_URL + "/categories"
+CATEGORY_TYPE_ITEM_URL = CATEGORY_URL + "/{id}"
 
-TYPE_URL = BASE_URL + "/types"
-TYPE_CATEGORY_URL = TYPE_URL + "/{category_id}"
-ITEM_URL = TYPE_CATEGORY_URL + "/{id}"
-
-
-def index_view(request):
-    menus = []
-    for label, route, title, icon in (
-        (u"Retour", "/admin/accounting", "", "fa fa-step-backward"),
-        (
-            u"Configuration des catégories d'indicateurs de Comptes de "
-            u"résultat",
-            CATEGORY_CONFIG_URL,
-            u"Définition des catégories permettant de faciliter la "
-            u"configuration des indicateurs de Comptes de résultat",
-            "fa fa-braille",
-        ),
-        (
-            u"Configuration des indicateurs de Comptes de résultat",
-            TYPE_URL,
-            u"Définition des codes comptables utilisés pour le calcul des "
-            u"Comptes de résultat",
-            "fa fa-braille",
-        ),
-    ):
-        menus.append(
-            dict(label=label, route_name=route, title=title, icon=icon)
-        )
-    return dict(
-        title=u"Configuration de la génération des États de trésorerie",
-        menus=menus
-    )
+TYPE_INDEX_URL = BASE_URL + "/types"
+TYPE_CATEGORY_URL = TYPE_INDEX_URL + "/{category_id}"
+TYPE_ITEM_URL = TYPE_CATEGORY_URL + "/{id}"
 
 
-def type_category_list_view(request):
-    """
-    List categories of Income Statement Measures we can edit
-    """
-    menus = []
-    menus.append(
-        {
-            'label': u"Retour",
-            "route_name": BASE_URL,
-            "title": "",
-            "icon": "fa fa-step-backward",
-        }
-    )
-
-    for category in IncomeStatementMeasureTypeCategory.get_categories():
-        label = u'Configuration des indicateurs de type %s' % category.label
-        url = request.route_path(
-            TYPE_CATEGORY_URL,
-            category_id=category.id,
-        )
-        menus.append(dict(label=label, url=url, icon="fa fa-braille"))
-
-    return dict(
-        title=u"Configuration des indicateurs de Compte de résultat",
-        help_message=u"""Les indicateurs de comptes de résultat permettent de
-        regrouper les écritures comptables derrière un même libellé afin de les
-        regrouper au sein d'un tableau annuel présentant le compte de résultat
-        de chaque entreprise.<br />
-        Les indicateurs sont divisés en 4 catégories (dans l'ordre de
-        présentation )<br />
-        <ul>
-        <li>Produits</li>
-        <li>Achats</li>
-        <li>Charges</li>
-        <li>Salaires et Cotisations</li>
-        </ul>
-        Depuis cette interface, vous pouvez configurer, par
-        catégorie, l'ensemble des indicateurs qui composeront les comptes de
-        résultat de vos entrepreneurs.""",
-        menus=menus
-    )
+class IncomeStatementMeasureIndexView(BaseAdminIndexView):
+    title = u"Comptes de résultat"
+    route_name = BASE_URL
 
 
 class CategoryListView(AdminCrudListView):
     columns = [u"Libellé de la catégorie", ]
-    title = u"Configuration des catégories d'indicateurs de compte de résultat"
+    title = u"Catégories d'indicateurs de compte de résultat"
+    route_name = CATEGORY_URL
+    item_route_name = CATEGORY_TYPE_ITEM_URL
     factory = IncomeStatementMeasureTypeCategory
-    back_route = BASE_URL
 
     def __init__(self, *args, **kwargs):
         AdminCrudListView.__init__(self, *args, **kwargs)
@@ -128,20 +72,6 @@ class CategoryListView(AdminCrudListView):
         :rtype: generator
         """
         yield measure_type.label
-
-    def _get_item_url(self, category, action=None):
-        """
-        shortcut for route_path calls
-        """
-        query = dict(self.request.GET)
-        if action is not None:
-            query['action'] = action
-
-        return self.request.route_path(
-            CATEGORY_URL,
-            id=category.id,
-            _query=query,
-        )
 
     def stream_actions(self, category):
         """
@@ -215,21 +145,36 @@ class CategoryListView(AdminCrudListView):
         des entrepreneurs. Elles permettent la configuration de totaux."""
         return result
 
-    def get_addurl(self):
-        return self.request.route_path(
-            CATEGORY_CONFIG_URL, _query={'action': "add"}
-        )
+
+class CategoryAddView(BaseAdminAddView):
+    title = u"Ajouter"
+    route_name = CATEGORY_URL
+
+    factory = IncomeStatementMeasureTypeCategory
+    schema = get_admin_income_statement_category_schema()
+
+    def before(self, form):
+        pre_filled = {
+            'order': self.factory.get_next_order()
+        }
+        form.set_appstruct(pre_filled)
 
 
-class CategoryDisableView(DisableView):
+class CategoryEditView(BaseAdminEditView):
+    factory = IncomeStatementMeasureTypeCategory
+    route_name = CATEGORY_TYPE_ITEM_URL
+    schema = get_admin_income_statement_category_schema()
+
+    @property
+    def title(self):
+        return u"Modifier la catégorie '{0}'".format(self.context.label)
+
+
+class CategoryDisableView(BaseAdminDisableView):
     """
     View for measure disable/enable
     """
-    def redirect(self):
-        return HTTPFound(self._redirect_url())
-
-    def _redirect_url(self):
-        return self.request.route_path(CATEGORY_CONFIG_URL)
+    route_name = CATEGORY_TYPE_ITEM_URL
 
     def on_disable(self):
         """
@@ -247,16 +192,11 @@ class CategoryDisableView(DisableView):
         self.request.dbsession.merge(self.context)
 
 
-class CategoryDeleteView(DeleteView):
+class CategoryDeleteView(BaseAdminDeleteView):
     """
     Category deletion view
     """
-
-    def redirect(self):
-        return HTTPFound(self._redirect_url())
-
-    def _redirect_url(self):
-        return self.request.route_path(CATEGORY_CONFIG_URL)
+    route_name = CATEGORY_TYPE_ITEM_URL
 
     def on_delete(self):
         """
@@ -265,59 +205,56 @@ class CategoryDeleteView(DeleteView):
         IncomeStatementMeasureTypeCategory.reorder()
 
 
-class CategoryAddView(BaseAddView):
-    add_template_vars = ('menus', 'help_msg')
-    factory = IncomeStatementMeasureTypeCategory
-    title = u"Ajouter"
-    schema = get_admin_income_statement_category_schema()
+class TypeListIndexView(BaseView, AdminTreeMixin):
+    title = u"Indicateurs de Compte de résultat"
+    route_name = TYPE_INDEX_URL
+    help_message = u"""Les indicateurs de comptes de résultat permettent de
+    regrouper les écritures comptables derrière un même libellé afin de les
+    regrouper au sein d'un tableau annuel présentant le compte de résultat
+    de chaque entreprise.<br />
+    Les indicateurs sont divisés en 4 catégories (dans l'ordre de
+    présentation )<br />
+    <ul>
+    <li>Produits</li>
+    <li>Achats</li>
+    <li>Charges</li>
+    <li>Salaires et Cotisations</li>
+    </ul>
+    Depuis cette interface, vous pouvez configurer, par
+    catégorie, l'ensemble des indicateurs qui composeront les comptes de
+    résultat de vos entrepreneurs."""
 
-    def before(self, form):
-        pre_filled = {
-            'order': self.factory.get_next_order()
-        }
-        form.set_appstruct(pre_filled)
-
-    def redirect(self, model=None):
-        return HTTPFound(self._redirect_url())
-
-    def _redirect_url(self):
-        return self.request.route_path(CATEGORY_CONFIG_URL)
-
-    @property
-    def menus(self):
-        return [
-            dict(
-                label=u"Retour",
-                url=self._redirect_url(),
-                icon="fa fa-step-backward"
+    def __call__(self):
+        navigation = []
+        for category in IncomeStatementMeasureTypeCategory.get_categories():
+            label = u'Indicateurs de type %s' % category.label
+            url = self.request.route_path(
+                TYPE_CATEGORY_URL,
+                category_id=category.id,
             )
-        ]
+            navigation.append(dict(label=label, url=url, icon="fa fa-braille"))
+
+        return dict(
+            title=self.title,
+            help_message=self.help_message,
+            navigation=navigation,
+            breadcrumb=self.breadcrumb,
+            back_link=self.back_link
+        )
 
 
-class CategoryEditView(BaseEditView):
-    add_template_vars = ('menus', 'help_msg')
-    factory = IncomeStatementMeasureTypeCategory
-    schema = get_admin_income_statement_category_schema()
+def _get_category_id_from_request(request):
+    """
+    Extract the category id from the given request
 
-    @property
-    def title(self):
-        return u"Modifier la catégorie '{0}'".format(self.context.label)
-
-    def redirect(self, model=None):
-        return HTTPFound(self._redirect_url())
-
-    def _redirect_url(self):
-        return self.request.route_path(CATEGORY_CONFIG_URL)
-
-    @property
-    def menus(self):
-        return [
-            dict(
-                label=u"Retour",
-                url=self._redirect_url(),
-                icon="fa fa-step-backward",
-            )
-        ]
+    :param obj request: The pyramid request object
+    :returns: A category id
+    :rtype: int
+    """
+    if isinstance(request.context, IncomeStatementMeasureTypeCategory):
+        return request.context.id
+    else:
+        return request.context.category_id
 
 
 class MeasureTypeListView(AdminCrudListView):
@@ -325,15 +262,22 @@ class MeasureTypeListView(AdminCrudListView):
         u"Libellé de l'indicateur", u"Regroupe",
         u"Correspond à un total",
     ]
-    title = u"Configuration des indicateurs de compte de résultat"
+    title = u"Indicateurs de compte de résultat"
     factory = IncomeStatementMeasureType
-    back_route = TYPE_URL
+    route_name = TYPE_CATEGORY_URL
 
     def __init__(self, *args, **kwargs):
         AdminCrudListView.__init__(self, *args, **kwargs)
         self.max_order = IncomeStatementMeasureType.get_next_order_by_category(
             self.context.id
         ) - 1
+
+    @property
+    def url(self):
+        return self.request.route_path(
+            TYPE_CATEGORY_URL,
+            category_id=_get_category_id_from_request(self.request)
+        )
 
     def stream_columns(self, measure_type):
         """
@@ -370,7 +314,7 @@ class MeasureTypeListView(AdminCrudListView):
             query['action'] = action
 
         return self.request.route_path(
-            ITEM_URL,
+            TYPE_ITEM_URL,
             id=measure_type.id,
             category_id=measure_type.category_id,
             _query=query,
@@ -475,14 +419,11 @@ class MeasureTypeListView(AdminCrudListView):
         )
 
 
-class MeasureTypeAddView(BaseAddView):
-    add_template_vars = ('menus', 'help_msg')
-    factory = IncomeStatementMeasureType
+class MeasureTypeAddView(BaseAdminAddView):
     title = u"Ajouter"
+    route_name = TYPE_CATEGORY_URL + "/add"
     _schema = None
-
-    def __init__(self, *args, **kwargs):
-        BaseAddView.__init__(self, *args, **kwargs)
+    factory = IncomeStatementMeasureType
 
     def is_total_form(self):
         return "is_total" in self.request.GET
@@ -521,15 +462,6 @@ class MeasureTypeAddView(BaseAddView):
 
         form.set_appstruct(pre_filled)
 
-    def redirect(self, model=None):
-        return HTTPFound(self._redirect_url())
-
-    def _redirect_url(self):
-        return self.request.route_path(
-            TYPE_CATEGORY_URL,
-            category_id=self.context.id,
-        )
-
     def merge_appstruct(self, appstruct, model):
         """
         Handle specific form keys when setting the new model's datas
@@ -537,31 +469,24 @@ class MeasureTypeAddView(BaseAddView):
         Regarding the type of total we manage (category total or operation
         specific total), we want to set some attributes
         """
-        model = BaseAddView.merge_appstruct(self, appstruct, model)
+        model = BaseAdminAddView.merge_appstruct(self, appstruct, model)
         if 'total_type' in appstruct:
             total_type = appstruct['total_type']
             model.account_prefix = appstruct[total_type]
 
         return model
 
-    @property
-    def menus(self):
-        return [
-            dict(
-                label=u"Retour",
-                url=self._redirect_url(),
-                icon="fa fa-step-backward"
-            )
-        ]
 
-
-class MeasureTypeEditView(BaseEditView):
-    add_template_vars = ('menus', 'help_msg')
+class MeasureTypeEditView(BaseAdminEditView):
+    route_name = TYPE_ITEM_URL
     _schema = None
     factory = IncomeStatementMeasureType
 
-    def __init__(self, *args, **kwargs):
-        BaseEditView.__init__(self, *args, **kwargs)
+    @property
+    def title(self):
+        return u"Modifier la définition de l'indicateur '{0}'".format(
+            self.context.label
+        )
 
     def is_total_form(self):
         return self.context.is_total
@@ -581,23 +506,8 @@ class MeasureTypeEditView(BaseEditView):
     def schema(self, value):
         self._schema = value
 
-    @property
-    def title(self):
-        return u"Modifier la définition de l'indicateur '{0}'".format(
-            self.context.label
-        )
-
-    def redirect(self):
-        return HTTPFound(self._redirect_url())
-
-    def _redirect_url(self):
-        return self.request.route_path(
-            TYPE_CATEGORY_URL,
-            category_id=self.context.category.id,
-        )
-
     def get_default_appstruct(self):
-        result = BaseEditView.get_default_appstruct(self)
+        result = BaseAdminEditView.get_default_appstruct(self)
         if self.is_total_form():
             result['total_type'] = self.context.total_type
             result['account_prefix'] = ''
@@ -611,25 +521,16 @@ class MeasureTypeEditView(BaseEditView):
         Regarding the type of total we manage (category total or operation
         specific total), we want to set some attributes
         """
-        model = BaseEditView.merge_appstruct(self, appstruct, model)
+        model = BaseAdminEditView.merge_appstruct(self, appstruct, model)
         if 'total_type' in appstruct:
             total_type = appstruct['total_type']
             model.account_prefix = appstruct[total_type]
 
         return model
 
-    @property
-    def menus(self):
-        return [
-            dict(
-                label=u"Retour",
-                url=self._redirect_url(),
-                icon="fa fa-step-backward",
-            )
-        ]
-
 
 class MeasureDisableView(CategoryDisableView):
+    route_name = TYPE_ITEM_URL
 
     def on_enable(self):
         """
@@ -641,22 +542,12 @@ class MeasureDisableView(CategoryDisableView):
         self.context.order = order
         self.request.dbsession.merge(self.context)
 
-    def _redirect_url(self):
-        return self.request.route_path(
-            TYPE_CATEGORY_URL,
-            category_id=self.context.category_id,
-        )
-
 
 class MeasureDeleteView(CategoryDeleteView):
     """
     View for measure disable/enable
     """
-    def _redirect_url(self):
-        return self.request.route_path(
-            TYPE_CATEGORY_URL,
-            category_id=self.context.category.id,
-        )
+    route_name = TYPE_ITEM_URL
 
     def on_delete(self):
         """
@@ -684,14 +575,14 @@ def add_routes(config):
     Add routes related to this module
     """
     config.add_route(BASE_URL, BASE_URL)
-    config.add_route(CATEGORY_CONFIG_URL, CATEGORY_CONFIG_URL)
+    config.add_route(CATEGORY_URL, CATEGORY_URL)
     config.add_route(
-        CATEGORY_URL,
-        CATEGORY_URL,
+        CATEGORY_TYPE_ITEM_URL,
+        CATEGORY_TYPE_ITEM_URL,
         traverse="/income_statement_measure_categories/{id}"
     )
 
-    config.add_route(TYPE_URL, TYPE_URL)
+    config.add_route(TYPE_INDEX_URL, TYPE_INDEX_URL)
     config.add_route(
         TYPE_CATEGORY_URL,
         TYPE_CATEGORY_URL,
@@ -702,8 +593,8 @@ def add_routes(config):
         traverse="/income_statement_measure_categories/{category_id}",
     )
     config.add_route(
-        ITEM_URL,
-        ITEM_URL,
+        TYPE_ITEM_URL,
+        TYPE_ITEM_URL,
         traverse="income_statement_measure_types/{id}",
     )
 
@@ -713,73 +604,71 @@ def add_views(config):
     Add views defined in this module
     """
     config.add_admin_view(
-        index_view, route_name=BASE_URL, renderer="admin/index.mako"
+        IncomeStatementMeasureIndexView, parent=AccountingIndexView,
     )
     config.add_admin_view(
         CategoryListView,
-        route_name=CATEGORY_CONFIG_URL,
+        parent=IncomeStatementMeasureIndexView,
         renderer="admin/crud_list.mako",
     )
     config.add_admin_view(
         CategoryAddView,
-        route_name=CATEGORY_CONFIG_URL,
+        parent=CategoryListView,
         renderer="admin/crud_add_edit.mako",
         request_param="action=add",
     )
     config.add_admin_view(
         CategoryEditView,
-        route_name=CATEGORY_URL,
+        parent=CategoryListView,
         renderer="admin/crud_add_edit.mako",
     )
     config.add_admin_view(
         CategoryDisableView,
-        route_name=CATEGORY_URL,
+        parent=CategoryListView,
         request_param="action=disable",
     )
     config.add_admin_view(
         CategoryDeleteView,
-        route_name=CATEGORY_URL,
+        parent=CategoryListView,
         request_param="action=delete",
     )
     config.add_admin_view(
         move_view,
-        route_name=CATEGORY_URL,
+        route_name=CATEGORY_TYPE_ITEM_URL,
         request_param='action=move',
     )
-
     config.add_admin_view(
-        type_category_list_view,
-        route_name=TYPE_URL,
-        renderer="admin/index.mako",
+        TypeListIndexView,
+        parent=IncomeStatementMeasureIndexView,
     )
     config.add_admin_view(
         MeasureTypeListView,
-        route_name=TYPE_CATEGORY_URL,
+        parent=TypeListIndexView,
         renderer="admin/crud_list.mako",
     )
     config.add_admin_view(
         MeasureTypeAddView,
-        route_name=TYPE_CATEGORY_URL + "/add",
+        parent=MeasureTypeListView,
         renderer="admin/crud_add_edit.mako",
     )
     config.add_admin_view(
         MeasureTypeEditView,
-        route_name=ITEM_URL,
+        parent=MeasureTypeListView,
         renderer="admin/crud_add_edit.mako",
     )
     config.add_admin_view(
         MeasureDisableView,
-        route_name=ITEM_URL,
+        parent=MeasureTypeListView,
         request_param="action=disable",
     )
     config.add_admin_view(
         MeasureDeleteView,
-        route_name=ITEM_URL,
+        parent=MeasureTypeListView,
         request_param="action=delete",
     )
     config.add_admin_view(
         move_view,
-        route_name=ITEM_URL,
+        route_name=TYPE_ITEM_URL,
         request_param='action=move',
     )
 

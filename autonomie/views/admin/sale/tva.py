@@ -6,18 +6,29 @@
 """
 Tva administration tools
 """
+import os
 from pyramid.httpexceptions import HTTPFound
 from autonomie.models.tva import Tva
 from autonomie.views import (
     BaseView,
-    DisableView,
-    BaseAddView,
-    BaseEditView,
 )
 from autonomie.utils.widgets import Link
-from autonomie.views import render_api
-from autonomie.views.admin.tools import AdminCrudListView
 from autonomie.forms.admin import get_tva_edit_schema
+from autonomie.views import render_api
+from autonomie.views.admin.tools import (
+    AdminCrudListView,
+    BaseAdminEditView,
+    AdminTreeMixin,
+    BaseAdminAddView,
+    BaseAdminDisableView,
+)
+from autonomie.views.admin.sale import (
+    SALE_URL,
+    SaleIndexView,
+)
+
+TVA_URL = os.path.join(SALE_URL, 'tva')
+TVA_ITEM_URL = os.path.join(TVA_URL, '{id}')
 
 
 class TvaListView(AdminCrudListView):
@@ -25,8 +36,12 @@ class TvaListView(AdminCrudListView):
     List of tva entries
     """
     title = u"Configuration comptable des produits et TVA collectés"
+    description = u"Configurer : Taux de TVA, codes produits et codes \
+analytiques associés"
+    route_name = TVA_URL
     columns = [u"Libellé", u"Valeur", u"Compte CG de TVA", u"Défaut ?"]
-    back_route = "admin_vente"
+
+    item_route_name = TVA_ITEM_URL
 
     def stream_columns(self, tva):
         """
@@ -53,44 +68,30 @@ Tva par défaut"
         :returns: List of 5-uples (url, label, title, icon, disable)
         """
         yield Link(
-            self.request.route_path(
-                "/admin/vente/tvas/",
-                id=tva.id
-            ),
+            self._get_item_url(tva),
             u"Voir/Modifier",
             icon=u"pencil",
         )
         if tva.active:
             yield Link(
-                self.request.route_path(
-                    "/admin/vente/tvas/",
-                    id=tva.id,
-                    _query=dict(action='disable'),
-                ),
+                self._get_item_url(tva, action='disable'),
                 label=u"Désactiver",
                 title=u"La TVA n'apparaitra plus dans l'interface",
                 icon=u"remove",
             )
             if not tva.default:
                 yield Link(
-                    self.request.route_path(
-                        "/admin/vente/tvas/",
-                        id=tva.id,
-                        _query=dict(action='set_default'),
-                    ),
+                    self._get_item_url(tva, action='set_default'),
                     label=u"Définir comme Taux de Tva par défaut",
                     title=u"La TVA sera sélectionnée par défaut dans les "
                     u"formulaires",
                 )
         else:
             yield Link(
-                self.request.route_path(
-                    "/admin/vente/tvas/",
-                    id=tva.id,
-                    _query=dict(action='disable'),
-                ),
+                self._get_item_url(tva, action='disable'),
                 u"Activer",
                 title=u"La TVA apparaitra plus dans l'interface",
+                icon="fa fa-check",
             )
 
     def load_items(self):
@@ -106,35 +107,21 @@ Tva par défaut"
                 )
         return result
 
-    def get_addurl(self):
-        return self.request.route_path(
-            '/admin/vente/tvas',
-            _query=dict(action="new")
-        )
 
-
-class TvaDisableView(DisableView):
+class TvaDisableView(BaseAdminDisableView):
+    route_name = TVA_ITEM_URL
     disable_msg = u"Le taux de TVA a bien été désactivé"
     enable_msg = u"Le taux de TVA a bien été activé"
-    redirect_route = "/admin/vente/tvas"
 
 
-class TvaEditView(BaseEditView):
+class TvaEditView(BaseAdminEditView):
     """
     Edit view
     """
-    add_template_vars = ('menus', 'help_msg')
+    route_name = TVA_ITEM_URL
+
     schema = get_tva_edit_schema()
     factory = Tva
-    redirect_route = "/admin/vente/tvas"
-
-    menus = [
-        dict(
-            label=u"Retour",
-            route_name="/admin/vente/tvas",
-            icon="fa fa-step-backward"
-        )
-    ]
     title = u"Modifier"
 
     def submit_success(self, appstruct):
@@ -151,83 +138,64 @@ class TvaEditView(BaseEditView):
         if self.msg:
             self.request.session.flash(self.msg)
 
-        if hasattr(self, 'redirect'):
-            return self.redirect()
-        elif self.redirect_route is not None:
-            return HTTPFound(self.request.route_path(self.redirect_route))
+        return self.redirect()
 
 
-class TvaAddView(BaseAddView):
+class TvaAddView(BaseAdminAddView):
     """
     Add view
     """
-    add_template_vars = ('menus', 'help_msg')
+    route_name = TVA_URL
     schema = get_tva_edit_schema()
     factory = Tva
-    redirect_route = "/admin/vente/tvas"
-    menus = [
-        dict(
-            label=u"Retour",
-            route_name="/admin/vente/tvas",
-            icon="fa fa-step-backward"
-        )
-    ]
     title = u"Ajouter"
 
 
-class TvaSetDefaultView(BaseView):
+class TvaSetDefaultView(BaseView, AdminTreeMixin):
     """
     Set the given tva as default
     """
+    route_name = TVA_ITEM_URL
+
     def __call__(self):
         for tva in Tva.query(include_inactive=True):
             tva.default = False
             self.request.dbsession.merge(tva)
         self.context.default = True
         self.request.dbsession.merge(tva)
-        return HTTPFound(self.request.route_path('/admin/vente/tvas'))
+        return HTTPFound(TVA_URL)
 
 
 def includeme(config):
     """
     Add routes and views
     """
-    config.add_route('/admin/vente/tvas', '/admin/vente/tvas')
-    config.add_route(
-        '/admin/vente/tvas/',
-        '/admin/vente/tvas/{id}',
-        traverse="/tvas/{id}"
-    )
+    config.add_route(TVA_URL, TVA_URL)
+    config.add_route(TVA_ITEM_URL, TVA_ITEM_URL, traverse="/tvas/{id}")
 
-    config.add_view(
+    config.add_admin_view(
         TvaListView,
-        route_name='/admin/vente/tvas',
-        permission='admin',
+        parent=SaleIndexView,
         renderer='admin/crud_list.mako',
     )
-    config.add_view(
+    config.add_admin_view(
         TvaDisableView,
-        route_name='/admin/vente/tvas/',
-        permission='admin',
+        parent=TvaListView,
         request_param="action=disable",
-        renderer='admin/crud_list.mako',
     )
-    config.add_view(
+    config.add_admin_view(
         TvaAddView,
-        route_name='/admin/vente/tvas',
-        permission='admin',
-        request_param="action=new",
+        parent=TvaListView,
+        request_param="action=add",
         renderer='admin/crud_add_edit.mako',
     )
-    config.add_view(
+    config.add_admin_view(
         TvaEditView,
-        route_name='/admin/vente/tvas/',
-        permission='admin',
+        parent=TvaListView,
         renderer='admin/crud_add_edit.mako',
     )
-    config.add_view(
+    config.add_admin_view(
         TvaSetDefaultView,
-        route_name='/admin/vente/tvas/',
-        permission='admin',
+        parent=TvaListView,
         request_param="action=set_default",
     )

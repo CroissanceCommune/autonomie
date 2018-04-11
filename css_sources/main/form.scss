@@ -57,3 +57,23 @@ ul.form-tabs li.error a {
 .form-row input[type=radio], .form-row input[type=checkbox]{
   width: 15px;
 }
+
+/* Deform sequences esthetic workaround */
+.deform-seq {
+  .panel-body {
+    padding: 0px !important;
+    .deform-seq-item {
+      margin-bottom: 0;
+      padding: 10px 10px 0px;
+      border-left: 0px;
+      border-right: 0px;
+      border-top: 0px;
+    }
+  }
+  .panel-footer {
+    padding: 0px !important;
+    a:before {
+      content: '+ ';
+    }
+  }
+}

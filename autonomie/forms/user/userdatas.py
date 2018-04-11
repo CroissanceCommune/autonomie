@@ -302,6 +302,36 @@ def customize_schema(schema):
     customize('sortie_motif_id', get_deferred_select(MotifSortieOption))
     customize("sortie_type_id", get_deferred_select(TypeSortieOption))
 
+    if 'social_statuses' in schema:
+        child_schema = schema['social_statuses'].children[0]
+        child_schema.widget = CleanMappingWidget()
+        customize_field(
+            child_schema,
+            'social_status_id',
+            widget=get_deferred_select(SocialStatusOption)
+        )
+        customize_field(
+            child_schema,
+            'step',
+            widget=deform.widget.HiddenWidget(),
+            default="entry"
+        )
+
+    if 'today_social_statuses' in schema:
+        child_schema = schema['today_social_statuses'].children[0]
+        child_schema.widget = CleanMappingWidget()
+        customize_field(
+            child_schema,
+            'social_status_id',
+            widget=get_deferred_select(SocialStatusOption)
+        )
+        customize_field(
+            child_schema,
+            'step',
+            widget=deform.widget.HiddenWidget(),
+            default="today"
+        )
+
     if 'statut_external_activity' in schema:
         child_schema = schema['statut_external_activity'].children[0]
         child_schema.widget = CleanMappingWidget()

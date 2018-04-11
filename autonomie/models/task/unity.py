@@ -41,10 +41,15 @@ class WorkUnit(DBBASE):
         Work unit, used to build the price list
     """
     __colanderalchemy_config__ = {
-        "title": u"une unité de prestation",
+        "title": u"Unités de prestation",
+        "description": u"Configurer les unités de prestation proposées dans les \
+formulaires d'édition des devis/factures",
         "help_msg": u"Configurer les unités de prestation proposées dans les \
 formulaires d'édition des devis/factures",
-        "validation_msg": u"Les unités de prestation ont bien été configurées"
+        "validation_msg": u"Les unités de prestation ont bien été configurées",
+        "seq_widget_options": {
+            "add_subitem_text_template": u"Ajouter une unité de prestation"
+        },
     }
     __tablename__ = "workunity"
     __table_args__ = default_table_args

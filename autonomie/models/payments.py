@@ -28,7 +28,12 @@ class PaymentMode(DBBASE):
         Payment mode entry
     """
     __colanderalchemy_config__ = {
-        "title": u"un mode de paiement",
+        "title": u"Modes de paiement",
+        "description": u"Configurer les modes de paiement proposés dans les \
+formulaires d'enregistrement des encaissements",
+        "seq_widget_options": {
+            "add_subitem_text_template": u"Ajouter un mode de paiement",
+        },
         "help_msg": u"Configurer les modes de paiement pour la saisie des \
 encaissements des factures",
         "validation_msg": u"Les modes de paiement ont bien été configurés"
@@ -51,7 +56,10 @@ class BankAccount(ConfigurableOption):
     Bank accounts used for payment registry
     """
     __colanderalchemy_config__ = {
-        "title": u"un compte banque",
+        "title": u"Comptes banque",
+        "seq_widget_options": {
+            "add_subitem_text_template": u"un compte banque",
+        },
         'validation_msg': u"Les comptes banques ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')

@@ -46,7 +46,9 @@ TASK_MENTION = sa.Table(
 
 class TaskMention(ConfigurableOption):
     __colanderalchemy_config__ = {
-        "title": u"une mention facultative",
+        "title": u"Mentions facultatives des devis/factures",
+        "description": u"Configurer les mentions que les entrepreneurs \
+peuvent faire figurer dans leurs devis/factures",
         "help_msg": u"Configurer des mentions facultatives pour les devis et \
 factures, celles-ci sont proposées aux entrepreneurs dans les formulaires et \
 insérées dans les sorties PDF.<br /> \
@@ -60,7 +62,11 @@ désactivation<br />\
 <b>Attention</b> : La modification des textes entrainent la modification \
 des documents (devis/factures) associés, préférez la suppression \
 (désactivation) et l'ajout de nouvelle mention",
-        "validation_msg": u"Les mentions facultatives ont bien été configurées"
+        "validation_msg": u"Les mentions facultatives ont bien été configurées",
+        "seq_widget_options": {
+            "add_subitem_text_template": u"Ajouter une mention",
+            "min_len": 0
+        },
     }
     id = get_id_foreignkey_col('configurable_option.id')
     title = sa.Column(

@@ -26,6 +26,7 @@ const PaymentLineCollection = OrderableCollection.extend({
         this.bindEvents();
     },
     bindEvents(){
+        console.log("PaymentLineCollection.bindEvents");
         this.listenTo(this, 'add', this.callChannel);
         this.listenTo(this, 'remove', this.callChannel);
         this.listenTo(this, 'change:amount', this.callChannel);
@@ -35,7 +36,6 @@ const PaymentLineCollection = OrderableCollection.extend({
         this.stopListening();
     },
     callChannel(){
-        console.log("Calling channel");
         this.channel.trigger('changed:payment_lines');
     },
     computeDividedAmount(total, payment_times){
@@ -102,6 +102,7 @@ const PaymentLineCollection = OrderableCollection.extend({
         return this.syncAll(old_models);
     },
     syncAll(old_models){
+        console.log("Syncing all models");
         var promises = [];
         var collection_url = this.url();
         _.each(old_models, function(model){
@@ -135,14 +136,17 @@ const PaymentLineCollection = OrderableCollection.extend({
         let ttc = this.topayAfterDeposit(deposit);
         let sum = 0;
         let models = this.slice(0, this.models.length - 1);
-        _.each(models, function(item){ sum += item.get('amount');});
+        _.each(models, function(item){
+            sum += item.getAmount();
+        });
         return ttc - sum;
     },
     updateSold(deposit){
+        console.log("Updating sold");
         this.unBindEvents();
         var value = this.getSoldAmount(deposit);
         this.models[this.models.length - 1].set({'amount': value});
-        this.models[this.models.length - 1].save();
+        this.models[this.models.length - 1].save().then(this.afterSyncAll.bind(this));
     },
     validate: function(){
         var result = {};

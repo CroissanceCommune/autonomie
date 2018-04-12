@@ -91,9 +91,9 @@ Puis créer un compte administrateur
 
     autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
 
-    
-N.B : pour un administrateur, préciser 
-    
+
+N.B : pour un administrateur, préciser
+
 .. code-block:: console
 
     --group=admin
@@ -109,7 +109,7 @@ suivantes
 
     git clone https://github.com/CroissanceCommune/autonomie.git
     cd autonomie
-    pip install pyramid_debugtoolbar
+    pip install libsass pytest sphinx pyramid_debugtoolbar
     # Ici on install autonomie en mode developpement
     python setup.py develop
     cp development.ini.sample development.ini

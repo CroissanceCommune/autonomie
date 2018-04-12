@@ -31,7 +31,8 @@ const PaymentBlockView = Mn.View.extend({
         lines: '.payment-lines-container',
     },
     modelEvents: {
-//        'change:payment_conditions': 'render'
+        'change:payment_times': 'onPaymentTimesChange',
+        'change:paymentDisplay': 'onPaymentDisplayChange',
     },
     childViewEvents: {
         'finish': 'onFinish',
@@ -61,6 +62,21 @@ const PaymentBlockView = Mn.View.extend({
     unbindValidation(){
         Validation.unbind(this);
     },
+    onPaymentTimesChange(model, value){
+        var old_value = model.previous('payment_times');
+        console.log("Old value was %s", old_value);
+        if ((value == -1) || (old_value == -1)){
+            this.renderTable();
+        }
+    },
+    onPaymentDisplayChange(model, value){
+        var old_value = model.previous('paymentDisplay');
+        console.log("Old value was %s", old_value);
+        // If it changed and it is or was ALL_NO_DATE we render the lines again
+        if ((old_value != value) && _.indexOf([value, old_value], 'ALL_NO_DATE') != -1){
+            this.renderTable();
+        }
+    },
     onFinish(field_name, value){
         /*
          * Launch when a field has been modified
@@ -79,10 +95,6 @@ const PaymentBlockView = Mn.View.extend({
         if (field_name == 'paymentDisplay'){
             var old_value = this.model.get('paymentDisplay');
             this.triggerMethod('data:persist', 'paymentDisplay', value);
-            // If it changed and it is or was ALL_NO_DATE we render the lines again
-            if ((old_value != value) && _.indexOf([value, old_value], 'ALL_NO_DATE') != -1){
-                this.renderTable();
-            }
         } else if (field_name == 'payment_times'){
             var old_value = this.model.get('payment_times');
             if (old_value != value){
@@ -104,11 +116,6 @@ const PaymentBlockView = Mn.View.extend({
                  } else {
                      this.triggerMethod('data:persist', field_name, value);
                  }
-                if ((value == -1) || (old_value == -1)){
-                    // If we set it on manual configuration we re-render the
-                    // table
-                    this.tableview.showLines();
-                }
             }
         } else if (field_name == 'deposit'){
             var old_value = this.model.get('deposit');

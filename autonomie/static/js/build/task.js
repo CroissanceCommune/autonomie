@@ -9414,7 +9414,8 @@ webpackJsonp([2],[
 	        lines: '.payment-lines-container'
 	    },
 	    modelEvents: {
-	        //        'change:payment_conditions': 'render'
+	        'change:payment_times': 'onPaymentTimesChange',
+	        'change:paymentDisplay': 'onPaymentDisplayChange'
 	    },
 	    childViewEvents: {
 	        'finish': 'onFinish'
@@ -9435,6 +9436,21 @@ webpackJsonp([2],[
 	    unbindValidation: function unbindValidation() {
 	        _backboneValidation2.default.unbind(this);
 	    },
+	    onPaymentTimesChange: function onPaymentTimesChange(model, value) {
+	        var old_value = model.previous('payment_times');
+	        console.log("Old value was %s", old_value);
+	        if (value == -1 || old_value == -1) {
+	            this.renderTable();
+	        }
+	    },
+	    onPaymentDisplayChange: function onPaymentDisplayChange(model, value) {
+	        var old_value = model.previous('paymentDisplay');
+	        console.log("Old value was %s", old_value);
+	        // If it changed and it is or was ALL_NO_DATE we render the lines again
+	        if (old_value != value && _.indexOf([value, old_value], 'ALL_NO_DATE') != -1) {
+	            this.renderTable();
+	        }
+	    },
 	    onFinish: function onFinish(field_name, value) {
 	        /*
 	         * Launch when a field has been modified
@@ -9453,10 +9469,6 @@ webpackJsonp([2],[
 	        if (field_name == 'paymentDisplay') {
 	            var old_value = this.model.get('paymentDisplay');
 	            this.triggerMethod('data:persist', 'paymentDisplay', value);
-	            // If it changed and it is or was ALL_NO_DATE we render the lines again
-	            if (old_value != value && _.indexOf([value, old_value], 'ALL_NO_DATE') != -1) {
-	                this.renderTable();
-	            }
 	        } else if (field_name == 'payment_times') {
 	            var old_value = this.model.get('payment_times');
 	            if (old_value != value) {
@@ -9474,11 +9486,6 @@ webpackJsonp([2],[
 	                    });
 	                } else {
 	                    this.triggerMethod('data:persist', field_name, value);
-	                }
-	                if (value == -1 || old_value == -1) {
-	                    // If we set it on manual configuration we re-render the
-	                    // table
-	                    this.tableview.showLines();
 	                }
 	            }
 	        } else if (field_name == 'deposit') {
@@ -9811,8 +9818,20 @@ webpackJsonp([2],[
 	
 	var _date = __webpack_require__(/*! ../../date.js */ 32);
 	
+	var _math = __webpack_require__(/*! ../../math.js */ 36);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : PaymentLineModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var PaymentLineModel = _BaseModel2.default.extend({
 	    props: ['id', 'task_id', 'order', 'description', 'amount', 'date'],
 	    defaults: {
@@ -9839,17 +9858,12 @@ webpackJsonp([2],[
 	        var min_order = this.model.collection.getMinOrder();
 	        var order = this.get('order');
 	        return order == min_order;
+	    },
+	    getAmount: function getAmount() {
+	        return (0, _math.strToFloat)(this.get('amount'));
 	    }
-	}); /*
-	     * File Name : PaymentLineModel.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
+	
 	exports.default = PaymentLineModel;
 
 /***/ }),
@@ -11403,6 +11417,7 @@ webpackJsonp([2],[
 	        this.bindEvents();
 	    },
 	    bindEvents: function bindEvents() {
+	        console.log("PaymentLineCollection.bindEvents");
 	        this.listenTo(this, 'add', this.callChannel);
 	        this.listenTo(this, 'remove', this.callChannel);
 	        this.listenTo(this, 'change:amount', this.callChannel);
@@ -11412,7 +11427,6 @@ webpackJsonp([2],[
 	        this.stopListening();
 	    },
 	    callChannel: function callChannel() {
-	        console.log("Calling channel");
 	        this.channel.trigger('changed:payment_lines');
 	    },
 	    computeDividedAmount: function computeDividedAmount(total, payment_times) {
@@ -11481,6 +11495,7 @@ webpackJsonp([2],[
 	    syncAll: function syncAll(old_models) {
 	        var _$;
 	
+	        console.log("Syncing all models");
 	        var promises = [];
 	        var collection_url = this.url();
 	        _.each(old_models, function (model) {
@@ -11508,15 +11523,16 @@ webpackJsonp([2],[
 	        var sum = 0;
 	        var models = this.slice(0, this.models.length - 1);
 	        _.each(models, function (item) {
-	            sum += item.get('amount');
+	            sum += item.getAmount();
 	        });
 	        return ttc - sum;
 	    },
 	    updateSold: function updateSold(deposit) {
+	        console.log("Updating sold");
 	        this.unBindEvents();
 	        var value = this.getSoldAmount(deposit);
 	        this.models[this.models.length - 1].set({ 'amount': value });
-	        this.models[this.models.length - 1].save();
+	        this.models[this.models.length - 1].save().then(this.afterSyncAll.bind(this));
 	    },
 	
 	    validate: function validate() {

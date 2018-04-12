@@ -12,16 +12,17 @@ down_revision = '4299e583631c'
 
 from alembic import op
 import sqlalchemy as sa
-
+from autonomie.alembic import utils
 
 def update_database_structure():
-    op.add_column(
+    utils.add_column(
         "accounting_operation_upload", sa.Column("filetype", sa.String(50))
     )
-    op.add_column(
+    utils.add_column(
         "accounting_operation", sa.Column("date", sa.Date())
     )
-    op.drop_column('accounting_operation', 'datetime')
+    if utils.column_exists('accounting_operation', 'datetime'):
+        op.drop_column('accounting_operation', 'datetime')
 
 
 def migrate_datas():

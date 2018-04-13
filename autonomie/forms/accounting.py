@@ -422,3 +422,13 @@ def get_admin_income_statement_category_schema():
     )
     schema['label'].validator = deferred_label_validator
     return schema
+
+
+def get_add_edit_accounting_operation_schema():
+    """
+    Build a schema for AccountingOperation add/edit
+    """
+    excludes = ("id", "upload_id", "company_id")
+
+    schema = SQLAlchemySchemaNode(AccountingOperation, excludes=excludes)
+    return schema

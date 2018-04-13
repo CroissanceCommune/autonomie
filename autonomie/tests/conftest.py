@@ -271,9 +271,11 @@ def get_csrf_request(config, pyramid_request):
         params=None, cookies=None, post=None,
         current_route_name=None, current_route_path=None
     ):
-        params = params or {}
         post = post or {}
-        params.update(post)
+        if params is not None:
+            params.update(post)
+        else:
+            params = post
         cookies = cookies or {}
         def_csrf = 'default_csrf'
         if u'csrf_token' not in post.keys():
@@ -318,10 +320,12 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         params=None, cookies=None, post=None,
         current_route_name=None, current_route_path=None
     ):
-        cookies = cookies or {}
-        params = params or {}
         post = post or {}
-        params.update(post)
+        if params is not None:
+            params.update(post)
+        else:
+            params = post
+        cookies = cookies or {}
         def_csrf = 'default_csrf'
         if u'csrf_token' not in post.keys():
             post.update({'csrf_token': def_csrf})

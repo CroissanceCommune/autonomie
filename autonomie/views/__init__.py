@@ -952,8 +952,7 @@ class BaseRestView(BaseView):
         """
         return self.context
 
-    def _submit_datas(self, edit=False):
-        submitted = self.request.json_body
+    def _submit_datas(self, submitted, edit=False):
         self.logger.debug(u" + Submitting %s" % submitted)
         submitted = self.pre_format(submitted)
         self.logger.debug(u" + After pre format %s" % submitted)
@@ -988,11 +987,13 @@ class BaseRestView(BaseView):
 
     def post(self):
         self.logger.info("POST request")
-        return self._submit_datas(edit=False)
+        submitted = self.request.json_body
+        return self._submit_datas(submitted, edit=False)
 
     def put(self):
         self.logger.info("PUT request")
-        return self._submit_datas(edit=True)
+        submitted = self.request.json_body
+        return self._submit_datas(submitted, edit=True)
 
     def delete(self):
         """

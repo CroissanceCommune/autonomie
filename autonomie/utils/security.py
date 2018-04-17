@@ -32,7 +32,10 @@ from pyramid.security import (
     Authenticated,
     ALL_PERMISSIONS,
 )
-from sqlalchemy.orm import undefer_group
+from sqlalchemy.orm import (
+    undefer_group,
+    load_only,
+)
 
 from autonomie_celery.models import (
     Job,
@@ -51,6 +54,7 @@ from autonomie.models.files import (
     Template,
     TemplatingHistory,
 )
+from autonomie.models.user.group import Group
 from autonomie.models.project import (
     Project,
     Phase,
@@ -86,6 +90,7 @@ from autonomie.models.expense.types import ExpenseType
 from autonomie.models.user.login import Login
 from autonomie.models.user.user import User
 from autonomie.models.user.userdatas import UserDatas
+from autonomie.models.training.trainer import TrainerDatas
 from autonomie.models.statistics import (
     StatisticSheet,
     StatisticEntry,
@@ -150,6 +155,21 @@ class RootFactory(dict):
         ('expense_payments', 'expense_payment', ExpensePayment, ),
         ('files', 'file', File, ),
         ('invoices', 'invoice', Invoice, ),
+        (
+            'income_statement_measure_grids',
+            'income_statement_measure_grid',
+            IncomeStatementMeasureGrid,
+        ),
+        (
+            'income_statement_measure_types',
+            'income_statement_measure_type',
+            IncomeStatementMeasureType,
+        ),
+        (
+            'income_statement_measure_categories',
+            'income_statement_measure_category',
+            IncomeStatementMeasureTypeCategory,
+        ),
         ('jobs', 'job', Job, ),
         ('logins', 'login', Login, ),
         ('payments', 'payment', Payment, ),
@@ -178,22 +198,8 @@ class RootFactory(dict):
             'treasury_measure_type',
             TreasuryMeasureType,
         ),
-        (
-            'income_statement_measure_grids',
-            'income_statement_measure_grid',
-            IncomeStatementMeasureGrid,
-        ),
-        (
-            'income_statement_measure_types',
-            'income_statement_measure_type',
-            IncomeStatementMeasureType,
-        ),
-        (
-            'income_statement_measure_categories',
-            'income_statement_measure_category',
-            IncomeStatementMeasureTypeCategory,
-        ),
         ('timeslots', 'timeslot', Timeslot, ),
+        ('trainerdatas', 'trainerdata', TrainerDatas,),
         ('tvas', 'tva', Tva,),
         ('users', 'user', User, ),
         ('userdatas', 'userdatas', UserDatas, ),
@@ -295,26 +301,6 @@ def get_base_acl(self):
     return acl
 
 
-def get_userdatas_acl(self):
-    """
-    Return the acl for userdatas
-    only the related account has view rights
-    """
-    acl = DEFAULT_PERM[:]
-    if self.user is not None:
-        acl.append(
-            (
-                Allow,
-                self.user.login,
-                (
-                    'view',
-                    'view.file',
-                )
-            ),
-        )
-    return acl
-
-
 def get_event_acl(self):
     """
     Return acl fr events participants can view
@@ -378,41 +364,258 @@ def get_company_acl(self):
                 # Accompagnement
                 "list_activities",
                 "list_workshops",
+                # New format
                 "view.accounting",
+                "list.estimation",
+                "list.invoice",
+                "list.activity",
+                "view.commercial",
+                "view.treasury",
+
             )
         )for user in self.employees]
     )
     return acl
 
 
+def _get_admin_user_base_acl(self):
+    """
+    Build acl for user account management for admins
+
+    :returns: A list of user acls
+    """
+    perms = (
+        'view.user',
+        'edit.user',
+        'admin.user',
+        'delete.user',
+        'list.holiday',
+        'add.holiday',
+
+        "list.company",
+        "admin.company",
+
+        "list.activity",
+
+        'add.userdatas',
+        "add.login",
+        "add.trainerdatas",
+    )
+    for group in Group.query().options(
+        load_only('name')
+    ).filter(Group.name != 'admin'):
+        perms += (u"addgroup.%s" % group.name,)
+
+    admin_perms = perms + ('addgroup.admin',)
+
+    return [
+        (Allow, 'group:admin', admin_perms),
+        (Allow, 'group:manager', perms),
+    ]
+
+
+def _get_user_base_acl(self):
+    """
+    Build acl for user account management for the owner
+
+    :returns: The list of user acls
+    """
+    result = []
+    if self.login and self.login.active:
+        perms = (
+            'view.user',
+            'set_email.user',
+            'list.holidays',
+            'add.holiday',
+            'edit.holiday',
+        )
+        result = [
+            (Allow, self.login.login, perms)
+        ]
+    return result
+
+
+def _get_admin_login_base_acl(user):
+    """
+    Build acl for login management for admins
+
+    :params obj user: A User instance
+    :returns: A list of user acls (in the format expected by Pyramid)
+    """
+    perms = (
+        'view.login',
+        'edit.login',
+        'admin.login',
+        "set_password.login",
+        'delete.login',
+        'disable.login',
+    )
+    return [
+        (Allow, 'group:admin', perms),
+        (Allow, 'group:manager', perms),
+    ]
+
+
+def _get_login_base_acl(user):
+    """
+    Build acl for login management for admins
+
+    :params obj user: A User instance
+    :returns: A list of user acls (in the format expected by Pyramid)
+    """
+    if user.login and user.login.active:
+        perms = ('view.login', 'set_password.login')
+        return [(Allow, user.login.login, perms)]
+    return []
+
+
+def _get_admin_userdatas_base_acl(self):
+    """
+    Build acl for userdatas management for admins
+    """
+    perms = (
+        'view.userdatas',
+        'edit.userdatas',
+        'admin.userdatas',
+        'delete.userdatas',
+        'addfile.userdatas',
+        'filelist.userdatas',
+        'py3o.userdatas',
+        'history.userdatas',
+        'doctype.userdatas',
+        'view.file',
+        'edit.file',
+        'delete.file',
+    )
+
+    return [
+        (Allow, 'group:admin', perms),
+        (Allow, 'group:manager', perms),
+    ]
+
+
+def _get_userdatas_base_acl(user):
+    """
+    Build acl for userdatas management for users
+
+    :params obj user: A User instance
+    :returns: A list of user acls (in the format expected by Pyramid)
+    """
+    result = []
+    if user.login and user.login.active:
+        perms = (
+            'filelist.userdatas',
+        )
+
+        result = [
+            (Allow, user.login.login, perms),
+        ]
+    return result
+
+
+def _get_admin_trainerdatas_base_acl(user):
+    """
+    Collect trainer datas management acl for admins
+
+    :params obj user: A User instance
+    :returns: A list of user acls (in the format expected by Pyramid)
+    """
+    perms = (
+        'view.trainerdatas',
+        'edit.trainerdatas',
+        'delete.trainerdatas',
+        'disable.trainerdatas',
+        'admin.trainerdatas',
+        'addfile.trainerdatas',
+        'filelist.trainerdatas',
+        'edit.file',
+        'delete.file',
+    )
+    return [
+        (Allow, 'group:admin', perms),
+        (Allow, 'group:manager', perms),
+    ]
+
+
+def _get_trainerdatas_base_acl(user):
+    """
+    Collect trainer datas management acl for owner
+
+    :params obj user: A User instance
+    :returns: A list of user aces (in the format expected by Pyramid)
+    """
+    result = []
+    if user.login and user.login.active:
+        perms = (
+            'view.trainerdatas',
+            'edit.trainerdatas',
+            'view.file',
+        )
+
+        result = [
+            (Allow, user.login.login, perms),
+        ]
+    return result
+
+
 def get_user_acl(self):
     """
-        Get acl for user account edition
+    Collect acl for a user context
+    :returns: A list of user aces (in the format expected by Pyramid)
     """
-    acl = DEFAULT_PERM[:]
-    if self.login and self.login.active:
-        acl.append(
-            (
-                Allow,
-                self.login.login,
-                (
-                    "view.user",
-                    "edit.user",
-                    "view.login",
-                    "view.company",
-                    "edit.company",
-                    "set_password.login",
-                    'list.holidays',
-                    'add.holiday',
-                    'edit.holiday',
-                    'list.competences',
-                )
-            )
-        )
-        acl.append((Allow, Authenticated, ('visit')))
+    print("Getting user acls !!!")
+    acl = DEFAULT_PERM_NEW[:]
+
+    acl.extend(_get_admin_user_base_acl(self))
+    acl.extend(_get_admin_login_base_acl(self))
+    acl.extend(_get_admin_userdatas_base_acl(self))
+    acl.extend(_get_admin_trainerdatas_base_acl(self))
+    acl.extend(_get_user_base_acl(self))
+    acl.extend(_get_login_base_acl(self))
+    acl.extend(_get_userdatas_base_acl(self))
+    acl.extend(_get_trainerdatas_base_acl(self))
     return acl
 
 
+def get_userdatas_acl(self):
+    """
+    Collect acl for a UserDatas context
+    :returns: A list of user aces (in the format expected by Pyramid)
+    """
+    acl = DEFAULT_PERM_NEW[:]
+    if self.user is not None:
+        acl.extend(_get_admin_userdatas_base_acl(self.user))
+        acl.extend(_get_userdatas_base_acl(self.user))
+    return acl
+
+
+def get_trainerdatas_acl(self):
+    """
+    Collect acl for TrainerDatas context
+
+    :returns: A list of user aces (in the format expected by Pyramid)
+    """
+    acl = DEFAULT_PERM_NEW[:]
+    if self.user is not None:
+        acl.extend(_get_admin_trainerdatas_base_acl(self.user))
+        acl.extend(_get_trainerdatas_base_acl(self.user))
+    return acl
+
+
+def get_login_acl(self):
+    """
+    Compute acl for a login object
+
+    :returns: A list of aces (in the format expected by Pyramid)
+    """
+    acl = DEFAULT_PERM_NEW[:]
+    if self.user is not None:
+        acl.extend(_get_admin_login_base_acl(self.user))
+        acl.extend(_get_login_base_acl(self.user))
+    return acl
+
+
+# TASKS : invoice/estimation/cancelinvoice
 def _get_user_status_acl(self):
     """
     Return the common status related acls
@@ -765,34 +968,6 @@ def get_project_acl(self):
     return acl
 
 
-def get_login_acl(self):
-    """
-    Compute acl for a login object
-    """
-    acl = DEFAULT_PERM_NEW[:]
-    admin_aces = (
-        'view.login',
-        'edit.login',
-        'delete.login',
-        "set_password.login",
-    )
-    acl.append((Allow, 'group:admin', admin_aces))
-    acl.append((Allow, 'group:manager', admin_aces))
-
-    if self.active:
-        acl.append(
-            (
-                Allow,
-                self.login,
-                (
-                    "view.login",
-                    "set_password.login",
-                )
-            )
-        )
-    return acl
-
-
 def get_file_acl(self):
     """
     Compute the acl for a file object
@@ -899,6 +1074,7 @@ def set_models_acl():
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)
+    TrainerDatas.__default_acl__ = property(get_trainerdatas_acl)
     TreasuryMeasureGrid.__acl__ = property(get_accounting_measure_acl)
     TreasuryMeasureType.__acl__ = property(get_base_acl)
     IncomeStatementMeasureGrid.__acl__ = property(get_accounting_measure_acl)

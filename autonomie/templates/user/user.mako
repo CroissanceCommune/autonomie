@@ -113,7 +113,7 @@
         </a>
     % endif
 % else:
-    Ce compte n'est rattaché à aucune entreprise
+    <em>Ce compte n'est rattaché à aucune entreprise</em>
 % endif
 </div>
 </div>
@@ -149,6 +149,41 @@
             href="${request.route_path('/users/{id}/userdatas/add', id=user.id)}"
             >
             <i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche de gestion sociale
+        </a>
+    % endif
+</div>
+</div>
+<hr />
+% endif
+
+% if request.has_permission('view.trainerdatas'):
+<div class='row'>
+    % if user.trainerdatas:
+    <div class='col-md-2'>
+        <i
+            class='fa fa-graduation-cap fa-3x fa-border text-success'
+            style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
+    <div class='text-success'>Une fiche formateur est associée à ce compte</div>
+    <a class='btn btn-default'
+        href="${request.route_path('/users/{id}/trainerdatas/edit', id=user.id)}"
+        >
+        <i class='fa fa-search'></i>&nbsp;Voir
+    </a>
+    % elif request.has_permission('add.trainerdatas'):
+    <div class='col-md-2'>
+        <i
+            class='fa fa-graduation-cap fa-3x fa-border'
+            style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
+        <em>Aucune fiche formateur n'est associée à ce compte</em>&nbsp;
+        <a
+            class='btn btn-primary'
+            href="${request.route_path('/users/{id}/trainerdatas/add', id=user.id)}"
+            >
+            <i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche formateur
         </a>
     % endif
 </div>

@@ -245,7 +245,7 @@
                   <td>${child.name}</td>
                   <td>${api.format_date(child.updated_at)}</td>
                   <td class="actions">
-                      % if api.has_permission('edit', child):
+                      % if api.has_permission('edit.file', child):
                         ${table_btn(request.route_path('file', id=child.id),
                             u"Voir/Modifier",
                             u"Voir/Modifier ce document",
@@ -255,7 +255,7 @@
                       u"Télécharger",
                       u"Télécharger ce document",
                       icon="download-alt")}
-                      % if api.has_permission('delete', child):
+                      % if api.has_permission('delete.file', child):
                           <% message = u"Ce fichier sera supprimer de la base de gestion sociale. Êtes-vous sûr de vouloir continuer ?" %>
                           ${table_btn(request.route_path('file', id=child.id, _query=dict(action='delete')),
                                 u"Supprimer",
@@ -269,7 +269,7 @@
               </tr>
             % endfor
             % if documents == []:
-                <tr><td colspan='6'>Aucun document social n'est disponible</td></tr>
+                <tr><td colspan='6'>Aucun document n'est disponible</td></tr>
             % endif
         </tbody>
   </table>

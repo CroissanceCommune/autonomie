@@ -735,7 +735,7 @@ def add_views(config):
     config.add_view(
         UserWorkshopListView,
         route_name='/users/{id}/workshops',
-        permission='view.workshops',
+        permission='list.activity',
         renderer="/accompagnement/user_workshops.mako",
         layout="user",
     )

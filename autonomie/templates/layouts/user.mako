@@ -34,15 +34,17 @@
                         <i class='fa fa-user fa-4x'></i>
                     </div>
                     <div class='col-md-9'>
-                        <div>${api.format_civilite(request.context.civilite)}&nbsp;${api.format_account(request.context)}</div>
-                        <div>${format_mail(request.context.email)}</div>
+                        <div>${api.format_civilite(layout.current_user_object.civilite)}&nbsp;${api.format_account(layout.current_user_object)}</div>
+                        <div>${format_mail(layout.current_user_object.email)}</div>
                         <div>
+                        % if request.has_permission("edit.user", layout.current_user_object):
                         <a
                             class='btn btn-default btn-small pull-right'
-                            href="${request.route_path('/users/{id}/edit', id=request.context.id)}"
+                            href="${request.route_path('/users/{id}/edit', id=layout.current_user_object.id)}"
                             >
                             <i class='fa fa-pencil'></i>
                         </a>
+                        % endif
                         </div>
                     </div>
                 </div>

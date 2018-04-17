@@ -16,7 +16,10 @@ def sidebar_panel(context, request, menu):
     :param request: The current request object
     :param obj menu: An instance of utils.menu.Menu
     """
-    return {'menu': menu}
+    return {
+        'menu': menu,
+        'current': menu.current or context,
+    }
 
 
 def sidebar_item_panel(context, request, menu):

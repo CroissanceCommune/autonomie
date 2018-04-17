@@ -74,6 +74,7 @@ class UserLayout(object):
 
     @property
     def usermenu(self):
+        UserMenu.set_current(self.current_user_object)
         return UserMenu
 
 

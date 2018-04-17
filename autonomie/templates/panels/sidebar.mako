@@ -23,7 +23,7 @@
 <nav class='navbar sidebar-menu'>
 <ul class='nav nav-left'>
 % for item in menu.items:
-    ${request.layout_manager.render_panel('sidebar_item', item)}
+    ${request.layout_manager.render_panel('sidebar_item', context=current, item)}
 % endfor
 </ul>
 </nav>

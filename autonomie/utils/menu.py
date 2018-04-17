@@ -138,6 +138,10 @@ class Menu(object):
     def __init__(self, name):
         self.name = name
         self.items = []
+        self.current = None
+
+    def set_current(self, current):
+        self.current = current
 
     def add(self, item):
         self.items.append(item)

@@ -118,6 +118,12 @@ class AttrMenuItem(MenuItem):
     def enabled(self, context, request):
         return getattr(context, self.model_attribute, None) is not None
 
+    def has_permission(self, context, request):
+        related = getattr(context, self.model_attribute, None)
+        if self.perm is not None and related is not None:
+            return request.has_permission(self.perm, related)
+        return True
+
 
 class AttrMenuDropdown(MenuDropdown):
     def __init__(self, *args, **kw):

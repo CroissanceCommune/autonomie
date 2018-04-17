@@ -189,6 +189,16 @@ class User(DBBASE, PersistentACLMixin):
             'export': {'exclude': True},
         }
     )
+    trainerdatas = relationship(
+        "TrainerDatas",
+        back_populates="user",
+        uselist=False,
+        cascade='all, delete-orphan',
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
+        }
+    )
     login = relationship(
         "Login",
         back_populates="user",
@@ -272,7 +282,7 @@ class User(DBBASE, PersistentACLMixin):
         """
         Return only enabled companies
         """
-        return [company for company in self.companies if not company.archived]
+        return [company for company in self.companies if company.active]
 
 
 # Registering event handlers to keep datas synchronized

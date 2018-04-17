@@ -1,0 +1,24 @@
+<div
+  tal:condition="info_message or warn_message or help_message"
+  class='panel panel-default'>
+    <div class='panel-heading'>
+    Message
+    </div>
+    <div class='panel-body'>
+        <div
+          tal:condition="info_message"
+          class="alert alert-success">
+          <i class='fa fa-info fa-2x'></i>&nbsp;${structure:info_message}
+        </div>
+        <div
+          tal:condition="warn_message"
+          class="alert alert-warn">
+          <i class='fa fa-warning fa-2x'></i>&nbsp;${structure:warn_message}
+        </div>
+        <div
+          tal:condition="help_message"
+          class="alert alert-info">
+          <i class='fa fa-question-circle fa-2x'></i>&nbsp;${structure:help_message}
+        </div>
+    </div
+</div>

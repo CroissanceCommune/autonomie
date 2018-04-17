@@ -40,7 +40,7 @@
 % endif
 % if request.has_permission('admin'):
     <a class='btn btn-success'
-        href="${request.route_path('templates')}">
+        href="${admin_url}">
     <i class="glyphicon glyphicon-plus"></i>
         Déposer de nouveau modèle de document
     </a>

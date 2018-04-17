@@ -21,6 +21,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name="mainblock">
 <h4>Changements de situation</h4>
 <table class='table table-condensed'>
@@ -53,7 +54,7 @@
         <th class='text-right'>Actions</th>
     </thead>
     <tbody>
-        % if template_history:
+        % if template_history is not UNDEFINED and template_history:
         % for history in template_history:
             % if history.template is not None:
                 <tr>
@@ -61,7 +62,7 @@
                     <td>${api.format_account(history.user)}</td>
                     <td>${api.format_datetime(history.created_at)}</td>
                     <td class='text-right'>
-                        <% url = request.route_path('templatinghistory', id=history.id, _query=dict(action='delete')) %>
+                        <% url = request.route_path('/templatinghistory/{id}', id=history.id, _query=dict(action='delete')) %>
                         ${table_btn(url, \
                         u"Supprimer cette entrée",\
                         u"Supprimer cette entrée de l'historique", \

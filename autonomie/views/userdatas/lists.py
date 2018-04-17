@@ -22,6 +22,15 @@ from autonomie.models.user.userdatas import (
 from autonomie.forms.user.userdatas import get_list_schema
 from autonomie.utils.renderer import set_close_popup_response
 from autonomie.views import BaseListView
+from autonomie.views.userdatas.routes import (
+    USERDATAS_URL,
+    USERDATAS_XLS_URL,
+    USERDATAS_CSV_URL,
+    USERDATAS_ODS_URL,
+    USER_USERDATAS_EDIT_URL,
+    USERDATAS_ITEM_URL,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +108,7 @@ class UserDatasListView(UserDatasListClass, BaseListView):
         """
         yield (
             self.request.route_path(
-                "/users/{id}/userdatas/edit",
+                USER_USERDATAS_EDIT_URL,
                 id=item.user_id
             ),
             u"Voir",
@@ -110,7 +119,7 @@ class UserDatasListView(UserDatasListClass, BaseListView):
 
         yield (
             self.request.route_path(
-                "/userdatas/{id}",
+                USERDATAS_ITEM_URL,
                 id=item.id,
                 _query={'action': 'delete'}
             ),
@@ -182,25 +191,13 @@ def add_routes(config):
     """
     Add module related routes
     """
-    config.add_route(
-        "/userdatas",
-        "/userdatas",
-    )
-
-    config.add_route(
-        "/userdatas.xls",
-        "/userdatas.xls",
-    )
-
-    config.add_route(
-        "/userdatas.csv",
-        "/userdatas.csv",
-    )
-
-    config.add_route(
-        "/userdatas.ods",
-        "/userdatas.ods",
-    )
+    for route in (
+        USERDATAS_URL,
+        USERDATAS_XLS_URL,
+        USERDATAS_CSV_URL,
+        USERDATAS_ODS_URL,
+    ):
+        config.add_route(route, route)
 
 
 def add_views(config):
@@ -209,26 +206,26 @@ def add_views(config):
     """
     config.add_view(
         UserDatasListView,
-        route_name="/userdatas",
+        route_name=USERDATAS_URL,
         renderer="/userdatas/list.mako",
         permission="admin_userdatas",
     )
 
     config.add_view(
         UserDatasXlsView,
-        route_name="/userdatas.xls",
+        route_name=USERDATAS_XLS_URL,
         permission="admin_userdatas",
     )
 
     config.add_view(
         UserDatasOdsView,
-        route_name="/userdatas.ods",
+        route_name=USERDATAS_ODS_URL,
         permission="admin_userdatas",
     )
 
     config.add_view(
         UserDatasCsvView,
-        route_name="/userdatas.csv",
+        route_name=USERDATAS_CSV_URL,
         permission="admin_userdatas",
     )
 

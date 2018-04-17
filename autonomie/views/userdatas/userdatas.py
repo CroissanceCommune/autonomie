@@ -13,7 +13,6 @@ from deform_extensions import AccordionFormWidget
 from js.deform import auto_need
 from genshi.template.eval import UndefinedError
 from sqlalchemy.orm import (
-    load_only,
     Load,
     joinedload,
 )
@@ -48,6 +47,23 @@ from autonomie.views.userdatas.py3o import (
     record_compilation,
     get_key_from_genshi_error,
 )
+from autonomie.views.user.routes import USER_ITEM_URL
+from autonomie.views.userdatas.routes import (
+    USERDATAS_URL,
+    USERDATAS_ITEM_URL,
+    USERDATAS_EDIT_URL,
+    USERDATAS_DOCTYPES_URL,
+    USERDATAS_PY3O_URL,
+    USERDATAS_MYDOCUMENTS_URL,
+    USERDATAS_HISTORY_URL,
+    USER_USERDATAS_URL,
+    USER_USERDATAS_ADD_URL,
+    USER_USERDATAS_EDIT_URL,
+    USER_USERDATAS_DOCTYPES_URL,
+    USER_USERDATAS_PY3O_URL,
+    USER_USERDATAS_HISTORY_URL,
+)
+from autonomie.views.admin.userdatas.templates import TEMPLATE_URL
 from autonomie.views.user.tools import UserFormConfigState
 
 
@@ -57,45 +73,38 @@ logger = logging.getLogger(__name__)
 USERDATAS_MENU = AttrMenuDropdown(
     name='userdatas',
     label=u'Gestion sociale',
-    default_route=u'/users/{id}/userdatas',
+    default_route=USER_USERDATAS_URL,
     icon=u'fa fa-id-card-o',
     model_attribute='userdatas',
-    perm='view.userdatas',
+    perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_view",
     label=u'Voir',
-    route_name=u'/users/{id}/userdatas/edit',
+    route_name=USER_USERDATAS_EDIT_URL,
     icon=u'fa fa-user-circle-o',
     perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_doctypes",
     label=u'Documents sociaux',
-    route_name=u'/users/{id}/userdatas/doctypes',
+    route_name=USER_USERDATAS_DOCTYPES_URL,
     icon=u'fa fa-check-square-o',
-    perm='edit.userdatas',
+    perm='doctypes.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_py3o",
     label=u'Génération de documents',
-    route_name=u'/users/{id}/userdatas/py3o',
+    route_name=USER_USERDATAS_PY3O_URL,
     icon=u'fa fa-puzzle-piece',
-    perm='edit.userdatas',
-)
-USERDATAS_MENU.add_item(
-    name="userdatas_filelist",
-    label=u'Portefeuille de documents',
-    route_name=u'/users/{id}/userdatas/filelist',
-    icon=u'fa fa-briefcase',
-    perm='view.userdatas',
+    perm='py3o.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_history",
     label=u'Historique',
-    route_name=u'/users/{id}/userdatas/history',
+    route_name=USER_USERDATAS_HISTORY_URL,
     icon=u'fa fa-history',
-    perm='view.userdatas',
+    perm='history.userdatas',
 )
 
 
@@ -110,7 +119,7 @@ def userdatas_add_entry_point(context, request):
         3- userdatas form
     """
     config = UserFormConfigState(request.session)
-    config.set_steps(['/users/{id}/userdatas/add'])
+    config.set_steps([USER_USERDATAS_ADD_URL])
     config.add_defaults({'groups': ['contractor']})
     return HTTPFound(
         request.route_path(
@@ -138,7 +147,7 @@ def userdatas_add_view(context, request):
     request.dbsession.flush()
     return HTTPFound(
         request.route_path(
-            '/users/{id}/userdatas/edit',
+            USER_USERDATAS_EDIT_URL,
             id=context.id,
         )
     )
@@ -171,6 +180,7 @@ class UserDatasEditView(BaseFormView):
     schema = get_add_edit_schema()
     validation_msg = u"Les informations sociales ont bien été enregistrées"
     buttons = (submit_btn, cancel_btn,)
+    add_template_vars = ("current_userdatas", "delete_url")
 
     @property
     def title(self):
@@ -181,6 +191,14 @@ class UserDatasEditView(BaseFormView):
     @property
     def current_userdatas(self):
         return self.context
+
+    @property
+    def delete_url(self):
+        return self.request.route_path(
+            USERDATAS_ITEM_URL,
+            id=self.current_userdatas.id,
+            _query={'action': 'delete'}
+        )
 
     def before(self, form):
         auto_need(form)
@@ -207,7 +225,7 @@ class UserUserDatasEditView(UserDatasEditView):
 class UserDatasDeleteView(DeleteView):
     def redirect(self):
         return HTTPFound(
-            self.request.route_path('/users/{id}', id=self.context.user_id)
+            self.request.route_path(USER_ITEM_URL, id=self.context.user_id)
         )
 
 
@@ -279,6 +297,10 @@ class UserDatasFileGeneration(BaseView):
     def current_userdatas(self):
         return self.context
 
+    @property
+    def admin_url(self):
+        return self.request.route_path(TEMPLATE_URL)
+
     def py3o_action_view(self, doctemplate_id):
         """
         Answer to simple GET requests
@@ -344,38 +366,12 @@ votre administrateur",
             return dict(
                 templates=available_templates.all(),
                 title=self.title,
-                current_userdatas=self.current_userdatas
+                current_userdatas=self.current_userdatas,
+                admin_url=self.admin_url,
             )
 
 
 class UserUserDatasFileGeneration(UserDatasFileGeneration):
-    @property
-    def current_userdatas(self):
-        return self.context.userdatas
-
-
-class UserDatasFileList(BaseView):
-    @property
-    def current_userdatas(self):
-        return self.context
-
-    def __call__(self):
-        query = files.File.query().options(load_only(
-            "description",
-            "name",
-            "updated_at",
-            "id",
-        ))
-        query = query.filter_by(parent_id=self.current_userdatas.id)
-
-        return dict(
-            title=u"Portefeuille de documents",
-            files=query,
-            current_userdatas=self.current_userdatas,
-        )
-
-
-class UserUserDatasFileList(UserDatasFileList):
     @property
     def current_userdatas(self):
         return self.context.userdatas
@@ -420,57 +416,29 @@ class UserUserDatasHistory(UserDatasHistory):
         return self.context.userdatas
 
 
-def mydocuments_view(context, request):
-    """
-    View callable collecting datas for showing the social docs associated to the
-    current user's account
-    """
-    if context.userdatas is not None:
-        query = files.File.query()
-        documents = query.filter(
-            files.File.parent_id == context.userdatas.id
-        ).all()
-    else:
-        documents = []
-    return dict(
-        title=u"Mes documents",
-        documents=documents,
-    )
-
-
 def add_routes(config):
     """
     Add module related routes
     """
-    config.add_route(
-        '/users/{id}/userdatas',
-        '/users/{id}/userdatas',
-        traverse='/users/{id}',
-    )
-    config.add_route(
-        '/users/{id}/userdatas/add',
-        '/users/{id}/userdatas/add',
-        traverse='/users/{id}',
-    )
-    config.add_route(
-        '/userdatas/{id}',
-        '/userdatas/{id}',
-        traverse='/userdatas/{id}',
-    )
-
-    for view in (
-        'edit', 'doctypes', 'py3o', 'mydocuments', "filelist", "history"
+    for route in (
+        USERDATAS_ITEM_URL,
+        USERDATAS_EDIT_URL,
+        USERDATAS_DOCTYPES_URL,
+        USERDATAS_PY3O_URL,
+        USERDATAS_MYDOCUMENTS_URL,
+        USERDATAS_HISTORY_URL
     ):
-        config.add_route(
-            '/userdatas/{id}/%s' % view,
-            '/userdatas/{id}/%s' % view,
-            traverse='/userdatas/{id}',
-        )
-        config.add_route(
-            '/users/{id}/userdatas/%s' % view,
-            '/users/{id}/userdatas/%s' % view,
-            traverse='/users/{id}',
-        )
+        config.add_route(route, route, traverse="/userdatas/{id}")
+
+    for route in (
+        USER_USERDATAS_URL,
+        USER_USERDATAS_ADD_URL,
+        USER_USERDATAS_EDIT_URL,
+        USER_USERDATAS_DOCTYPES_URL,
+        USER_USERDATAS_PY3O_URL,
+        USER_USERDATAS_HISTORY_URL
+    ):
+        config.add_route(route, route, traverse="/users/{id}")
 
 
 def add_views(config):
@@ -479,101 +447,80 @@ def add_views(config):
     """
     config.add_view(
         userdatas_add_view,
-        route_name='/users/{id}/userdatas/add',
+        route_name=USER_USERDATAS_ADD_URL,
         permission="add.userdatas",
     )
     config.add_view(
         UserDatasEditView,
-        route_name='/userdatas/{id}',
+        route_name=USERDATAS_EDIT_URL,
         permission="edit.userdatas",
         renderer="/base/formpage.mako",
     )
     config.add_view(
         UserUserDatasEditView,
-        route_name='/users/{id}/userdatas',
+        route_name=USER_USERDATAS_URL,
         permission="edit.userdatas",
         renderer="/userdatas/edit.mako",
         layout='user',
     )
     config.add_view(
         UserUserDatasEditView,
-        route_name='/users/{id}/userdatas/edit',
+        route_name=USER_USERDATAS_EDIT_URL,
         permission="edit.userdatas",
         renderer="/userdatas/edit.mako",
         layout='user',
     )
     config.add_view(
         UserDatasDeleteView,
-        route_name='/userdatas/{id}',
+        route_name=USERDATAS_ITEM_URL,
         permission="delete.userdatas",
         request_param="action=delete",
     )
     config.add_view(
         userdatas_add_entry_point,
-        route_name='/userdatas',
+        route_name=USERDATAS_URL,
         request_param="action=add",
         permission="add.userdatas",
     )
     config.add_view(
         UserDatasDocTypeView,
-        route_name='/userdatas/{id}/doctypes',
-        permission="edit.userdatas",
+        route_name=USERDATAS_DOCTYPES_URL,
+        permission="doctype.userdatas",
         renderer="/base/formpage.mako",
     )
     config.add_view(
         UserUserDatasDocTypeView,
-        route_name='/users/{id}/userdatas/doctypes',
-        permission="edit.userdatas",
+        route_name=USER_USERDATAS_DOCTYPES_URL,
+        permission="doctype.userdatas",
         renderer="/userdatas/doctypes.mako",
         layout='user',
     )
     config.add_view(
         UserDatasFileGeneration,
-        route_name='/userdatas/{id}/py3o',
-        permission="edit.userdatas",
+        route_name=USERDATAS_PY3O_URL,
+        permission="py3o.userdatas",
         renderer="/userdatas/py3o.mako",
     )
     config.add_view(
         UserUserDatasFileGeneration,
-        route_name='/users/{id}/userdatas/py3o',
-        permission="edit.userdatas",
+        route_name=USER_USERDATAS_PY3O_URL,
+        permission="py3o.userdatas",
         renderer="/userdatas/py3o.mako",
         layout='user',
     )
     config.add_view(
-        UserDatasFileList,
-        route_name="/userdatas/{id}/filelist",
-        permission="view.userdatas",
-        renderer="/userdatas/filelist.mako",
-        layout="user"
-    )
-    config.add_view(
-        UserUserDatasFileList,
-        route_name="/users/{id}/userdatas/filelist",
-        permission="view.userdatas",
-        renderer="/userdatas/filelist.mako",
-        layout="user"
-    )
-    config.add_view(
         UserDatasHistory,
-        route_name="/userdatas/{id}/history",
-        permission="view.userdatas",
+        route_name=USERDATAS_HISTORY_URL,
+        permission="history.userdatas",
         renderer="/userdatas/history.mako",
         layout="user"
     )
     config.add_view(
         UserUserDatasHistory,
-        route_name="/users/{id}/userdatas/history",
-        permission="view.userdatas",
+        route_name=USER_USERDATAS_HISTORY_URL,
+        permission="history.userdatas",
         renderer="/userdatas/history.mako",
         layout="user"
-    )
-    config.add_view(
-        mydocuments_view,
-        route_name='/users/{id}/userdatas/mydocuments',
-        permission="view.documents",
-        renderer="/userdatas/mydocuments.mako",
-        layout='user',
     )
 
 

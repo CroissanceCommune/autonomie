@@ -109,7 +109,7 @@ def get_groups(request):
     groups = Group.query().options(load_only(Group.id, Group.label)).all()
     return [
         (group.name, group.label) for group in groups
-        if request.has_permission(group.name)
+        if request.has_permission(u"addgroup.{0}".format(group.name))
     ]
 
 

@@ -78,14 +78,14 @@ def add_views(config):
         UserCompaniesView,
         route_name="/users/{id}/companies",
         layout="user",
-        permission="view.company",
+        permission="list.company",
         renderer="autonomie:templates/user/companies.mako",
     )
     config.add_view(
         CompanyAssociationView,
         route_name='/users/{id}/companies/associate',
         renderer="autonomie:templates/base/formpage.mako",
-        permission="edit.company",
+        permission="admin.company",
         layout="default",
     )
 

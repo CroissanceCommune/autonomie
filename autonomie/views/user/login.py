@@ -17,6 +17,15 @@ from autonomie.views import (
     DisableView,
     DeleteView,
 )
+from autonomie.views.user.routes import (
+    USER_ITEM_URL,
+    USER_LOGIN_URL,
+    USER_LOGIN_EDIT_URL,
+    USER_LOGIN_SET_PASSWORD_URL,
+    LOGIN_ITEM_URL,
+    LOGIN_EDIT_URL,
+    LOGIN_SET_PASSWORD_URL,
+)
 from autonomie.views.user.tools import UserFormConfigState
 
 
@@ -67,7 +76,7 @@ class LoginAddView(BaseFormView):
             )
         else:
             redirect = self.request.route_path(
-                "/users/{id}",
+                USER_ITEM_URL,
                 id=self.context.id,
             )
         logger.debug(u"  + Login  with id {0} added".format(model.id))
@@ -106,7 +115,7 @@ class LoginEditView(BaseFormView):
         self.dbsession.merge(model)
         self.dbsession.flush()
         redirect = self.request.route_path(
-            "/users/{id}/login",
+            USER_LOGIN_URL,
             id=self.current().user_id,
         )
         logger.debug(u"  + Login  with id {0} modified".format(model.id))
@@ -156,7 +165,7 @@ class LoginDisableView(DisableView):
     def redirect(self):
         return HTTPFound(
             self.request.route_path(
-                "/users/{id}/login",
+                USER_LOGIN_URL,
                 id=self.context.user_id,
             )
         )
@@ -167,7 +176,7 @@ class LoginDeleteView(DeleteView):
 
     def redirect(self):
         return HTTPFound(
-            self.request.route_path("/users/{id}", id=self.context.user_id)
+            self.request.route_path(USER_ITEM_URL, id=self.context.user_id)
         )
 
 
@@ -179,81 +188,69 @@ def login_view(context, request):
 
 
 def add_routes(config):
-    config.add_route(
-        "/logins/{id}",
-        "/logins/{id}",
-        traverse="/logins/{id}",
-    )
-    config.add_route(
-        "/users/{id}/login",
-        "/users/{id}/login",
-        traverse="/users/{id}",
-    )
-    for form_name in ('set_password', 'edit'):
-        config.add_route(
-            "/logins/{id}/%s" % form_name,
-            "/logins/{id}/%s" % form_name,
-            traverse="/logins/{id}",
-        )
-        config.add_route(
-            "/users/{id}/login/%s" % form_name,
-            "/users/{id}/login/%s" % form_name,
-            traverse="/users/{id}",
-        )
+    for route in (LOGIN_ITEM_URL, LOGIN_EDIT_URL, LOGIN_SET_PASSWORD_URL):
+        config.add_route(route, route, traverse="/logins/{id}")
+
+    for route in (
+        USER_LOGIN_URL,
+        USER_LOGIN_EDIT_URL,
+        USER_LOGIN_SET_PASSWORD_URL
+    ):
+        config.add_route(route, route, traverse="/users/{id}")
 
 
 def add_views(config):
     config.add_view(
+        login_view,
+        route_name=USER_LOGIN_URL,
+        permission="view.login",
+        renderer="/user/login.mako",
+        layout='user',
+    )
+    config.add_view(
         LoginAddView,
-        route_name="/users/{id}/login",
+        route_name=USER_LOGIN_URL,
         request_param="action=add",
-        permission="add.user",
+        permission="add.login",
         renderer="/base/formpage.mako",
         layout='default',
     )
     config.add_view(
         UserLoginEditView,
-        route_name="/users/{id}/login/edit",
+        route_name=USER_LOGIN_EDIT_URL,
         permission="edit.login",
         renderer="/user/edit.mako",
         layout='user',
     )
     config.add_view(
         LoginEditView,
-        route_name="/logins/{id}/edit",
+        route_name=LOGIN_EDIT_URL,
         permission="edit.login",
         renderer="/base/formpage.mako",
     )
     config.add_view(
-        login_view,
-        route_name="/users/{id}/login",
-        permission="view.login",
-        renderer="/user/login.mako",
-        layout='user',
-    )
-    config.add_view(
         LoginDisableView,
-        route_name="/logins/{id}",
+        route_name=LOGIN_ITEM_URL,
         request_param="action=activate",
-        permission="edit.login",
+        permission="disable.login",
         layout='user'
     )
     config.add_view(
         LoginDeleteView,
-        route_name="/logins/{id}",
+        route_name=LOGIN_ITEM_URL,
         request_param="action=delete",
-        permission="edit.login",
+        permission="delete.login",
     )
     config.add_view(
         LoginPasswordView,
-        route_name="/logins/{id}/set_password",
+        route_name=LOGIN_SET_PASSWORD_URL,
         permission="set_password.login",
         renderer="/base/formpage.mako",
         layout='default',
     )
     config.add_view(
         UserLoginPasswordView,
-        route_name="/users/{id}/login/set_password",
+        route_name=USER_LOGIN_SET_PASSWORD_URL,
         permission="set_password.login",
         renderer="/user/edit.mako",
         layout='user',

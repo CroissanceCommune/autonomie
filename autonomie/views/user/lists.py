@@ -7,7 +7,6 @@
 User and user datas listing views
 """
 import logging
-import colander
 
 from sqlalchemy import (
     or_,
@@ -97,7 +96,7 @@ class GeneralAccountList(BaseListView):
         return query
 
     def filter_login_filter(self, query, appstruct):
-        login_filter = appstruct.get('login_filter')
+        login_filter = appstruct.get('login_filter', 'active_login')
         logger.debug("Filtering login : %s" % login_filter)
         if login_filter != 'no_login':
             query = query.join(Login)
@@ -170,7 +169,7 @@ class GeneralUserList(BaseListView):
         return query
 
     def filter_active(self, query, appstruct):
-        active = appstruct.get('active')
+        active = appstruct.get('active', 'Y')
         if active == 'Y':
             query = query.filter(Login.active == True)
         elif active == "N":

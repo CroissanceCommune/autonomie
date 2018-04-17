@@ -19,6 +19,12 @@ from autonomie.views import (
     DeleteView,
     BaseEditView,
 )
+from autonomie.views.user.routes import (
+    USER_URL,
+    USER_ITEM_URL,
+    USER_ITEM_EDIT_URL,
+    USER_LOGIN_URL,
+)
 from autonomie.views.user.tools import UserFormConfigState
 
 
@@ -81,7 +87,7 @@ déjà été créés : <ul>".format(query_count)
 
         for entry in query:
             msg += u"<li><a href='%s'>%s (%s)</a></li>" % (
-                self.request.route_path('/users/{id}', id=entry.id),
+                self.request.route_path(USER_ITEM_URL, id=entry.id),
                 format_account(entry),
                 entry.email,
             )
@@ -128,7 +134,7 @@ déjà été créés : <ul>".format(query_count)
 
         if add_login:
             redirect = self.request.route_path(
-                "/users/{id}/login",
+                USER_LOGIN_URL,
                 id=model.id,
                 _query={'action': 'add'}
             )
@@ -141,7 +147,7 @@ déjà été créés : <ul>".format(query_count)
                 )
             else:
                 redirect = self.request.route_path(
-                    "/users/{id}",
+                    USER_ITEM_URL,
                     id=model.id,
                 )
         logger.debug(u"Account with id {0} added".format(model.id))
@@ -156,7 +162,7 @@ class UserEditView(BaseEditView):
 
 
 class UserDeleteView(DeleteView):
-    redirect_route = '/users'
+    redirect_route = USER_URL
 
 
 def add_routes(config):
@@ -164,13 +170,13 @@ def add_routes(config):
     Add module related routes
     """
     config.add_route(
-        '/users/{id}',
-        '/users/{id}',
+        USER_ITEM_URL,
+        USER_ITEM_URL,
         traverse='/users/{id}'
     )
     config.add_route(
-        '/users/{id}/edit',
-        '/users/{id}/edit',
+        USER_ITEM_EDIT_URL,
+        USER_ITEM_EDIT_URL,
         traverse='/users/{id}'
     )
 
@@ -181,7 +187,7 @@ def add_views(config):
     """
     config.add_view(
         user_view,
-        route_name='/users/{id}',
+        route_name=USER_ITEM_URL,
         permission="view.user",
         renderer='/user/user.mako',
         layout='user',
@@ -189,7 +195,7 @@ def add_views(config):
 
     config.add_view(
         UserAddView,
-        route_name='/users',
+        route_name=USER_URL,
         request_param="action=add",
         permission="add.user",
         renderer='/user/add.mako',
@@ -198,7 +204,7 @@ def add_views(config):
 
     config.add_view(
         UserEditView,
-        route_name='/users/{id}/edit',
+        route_name=USER_ITEM_EDIT_URL,
         permission="edit.user",
         renderer='/user/edit.mako',
         layout="user",
@@ -206,7 +212,7 @@ def add_views(config):
 
     config.add_view(
         UserDeleteView,
-        route_name='/users/{id}',
+        route_name=USER_ITEM_URL,
         permission="delete.user",
         request_param="action=delete",
     )

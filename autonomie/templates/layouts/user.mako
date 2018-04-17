@@ -4,19 +4,15 @@
        * Arezki Feth <f.a@majerti.fr>;
        * Miotte Julien <j.m@majerti.fr>;
        * TJEBBES Gaston <g.t@majerti.fr>
-
  This file is part of Autonomie : Progiciel de gestion de CAE.
-
     Autonomie is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     Autonomie is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
@@ -34,15 +30,17 @@
                         <i class='fa fa-user fa-4x'></i>
                     </div>
                     <div class='col-md-9'>
-                        <div>${api.format_civilite(request.context.civilite)}&nbsp;${api.format_account(request.context)}</div>
-                        <div><small>${format_mail(request.context.email)}</small></div>
+                        <div>${api.format_civilite(layout.current_user_object.civilite)}&nbsp;${api.format_account(layout.current_user_object)}</div>
+                        <div>${format_mail(layout.current_user_object.email)}</div>
                         <div>
+                        % if request.has_permission("edit.user", layout.current_user_object):
                         <a
                             class='btn btn-default btn-small pull-right'
-                            href="${request.route_path('/users/{id}/edit', id=request.context.id)}"
+                            href="${request.route_path('/users/{id}/edit', id=layout.current_user_object.id)}"
                             >
                             <i class='fa fa-pencil'></i>
                         </a>
+                        % endif
                         </div>
                     </div>
                 </div>

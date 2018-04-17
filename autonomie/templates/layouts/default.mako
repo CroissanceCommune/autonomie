@@ -56,6 +56,7 @@
         </div>
         % endif
         </%block>
+        <%block name="actionmenu">
         % if not request.actionmenu.void():
         <div class='hidden-print'>
             <div class='subnav'>
@@ -63,6 +64,7 @@
             </div>
         </div>
         % endif
+        </%block>
     % endif
 
     <%block name='afteractionmenu' />

@@ -79,13 +79,13 @@ AUTONOMIE_MODULES = (
     "autonomie.views.static",
     "autonomie.views.statistics",
     "autonomie.views.tests",
+    'autonomie.views.training',
     "autonomie.views.treasury_files",
     "autonomie.views.user.user",
     "autonomie.views.user.login",
     "autonomie.views.user.company",
     "autonomie.views.user.lists",
-    "autonomie.views.userdatas.userdatas",
-    "autonomie.views.userdatas.lists",
+    "autonomie.views.userdatas",
 )
 
 AUTONOMIE_LAYOUTS_MODULES = (
@@ -94,6 +94,7 @@ AUTONOMIE_LAYOUTS_MODULES = (
 )
 
 AUTONOMIE_PANELS_MODULES = (
+    "autonomie.panels.form",
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",

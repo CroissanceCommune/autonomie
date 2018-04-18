@@ -25,53 +25,67 @@
 <%block name="mainblock">
 % if request.has_permission('edit.login'):
 <div class='row'>
-
-% if user.login:
-    <div>
-    % if user.login.active:
-    <div class='col-md-2'>
-    <i class='fa fa-lock fa-3x fa-border text-success' style='vertical-align:middle'></i>
-    </div>
-    <div class='col-md-10'>
-    <span class='text-success'>
-        Ce compte dispose d'identifiants
-        <strong>l'utilisateur peut se connecter à Autonomie</strong>
-    </span>
+    % if user.login:
+        % if user.login.active:
+        <div class='col-md-2'>
+            <i class='fa fa-lock fa-3x fa-border text-success' style='vertical-align:middle'></i>
+        </div>
+        <div class='col-md-10'>
+            <span class='text-success'>
+                Ce compte dispose d'identifiants
+                <strong>l'utilisateur peut se connecter à Autonomie</strong>
+            </span>
+        </div>
+        % else:
+        <div class='col-md-2'>
+            <i class='fa fa-lock fa-3x fa-border text-danger' style='vertical-align:middle'></i>
+        </div>
+        <div class='col-md-10'>
+            <span class='text-danger'>
+                Les identifiants de ce compte sont désactivés
+                <strong>
+                l'utilisateur ne peut pas se connecter à Autonomie
+                </strong>
+            </span>
+        </div>
+        % endif
+        <a class='btn btn-default'
+            href="${request.route_path('/users/{id}/login', id=user.id)}"
+            >
+            <i class='fa fa-search'></i>&nbsp;Voir
+        </a>
     % else:
-    <div class='col-md-2'>
-    <i class='fa fa-lock fa-3x fa-border text-danger' style='vertical-align:middle'></i>
-    </div>
-    <div class='col-md-10'>
-    <span class='text-danger'>
-        Les identifiants de ce compte sont désactivés
-        <strong>
-        l'utilisateur ne peut pas se connecter à Autonomie
-        </strong>
-    </span>
+        <div class='col-md-2'>
+            <i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
+        </div>
+        <div class='col-md-10'>
+            <em>Ce compte ne dispose pas d'identifiants</em><&nbsp;
+            <a
+            class='btn btn-primary'
+            href="${request.route_path('/users/{id}/login', id=user.id, _query={'action': 'add'})}"
+            >
+                <i class='fa fa-plus-circle'></i>&nbsp;Créer des identifiants
+            </a>
+        </div>
     % endif
-    </div>
-    <a class='btn btn-default'
-        href="${request.route_path('/users/{id}/login', id=user.id)}"
-        >
-        <i class='fa fa-search'></i>&nbsp;Voir
-    </a>
-% else:
-    <div class='col-md-2'>
-    <i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
-    </div>
-    <div class='col-md-10'>
-    <em>Ce compte ne dispose pas d'identifiants</em><&nbsp;
+% elif request.has_permission('set_email.user'):
     <a
-    class='btn btn-primary'
-    href="${request.route_path('/users/{id}/login', id=user.id, _query={'action': 'add'})}"
-    >
-        <i class='fa fa-plus-circle'></i>&nbsp;Créer des identifiants
+        class='btn btn-primary primary-action'
+        href="${request.route_path('/users/{id}/myaccount', id=request.context.id)}"
+        >
+        <i class='fa fa-pencil'></i>&nbsp;Modifier mes informations
     </a>
 % endif
-</div>
+% if request.has_permission('set_password.login') and user.login:
+    <a
+        class='btn btn-primary primary-action'
+        href="${request.route_path('/users/{id}/login/set_password', id=request.context.id)}"
+        >
+        <i class='fa fa-lock'></i>&nbsp;Changer de mot de passe
+    </a>
+% endif
 </div>
 <hr />
-% endif
 
 
 % if request.has_permission('admin.company'):

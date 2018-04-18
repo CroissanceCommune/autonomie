@@ -29,15 +29,16 @@
             class='disabled'
         % endif
         >
-            % if elem.enabled(_context, request):
             <a
                 title='${elem.title}'
-                href="${elem.url(_context, request)}">
-            % endif
-                <i class="${elem.icon}"></i>&nbsp;<span class='hidden-xs'>${elem.label|n}</span>
             % if elem.enabled(_context, request):
-            </a>
+                href="${elem.url(_context, request)}"
+            % else:
+                href='#'
             % endif
+                >
+                <i class="${elem.icon}"></i>&nbsp;<span class='hidden-xs'>${elem.label|n}</span>
+            </a>
         </li>
     % endif
 </%def>

@@ -123,8 +123,11 @@ def get_add_edit_project_schema():
     """
     Return the project Edition/add form schema
     """
-    excludes = ("_acl", "id", "company_id", "archived", "customers",
-                "invoices", "tasks", "estimations", "cancelinvoices",)
+    excludes = (
+        "_acl", "id", "company_id", "archived", "customers",
+        "invoices", "tasks", "estimations", "cancelinvoices",
+        "project_type_id", "project_type",
+    )
     schema = SQLAlchemySchemaNode(Project, excludes=excludes)
     schema = _customize_project_schema(schema)
     return schema

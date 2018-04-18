@@ -106,8 +106,7 @@ nav.sidebar-menu .subnav li {
   -moz-border-radius: 4px 0 0 4px; }
 
 .breadcrumb-arrow li, .breadcrumb-arrow li a, .breadcrumb-arrow li span {
-  display: inline-block;
-  vertical-align: top; }
+  display: inline-block; }
 
 .breadcrumb-arrow li:not(:first-child) {
   margin-left: -5px; }

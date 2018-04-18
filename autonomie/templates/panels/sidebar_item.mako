@@ -74,8 +74,8 @@
         % endif
     % endif
 </%def>
-% if menu.__type__ == 'dropdown':
-${render_dropdown(menu)}
+% if menu_item.__type__ == 'dropdown':
+${render_dropdown(menu_item)}
 % else:
-${render_item(menu)}
+${render_item(menu_item)}
 % endif

@@ -15,6 +15,9 @@ from autonomie.export.sage import SageExpensePaymentCsvWriter
 from autonomie.utils import strings
 from autonomie.utils.widgets import ViewLink
 
+from autonomie.views.admin.expense.accounting import (
+    EXPENSE_PAYMENT_ACCOUNTING_URL,
+)
 from autonomie.views.export.utils import (
     get_period_form,
     get_all_form,
@@ -49,7 +52,7 @@ class SageExpensePaymentExportPage(BaseExportView):
     Provide an expense payment export page
     """
     title = u"Export des règlements de notes de frais au format CSV pour Sage"
-    admin_route_name = 'admin_expense_treasury'
+    admin_route_name = EXPENSE_PAYMENT_ACCOUNTING_URL
 
     def _populate_action_menu(self):
         self.request.actionmenu.add(
@@ -203,7 +206,7 @@ de notes de dépense",
 
             if payment.waiver and not self._check_waiver(payment):
                 admin_url = self.request.route_path(
-                    'admin_expense_treasury'
+                    self.admin_route_name
                 )
                 message = ERR_WAIVER_CONFIG.format(admin_url)
                 res['errors'].append(message)

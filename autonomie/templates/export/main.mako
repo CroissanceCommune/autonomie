@@ -21,8 +21,7 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
-<%inherit file="/admin/index.mako"></%inherit>
+<%inherit file="${context['main_template'].uri}" />
 <%block name='content'>
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>

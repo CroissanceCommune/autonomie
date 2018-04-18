@@ -24,8 +24,8 @@
 <%block name='afteractionmenu'>
 <div class='page-header-block'>
 
-% if breadcrumb is not UNDEFINED:
-    <ul class="breadcrumb breadcrumb-arrow">
+% if breadcrumb is not UNDEFINED and 'popup' not in request.GET:
+    <ul class="breadcrumb breadcrumb-arrow hidden-xs">
         % if back_link:
         <li><a href='${back_link}'><i class='fa fa-chevron-left'></i></a></li>
         % endif

@@ -38,6 +38,10 @@ from autonomie.models.task import (
     CancelInvoice,
 )
 
+from autonomie.views.admin.sale.accounting import (
+    ACCOUNTING_URL,
+    ACCOUNTING_CONFIG_URL,
+)
 from autonomie.views.export import BaseExportView
 from autonomie.views.export.utils import (
     get_period_form,
@@ -79,7 +83,7 @@ class SageSingleInvoiceExportPage(BaseExportView):
     """
     Single invoice export page
     """
-    admin_route_name = 'admin_vente'
+    admin_route_name = ACCOUNTING_URL
 
     @property
     def title(self):
@@ -192,7 +196,7 @@ class SageSingleInvoiceExportPage(BaseExportView):
             if invoice.discounts:
                 if not self._check_discount_config():
                     admin_url = self.request.route_path(
-                        "admin_vente_treasury_main"
+                        ACCOUNTING_CONFIG_URL,
                     )
 
                     message = MISSING_RRR_CONFIG_ERROR_MSG.format(

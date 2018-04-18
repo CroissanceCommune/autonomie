@@ -109,14 +109,14 @@
                         <tr>
                             <td>
                             % if request.has_permission('view.user', user):
-                            <a href="${url}">
-                            ${api.format_account(user)}
-                            </a>
-                            % if user.login is None:
-                                <span class='text-warning'>ce compte ne dispose pas d'identifiants</span>
-                            % elif not user.login.active:
-                                ${login_disabled_msg()}
-                            % endif
+                                <a href="${url}">
+                                ${api.format_account(user)}
+                                </a>
+                                % if user.login is None:
+                                    <span class='text-warning'>ce compte ne dispose pas d'identifiants</span>
+                                % elif not user.login.active:
+                                    ${login_disabled_msg()}
+                                % endif
                             % else:
                                 ${api.format_account(user)}
                             % endif

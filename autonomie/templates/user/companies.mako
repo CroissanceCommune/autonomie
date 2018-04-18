@@ -62,37 +62,40 @@
                     </td>
                     <td class='actions'>
                         ${table_btn(url, u"Voir", u"Modifier l'entreprise", icon='glyphicon glyphicon-search')}
-                        <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
-                        ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
-
-                        % if len(company.employees) > 1:
-                            <% url = request.route_path('company', id=company.id, _query=dict(action="remove", uid=user.id)) %>
-                            <% msg = u"{0} n\\'aura plus accès aux données de l\\'entreprise {1}. Êtes-vous sûr de vouloir continuer ?".format(api.format_account(user), company.name) %>
-
-                            ${table_btn(url, \
-                            u"Retirer",
-                            u"Retirer %s de cette entreprise" % user.label,
-                            onclick="return confirm('%s');" % msg,
-                            icon="link",
-                            css_class="btn-warning")}
-
+                        % if request.has_permission("edit.company", company):
+                            <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
+                            ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
                         % endif
+                        % if request.has_permission('admin.company'):
+                            % if len(company.employees) > 1:
+                                <% url = request.route_path('company', id=company.id, _query=dict(action="remove", uid=user.id)) %>
+                                <% msg = u"{0} n\\'aura plus accès aux données de l\\'entreprise {1}. Êtes-vous sûr de vouloir continuer ?".format(api.format_account(user), company.name) %>
 
-                        <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
-                        % if company.active:
-                            <% msg = u"Cette entreprise n\\'apparaîtra plus dans les listings de factures. Êtes-vous sûr de vouloir continuer ?" %>
-                            ${table_btn(url, \
-                            u"Désactiver", \
-                            u"désactiver l'entreprise", \
-                            icon='glyphicon glyphicon-book', \
-                            onclick="return confirm('%s');" % msg,
-                            css_class="btn-danger")}
-                        % else:
-                            ${table_btn(url, \
-                            u"Activer", \
-                            u"Activer l'entreprise", \
-                            icon='glyphicon glyphicon-book', \
-                            css_class="btn-success")}
+                                ${table_btn(url, \
+                                u"Retirer",
+                                u"Retirer %s de cette entreprise" % user.label,
+                                onclick="return confirm('%s');" % msg,
+                                icon="link",
+                                css_class="btn-warning")}
+
+                            % endif
+
+                            <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
+                            % if company.active:
+                                <% msg = u"Cette entreprise n\\'apparaîtra plus dans les listings de factures. Êtes-vous sûr de vouloir continuer ?" %>
+                                ${table_btn(url, \
+                                u"Désactiver", \
+                                u"désactiver l'entreprise", \
+                                icon='glyphicon glyphicon-book', \
+                                onclick="return confirm('%s');" % msg,
+                                css_class="btn-danger")}
+                            % else:
+                                ${table_btn(url, \
+                                u"Activer", \
+                                u"Activer l'entreprise", \
+                                icon='glyphicon glyphicon-book', \
+                                css_class="btn-success")}
+                            % endif
                         % endif
                     </td>
                 </tr>

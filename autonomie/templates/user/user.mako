@@ -74,7 +74,7 @@
 % endif
 
 
-% if request.has_permission('edit.company'):
+% if request.has_permission('admin.company'):
 <div class='row'>
 <div class='col-md-2'>
 <i class='fa fa-building fa-3x fa-border' style='vertical-align:middle'></i>

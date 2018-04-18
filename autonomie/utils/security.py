@@ -628,6 +628,7 @@ def _get_user_status_acl(self):
             'view.file',
             'add.file',
             'edit.file',
+            "delete.file",
         )
 
         if self.status in ('draft', 'invalid'):
@@ -654,6 +655,7 @@ def _get_admin_status_acl(self):
         'view.file',
         'add.file',
         'edit.file',
+        "delete.file",
     )
 
     if self.status in ('draft', 'wait', 'invalid'):
@@ -953,6 +955,7 @@ def get_project_acl(self):
         'view.file',
         'add.file',
         'edit.file',
+        "delete.file",
     )
 
     if not self.has_tasks():

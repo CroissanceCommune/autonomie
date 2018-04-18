@@ -96,8 +96,14 @@ def get_auth_validator(current_login_object=None):
 
 @colander.deferred
 def deferred_password_validator(node, kw):
-    current_login = kw['request'].context
-    return get_auth_validator(current_login)
+    context = kw['request'].context
+    if isinstance(context, Login):
+        login = context
+    elif isinstance(context, User):
+        login = context.login
+    else:
+        raise Exception(u"Invalid context for this validator")
+    return get_auth_validator(login)
 
 
 def get_groups(request):

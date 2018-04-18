@@ -310,7 +310,7 @@ def get_event_acl(self):
         acl.append(
             (
                 Allow,
-                user.login,
+                user.login.login,
                 ("view_activity", "view_workshop", "view.file")
             )
         )
@@ -327,7 +327,7 @@ def get_activity_acl(self):
             acl.append(
                 (
                     Allow,
-                    user.login,
+                    user.login.login,
                     ("view_activity", "view.file")
                 )
             )
@@ -641,7 +641,7 @@ def _get_user_status_acl(self):
         if self.status in ('wait',):
             perms += ('draft.%s' % self.type_,)
 
-        acl.append((Allow, user.login, perms))
+        acl.append((Allow, user.login.login, perms))
     return acl
 
 
@@ -720,7 +720,7 @@ def get_estimation_default_acl(self):
                 perms += ('geninv.estimation',)
 
         if perms:
-            acl.append((Allow, user.login, perms))
+            acl.append((Allow, user.login.login, perms))
     return acl
 
 
@@ -764,7 +764,7 @@ def get_invoice_default_acl(self):
             perms += ('gencinv.invoice',)
 
         if perms:
-            acl.append((Allow, user.login, perms))
+            acl.append((Allow, user.login.login, perms))
 
     return acl
 
@@ -886,7 +886,7 @@ def get_payment_default_acl(self):
     acl.append((Allow, 'group:payment_admin', admin_perms))
 
     for user in self.task.company.employees:
-        acl.append((Allow, user.login, ('view.payment',)))
+        acl.append((Allow, user.login.login, ('view.payment',)))
 
     return acl
 
@@ -907,7 +907,7 @@ def get_expense_payment_acl(self):
     acl.append((Allow, 'group:manager', admin_perms))
 
     for user in self.expense.company.employees:
-        acl.append((Allow, user.login, ('view.payment',)))
+        acl.append((Allow, user.login.login, ('view.payment',)))
     return acl
 
 
@@ -924,7 +924,7 @@ def get_customer_acl(self):
         acl.insert(0, (Deny, Everyone, ('delete_customer',)))
 
     for user in self.company.employees:
-        acl.append((Allow, user.login, perms))
+        acl.append((Allow, user.login.login, perms))
 
     return acl
 
@@ -966,7 +966,7 @@ def get_project_acl(self):
     acl.append((Deny, 'group:estimation_only', ('add_invoice',)))
 
     for user in self.company.employees:
-        acl.append((Allow, user.login, perms))
+        acl.append((Allow, user.login.login, perms))
 
     return acl
 
@@ -997,7 +997,7 @@ def get_product_acl(self):
         acl.append(
             (
                 Allow,
-                user.login,
+                user.login.login,
                 (
                     'list_sale_products',
                     'view_sale_product',

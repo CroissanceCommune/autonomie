@@ -40,7 +40,6 @@ from autonomie.utils.widgets import (
     ViewLink,
     Link,
 )
-from autonomie_base.models.base import DBSESSION
 from autonomie.models.files import File
 from autonomie import forms
 from autonomie.forms.files import (
@@ -50,6 +49,7 @@ from autonomie.resources import fileupload_js
 from autonomie.views import (
     BaseFormView,
     BaseView,
+    DeleteView,
 )
 
 
@@ -77,26 +77,30 @@ def file_dl_view(context, request):
     return request.response
 
 
-class FileView(BaseView):
+class FileViewRedirectMixin(object):
     """
-    A base file view allowing to tune the way datas is shown
+    Mixin providing tools to handle redirection from within a File related view
     """
     NODE_TYPE_ROUTES = {
-        'estimation': "/estimations/{id}.html",
-        'invoice': "/invoices/{id}.html",
+        'activity': u"activity",
         'cancelinvoice': "/cancelinvoices/{id}.html",
+        'estimation': "/estimations/{id}.html",
         'expensesheet': "/expenses/{id}",
+        'invoice': "/invoices/{id}.html",
+        'project': "project",
         'userdata': "/users/{id}/userdatas/filelist",
+        "workshop": u"workshop",
     }
 
     NODE_TYPE_LABEL = {
-        'project': u'au projet',
-        'estimation': u'au devis',
-        'invoice': u'à la facture',
-        'cancelinvoice': u"à l'avoir",
         'activity': u'au rendez-vous',
-        'userdata': u"à la fiche de gestion sociale",
+        'cancelinvoice': u"à l'avoir",
+        'estimation': u'au devis',
         "expensesheet": u"à la note de dépense",
+        'invoice': u'à la facture',
+        'project': u'au projet',
+        'userdata': u"à la fiche de gestion sociale",
+        "workshop": u"à l'atelier",
     }
 
     def get_redirect_item(self):
@@ -122,6 +126,11 @@ attribute")
         label = u"Revenir {0}".format(type_label)
         return label
 
+
+class FileView(BaseView, FileViewRedirectMixin):
+    """
+    A base file view allowing to tune the way datas is shown
+    """
     def populate_actionmenu(self):
         return Link(self.back_url(), self.get_label())
 
@@ -289,23 +298,11 @@ def get_add_file_link(
     )
 
 
-def file_delete_view(context, request):
-    """
-    View for file deletion
-    """
-    referrer = request.referrer
-    DBSESSION().delete(context)
-    if referrer is None:
-        parent = context.parent
-        if parent.type_ in ('estimation', 'invoice', 'cancelinvoice',):
-            route_name = "/%ss/{id}" % parent.type_
-        elif parent.type_ in 'expensesheet':
-            route_name = "/expenses/{id}"
-        else:
-            route_name = parent.type_
-        return HTTPFound(request.route_path(route_name, id=parent.id))
-    else:
-        return HTTPFound(referrer)
+class FileDeleteView(DeleteView, FileViewRedirectMixin):
+    delete_msg = u"Le fichier a été supprimé"
+
+    def redirect(self):
+        return HTTPFound(self.back_url())
 
 
 def add_routes(config):
@@ -364,8 +361,8 @@ def includeme(config):
         request_param='action=edit',
     )
     config.add_view(
-        file_delete_view,
+        FileDeleteView,
         route_name='file',
-        permission='edit.file',
+        permission='delete.file',
         request_param='action=delete',
     )

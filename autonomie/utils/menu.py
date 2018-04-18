@@ -30,6 +30,9 @@ class MenuItem(object):
     def enabled(self, context, request):
         return True
 
+    def visible(self, context, request):
+        return True
+
     def selected(self, context, request):
         return request.matched_route.name == self.route_name
 
@@ -107,19 +110,47 @@ class MenuDropdown(object):
 
 class AttrMenuItem(MenuItem):
     """
-    A menu item that is condionnaly shown regarding a model's attribute
+    A menu item that is condionnaly active regarding a model's attribute
 
-    If the context's attribute is None, the menu is not shown
+    hidden_attribute
+
+        The context's attribute used to check if the menu should be shown or not
+        (not shown if the attribute is None)
+
+    disable_attribute
+
+        The context's attribute used to check if the menu should be disabled
+        (disabled if attribute is None)
+
+    perm_context_attribute
+
+        The current context's attribute used as context for the permission check
+
+        E.g: if the context is a User and perm_context_attribute is "userdatas",
+        we will chek the menu permission regarding the related UserDatas
+        instance
     """
     def __init__(self, *args, **kw):
-        self.model_attribute = kw.pop('model_attribute')
+        self.hidden_attribute = kw.pop('hidden_attribute', None)
+        self.disable_attribute = kw.pop('disable_attribute', None)
+        self.perm_context_attribute = kw.pop('perm_context_attribute', None)
         MenuItem.__init__(self, **kw)
 
     def enabled(self, context, request):
-        return getattr(context, self.model_attribute, None) is not None
+        if self.disable_attribute is None:
+            return True
+        return getattr(context, self.disable_attribute, None) is not None
+
+    def visible(self, context, request):
+        if self.hidden_attribute is None:
+            return True
+        return getattr(context, self.hidden_attribute, None) is not None
 
     def has_permission(self, context, request):
-        related = getattr(context, self.model_attribute, None)
+        related = context
+        if self.perm_context_attribute is not None:
+            related = getattr(context, self.perm_context_attribute, None)
+
         if self.perm is not None and related is not None:
             return request.has_permission(self.perm, related)
         return True
@@ -127,11 +158,19 @@ class AttrMenuItem(MenuItem):
 
 class AttrMenuDropdown(MenuDropdown):
     def __init__(self, *args, **kw):
-        self.model_attribute = kw.pop('model_attribute')
+        self.hidden_attribute = kw.pop('hidden_attribute', None)
+        self.disable_attribute = kw.pop('disable_attribute', None)
         MenuDropdown.__init__(self, **kw)
 
     def enabled(self, context, request):
-        return getattr(context, self.model_attribute, None) is not None
+        if self.disable_attribute is None:
+            return True
+        return getattr(context, self.disable_attribute, None) is not None
+
+    def visible(self, context, request):
+        if self.hidden_attribute is None:
+            return True
+        return getattr(context, self.hidden_attribute, None) is not None
 
 
 class Menu(object):

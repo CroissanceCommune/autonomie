@@ -13,7 +13,10 @@ from sqlalchemy import or_
 
 from autonomie.utils.strings import format_account
 from autonomie.models.user.user import User
-from autonomie.forms.user.user import get_add_edit_schema
+from autonomie.forms.user.user import (
+    get_add_edit_schema,
+    get_edit_account_schema,
+)
 from autonomie.views import (
     BaseFormView,
     DeleteView,
@@ -22,6 +25,7 @@ from autonomie.views import (
 from autonomie.views.user.routes import (
     USER_URL,
     USER_ITEM_URL,
+    USER_MYACCOUNT_URL,
     USER_ITEM_EDIT_URL,
     USER_LOGIN_URL,
 )
@@ -154,6 +158,21 @@ déjà été créés : <ul>".format(query_count)
         return HTTPFound(redirect)
 
 
+class UserAccountEditView(BaseEditView):
+    """
+    View allowing a end user to modify some of his account informations
+    """
+    schema = get_edit_account_schema()
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                USER_ITEM_URL,
+                id=self.context.id,
+            )
+        )
+
+
 class UserEditView(BaseEditView):
     schema = get_add_edit_schema(edit=True)
 
@@ -175,6 +194,11 @@ def add_routes(config):
         traverse='/users/{id}'
     )
     config.add_route(
+        USER_MYACCOUNT_URL,
+        USER_MYACCOUNT_URL,
+        traverse='/users/{id}'
+    )
+    config.add_route(
         USER_ITEM_EDIT_URL,
         USER_ITEM_EDIT_URL,
         traverse='/users/{id}'
@@ -191,6 +215,13 @@ def add_views(config):
         permission="view.user",
         renderer='/user/user.mako',
         layout='user',
+    )
+    config.add_view(
+        UserAccountEditView,
+        route_name=USER_MYACCOUNT_URL,
+        permission="set_email.user",
+        renderer='autonomie:templates/base/formpage.mako',
+        layout='default',
     )
 
     config.add_view(

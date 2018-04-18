@@ -8,6 +8,7 @@ import os
 
 USER_URL = "/users"
 USER_ITEM_URL = os.path.join(USER_URL, '{id}')
+USER_MYACCOUNT_URL = os.path.join(USER_ITEM_URL, 'myaccount')
 USER_ITEM_EDIT_URL = os.path.join(USER_ITEM_URL, 'edit')
 USER_LOGIN_URL = os.path.join(USER_ITEM_URL, "login")
 USER_LOGIN_EDIT_URL = os.path.join(USER_LOGIN_URL, "edit")

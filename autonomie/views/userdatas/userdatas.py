@@ -75,7 +75,7 @@ USERDATAS_MENU = AttrMenuDropdown(
     label=u'Gestion sociale',
     default_route=USER_USERDATAS_URL,
     icon=u'fa fa-id-card-o',
-    model_attribute='userdatas',
+    hidden_attribute='userdatas',
     perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(

@@ -132,7 +132,7 @@ ACCOMPAGNEMENT_MENU = AttrMenuDropdown(
     label=u"Accompagnement",
     default_route="/users/{id}/activities",
     icon=u"fa fa-users",
-    model_attribute='login',
+    hidden_attribute='login',
     perm="list.activity",
 )
 ACCOMPAGNEMENT_MENU.add_item(

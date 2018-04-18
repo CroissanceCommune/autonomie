@@ -37,7 +37,8 @@ UserMenu.add(
         label=u'Identifiants',
         route_name=u'/users/{id}/login',
         icon=u'fa fa-lock',
-        model_attribute='login',
+        disable_attribute='login',
+        perm_context_attribute="login",
         perm='view.login',
     ),
 )
@@ -47,8 +48,8 @@ UserMenu.add(
         label=u'Entreprises',
         route_name=u'/users/{id}/companies',
         icon=u'fa fa-building',
-        model_attribute='companies',
-        perm='view.company',
+        disable_attribute='companies',
+        perm='list.company',
     ),
 )
 

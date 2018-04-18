@@ -46,7 +46,7 @@ TRAINER_MENU = AttrMenuDropdown(
     label=u"Formation",
     default_route=USER_TRAINER_URL,
     icon=u"fa fa-graduation-cap",
-    model_attribute="trainerdatas",
+    hidden_attribute="trainerdatas",
     perm="view.trainerdatas",
 )
 TRAINER_MENU.add_item(

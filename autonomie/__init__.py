@@ -284,6 +284,19 @@ def base_configure(config, dbsession, **settings):
         reify=True
     )
 
+    from autonomie.utils.predicates import (
+        SettingHasValuePredicate,
+        ApiKeyAuthenticationPredicate,
+    )
+    # Allows to restrict view acces only if a setting is set
+    config.add_view_predicate(
+        'if_setting_has_value', SettingHasValuePredicate
+    )
+    # Allows to authentify a view through hmac api key auth
+    config.add_view_predicate(
+        'api_key_authentication', ApiKeyAuthenticationPredicate
+    )
+
     add_static_views(config, settings)
 
     for module in AUTONOMIE_LAYOUTS_MODULES:

@@ -68,20 +68,22 @@
                 <div class='col-md-6 col-xs-12'>
                     ${format_company(company)}
                     </div><div class='col-md-6 col-xs-12'>
-                    % for route, label in ( \
-                    ('company_estimations', u"Voir les devis"),\
-                    ('company_invoices', u"Voir les factures"),\
-                    ('commercial_handling', u"Voir la gestion commerciale"), \
-                    ('/companies/{id}/accounting/treasury_measure_grids', u"Voir les états de trésorerie"), \
-                    ('company_activities', u"Voir les rendez-vous"),\
-                    ('company_workshops', u"Voir les ateliers"),\
+                    % for perm, route, label in ( \
+                    ('list.estimation', 'company_estimations', u"Voir les devis"),\
+                    ('list.invoice', 'company_invoices', u"Voir les factures"),\
+                    ('view.commercial', 'commercial_handling', u"Voir la gestion commerciale"), \
+                    ('view.treasury', '/companies/{id}/accounting/treasury_measure_grids', u"Voir les états de trésorerie"), \
+                    ('list.activity', 'company_activities', u"Voir les rendez-vous"),\
+                    ('list.activity', 'company_workshops', u"Voir les ateliers"),\
                     ):
+                    % if request.has_permission(perm):
                     <p>
                         <a
                             href="${request.route_path(route, id=_context.id)}">
                             <i class='fa fa-arrow-right'></i>&nbsp;${label}
                         </a>
                     </p>
+                    % endif
                     % endfor
                 </div>
             </div>
@@ -93,14 +95,18 @@
         </div>
         <div class='panel-body'>
         % for user in company.employees:
+            % if request.has_permission("view.user", user):
             <a
                 href="${request.route_path('/users/{id}', id=user.id)}"
                 title='Voir ce compte'>
+            % endif
                 <i class='glyphicon glyphicon-user'></i>&nbsp;${api.format_account(user)}
                 % if user.login is not None and not user.login.active:
                 ${login_disabled_msg()}
                 % endif
+            % if request.has_permission("view.user", user):
             </a>
+            % endif
             <br />
         % endfor
         % if len(company.employees) == 0:

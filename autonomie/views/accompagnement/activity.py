@@ -132,22 +132,22 @@ ACCOMPAGNEMENT_MENU = AttrMenuDropdown(
     label=u"Accompagnement",
     default_route="/users/{id}/activities",
     icon=u"fa fa-users",
-    model_attribute='login',
-    perm="view.activities",
+    hidden_attribute='login',
+    perm="list.activity",
 )
 ACCOMPAGNEMENT_MENU.add_item(
     name="activity_view",
     label=u"Rendez-vous",
     route_name=u'/users/{id}/activities',
     icon=u"fa fa-calendar",
-    perm="view.activities",
+    perm="list.activity",
 )
 ACCOMPAGNEMENT_MENU.add_item(
     name="workshop_view",
     label=u"Ateliers",
     icon=u"fa fa-slideshare",
     route_name=u'/users/{id}/workshops',
-    perm="view.activities",
+    perm="list.activity",
 )
 
 
@@ -964,7 +964,7 @@ def add_views(config):
     config.add_view(
         UserActivityListView,
         route_name="/users/{id}/activities",
-        permission='view.activities',
+        permission='list.activity',
         renderer="/accompagnement/user_activities.mako",
         layout="user"
     )

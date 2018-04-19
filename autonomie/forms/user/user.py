@@ -101,14 +101,15 @@ def set_widgets(schema):
             )
         )
 
-    customize(
-        'civilite',
-        widget=forms.get_select(CIVILITE_OPTIONS),
-        validator=forms.get_select_validator(CIVILITE_OPTIONS)
-    )
+    if 'civilite' in schema:
+        customize(
+            'civilite',
+            widget=forms.get_select(CIVILITE_OPTIONS),
+            validator=forms.get_select_validator(CIVILITE_OPTIONS)
+        )
 
-    customize('email', validator=forms.mail_validator())
-
+    if 'email' in schema:
+        customize('email', validator=forms.mail_validator())
     return schema
 
 
@@ -199,6 +200,20 @@ def get_edit_accounting_schema():
             'vehicle',
             'compte_tiers',
         ),
+    )
+    set_widgets(schema)
+    return schema
+
+
+def get_edit_account_schema():
+    """
+    Build a schema for user account schema edition
+
+    Allow to edit email informations
+    """
+    schema = SQLAlchemySchemaNode(
+        User,
+        includes=('firstname', 'lastname', 'email',),
     )
     set_widgets(schema)
     return schema

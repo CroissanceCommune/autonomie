@@ -25,6 +25,7 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%namespace file="/base/utils.mako" import="company_disabled_msg"/>
+<%namespace file="/base/utils.mako" import="login_disabled_msg"/>
 <%block name="content">
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
@@ -76,21 +77,42 @@
             <tbody>
                 % for company in records:
                     <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
-                    <% onclick = "document.location='{url}'".format(url=url) %>
                     <tr>
-                        <td onclick="${onclick}" class="rowlink">
-                            ${company.name}
-                            % if not company.active:
-                            ${company_disabled_msg()}
+                        <td>
+                            <% company_url = request.route_path('company', id=company.id) %>
+                            % if request.has_permission('view.company', company):
+                            <a href="${company_url}">
+                            ${company.name} (<small>${company.goal}</small>)
+                            </a>
+                                % if request.has_permission('admin_company', company):
+                                    % if not company.active:
+                                        ${company_disabled_msg()}
+                                    % endif
+                                % endif
+                            % else:
+                            ${company.name} (<small>${company.goal}</small>)
                             % endif
                         </td>
-                        <td onclick="${onclick}" class="rowlink">
+                        <td>
                             ${company.email}
                         </td>
-                        <td onclick="${onclick}" class="rowlink">
+                        <td>
                             <ul>
                                 % for user in company.employees:
-                                    <li>${api.format_account(user)}</li>
+                                    <li>
+                                    % if request.has_permission('view.user', user):
+                                        <a href="${url}">
+                                        ${api.format_account(user)}
+                                        </a>
+                                        % if user.login is None:
+                                            <span class='text-warning'>ce compte ne dispose pas d'identifiants</span>
+                                        % elif not user.login.active:
+                                            ${login_disabled_msg()}
+                                        % endif
+                                    % else:
+                                        ${api.format_account(user)}
+                                    % endif
+                                    </li>
                                 % endfor
                             </ul>
                         </td>

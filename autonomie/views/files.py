@@ -36,11 +36,9 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import NO_PERMISSION_REQUIRED
 
 from autonomie.export.utils import write_file_to_request
-from autonomie.utils.widgets import ViewLink
-from autonomie_base.models.base import DBSESSION
-from autonomie.models.node import (
-    NODE_TYPE_ROUTES,
-    NODE_TYPE_LABEL,
+from autonomie.utils.widgets import (
+    ViewLink,
+    Link,
 )
 from autonomie.models.files import File
 from autonomie import forms
@@ -50,6 +48,8 @@ from autonomie.forms.files import (
 from autonomie.resources import fileupload_js
 from autonomie.views import (
     BaseFormView,
+    BaseView,
+    DeleteView,
 )
 
 
@@ -57,8 +57,8 @@ UPLOAD_MISSING_DATAS_MSG = u"Des informations sont manquantes pour \
 l'adjonction de fichiers"
 
 
-UPLOAD_OK_MSG = u"Le fichier a bien été adjoint au document"
-EDIT_OK_MSG = u"Le fichier a bien été adjoint au document"
+UPLOAD_OK_MSG = u"Le fichier a bien été enregistré"
+EDIT_OK_MSG = u"Le fichier a bien été enregistré"
 
 
 logger = log = logging.getLogger(__name__)
@@ -77,15 +77,82 @@ def file_dl_view(context, request):
     return request.response
 
 
-def file_view(context, request):
+class FileViewRedirectMixin(object):
     """
-    simple view for a given file, displays information related to this file
+    Mixin providing tools to handle redirection from within a File related view
     """
-    populate_actionmenu(context, request)
-    return dict(
-        title=u"Fichier {0}".format(context.name),
-        file=context,
-    )
+    NODE_TYPE_ROUTES = {
+        'activity': u"activity",
+        'cancelinvoice': "/cancelinvoices/{id}.html",
+        'estimation': "/estimations/{id}.html",
+        'expensesheet': "/expenses/{id}",
+        'invoice': "/invoices/{id}.html",
+        'project': "project",
+        'userdata': "/users/{id}/userdatas/filelist",
+        "workshop": u"workshop",
+    }
+
+    NODE_TYPE_LABEL = {
+        'activity': u'au rendez-vous',
+        'cancelinvoice': u"à l'avoir",
+        'estimation': u'au devis',
+        "expensesheet": u"à la note de dépense",
+        'invoice': u'à la facture',
+        'project': u'au projet',
+        'userdata': u"à la fiche de gestion sociale",
+        "workshop": u"à l'atelier",
+    }
+
+    def get_redirect_item(self):
+        item = parent = self.context.parent
+
+        if parent.type_ == 'userdata':
+            item = parent.user
+        return item
+
+    def back_url(self):
+        parent = self.context.parent
+        route_name = self.NODE_TYPE_ROUTES.get(parent.type_)
+        if route_name is None:
+            raise Exception(u"You should set the route on the FileView \
+attribute")
+        return self.request.route_path(
+            route_name, id=self.get_redirect_item().id
+        )
+
+    def get_label(self):
+        parent = self.context.parent
+        type_label = self.NODE_TYPE_LABEL.get(parent.type_, u'au précédent')
+        label = u"Revenir {0}".format(type_label)
+        return label
+
+
+class FileView(BaseView, FileViewRedirectMixin):
+    """
+    A base file view allowing to tune the way datas is shown
+    """
+    def populate_actionmenu(self):
+        return Link(self.back_url(), self.get_label())
+
+    def edit_url(self):
+        return self.request.route_path(
+            "file", id=self.context.id, _query={'action': 'edit'}
+        )
+
+    def delete_url(self):
+        return self.request.route_path(
+            "file", id=self.context.id, _query={'action': 'delete'}
+        )
+
+    def __call__(self):
+        self.populate_actionmenu()
+        return dict(
+            title=u"Fichier {0}".format(self.context.name),
+            file=self.context,
+            edit_url=self.edit_url(),
+            delete_url=self.delete_url(),
+            navigation=self.populate_actionmenu(),
+        )
 
 
 class FileUploadView(BaseFormView):
@@ -133,13 +200,21 @@ class FileUploadView(BaseFormView):
         self.request.dbsession.flush()
         self.request.session.flash(self.valid_msg)
 
+    def redirect(self, come_from=None):
+        """
+        Build the redirection url
+
+        Can be overriden to specify a redirection
+        """
+        return HTTPFound(come_from)
+
     def submit_success(self, appstruct):
         """
             Insert data in the database
         """
         log.debug(u"A file has been uploaded (add or edit)")
 
-        come_from = appstruct.pop('come_from')
+        come_from = appstruct.pop('come_from', None)
         appstruct.pop("filetype", '')
 
         appstruct = forms.flatten_appstruct(appstruct)
@@ -150,7 +225,7 @@ class FileUploadView(BaseFormView):
         # file upload widget
         self.request.session.pop('substanced.tempstore')
         self.request.session.changed()
-        return HTTPFound(come_from)
+        return self.redirect(come_from)
 
 
 class FileEditView(FileUploadView):
@@ -223,57 +298,11 @@ def get_add_file_link(
     )
 
 
-def populate_actionmenu(context, request):
-    """
-        Add menu items
-    """
-    type_label = NODE_TYPE_LABEL.get(context.parent.type_, u'précédent')
-    label = u"Revenir au {0}".format(type_label)
-    request.actionmenu.add(
-        ViewLink(
-            label,
-            perm='view.file',
-            path=NODE_TYPE_ROUTES.get(
-                context.parent.type_,
-                context.parent.type_
-            ),
-            id=context.parent.id
-        )
-    )
-    request.actionmenu.add(
-        ViewLink(
-            u"Modifier",
-            perm=u'edit.file',
-            path="file",
-            id=context.id,
-            _query=dict(action='edit'),
-        )
-    )
-    request.actionmenu.add(
-        ViewLink(
-            u"Supprimer le fichier",
-            perm=u'edit.file',
-            path="file",
-            confirm=u"Êtes-vous sûr de vouloir supprimer ce fichier ?",
-            id=context.id,
-            _query=dict(action='delete')
-        )
-    )
+class FileDeleteView(DeleteView, FileViewRedirectMixin):
+    delete_msg = u"Le fichier a été supprimé"
 
-
-def file_delete_view(context, request):
-    """
-        View for file deletion
-    """
-    parent = context.parent
-    DBSESSION().delete(context)
-    if parent.type_ in ('estimation', 'invoice', 'cancelinvoice',):
-        route_name = "/%ss/{id}" % parent.type_
-    elif parent.type_ in 'expensesheet':
-        route_name = "/expenses/{id}"
-    else:
-        route_name = parent.type_
-    return HTTPFound(request.route_path(route_name, id=parent.id))
+    def redirect(self):
+        return HTTPFound(self.back_url())
 
 
 def add_routes(config):
@@ -303,7 +332,7 @@ def includeme(config):
     """
     add_routes(config)
     config.add_view(
-        file_view,
+        FileView,
         route_name="file",
         permission='view.file',
         renderer="file.mako",
@@ -332,8 +361,8 @@ def includeme(config):
         request_param='action=edit',
     )
     config.add_view(
-        file_delete_view,
+        FileDeleteView,
         route_name='file',
-        permission='edit.file',
+        permission='delete.file',
         request_param='action=delete',
     )

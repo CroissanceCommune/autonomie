@@ -15,6 +15,7 @@ from autonomie.models.task import (
 )
 from autonomie.utils.widgets import ViewLink
 
+from autonomie.views.admin.sale.receipts import RECEIPT_URL
 from autonomie.views.export.utils import (
     get_period_form,
     get_all_form,
@@ -44,7 +45,7 @@ class SagePaymentExportPage(BaseExportView):
     Provide a sage export view compound of multiple forms for payment exports
     """
     title = u"Export des encaissements au format CSV pour Sage"
-    admin_route_name = 'admin_receipts'
+    admin_route_name = RECEIPT_URL
 
     def _populate_action_menu(self):
         self.request.actionmenu.add(
@@ -174,7 +175,8 @@ class SagePaymentExportPage(BaseExportView):
                 payment_url = self.request.route_path(
                     'payment',
                     id=payment.id,
-                    _query={'action': 'edit'})
+                    _query={'action': 'edit'}
+                )
                 message = PAYMENT_BANK_ERROR_MSG.format(
                     invoice.official_number,
                     payment_url)

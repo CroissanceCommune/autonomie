@@ -23,6 +23,7 @@ GROUPS = (
     ('manager', u"Est membre de l'équipe d'appui", ),
     ('admin', u"Administre l'application", ),
     ('contractor', u'Entrepreneur de la coopérative',),
+    ('trainer', u"Entrepreneur - Formateur",),
 )
 
 

@@ -13,11 +13,21 @@ from sqlalchemy import or_
 
 from autonomie.utils.strings import format_account
 from autonomie.models.user.user import User
-from autonomie.forms.user.user import get_add_edit_schema
+from autonomie.forms.user.user import (
+    get_add_edit_schema,
+    get_edit_account_schema,
+)
 from autonomie.views import (
     BaseFormView,
     DeleteView,
     BaseEditView,
+)
+from autonomie.views.user.routes import (
+    USER_URL,
+    USER_ITEM_URL,
+    USER_MYACCOUNT_URL,
+    USER_ITEM_EDIT_URL,
+    USER_LOGIN_URL,
 )
 from autonomie.views.user.tools import UserFormConfigState
 
@@ -81,7 +91,7 @@ déjà été créés : <ul>".format(query_count)
 
         for entry in query:
             msg += u"<li><a href='%s'>%s (%s)</a></li>" % (
-                self.request.route_path('/users/{id}', id=entry.id),
+                self.request.route_path(USER_ITEM_URL, id=entry.id),
                 format_account(entry),
                 entry.email,
             )
@@ -128,7 +138,7 @@ déjà été créés : <ul>".format(query_count)
 
         if add_login:
             redirect = self.request.route_path(
-                "/users/{id}/login",
+                USER_LOGIN_URL,
                 id=model.id,
                 _query={'action': 'add'}
             )
@@ -141,11 +151,26 @@ déjà été créés : <ul>".format(query_count)
                 )
             else:
                 redirect = self.request.route_path(
-                    "/users/{id}",
+                    USER_ITEM_URL,
                     id=model.id,
                 )
         logger.debug(u"Account with id {0} added".format(model.id))
         return HTTPFound(redirect)
+
+
+class UserAccountEditView(BaseEditView):
+    """
+    View allowing a end user to modify some of his account informations
+    """
+    schema = get_edit_account_schema()
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                USER_ITEM_URL,
+                id=self.context.id,
+            )
+        )
 
 
 class UserEditView(BaseEditView):
@@ -156,7 +181,7 @@ class UserEditView(BaseEditView):
 
 
 class UserDeleteView(DeleteView):
-    redirect_route = '/users'
+    redirect_route = USER_URL
 
 
 def add_routes(config):
@@ -164,13 +189,18 @@ def add_routes(config):
     Add module related routes
     """
     config.add_route(
-        '/users/{id}',
-        '/users/{id}',
+        USER_ITEM_URL,
+        USER_ITEM_URL,
         traverse='/users/{id}'
     )
     config.add_route(
-        '/users/{id}/edit',
-        '/users/{id}/edit',
+        USER_MYACCOUNT_URL,
+        USER_MYACCOUNT_URL,
+        traverse='/users/{id}'
+    )
+    config.add_route(
+        USER_ITEM_EDIT_URL,
+        USER_ITEM_EDIT_URL,
         traverse='/users/{id}'
     )
 
@@ -181,15 +211,22 @@ def add_views(config):
     """
     config.add_view(
         user_view,
-        route_name='/users/{id}',
+        route_name=USER_ITEM_URL,
         permission="view.user",
         renderer='/user/user.mako',
         layout='user',
     )
+    config.add_view(
+        UserAccountEditView,
+        route_name=USER_MYACCOUNT_URL,
+        permission="set_email.user",
+        renderer='autonomie:templates/base/formpage.mako',
+        layout='default',
+    )
 
     config.add_view(
         UserAddView,
-        route_name='/users',
+        route_name=USER_URL,
         request_param="action=add",
         permission="add.user",
         renderer='/user/add.mako',
@@ -198,7 +235,7 @@ def add_views(config):
 
     config.add_view(
         UserEditView,
-        route_name='/users/{id}/edit',
+        route_name=USER_ITEM_EDIT_URL,
         permission="edit.user",
         renderer='/user/edit.mako',
         layout="user",
@@ -206,7 +243,7 @@ def add_views(config):
 
     config.add_view(
         UserDeleteView,
-        route_name='/users/{id}',
+        route_name=USER_ITEM_URL,
         permission="delete.user",
         request_param="action=delete",
     )

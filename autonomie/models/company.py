@@ -426,3 +426,11 @@ class Company(DBBASE, PersistentACLMixin):
     @classmethod
     def label_query(cls):
         return cls._autonomie_service.label_query(cls)
+
+
+    @classmethod
+    def get_id_by_analytical_account(cls, analytical_account):
+        return cls._autonomie_service.get_id_by_analytical_account(
+            cls,
+            analytical_account
+        )

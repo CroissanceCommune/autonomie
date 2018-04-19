@@ -22,55 +22,24 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-% if info_message != UNDEFINED:
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Message
-    </div>
-    <div class='panel-body'>
-        <div class="alert alert-success">
-            ${info_message|n}
-        </div>
-    </div
-</div>
+% if request.has_permission('delete.userdatas', current_userdatas):
+<a
+    class='btn btn-danger primary-action btn-head'
+    href="${delete_url}"
+    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette fiche de gestion et tous les éléments associés (fichiers, historiques ...) ?')">
+    <i class='fa fa-trash'></i>&nbsp;Supprimer la fiche
+</a>
 % endif
-% if warn_message != UNDEFINED:
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Message
-    </div>
-    <div class='panel-body'>
-        <div class="alert alert-warn">
-            <i class='fa fa-warning'></i>
-            ${warn_message|n}
-        </div>
-    </div>
-</div>
-% endif
-% if help_message != UNDEFINED:
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Message
-    </div>
-    <div class='panel-body'>
-        <div class='alert alert-info'>
-        <i class='fa fa-question-circle fa-2x'></i>
-        ${help_message|n}
-        </div>
-    </div>
-</div>
-% endif
-<div class="col-md-12">
+
+${request.layout_manager.render_panel('help_message_panel', parent_tmpl_dict=context.kwargs)}
     <button
         type="button"
-        class="btn btn-info primary-action"
+        class="btn btn-info primary-action btn-head"
         onclick="javascript:enableForm('#deform');$(this).hide();"
-        style="margin-bottom: 15px"
         >
         Dégeler le formulaire
    </button>
     ${form|n}
-</div>
 </%block>
 <%block name="footerjs">
     setAuthCheckBeforeSubmit('#deform');

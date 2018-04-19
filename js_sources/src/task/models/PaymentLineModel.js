@@ -11,6 +11,7 @@
 import Bb from 'backbone';
 import BaseModel from "./BaseModel.js";
 import { dateToIso } from '../../date.js';
+import { strToFloat } from "../../math.js";
 
 const PaymentLineModel = BaseModel.extend({
     props: [
@@ -46,6 +47,9 @@ const PaymentLineModel = BaseModel.extend({
         let order = this.get('order');
         return order == min_order;
     },
+    getAmount: function(){
+        return strToFloat(this.get('amount'));
+    }
 });
 
 export default PaymentLineModel;

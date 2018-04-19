@@ -197,3 +197,14 @@ class CompanyService(object):
         query = company_class.query()
         query = query.options(load_only('id', 'name', 'active'))
         return query
+
+    @classmethod
+    def get_id_by_analytical_account(cls, company_class, analytical_account):
+        result = DBSESSION().query(
+            company_class.id
+        ).filter_by(
+            code_compta=analytical_account
+        ).filter_by(active=True).first()
+        if result is not None:
+            result = result[0]
+        return result

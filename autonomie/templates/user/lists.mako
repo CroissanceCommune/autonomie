@@ -108,27 +108,37 @@
                         <% url = request.route_path('/users/{id}', id=user.id) %>
                         <tr>
                             <td>
-                            <a href="${url}">
-                            ${api.format_account(user)}
-                            </a>
-                            % if user.login is None:
-                                <span class='text-warning'>ce compte ne dispose pas d'identifiants</span>
-                            % elif not user.login.active:
-                                ${login_disabled_msg()}
+                            % if request.has_permission('view.user', user):
+                                <a href="${url}">
+                                ${api.format_account(user)}
+                                </a>
+                                % if user.login is None:
+                                    <span class='text-warning'>ce compte ne dispose pas d'identifiants</span>
+                                % elif not user.login.active:
+                                    ${login_disabled_msg()}
+                                % endif
+                            % else:
+                                ${api.format_account(user)}
                             % endif
                             </td>
-                            <td><a href="${url}">${user.email}</a></td>
+                            <td>${user.email}</td>
                             <td>
                                 <ul class="list-unstyled">
                                     % for company in user.companies:
                                         <% company_url = request.route_path('company', id=company.id) %>
                                         <li>
-                                        <a href="${company_url}">${company.name} (<small>${company.goal}</small>)</a>
+                                        % if request.has_permission('view.company', company):
+                                        <a href="${company_url}">
+                                        ${company.name} (<small>${company.goal}</small>)
+                                        </a>
                                             % if request.has_permission('admin_company', company):
                                                 % if not company.active:
                                                     ${company_disabled_msg()}
                                                 % endif
                                             % endif
+                                        % else:
+                                        ${company.name} (<small>${company.goal}</small>)
+                                        % endif
                                         </li>
                                     % endfor
                                 </ul>

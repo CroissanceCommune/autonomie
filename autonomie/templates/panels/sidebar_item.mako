@@ -21,7 +21,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%def name="render_item(elem)">
-    % if elem.has_permission(_context, request):
+    % if elem.has_permission(_context, request) and elem.visible(_context, request):
         <li
         % if elem.selected(_context, request):
             class="active"
@@ -31,14 +31,19 @@
         >
             <a
                 title='${elem.title}'
-                href="${elem.url(_context, request)}">
+            % if elem.enabled(_context, request):
+                href="${elem.url(_context, request)}"
+            % else:
+                href='#'
+            % endif
+                >
                 <i class="${elem.icon}"></i>&nbsp;<span class='hidden-xs'>${elem.label|n}</span>
             </a>
         </li>
     % endif
 </%def>
 <%def name="render_dropdown(elem)">
-    % if elem.has_permission(_context, request):
+    % if elem.has_permission(_context, request) and elem.visible(_context, request):
         % if not elem.enabled(_context, request):
         ${render_item(elem)}
         % else:
@@ -74,8 +79,8 @@
         % endif
     % endif
 </%def>
-% if menu.__type__ == 'dropdown':
-${render_dropdown(menu)}
+% if menu_item.__type__ == 'dropdown':
+${render_dropdown(menu_item)}
 % else:
-${render_item(menu)}
+${render_item(menu_item)}
 % endif

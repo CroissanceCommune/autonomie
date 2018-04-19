@@ -22,44 +22,7 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-% if info_message != UNDEFINED:
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Message
-    </div>
-    <div class='panel-body'>
-        <div class="alert alert-success">
-            ${info_message|n}
-        </div>
-    </div
-</div>
-% endif
-% if warn_message != UNDEFINED:
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Message
-    </div>
-    <div class='panel-body'>
-        <div class="alert alert-warn">
-            <i class='fa fa-warning'></i>
-            ${warn_message|n}
-        </div>
-    </div>
-</div>
-% endif
-% if help_message != UNDEFINED:
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Message
-    </div>
-    <div class='panel-body'>
-        <div class='alert alert-info'>
-        <i class='fa fa-question-circle fa-2x'></i>
-        ${help_message|n}
-        </div>
-    </div>
-</div>
-% endif
+${request.layout_manager.render_panel('help_message_panel', parent_tmpl_dict=context.kwargs)}
 <div class="col-md-12">
     <h3>${title}</h3>
     ${form|n}

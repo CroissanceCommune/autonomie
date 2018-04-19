@@ -56,6 +56,7 @@ from .expense import payment
 from .project import phase
 from .project import project
 from .project import types
+from .training import trainer
 from .user import user
 from .user import login
 from .user import group

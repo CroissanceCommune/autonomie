@@ -79,13 +79,13 @@ AUTONOMIE_MODULES = (
     "autonomie.views.static",
     "autonomie.views.statistics",
     "autonomie.views.tests",
+    'autonomie.views.training',
     "autonomie.views.treasury_files",
     "autonomie.views.user.user",
     "autonomie.views.user.login",
     "autonomie.views.user.company",
     "autonomie.views.user.lists",
-    "autonomie.views.userdatas.userdatas",
-    "autonomie.views.userdatas.lists",
+    "autonomie.views.userdatas",
 )
 
 AUTONOMIE_LAYOUTS_MODULES = (
@@ -94,6 +94,7 @@ AUTONOMIE_LAYOUTS_MODULES = (
 )
 
 AUTONOMIE_PANELS_MODULES = (
+    "autonomie.panels.form",
     "autonomie.panels.menu",
     "autonomie.panels.task",
     "autonomie.panels.company",
@@ -281,6 +282,19 @@ def base_configure(config, dbsession, **settings):
         get_current_company,
         'current_company',
         reify=True
+    )
+
+    from autonomie.utils.predicates import (
+        SettingHasValuePredicate,
+        ApiKeyAuthenticationPredicate,
+    )
+    # Allows to restrict view acces only if a setting is set
+    config.add_view_predicate(
+        'if_setting_has_value', SettingHasValuePredicate
+    )
+    # Allows to authentify a view through hmac api key auth
+    config.add_view_predicate(
+        'api_key_authentication', ApiKeyAuthenticationPredicate
     )
 
     add_static_views(config, settings)

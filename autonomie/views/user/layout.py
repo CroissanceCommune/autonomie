@@ -10,6 +10,7 @@ import pkg_resources
 from autonomie.resources import (
     user_resources,
 )
+from autonomie.models.user.user import User
 from autonomie.utils.menu import (
     MenuItem,
     AttrMenuItem,
@@ -36,7 +37,8 @@ UserMenu.add(
         label=u'Identifiants',
         route_name=u'/users/{id}/login',
         icon=u'fa fa-lock',
-        model_attribute='login',
+        disable_attribute='login',
+        perm_context_attribute="login",
         perm='view.login',
     ),
 )
@@ -46,8 +48,8 @@ UserMenu.add(
         label=u'Entreprises',
         route_name=u'/users/{id}/companies',
         icon=u'fa fa-building',
-        model_attribute='companies',
-        perm='view.companies',
+        disable_attribute='companies',
+        perm='list.company',
     ),
 )
 
@@ -63,8 +65,17 @@ class UserLayout(object):
     def __init__(self, context, request):
         user_resources.need()
 
+        if isinstance(context, User):
+            self.current_user_object = context
+        elif hasattr(context, 'user'):
+            self.current_user_object = context.user
+        else:
+            raise KeyError(u"Can't retrieve the associated user object, \
+                           current context : %s" % context)
+
     @property
     def usermenu(self):
+        UserMenu.set_current(self.current_user_object)
         return UserMenu
 
 

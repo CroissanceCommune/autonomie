@@ -1,23 +1,32 @@
 .btn{
   font-size: 0.95rem;
   border-radius: 0px;
+  // Button placed at the top of a page
+  &.btn-head{
+    margin-bottom: 15px !important;
+  }
+  // Main action btn
+  &.primary-action{
+    padding: 6px 18px;
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+  }
+  // Main action btn + primary
+  &.btn-primary.primary-action{
+    -webkit-box-shadow: 0px 1px 0px #2b638f;
+    -moz-box-shadow: 0px 1px 0px #2b638f;
+    box-shadow: 0px 1px 0px #2b638f;
+  }
+  // A secondary action button
+  &.secondary-action{
+    padding: 4px 8px;
+  }
+  // A third place action button
+  &.tertiary-action{
+    padding: 2px 4px;
+  }
 }
-.btn.primary-action{
-  padding: 6px 18px;
-  font-size: 1.1rem;
-  margin-bottom: 2px;
-}
-.btn-primary.primary-action{
-  -webkit-box-shadow: 0px 1px 0px #2b638f;
-  -moz-box-shadow: 0px 1px 0px #2b638f;
-  box-shadow: 0px 1px 0px #2b638f;
-}
-.btn.secondary-action{
-  padding: 4px 8px;
-}
-.btn.tertiary-action{
-  padding: 2px 4px;
-}
+// A button with no style
 .btn-nostyle{
   border: none;
   border-radius: 2px;

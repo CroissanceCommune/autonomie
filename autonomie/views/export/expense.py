@@ -15,6 +15,8 @@ from autonomie.utils.files import get_timestamped_filename
 from autonomie.utils import strings
 from autonomie.utils.widgets import ViewLink
 
+from autonomie.views.admin.sale.accounting import ACCOUNTING_URL
+from autonomie.views.admin.expense.accounting import EXPENSE_ACCOUNTING_URL
 from autonomie.views.export import BaseExportView
 from autonomie.views.export.utils import (
     get_expense_all_form,
@@ -52,7 +54,7 @@ class SageExpenseExportPage(BaseExportView):
     contribution_config_keys = (
         'compte_cg_contribution', 'contribution_cae', 'numero_analytique',
     )
-    admin_route_name = 'admin_expense'
+    admin_route_name = EXPENSE_ACCOUNTING_URL
 
     def _populate_action_menu(self):
         self.request.actionmenu.add(
@@ -260,8 +262,8 @@ class SageExpenseExportPage(BaseExportView):
         errors = []
 
         if not self._check_config(self.request.config):
-            url1 = self.request.route_path('admin_expense')
-            url2 = self.request.route_path('admin_vente')
+            url1 = self.request.route_path(EXPENSE_ACCOUNTING_URL)
+            url2 = self.request.route_path(ACCOUNTING_URL)
             errors.append(CONFIG_ERROR_MSG.format(url1, url2))
 
         for expense in expenses:

@@ -79,6 +79,7 @@ def includeme(config):
         renderer='json',
         xhr=True,
         permission=NO_PERMISSION_REQUIRED,
+        api_key_authentication="autonomie.accounting_api_key",
     )
     config.add_view(
         AccountingOperationRestView,
@@ -88,4 +89,5 @@ def includeme(config):
         renderer='json',
         xhr=True,
         permission=NO_PERMISSION_REQUIRED,
+        api_key_authentication="autonomie.accounting_api_key",
     )

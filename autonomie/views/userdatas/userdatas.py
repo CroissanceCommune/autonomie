@@ -416,31 +416,6 @@ class UserUserDatasHistory(UserDatasHistory):
         return self.context.userdatas
 
 
-def add_routes(config):
-    """
-    Add module related routes
-    """
-    for route in (
-        USERDATAS_ITEM_URL,
-        USERDATAS_EDIT_URL,
-        USERDATAS_DOCTYPES_URL,
-        USERDATAS_PY3O_URL,
-        USERDATAS_MYDOCUMENTS_URL,
-        USERDATAS_HISTORY_URL
-    ):
-        config.add_route(route, route, traverse="/userdatas/{id}")
-
-    for route in (
-        USER_USERDATAS_URL,
-        USER_USERDATAS_ADD_URL,
-        USER_USERDATAS_EDIT_URL,
-        USER_USERDATAS_DOCTYPES_URL,
-        USER_USERDATAS_PY3O_URL,
-        USER_USERDATAS_HISTORY_URL
-    ):
-        config.add_route(route, route, traverse="/users/{id}")
-
-
 def add_views(config):
     """
     Add module related views
@@ -535,7 +510,5 @@ def includeme(config):
 
     :param obj config: The current application config object
     """
-    add_routes(config)
     add_views(config)
-
     register_menus()

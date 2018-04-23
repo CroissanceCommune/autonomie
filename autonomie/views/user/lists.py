@@ -177,19 +177,11 @@ class GeneralUserList(BaseListView):
         return query
 
 
-def add_routes(config):
+def includeme(config):
     """
-    Add module related routes
-    """
-    config.add_route(
-        "/users",
-        "/users",
-    )
+    Pyramid module entry point
 
-
-def add_views(config):
-    """
-    Add module related views
+    :param obj config: The pyramid configuration object
     """
     config.add_view(
         GeneralAccountList,
@@ -197,13 +189,3 @@ def add_views(config):
         renderer='/user/lists.mako',
         permission='visit'
     )
-
-
-def includeme(config):
-    """
-    Pyramid module entry point
-
-    :param obj config: The pyramid configuration object
-    """
-    add_routes(config)
-    add_views(config)

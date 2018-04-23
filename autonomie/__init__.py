@@ -81,10 +81,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.tests",
     'autonomie.views.training',
     "autonomie.views.treasury_files",
-    "autonomie.views.user.user",
-    "autonomie.views.user.login",
-    "autonomie.views.user.company",
-    "autonomie.views.user.lists",
+    "autonomie.views.user",
     "autonomie.views.userdatas",
 )
 

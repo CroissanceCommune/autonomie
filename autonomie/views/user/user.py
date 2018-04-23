@@ -184,28 +184,7 @@ class UserDeleteView(DeleteView):
     redirect_route = USER_URL
 
 
-def add_routes(config):
-    """
-    Add module related routes
-    """
-    config.add_route(
-        USER_ITEM_URL,
-        USER_ITEM_URL,
-        traverse='/users/{id}'
-    )
-    config.add_route(
-        USER_MYACCOUNT_URL,
-        USER_MYACCOUNT_URL,
-        traverse='/users/{id}'
-    )
-    config.add_route(
-        USER_ITEM_EDIT_URL,
-        USER_ITEM_EDIT_URL,
-        traverse='/users/{id}'
-    )
-
-
-def add_views(config):
+def includeme(config):
     """
     Add module related views
     """
@@ -247,8 +226,3 @@ def add_views(config):
         permission="delete.user",
         request_param="action=delete",
     )
-
-
-def includeme(config):
-    add_routes(config)
-    add_views(config)

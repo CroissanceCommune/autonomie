@@ -187,19 +187,8 @@ def login_view(context, request):
     return dict(login=context.login, title=u"Identifiants rattachés au compte")
 
 
-def add_routes(config):
-    for route in (LOGIN_ITEM_URL, LOGIN_EDIT_URL, LOGIN_SET_PASSWORD_URL):
-        config.add_route(route, route, traverse="/logins/{id}")
 
-    for route in (
-        USER_LOGIN_URL,
-        USER_LOGIN_EDIT_URL,
-        USER_LOGIN_SET_PASSWORD_URL
-    ):
-        config.add_route(route, route, traverse="/users/{id}")
-
-
-def add_views(config):
+def includeme(config):
     config.add_view(
         login_view,
         route_name=USER_LOGIN_URL,
@@ -255,8 +244,3 @@ def add_views(config):
         renderer="/user/edit.mako",
         layout='user',
     )
-
-
-def includeme(config):
-    add_routes(config)
-    add_views(config)

@@ -187,20 +187,7 @@ class UserDatasCsvView(UserDatasXlsView):
     file_format = 'csv'
 
 
-def add_routes(config):
-    """
-    Add module related routes
-    """
-    for route in (
-        USERDATAS_URL,
-        USERDATAS_XLS_URL,
-        USERDATAS_CSV_URL,
-        USERDATAS_ODS_URL,
-    ):
-        config.add_route(route, route)
-
-
-def add_views(config):
+def includeme(config):
     """
     Add module related views
     """
@@ -228,8 +215,3 @@ def add_views(config):
         route_name=USERDATAS_CSV_URL,
         permission="admin_userdatas",
     )
-
-
-def includeme(config):
-    add_routes(config)
-    add_views(config)

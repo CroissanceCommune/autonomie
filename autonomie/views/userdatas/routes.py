@@ -30,3 +30,32 @@ USER_USERDATAS_HISTORY_URL = os.path.join(USER_USERDATAS_URL, "history")
 
 TEMPLATING_URL = "/templatinghistory"
 TEMPLATING_ITEM_URL = os.path.join(TEMPLATING_URL, '{id}')
+
+
+def includeme(config):
+    for route in (
+        USERDATAS_URL, USERDATAS_XLS_URL, USERDATAS_CSV_URL, USERDATAS_ODS_URL
+    ):
+        config.add_route(route, route)
+
+    for route in (
+        USERDATAS_ITEM_URL, USERDATAS_EDIT_URL, USERDATAS_DOCTYPES_URL,
+        USERDATAS_PY3O_URL, USERDATAS_MYDOCUMENTS_URL, USERDATAS_FILELIST_URL,
+        USERDATAS_HISTORY_URL
+    ):
+        config.add_route(route, route, traverse="/userdatas/{id}")
+
+    for route in (
+        USER_USERDATAS_URL, USER_USERDATAS_ADD_URL, USER_USERDATAS_EDIT_URL,
+        USER_USERDATAS_DOCTYPES_URL, USER_USERDATAS_PY3O_URL,
+        USER_USERDATAS_MYDOCUMENTS_URL, USER_USERDATAS_FILELIST_URL,
+        USER_USERDATAS_HISTORY_URL
+    ):
+        config.add_route(route, route, traverse="/users/{id}")
+
+    config.add_route(TEMPLATING_URL, TEMPLATING_URL)
+    config.add_route(
+        TEMPLATING_ITEM_URL,
+        TEMPLATING_ITEM_URL,
+        traverse="/templatinghistory/{id}"
+    )

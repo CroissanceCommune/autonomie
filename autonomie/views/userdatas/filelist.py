@@ -96,26 +96,6 @@ def mydocuments_view(context, request):
 
 
 def includeme(config):
-    config.add_route(
-        TEMPLATING_ITEM_URL,
-        TEMPLATING_ITEM_URL,
-        traverse='/templatinghistory/{id}',
-    )
-    config.add_route(
-        USERDATAS_FILELIST_URL,
-        USERDATAS_FILELIST_URL,
-        traverse="/userdatas/{id}",
-    )
-    config.add_route(
-        USER_USERDATAS_FILELIST_URL,
-        USER_USERDATAS_FILELIST_URL,
-        traverse="/users/{id}",
-    )
-    config.add_route(
-        USER_USERDATAS_MYDOCUMENTS_URL,
-        USER_USERDATAS_MYDOCUMENTS_URL,
-        traverse="/users/{id}",
-    )
     config.add_view(
         UserDatasFileAddView,
         route_name=USERDATAS_ITEM_URL,

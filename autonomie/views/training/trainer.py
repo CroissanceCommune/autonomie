@@ -3,7 +3,6 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-import os
 import logging
 from sqlalchemy.orm import load_only
 
@@ -28,18 +27,17 @@ from autonomie.views import (
     submit_btn,
     cancel_btn,
 )
+from autonomie.views.training.routes import (
+    TRAINER_ITEM_URL,
+    TRAINER_FILE_URL,
+    USER_TRAINER_URL,
+    USER_TRAINER_EDIT_URL,
+    USER_TRAINER_FILE_URL,
+    USER_TRAINER_ADD_URL
+)
+
 
 logger = logging.getLogger(__name__)
-
-USER_ITEM_URL = "/users/{id}"
-
-TRAINER_URL = '/trainerdatas'
-TRAINER_ITEM_URL = os.path.join(TRAINER_URL, "{id}")
-TRAINER_FILE_URL = os.path.join(TRAINER_ITEM_URL, "filelist")
-USER_TRAINER_URL = os.path.join(USER_ITEM_URL, "trainerdatas")
-USER_TRAINER_ADD_URL = os.path.join(USER_TRAINER_URL, "add")
-USER_TRAINER_EDIT_URL = os.path.join(USER_TRAINER_URL, "edit")
-USER_TRAINER_FILE_URL = os.path.join(USER_TRAINER_URL, "filelist")
 
 TRAINER_MENU = AttrMenuDropdown(
     name='trainerdatas',
@@ -162,36 +160,6 @@ class UserTrainerDatasFileList(TrainerDatasFileList):
         return self.context.trainerdatas
 
 
-def add_routes(config):
-    config.add_route(
-        USER_TRAINER_URL,
-        USER_TRAINER_URL,
-        traverse="/users/{id}",
-    )
-    config.add_route(
-        USER_TRAINER_ADD_URL,
-        USER_TRAINER_ADD_URL,
-        traverse="/users/{id}",
-    )
-    config.add_route(
-        USER_TRAINER_EDIT_URL,
-        USER_TRAINER_EDIT_URL,
-        traverse="/users/{id}",
-    )
-    config.add_route(
-        USER_TRAINER_FILE_URL,
-        USER_TRAINER_FILE_URL,
-        traverse="/users/{id}",
-    )
-    config.add_route(TRAINER_URL, TRAINER_URL)
-    config.add_route(
-        TRAINER_ITEM_URL, TRAINER_ITEM_URL, traverse="/trainerdatas/{id}"
-    )
-    config.add_route(
-        TRAINER_FILE_URL, TRAINER_FILE_URL, traverse="/trainerdatas/{id}"
-    )
-
-
 def add_views(config):
     config.add_view(
         trainerdatas_add_entry_view,
@@ -247,7 +215,5 @@ def includeme(config):
 
     :param obj config: The current application config object
     """
-    add_routes(config)
     add_views(config)
-
     register_menus()

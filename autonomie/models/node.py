@@ -38,7 +38,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, backref
 
-from autonomie import forms
 from autonomie_base.models.types import (
     ACLType,
     PersistentACLMixin,
@@ -100,7 +99,7 @@ class Node(DBBASE, PersistentACLMixin):
     parent_id = Column(
         ForeignKey('node.id'),
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         },
     )
@@ -112,13 +111,13 @@ class Node(DBBASE, PersistentACLMixin):
             'parent',
             remote_side=[id],
             info={
-                'colanderalchemy': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
                 'export': {'exclude': True},
             },
         ),
         cascade='all',
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         },
     )
@@ -126,13 +125,13 @@ class Node(DBBASE, PersistentACLMixin):
     type_ = Column(
         'type_',
         String(30),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
         nullable=False,
     )
     _acl = Column(
         MutableList.as_mutable(ACLType),
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True}
         },
     )

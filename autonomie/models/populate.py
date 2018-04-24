@@ -111,19 +111,35 @@ def populate_accounting_income_statement_measure_types(session):
 
 
 def populate_project_types(session):
-    from autonomie.models.project.types import ProjectType
+    from autonomie.models.project.types import (
+        ProjectType,
+        SubProjectType,
+    )
     for name, label, private in (
         ("default", u"Projet classique", False),
         ("training", u"Formation", True),
         ("construction", u"Chantier", False),
     ):
-        if ProjectType.query().filter_by(name=name).count() == 0:
+        ptype = ProjectType.query().filter_by(name=name).first()
+        if ptype is None:
+            ptype = ProjectType(
+                name=name,
+                label=label,
+                editable=False,
+                private=private,
+            )
+            session.add(ptype)
+            session.flush()
+
+        if SubProjectType.query().filter_by(name=name).count() == 0:
             session.add(
-                ProjectType(
+                SubProjectType(
                     name=name,
                     label=label,
                     editable=False,
                     private=private,
+                    project_type_id=ptype.id,
+
                 )
             )
     session.flush()
@@ -140,6 +156,7 @@ def populate_database():
         populate_groups,
         populate_accounting_treasury_measure_types,
         populate_accounting_income_statement_measure_types,
+        populate_project_types,
     ):
         try:
             func(session)

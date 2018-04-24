@@ -61,6 +61,7 @@ from autonomie.models.project import (
 )
 from autonomie.models.project.types import (
     ProjectType,
+    SubProjectType,
 )
 from autonomie.models.task.task import (
     TaskLine,
@@ -184,6 +185,7 @@ class RootFactory(dict):
         ('statistic_entries', 'statistic_entry', StatisticEntry,),
         ('statistic_criteria', 'statistic_criterion',
             BaseStatisticCriterion,),
+        ('sub_project_types', 'sub_project_type', SubProjectType),
         ('task_lines', 'task_line', TaskLine),
         ('task_line_groups', 'task_line_group', TaskLineGroup),
         ('templates', 'template', Template, ),
@@ -1066,6 +1068,7 @@ def set_models_acl():
     Phase.__acl__ = property(get_phase_acl)
     Project.__default_acl__ = property(get_project_acl)
     ProjectType.__acl__ = property(get_base_acl)
+    SubProjectType.__acl__ = property(get_base_acl)
     SaleProductCategory.__acl__ = property(get_product_acl)
     SaleProduct.__acl__ = property(get_product_acl)
     SaleProductGroup.__acl__ = property(get_product_acl)

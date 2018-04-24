@@ -11,6 +11,11 @@ from sqlalchemy import (
     Integer,
     String,
     Boolean,
+    ForeignKey,
+    not_,
+)
+from sqlalchemy.orm import (
+    relationship,
 )
 from autonomie_base.models.base import (
     DBBASE,
@@ -18,16 +23,73 @@ from autonomie_base.models.base import (
 )
 
 
-class ProjectType(DBBASE):
+class BaseProjectType(DBBASE):
+    __tablename__ = 'base_project_type'
+    __table_args__ = default_table_args
+    __mapper_args__ = {
+        'polymorphic_on': 'type_',
+        'polymorphic_identity': 'base_project_type',
+    }
+    id = Column(Integer, primary_key=True)
+    type_ = Column(
+        'type_',
+        String(30),
+        info={'colanderalchemy': {'exclude': True}},
+        nullable=False,
+    )
+    private = Column(
+        Boolean(),
+        info={
+            "colanderalchemy": {
+                "title": u"Nécessite un rôle particulier ?",
+                "description": u"Les utilisateurs doivent-ils disposer d'un "
+                u"rôle particulier pour utiliser ce type ?"
+            }
+        }
+    )
+    name = Column(
+        String(50),
+        info={
+            'colanderalchemy': {
+                "title": u"Nom interne",
+                "description": u"Le nom interne est utilisé pour définir les "
+                u"rôles des utilisateurs accédant à ce type."
+            }
+        }
+    )
+    editable = Column(Boolean(), default=True)
+    active = Column(Boolean(), default=True)
+
+    @classmethod
+    def unique_label(cls, label, type_id):
+        """
+        Check if a label is unique
+
+        :param str label: Label to check
+        :param int type_id: The type id to exclude
+        :rtype: bool
+        """
+        query = cls.query()
+        if type_id:
+            query = query.filter(not_(cls.id == type_id))
+        count = query.filter(cls.label == label).count()
+        return count == 0
+
+
+class ProjectType(BaseProjectType):
     __tablename__ = "project_type"
     __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'project_type'}
     __colanderalchemy_config__ = {
         "help_msg": u"""Les types de projets permettent de prédéfinir des
         comportements spécifiques (documents à rattacher, modèles à utiliser
         pour les PDFs, mentions ...)"""
     }
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    id = Column(
+        ForeignKey('base_project_type.id'),
+        primary_key=True,
+        info={'colanderalchemy': {'exclude': True}}
+    )
     label = Column(
         String(255),
         info={
@@ -39,18 +101,6 @@ class ProjectType(DBBASE):
         nullable=False,
         unique=True,
     )
-    private = Column(
-        Boolean(),
-        info={
-            "colanderalchemy": {
-                "title": u"Nécessite des droits particulires ?",
-                "description": u"Les utilisateurs doivent-ils disposer de "
-                u"droits particuliers pour accéder à ce type de projet ?"
-            }
-        }
-    )
-    editable = Column(Boolean(), default=True)
-    active = Column(Boolean(), default=True)
     default = Column(
         Boolean(),
         default=False,
@@ -71,3 +121,61 @@ class ProjectType(DBBASE):
         """
         from autonomie.models.project.project import Project
         return Project.query().filter_by(project_type_id=self.id).count() > 0
+
+
+class SubProjectType(BaseProjectType):
+    __tablename__ = "sub_project_type"
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'sub_project_type'}
+    __colanderalchemy_config__ = {
+        "help_msg": u"""Les types de sous-projet permettent de prédéfinir des
+        comportements spécifiques (documents à rattacher, modèles à utiliser
+        pour les PDFs, mentions ...) propres à certains types d'affaires (ex:
+        les sous-projets Formation associés au projet de type Convention)"""
+    }
+    id = Column(
+        ForeignKey('base_project_type.id'),
+        primary_key=True,
+        info={'colanderalchemy': {'exclude': True}}
+    )
+    label = Column(
+        String(255),
+        info={
+            "colanderalchemy": {
+                "title": u"Libellé",
+                "description": u"Libellé présenté aux entrepreneurs",
+            }
+        },
+        nullable=False,
+        unique=True,
+    )
+    project_type_id = Column(
+        ForeignKey('project_type.id'),
+        info={
+            "colanderalchemy": {
+                "title": u"Ce type de sous-projet est utilisé par défaut pour "
+                u"les projets de type :"
+            }
+        }
+    )
+
+    project_type = relationship(
+        "ProjectType",
+        primaryjoin="ProjectType.id==SubProjectType.project_type_id",
+        info={
+            'colanderalchemy': {'exclude': True}
+        }
+    )
+
+    @classmethod
+    def get_by_name(cls, name):
+        return cls.query().filter_by(name=name).first()
+
+    def is_used(self):
+        """
+        Check if there is a project using this specific type
+        """
+        from autonomie.models.project.phase import SubProject
+        return SubProject.query().filter_by(
+            subproject_type_id=self.id
+        ).count() > 0

@@ -8,13 +8,13 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
+    Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
     backref,
 )
 
-from autonomie import forms
 from autonomie_base.models.types import (
     PersistentACLMixin,
 )
@@ -22,6 +22,49 @@ from autonomie_base.models.base import (
     default_table_args,
     DBBASE,
 )
+
+
+class SubProject(DBBASE, PersistentACLMixin):
+    __tablename__ = "sub_project"
+    __table_args__ = default_table_args
+    id = Column(
+        Integer,
+        primary_key=True,
+        info={'colanderalchemy': {'exclude': True}},
+    )
+
+    name = Column("name", String(150), default=u'Phase par défaut')
+
+    closed = Column(
+        Boolean(),
+        default=False,
+        info={
+            'colanderalchemy': {
+                'title': u"Ce sous-projet est-il fermé ?"
+            }
+        },
+    )
+
+    subproject_type_id = Column(
+        ForeignKey('sub_project_type.id'),
+        info={'colanderalchemy': {'title': u'Type de sous-projet'}}
+    )
+    project_id = Column(
+        ForeignKey('project.id'),
+        info={'colanderalchemy': {'exclude': True}},
+    )
+
+    subproject_type = relationship(
+        "SubProjectType",
+        info={'colanderalchemy': {'exclude': True}},
+    )
+    project = relationship(
+        "Project",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        },
+    )
 
 
 class Phase(DBBASE, PersistentACLMixin):
@@ -33,12 +76,12 @@ class Phase(DBBASE, PersistentACLMixin):
     id = Column(
         Integer,
         primary_key=True,
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     project_id = Column(
         ForeignKey('project.id'),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     name = Column("name", String(150), default=u'Phase par défaut')
@@ -49,12 +92,12 @@ class Phase(DBBASE, PersistentACLMixin):
             "phases",
             cascade="all, delete-orphan",
             info={
-                'colanderalchemy': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
                 'export': {'exclude': True}
             },
         ),
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True}
         },
     )

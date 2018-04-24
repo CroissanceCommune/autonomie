@@ -4,10 +4,16 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import os
-from autonomie.models.project.types import ProjectType
+from autonomie.models.project.types import (
+    ProjectType,
+    SubProjectType,
+)
 
 from autonomie.utils.widgets import Link
-from autonomie.forms.admin.project import get_admin_project_type_schema
+from autonomie.forms.admin.project import (
+    get_admin_project_type_schema,
+    get_admin_subproject_type_schema,
+)
 from autonomie.views.admin.tools import (
     AdminCrudListView,
     BaseAdminDisableView,
@@ -21,19 +27,20 @@ from autonomie.views.admin.sale.business_cycle import (
     BUSINESS_URL
 )
 
-BASE_URL = os.path.join(BUSINESS_URL, "project_types")
-ITEM_URL = os.path.join(BASE_URL, "{id}")
+PROJECT_TYPE_URL = os.path.join(BUSINESS_URL, "project_types")
+PROJECT_TYPE_ITEM_URL = os.path.join(PROJECT_TYPE_URL, "{id}")
+SUBPROJECT_TYPE_URL = os.path.join(BUSINESS_URL, "subproject_types")
+SUBPROJECT_TYPE_ITEM_URL = os.path.join(SUBPROJECT_TYPE_URL, "{id}")
 
 
 class ProjectTypeListView(AdminCrudListView):
-    title = u"Types de projets"
-    description = u"Configurer les types de projets proposés aux entrepreneurs \
+    title = u"Types de projet"
+    description = u"Configurer les types de projet proposés aux entrepreneurs \
 ceux-ci servent de base pour la configuration des cycles d'affaire."
-    route_name = BASE_URL
-    item_route_name = ITEM_URL
+    route_name = PROJECT_TYPE_URL
+    item_route_name = PROJECT_TYPE_ITEM_URL
     columns = [
         u'Libellé',
-        u"Nom interne",
         u"Nécessite des droits particuliers",
         u"Type de projet par défaut ?",
     ]
@@ -41,7 +48,6 @@ ceux-ci servent de base pour la configuration des cycles d'affaire."
 
     def stream_columns(self, type_):
         yield type_.label
-        yield type_.name
         if type_.private:
             yield u"<i class='glyphicon glyphicon-ok-sign'></i>"
         else:
@@ -81,10 +87,7 @@ ceux-ci servent de base pour la configuration des cycles d'affaire."
                 u"Supprimer",
                 title=u"Supprimer ce type de projet",
                 icon=u"trash",
-                confirm=u"Êtes-vous sûr de vouloir supprimer "
-                u"cet élément ? Tous les éléments dans les comptes de résultat "
-                u"ayant été générés depuis des indicateurs seront  également "
-                u"supprimés.",
+                confirm=u"Êtes-vous sûr de vouloir supprimer cet élément ?"
             )
 
     def load_items(self):
@@ -101,25 +104,25 @@ class ProjectTypeDisableView(BaseAdminDisableView):
     """
     View for ProjectType disable/enable
     """
-    pass
+    route_name = PROJECT_TYPE_ITEM_URL
 
 
 class ProjectTypeDeleteView(BaseAdminDeleteView):
     """
     ProjectType deletion view
     """
-    pass
+    route_name = PROJECT_TYPE_ITEM_URL
 
 
 class ProjectTypeAddView(BaseAdminAddView):
     title = u"Ajouter"
-    route_name = BASE_URL
+    route_name = PROJECT_TYPE_URL
     factory = ProjectType
     schema = get_admin_project_type_schema()
 
 
 class ProjectTypeEditView(BaseAdminEditView):
-    route_name = ITEM_URL
+    route_name = PROJECT_TYPE_ITEM_URL
     factory = ProjectType
     schema = get_admin_project_type_schema()
 
@@ -128,9 +131,130 @@ class ProjectTypeEditView(BaseAdminEditView):
         return u"Modifier le type de projet '{0}'".format(self.context.label)
 
 
+class SubProjectTypeListView(AdminCrudListView):
+    title = u"Types de sous-projets"
+    description = u"""Configurer les types de sous-projets proposés aux
+    entrepreneurs ceux-ci permettent de classifier les affaires.
+    Ex: Un sous-type de projet 'Formation' permet de regrouper les documents
+    liés à la formation.
+    Il va ensuite être possible de spécifier :
+        - Des mentions à inclure dans les documents placées dans ces
+        sous-projets
+        - Les documents requis à la validation des devis ou des factures
+        - Le modèle de document à utiliser pour générer les devis/factures
+        - Les modèles de document à proposer pour générer les documents
+        spécifiques (livret d'accueil ...)
+    """
+    factory = SubProjectType
+    route_name = SUBPROJECT_TYPE_URL
+    item_route_name = SUBPROJECT_TYPE_ITEM_URL
+    columns = [
+        u'Libellé',
+        u"Nécessite des droits particuliers",
+        u"Est utilisé par défaut pour les projets de type",
+    ]
+
+    def stream_columns(self, type_):
+        yield type_.label
+        if type_.private:
+            yield u"<i class='glyphicon glyphicon-ok-sign'></i>"
+        else:
+            yield u""
+        if type_.project_type:
+            yield type_.project_type.label
+        else:
+            yield u""
+
+    def stream_actions(self, type_):
+        if type_.editable:
+            yield Link(
+                self._get_item_url(type_),
+                u"Voir/Modifier",
+                icon=u"pencil",
+            )
+        if type_.active:
+            yield Link(
+                self._get_item_url(type_, action='disable'),
+                u"Désactiver",
+                title=u"Ce type de sous-projet ne sera plus proposé aux "
+                u"utilisateurs",
+                icon=u"remove",
+            )
+        else:
+            yield Link(
+                self._get_item_url(type_, action='disable'),
+                u"Activer",
+                title=u"Ce type de sous-projet sera proposé aux utilisateurs",
+                icon=u"check-square-o",
+            )
+
+        if not type_.is_used():
+            yield Link(
+                self._get_item_url(type_, action='delete'),
+                u"Supprimer",
+                title=u"Supprimer ce type de sous-projet",
+                icon=u"trash",
+                confirm=u"Êtes-vous sûr de vouloir supprimer cet élément ?"
+            )
+
+    def load_items(self):
+        items = SubProjectType.query()
+        items = items.order_by(self.factory.name)
+        return items
+
+
+class SubProjectTypeDisableView(BaseAdminDisableView):
+    """
+    View for SubProjectType disable/enable
+    """
+    route_name = SUBPROJECT_TYPE_ITEM_URL
+
+
+class SubProjectTypeDeleteView(BaseAdminDeleteView):
+    """
+    SubProjectType deletion view
+    """
+    route_name = SUBPROJECT_TYPE_ITEM_URL
+
+
+class SubProjectTypeAddView(BaseAdminAddView):
+    title = u"Ajouter"
+    route_name = SUBPROJECT_TYPE_URL
+    factory = SubProjectType
+    schema = get_admin_subproject_type_schema()
+
+
+class SubProjectTypeEditView(BaseAdminEditView):
+    route_name = SUBPROJECT_TYPE_ITEM_URL
+    factory = SubProjectType
+    schema = get_admin_subproject_type_schema()
+
+    @property
+    def title(self):
+        return u"Modifier le type de sous-projet '{0}'".format(
+            self.context.label
+        )
+
+
 def includeme(config):
-    config.add_route(BASE_URL, BASE_URL)
-    config.add_route(ITEM_URL, ITEM_URL, traverse="/project_types/{id}")
+    config.add_route(
+        PROJECT_TYPE_URL,
+        PROJECT_TYPE_URL
+    )
+    config.add_route(
+        PROJECT_TYPE_ITEM_URL,
+        PROJECT_TYPE_ITEM_URL,
+        traverse="/project_types/{id}"
+    )
+    config.add_route(
+        SUBPROJECT_TYPE_URL,
+        SUBPROJECT_TYPE_URL
+    )
+    config.add_route(
+        SUBPROJECT_TYPE_ITEM_URL,
+        SUBPROJECT_TYPE_ITEM_URL,
+        traverse="/sub_project_types/{id}"
+    )
 
     config.add_admin_view(
         ProjectTypeListView,
@@ -157,5 +281,33 @@ def includeme(config):
     config.add_admin_view(
         ProjectTypeDeleteView,
         parent=ProjectTypeListView,
+        request_param="action=delete",
+    )
+
+    config.add_admin_view(
+        SubProjectTypeListView,
+        parent=BusinessCycleIndexView,
+        renderer="admin/crud_list.mako",
+    )
+
+    config.add_admin_view(
+        SubProjectTypeAddView,
+        parent=SubProjectTypeListView,
+        renderer="admin/crud_add_edit.mako",
+        request_param="action=add",
+    )
+    config.add_admin_view(
+        SubProjectTypeEditView,
+        parent=SubProjectTypeListView,
+        renderer="admin/crud_add_edit.mako",
+    )
+    config.add_admin_view(
+        SubProjectTypeDisableView,
+        parent=SubProjectTypeListView,
+        request_param="action=disable",
+    )
+    config.add_admin_view(
+        SubProjectTypeDeleteView,
+        parent=SubProjectTypeListView,
         request_param="action=delete",
     )

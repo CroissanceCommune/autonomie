@@ -158,7 +158,15 @@ class Project(Node):
             'export': {'exclude': True},
         }
     )
-
+    subprojects = relationship(
+        "SubProject",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        }
+    )
     tasks = relationship(
         "Task",
         primaryjoin="Task.project_id==Project.id",

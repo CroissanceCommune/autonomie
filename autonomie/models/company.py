@@ -32,6 +32,7 @@ from sqlalchemy import (
     Table,
     Column,
     Integer,
+    Float,
     String,
     Text,
     ForeignKey,
@@ -174,7 +175,7 @@ class Company(DBBASE, PersistentACLMixin):
         group="edit",
     )
     contribution = deferred(
-        Column(Integer),
+        Column(Float),
         group='edit'
     )
 

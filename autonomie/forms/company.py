@@ -42,6 +42,7 @@ from autonomie.models.customer import Customer
 
 from autonomie import forms
 from autonomie.forms.customer import build_customer_values
+from autonomie.forms.custom_types import QuantityType
 from autonomie.forms import (
     files,
     lists,
@@ -177,7 +178,7 @@ comptabilité",
             missing="")
 
     contribution = colander.SchemaNode(
-            colander.Integer(),
+            QuantityType(),
             widget=deform.widget.TextInputWidget(
                 input_append="%",
                 css_class="col-md-1"

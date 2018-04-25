@@ -4,6 +4,8 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import os
+from pyramid.httpexceptions import HTTPFound
+
 from autonomie.models.project.types import (
     ProjectType,
     SubProjectType,
@@ -14,12 +16,14 @@ from autonomie.forms.admin.project import (
     get_admin_project_type_schema,
     get_admin_subproject_type_schema,
 )
+from autonomie.views import BaseView
 from autonomie.views.admin.tools import (
     AdminCrudListView,
     BaseAdminDisableView,
     BaseAdminDeleteView,
     BaseAdminEditView,
     BaseAdminAddView,
+    AdminTreeMixin,
 )
 
 from autonomie.views.admin.sale.business_cycle import (
@@ -81,6 +85,14 @@ ceux-ci servent de base pour la configuration des cycles d'affaire."
                 icon=u"check-square-o",
             )
 
+        if not type_.default:
+            yield Link(
+                self._get_item_url(type_, action='set_default'),
+                label=u"Définir comme type par défaut",
+                title=u"Le type sera sélectionné par défaut à la création "
+                u"d'un projet",
+            )
+
         if not type_.is_used():
             yield Link(
                 self._get_item_url(type_, action='delete'),
@@ -131,6 +143,21 @@ class ProjectTypeEditView(BaseAdminEditView):
         return u"Modifier le type de projet '{0}'".format(self.context.label)
 
 
+class ProjectTypeSetDefaultView(BaseView, AdminTreeMixin):
+    """
+    Set the given tva as default
+    """
+    route_name = PROJECT_TYPE_ITEM_URL
+
+    def __call__(self):
+        for item in ProjectType.query():
+            item.default = False
+            self.request.dbsession.merge(item)
+        self.context.default = True
+        self.request.dbsession.merge(item)
+        return HTTPFound(self.back_link)
+
+
 class SubProjectTypeListView(AdminCrudListView):
     title = u"Types de sous-projets"
     description = u"""Configurer les types de sous-projets proposés aux
@@ -151,7 +178,8 @@ class SubProjectTypeListView(AdminCrudListView):
     columns = [
         u'Libellé',
         u"Nécessite des droits particuliers",
-        u"Est utilisé par défaut pour les projets de type",
+        u"Par défaut pour les projets de type",
+        u"Sélectionnable pour les projets de type",
     ]
 
     def stream_columns(self, type_):
@@ -164,6 +192,8 @@ class SubProjectTypeListView(AdminCrudListView):
             yield type_.project_type.label
         else:
             yield u""
+
+        yield u",".join([t.label for t in type_.other_project_types])
 
     def stream_actions(self, type_):
         if type_.editable:
@@ -282,6 +312,11 @@ def includeme(config):
         ProjectTypeDeleteView,
         parent=ProjectTypeListView,
         request_param="action=delete",
+    )
+    config.add_admin_view(
+        ProjectTypeSetDefaultView,
+        parent=ProjectTypeListView,
+        request_param="action=set_default",
     )
 
     config.add_admin_view(

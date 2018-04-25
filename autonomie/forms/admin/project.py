@@ -4,7 +4,6 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import colander
-# import deform_extensions
 from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.project.types import (
@@ -13,8 +12,9 @@ from autonomie.models.project.types import (
 )
 from autonomie.forms import (
     customize_field,
-    reorder_schema,
-    get_deferred_select,
+    get_deferred_model_select,
+    get_sequence_child_item,
+    get_deferred_model_select_checkbox
 )
 
 
@@ -57,21 +57,13 @@ def get_deferred_unique_label_validator(class_):
 def get_admin_project_type_schema():
     schema = SQLAlchemySchemaNode(
         ProjectType,
-        includes=(
-            "name", "label", "private", "default",
-        )
+        includes=("label",)
     )
-    reorder_schema(schema, ('label', 'default'))
     customize_field(
         schema,
         "label",
         validator=get_deferred_unique_label_validator(ProjectType),
     )
-    # customize_field(
-    #     schema,
-    #     "private",
-    #     widget=deform_extensions.CheckboxToggleWidget(true_target="name")
-    # )
     return schema
 
 
@@ -79,21 +71,25 @@ def get_admin_subproject_type_schema():
     schema = SQLAlchemySchemaNode(
         SubProjectType,
         includes=(
-            'label', 'private', 'name', 'project_type_id'
+            'label', 'project_type_id', 'other_project_types'
         )
     )
-    reorder_schema(schema, ('label', 'project_type_id'))
     customize_field(
         schema,
         "label",
         validator=get_deferred_unique_label_validator(SubProjectType),
     )
-    # customize_field(
-    #     schema,
-    #     "private",
-    #     widget=deform_extensions.CheckboxToggleWidget(true_target="name")
-    # )
     customize_field(
-        schema, 'project_type_id', widget=get_deferred_select(ProjectType)
+        schema, 'project_type_id', widget=get_deferred_model_select(ProjectType)
     )
+    customize_field(
+        schema,
+        'other_project_types',
+        children=get_sequence_child_item(ProjectType),
+        widget=get_deferred_model_select_checkbox(
+            ProjectType,
+            filters=[['active', True]],
+        )
+    )
+
     return schema

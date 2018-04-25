@@ -7,6 +7,7 @@
 Project Type management
 """
 from sqlalchemy import (
+    Table,
     Column,
     Integer,
     String,
@@ -20,6 +21,16 @@ from sqlalchemy.orm import (
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+)
+
+
+ProjectTypeSubProjectType = Table(
+    'project_type_sub_project_type',
+    DBBASE.metadata,
+    Column("project_type_id", Integer, ForeignKey('project_type.id')),
+    Column("sub_project_type_id", Integer, ForeignKey('sub_project_type.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine']
 )
 
 
@@ -164,6 +175,17 @@ class SubProjectType(BaseProjectType):
         primaryjoin="ProjectType.id==SubProjectType.project_type_id",
         info={
             'colanderalchemy': {'exclude': True}
+        }
+    )
+
+    other_project_types = relationship(
+        "ProjectType",
+        secondary=ProjectTypeSubProjectType,
+        info={
+            'colanderalchemy': {
+                'title': u"Ce type de sous-projet peut également être utilisé "
+                u"dans les projets de type : "
+            }
         }
     )
 

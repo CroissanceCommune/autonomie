@@ -36,6 +36,7 @@ from autonomie.models.company import CompanyActivity
 
 from autonomie.forms.validators import validate_image_mime
 from autonomie import forms
+from autonomie.forms.custom_types import QuantityType
 from autonomie.forms import (
     files,
     lists,
@@ -179,7 +180,7 @@ comptabilité",
             missing="")
 
     contribution = colander.SchemaNode(
-            colander.Integer(),
+            QuantityType(),
             widget=deform.widget.TextInputWidget(
                 input_append="%",
                 css_class="col-md-1"

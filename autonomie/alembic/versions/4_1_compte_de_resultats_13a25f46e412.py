@@ -22,6 +22,13 @@ def update_database_structure():
         "accounting_operation", sa.Column("date", sa.Date())
     )
     op.drop_column('accounting_operation', 'datetime')
+    op.alter_column(
+        'company',
+        'contribution',
+        existing_type=sa.Integer,
+        type_=sa.Float,
+        existing_nullable=True,
+    )
 
 
 def migrate_datas():

@@ -652,6 +652,10 @@ class BaseAddView(BaseFormView):
         new_model = self.create_instance()
         new_model = self.merge_appstruct(appstruct, new_model)
         self.dbsession.add(new_model)
+
+        if hasattr(self, 'on_add'):
+            self.on_add(new_model, appstruct)
+
         self.dbsession.flush()
         if self.msg:
             self.request.session.flash(self.msg)
@@ -702,6 +706,10 @@ class BaseEditView(BaseFormView):
     def submit_success(self, appstruct):
         model = self.merge_appstruct(appstruct, self.context)
         self.dbsession.merge(model)
+
+        if hasattr(self, 'on_edit'):
+            self.on_edit(appstruct)
+
         self.dbsession.flush()
         if self.msg:
             self.request.session.flash(self.msg)

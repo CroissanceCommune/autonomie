@@ -99,7 +99,7 @@
                 </tr>
                 <tr>
                     <td class='status-invalid'><br /></td>
-                    <td>Devis invalide</td>
+                    <td>Devis invalides</td>
                 </tr>
             </table>
         </div>

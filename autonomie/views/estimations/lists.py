@@ -18,8 +18,12 @@ from autonomie.models.task import (
     Estimation,
     Task,
 )
-from autonomie.views import BaseListView
+from autonomie.views import (
+    BaseListView,
+    TreeMixin,
+)
 from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
+from autonomie.views.project.project import ProjectListView
 
 logger = logging.getLogger(__name__)
 
@@ -123,11 +127,7 @@ class GlobalEstimationList(BaseListView):
         """
         Filter the estimations by status
         """
-        status = appstruct.get('status', 'valid')
-        logger.info("  + Status filtering : %s" % status)
-        if status != 'all':
-            query = query.filter(Estimation.status == status)
-
+        query = query.filter(Estimation.status == 'valid')
         return query
 
     def more_template_vars(self, response_dict):
@@ -147,6 +147,7 @@ class GlobalEstimationList(BaseListView):
 
 
 class CompanyEstimationList(GlobalEstimationList):
+    is_admin = False
     schema = get_list_schema(is_global=False, excludes=("company_id",))
     add_template_vars = (u'title', 'is_admin', "with_draft", )
 
@@ -166,17 +167,28 @@ class CompanyEstimationList(GlobalEstimationList):
         """
         return self.request.context.id
 
+    def filter_status(self, query, appstruct):
+        """
+        Filter the estimations by status
+        """
+        status = appstruct.get('status', 'all')
+        logger.info("  + Status filtering : %s" % status)
+        if status != 'all':
+            query = query.filter(Estimation.status == status)
 
-class ProjectEstimationList(CompanyEstimationList):
+        return query
+
+
+class ProjectEstimationList(CompanyEstimationList, TreeMixin):
+    route_name = PROJECT_ITEM_ESTIMATION_ROUTE
     schema = get_list_schema(
         is_global=False,
         excludes=("company_id", 'year', 'customers',)
     )
-    is_admin = False
 
     @property
     def title(self):
-        return u"Devis de l'entreprise {0}".format(
+        return u"Devis du projet {0}".format(
             self.request.context.name
         )
 
@@ -187,6 +199,7 @@ class ProjectEstimationList(CompanyEstimationList):
         return self.request.context.company_id
 
     def filter_project(self, query, appstruct):
+        self.populate_navigation()
         query = query.filter(Estimation.project_id == self.context.id)
         return query
 
@@ -217,9 +230,9 @@ def add_views(config):
         renderer="estimations.mako",
         permission="list_estimations",
     )
-    config.add_view(
+    config.add_tree_view(
         ProjectEstimationList,
-        route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
+        parent=ProjectListView,
         renderer="project/estimations.mako",
         permission="list_estimations",
         layout="project"

@@ -34,7 +34,7 @@ from autonomie.forms.tasks.task import get_add_edit_task_schema
 from autonomie.forms.widgets import CleanMappingWidget
 
 SIGNED_STATUS_OPTIONS = (
-    ('all', u"Tous les devis", ),
+    ('all', u"Filtrer par statut client", ),
     ('waiting', u"Devis en cours", ),
     ('signed', u'Devis signé'),
     ('geninv', u"Devis concrétisés (avec facture)", ),
@@ -42,12 +42,11 @@ SIGNED_STATUS_OPTIONS = (
 )
 
 STATUS_OPTIONS = (
-    ('all', u"Tous les devis", ),
-    ('draft', u"Les brouillons"),
-    ('wait', u"Les devis en attente"),
-    ('invalid', u"Les devis invalides"),
+    ('all', u"Filtrer par statut", ),
+    ('draft', u"Brouillon"),
+    ('wait', u"En attente de validation"),
+    ('invalid', u"Invalide"),
 )
-
 
 
 def get_list_schema(is_global=False, excludes=()):
@@ -63,10 +62,10 @@ def get_list_schema(is_global=False, excludes=()):
 
     del schema['search']
 
-    if not 'customer' in excludes:
+    if 'customer' not in excludes:
         schema.insert(0, customer_node(is_global))
 
-    if not "company_id" in excludes:
+    if "company_id" not in excludes:
         schema.insert(
             0,
             company_node(
@@ -104,7 +103,7 @@ def get_list_schema(is_global=False, excludes=()):
         )
     )
 
-    if not "status" in excludes:
+    if "status" not in excludes:
         schema.insert(0, colander.SchemaNode(
             colander.String(),
             name='status',
@@ -114,7 +113,7 @@ def get_list_schema(is_global=False, excludes=()):
             missing='all'
         ))
 
-    if not "signed_status" in excludes:
+    if "signed_status" not in excludes:
         schema.insert(0, colander.SchemaNode(
             colander.String(),
             name='signed_status',
@@ -124,7 +123,7 @@ def get_list_schema(is_global=False, excludes=()):
             missing='all'
         ))
 
-    if not "year" in excludes:
+    if "year" not in excludes:
         node = forms.year_select_node(
             name='year',
             query_func=get_invoice_years,

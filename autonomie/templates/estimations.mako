@@ -72,7 +72,7 @@
 <% columns = 8 %>
     <div class='row'>
         <div class='col-md-4 col-md-offset-8 col-xs-12'>
-            <table class='table table-bordered status-table'>
+            <table class='table table-condensed table-bordered status-table'>
                 <tr>
                     <td class='geninv-True'><br /></td>
                     <td>Devis concrétisés en facture</td>
@@ -89,6 +89,20 @@
                     <td class='signed-status-aborted'><br /></td>
                     <td>Devis annulés</td>
                 </tr>
+                % if with_draft is not UNDEFINED:
+                <tr>
+                    <td class='status-draft'><br /></td>
+                    <td>Devis en brouillon</td>
+                </tr>
+                <tr>
+                    <td class='status-wait'><br /></td>
+                    <td>Devis en attente de validation</td>
+                </tr>
+                <tr>
+                    <td class='status-invalid'><br /></td>
+                    <td>Devis invalide</td>
+                </tr>
+                % endif
             </table>
         </div>
     </div>

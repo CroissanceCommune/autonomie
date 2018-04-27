@@ -64,6 +64,7 @@
             </div>
         </div>
         % endif
+        ${request.layout_manager.render_panel('navigation')}
         </%block>
     % endif
 

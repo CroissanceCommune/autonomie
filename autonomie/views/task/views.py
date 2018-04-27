@@ -40,6 +40,7 @@ from autonomie.views import (
     submit_btn,
     cancel_btn,
 )
+from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
 
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ def get_project_redirect_btn(request, id_):
     """
     return ViewLink(
         u"Revenir au projet",
-        path="project",
+        path=PROJECT_ITEM_ROUTE,
         id=id_
     )
 

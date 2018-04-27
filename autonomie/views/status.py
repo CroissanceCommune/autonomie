@@ -29,6 +29,7 @@ from autonomie.exception import (
 from autonomie.events.tasks import StatusChanged
 from autonomie.utils.rest import RestError
 from autonomie.views import BaseView
+from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +198,7 @@ class TaskStatusView(StatusView):
 
     def redirect(self):
         project_id = self.request.context.project.id
-        loc = self.request.route_path('project', id=project_id)
+        loc = self.request.route_path(PROJECT_ITEM_ROUTE, id=project_id)
         if self.request.is_xhr:
             return dict(redirect=loc)
         else:

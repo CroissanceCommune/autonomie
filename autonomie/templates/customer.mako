@@ -154,7 +154,7 @@
     </div>
     <div class='panel-body'>
         <a class='btn btn-primary primary-action'
-            href='${request.route_path("company_projects", id=customer.company.id, _query=dict(action="add", customer=customer.id))}'>
+            href='${add_project_url}'>
             <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouveau projet
         </a>
         %if customer.projects:
@@ -181,13 +181,13 @@
                                 </td>
                                 <td>
                                     <div class='btn-group'>
-                                        ${table_btn(request.route_path("project", id=project.id), u"Voir", "Voir ce projet", icon=u"pencil")}
+                                        ${table_btn(request.route_path("/projects/{id}", id=project.id), u"Voir", "Voir ce projet", icon=u"pencil")}
                                         %if not project.archived:
-                                            ${table_btn(request.route_path("project_estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"plus")}
-                                            ${table_btn(request.route_path("project_invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"plus")}
-                                            ${table_btn(request.route_path("project", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"book")}
+                                            ${table_btn(request.route_path("/projects/{id}/estimations", id=project.id), u"Devis", "Ajouter un devis", icon=u"plus")}
+                                            ${table_btn(request.route_path("/projects/{id}/invoices", id=project.id), u"Facture", "Ajouter une facture", icon=u"plus")}
+                                            ${table_btn(request.route_path("/projects/{id}", id=project.id, _query=dict(action="archive")), u"Archiver", u"Archiver ce projet", onclick=u"return confirm('Êtes-vous sûr de vouloir archiver ce projet ?');", icon=u"book")}
                                         %elif api.has_permission('delete_project', project):
-                                            <% del_url = request.route_path("project", id=project.id, _query=dict(action="delete")) %>
+                                            <% del_url = request.route_path("/projects/{id}", id=project.id, _query=dict(action="delete")) %>
                                             ${table_btn(del_url,\
                                             u"Supprimer", \
                                             u"Supprimer ce projet", \

@@ -36,7 +36,6 @@ import logging
 from sqlalchemy import or_
 from webhelpers.html import tags
 from webhelpers.html import HTML
-from pyramid.security import has_permission
 
 from autonomie.models.company import Company
 
@@ -164,18 +163,15 @@ def get_company(request, cid):
     return request._company
 
 
-def get_company_menu(request, cid, css=None):
+def _get_company_gestion_dropdown(request, cid):
     """
-        Build the usermenu
+    Build and Return the 'Gestion' dropdown
+
+    :param obj request: The request object
+    :param int cid: The company id
+    :returns: A DropDown
+    :rtype: obj
     """
-    menu = Menu(css=css)
-    href = request.route_path("company_customers", id=cid)
-    menu.add_item(u"Clients", icon="fa fa-users", href=href)
-
-    href = request.route_path("company_projects", id=cid)
-    menu.add_item(u"Projets", icon="fa fa-folder-open-o", href=href)
-
-    # Gestion
     gestion = DropDown(label=u"Gestion")
 
     href = request.route_path("company_estimations", id=cid)
@@ -193,7 +189,6 @@ def get_company_menu(request, cid, css=None):
         icon="fa fa-line-chart",
         href=href
     )
-
     href = request.route_path(
         "/companies/{id}/accounting/treasury_measure_grids",
         id=cid
@@ -203,6 +198,7 @@ def get_company_menu(request, cid, css=None):
         icon="fa fa-money",
         href=href
     )
+
     href = request.route_path(
         "/companies/{id}/accounting/income_statement_measure_grids",
         id=cid
@@ -212,10 +208,18 @@ def get_company_menu(request, cid, css=None):
         icon="fa fa-table",
         href=href
     )
+    return gestion
 
-    menu.add(gestion)
 
-    # Docs
+def _get_company_accounting_documents_dropdown(request, cid):
+    """
+    Build the treasury related dropdown
+
+    :param obj request: The request object
+    :param int cid: The company id
+    :returns: A DropDown
+    :rtype: obj
+    """
     docs = DropDown(label=u"Documents")
 
     href = request.route_path("treasury", id=cid)
@@ -243,9 +247,18 @@ def get_company_menu(request, cid, css=None):
         )
         docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
 
-    menu.add(docs)
+    return docs
 
-    # Accompagnement
+
+def _get_company_accompagnement_dropdown(request, cid):
+    """
+    Build the Accompagnement dropdown menu
+
+    :param obj request: The request object
+    :param int cid: The company id
+    :returns: A DropDown
+    :rtype: obj
+    """
     accompagnement = DropDown(label=u"Accompagnement")
 
     href = request.route_path("company_activities", id=cid)
@@ -256,10 +269,18 @@ def get_company_menu(request, cid, css=None):
 
     href = request.route_path('user_competences', id=request.user.id)
     accompagnement.add_item(u"Compétences", href=href, icon="fa fa-star")
+    return accompagnement
 
-    menu.add(accompagnement)
 
-    # Params
+def _get_company_param_dropdown(request, cid):
+    """
+    Build the param dropdown
+
+    :param obj request: The Pyramid request object
+    :param int cid: The current company id
+    :returns: A DropDown
+    :rtype: obj
+    """
     params = DropDown(label=u"Paramètres")
 
     href = request.route_path("company", id=cid)
@@ -267,9 +288,24 @@ def get_company_menu(request, cid, css=None):
 
     href = request.route_path("sale_categories", id=cid)
     params.add_item(u"Catalogue produits", icon="fa fa-book", href=href)
+    return params
 
-    menu.add(params)
 
+def get_company_menu(request, cid, css=None):
+    """
+    Build the Company related menu
+    """
+    menu = Menu(css=css)
+    href = request.route_path("company_customers", id=cid)
+    menu.add_item(u"Clients", icon="fa fa-users", href=href)
+
+    from autonomie.views.project.routes import COMPANY_PROJECTS_ROUTE
+    href = request.route_path(COMPANY_PROJECTS_ROUTE, id=cid)
+    menu.add_item(u"Projets", icon="fa fa-folder-open-o", href=href)
+    menu.add(_get_company_gestion_dropdown(request, cid))
+    menu.add(_get_company_accounting_documents_dropdown(request, cid))
+    menu.add(_get_company_accompagnement_dropdown(request, cid))
+    menu.add(_get_company_param_dropdown(request, cid))
     return menu
 
 
@@ -279,7 +315,7 @@ def get_admin_menus(request):
     """
     menu = Menu()
 
-    if has_permission("admin", request.context, request):
+    if request.has_permission("admin"):
         href = request.route_path("/admin")
         menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
 
@@ -296,7 +332,7 @@ def get_admin_menus(request):
 
     menu.add(documents)
 
-    if has_permission("admin_treasury", request.context, request):
+    if request.has_permission("admin_treasury"):
         treasury = DropDown(label=u"Comptabilité")
 
         href = request.route_path("/export/treasury/invoices")
@@ -398,7 +434,11 @@ def company_choice(request, companies, cid):
 
         options.append((url, name))
 
-    default = request.route_path("company", id=cid)
+    if request.context.__name__ == 'company':
+        default = request.current_route_path(id=cid)
+    else:
+        default = request.route_path("company", id=cid)
+
     html_attrs = {
         'class': 'company-search',
         'id': "company-select-menu",

@@ -44,6 +44,7 @@ from autonomie.utils.filedepot import (
 
 
 AUTONOMIE_MODULES = (
+    "autonomie.views",
     "autonomie.views.accompagnement.activity",
     "autonomie.views.accompagnement.workshop",
     "autonomie.views.accounting",
@@ -67,7 +68,6 @@ AUTONOMIE_MODULES = (
     "autonomie.views.invoices.lists",
     "autonomie.views.invoices.rest_api",
     "autonomie.views.job",
-    "autonomie.views.json",
     "autonomie.views.manage",
     "autonomie.views.payment",
     "autonomie.views.sale_product",
@@ -99,6 +99,7 @@ AUTONOMIE_PANELS_MODULES = (
     'autonomie.panels.files',
     'autonomie.panels.sidebar',
     "autonomie.panels.widgets",
+    "autonomie.panels.navigation",
 )
 
 AUTONOMIE_EVENT_MODULES = (

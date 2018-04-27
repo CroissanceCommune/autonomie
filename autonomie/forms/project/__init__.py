@@ -32,9 +32,14 @@ import functools
 
 from colanderalchemy import SQLAlchemySchemaNode
 
+from autonomie_base.models.base import DBSESSION
 from autonomie.models.customer import Customer
 from autonomie.models.project import (
     Project,
+)
+from autonomie.models.project.types import (
+    ProjectType,
+    SubProjectType,
 )
 from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
@@ -87,27 +92,110 @@ def check_begin_end_date(form, value):
             raise exc
 
 
+@colander.deferred
+def deferred_default_project_type(node, kw):
+    """
+    Load the default ProjectType on bind
+    """
+    res = DBSESSION().query(ProjectType.id).filter_by(default=True).first()
+    if res is not None:
+        res = res[0]
+    else:
+        res = colander.null
+    return res
+
+
+@colander.deferred
+def deferred_project_type_widget(node, kw):
+    """
+    Build a ProjectType radio checkbox widget on bind
+    Filter project types by active and folowing the associated rights
+    """
+    request = kw['request']
+    project_types = ProjectType.query_for_select()
+
+    values = []
+    for project_type in project_types:
+        if not project_type.private or \
+                request.has_permission('add.%s' % project_type.name):
+            values.append((project_type.id, project_type.label))
+    return deform.widget.RadioChoiceWidget(values=values)
+
+
+@colander.deferred
+def deferred_subproject_type_widget(node, kw):
+    """
+    Build a SubProjectType checkbox list widget on bind
+
+    Only show active subprojecttypes than can be associated to the current's
+    project type
+    """
+    request = kw['request']
+    ptype_id = request.context.project_type_id
+
+    subproject_types_query = SubProjectType.query_for_select()
+    subproject_types_query.filter(
+        SubProjectType.other_project_types.any(
+            ProjectType.id == ptype_id
+        )
+    )
+
+    values = []
+    for subproject_type in subproject_types_query:
+        if not subproject_type.private or \
+                request.has_permission('add.%s' % subproject_type.name):
+            values.append((subproject_type.id, subproject_type.label))
+
+    return deform.widget.CheckboxChoiceWidget(values=values)
+
+
 def _customize_project_schema(schema):
     """
     Customize the project schema to add widgets/validators ...
 
     :param obj schema: a colander.SchemaNode instance
     """
-    schema.validator = check_begin_end_date
-    customize = functools.partial(forms.customize_field, schema)
-    customize('name', missing=colander.required)
-    customize(
-        'definition',
-        widget=deform.widget.TextAreaWidget(css_class='col-md-10')
-    )
+    if 'starting_date' in schema:
+        schema.validator = check_begin_end_date
 
+    customize = functools.partial(forms.customize_field, schema)
+    if 'name 'in schema:
+        customize('name', missing=colander.required, title=u"Nom du projet")
+
+    if 'project_type_id' in schema:
+        customize(
+            'project_type_id',
+            title=u"Type de projet",
+            widget=deferred_project_type_widget,
+            default=deferred_default_project_type,
+            missing=colander.required,
+        )
+
+    if 'subtypes' in schema:
+        customize(
+            "subtypes",
+            title=u"Types d'affaires",
+            description=u"Le type d'affaire qui peut être mené dans ce projet",
+            missing=colander.drop,
+            children=[forms.get_sequence_child_item_id_node(SubProjectType)],
+            widget=deferred_subproject_type_widget
+        )
+
+    return schema
+
+
+def _add_customer_node_to_schema(schema):
+    """
+    Build a custom customer selection node and add it to the schema
+
+    :param obj schema: a colander.SchemaNode instance
+    """
     # Add a custom node to be able to associate existing customers
     customer_id_node = get_customer_select_node(name="un client")
     customer_id_node.objectify = customer_objectify
     customer_id_node.dictify = customer_dictify
 
-    schema.insert(
-        3,
+    schema.add(
         colander.SchemaNode(
             colander.Sequence(),
             customer_id_node,
@@ -119,17 +207,47 @@ def _customize_project_schema(schema):
     return schema
 
 
-def get_add_edit_project_schema():
+def get_add_project_schema():
+    """
+    Build a schema for project add
+    """
+    schema = SQLAlchemySchemaNode(Project, includes=("name", 'project_type_id'))
+    _customize_project_schema(schema)
+    _add_customer_node_to_schema(schema)
+    return schema
+
+
+def get_add_step2_project_schema():
+    """
+    Build a schema for the second step of project add
+    """
+    schema = SQLAlchemySchemaNode(
+        Project,
+        includes=(
+            'code',
+            'description',
+            'definition',
+            'starting_date',
+            'ending_date',
+            'subtypes',
+        ),
+    )
+    _customize_project_schema(schema)
+    return schema
+
+
+def get_edit_project_schema():
     """
     Return the project Edition/add form schema
     """
     excludes = (
         "_acl", "id", "company_id", "archived", "customers",
         "invoices", "tasks", "estimations", "cancelinvoices",
-        "project_type_id", "project_type",
+        "project_type_id", "project_type", "subtypes",
     )
     schema = SQLAlchemySchemaNode(Project, excludes=excludes)
-    schema = _customize_project_schema(schema)
+    _customize_project_schema(schema)
+    _add_customer_node_to_schema(schema)
     return schema
 
 

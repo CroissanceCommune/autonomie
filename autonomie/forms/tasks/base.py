@@ -218,9 +218,9 @@ def deferred_company_customer_validator(node, kw):
 def get_tasktype_from_request(request):
     route_name = request.matched_route.name
     result = request.context.type_
-    for predicate in ('estimation', 'invoice', 'cancelinvoice'):
+    for predicate in ('estimation', 'cancelinvoice', 'invoice'):
         # Matches estimation and estimations
-        if route_name == "project_%ss" % predicate:
+        if predicate in route_name:
             result = predicate
             break
     return result

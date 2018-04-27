@@ -1,0 +1,9 @@
+<ul class='breadcrumb breadcrumb-arrow' tal:condition="breadcrumb or back_link">
+  <li tal:condition="back_link">
+    <a href='${back_link}'><i class='fa fa-chevron-left'></i></a>
+  </li>
+  <li tal:repeat="item breadcrumb" tal:attributes="class string:${'active' if repeat.item.end else ''}">
+    <a href="${item.url}" tal:content="item.label" tal:condition="not repeat.item.end"></a>
+    <span tal:condition="repeat.item.end" tal:content="item.label"></span>
+  </li>
+</ul>

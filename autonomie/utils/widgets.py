@@ -361,6 +361,13 @@ class ActionMenu(Menu):
     template = "base/actionmenu.mako"
 
 
+class Navigation(object):
+    def __init__(self):
+        self.breadcrumb = []
+        self.back_link = None
+        self.links = []
+
+
 class Link(object):
     panel_name = "link"
 

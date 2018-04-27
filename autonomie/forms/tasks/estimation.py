@@ -33,7 +33,7 @@ from autonomie.forms.tasks.lists import (
 from autonomie.forms.tasks.task import get_add_edit_task_schema
 from autonomie.forms.widgets import CleanMappingWidget
 
-STATUS_OPTIONS = (
+SIGNED_STATUS_OPTIONS = (
     ('all', u"Tous les devis", ),
     ('waiting', u"Devis en cours", ),
     ('signed', u'Devis signé'),
@@ -41,12 +41,21 @@ STATUS_OPTIONS = (
     ('aborted', u"Devis annulés", ),
 )
 
+STATUS_OPTIONS = (
+    ('all', u"Tous les devis", ),
+    ('draft', u"Les brouillons"),
+    ('wait', u"Les devis en attente"),
+    ('invalid', u"Les devis invalides"),
+)
 
-def get_list_schema(is_global=False):
+
+
+def get_list_schema(is_global=False, excludes=()):
     """
     Return the estimation list schema
 
     :param bool is_global: Should we include global search fields (CAE wide)
+    :param tuple excludes: List of field to exclude
     :returns: The list schema
     :rtype: colander.SchemaNode
     """
@@ -54,9 +63,10 @@ def get_list_schema(is_global=False):
 
     del schema['search']
 
-    schema.insert(0, customer_node(is_global))
+    if not 'customer' in excludes:
+        schema.insert(0, customer_node(is_global))
 
-    if is_global:
+    if not "company_id" in excludes:
         schema.insert(
             0,
             company_node(
@@ -94,19 +104,32 @@ def get_list_schema(is_global=False):
         )
     )
 
-    schema.insert(0, colander.SchemaNode(
-        colander.String(),
-        name='status',
-        widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
-        validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
-        default='all',
-        missing='all'
-    ))
-    node = forms.year_select_node(
-        name='year',
-        query_func=get_invoice_years,
-    )
-    schema.insert(0, node)
+    if not "status" in excludes:
+        schema.insert(0, colander.SchemaNode(
+            colander.String(),
+            name='status',
+            widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
+            validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+            default='all',
+            missing='all'
+        ))
+
+    if not "signed_status" in excludes:
+        schema.insert(0, colander.SchemaNode(
+            colander.String(),
+            name='signed_status',
+            widget=deform.widget.SelectWidget(values=SIGNED_STATUS_OPTIONS),
+            validator=colander.OneOf([s[0] for s in SIGNED_STATUS_OPTIONS]),
+            default='all',
+            missing='all'
+        ))
+
+    if not "year" in excludes:
+        node = forms.year_select_node(
+            name='year',
+            query_func=get_invoice_years,
+        )
+        schema.insert(0, node)
 
     return schema
 

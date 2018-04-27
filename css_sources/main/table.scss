@@ -4,12 +4,15 @@ $green_status_light: #c4ffaa;
 $green_status_label: #5cb85c;
 $red_status_hard: #C43C35;
 $red_status_light: #f9aaaa;
+$red_status_light2: #f8c3c3;
 $red_status_label:#d9534f;
 $orange_status_hard: #ffb266;
 $orange_status_light: #ffb266;
+$orange_status_light2: #ffd790;
 $orange_status_label: #f0ad4e;
 $blue_status_hard: #238bff;
 $blue_status_light: #7db9fd;
+$blue_status_light2: #b3d5fb;
 $blue_status_label: #5bc0de;
 
 table{
@@ -45,6 +48,27 @@ table.opa tfoot td{
 .status-table{
   td.status-td{
     width: 16px;
+  }
+  .status-draft{
+    background-color: #ddd;
+  }
+  .status-wait{
+    background: repeating-linear-gradient(
+			45deg,
+			$orange_status_light,
+			$orange_status_light 10px,
+			$orange_status_light2 10px,
+			$orange_status_light2 20px
+		);
+  }
+  .status-invalid{
+    background: repeating-linear-gradient(
+			45deg,
+			$red_status_light,
+			$red_status_light 10px,
+			$red_status_light2 10px,
+			$red_status_light2 20px
+		);
   }
   .signed-status-signed, .justified-True:not(.status-valid), .job-planned{
     background-color: $blue_status_light;

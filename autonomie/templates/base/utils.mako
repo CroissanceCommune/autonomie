@@ -76,7 +76,7 @@
     </%doc>
     %if project is not UNDEFINED and project is not None:
         % if link:
-        <a href="${request.route_path('project', id=project.id)}"
+        <a href="${request.route_path('/projects/{id}', id=project.id)}"
             title="Voir le projet ${project.name}">
         % endif
         ${project.name}

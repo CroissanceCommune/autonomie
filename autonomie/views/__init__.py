@@ -34,6 +34,7 @@ import itertools
 
 from deform import Form
 from deform import Button
+from deform_extensions import GridFormWidget
 from pyramid_deform import (
     FormView,
     CSRFSchema,
@@ -51,6 +52,10 @@ from autonomie.utils.renderer import set_close_popup_response
 from autonomie.compute.math_utils import convert_to_int
 from autonomie.export.utils import write_file_to_request
 from autonomie.utils import rest
+from autonomie.utils.widgets import Link
+
+
+logger = logging.getLogger(__name__)
 
 
 submit_btn = Button(
@@ -135,9 +140,11 @@ class BaseListClass(BaseView):
         """
         collect the filter_... methods attached to the current object
         """
-        for method_name, method in inspect.getmembers(self, inspect.ismethod):
-            if method_name.startswith('filter_'):
-                yield method
+        for key in dir(self):
+            if key.startswith('filter_'):
+                func = getattr(self, key)
+                if inspect.ismethod(func):
+                    yield func
 
     def _filter(self, query, appstruct):
         """
@@ -303,6 +310,34 @@ class BaseListView(BaseListClass):
     add_template_vars = ()
     grid = None
     use_paginate = True
+
+    def _get_item_url(self, item, action=None, **kw):
+        """
+        Build an url to an item's action
+
+        Usefull from inside the stream_actions method
+
+        :param obj item: An instance with an id
+        :param str action: The name of the action
+        (duplicate/disable/edit...)
+        :param dict kw: Other optionnal route params passed to route_path call
+
+        :returns: An url
+        :rtype: str
+        """
+        if not hasattr(self, 'item_route_name'):
+            raise Exception(u"Un attribut item_route_name doit être défini")
+
+        query = dict(self.request.GET)
+        if action is not None:
+            query['action'] = action
+
+        return self.request.route_path(
+            self.item_route_name,
+            id=item.id,
+            _query=query,
+            **kw
+        )
 
     def _get_current_page(self, appstruct):
         """
@@ -541,6 +576,13 @@ class BaseFormView(FormView):
         if self.request.has_permission('manage'):
             tinymce.need()
 
+    def before(self, form):
+        FormView.before(self, form)
+        if hasattr(self, "named_form_grid"):
+            form.widget = GridFormWidget(named_grid=self.named_form_grid)
+        elif hasattr(self, 'form_grid'):
+            form.widget = GridFormWidget(grid=self.form_grid)
+
     def __call__(self):
         if self.use_csrf_token and 'csrf_token' not in self.schema:
             self.schema.children.append(CSRFSchema()['csrf_token'])
@@ -690,6 +732,7 @@ class BaseEditView(BaseFormView):
         return self.schema.dictify(self.context)
 
     def before(self, form):
+        BaseFormView.before(self, form)
         form.set_appstruct(self.get_default_appstruct())
 
     def merge_appstruct(self, appstruct, model):
@@ -1012,6 +1055,161 @@ class BaseRestView(BaseView):
         return {}
 
 
+class TreeMixinMetaClass(type):
+    """
+    Metaclasse qui attache un attribut children spécifique à chaque classe fille
+    créée
+
+
+    LE problème d'origine :
+
+        class A:
+            children = []
+
+        class B(A):
+            pass
+
+        B.children.append('o')
+        A.children
+        ['o']
+
+    Avec cette métaclasse
+
+    A.children = []
+    """
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(TreeMixinMetaClass, cls).__new__(
+            cls, clsname, bases, attrs
+        )
+        newclass.children = []
+        return newclass
+
+
+class TreeMixin:
+    """
+    Mixin adding tree structure to views
+
+    class MyView(BaseView, TreeMixin):
+        route_name = "/myviewroute"
+
+
+    Inherit from the TreeMixin and attach views to parent views
+
+    route_name
+
+        current route_name
+
+    children
+
+        class attribute in list format registering all view children
+
+    parent
+
+        weakref to the parent view
+    """
+    __metaclass__ = TreeMixinMetaClass
+    route_name = None
+    parent_view = None
+    description = ""
+    title = ""
+
+    @classmethod
+    def get_url(cls, request):
+        if getattr(cls, 'url', None) is not None:
+            return cls(request).url
+        elif getattr(cls, 'route_name', None) is not None:
+            if isinstance(cls.route_name, property):
+                return cls(request).route_name
+            else:
+                return request.route_path(cls.route_name)
+        else:
+            return ""
+
+    @classmethod
+    def get_title(cls, request):
+        if isinstance(cls.title, property):
+            return cls(request).title
+        else:
+            return cls.title
+
+    @classmethod
+    def get_breadcrumb(cls, request, local=False):
+        """
+        Collect breadcrumb entries
+
+        :param obj request: The Pyramid request
+        :param bool local: Is the breadcrumb for local use
+        :returns: A generator of 2-uples (title, url)
+        """
+        if cls.parent_view is not None:
+            for link in cls.parent_view.get_breadcrumb(request):
+                yield link
+
+        if not local:
+            yield Link(cls.get_url(request), cls.get_title(request))
+        else:
+            yield Link("", cls.get_title(request))
+
+    @classmethod
+    def get_back_url(cls, request):
+        logger.debug(u"Asking for the parent url : {0}".format(cls))
+        if cls.parent_view is not None:
+            return cls.parent_view.get_url(request)
+        else:
+            return None
+
+    @classmethod
+    def get_navigation(cls, request):
+        result = []
+        for child in cls.children:
+            if getattr(child, 'route_name', None) is not None:
+                result.append(
+                    Link(
+                        label=child.title,
+                        route_name=child.route_name,
+                        title=child.description,
+                    )
+                )
+            else:
+                url = child.get_url(request)
+                if url:
+                    result.append(
+                        Link(
+                            label=child.title,
+                            title=child.description,
+                            url=url,
+                        )
+                    )
+        return result
+
+    @property
+    def navigation(self):
+        return self.get_navigation(self.request)
+
+    @property
+    def breadcrumb(self):
+        return self.get_breadcrumb(self.request, local=True)
+
+    @property
+    def back_link(self):
+        return self.get_back_url(self.request)
+
+    @classmethod
+    def add_child(cls, view_class):
+        cls.children.append(view_class)
+        view_class.parent_view = cls
+
+    def populate_navigation(self):
+        try:
+            self.request.navigation.breadcrumb = self.breadcrumb
+            self.request.navigation.back_link = self.back_link
+        except Exception as err:
+            logger.exception(u"Error in populate_navigation")
+            logger.error(u"I'm %s " % self)
+            logger.error(u"Parent : %s" % self.parent_view)
+            raise err
+
+
 def make_panel_wrapper_view(panel_name, js_resources=()):
     """
     Return a view wrapping the given panel
@@ -1048,3 +1246,31 @@ def add_panel_page_view(config, panel_name, **kwargs):
         renderer="panel_page_wrapper.mako",
         **kwargs
     )
+
+
+def add_tree_view_directive(config, *args, **kwargs):
+    """
+    Custom add view directive specific to views using the TreeMixin class
+    It allows to pass a parent parameter matching the parent view
+
+    This way views can display a breadcrumb for navigation
+    """
+    if 'parent' in kwargs:
+        parent = kwargs.pop('parent')
+        if not hasattr(parent, 'add_child'):
+            raise Exception(u"The parent (%s) view should inherit the "
+                            u"Treemixin class" % parent)
+        parent.add_child(args[0])
+
+    if 'route_name' not in kwargs:
+        # Use the route_name set on the view by default
+        kwargs['route_name'] = args[0].route_name
+
+    config.add_view(*args, **kwargs)
+
+
+def includeme(config):
+    """
+    Pyramid inclusion mechanism
+    """
+    config.add_directive('add_tree_view', add_tree_view_directive)

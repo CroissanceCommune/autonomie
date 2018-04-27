@@ -117,3 +117,10 @@ class ProjectService(object):
         Only load columns used to build project labels
         """
         return project_class.query().options(load_only('id', 'name', 'code'))
+
+    @classmethod
+    def get_code_list_with_labels(cls, project_class, company_id):
+        query = project_class.query().options(load_only('name', 'code'))
+        query = query.filter_by(company_id=company_id)
+        query = query.filter(project_class.code != None)
+        return query.all()

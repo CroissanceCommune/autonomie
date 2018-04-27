@@ -47,35 +47,56 @@ from autonomie.models.project import (
 )
 from autonomie.models.customer import Customer
 from autonomie.utils.colors import COLORS_SET
-from autonomie.utils.widgets import (
-    ViewLink,
-)
 from autonomie.forms.project import (
     get_list_schema,
-    get_add_edit_project_schema,
+    get_add_project_schema,
+    get_add_step2_project_schema,
+    get_edit_project_schema,
     PhaseSchema,
 )
 from autonomie.forms import (
     merge_session_with_post,
 )
-from deform_extensions import GridFormWidget
 from autonomie.views import (
+    BaseView,
+    BaseAddView,
+    BaseEditView,
     BaseFormView,
     submit_btn,
     BaseListView,
+    TreeMixin,
 )
 from autonomie.views.files import (
     FileUploadView,
 )
+from autonomie.views.project.routes import (
+    COMPANY_PROJECTS_ROUTE,
+    PROJECT_ITEM_ROUTE,
+    PROJECT_ITEM_ESTIMATION_ROUTE,
+    PROJECT_ITEM_INVOICE_ROUTE,
+    PHASE_ITEM_ROUTE,
+)
 
 log = logger = logging.getLogger(__name__)
-FORM_GRID = (
+ADD_FORM_GRID = (
     (
-        ('code', 6),
+        ('name', 12),
     ),
     (
-        ('name', 4),
-        ('type', 4),
+        ('project_type_id', 12),
+    ),
+    (
+        ('customers', 12),
+    ),
+)
+FORM_GRID = (
+    (
+        ('name', 6),
+    ),
+    (
+        ('description', 4),
+        ('', 2),
+        ('code', 2),
     ),
     (
         ('customers', 8),
@@ -148,16 +169,6 @@ des documents".format(context.name)
     return HTTPFound(redirect)
 
 
-def get_project_form(request):
-    """
-    Returns the project add/edit form
-    """
-    schema = get_add_edit_project_schema().bind(request=request)
-    form = Form(schema, buttons=(submit_btn,))
-    form.widget = GridFormWidget(named_grid=FORM_GRID)
-    return form
-
-
 def redirect_to_customerslist(request, company):
     """
         Force project page to be redirected to customer page
@@ -171,7 +182,7 @@ de créer de nouveaux projets")
     )
 
 
-class ProjectsList(BaseListView):
+class ProjectsListView(BaseListView, TreeMixin):
     """
     The project list view is compound of :
         * the list of projects with action buttons (view, delete ...)
@@ -180,7 +191,7 @@ class ProjectsList(BaseListView):
             * an add projectform popup
             * a searchform
     """
-    add_template_vars = ('title', 'stream_actions', 'addform')
+    add_template_vars = ('title', 'stream_actions', 'add_url')
     title = u"Liste des projets"
     schema = get_list_schema()
     default_sort = "created_at"
@@ -190,6 +201,16 @@ class ProjectsList(BaseListView):
         "code": Project.code,
         "created_at": Project.created_at,
     }
+    route_name = COMPANY_PROJECTS_ROUTE
+    item_route_name = PROJECT_ITEM_ROUTE
+
+    @property
+    def url(self):
+        if isinstance(self.context, Project):
+            cid = self.context.company_id
+        else:
+            cid = self.context.id
+        return self.request.route_path(self.route_name, id=cid)
 
     def query(self):
         company = self.request.context
@@ -219,14 +240,6 @@ class ProjectsList(BaseListView):
             )
         return query
 
-    @property
-    def addform(self):
-        res = None
-        if self.request.has_permission('add_project'):
-            form = get_project_form(self.request)
-            res = form.render()
-        return res
-
     def stream_actions(self, project):
         """
         Stream actions available for the given project
@@ -235,7 +248,7 @@ class ProjectsList(BaseListView):
         :rtype: generator
         """
         yield (
-            self.request.route_path("project", id=project.id),
+            self._get_item_url(project),
             u"Voir/Modifier",
             u"Voir/Modifier",
             u"pencil",
@@ -243,7 +256,11 @@ class ProjectsList(BaseListView):
         )
         if self.request.has_permission('add_estimation', project):
             yield (
-                self.request.route_path("project_estimations", id=project.id),
+                self.request.route_path(
+                    PROJECT_ITEM_ESTIMATION_ROUTE,
+                    id=project.id,
+                    _query={'action': 'add'},
+                ),
                 u"Nouveau devis",
                 u"Créer un devis",
                 u"file",
@@ -251,7 +268,11 @@ class ProjectsList(BaseListView):
             )
         if self.request.has_permission('add_invoice', project):
             yield (
-                self.request.route_path("project_invoices", id=project.id),
+                self.request.route_path(
+                    PROJECT_ITEM_INVOICE_ROUTE,
+                    id=project.id,
+                    _query={'action': 'add'},
+                ),
                 u"Nouvelle facture",
                 u"Créer une facture",
                 u"file",
@@ -260,11 +281,7 @@ class ProjectsList(BaseListView):
         if self.request.has_permission('edit_project', project):
             if project.archived:
                 yield (
-                    self.request.route_path(
-                        "project",
-                        id=project.id,
-                        _query=dict(action="archive")
-                    ),
+                    self._get_item_url(project, action='archive'),
                     u"Désarchiver le projet",
                     u"Désarchiver le projet",
                     u"book",
@@ -272,11 +289,7 @@ class ProjectsList(BaseListView):
                 )
             else:
                 yield (
-                    self.request.route_path(
-                        "project",
-                        id=project.id,
-                        _query=dict(action="archive")
-                    ),
+                    self._get_item_url(project, action='archive'),
                     u"Archiver le projet",
                     u"Archiver le projet",
                     u"book",
@@ -284,11 +297,7 @@ class ProjectsList(BaseListView):
                 )
         if self.request.has_permission('delete_project', project):
             yield (
-                self.request.route_path(
-                    "project",
-                    id=project.id,
-                    _query=dict(action="delete")
-                ),
+                self._get_item_url(project, action='delete'),
                 u"Supprimer",
                 u"Supprimer ce projet",
                 u"trash",
@@ -299,6 +308,14 @@ class ProjectsList(BaseListView):
                     )
                 }
             )
+
+    @property
+    def add_url(self):
+        return self.request.route_path(
+            COMPANY_PROJECTS_ROUTE,
+            id=self.context.id,
+            _query={'action': 'add'}
+        )
 
 
 def project_archive(request):
@@ -319,7 +336,7 @@ def project_archive(request):
     else:
         return HTTPFound(
             request.route_path(
-                "company_projects",
+                COMPANY_PROJECTS_ROUTE,
                 id=request.context.company_id
             )
         )
@@ -340,322 +357,269 @@ def project_delete(request):
         return HTTPFound(request.referer)
     else:
         return HTTPFound(
-            request.route_path("company_projects", id=cid)
+            request.route_path(COMPANY_PROJECTS_ROUTE, id=cid)
         )
 
 
-def get_color(index):
-    """
-    return the color for the given index (uses modulo to avoid index errors
-    """
-    return COLORS_SET[index % len(COLORS_SET)]
-
-
-def get_phase_add_form(request):
-    """
-    Return a form object for phase add
-    :param obj request: The pyramid request object
-    :returns: A form
-    :rtype: class:`deform.Form`
-    """
-    schema = PhaseSchema().bind(request=request)
-    form = Form(
-        schema,
-        buttons=(submit_btn,),
-        action=request.current_route_path(_query={'action': 'addphase'}),
-    )
-    return form
-
-
-def set_task_colors(phases):
-    """
-    Set colors on the estimation/invoice/cancelinvoice objects so that we can
-    visually identify related objects
-
-    :param list phases: The list of phases of this project
-    """
-    index = 0
-
-    for phase in phases:
-        for estimation in phase.estimations:
-            estimation.color = get_color(index)
-            index += 1
-
-    for phase in phases:
-        for invoice in phase.invoices:
-            if invoice.estimation and hasattr(invoice.estimation, 'color'):
-                invoice.color = invoice.estimation.color
-            else:
-                invoice.color = get_color(index)
-                index += 1
-
-    for phase in phases:
-        for cancelinvoice in phase.cancelinvoices:
-            if cancelinvoice.invoice and \
-                    hasattr(cancelinvoice.invoice, 'color'):
-                cancelinvoice.color = cancelinvoice.invoice.color
-            else:
-                cancelinvoice.color = get_color(index)
-                index += 1
-
-
-def get_latest_phase(request, phases):
-    """
-    Return the phase where we can identify the last modification
-    :param list phases: The list of phases of the given project
-    """
-    result = 0
-    if 'phase' in request.GET:
-        result = Phase.get(request.GET['phase'])
-
-    else:
-        # We get the latest used task and so we get the latest used phase
-        all_tasks = []
-        for phase in phases:
-            all_tasks.extend(phase.tasks)
-        all_tasks.sort(key=lambda task: task.status_date, reverse=True)
-
-        if all_tasks:
-            result = all_tasks[0].phase
-    return result
-
-
-def project_view(request):
-    """
-        Return datas for displaying one project
-    """
-    populate_actionmenu(request)
-    phases = request.context.phases
-
-    set_task_colors(phases)
-
-    customer_names = (
-        customer.get_label() for customer in request.context.customers
-    )
-    title = u"Projet : {0} ({1})".format(
-        request.context.name,
-        ", ".join(customer_names)
-    )
-
-    return dict(
-        title=title,
-        project=request.context,
-        company=request.context.company,
-        latest_phase=get_latest_phase(request, phases),
-        phase_form=get_phase_add_form(request),
-    )
-
-
-class ProjectAdd(BaseFormView):
-    add_template_vars = ('title', 'projects', )
-    title = u"Ajout d'un nouveau projet"
-    schema = get_add_edit_project_schema()
-    buttons = (submit_btn,)
-    validation_msg = u"Le projet a été ajouté avec succès"
+class ProjectView(BaseView, TreeMixin):
+    route_name = PROJECT_ITEM_ROUTE
 
     @property
-    def projects(self):
-        return self.context.get_project_codes_and_names()
+    def url(self):
+        return self.request.route_path(self.route_name, id=self.context.id)
+
+    def _get_phase_add_form(self):
+        """
+        Return a form object for phase add
+        :param obj request: The pyramid request object
+        :returns: A form
+        :rtype: class:`deform.Form`
+        """
+        schema = PhaseSchema().bind(request=self.request)
+        form = Form(
+            schema,
+            buttons=(submit_btn,),
+            action=self.request.current_route_path(
+                _query={'action': 'addphase'}
+            ),
+        )
+        return form
+
+    def _get_latest_phase(self, phases):
+        """
+        Return the phase where we can identify the last modification
+        :param list phases: The list of phases of the given project
+        """
+        result = 0
+        if 'phase' in self.request.GET:
+            result = Phase.get(self.request.GET['phase'])
+
+        else:
+            # We get the latest used task and so we get the latest used phase
+            all_tasks = []
+            for phase in phases:
+                all_tasks.extend(phase.tasks)
+            all_tasks.sort(key=lambda task: task.status_date, reverse=True)
+
+            if all_tasks:
+                result = all_tasks[0].phase
+        return result
+
+    def _get_color(self, index):
+        """
+        return the color for the given index (uses modulo to avoid index errors
+        """
+        return COLORS_SET[index % len(COLORS_SET)]
+
+    def _set_task_colors(self, phases):
+        """
+        Set colors on the estimation/invoice/cancelinvoice objects so that we
+        can visually identify related objects
+
+        :param list phases: The list of phases of this project
+        """
+        index = 0
+
+        for phase in phases:
+            for estimation in phase.estimations:
+                estimation.color = self._get_color(index)
+                index += 1
+
+        for phase in phases:
+            for invoice in phase.invoices:
+                if invoice.estimation and hasattr(invoice.estimation, 'color'):
+                    invoice.color = invoice.estimation.color
+                else:
+                    invoice.color = self._get_color(index)
+                    index += 1
+
+        for phase in phases:
+            for cancelinvoice in phase.cancelinvoices:
+                if cancelinvoice.invoice and \
+                        hasattr(cancelinvoice.invoice, 'color'):
+                    cancelinvoice.color = cancelinvoice.invoice.color
+                else:
+                    cancelinvoice.color = self._get_color(index)
+                    index += 1
+
+    @property
+    def title(self):
+        return u"Projet : {0}".format(self.context.name)
+
+    def __call__(self):
+        """
+            Return datas for displaying one project
+        """
+        self.populate_navigation()
+        phases = self.context.phases
+
+        self._set_task_colors(phases)
+
+        return dict(
+            title=self.title,
+            project=self.context,
+            company=self.context.company,
+            latest_phase=self._get_latest_phase(phases),
+            phase_form=self._get_phase_add_form(),
+        )
+
+
+class ProjectAddView(BaseAddView, TreeMixin):
+    title = u"Ajout d'un nouveau projet"
+    schema = get_add_project_schema()
+    msg = u"Le projet a été ajouté avec succès"
+    named_form_grid = ADD_FORM_GRID
+    factory = Project
+    route_name = COMPANY_PROJECTS_ROUTE
 
     def before(self, form):
-        populate_actionmenu(self.request)
-        form.widget = GridFormWidget(named_grid=FORM_GRID)
+        BaseAddView.before(self, form)
+        self.populate_navigation()
         # If there's no customer, redirect to customer view
         if len(self.request.context.customers) == 0:
             redirect_to_customerslist(self.request, self.request.context)
 
-    def submit_success(self, appstruct):
-        """
-            Add a project with a default phase in the database
-        """
-        # It's an add form
-        model = self.schema.objectify(appstruct)
-        model.company = self.context
-
-        # Add a default phase to the project
-        default_phase = Phase()
-        model.phases.append(default_phase)
-
-        self.dbsession.add(model)
-
-        self.dbsession.flush()
-
-        self.session.flash(self.validation_msg)
+    def redirect(self, new_model):
         return HTTPFound(
             self.request.route_path(
-                'project',
-                id=model.id
+                PROJECT_ITEM_ROUTE,
+                id=new_model.id,
+                _query={'action': 'addstep2'},
+            )
+        )
+
+    def on_add(self, new_model, appstruct):
+        """
+        On add, set the project's company
+        """
+        new_model.company = self.context
+
+
+class ProjectAddStep2View(BaseEditView, TreeMixin):
+    named_form_grid = FORM_GRID
+    add_template_vars = ('title', 'project_codes')
+    schema = get_add_step2_project_schema()
+    route_name = PROJECT_ITEM_ROUTE
+
+    @property
+    def project_codes(self):
+        return Project.get_code_list_with_labels(self.context.company_id)
+
+    @reify
+    def title(self):
+        return u"Création du projet : {0}, étape 2".format(self.context.name)
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                PROJECT_ITEM_ROUTE,
+                id=self.context.id,
             )
         )
 
 
-class ProjectEdit(ProjectAdd):
-    add_template_vars = ('title', 'project', 'projects',)
-    validation_msg = u"Le projet a été modifié avec succès"
+class ProjectEditView(BaseEditView, TreeMixin):
+    add_template_vars = ('project', 'project_codes',)
+    named_form_grid = FORM_GRID
+    schema = get_edit_project_schema()
+    route_name = PROJECT_ITEM_ROUTE
 
-    def appstruct(self):
-        """
-        Populate the form with the current edited context (customer)
-        """
-        return self.schema.dictify(self.request.context)
+    def before(self, form):
+        BaseEditView.before(self, form)
+        self.populate_navigation()
 
-    @reify
+    @property
     def title(self):
         return u"Modification du projet : {0}".format(self.request.context.name)
 
-    @reify
+    @property
     def project(self):
         return self.context
 
     @property
-    def projects(self):
-        query = self.context.company.get_project_codes_and_names()
-        return query.filter(Project.id != self.context.id)
+    def project_codes(self):
+        return Project.get_code_list_with_labels(self.context.company_id)
 
-    def before(self, form):
-        populate_actionmenu(self.request, self.context)
-        form.widget = GridFormWidget(named_grid=FORM_GRID)
-
-    def submit_success(self, appstruct):
-        # It's an edition one
-        model = self.schema.objectify(appstruct, self.context)
-        model = self.dbsession.merge(model)
-
-        self.dbsession.flush()
-
-        self.session.flash(self.validation_msg)
+    def redirect(self):
         return HTTPFound(
             self.request.route_path(
-                'project',
-                id=model.id
+                PROJECT_ITEM_ROUTE,
+                id=self.context.id
             )
         )
 
 
-def populate_actionmenu(request, project=None):
-    """
-        add items to the "actionmenu"
-    """
-    company_id = request.context.get_company_id()
-    request.actionmenu.add(get_list_view_btn(company_id))
-    if project is not None:
-        request.actionmenu.add(get_view_btn(project))
-
-
-def get_list_view_btn(cid):
-    """
-    Build a button returning the user to the project list
-
-    :param int cid: The company id we're working on
-    :returns: A Link object
-    """
-    return ViewLink(
-        u"Liste des projets",
-        "list_projects",
-        path="company_projects",
-        id=cid,
-    )
-
-
-def get_view_btn(project):
-    """
-    Build a link returning to a project's view page
-
-    :param obj project: A Project instance
-    """
-    return ViewLink(
-        u"Retour au projet",
-        "view_project",
-        path="project",
-        id=project.id,
-    )
-
-
 def includeme(config):
-    config.add_route(
-        'company_projects',
-        '/company/{id:\d+}/projects',
-        traverse='/companies/{id}',
-    )
-    config.add_route(
-        'project',
-        '/projects/{id:\d+}',
-        traverse='/projects/{id}',
-    )
-    config.add_route(
-        'phase',
-        '/phases/{id:\d+}',
-        traverse='/phases/{id}',
-    )
-    config.add_view(
-        ProjectAdd,
-        route_name='company_projects',
-        renderer='project_edit.mako',
-        request_method='POST',
+    config.add_tree_view(
+        ProjectsListView,
+        renderer='project/list.mako',
+        request_method='GET',
         permission='list_projects',
     )
-    config.add_view(
-        ProjectAdd,
-        route_name='company_projects',
-        renderer='project_edit.mako',
+    config.add_tree_view(
+        ProjectView,
+        parent=ProjectsListView,
+        renderer='project/general.mako',
+        permission='view_project',
+        layout='project',
+    )
+    config.add_tree_view(
+        ProjectAddView,
+        parent=ProjectsListView,
+        renderer='autonomie:templates/base/formpage.mako',
         request_param='action=add',
         permission='add_project',
     )
-    config.add_view(
-        ProjectEdit,
-        route_name='project',
-        renderer='project_edit.mako',
-        request_param='action=edit',
+    config.add_tree_view(
+        ProjectAddStep2View,
+        parent=ProjectsListView,
+        renderer='project/edit.mako',
+        request_param='action=addstep2',
         permission='edit_project',
     )
-    config.add_view(
-        project_view,
-        route_name='project',
-        renderer='project.mako',
-        permission='view_project',
+    config.add_tree_view(
+        ProjectEditView,
+        parent=ProjectView,
+        renderer='project/edit.mako',
+        request_param='action=edit',
+        permission='edit_project',
+        layout='project',
     )
     config.add_view(
         project_delete,
-        route_name="project",
+        route_name=PROJECT_ITEM_ROUTE,
         request_param="action=delete",
         permission='edit_project',
     )
     config.add_view(
         project_archive,
-        route_name="project",
+        route_name=PROJECT_ITEM_ROUTE,
         request_param="action=archive",
         permission='edit_project',
     )
     config.add_view(
         PhaseAddFormView,
-        route_name="project",
+        route_name=PROJECT_ITEM_ROUTE,
         request_param="action=addphase",
         renderer="base/formpage.mako",
         permission='edit_project',
     )
     config.add_view(
         PhaseEditFormView,
-        route_name="phase",
+        route_name=PHASE_ITEM_ROUTE,
         renderer="base/formpage.mako",
         permission='edit_phase',
     )
     config.add_view(
         phase_delete_view,
-        route_name="phase",
+        route_name=PHASE_ITEM_ROUTE,
         renderer="base/formpage.mako",
         permission='edit_phase',
         request_param="action=delete",
     )
     config.add_view(
-        ProjectsList,
-        route_name='company_projects',
-        renderer='projects.mako',
-        request_method='GET',
-        permission='list_projects',
-    )
-    config.add_view(
         FileUploadView,
-        route_name="project",
+        route_name=PROJECT_ITEM_ROUTE,
         renderer='base/formpage.mako',
         permission='edit_project',
         request_param='action=attach_file',

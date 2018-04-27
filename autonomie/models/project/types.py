@@ -17,10 +17,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import (
     relationship,
+    load_only,
 )
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 
 
@@ -85,6 +87,17 @@ class BaseProjectType(DBBASE):
             query = query.filter(not_(cls.id == type_id))
         count = query.filter(cls.label == label).count()
         return count == 0
+
+    @classmethod
+    def query_for_select(cls):
+        """
+        Query project types for selection purpose
+        """
+        query = DBSESSION().query(cls).options(
+            load_only('id', 'label', 'private')
+        )
+        query = query.filter_by(active=True)
+        return query
 
 
 class ProjectType(BaseProjectType):

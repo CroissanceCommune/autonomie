@@ -27,17 +27,14 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='content'>
 <div class='row page-header-block'>
-% if addform is not None:
-    <button class='btn btn-primary primary-action' data-target="#project-forms" aria-expanded="false" aria-controls="project-forms" data-toggle='collapse'>
+% if api.has_permission('add_project'):
+    <a
+        class='btn btn-primary primary-action'
+        href="${add_url}"
+    >
             <i class='glyphicon glyphicon-plus'></i>
             Ajouter un projet
-        </button>
-        <div class='collapse row' id="project-forms">
-            <div class='col-md-12 col-lg-6'>
-                <h2>Ajouter un projet</h2>
-                ${addform|n}
-            </div>
-        </div>
+        </a>
 % endif
 </div>
 
@@ -91,7 +88,7 @@
                 % if records:
                     % for id, project in records:
                         <tr class='tableelement' id="${project.id}">
-                            <% url = request.route_path("project", id=project.id) %>
+                            <% url = request.route_path("/projects/{id}", id=project.id) %>
                             <% onclick = "document.location='{url}'".format(url=url) %>
                             <td onclick="${onclick}" class="visible-lg rowlink" >${api.format_date(project.created_at)}</td>
                             <td onclick="${onclick}" class='rowlink'>${project.code}</td>

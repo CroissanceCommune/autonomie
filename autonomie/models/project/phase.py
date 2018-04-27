@@ -33,7 +33,14 @@ class SubProject(DBBASE, PersistentACLMixin):
         info={'colanderalchemy': {'exclude': True}},
     )
 
-    name = Column("name", String(150), default=u'Phase par défaut')
+    name = Column(
+        String(150),
+        info={
+            "colanderalchemy": {
+                "title": u"Nom du sous-projet",
+            }
+        }
+    )
 
     closed = Column(
         Boolean(),

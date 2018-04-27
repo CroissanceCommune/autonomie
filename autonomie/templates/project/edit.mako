@@ -23,10 +23,10 @@
 </%doc>
 
 <%inherit file="${context['main_template'].uri}" />
-<%namespace file="base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="format_text" />
 <%block name='content'>
 <div class='row'>
-    <div class='col-md-6 col-md-offset-3'>
+    <div class='col-md-8'>
         <div class='panel panel-default page-block'>
         <div class='panel-heading'>
         ${title}
@@ -36,14 +36,14 @@
         </div>
         </div>
     </div>
-    <div class='col-md-3'>
+    <div class='col-md-4'>
         <div class='panel panel-default page-block'>
         <div class='panel-heading'>
             Codes projet utilisés
         </div>
         <div class='panel-body'>
         <ul>
-            % for project in projects:
+            % for project in project_codes:
                 <li>
                 ${project.code.upper()} (${project.name})
                 </li>

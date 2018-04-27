@@ -60,6 +60,15 @@ ProjectCustomer = Table(
     mysql_engine=default_table_args['mysql_engine']
 )
 
+ProjectSubProjectType = Table(
+    'project_sub_project_type',
+    DBBASE.metadata,
+    Column("project_id", Integer, ForeignKey('project.id')),
+    Column("sub_project_type_id", Integer, ForeignKey('sub_project_type.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine']
+)
+
 
 class Project(Node):
     """
@@ -77,13 +86,23 @@ class Project(Node):
 
     code = Column(
         String(4),
-        info={'colanderalchemy': {'title': u"Code"}},
+        info={
+            'colanderalchemy': {
+                'title': u"Code",
+                'description': u"Max 4 caractères."
+            }
+        },
     )
 
-    type = deferred(
+    description = deferred(
         Column(
             String(150),
-            info={'colanderalchemy': {'title': u"Type de projet"}},
+            info={
+                'colanderalchemy': {
+                    'title': u"Description succinte",
+                    "description": u"Max 150 caractères",
+                }
+            },
         ),
         group='edit'
     )
@@ -156,6 +175,17 @@ class Project(Node):
                 "exclude": True,
             },
             'export': {'exclude': True},
+        }
+    )
+    subtypes = relationship(
+        "SubProjectType",
+        secondary=ProjectSubProjectType,
+        info={
+            "colanderalchemy": {
+                "title": u"Types de sous-projet proposés",
+                "description": u"Types d'affaires que l'on peut utiliser "
+                "dans ce projet",
+            }
         }
     )
     subprojects = relationship(
@@ -239,7 +269,7 @@ class Project(Node):
             name=self.name,
             code=self.code,
             definition=self.definition,
-            type=self.type,
+            description=self.description,
             archived=self.archived,
             phases=phases,
         )
@@ -254,3 +284,7 @@ class Project(Node):
     @classmethod
     def label_query(cls):
         return cls._autonomie_service.label_query(cls)
+
+    @classmethod
+    def get_code_list_with_labels(cls, company_id):
+        return cls._autonomie_service.get_code_list_with_labels(cls, company_id)

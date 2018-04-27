@@ -23,10 +23,10 @@
 </%doc>
 
 <%inherit file="${context['main_template'].uri}" />
-<%namespace file="base/utils.mako" import="table_btn" />
-<%namespace file="base/utils.mako" import="format_text" />
+<%namespace file="/base/utils.mako" import="table_btn" />
+<%namespace file="/base/utils.mako" import="format_text" />
 <%namespace file="/base/utils.mako" import="format_filelist" />
-<%block name='content'>
+<%block name="mainblock">
 <%def name="action_cell(task, view_url)">
     <% pdf_url = request.route_path('/%ss/{id}.pdf' % task.type_, id=task.id) %>
     <% del_url = request.route_path('/%ss/{id}/delete' % task.type_, id=task.id) %>
@@ -164,7 +164,7 @@
 
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
-    ${title}
+    <div>${title}</div>
     </div>
 
     <div class='panel-body'>
@@ -238,7 +238,7 @@
                                     </a>
                                     % if api.has_permission('edit_phase'):
                                         <a
-                                            href="${request.route_path('phase', id=phase.id)}"
+                                            href="${request.route_path('/phases/{id}', id=phase.id)}"
                                             title="Éditer le libellé de ce dossier"
                                             >
                                             <i style="vertical-align:middle"
@@ -247,7 +247,7 @@
                                         </a>
                                         % if len(phase.tasks) == 0:
                                             <a
-                                                href="${request.route_path('phase', id=phase.id, _query=dict(action='delete'))}"
+                                                href="${request.route_path('/phases/{id}', id=phase.id, _query=dict(action='delete'))}"
                                                 onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');"
                                                 title="Supprimer ce dossier"
                                                 >
@@ -333,7 +333,7 @@
             %endfor
             </div>
             %if not project.phases:
-                <strong>Aucune phase n'a été créée dans ce projet</strong>
+                <strong>Aucun dossier n'a été créé dans ce projet</strong>
             %endif
 
         </div>
@@ -342,7 +342,7 @@
             <div role="tabpanel" class="tab-pane row" id="general_information">
                 <div class="col-md-10 col-md-offset-1 col-xs-12">
                     <a class='btn btn-primary primary-action'
-                        href="${request.route_path('project', id=request.context.id, _query={'action': 'edit'})}"
+                        href="${request.route_path('/projects/{id}', id=request.context.id, _query={'action': 'edit'})}"
                         title="Modifier le projet">
                         <i class='glyphicon glyphicon-pencil'></i>
                         Modifier
@@ -364,8 +364,12 @@
                     % endfor
                     <h3>Informations générales</h3>
                     <dl>
-                        %if project.type:
-                            <dt>Type de projet :</dt> <dd>${project.type}</dd>
+                        <dt>Type de projet :</dt><dd>${project.project_type.label}</dd>
+                        % if project.subtypes:
+                            <dt>Types d'affaire :</dt><dd>${','.join([s.label for s in project.subtypes])}</dd>
+                        % endif
+                        %if project.description:
+                            <dt>Description succinte :</dt> <dd>${project.description}</dd>
                         % endif
                         % if project.starting_date:
                             <dt>Début prévu le :</dt><dd>${api.format_date(project.starting_date)}</dd>
@@ -387,7 +391,7 @@
             <div role="tabpanel" class="tab-pane row" id="attached_files">
                 <div class="col-md-10 col-md-offset-1 col-xs-12">
                     <a class='btn btn-primary primary-action'
-                        href="${request.route_path('project', id=project.id, _query={'action': 'attach_file'})}"
+                        href="${request.route_path('/projects/{id}', id=project.id, _query={'action': 'attach_file'})}"
                         title="Attacher un fichier">
                         <i class='glyphicon glyphicon-plus-sign'></i>
                        Attacher un fichier

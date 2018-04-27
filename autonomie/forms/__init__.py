@@ -403,7 +403,7 @@ def get_hidden_field_conf(title=None):
     return res
 
 
-def get_deferred_select_validator(model, id_key='id', filters=[]):
+def get_deferred_model_select_validator(model, id_key='id', filters=[]):
     """
     Return a deferred validator based on the given model
 
@@ -431,6 +431,9 @@ def get_deferred_select_validator(model, id_key='id', filters=[]):
 
         return colander.OneOf([getattr(m, id_key) for m in query])
     return deferred_validator
+
+
+get_deferred_select_validator = get_deferred_model_select_validator
 
 
 def get_model_select_option_values(model, keys, filters=(), add_default=True):
@@ -651,14 +654,38 @@ class CustomModelSchemaNode(colander.SchemaNode):
         """
         Return the datas needed to fill the form
         """
-        return instance.id
+        return getattr(instance, self.name)
 
-    def objectify(self, id):
+    def objectify(self, value):
         """
         Return the related object that have been configured
         """
         from autonomie_base.models.base import DBSESSION
-        return DBSESSION().query(self.model).get(id)
+        res = DBSESSION().query(self.model).filter(
+            getattr(self.model, self.name) == value
+        ).first()
+        if res is None:
+            res = colander.null
+        return res
+
+
+def get_sequence_child_item_id_node(model, **kw):
+    """
+    Build a child item SchemaNode compatible with colanderalchemy's serialization technic
+    it provides a node with dictify and objectify methods
+
+    It can be used when editing M2M or O2M relationships
+
+    :param obj model: The model we relay
+    """
+    if 'name' not in kw:
+        kw['name'] = 'id'
+
+    return CustomModelSchemaNode(
+        colander.Integer(),
+        model=model,
+        **kw
+    )
 
 
 def get_sequence_child_item(
@@ -696,13 +723,11 @@ def get_sequence_child_item(
         missing = colander.required
 
     return [
-        CustomModelSchemaNode(
-            colander.Integer(),
-            name='id',
-            widget=get_deferred_select(model, keys=child_attrs),
+        get_sequence_child_item_id_node(
+            widget=get_deferred_model_select(model, keys=child_attrs),
             missing=missing,
             model=model,
-            validator=get_deferred_select_validator(model)
+            validator=get_deferred_model_select_validator(model)
         )
     ]
 

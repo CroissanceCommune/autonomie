@@ -27,26 +27,16 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/pager.mako" import="pager"/>
-<%block name='content'>
+<%block name='mainblock'>
 <div class='row page-header-block'>
-    % if api.has_permission('admin_treasury'):
-        <a
-            class='btn btn-default primary-action'
-            href='/invoices?action=export_pdf'>
-            <i class='fa fa-file-pdf-o'></i>&nbsp;Export massif
-        </a>
-    % endif
     <div class="pull-right btn-group" role='group'>
         <%
 ## We build the link with the current search arguments
         args = request.GET
-        if is_admin:
-            url = request.route_path('invoices.xls', _query=args)
-        else:
-            url = request.route_path('company_invoices.xls', id=request.context.id, _query=args)
+        url = request.route_path('/projects/{id}/invoices.{extension}', extension='xls', id=request.context.id, _query=args)
         %>
         <a
-            class='btn btn-default'
+            class='btn btn-default btn-small'
             onclick="openPopup('${url}');"
             href='#'
             title="Export au format Excel"
@@ -56,13 +46,10 @@
         <%
 ## We build the link with the current search arguments
         args = request.GET
-        if is_admin:
-            url = request.route_path('invoices.ods', _query=args)
-        else:
-            url = request.route_path('company_invoices.ods', id=request.context.id, _query=args)
+        url = request.route_path('/projects/{id}/invoices.{extension}', extension='ods', id=request.context.id, _query=args)
         %>
         <a
-            class='btn btn-default'
+            class='btn btn-default btn-small'
             onclick="openPopup('${url}');"
             href='#'
             title="Export au formt Open document"
@@ -72,13 +59,10 @@
         <%
 ## We build the link with the current search arguments
         args = request.GET
-        if is_admin:
-            url = request.route_path('invoices.csv', _query=args)
-        else:
-            url = request.route_path('company_invoices.csv', id=request.context.id, _query=args)
+        url = request.route_path('/projects/{id}/invoices.{extension}', extension='csv', id=request.context.id, _query=args)
         %>
         <a
-            class='btn btn-default'
+            class='btn btn-default btn-small'
             onclick="openPopup('${url}');"
             href='#'
             title="Export au formt csv"
@@ -146,6 +130,18 @@
                         <td class='tolate-True'><br /></td>
                         <td>Factures non payées depuis plus de 45 jours</td>
                     </tr>
+                    <tr>
+                        <td class='status-draft'><br /></td>
+                        <td>Factures en brouillon</td>
+                    </tr>
+                    <tr>
+                        <td class='status-wait'><br /></td>
+                        <td>Factures en attente de validation</td>
+                    </tr>
+                    <tr>
+                        <td class='status-invalid'><br /></td>
+                        <td>Factures invalides</td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -153,14 +149,4 @@
         ${pager(records)}
     </div>
 </div>
-</%block>
-<%block name='footerjs'>
-## #deformField2_chzn (company_id) and #deformField3_chzn (customer_id) are the
-## tag names
-% if is_admin:
-    $('#deformField2_chzn').change(function(){$(this).closest('form').submit()});
-% endif
-$('#deformField3_chzn').change(function(){$(this).closest('form').submit()});
-$('select[name=year]').change(function(){$(this).closest('form').submit()});
-$('select[name=status]').change(function(){$(this).closest('form').submit()});
 </%block>

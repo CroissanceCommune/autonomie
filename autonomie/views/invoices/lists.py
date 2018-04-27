@@ -74,9 +74,15 @@ from autonomie.forms.tasks.invoice import (
     pdfexportSchema,
 )
 from autonomie.views import (
+    TreeMixin,
     BaseListView,
     submit_btn,
 )
+from autonomie.views.project.routes import (
+    PROJECT_ITEM_INVOICE_ROUTE,
+    PROJECT_ITEM_INVOICE_EXPORT_ROUTE,
+)
+from autonomie.views.project.project import ProjectListView
 
 logger = log = logging.getLogger(__name__)
 
@@ -121,9 +127,21 @@ def get_year_range(year):
     return fday, lday
 
 
+def filter_all_status(self, query, appstruct):
+    """
+    Filter the invoice by status
+    """
+    status = appstruct.get('status', 'all')
+    if status != 'all':
+        logger.info("  + Status filtering : %s" % status)
+        query = query.filter(Task.status == status)
+
+    return query
+
+
 class InvoiceListTools(object):
     title = u"Factures de la CAE"
-    schema = get_list_schema(is_admin=True)
+    schema = get_list_schema(is_global=True, excludes=('status',))
     sort_columns = dict(
         date=Task.date,
         internal_number=Task.internal_number,
@@ -180,8 +198,6 @@ class InvoiceListTools(object):
                 Invoice.paid_status,
             )
         )
-
-        query = query.filter(Task.status == 'valid')
         return query
 
     def _get_company_id(self, appstruct):
@@ -202,6 +218,7 @@ class InvoiceListTools(object):
     def filter_official_number(self, query, appstruct):
         number = appstruct['search']
         if number and number != -1:
+            logger.debug(u"    Filtering by official_number : %s" % number)
             prefix = self.request.config.get('invoiceprefix', '')
             if prefix and number.startswith(prefix):
                 number = number[len(prefix):]
@@ -223,10 +240,12 @@ class InvoiceListTools(object):
     def filter_customer(self, query, appstruct):
         customer_id = appstruct.get('customer_id')
         if customer_id not in (None, colander.null):
+            logger.debug(u"Customer id : %s" % customer_id)
             query = query.filter(Task.customer_id == customer_id)
         return query
 
     def filter_date(self, query, appstruct):
+        logger.debug(u" + Filtering date")
         period = appstruct.get('period', {})
         if period.get('start') not in (None, colander.null):
             start = period.get('start')
@@ -235,7 +254,9 @@ class InvoiceListTools(object):
                 end = datetime.date.today()
             query = query.filter(Task.date.between(start, end))
 
-        year = appstruct['year']
+            logger.debug(u"    Between %s and %s" % (start, end))
+
+        year = appstruct.get('year', -1)
         if year != -1:
             query = query.filter(
                 or_(
@@ -243,10 +264,19 @@ class InvoiceListTools(object):
                     CancelInvoice.financial_year == year,
                 )
             )
+            logger.debug(u"    Year : %s" % year)
         return query
 
     def filter_status(self, query, appstruct):
-        status = appstruct['status']
+        """
+        Filter the status a first time (to be overriden)
+        """
+        logger.debug("Filtering status")
+        query = query.filter(Task.status == 'valid')
+        return query
+
+    def filter_paid_status(self, query, appstruct):
+        status = appstruct['paid_status']
         if status == 'paid':
             query = self._filter_paid(query)
         elif status == 'notpaid':
@@ -301,8 +331,13 @@ class CompanyInvoicesListView(GlobalInvoicesListView):
     """
     Invoice list for one given company
     """
-    schema = get_list_schema(is_admin=False)
     is_admin = False
+    schema = get_list_schema(is_global=False, excludes=("company_id",))
+    add_template_vars = (u'title', 'is_admin', "with_draft", )
+
+    @property
+    def with_draft(self):
+        return True
 
     def _get_company_id(self, appstruct):
         return self.request.context.id
@@ -310,6 +345,34 @@ class CompanyInvoicesListView(GlobalInvoicesListView):
     @property
     def title(self):
         return u"Factures de l'entreprise {0}".format(self.request.context.name)
+
+    filter_status = filter_all_status
+
+
+class ProjectInvoicesListView(CompanyInvoicesListView, TreeMixin):
+    """
+    Invoice list for one given company
+    """
+    route_name = PROJECT_ITEM_INVOICE_ROUTE
+    schema = get_list_schema(
+        is_global=False,
+        excludes=("company_id", 'year', 'customers',)
+    )
+    is_admin = False
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.company_id
+
+    @property
+    def title(self):
+        return u"Factures du projet {0}".format(
+            self.request.context.name
+        )
+
+    def filter_project(self, query, appstruct):
+        self.populate_navigation()
+        query = query.filter(Task.project_id == self.context.id)
+        return query
 
 
 class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
@@ -322,7 +385,6 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
             [Invoice, CancelInvoice]
         )
         query = query.options(load_only(Task.id))
-        query = query.filter(Task.status == 'valid')
         return query
 
     def _build_return_value(self, schema, appstruct, query):
@@ -340,7 +402,7 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
 
         logger.debug("    + In the GlobalInvoicesCsvView._build_return_value")
         job = FileGenerationJob()
-        job.set_owner(self.request.user.login)
+        job.set_owner(self.request.user.login.login)
         self.request.dbsession.add(job)
         self.request.dbsession.flush()
         logger.debug("    + The job {job.id} was initialized".format(job=job))
@@ -375,24 +437,66 @@ class GlobalInvoicesOdsView(GlobalInvoicesCsvView):
 
 
 class CompanyInvoicesCsvView(GlobalInvoicesCsvView):
-    schema = get_list_schema(is_admin=False)
+    schema = get_list_schema(is_global=False, excludes=('company_id',))
 
     def _get_company_id(self, appstruct):
         return self.request.context.id
+
+    filter_status = filter_all_status
 
 
 class CompanyInvoicesXlsView(GlobalInvoicesXlsView):
-    schema = get_list_schema(is_admin=False)
+    schema = get_list_schema(is_global=False, excludes=('company_id',))
 
     def _get_company_id(self, appstruct):
         return self.request.context.id
+
+    filter_status = filter_all_status
 
 
 class CompanyInvoicesOdsView(GlobalInvoicesOdsView):
-    schema = get_list_schema(is_admin=False)
+    schema = get_list_schema(is_global=False, excludes=('company_id',))
 
     def _get_company_id(self, appstruct):
         return self.request.context.id
+
+    filter_status = filter_all_status
+
+
+class ProjectInvoicesCsvView(CompanyInvoicesCsvView):
+    schema = get_list_schema(is_global=False, excludes=('company_id', 'year',))
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.company_id
+
+    def filter_project(self, query, appstruct):
+        return query.filter(Task.project_id == self.context.id)
+
+    filter_status = filter_all_status
+
+
+class ProjectInvoicesXlsView(CompanyInvoicesXlsView):
+    schema = get_list_schema(is_global=False, excludes=('company_id', 'year', ))
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.company_id
+
+    def filter_project(self, query, appstruct):
+        return query.filter(Task.project_id == self.context.id)
+
+    filter_status = filter_all_status
+
+
+class ProjectInvoicesOdsView(CompanyInvoicesOdsView):
+    schema = get_list_schema(is_global=False, excludes=('company_id', 'year', ))
+
+    def _get_company_id(self, appstruct):
+        return self.request.context.company_id
+
+    def filter_project(self, query, appstruct):
+        return query.filter(Task.project_id == self.context.id)
+
+    filter_status = filter_all_status
 
 
 def get_invoice_pdf_export_form(request):
@@ -511,47 +615,97 @@ def add_routes(config):
     config.add_route("invoices", "/invoices")
 
     # invoice export routes
-    for extension in ('csv', 'xls', 'ods'):
-        config.add_route("invoices.%s" % extension, "/invoices.%s" % extension)
-        config.add_route(
-            'company_invoices.%s' % extension,
-            '/company/{id:\d+}/invoices.%s' % extension,
-            traverse='/companies/{id}',
-        )
+    config.add_route(
+        "invoices_export",
+        "/invoices.{extension}"
+    )
+    config.add_route(
+        "company_invoices_export",
+        "/company/{id:\d+}/invoices.{extension}",
+        traverse='/companies/{id}',
+    )
 
 
 def includeme(config):
     add_routes(config)
-    config.add_view(
-        CompanyInvoicesListView,
-        route_name='company_invoices',
-        renderer='invoices.mako',
-        permission='list_invoices'
-    )
-
     config.add_view(
         GlobalInvoicesListView,
         route_name="invoices",
         renderer="invoices.mako",
         permission="admin_invoices"
     )
-
     config.add_view(
         GlobalInvoicesCsvView,
-        route_name="invoices.csv",
+        route_name="invoices_export",
+        match_param="extension=csv",
         permission="admin_invoices"
     )
-
     config.add_view(
         GlobalInvoicesOdsView,
-        route_name="invoices.ods",
+        route_name="invoices_export",
+        match_param="extension=ods",
+        permission="admin_invoices"
+    )
+    config.add_view(
+        GlobalInvoicesXlsView,
+        route_name="invoices_export",
+        match_param="extension=xls",
         permission="admin_invoices"
     )
 
     config.add_view(
-        GlobalInvoicesXlsView,
-        route_name="invoices.xls",
-        permission="admin_invoices"
+        CompanyInvoicesListView,
+        route_name='company_invoices',
+        renderer='invoices.mako',
+        permission='list_invoices'
+    )
+    config.add_view(
+        CompanyInvoicesCsvView,
+        route_name="company_invoices_export",
+        match_param="extension=csv",
+        permission="list_invoices"
+    )
+
+    config.add_view(
+        CompanyInvoicesOdsView,
+        route_name="company_invoices_export",
+        match_param="extension=ods",
+        permission="list_invoices"
+    )
+
+    config.add_view(
+        CompanyInvoicesXlsView,
+        route_name="company_invoices_export",
+        match_param="extension=xls",
+        permission="list_invoices"
+    )
+
+    config.add_tree_view(
+        ProjectInvoicesListView,
+        parent=ProjectListView,
+        renderer="project/invoices.mako",
+        permission='list_invoices',
+        layout="project",
+    )
+    config.add_view(
+        ProjectInvoicesCsvView,
+        route_name=PROJECT_ITEM_INVOICE_EXPORT_ROUTE,
+        match_param="extension=csv",
+        permission="list_invoices"
+    )
+
+    config.add_view(
+        ProjectInvoicesOdsView,
+        route_name=PROJECT_ITEM_INVOICE_EXPORT_ROUTE,
+        match_param="extension=ods",
+        permission="list_invoices"
+    )
+
+    config.add_view(
+        ProjectInvoicesXlsView,
+        route_name=PROJECT_ITEM_INVOICE_EXPORT_ROUTE,
+        match_param="extension=xls",
+        permission="list_invoices"
     )
 
     config.add_view(
@@ -560,22 +714,4 @@ def includeme(config):
         request_param='action=export_pdf',
         renderer="/base/formpage.mako",
         permission="list_invoices",
-    )
-
-    config.add_view(
-        CompanyInvoicesCsvView,
-        route_name="company_invoices.csv",
-        permission="list_invoices"
-    )
-
-    config.add_view(
-        CompanyInvoicesOdsView,
-        route_name="company_invoices.ods",
-        permission="list_invoices"
-    )
-
-    config.add_view(
-        CompanyInvoicesXlsView,
-        route_name="company_invoices.xls",
-        permission="list_invoices"
     )

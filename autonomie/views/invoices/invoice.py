@@ -29,7 +29,6 @@ import logging
 import datetime
 
 from pyramid.httpexceptions import HTTPFound
-from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie_base.utils.date import format_date
 
@@ -58,6 +57,7 @@ from autonomie.views import (
     add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
+from autonomie.views.project.routes import PROJECT_ITEM_INVOICE_ROUTE
 
 from autonomie.views.task.views import (
     TaskAddView,
@@ -410,12 +410,6 @@ def add_routes(config):
     add module related routes
     """
     config.add_route(
-        'project_invoices',
-        '/projects/{id:\d+}/invoices',
-        traverse='/projects/{id}'
-    )
-
-    config.add_route(
         '/invoices/{id}',
         '/invoices/{id:\d+}',
         traverse='/invoices/{id}',
@@ -451,9 +445,10 @@ def includeme(config):
 
     config.add_view(
         InvoiceAddView,
-        route_name="project_invoices",
+        route_name=PROJECT_ITEM_INVOICE_ROUTE,
         renderer='tasks/add.mako',
         permission='add_invoice',
+        request_param="action=add",
     )
 
     config.add_view(

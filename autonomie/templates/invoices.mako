@@ -41,9 +41,9 @@
 ## We build the link with the current search arguments
         args = request.GET
         if is_admin:
-            url = request.route_path('invoices.xls', _query=args)
+            url = request.route_path('invoices_export', extension="xls", _query=args)
         else:
-            url = request.route_path('company_invoices.xls', id=request.context.id, _query=args)
+            url = request.route_path('company_invoices_export', extension="xls", id=request.context.id, _query=args)
         %>
         <a
             class='btn btn-default'
@@ -57,9 +57,9 @@
 ## We build the link with the current search arguments
         args = request.GET
         if is_admin:
-            url = request.route_path('invoices.ods', _query=args)
+            url = request.route_path('invoices_export', extension="ods", _query=args)
         else:
-            url = request.route_path('company_invoices.ods', id=request.context.id, _query=args)
+            url = request.route_path('company_invoices_export', extension="ods", id=request.context.id, _query=args)
         %>
         <a
             class='btn btn-default'
@@ -73,9 +73,9 @@
 ## We build the link with the current search arguments
         args = request.GET
         if is_admin:
-            url = request.route_path('invoices.csv', _query=args)
+            url = request.route_path('invoices_export', extension="csv", _query=args)
         else:
-            url = request.route_path('company_invoices.csv', id=request.context.id, _query=args)
+            url = request.route_path('company_invoices_export', extension="csv", id=request.context.id, _query=args)
         %>
         <a
             class='btn btn-default'
@@ -146,6 +146,20 @@
                         <td class='tolate-True'><br /></td>
                         <td>Factures non payées depuis plus de 45 jours</td>
                     </tr>
+                    % if with_draft:
+                    <tr>
+                        <td class='status-draft'><br /></td>
+                        <td>Factures en brouillon</td>
+                    </tr>
+                    <tr>
+                        <td class='status-wait'><br /></td>
+                        <td>Factures en attente de validation</td>
+                    </tr>
+                    <tr>
+                        <td class='status-invalid'><br /></td>
+                        <td>Factures invalides</td>
+                    </tr>
+                    % endif
                 </table>
             </div>
         </div>

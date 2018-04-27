@@ -182,7 +182,7 @@ de créer de nouveaux projets")
     )
 
 
-class ProjectsListView(BaseListView, TreeMixin):
+class ProjectListView(BaseListView, TreeMixin):
     """
     The project list view is compound of :
         * the list of projects with action buttons (view, delete ...)
@@ -551,28 +551,28 @@ class ProjectEditView(BaseEditView, TreeMixin):
 
 def includeme(config):
     config.add_tree_view(
-        ProjectsListView,
+        ProjectListView,
         renderer='project/list.mako',
         request_method='GET',
         permission='list_projects',
     )
     config.add_tree_view(
         ProjectView,
-        parent=ProjectsListView,
+        parent=ProjectListView,
         renderer='project/general.mako',
         permission='view_project',
         layout='project',
     )
     config.add_tree_view(
         ProjectAddView,
-        parent=ProjectsListView,
+        parent=ProjectListView,
         renderer='autonomie:templates/base/formpage.mako',
         request_param='action=add',
         permission='add_project',
     )
     config.add_tree_view(
         ProjectAddStep2View,
-        parent=ProjectsListView,
+        parent=ProjectListView,
         renderer='project/edit.mako',
         request_param='action=addstep2',
         permission='edit_project',

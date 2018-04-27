@@ -1,4 +1,6 @@
 /* Table related css classes */
+$grey_status_light: #ededed;
+$grey_status_light2: #dddddd;
 $green_status_hard: #baff87;
 $green_status_light: #c4ffaa;
 $green_status_label: #5cb85c;
@@ -50,7 +52,13 @@ table.opa tfoot td{
     width: 16px;
   }
   .status-draft{
-    background-color: #ddd;
+    background: repeating-linear-gradient(
+			45deg,
+			$grey_status_light,
+			$grey_status_light 10px,
+			$grey_status_light2 10px,
+			$grey_status_light2 20px
+		);
   }
   .status-wait{
     background: repeating-linear-gradient(

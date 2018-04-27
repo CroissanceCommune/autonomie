@@ -94,6 +94,9 @@ nav.sidebar-menu .subnav li {
       padding: 10px 15px; }
 
 .breadcrumb-arrow {
+  margin-top: 3px;
+  margin-left: 3px;
+  margin-bottom: 5px;
   height: 36px;
   padding: 0;
   line-height: 36px;
@@ -195,7 +198,7 @@ table.opa tfoot td {
   width: 16px; }
 
 .status-table .status-draft {
-  background-color: #ddd; }
+  background: repeating-linear-gradient(45deg, #ededed, #ededed 10px, #dddddd 10px, #dddddd 20px); }
 
 .status-table .status-wait {
   background: repeating-linear-gradient(45deg, #ffb266, #ffb266 10px, #ffd790 10px, #ffd790 20px); }

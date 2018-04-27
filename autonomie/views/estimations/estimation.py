@@ -75,6 +75,7 @@ from autonomie.views import (
     add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
+from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
 from autonomie.views.task.views import (
     TaskAddView,
     TaskEditView,
@@ -252,12 +253,6 @@ def add_routes(config):
     Add module's specific routes
     """
     config.add_route(
-        'project_estimations',
-        '/projects/{id:\d+}/estimations',
-        traverse='/projects/{id}',
-    )
-
-    config.add_route(
         '/estimations/{id}',
         '/estimations/{id:\d+}',
         traverse='/estimations/{id}'
@@ -290,9 +285,10 @@ def includeme(config):
 
     config.add_view(
         EstimationAddView,
-        route_name="project_estimations",
+        route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
         renderer='tasks/add.mako',
         permission='add_estimation',
+        request_param="action=add",
     )
 
     config.add_view(

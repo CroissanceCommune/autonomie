@@ -31,6 +31,7 @@ TODAY = datetime.date.today()
 def test_add_invoice(config, get_csrf_request_with_db, project, phase, company,
                      user, customer, ):
     from autonomie.models.task.invoice import Invoice
+    from autonomie.views.project.routes import PROJECT_ITEM_INVOICE_ROUTE
     from autonomie.views.invoices.invoice import InvoiceAddView
     config.add_route('/invoices/{id}', "/")
     value = {
@@ -44,7 +45,7 @@ def test_add_invoice(config, get_csrf_request_with_db, project, phase, company,
     request = get_csrf_request_with_db()
     request.context = project
     request.current_company = company.id
-    request.matched_route = Dummy(name="project_invoices")
+    request.matched_route = Dummy(name=PROJECT_ITEM_INVOICE_ROUTE)
     request.user = user
     view = InvoiceAddView(request)
     view.submit_success(value)

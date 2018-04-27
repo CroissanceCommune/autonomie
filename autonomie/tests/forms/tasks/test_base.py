@@ -69,10 +69,11 @@ def test_new_task_schema(project, customer, phase, company, phase2, project2):
     from pyramid.testing import DummyRequest
     from autonomie.tests.tools import Dummy
     from autonomie.forms.tasks.base import get_new_task_schema
+    from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
     schema = get_new_task_schema()
     req = DummyRequest(
         context=project,
-        matched_route=Dummy(name='project_estimations'),
+        matched_route=Dummy(name=PROJECT_ITEM_ESTIMATION_ROUTE),
         current_company=company,
     )
     schema = schema.bind(request=req)

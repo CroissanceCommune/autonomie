@@ -24,6 +24,9 @@ ACCOUNTING_OPERATION_ROUTE = os.path.join(API_ROOT, "accounting", "operations")
 ACCOUNTING_OPERATION_ITEM_ROUTE = os.path.join(
     ACCOUNTING_OPERATION_ROUTE, "{id}"
 )
+ACCOUNTING_OPERATION_DEL_ROUTE = os.path.join(
+    ACCOUNTING_OPERATION_ROUTE, "delete"
+)
 
 
 class AccountingOperationRestView(BaseRestView):
@@ -162,6 +165,7 @@ class AccountingOperationRestView(BaseRestView):
 
 def includeme(config):
     config.add_route(ACCOUNTING_OPERATION_ROUTE, ACCOUNTING_OPERATION_ROUTE)
+    config.add_route(ACCOUNTING_OPERATION_DEL_ROUTE, ACCOUNTING_OPERATION_DEL_ROUTE)
     config.add_view(
         AccountingOperationRestView,
         route_name=ACCOUNTING_OPERATION_ROUTE,
@@ -184,9 +188,9 @@ def includeme(config):
     )
     config.add_view(
         AccountingOperationRestView,
-        route_name=ACCOUNTING_OPERATION_ROUTE,
+        route_name=ACCOUNTING_OPERATION_DEL_ROUTE,
         attr='collection_delete',
-        request_method='DELETE',
+        request_method='POST',
         renderer='json',
         xhr=True,
         permission=NO_PERMISSION_REQUIRED,

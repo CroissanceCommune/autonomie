@@ -225,6 +225,17 @@ class TypeSortieOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
+class TypeContratOption(ConfigurableOption):
+    """
+    Possible values for contract type (parcours)
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Type de contrat",
+        'validation_msg': u"Les types de contrat ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
 class SocialDocTypeOption(ConfigurableOption):
     """
     Different social doc types

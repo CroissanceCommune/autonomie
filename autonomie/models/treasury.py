@@ -73,7 +73,7 @@ analytiques et 4 lignes générales).
 indiqué (taux de contribution).
         <h4>Variable utilisable dans les gabarits de libellés</h4>\
         <ul>\
-        <li>client.name</li>\
+        <li>client.label</li>\
         <li>entreprise.name</li>\
         <li>numero_facture</li>\
         </ul>

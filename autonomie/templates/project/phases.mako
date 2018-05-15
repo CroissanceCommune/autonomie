@@ -158,153 +158,150 @@
         ${action_cell(task, view_url)}
 </tr>
 </%def>
-                % if api.has_permission('add_phase'):
-                <button class='btn btn-default secondary-action'
-                    data-target="#phase-form"
-                    aria-expanded="false"
-                    aria-controls="phase-form"
-                    data-toggle='collapse'>
-                    <i class='glyphicon glyphicon-plus'></i>
-                    Ajouter un dossier
-                </button>
+% if api.has_permission('add_phase'):
+<button class='btn btn-default secondary-action'
+    data-target="#phase-form"
+    aria-expanded="false"
+    aria-controls="phase-form"
+    data-toggle='collapse'>
+    <i class='glyphicon glyphicon-plus'></i>
+    Ajouter un dossier
+</button>
 
-                <div class='collapse' id='phase-form'>
-                    <h3>Ajouter un dossier</h3>
-                    ${phase_form.render()|n}
-                </div>
-                <hr />
-                % endif
-
-
-                <div class='panel-group' id='phase_accordion'>
-                    %for phase in project.phases:
-                        % if len(project.phases) > 1:
-                            %if phase == latest_phase:
-                                <% section_css = 'in collapse' %>
-                            %else:
-                                <% section_css = 'collapse' %>
-                            %endif
-                            <div class='panel panel-default'>
-                                <div class='panel-heading section-header'>
-                                    <a href="#phase_${phase.id}"
-                                        data-toggle='collapse'
-                                        data-parent='#phase_accordion'
-                                        class='accordion-toggle'>
-                                        <%
-                                            if phase.is_default():
-                                                label = u"Dossier par défaut"
-                                            else:
-                                                label = phase.name
-                                        %>
-                                                <i style="vertical-align:middle"
-                                                    class="glyphicon glyphicon-folder-open">
-                                                </i>
-                                                &nbsp;${label}&nbsp;
-                                    </a>
-                                    % if api.has_permission('edit_phase'):
-                                        <a
-                                            href="${request.route_path('/phases/{id}', id=phase.id)}"
-                                            title="Éditer le libellé de ce dossier"
-                                            >
-                                            <i style="vertical-align:middle"
-                                                class="glyphicon glyphicon-pencil">
-                                            </i>
-                                        </a>
-                                        % if len(phase.tasks) == 0:
-                                            <a
-                                                href="${request.route_path('/phases/{id}', id=phase.id, _query=dict(action='delete'))}"
-                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');"
-                                                title="Supprimer ce dossier"
-                                                >
-                                                <i style="vertical-align:middle"
-                                                    class="glyphicon glyphicon-trash">
-                                                </i>
-                                            </a>
-                                        % endif
-                                    % endif
-                            </div>
-                            <div class="panel-collapse ${section_css}"
-                                id='phase_${phase.id}'>
-                                <div class='panel-body'>
-                    % else:
-                            <div class='panel panel-default'>
-                                <div class="panel-collapse" id='phase_${phase.id}'>
-                                    <div class='panel-body'>
-                    % endif
-
-                <div class='header'>
-                    <h3 class='pull-left'>Devis</h3>
-                    % if api.has_permission('add_estimation'):
-                        <a
-                            class='btn btn-primary primary-action'
-                            href='${request.route_path(estimation_add_route, id=project.id, _query=dict(phase=phase.id, action="add"))}'
-                            >
-                            <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer un devis
-                        </a>
-                    % endif
-                </div>
-                % if  phase.estimations:
-                    <table class='table table-striped table-condensed'>
-                        <thead>
-                            <th></th>
-                            <th>Nom</th>
-                            <th class="hidden-xs">État</th>
-                            <th class="actions">Action</th>
-                        </thead>
-                        %for task in phase.estimations:
-                            ${estimation_row(task)}
-                        %endfor
-                    </table>
-                % else:
-                    <div class="alert alert-warning" style='clear:both'>Aucun devis n'a été créé</div>
-                %endif
-                <hr />
-                <div class='header'>
-                    <h3 class='pull-left'>
-                        Facture(s), Avoir(s)
-                    </h3>
-                    % if api.has_permission('add_invoice'):
-                        <a class='btn btn-primary primary-action'
-                            href='${request.route_path(\
-                            invoice_add_route, \
-                            id=project.id, \
-                            _query=dict(phase=phase.id, action="add"))}'>
-                            <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer une facture
-                        </a>
-                    % endif
-                </div>
-                %if phase.invoices:
-                    <table class='table table-striped table-condensed'>
-                        <thead>
-                            <th></th>
-                            <th>Numéro</th>
-                            <th>Nom</th>
-                            <th class="hidden-xs">État</th>
-                            <th style="text-align:center">Action</th>
-                        </thead>
-                        %for task in phase.invoices:
-                            ${invoice_row(task)}
-                        %endfor
-                        % for task in phase.cancelinvoices:
-                            ${cancelinvoice_row(task)}
-                        % endfor
-                    </table>
-                % else:
-                    <div class="alert alert-warning" style='clear:both'>Aucune facture n'a été créée</div>
-                % endif
-                </div>
-                </div>
-                </div>
-            %endfor
-            </div>
-            %if not project.phases:
-                <strong>Aucun dossier n'a été créé dans ce projet</strong>
+<div class='collapse' id='phase-form'>
+    <h3>Ajouter un dossier</h3>
+    ${phase_form.render()|n}
+</div>
+<hr />
+% endif
+<div class='panel-group project-view' id='phase_accordion'>
+    %for phase in project.phases:
+        % if len(project.phases) > 1:
+            %if phase == latest_phase:
+                <% section_css = 'in collapse' %>
+            %else:
+                <% section_css = 'collapse' %>
             %endif
-
+    <div class='panel panel-default'>
+        <div class='panel-heading section-header'>
+            <a href="#phase_${phase.id}"
+                data-toggle='collapse'
+                data-parent='#phase_accordion'
+                class='accordion-toggle'>
+                <%
+                    if phase.is_default():
+                        label = u"Dossier par défaut"
+                    else:
+                        label = phase.name
+                %>
+                        <i style="vertical-align:middle"
+                            class="glyphicon glyphicon-folder-open">
+                        </i>
+                        &nbsp;${label}&nbsp;
+            </a>
+            % if api.has_permission('edit_phase'):
+                <a
+                    href="${request.route_path('/phases/{id}', id=phase.id)}"
+                    title="Éditer le libellé de ce dossier"
+                    >
+                    <i style="vertical-align:middle"
+                        class="glyphicon glyphicon-pencil">
+                    </i>
+                </a>
+                % if len(phase.tasks) == 0:
+                    <a
+                        href="${request.route_path('/phases/{id}', id=phase.id, _query=dict(action='delete'))}"
+                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');"
+                        title="Supprimer ce dossier"
+                        >
+                        <i style="vertical-align:middle"
+                            class="glyphicon glyphicon-trash">
+                        </i>
+                    </a>
+                % endif
+            % endif
+    </div>
+    <div class="panel-collapse ${section_css}"
+        id='phase_${phase.id}'>
+        <div class='panel-body'>
+    % else:
+    <div class='panel panel-default'>
+        <div class="panel-collapse" id='phase_${phase.id}'>
+            <div class='panel-body'>
+    % endif
+    <div class='header'>
+        <h3 class='pull-left'>Devis</h3>
+        % if api.has_permission('add_estimation'):
+            <a
+                class='btn btn-primary primary-action'
+                href='${request.route_path(estimation_add_route, id=project.id, _query=dict(phase=phase.id, action="add"))}'
+                >
+                <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer un devis
+            </a>
+        % endif
+    </div>
+    % if  phase.estimations:
+        <table class='table table-striped table-condensed'>
+            <thead>
+                <th></th>
+                <th>Nom</th>
+                <th class="hidden-xs">État</th>
+                <th class="actions">Action</th>
+            </thead>
+            %for task in phase.estimations:
+                ${estimation_row(task)}
+            %endfor
+        </table>
+    % else:
+        <div class="alert alert-warning" style='clear:both'>Aucun devis n'a été créé</div>
+    %endif
+        <hr />
+        <div class='header'>
+            <h3 class='pull-left'>
+                Facture(s), Avoir(s)
+            </h3>
+            % if api.has_permission('add_invoice'):
+                <a class='btn btn-primary primary-action'
+                    href='${request.route_path(\
+                    invoice_add_route, \
+                    id=project.id, \
+                    _query=dict(phase=phase.id, action="add"))}'>
+                    <span class='glyphicon glyphicon-plus-sign'></span>&nbsp;Créer une facture
+                </a>
+            % endif
         </div>
-
-
+        %if phase.invoices:
+            <table class='table table-striped table-condensed'>
+                <thead>
+                    <th></th>
+                    <th>Numéro</th>
+                    <th>Nom</th>
+                    <th class="hidden-xs">État</th>
+                    <th style="text-align:center">Action</th>
+                </thead>
+                %for task in phase.invoices:
+                    ${invoice_row(task)}
+                %endfor
+                % for task in phase.cancelinvoices:
+                    ${cancelinvoice_row(task)}
+                % endfor
+            </table>
+        % else:
+            <div class="alert alert-warning" style='clear:both'>Aucune facture n'a été créée</div>
+        % endif
         </div>
+        </div>
+    </div>
+%endfor
+</div>
+%if not project.phases:
+    <strong>Aucun dossier n'a été créé dans ce projet</strong>
+%endif
+
+</div>
+
+
+</div>
 </%block>
 <%block name="footerjs">
 $( function() {

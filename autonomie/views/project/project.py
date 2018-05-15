@@ -260,6 +260,14 @@ class ProjectListView(BaseListView, TreeMixin):
 class ProjectView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_ROUTE
 
+    @property
+    def url(self):
+        return self.request.route_path(self.route_name, id=self.context.id)
+
+    @property
+    def title(self):
+        return u"Projet : {0}".format(self.context.name)
+
     def __call__(self):
         self.populate_navigation()
         return dict()
@@ -267,6 +275,14 @@ class ProjectView(BaseView, TreeMixin):
 
 class ProjectByPhaseView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_PHASE_ROUTE
+
+    @property
+    def url(self):
+        return self.request.route_path(self.route_name, id=self.context.id)
+
+    @property
+    def title(self):
+        return u"Projet : {0}".format(self.context.name)
 
     def _get_phase_add_form(self):
         """

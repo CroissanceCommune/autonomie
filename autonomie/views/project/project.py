@@ -569,6 +569,7 @@ def includeme(config):
         renderer='autonomie:templates/base/formpage.mako',
         request_param='action=add',
         permission='add_project',
+        layout='default',
     )
     config.add_tree_view(
         ProjectAddStep2View,
@@ -576,6 +577,7 @@ def includeme(config):
         renderer='project/edit.mako',
         request_param='action=addstep2',
         permission='edit_project',
+        layout='default',
     )
     config.add_tree_view(
         ProjectEditView,

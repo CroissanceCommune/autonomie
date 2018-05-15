@@ -72,6 +72,8 @@ from autonomie.views.files import (
 from autonomie.views.project.routes import (
     COMPANY_PROJECTS_ROUTE,
     PROJECT_ITEM_ROUTE,
+    PROJECT_ITEM_GENERAL_ROUTE,
+    PROJECT_ITEM_PHASE_ROUTE,
     PROJECT_ITEM_ESTIMATION_ROUTE,
     PROJECT_ITEM_INVOICE_ROUTE,
     PHASE_ITEM_ROUTE,
@@ -122,7 +124,7 @@ class PhaseAddFormView(BaseFormView):
         self.dbsession.add(model)
         self.dbsession.flush()
         redirect = self.request.route_path(
-            "project",
+            PROJECT_ITEM_PHASE_ROUTE,
             id=model.project_id,
             _query={'phase': model.id}
         )
@@ -140,7 +142,7 @@ class PhaseEditFormView(BaseFormView):
         merge_session_with_post(self.context, appstruct)
         self.dbsession.merge(self.context)
         redirect = self.request.route_path(
-            "project",
+            PROJECT_ITEM_PHASE_ROUTE,
             id=self.context.project_id,
         )
         return HTTPFound(redirect)
@@ -155,7 +157,7 @@ def phase_delete_view(context, request):
     :param obj request: The pyramid request object
     """
     redirect = request.route_path(
-        "project",
+        PROJECT_ITEM_PHASE_ROUTE,
         id=context.project_id,
     )
     if len(context.tasks) == 0:
@@ -361,12 +363,8 @@ def project_delete(request):
         )
 
 
-class ProjectView(BaseView, TreeMixin):
-    route_name = PROJECT_ITEM_ROUTE
-
-    @property
-    def url(self):
-        return self.request.route_path(self.route_name, id=self.context.id)
+class ProjectByPhaseView(BaseView, TreeMixin):
+    route_name = PROJECT_ITEM_PHASE_ROUTE
 
     def _get_phase_add_form(self):
         """
@@ -379,7 +377,9 @@ class ProjectView(BaseView, TreeMixin):
         form = Form(
             schema,
             buttons=(submit_btn,),
-            action=self.request.current_route_path(
+            action=self.request.route_path(
+                PROJECT_ITEM_ROUTE,
+                id=self.context.id,
                 _query={'action': 'addphase'}
             ),
         )
@@ -442,6 +442,26 @@ class ProjectView(BaseView, TreeMixin):
                     cancelinvoice.color = self._get_color(index)
                     index += 1
 
+    def __call__(self):
+        self.populate_navigation()
+        phases = self.context.phases
+        self._set_task_colors(phases)
+        return dict(
+            project=self.context,
+            latest_phase=self._get_latest_phase(phases),
+            phase_form=self._get_phase_add_form(),
+            estimation_add_route=PROJECT_ITEM_ESTIMATION_ROUTE,
+            invoice_add_route=PROJECT_ITEM_INVOICE_ROUTE,
+        )
+
+
+class ProjectGeneralView(BaseView, TreeMixin):
+    route_name = PROJECT_ITEM_GENERAL_ROUTE
+
+    @property
+    def url(self):
+        return self.request.route_path(self.route_name, id=self.context.id)
+
     @property
     def title(self):
         return u"Projet : {0}".format(self.context.name)
@@ -451,16 +471,11 @@ class ProjectView(BaseView, TreeMixin):
             Return datas for displaying one project
         """
         self.populate_navigation()
-        phases = self.context.phases
-
-        self._set_task_colors(phases)
 
         return dict(
             title=self.title,
             project=self.context,
             company=self.context.company,
-            latest_phase=self._get_latest_phase(phases),
-            phase_form=self._get_phase_add_form(),
         )
 
 
@@ -543,7 +558,7 @@ class ProjectEditView(BaseEditView, TreeMixin):
     def redirect(self):
         return HTTPFound(
             self.request.route_path(
-                PROJECT_ITEM_ROUTE,
+                PROJECT_ITEM_GENERAL_ROUTE,
                 id=self.context.id
             )
         )
@@ -557,7 +572,14 @@ def includeme(config):
         permission='list_projects',
     )
     config.add_tree_view(
-        ProjectView,
+        ProjectByPhaseView,
+        parent=ProjectListView,
+        renderer='project/phases.mako',
+        permission='view_project',
+        layout='project',
+    )
+    config.add_tree_view(
+        ProjectGeneralView,
         parent=ProjectListView,
         renderer='project/general.mako',
         permission='view_project',
@@ -581,7 +603,7 @@ def includeme(config):
     )
     config.add_tree_view(
         ProjectEditView,
-        parent=ProjectView,
+        parent=ProjectGeneralView,
         renderer='project/edit.mako',
         request_param='action=edit',
         permission='edit_project',
@@ -605,6 +627,7 @@ def includeme(config):
         request_param="action=addphase",
         renderer="base/formpage.mako",
         permission='edit_project',
+        layout='default'
     )
     config.add_view(
         PhaseEditFormView,

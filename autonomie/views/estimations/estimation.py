@@ -289,6 +289,7 @@ def includeme(config):
         renderer='tasks/add.mako',
         permission='add_estimation',
         request_param="action=add",
+        layout="default"
     )
 
     config.add_view(

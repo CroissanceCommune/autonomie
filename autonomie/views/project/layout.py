@@ -16,9 +16,11 @@ from autonomie.resources import (
     project_resources,
 )
 from autonomie.views.project.routes import (
+    PROJECT_ITEM_ROUTE,
     PROJECT_ITEM_ESTIMATION_ROUTE,
     PROJECT_ITEM_INVOICE_ROUTE,
-    PROJECT_ITEM_ROUTE,
+    PROJECT_ITEM_PHASE_ROUTE,
+    PROJECT_ITEM_GENERAL_ROUTE,
 )
 
 
@@ -29,7 +31,7 @@ ProjectMenu = Menu(name="projectmenu")
 ProjectMenu.add(
     MenuItem(
         name="project_estimations",
-        label=u'Devis',
+        label=u'Tous les devis',
         route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
         icon=u'fa fa-project-o',
         perm='view.project',
@@ -38,9 +40,18 @@ ProjectMenu.add(
 ProjectMenu.add(
     MenuItem(
         name="project_invoices",
-        label=u'Factures',
+        label=u'Toutes les factures',
         route_name=PROJECT_ITEM_INVOICE_ROUTE,
         icon=u'fa fa-project-o',
+        perm='view.project',
+    )
+)
+ProjectMenu.add(
+    MenuItem(
+        name="project_phases",
+        label=u"Document rangés par dossiers",
+        route_name=PROJECT_ITEM_PHASE_ROUTE,
+        icon=u'fa fa-folder-o',
         perm='view.project',
     )
 )

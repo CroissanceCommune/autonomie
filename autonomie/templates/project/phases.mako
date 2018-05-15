@@ -158,14 +158,6 @@
         ${action_cell(task, view_url)}
 </tr>
 </%def>
-
-
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    <div></div>
-    </div>
-
-    <div class='panel-body'>
                 % if api.has_permission('add_phase'):
                 <button class='btn btn-default secondary-action'
                     data-target="#phase-form"
@@ -313,8 +305,6 @@
 
 
         </div>
-    </div>
-</div>
 </%block>
 <%block name="footerjs">
 $( function() {

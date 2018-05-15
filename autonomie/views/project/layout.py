@@ -30,10 +30,19 @@ logger = logging.getLogger(__name__)
 ProjectMenu = Menu(name="projectmenu")
 ProjectMenu.add(
     MenuItem(
+        name="project_base",
+        label=u'Accueil du projet',
+        route_name=PROJECT_ITEM_ROUTE,
+        icon=u'fa fa-pie-chart-o',
+        perm='view.project',
+    )
+)
+ProjectMenu.add(
+    MenuItem(
         name="project_estimations",
         label=u'Tous les devis',
         route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
-        icon=u'fa fa-project-o',
+        icon=u'fa fa-file-o',
         perm='view.project',
     )
 )
@@ -42,7 +51,7 @@ ProjectMenu.add(
         name="project_invoices",
         label=u'Toutes les factures',
         route_name=PROJECT_ITEM_INVOICE_ROUTE,
-        icon=u'fa fa-project-o',
+        icon=u'fa fa-file-o',
         perm='view.project',
     )
 )
@@ -59,8 +68,8 @@ ProjectMenu.add(
     MenuItem(
         name="project_general",
         label=u'Informations générales',
-        route_name=PROJECT_ITEM_ROUTE,
-        icon=u'fa fa-project-o',
+        route_name=PROJECT_ITEM_GENERAL_ROUTE,
+        icon=u'fa fa-pencil-o',
         perm='view.project',
     )
 )

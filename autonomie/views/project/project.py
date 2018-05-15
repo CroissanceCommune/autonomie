@@ -54,14 +54,10 @@ from autonomie.forms.project import (
     get_edit_project_schema,
     PhaseSchema,
 )
-from autonomie.forms import (
-    merge_session_with_post,
-)
 from autonomie.views import (
     BaseView,
     BaseAddView,
     BaseEditView,
-    BaseFormView,
     submit_btn,
     BaseListView,
     TreeMixin,
@@ -76,7 +72,6 @@ from autonomie.views.project.routes import (
     PROJECT_ITEM_PHASE_ROUTE,
     PROJECT_ITEM_ESTIMATION_ROUTE,
     PROJECT_ITEM_INVOICE_ROUTE,
-    PHASE_ITEM_ROUTE,
 )
 
 log = logger = logging.getLogger(__name__)
@@ -111,64 +106,6 @@ FORM_GRID = (
         ('definition', 10),
     )
 )
-
-
-class PhaseAddFormView(BaseFormView):
-    title = u"Ajouter un dossier au projet"
-    schema = PhaseSchema()
-
-    def submit_success(self, appstruct):
-        model = Phase()
-        model.project_id = self.context.id
-        merge_session_with_post(model, appstruct)
-        self.dbsession.add(model)
-        self.dbsession.flush()
-        redirect = self.request.route_path(
-            PROJECT_ITEM_PHASE_ROUTE,
-            id=model.project_id,
-            _query={'phase': model.id}
-        )
-        return HTTPFound(redirect)
-
-
-class PhaseEditFormView(BaseFormView):
-    title = u"Modification du dossier"
-    schema = PhaseSchema()
-
-    def before(self, form):
-        form.set_appstruct(self.context.appstruct())
-
-    def submit_success(self, appstruct):
-        merge_session_with_post(self.context, appstruct)
-        self.dbsession.merge(self.context)
-        redirect = self.request.route_path(
-            PROJECT_ITEM_PHASE_ROUTE,
-            id=self.context.project_id,
-        )
-        return HTTPFound(redirect)
-
-
-def phase_delete_view(context, request):
-    """
-    Phase deletion view
-
-    Allows to delete phases without documents
-    :param obj context: The current phase
-    :param obj request: The pyramid request object
-    """
-    redirect = request.route_path(
-        PROJECT_ITEM_PHASE_ROUTE,
-        id=context.project_id,
-    )
-    if len(context.tasks) == 0:
-        msg = u"Le dossier {0} a été supprimé".format(context.name)
-        request.dbsession.delete(context)
-        request.session.flash(msg)
-    else:
-        msg = u"Impossible de supprimer le dossier {0}, il contient \
-des documents".format(context.name)
-        request.session.flash(msg, 'error')
-    return HTTPFound(redirect)
 
 
 def redirect_to_customerslist(request, company):
@@ -320,47 +257,12 @@ class ProjectListView(BaseListView, TreeMixin):
         )
 
 
-def project_archive(request):
-    """
-    Archive the current project
-    """
-    project = request.context
-    if not project.archived:
-        project.archived = True
-    else:
-        project.archived = False
-        request.session.flash(
-            u"Le projet '{0}' a été désarchivé".format(project.name)
-        )
-    request.dbsession.merge(project)
-    if request.referer is not None:
-        return HTTPFound(request.referer)
-    else:
-        return HTTPFound(
-            request.route_path(
-                COMPANY_PROJECTS_ROUTE,
-                id=request.context.company_id
-            )
-        )
+class ProjectView(BaseView, TreeMixin):
+    route_name = PROJECT_ITEM_ROUTE
 
-
-def project_delete(request):
-    """
-        Delete the current project
-    """
-    project = request.context
-    cid = project.company_id
-    log.info(u"Project {0} deleted".format(project))
-    request.dbsession.delete(project)
-    request.session.flash(
-        u"Le projet '{0}' a bien été supprimé".format(project.name)
-    )
-    if request.referer is not None:
-        return HTTPFound(request.referer)
-    else:
-        return HTTPFound(
-            request.route_path(COMPANY_PROJECTS_ROUTE, id=cid)
-        )
+    def __call__(self):
+        self.populate_navigation()
+        return dict()
 
 
 class ProjectByPhaseView(BaseView, TreeMixin):
@@ -564,12 +466,62 @@ class ProjectEditView(BaseEditView, TreeMixin):
         )
 
 
+def project_archive(request):
+    """
+    Archive the current project
+    """
+    project = request.context
+    if not project.archived:
+        project.archived = True
+    else:
+        project.archived = False
+        request.session.flash(
+            u"Le projet '{0}' a été désarchivé".format(project.name)
+        )
+    request.dbsession.merge(project)
+    if request.referer is not None:
+        return HTTPFound(request.referer)
+    else:
+        return HTTPFound(
+            request.route_path(
+                COMPANY_PROJECTS_ROUTE,
+                id=request.context.company_id
+            )
+        )
+
+
+def project_delete(request):
+    """
+        Delete the current project
+    """
+    project = request.context
+    cid = project.company_id
+    log.info(u"Project {0} deleted".format(project))
+    request.dbsession.delete(project)
+    request.session.flash(
+        u"Le projet '{0}' a bien été supprimé".format(project.name)
+    )
+    if request.referer is not None:
+        return HTTPFound(request.referer)
+    else:
+        return HTTPFound(
+            request.route_path(COMPANY_PROJECTS_ROUTE, id=cid)
+        )
+
+
 def includeme(config):
     config.add_tree_view(
         ProjectListView,
         renderer='project/list.mako',
         request_method='GET',
         permission='list_projects',
+    )
+    config.add_tree_view(
+        ProjectView,
+        parent=ProjectListView,
+        renderer='project/base.mako',
+        permission='view_project',
+        layout='project',
     )
     config.add_tree_view(
         ProjectByPhaseView,
@@ -620,27 +572,6 @@ def includeme(config):
         route_name=PROJECT_ITEM_ROUTE,
         request_param="action=archive",
         permission='edit_project',
-    )
-    config.add_view(
-        PhaseAddFormView,
-        route_name=PROJECT_ITEM_ROUTE,
-        request_param="action=addphase",
-        renderer="base/formpage.mako",
-        permission='edit_project',
-        layout='default'
-    )
-    config.add_view(
-        PhaseEditFormView,
-        route_name=PHASE_ITEM_ROUTE,
-        renderer="base/formpage.mako",
-        permission='edit_phase',
-    )
-    config.add_view(
-        phase_delete_view,
-        route_name=PHASE_ITEM_ROUTE,
-        renderer="base/formpage.mako",
-        permission='edit_phase',
-        request_param="action=delete",
     )
     config.add_view(
         FileUploadView,

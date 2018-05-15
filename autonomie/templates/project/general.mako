@@ -29,7 +29,7 @@
         <a href="${request.route_path('customer', id=customer.id, _query={'action': 'edit'})}"
             class='btn btn-default btn-small pull-right'
             title="Modifier ce client">
-            <i class='glyphicon glyphicon-pencil'></i> Modifier
+            <i class='glyphicon glyphicon-pencil'></i> Modifier ce client
         </a>
         <address>
             ${format_text(customer.full_address)}

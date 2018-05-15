@@ -50,9 +50,7 @@
             </div>
             <div class='col-md-9 hidden-xs'>
             <%block name='projecttitle'>
-            % if title is not UNDEFINED and title is not None:
                 <div>Clients : ${','.join(layout.customer_names)}</div>
-            % endif
             </%block>
             </div>
         </div>

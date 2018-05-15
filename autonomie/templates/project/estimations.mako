@@ -28,38 +28,32 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="format_text" />
 <%block name='mainblock'>
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    <a href='#filter-form'
-        data-toggle='collapse'
-        aria-expanded="false"
-        aria-controls="filter-form">
-        <i class='glyphicon glyphicon-search'></i>&nbsp;
-        Filtres&nbsp;
-        <i class='glyphicon glyphicon-chevron-down'></i>
+<a href='#filter-form'
+    data-toggle='collapse'
+    aria-expanded="false"
+    aria-controls="filter-form">
+    <i class='glyphicon glyphicon-search'></i>&nbsp;
+    Filtres&nbsp;
+    <i class='glyphicon glyphicon-chevron-down'></i>
+</a>
+% if '__formid__' in request.GET:
+<div class='help-text'>
+    <small><i>Des filtres sont actifs</i></small>
+</div>
+<div class='help-text'>
+    <a href="${request.current_route_path(_query={})}">
+        <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
     </a>
-    % if '__formid__' in request.GET:
-        <div class='help-text'>
-            <small><i>Des filtres sont actifs</i></small>
-        </div>
-        <div class='help-text'>
-            <a href="${request.current_route_path(_query={})}">
-                <i class='glyphicon glyphicon-remove'></i> Supprimer tous les filtres
-            </a>
-        </div>
-    % endif
-    </div>
-    <div class='panel-body'>
-    % if '__formid__' in request.GET:
-        <div class='collapse' id='filter-form'>
-    % else:
-        <div class='in collapse' id='filter-form'>
-    % endif
-            <div class='row'>
-                <div class='col-xs-12'>
-                    ${form|n}
-                </div>
-            </div>
+</div>
+% endif
+% if '__formid__' in request.GET:
+<div class='collapse' id='filter-form'>
+% else:
+<div class='in collapse' id='filter-form'>
+% endif
+    <div class='row'>
+        <div class='col-xs-12'>
+            ${form|n}
         </div>
     </div>
 </div>

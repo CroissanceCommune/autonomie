@@ -9,3 +9,4 @@ def includeme(config):
     config.include('.routes')
     config.include('.layout')
     config.include('.project')
+    config.include('.phases')

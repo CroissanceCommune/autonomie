@@ -115,10 +115,10 @@ def populate_project_types(session):
         ProjectType,
         SubProjectType,
     )
-    for name, label, private in (
-        ("default", u"Projet classique", False),
-        ("training", u"Formation", True),
-        ("construction", u"Chantier", False),
+    for name, label, subtype_label, private in (
+        ("default", u"Projet classique", "Affaire simple", False),
+        ("training", u"Convention de formation", "Formation", True),
+        ("construction", u"Chantiers", u"Chantier", True),
     ):
         ptype = ProjectType.query().filter_by(name=name).first()
         if ptype is None:
@@ -135,7 +135,7 @@ def populate_project_types(session):
             session.add(
                 SubProjectType(
                     name=name,
-                    label=label,
+                    label=subtype_label,
                     editable=False,
                     private=private,
                     project_type_id=ptype.id,

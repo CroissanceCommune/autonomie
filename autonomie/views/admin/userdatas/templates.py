@@ -90,8 +90,8 @@ class TemplateListView(AdminCrudListView):
         yield format_date(item.updated_at)
 
     def more_template_vars(self, result):
-        result['warn_msg'] = u"Les modèles de document doivent être au format "
-        u"odt pour pouvoir être utilisés par Autonomie"
+        result['warn_msg'] = u"Les modèles de document doivent être au format \
+odt pour pouvoir être utilisés par Autonomie"
         return result
 
     def load_items(self):

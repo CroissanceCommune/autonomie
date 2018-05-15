@@ -21,6 +21,15 @@ def update_database_structure():
             'project_type_id', sa.Integer, sa.ForeignKey('project_type.id'),
         )
     )
+    op.add_column("task_mention", sa.Column("help_text", sa.String(255)))
+    op.alter_column(
+        'project',
+        'type',
+        new_column_name='description',
+        existing_type=sa.String(150),
+        existing_nullable=True
+    )
+
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION

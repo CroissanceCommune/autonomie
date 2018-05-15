@@ -152,10 +152,17 @@ class SubProjectType(BaseProjectType):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'sub_project_type'}
     __colanderalchemy_config__ = {
-        "help_msg": u"""Les types de sous-projet permettent de prédéfinir des
-        comportements spécifiques (documents à rattacher, modèles à utiliser
-        pour les PDFs, mentions ...) propres à certains types d'affaires (ex:
-        les sous-projets Formation associés au projet de type Convention)"""
+        "help_msg": u"""Les types d'affaire permettent de prédéfinir des
+        comportements spécifiques.
+    Ex: Un type d'affaire 'Formation' permet de regrouper les documents
+    liés à la formation.
+    Il va ensuite être possible de spécifier :
+        - Des mentions à inclure dans les documents placées dans cette affaire
+        - Les documents requis à la validation des devis ou des factures
+        - Le modèle de document à utiliser pour générer les devis/factures
+        - Les modèles de document à proposer pour générer les documents
+        spécifiques (livret d'accueil ...)
+    """
     }
     id = Column(
         ForeignKey('base_project_type.id'),
@@ -177,7 +184,7 @@ class SubProjectType(BaseProjectType):
         ForeignKey('project_type.id'),
         info={
             "colanderalchemy": {
-                "title": u"Ce type de sous-projet est utilisé par défaut pour "
+                "title": u"Ce type d'affaire est utilisé par défaut pour "
                 u"les projets de type :"
             }
         }
@@ -196,7 +203,7 @@ class SubProjectType(BaseProjectType):
         secondary=ProjectTypeSubProjectType,
         info={
             'colanderalchemy': {
-                'title': u"Ce type de sous-projet peut également être utilisé "
+                'title': u"Ce type d'affaire peut également être utilisé "
                 u"dans les projets de type : "
             }
         }

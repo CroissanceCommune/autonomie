@@ -159,18 +159,10 @@ class ProjectTypeSetDefaultView(BaseView, AdminTreeMixin):
 
 
 class SubProjectTypeListView(AdminCrudListView):
-    title = u"Types de sous-projets"
-    description = u"""Configurer les types de sous-projets proposés aux
-    entrepreneurs ceux-ci permettent de classifier les affaires.
-    Ex: Un sous-type de projet 'Formation' permet de regrouper les documents
-    liés à la formation.
-    Il va ensuite être possible de spécifier :
-        - Des mentions à inclure dans les documents placées dans ces
-        sous-projets
-        - Les documents requis à la validation des devis ou des factures
-        - Le modèle de document à utiliser pour générer les devis/factures
-        - Les modèles de document à proposer pour générer les documents
-        spécifiques (livret d'accueil ...)
+    title = u"Types d'affaire"
+    description = u"""Configurer les types d'affaires proposés aux
+    entrepreneurs. Les types d'affaire permettent de spécifier des règles
+    (documents requis ...) spécifiques.
     """
     factory = SubProjectType
     route_name = SUBPROJECT_TYPE_URL

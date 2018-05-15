@@ -46,6 +46,7 @@ STATUS_OPTIONS = (
     ('draft', u"Brouillon"),
     ('wait', u"En attente de validation"),
     ('invalid', u"Invalide"),
+    ("valid", u"Validé"),
 )
 
 

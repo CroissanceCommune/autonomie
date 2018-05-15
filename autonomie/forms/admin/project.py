@@ -6,6 +6,7 @@
 import colander
 from colanderalchemy import SQLAlchemySchemaNode
 
+from sqlalchemy import not_
 from autonomie.models.project.types import (
     ProjectType,
     SubProjectType,
@@ -67,6 +68,28 @@ def get_admin_project_type_schema():
     return schema
 
 
+@colander.deferred
+def get_deferred_unique_project_type_default(node, kw):
+    """
+    Ensure a subproject type is not a default for a project type already having
+    a default value
+    """
+    context = kw['request'].context
+
+    def validator(node, value):
+        query = SubProjectType.query().filter_by(project_type_id=value)
+        if isinstance(context, SubProjectType):
+            query = query.filter(not_(SubProjectType.id == context.id))
+
+        if query.count() > 0:
+            raise colander.Invalid(
+                node,
+                u"Ce type de projet a déjà un type d'affaire par défaut"
+            )
+
+    return validator
+
+
 def get_admin_subproject_type_schema():
     schema = SQLAlchemySchemaNode(
         SubProjectType,
@@ -80,7 +103,10 @@ def get_admin_subproject_type_schema():
         validator=get_deferred_unique_label_validator(SubProjectType),
     )
     customize_field(
-        schema, 'project_type_id', widget=get_deferred_model_select(ProjectType)
+        schema,
+        'project_type_id',
+        widget=get_deferred_model_select(ProjectType),
+        validator=get_deferred_unique_project_type_default
     )
     customize_field(
         schema,

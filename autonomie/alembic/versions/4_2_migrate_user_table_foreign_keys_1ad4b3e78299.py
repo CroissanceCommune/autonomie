@@ -94,6 +94,9 @@ def migrate_datas():
                 login.id, user.id
             )
         )
+    op.drop_column("accounts", "login")
+    op.drop_column("accounts", "password")
+    op.drop_column("accounts", "active")
 
 
     from autonomie.models.user.user import User
@@ -125,9 +128,6 @@ def migrate_datas():
 def clean_database():
     op.execute("ALTER TABLE user_groups DROP INDEX IF EXISTS `user_id`")
     op.drop_column('user_groups', 'user_id')
-    op.drop_column("accounts", "login")
-    op.drop_column("accounts", "password")
-    op.drop_column("accounts", "active")
     op.drop_column('invoice', 'deposit')
 
 

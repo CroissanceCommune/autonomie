@@ -383,7 +383,7 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
 
     def query(self):
         query = self.request.dbsession.query(
-            Task.id
+            Task
         ).with_polymorphic(
             [Invoice, CancelInvoice]
         )
@@ -473,6 +473,7 @@ class ProjectInvoicesCsvView(CompanyInvoicesCsvView):
         return self.request.context.company_id
 
     def filter_project(self, query, appstruct):
+        logger.debug(u" + Filtering by project_id")
         return query.filter(Task.project_id == self.context.id)
 
     filter_status = filter_all_status
@@ -485,6 +486,7 @@ class ProjectInvoicesXlsView(CompanyInvoicesXlsView):
         return self.request.context.company_id
 
     def filter_project(self, query, appstruct):
+        logger.debug(u" + Filtering by project_id")
         return query.filter(Task.project_id == self.context.id)
 
     filter_status = filter_all_status
@@ -497,6 +499,7 @@ class ProjectInvoicesOdsView(CompanyInvoicesOdsView):
         return self.request.context.company_id
 
     def filter_project(self, query, appstruct):
+        logger.debug(u" + Filtering by project_id")
         return query.filter(Task.project_id == self.context.id)
 
     filter_status = filter_all_status

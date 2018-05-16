@@ -39,7 +39,7 @@ from autonomie.models.project import (
 )
 from autonomie.models.project.types import (
     ProjectType,
-    SubProjectType,
+    BusinessType,
 )
 from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
@@ -123,30 +123,48 @@ def deferred_project_type_widget(node, kw):
 
 
 @colander.deferred
-def deferred_subproject_type_widget(node, kw):
+def deferred_business_type_widget(node, kw):
     """
-    Build a SubProjectType checkbox list widget on bind
+    Build a BusinessType checkbox list widget on bind
 
-    Only show active subprojecttypes than can be associated to the current's
+    Only show active businesstypes than can be associated to the current's
     project type
     """
     request = kw['request']
     ptype_id = request.context.project_type_id
 
-    subproject_types_query = SubProjectType.query_for_select()
-    subproject_types_query.filter(
-        SubProjectType.other_project_types.any(
+    business_types_query = BusinessType.query_for_select()
+    business_types_query = business_types_query.filter(
+        BusinessType.other_project_types.any(
             ProjectType.id == ptype_id
         )
     )
 
     values = []
-    for subproject_type in subproject_types_query:
-        if not subproject_type.private or \
-                request.has_permission('add.%s' % subproject_type.name):
-            values.append((subproject_type.id, subproject_type.label))
+    for business_type in business_types_query:
+        if not business_type.private or \
+                request.has_permission('add.%s' % business_type.name):
+            values.append((business_type.id, business_type.label))
 
     return deform.widget.CheckboxChoiceWidget(values=values)
+
+
+@colander.deferred
+def deferred_business_type_description(node, kw):
+    request = kw['request']
+    ptype_id = request.context.project_type_id
+
+    business_types_query = BusinessType.query_for_select()
+    business_types_query = business_types_query.filter(
+        BusinessType.project_type_id == ptype_id
+    )
+    description = u"Le type d'affaire qui peut être mené dans ce projet "
+    res = business_types_query.first()
+    if res is not None:
+        description = u"%s (autre que le type par défaut : %s)" % (
+            description, res.label
+        )
+    return description
 
 
 def _customize_project_schema(schema):
@@ -171,14 +189,14 @@ def _customize_project_schema(schema):
             missing=colander.required,
         )
 
-    if 'subtypes' in schema:
+    if 'business_types' in schema:
         customize(
-            "subtypes",
+            "business_types",
             title=u"Types d'affaires",
-            description=u"Le type d'affaire qui peut être mené dans ce projet",
             missing=colander.drop,
-            children=[forms.get_sequence_child_item_id_node(SubProjectType)],
-            widget=deferred_subproject_type_widget
+            children=[forms.get_sequence_child_item_id_node(BusinessType)],
+            widget=deferred_business_type_widget,
+            description=deferred_business_type_description
         )
 
     return schema
@@ -229,7 +247,7 @@ def get_add_step2_project_schema():
             'definition',
             'starting_date',
             'ending_date',
-            'subtypes',
+            'business_types',
         ),
     )
     _customize_project_schema(schema)
@@ -243,7 +261,7 @@ def get_edit_project_schema():
     excludes = (
         "_acl", "id", "company_id", "archived", "customers",
         "invoices", "tasks", "estimations", "cancelinvoices",
-        "project_type_id", "project_type", "subtypes",
+        "project_type_id", "project_type", "business_types",
     )
     schema = SQLAlchemySchemaNode(Project, excludes=excludes)
     _customize_project_schema(schema)

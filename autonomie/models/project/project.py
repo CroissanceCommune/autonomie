@@ -60,11 +60,11 @@ ProjectCustomer = Table(
     mysql_engine=default_table_args['mysql_engine']
 )
 
-ProjectSubProjectType = Table(
-    'project_sub_project_type',
+ProjectBusinessType = Table(
+    'project_business_type',
     DBBASE.metadata,
     Column("project_id", Integer, ForeignKey('project.id')),
-    Column("sub_project_type_id", Integer, ForeignKey('sub_project_type.id')),
+    Column("business_type_id", Integer, ForeignKey('business_type.id')),
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine']
 )
@@ -177,9 +177,9 @@ class Project(Node):
             'export': {'exclude': True},
         }
     )
-    subtypes = relationship(
-        "SubProjectType",
-        secondary=ProjectSubProjectType,
+    business_types = relationship(
+        "BusinessType",
+        secondary=ProjectBusinessType,
         info={
             "colanderalchemy": {
                 "title": u"Types de sous-projet proposés",
@@ -188,8 +188,8 @@ class Project(Node):
             }
         }
     )
-    subprojects = relationship(
-        "SubProject",
+    businesses = relationship(
+        "Business",
         back_populates="project",
         cascade="all, delete-orphan",
         info={
@@ -264,6 +264,9 @@ class Project(Node):
             Return a dict view of this object
         """
         phases = [phase.todict() for phase in self.phases]
+        business_types = [
+            business_type.todict() for business_type in self.business_types
+        ]
         return dict(
             id=self.id,
             name=self.name,
@@ -272,6 +275,7 @@ class Project(Node):
             description=self.description,
             archived=self.archived,
             phases=phases,
+            business_types=business_types,
         )
 
     def __json__(self, request):

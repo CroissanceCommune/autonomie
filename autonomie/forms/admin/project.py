@@ -9,7 +9,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import not_
 from autonomie.models.project.types import (
     ProjectType,
-    SubProjectType,
+    BusinessType,
 )
 from autonomie.forms import (
     customize_field,
@@ -39,7 +39,7 @@ def get_deferred_unique_label_validator(class_):
     """
     Returns a unique label validator for the given class
 
-    :param obj class_: The classname ProjectType/SubProjectType
+    :param obj class_: The classname ProjectType/BusinessType
     """
     @colander.deferred
     def deferred_unique_label_validator(node, kw):
@@ -47,7 +47,7 @@ def get_deferred_unique_label_validator(class_):
         Deferred unique validator
         """
         context = kw['request'].context
-        if isinstance(context, (ProjectType, SubProjectType)):
+        if isinstance(context, (ProjectType, BusinessType)):
             type_id = context.id
         else:
             type_id = None
@@ -71,15 +71,15 @@ def get_admin_project_type_schema():
 @colander.deferred
 def get_deferred_unique_project_type_default(node, kw):
     """
-    Ensure a subproject type is not a default for a project type already having
+    Ensure a business type is not a default for a project type already having
     a default value
     """
     context = kw['request'].context
 
     def validator(node, value):
-        query = SubProjectType.query().filter_by(project_type_id=value)
-        if isinstance(context, SubProjectType):
-            query = query.filter(not_(SubProjectType.id == context.id))
+        query = BusinessType.query().filter_by(project_type_id=value)
+        if isinstance(context, BusinessType):
+            query = query.filter(not_(BusinessType.id == context.id))
 
         if query.count() > 0:
             raise colander.Invalid(
@@ -90,9 +90,9 @@ def get_deferred_unique_project_type_default(node, kw):
     return validator
 
 
-def get_admin_subproject_type_schema():
+def get_admin_business_type_schema():
     schema = SQLAlchemySchemaNode(
-        SubProjectType,
+        BusinessType,
         includes=(
             'label', 'project_type_id', 'other_project_types'
         )
@@ -100,7 +100,7 @@ def get_admin_subproject_type_schema():
     customize_field(
         schema,
         "label",
-        validator=get_deferred_unique_label_validator(SubProjectType),
+        validator=get_deferred_unique_label_validator(BusinessType),
     )
     customize_field(
         schema,

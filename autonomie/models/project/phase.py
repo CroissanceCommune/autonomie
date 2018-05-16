@@ -24,8 +24,8 @@ from autonomie_base.models.base import (
 )
 
 
-class SubProject(DBBASE, PersistentACLMixin):
-    __tablename__ = "sub_project"
+class Business(DBBASE, PersistentACLMixin):
+    __tablename__ = "business"
     __table_args__ = default_table_args
     id = Column(
         Integer,
@@ -52,17 +52,17 @@ class SubProject(DBBASE, PersistentACLMixin):
         },
     )
 
-    subproject_type_id = Column(
-        ForeignKey('sub_project_type.id'),
-        info={'colanderalchemy': {'title': u'Type de sous-projet'}}
+    business_type_id = Column(
+        ForeignKey('business_type.id'),
+        info={'colanderalchemy': {'title': u"Type d'affaires"}}
     )
     project_id = Column(
         ForeignKey('project.id'),
         info={'colanderalchemy': {'exclude': True}},
     )
 
-    subproject_type = relationship(
-        "SubProjectType",
+    business_type = relationship(
+        "BusinessType",
         info={'colanderalchemy': {'exclude': True}},
     )
     project = relationship(

@@ -8,13 +8,13 @@ from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.project.types import (
     ProjectType,
-    SubProjectType,
+    BusinessType,
 )
 
 from autonomie.utils.widgets import Link
 from autonomie.forms.admin.project import (
     get_admin_project_type_schema,
-    get_admin_subproject_type_schema,
+    get_admin_business_type_schema,
 )
 from autonomie.views import BaseView
 from autonomie.views.admin.tools import (
@@ -33,8 +33,8 @@ from autonomie.views.admin.sale.business_cycle import (
 
 PROJECT_TYPE_URL = os.path.join(BUSINESS_URL, "project_types")
 PROJECT_TYPE_ITEM_URL = os.path.join(PROJECT_TYPE_URL, "{id}")
-SUBPROJECT_TYPE_URL = os.path.join(BUSINESS_URL, "subproject_types")
-SUBPROJECT_TYPE_ITEM_URL = os.path.join(SUBPROJECT_TYPE_URL, "{id}")
+BUSINESS_TYPE_URL = os.path.join(BUSINESS_URL, "business_types")
+BUSINESS_TYPE_ITEM_URL = os.path.join(BUSINESS_TYPE_URL, "{id}")
 
 
 class ProjectTypeListView(AdminCrudListView):
@@ -158,15 +158,15 @@ class ProjectTypeSetDefaultView(BaseView, AdminTreeMixin):
         return HTTPFound(self.back_link)
 
 
-class SubProjectTypeListView(AdminCrudListView):
+class BusinessTypeListView(AdminCrudListView):
     title = u"Types d'affaire"
     description = u"""Configurer les types d'affaires proposés aux
     entrepreneurs. Les types d'affaire permettent de spécifier des règles
     (documents requis ...) spécifiques.
     """
-    factory = SubProjectType
-    route_name = SUBPROJECT_TYPE_URL
-    item_route_name = SUBPROJECT_TYPE_ITEM_URL
+    factory = BusinessType
+    route_name = BUSINESS_TYPE_URL
+    item_route_name = BUSINESS_TYPE_ITEM_URL
     columns = [
         u'Libellé',
         u"Nécessite des droits particuliers",
@@ -220,36 +220,36 @@ class SubProjectTypeListView(AdminCrudListView):
             )
 
     def load_items(self):
-        items = SubProjectType.query()
+        items = BusinessType.query()
         items = items.order_by(self.factory.name)
         return items
 
 
-class SubProjectTypeDisableView(BaseAdminDisableView):
+class BusinessTypeDisableView(BaseAdminDisableView):
     """
-    View for SubProjectType disable/enable
+    View for BusinessType disable/enable
     """
-    route_name = SUBPROJECT_TYPE_ITEM_URL
+    route_name = BUSINESS_TYPE_ITEM_URL
 
 
-class SubProjectTypeDeleteView(BaseAdminDeleteView):
+class BusinessTypeDeleteView(BaseAdminDeleteView):
     """
-    SubProjectType deletion view
+    BusinessType deletion view
     """
-    route_name = SUBPROJECT_TYPE_ITEM_URL
+    route_name = BUSINESS_TYPE_ITEM_URL
 
 
-class SubProjectTypeAddView(BaseAdminAddView):
+class BusinessTypeAddView(BaseAdminAddView):
     title = u"Ajouter"
-    route_name = SUBPROJECT_TYPE_URL
-    factory = SubProjectType
-    schema = get_admin_subproject_type_schema()
+    route_name = BUSINESS_TYPE_URL
+    factory = BusinessType
+    schema = get_admin_business_type_schema()
 
 
-class SubProjectTypeEditView(BaseAdminEditView):
-    route_name = SUBPROJECT_TYPE_ITEM_URL
-    factory = SubProjectType
-    schema = get_admin_subproject_type_schema()
+class BusinessTypeEditView(BaseAdminEditView):
+    route_name = BUSINESS_TYPE_ITEM_URL
+    factory = BusinessType
+    schema = get_admin_business_type_schema()
 
     @property
     def title(self):
@@ -269,13 +269,13 @@ def includeme(config):
         traverse="/project_types/{id}"
     )
     config.add_route(
-        SUBPROJECT_TYPE_URL,
-        SUBPROJECT_TYPE_URL
+        BUSINESS_TYPE_URL,
+        BUSINESS_TYPE_URL
     )
     config.add_route(
-        SUBPROJECT_TYPE_ITEM_URL,
-        SUBPROJECT_TYPE_ITEM_URL,
-        traverse="/sub_project_types/{id}"
+        BUSINESS_TYPE_ITEM_URL,
+        BUSINESS_TYPE_ITEM_URL,
+        traverse="/business_types/{id}"
     )
 
     config.add_admin_view(
@@ -312,29 +312,29 @@ def includeme(config):
     )
 
     config.add_admin_view(
-        SubProjectTypeListView,
+        BusinessTypeListView,
         parent=BusinessCycleIndexView,
         renderer="admin/crud_list.mako",
     )
 
     config.add_admin_view(
-        SubProjectTypeAddView,
-        parent=SubProjectTypeListView,
+        BusinessTypeAddView,
+        parent=BusinessTypeListView,
         renderer="admin/crud_add_edit.mako",
         request_param="action=add",
     )
     config.add_admin_view(
-        SubProjectTypeEditView,
-        parent=SubProjectTypeListView,
+        BusinessTypeEditView,
+        parent=BusinessTypeListView,
         renderer="admin/crud_add_edit.mako",
     )
     config.add_admin_view(
-        SubProjectTypeDisableView,
-        parent=SubProjectTypeListView,
+        BusinessTypeDisableView,
+        parent=BusinessTypeListView,
         request_param="action=disable",
     )
     config.add_admin_view(
-        SubProjectTypeDeleteView,
-        parent=SubProjectTypeListView,
+        BusinessTypeDeleteView,
+        parent=BusinessTypeListView,
         request_param="action=delete",
     )

@@ -26,11 +26,11 @@ from autonomie_base.models.base import (
 )
 
 
-ProjectTypeSubProjectType = Table(
-    'project_type_sub_project_type',
+ProjectTypeBusinessType = Table(
+    'project_type_business_type',
     DBBASE.metadata,
     Column("project_type_id", Integer, ForeignKey('project_type.id')),
-    Column("sub_project_type_id", Integer, ForeignKey('sub_project_type.id')),
+    Column("business_type_id", Integer, ForeignKey('business_type.id')),
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine']
 )
@@ -99,6 +99,16 @@ class BaseProjectType(DBBASE):
         query = query.filter_by(active=True)
         return query
 
+    def todict(self, request):
+        res = {
+            'id': self.id,
+            'name': self.name,
+            'active': self.active,
+            'editable': self.editable,
+            'private': self.private,
+        }
+        return res
+
 
 class ProjectType(BaseProjectType):
     __tablename__ = "project_type"
@@ -134,6 +144,13 @@ class ProjectType(BaseProjectType):
             }
         }
     )
+    default_business_type = relationship(
+        "BusinessType",
+        primaryjoin="ProjectType.id==BusinessType.project_type_id",
+        back_populates='project_type',
+        uselist=False,
+        info={'colanderalchemy': {'exclude': True}},
+    )
 
     @classmethod
     def get_by_name(cls, name):
@@ -147,10 +164,10 @@ class ProjectType(BaseProjectType):
         return Project.query().filter_by(project_type_id=self.id).count() > 0
 
 
-class SubProjectType(BaseProjectType):
-    __tablename__ = "sub_project_type"
+class BusinessType(BaseProjectType):
+    __tablename__ = "business_type"
     __table_args__ = default_table_args
-    __mapper_args__ = {'polymorphic_identity': 'sub_project_type'}
+    __mapper_args__ = {'polymorphic_identity': 'business_type'}
     __colanderalchemy_config__ = {
         "help_msg": u"""Les types d'affaire permettent de prédéfinir des
         comportements spécifiques.
@@ -192,7 +209,7 @@ class SubProjectType(BaseProjectType):
 
     project_type = relationship(
         "ProjectType",
-        primaryjoin="ProjectType.id==SubProjectType.project_type_id",
+        primaryjoin="ProjectType.id==BusinessType.project_type_id",
         info={
             'colanderalchemy': {'exclude': True}
         }
@@ -200,7 +217,7 @@ class SubProjectType(BaseProjectType):
 
     other_project_types = relationship(
         "ProjectType",
-        secondary=ProjectTypeSubProjectType,
+        secondary=ProjectTypeBusinessType,
         info={
             'colanderalchemy': {
                 'title': u"Ce type d'affaire peut également être utilisé "
@@ -217,7 +234,16 @@ class SubProjectType(BaseProjectType):
         """
         Check if there is a project using this specific type
         """
-        from autonomie.models.project.phase import SubProject
-        return SubProject.query().filter_by(
-            subproject_type_id=self.id
+        from autonomie.models.project.phase import Business
+        return Business.query().filter_by(
+            business_type_id=self.id
         ).count() > 0
+
+    def todict(self, request):
+        """
+        Dict representation of this element
+        """
+        res = BaseProjectType.todict(self, request)
+        res['label'] = self.label
+        res['project_type_id'] = self.project_type_id
+        return res

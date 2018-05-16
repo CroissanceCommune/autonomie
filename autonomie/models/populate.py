@@ -113,7 +113,7 @@ def populate_accounting_income_statement_measure_types(session):
 def populate_project_types(session):
     from autonomie.models.project.types import (
         ProjectType,
-        SubProjectType,
+        BusinessType,
     )
     for name, label, subtype_label, private in (
         ("default", u"Projet classique", "Affaire simple", False),
@@ -131,9 +131,9 @@ def populate_project_types(session):
             session.add(ptype)
             session.flush()
 
-        if SubProjectType.query().filter_by(name=name).count() == 0:
+        if BusinessType.query().filter_by(name=name).count() == 0:
             session.add(
-                SubProjectType(
+                BusinessType(
                     name=name,
                     label=subtype_label,
                     editable=False,

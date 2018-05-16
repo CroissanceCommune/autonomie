@@ -104,6 +104,9 @@ FORM_GRID = (
     ),
     (
         ('definition', 10),
+    ),
+    (
+        ('business_types', 10),
     )
 )
 

@@ -22,6 +22,8 @@
 </%doc>
 <%inherit file="/layouts/default.mako" />
 <%block name="headtitle">
+<div id='popupmessage'>
+</div>
 </%block>
 <%block name='content'>
 <div class='panel panel-default page-block'>

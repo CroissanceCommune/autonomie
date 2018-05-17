@@ -43,7 +43,7 @@ ProjectMenu.add(
         label=u'Tous les devis',
         route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
         icon=u'fa fa-file-o',
-        perm='view.project',
+        perm='list.estimations',
     )
 )
 ProjectMenu.add(
@@ -52,7 +52,7 @@ ProjectMenu.add(
         label=u'Toutes les factures',
         route_name=PROJECT_ITEM_INVOICE_ROUTE,
         icon=u'fa fa-file-o',
-        perm='view.project',
+        perm='list.invoices',
     )
 )
 ProjectMenu.add(

@@ -28,6 +28,13 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="format_text" />
 <%block name='mainblock'>
+<div>
+<a class='btn btn-primary primary-action'
+    href='${add_url}'>
+    <i class='fa fa-plus-circle'></i>&nbsp;Créer un devis
+</a>
+</div>
+<hr />
 <a href='#filter-form'
     data-toggle='collapse'
     aria-expanded="false"

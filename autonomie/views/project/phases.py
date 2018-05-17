@@ -91,19 +91,19 @@ def includeme(config):
         route_name=PROJECT_ITEM_ROUTE,
         request_param="action=addphase",
         renderer="base/formpage.mako",
-        permission='edit_project',
+        permission='add.phase',
         layout='default'
     )
     config.add_view(
         PhaseEditFormView,
         route_name=PHASE_ITEM_ROUTE,
         renderer="base/formpage.mako",
-        permission='edit_phase',
+        permission='edit.phase',
     )
     config.add_view(
         phase_delete_view,
         route_name=PHASE_ITEM_ROUTE,
         renderer="base/formpage.mako",
-        permission='edit_phase',
+        permission='delete.phase',
         request_param="action=delete",
     )

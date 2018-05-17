@@ -40,7 +40,10 @@ from autonomie.views import (
     submit_btn,
     cancel_btn,
 )
-from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
+from autonomie.views.project.routes import (
+    PROJECT_ITEM_PHASE_ROUTE,
+    PROJECT_ITEM_ROUTE,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -64,7 +67,10 @@ def populate_actionmenu(request):
     if request.context.type_ == 'project':
         project_id = request.context.id
     else:
-        project_id = request.context.phase.project_id
+        if request.context.phase:
+            project_id = request.context.phase.project_id
+        else:
+            project_id = request.context.project_id
     request.actionmenu.add(get_project_redirect_btn(request, project_id))
 
 
@@ -89,8 +95,11 @@ class TaskAddView(BaseFormView):
             raise Exception("Forgot to set the factory attribute")
 
         name = appstruct['name']
-        phase_id = appstruct['phase_id']
-        phase = Phase.get(phase_id)
+        phase_id = appstruct.get('phase_id')
+        if phase_id:
+            phase = Phase.get(phase_id)
+        else:
+            phase = None
         project_id = appstruct['project_id']
         project = Project.get(project_id)
         customer_id = appstruct['customer_id']
@@ -244,6 +253,29 @@ class TaskDuplicateView(BaseFormView):
             self.request.route_path(
                 '/%ss/{id}' % self.context.type_,
                 id=task.id
+            )
+        )
+
+
+class TaskMoveToPhaseView(BaseView):
+    """
+    View used to move a document to a specific directory/phase
+
+    expects a get arg "phase" containing the destination phase_id
+    """
+    def __call__(self):
+        phase_id = self.request.params.get('phase')
+        if phase_id:
+            phase = Phase.get(phase_id)
+            if phase in self.context.project.phases:
+                self.context.phase_id = phase_id
+                self.request.dbsession.merge(self.context)
+
+        return HTTPFound(
+            self.request.route_path(
+                PROJECT_ITEM_PHASE_ROUTE,
+                id=self.context.project_id,
+                _query={'phase': phase_id}
             )
         )
 

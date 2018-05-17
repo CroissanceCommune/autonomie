@@ -139,3 +139,12 @@ class Phase(DBBASE, PersistentACLMixin):
         """
         return dict(id=self.id,
                     name=self.name)
+
+    def label(self):
+        """
+        Return a label representing this phase
+        """
+        if self.is_default():
+            return u"Dossier par défaut"
+        else:
+            return self.name

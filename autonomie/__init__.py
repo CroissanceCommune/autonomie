@@ -100,6 +100,7 @@ AUTONOMIE_PANELS_MODULES = (
     'autonomie.panels.sidebar',
     "autonomie.panels.widgets",
     "autonomie.panels.navigation",
+    "autonomie.panels.project",
 )
 
 AUTONOMIE_EVENT_MODULES = (

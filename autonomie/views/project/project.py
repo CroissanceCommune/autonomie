@@ -43,7 +43,12 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.project import (
     Project,
-    Phase,
+)
+from autonomie.models.task import (
+    Task,
+    Estimation,
+    Invoice,
+    CancelInvoice
 )
 from autonomie.models.customer import Customer
 from autonomie.utils.colors import COLORS_SET
@@ -306,24 +311,27 @@ class ProjectByPhaseView(BaseView, TreeMixin):
         )
         return form
 
-    def _get_latest_phase(self, phases):
+    def _get_latest_phase_id(self, tasks_by_phase):
         """
         Return the phase where we can identify the last modification
-        :param list phases: The list of phases of the given project
+
+        :param list tasks_by_phase: The dict of tasks
         """
         result = 0
         if 'phase' in self.request.GET:
-            result = Phase.get(self.request.GET['phase'])
+            result = int(self.request.GET['phase'])
 
         else:
             # We get the latest used task and so we get the latest used phase
             all_tasks = []
-            for phase in phases:
-                all_tasks.extend(phase.tasks)
+            for phase_id, tasks in tasks_by_phase.items():
+                all_tasks.extend(tasks['estimations'])
+                all_tasks.extend(tasks['invoices'])
             all_tasks.sort(key=lambda task: task.status_date, reverse=True)
 
             if all_tasks:
-                result = all_tasks[0].phase
+                result = all_tasks[0].phase_id
+
         return result
 
     def _get_color(self, index):
@@ -332,47 +340,100 @@ class ProjectByPhaseView(BaseView, TreeMixin):
         """
         return COLORS_SET[index % len(COLORS_SET)]
 
-    def _set_task_colors(self, phases):
+    def _set_estimation_colors(self, estimations):
         """
-        Set colors on the estimation/invoice/cancelinvoice objects so that we
-        can visually identify related objects
+        Set colors on the estimations
 
-        :param list phases: The list of phases of this project
+        :param list estimations: Estimations
         """
-        index = 0
+        color_index = 0
+        for estimation in estimations:
+            estimation.color = self._get_color(color_index)
+            color_index += 1
 
-        for phase in phases:
-            for estimation in phase.estimations:
-                estimation.color = self._get_color(index)
-                index += 1
+    def _set_invoice_colors(self, invoices):
+        """
+        Set colors on invoices
 
-        for phase in phases:
-            for invoice in phase.invoices:
-                if invoice.estimation and hasattr(invoice.estimation, 'color'):
-                    invoice.color = invoice.estimation.color
-                else:
-                    invoice.color = self._get_color(index)
-                    index += 1
+        :param list invoices: List of invoices
+        """
+        color_index = 0
+        for invoice in invoices:
+            if invoice.estimation and hasattr(invoice.estimation, 'color'):
+                invoice.color = invoice.estimation.color
+            else:
+                invoice.color = self._get_color(color_index)
+                color_index += 1
 
+    def _set_cancelinvoice_colors(self, invoices):
+        """
+        Set colors on cancelinvoices
+
+        :param list invoices: List of cancelinvoices
+        """
+        color_index = 0
+        for invoice in invoices:
+            if invoice.invoice and hasattr(invoice.invoice, 'color'):
+                invoice.color = invoice.invoice.color
+            else:
+                invoice.color = self._get_color(color_index)
+                color_index += 1
+
+    def _collect_documents_by_phase(self, phases):
+        """
+        Collect all documents (estimations, invoices, cancelinvoices)
+        and store them by phase
+
+        :param phases: All the phases attached to this project
+        :returns: A dict {phase_id: {'estimations': [], 'invoices': {}}}
+        :rtype: dict
+        """
+        estimations = self.request.dbsession.query(Estimation).filter_by(
+            project_id=self.context.id
+        ).order_by(Estimation.date).all()
+
+        query = self.request.dbsession.query(Task)
+        query = query.with_polymorphic([Invoice, CancelInvoice])
+        query = query.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
+        query = query.filter_by(project_id=self.context.id)
+        invoices = query.order_by(Task.date).all()
+
+        self._set_estimation_colors(estimations)
+        self._set_invoice_colors([i for i in invoices if i.type_ == 'invoice'])
+        self._set_cancelinvoice_colors(
+            [i for i in invoices if i.type_ == 'cancelinvoice']
+        )
+
+        result = {}
         for phase in phases:
-            for cancelinvoice in phase.cancelinvoices:
-                if cancelinvoice.invoice and \
-                        hasattr(cancelinvoice.invoice, 'color'):
-                    cancelinvoice.color = cancelinvoice.invoice.color
-                else:
-                    cancelinvoice.color = self._get_color(index)
-                    index += 1
+            result[phase.id] = {'estimations': [], 'invoices': []}
+        for estimation in estimations:
+            logger.debug("We've got an estimation : %s" % estimation.phase_id)
+            phase_dict = result.setdefault(
+                estimation.phase_id, {'estimations': [], 'invoices': []}
+            )
+            phase_dict['estimations'].append(estimation)
+
+        for invoice in invoices:
+            phase_dict = result.setdefault(
+                invoice.phase_id, {'estimations': [], 'invoices': []}
+            )
+            phase_dict['invoices'].append(invoice)
+        logger.debug("Returning %s" % result)
+        return result
 
     def __call__(self):
         self.populate_navigation()
         phases = self.context.phases
-        self._set_task_colors(phases)
+        tasks_by_phase = self._collect_documents_by_phase(phases)
+
         return dict(
             project=self.context,
-            latest_phase=self._get_latest_phase(phases),
+            latest_phase_id=self._get_latest_phase_id(tasks_by_phase),
             phase_form=self._get_phase_add_form(),
-            estimation_add_route=PROJECT_ITEM_ESTIMATION_ROUTE,
-            invoice_add_route=PROJECT_ITEM_INVOICE_ROUTE,
+            tasks_by_phase=tasks_by_phase,
+            tasks_without_phases=tasks_by_phase.pop(None, None),
+            phases=phases,
         )
 
 

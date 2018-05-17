@@ -394,6 +394,8 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
         """
         Return the streamed file object
         """
+        all_ids = [elem.id for elem in query]
+        logger.debug("    + All_ids where collected : {0}".format(all_ids))
         service_ok, msg = check_alive()
         if not service_ok:
             if "popup" in self.request.GET:
@@ -409,8 +411,6 @@ class GlobalInvoicesCsvView(InvoiceListTools, BaseListView):
         self.request.dbsession.add(job)
         self.request.dbsession.flush()
         logger.debug("    + The job {job.id} was initialized".format(job=job))
-        all_ids = [elem.id for elem in query]
-        logger.debug("    + All_ids where collected : {0}".format(all_ids))
         logger.debug("    + Delaying the export_to_file task")
         celery_job = export_to_file.delay(
             job.id,

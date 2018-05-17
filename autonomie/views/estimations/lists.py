@@ -185,6 +185,15 @@ class ProjectEstimationList(CompanyEstimationList, TreeMixin):
         is_global=False,
         excludes=("company_id", 'year', 'customers',)
     )
+    add_template_vars = (u'title', 'is_admin', "with_draft", "add_url", )
+
+    @property
+    def add_url(self):
+        return self.request.route_path(
+            PROJECT_ITEM_ESTIMATION_ROUTE,
+            id=self.request.context.id,
+            _query={'action': 'add'}
+        )
 
     @property
     def title(self):

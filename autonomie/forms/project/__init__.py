@@ -119,7 +119,10 @@ def deferred_project_type_widget(node, kw):
         if not project_type.private or \
                 request.has_permission('add.%s' % project_type.name):
             values.append((project_type.id, project_type.label))
-    return deform.widget.RadioChoiceWidget(values=values)
+    if len(values) <= 1:
+        return deform.widget.HiddenWidget()
+    else:
+        return deform.widget.RadioChoiceWidget(values=values)
 
 
 @colander.deferred

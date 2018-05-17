@@ -29,6 +29,10 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%block name='mainblock'>
 <div class='row page-header-block'>
+    <a class='btn btn-primary primary-action'
+        href='${add_url}'>
+        <i class='fa fa-plus-circle'></i>&nbsp;Créer une facture
+    </a>
     <div class="pull-right btn-group" role='group'>
         <%
 ## We build the link with the current search arguments

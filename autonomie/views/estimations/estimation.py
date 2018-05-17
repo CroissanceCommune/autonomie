@@ -85,6 +85,7 @@ from autonomie.views.task.views import (
     TaskDuplicateView,
     TaskSetMetadatasView,
     TaskSetDraftView,
+    TaskMoveToPhaseView,
 )
 
 log = logger = logging.getLogger(__name__)
@@ -102,7 +103,6 @@ class EstimationAddView(TaskAddView):
         """
         Add Estimation's specific attribute while adding this task
         """
-        estimation.course = appstruct['course']
         estimation.payment_lines = [PaymentLine(description='Solde', amount=0)]
         return estimation
 
@@ -272,6 +272,7 @@ def add_routes(config):
         'set_metadatas',
         'attach_invoices',
         'set_draft',
+        'move',
     ):
         config.add_route(
             '/estimations/{id}/%s' % action,
@@ -357,6 +358,11 @@ def includeme(config):
         route_name="/estimations/{id}/set_metadatas",
         permission='view.estimation',
         renderer='tasks/add.mako',
+    )
+    config.add_view(
+        TaskMoveToPhaseView,
+        route_name="/estimations/{id}/move",
+        permission='view.estimation',
     )
     config.add_view(
         TaskSetDraftView,

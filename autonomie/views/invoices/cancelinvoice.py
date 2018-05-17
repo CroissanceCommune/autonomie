@@ -52,6 +52,7 @@ from autonomie.views.task.views import (
     TaskSetMetadatasView,
     TaskSetProductsView,
     TaskSetDraftView,
+    TaskMoveToPhaseView,
 )
 
 
@@ -183,6 +184,7 @@ def add_routes(config):
         'set_products',
         'set_metadatas',
         'set_draft',
+        'move',
     ):
         config.add_route(
             '/cancelinvoices/{id}/%s' % action,
@@ -266,4 +268,9 @@ def includeme(config):
         route_name="/cancelinvoices/{id}/set_products",
         permission="set_treasury.cancelinvoice",
         renderer='base/formpage.mako',
+    )
+    config.add_view(
+        TaskMoveToPhaseView,
+        route_name="/cancelinvoices/{id}/move",
+        permission="view.cancelinvoice",
     )

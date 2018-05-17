@@ -69,6 +69,7 @@ from autonomie.views.task.views import (
     TaskSetMetadatasView,
     TaskSetProductsView,
     TaskSetDraftView,
+    TaskMoveToPhaseView,
 )
 
 
@@ -87,7 +88,6 @@ class InvoiceAddView(TaskAddView):
         """
         Add Invoice's specific attribute while adding this task
         """
-        invoice.course = appstruct['course']
         invoice.financial_year = datetime.date.today().year
         invoice.prefix = self.request.config.get('invoiceprefix', '')
         return invoice
@@ -432,6 +432,7 @@ def add_routes(config):
         'set_metadatas',
         'attach_estimation',
         'set_draft',
+        'move',
     ):
         config.add_route(
             '/invoices/{id}/%s' % action,
@@ -550,4 +551,9 @@ def includeme(config):
         route_name="/invoices/{id}/attach_estimation",
         permission="view.invoice",
         renderer='base/formpage.mako',
+    )
+    config.add_view(
+        TaskMoveToPhaseView,
+        route_name="/invoices/{id}/move",
+        permission="view.invoice",
     )

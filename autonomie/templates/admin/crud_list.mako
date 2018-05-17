@@ -97,7 +97,13 @@
                     </tr>
                 % endfor
                 % if not items:
-                    <tr><td colspan='${len(columns) + 1}'>Aucun taux de tva n'a encore été configuré</td></tr>
+                    <tr><td colspan='${len(columns) + 1}' style="text-align:center; padding-top:20px; font-style:italic;">
+                        % if nodata_msg is not UNDEFINED and nodata_msg is not None:
+                            ${nodata_msg|n}
+                        % else:
+                            Aucun élément configuré
+                        % endif
+                    </td></tr>
                 % endif
                 </tbody>
                 </table>

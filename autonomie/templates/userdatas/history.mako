@@ -22,57 +22,36 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-<h4>Changements de situation</h4>
+% if api.has_permission('edit.userdatas'):
+    <div class="page-header-block">
+        <button class="btn btn-primary primary-action" data-target="#step-forms" aria-expanded="true" aria-controls="step-forms" data-toggle="collapse">
+            <i class="fa fa-plus"></i>
+            Ajouter une étape
+        </button>
+
+        <div class='collapse' id="step-forms">
+            <h4>Nouvelle étape de parcours</h4>
+            <div class='col-md-12 col-lg-6'>
+                <div class='container'>
+
+                </div>
+            </div>
+        </div>
+    </div>
+% endif
 <table class='table table-condensed'>
-    <thead><tr><th>Date</th><th>Situation</th></tr></thead>
+    <thead><tr><th>Date</th><th style="min-width:50%;">Etape</th><th>Echéance</th></tr></thead>
     <tbody>
         % if status_history:
         % for situation in status_history:
         <tr>
             <td>${api.format_date(situation.date)}</td>
             <td>${situation.situation.label}</td>
+            <td>${api.format_date(situation.date)}</td>
         </tr>
         % endfor
         % else:
-        <tr><td colspan=2>Aucun historique n'a été enregistré</td></tr>
-        % endif
-    </tbody>
-</table>
-<hr/>
-<h4>Documents générés depuis Autonomie</h4>
-<span class='help-block'>
-    <i class='fa fa-question-circle fa-2x'></i>
-    Chaque fois qu'un utilisateur génère un document depuis cette page, une entrée est ajoutée à l'historique.<br />
-    Si nécessaire, pour rendre plus pertinente cette liste, vous pouvez supprimer certaines entrées.
-</span>
-<table class='table table-stripped table-condensed'>
-    <thead>
-        <th>Nom du document</th>
-        <th>Généré par</th>
-        <th>Date</th>
-        <th class='text-right'>Actions</th>
-    </thead>
-    <tbody>
-        % if template_history:
-        % for history in template_history:
-            % if history.template is not None:
-                <tr>
-                    <td>${history.template.description}</td>
-                    <td>${api.format_account(history.user)}</td>
-                    <td>${api.format_datetime(history.created_at)}</td>
-                    <td class='text-right'>
-                        <% url = request.route_path('templatinghistory', id=history.id, _query=dict(action='delete')) %>
-                        ${table_btn(url, \
-                        u"Supprimer cette entrée",\
-                        u"Supprimer cette entrée de l'historique", \
-                        icon='trash', \
-                        css_class="btn-danger")}
-                    </td>
-                </tr>
-            % endif
-        % endfor
-        % else:
-            <tr><td colspan='4'>Aucun document n'a été généré</td></tr>
+        <tr><td colspan=3>Le parcours de ce porteur de projet est vierge</td></tr>
         % endif
     </tbody>
 </table>

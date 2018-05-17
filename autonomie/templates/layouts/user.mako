@@ -35,7 +35,7 @@
                     </div>
                     <div class='col-md-9'>
                         <div>${api.format_civilite(request.context.civilite)}&nbsp;${api.format_account(request.context)}</div>
-                        <div>${format_mail(request.context.email)}</div>
+                        <div><small>${format_mail(request.context.email)}</small></div>
                         <div>
                         <a
                             class='btn btn-default btn-small pull-right'

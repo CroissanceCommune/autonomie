@@ -64,9 +64,16 @@ USERDATAS_MENU = AttrMenuDropdown(
 )
 USERDATAS_MENU.add_item(
     name="userdatas_view",
-    label=u'Voir',
+    label=u'Fiche du porteur',
     route_name=u'/users/{id}/userdatas/edit',
     icon=u'fa fa-user-circle-o',
+    perm='view.userdatas',
+)
+USERDATAS_MENU.add_item(
+    name="userdatas_parcours",
+    label=u'Parcours',
+    route_name=u'/users/{id}/userdatas/history',
+    icon=u'fa fa-history',
     perm='edit.userdatas',
 )
 USERDATAS_MENU.add_item(
@@ -88,13 +95,6 @@ USERDATAS_MENU.add_item(
     label=u'Portefeuille de documents',
     route_name=u'/users/{id}/userdatas/filelist',
     icon=u'fa fa-briefcase',
-    perm='view.userdatas',
-)
-USERDATAS_MENU.add_item(
-    name="userdatas_history",
-    label=u'Historique',
-    route_name=u'/users/{id}/userdatas/history',
-    icon=u'fa fa-history',
     perm='view.userdatas',
 )
 
@@ -175,7 +175,7 @@ class UserDatasEditView(BaseFormView):
     @property
     def title(self):
         return u"Fiche de gestion sociale de {0}".format(
-            format_account(self.current_userdatas.user)
+            format_account(self.current_userdatas.user, False)
         )
 
     @property
@@ -410,7 +410,9 @@ class UserDatasHistory(BaseView):
             status_history=status_query.all(),
             user=self.current_userdatas.user,
             template_history=template_query.all(),
-            title=u"Historique"
+            title=u"Parcours de {0}".format(
+            	format_account(self.current_userdatas.user, False)
+        	)
         )
 
 

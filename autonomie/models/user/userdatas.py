@@ -195,7 +195,8 @@ class CaeSituationOption(ConfigurableOption):
         default=False,
         info={
             'colanderalchemy': {
-                'title': u'Donne droit à un compte Autonomie',
+                'title': '',
+                'label': u'Donne droit à un compte Autonomie',
                 'description': u"Si un porteur de projet a ce statut, \
 un compte Autonomie lui sera automatiquement associé"
             }

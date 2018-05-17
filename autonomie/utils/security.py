@@ -37,6 +37,7 @@ from sqlalchemy.orm import (
     load_only,
 )
 
+from autonomie_base.models.base import DBSESSION
 from autonomie_celery.models import (
     Job,
 )
@@ -67,6 +68,7 @@ from autonomie.models.task.task import (
     TaskLine,
     TaskLineGroup,
     DiscountLine,
+    Task,
 )
 from autonomie.models.task.estimation import (
     PaymentLine,
@@ -935,7 +937,18 @@ def get_phase_acl(self):
     """
     Return acl for a phase
     """
-    return get_project_acl(self.project)
+    acl = DEFAULT_PERM[:]
+
+    perms = ("edit.phase",)
+    if DBSESSION().query(Task.id).filter_by(phase_id=self.id).count() == 0:
+        perms += ('delete.phase',)
+    else:
+        acl.insert(0, (Deny, Everyone, ('delete.phase',)))
+
+    for user in self.project.company.employees:
+        acl.append((Allow, user.login.login, perms))
+
+    return acl
 
 
 def get_project_acl(self):

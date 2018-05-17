@@ -359,7 +359,16 @@ class ProjectInvoicesListView(CompanyInvoicesListView, TreeMixin):
         is_global=False,
         excludes=("company_id", 'year', 'customers',)
     )
+    add_template_vars = (u'title', 'is_admin', "with_draft", 'add_url', )
     is_admin = False
+
+    @property
+    def add_url(self):
+        return self.request.route_path(
+            PROJECT_ITEM_INVOICE_ROUTE,
+            id=self.context.id,
+            _query={'action': 'add'}
+        )
 
     def _get_company_id(self, appstruct):
         return self.request.context.company_id

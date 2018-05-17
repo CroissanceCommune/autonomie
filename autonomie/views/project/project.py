@@ -41,6 +41,7 @@ from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie_base.models.base import DBSESSION
+from autonomie.utils.navigation import NavigationHandler
 from autonomie.models.project import (
     Project,
 )
@@ -127,6 +128,28 @@ de créer de nouveaux projets")
     raise HTTPFound(
         request.route_path("company_customers", id=company.id)
     )
+
+
+def remember_navigation_history(request, project_id):
+    """
+    Remember the last page the user has visited inside a project
+
+    :param obj request: The request object
+    """
+    keyword = "/projects/%s" % project_id
+    handler = NavigationHandler(request, keyword)
+    handler.remember()
+
+
+def retrieve_navigation_history(request, project_id):
+    """
+    Retrieve the last page the user has visited inside a project
+
+    :param obj request: The request object
+    """
+    keyword = "/projects/%s" % project_id
+    handler = NavigationHandler(request, keyword)
+    return handler.last()
 
 
 class ProjectListView(BaseListView, TreeMixin):
@@ -265,24 +288,22 @@ class ProjectListView(BaseListView, TreeMixin):
         )
 
 
-class ProjectView(BaseView, TreeMixin):
-    route_name = PROJECT_ITEM_ROUTE
-
-    @property
-    def url(self):
-        return self.request.route_path(self.route_name, id=self.context.id)
-
-    @property
-    def title(self):
-        return u"Projet : {0}".format(self.context.name)
-
-    def __call__(self):
-        self.populate_navigation()
-        return dict()
+def project_entry_point_view(context, request):
+    """
+    Project entry point view only redirects to the most appropriate page
+    """
+    last = retrieve_navigation_history(request, context.id)
+    if last is None:
+        last = request.route_path(PROJECT_ITEM_PHASE_ROUTE, id=context.id)
+    return HTTPFound(last)
 
 
 class ProjectByPhaseView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_PHASE_ROUTE
+
+    def __init__(self, *args, **kw):
+        BaseView.__init__(self, *args, **kw)
+        remember_navigation_history(self.request, self.context.id)
 
     @property
     def url(self):
@@ -596,12 +617,10 @@ def includeme(config):
         request_method='GET',
         permission='list_projects',
     )
-    config.add_tree_view(
-        ProjectView,
-        parent=ProjectListView,
-        renderer='project/base.mako',
-        permission='view_project',
-        layout='project',
+    config.add_view(
+        project_entry_point_view,
+        route_name=PROJECT_ITEM_ROUTE,
+        permission='view.project',
     )
     config.add_tree_view(
         ProjectByPhaseView,

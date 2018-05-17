@@ -23,7 +23,11 @@ from autonomie.views import (
     TreeMixin,
 )
 from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
-from autonomie.views.project.project import ProjectListView
+from autonomie.views.project.project import (
+    ProjectListView,
+    remember_navigation_history,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +212,7 @@ class ProjectEstimationList(CompanyEstimationList, TreeMixin):
         return self.request.context.company_id
 
     def filter_project(self, query, appstruct):
+        remember_navigation_history(self.request, self.context.id)
         self.populate_navigation()
         query = query.filter(Estimation.project_id == self.context.id)
         return query

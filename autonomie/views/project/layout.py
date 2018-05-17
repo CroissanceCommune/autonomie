@@ -30,15 +30,6 @@ logger = logging.getLogger(__name__)
 ProjectMenu = Menu(name="projectmenu")
 ProjectMenu.add(
     MenuItem(
-        name="project_base",
-        label=u'Accueil du projet',
-        route_name=PROJECT_ITEM_ROUTE,
-        icon=u'fa fa-pie-chart-o',
-        perm='view.project',
-    )
-)
-ProjectMenu.add(
-    MenuItem(
         name="project_estimations",
         label=u'Tous les devis',
         route_name=PROJECT_ITEM_ESTIMATION_ROUTE,

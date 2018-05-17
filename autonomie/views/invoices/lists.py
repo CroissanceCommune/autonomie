@@ -82,7 +82,10 @@ from autonomie.views.project.routes import (
     PROJECT_ITEM_INVOICE_ROUTE,
     PROJECT_ITEM_INVOICE_EXPORT_ROUTE,
 )
-from autonomie.views.project.project import ProjectListView
+from autonomie.views.project.project import (
+    ProjectListView,
+    remember_navigation_history,
+)
 
 logger = log = logging.getLogger(__name__)
 
@@ -380,6 +383,7 @@ class ProjectInvoicesListView(CompanyInvoicesListView, TreeMixin):
         )
 
     def filter_project(self, query, appstruct):
+        remember_navigation_history(self.request, self.context.id)
         self.populate_navigation()
         query = query.filter(Task.project_id == self.context.id)
         return query

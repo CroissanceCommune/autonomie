@@ -337,9 +337,68 @@ def deferred_default_phase(node, kw):
     phases = get_phases_from_request(request)
     phase = request.params.get('phase')
     if phase in [str(p.id) for p in phases]:
+        logger.debug("Found the current phase : %s" % phase)
         return int(phase)
     else:
         return colander.null
+
+
+def collect_business_types(request):
+    """
+    Collect available business types allowed for the current user
+
+    :param obj request: The current Pyramid request
+    """
+    project = request.context
+    if not isinstance(project, Project):
+        raise KeyError(u"Context should be Project, it's %s" % project)
+
+    result = []
+    if project.project_type.default_business_type:
+        result.append(project.project_type.default_business_type)
+
+    for business_type in project.business_types:
+        if request.has_permission("add.%s" % business_type.name):
+            result.append(business_type)
+    return result
+
+
+@colander.deferred
+def deferred_business_type_widget(node, kw):
+    """
+    Collect the widget to display for business type selection
+
+    :param node: The node we affect the widget to
+    :param dict kw: The colander schema binding dict
+    :returns: A SelectWidget or an hidden one
+    """
+    request = kw['request']
+    business_types = collect_business_types(request)
+    if len(business_types) == 1:
+        return deform.widget.HiddenWidget()
+    else:
+        return deform.widget.SelectWidget(
+            values=[
+                (business_type.id, business_type.label)
+                for business_type in business_types
+            ]
+        )
+
+
+@colander.deferred
+def deferred_business_type_default(node, kw):
+    """
+    Collect the default value to present to the end user
+    """
+    request = kw['request']
+    project = request.context
+    if not isinstance(project, Project):
+        raise KeyError(u"Context should be Project, it's %s" % project)
+
+    if project.project_type.default_business_type:
+        return project.project_type.default_business_type.id
+    else:
+        return collect_business_types(request)[0].id
 
 
 class NewTaskSchema(colander.Schema):
@@ -369,14 +428,14 @@ class NewTaskSchema(colander.Schema):
         colander.Integer(),
         title=u"Dossier dans lequel insérer le document",
         widget=deferred_phases_widget,
-        default=deferred_default_phase
+        default=deferred_default_phase,
+        missing=colander.drop,
     )
-    course = colander.SchemaNode(
+    business_type_id = colander.SchemaNode(
         colander.Integer(),
-        title=u"Formation",
-        label=deferred_course_title,
-        widget=deform.widget.CheckboxWidget(true_val="1", false_val="0"),
-        missing=0,
+        title=u"Type d'affaire",
+        widget=deferred_business_type_widget,
+        default=deferred_business_type_default,
     )
 
 
@@ -389,9 +448,9 @@ def validate_customer_project_phase(form, value):
     """
     customer_id = value['customer_id']
     project_id = value['project_id']
-    phase_id = value['phase_id']
+    phase_id = value.get('phase_id')
 
-    if not Project.check_phase_id(project_id, phase_id):
+    if phase_id and not Project.check_phase_id(project_id, phase_id):
         exc = colander.Invalid(form, u"Projet et dossier ne correspondent pas")
         exc['phase_id'] = u"Ne correspond pas au projet ci-dessus"
         raise exc
@@ -432,11 +491,11 @@ def get_task_metadatas_edit_schema():
     :returns: The schema
     """
     schema = NewTaskSchema().clone()
-    del schema['course']
     schema['customer_id'].widget = deform.widget.HiddenWidget()
     schema['project_id'].widget = deferred_customer_project_widget
     schema['project_id'].title = u"Projet vers lequel déplacer ce document"
     schema['phase_id'].title = u"Dossier dans lequel déplacer ce document"
+    schema['business_type_id'].widget = deform.widget.HiddenWidget()
     schema.after_bind = add_date_field_after_bind
     return schema
 

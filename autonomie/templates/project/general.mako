@@ -41,8 +41,8 @@
 <h3>Informations générales</h3>
 <dl>
     <dt>Type de projet :</dt><dd>${project.project_type.label}</dd>
-    % if project.subtypes:
-        <dt>Types d'affaire :</dt><dd>${','.join([s.label for s in project.subtypes])}</dd>
+    % if project.business_types:
+        <dt>Types d'affaire :</dt><dd>${','.join([s.label for s in project.business_types])}</dd>
     % endif
     %if project.description:
         <dt>Description succinte :</dt> <dd>${project.description}</dd>

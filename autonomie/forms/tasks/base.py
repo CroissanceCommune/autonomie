@@ -148,7 +148,7 @@ def _get_project_customers(project):
     :rtype: list
     """
     query = Customer.label_query()
-    customers = query.filter(Customer.projects.any(Project.id==project.id))
+    customers = query.filter(Customer.projects.any(Project.id == project.id))
     return customers
 
 
@@ -164,7 +164,7 @@ def _get_company_customers(context):
     customers = Customer.label_query()
     customers = customers.filter_by(company_id=company_id).all()
 
-    if hasattr(context, project_id):
+    if hasattr(context, "project_id"):
         # Si le contexte est attaché à un projet, on s'assure que les clients du
         # projet sont présentés en haut de la liste des clients en utilisant une
         # fonction de tri custom
@@ -294,8 +294,6 @@ def deferred_phases_widget(node, kw):
         return phase select widget
     """
     request = kw['request']
-    customer_id = deferred_default_customer(node, kw)
-
     phases = _get_phases_from_request(request)
 
     choices = _get_phase_choices(phases)
@@ -325,9 +323,11 @@ def _collect_business_types(request):
 
     :param obj request: The current Pyramid request
     """
-    project = request.context
-    if not isinstance(project, Project):
-        raise KeyError(u"Context should be Project, it's %s" % project)
+    context = request.context
+    if isinstance(context, Project):
+        project = context
+    elif hasattr(context, "project"):
+        project = context.project
 
     result = []
     if project.project_type.default_business_type:
@@ -378,8 +378,17 @@ def deferred_business_type_default(node, kw):
     """
     request = kw['request']
     project = request.context
-    if not isinstance(project, Project):
-        raise KeyError(u"Context should be Project, it's %s" % project)
+    context = request.context
+    if isinstance(context, Project):
+        project = context
+    elif hasattr(context, "project"):
+        project = context.project
+    else:
+        raise KeyError(
+            u"No project could be found starting from current : %s" % (
+                context,
+            )
+        )
 
     if project.project_type.default_business_type:
         return project.project_type.default_business_type.id

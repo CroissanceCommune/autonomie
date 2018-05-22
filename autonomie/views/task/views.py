@@ -205,7 +205,9 @@ class TaskDeleteView(BaseView):
             message = self.msg.format(context=self.context)
             self.request.session.flash(message)
 
-        return HTTPFound(self.request.route_path('project', id=project.id))
+        return HTTPFound(
+            self.request.route_path(PROJECT_ITEM_ROUTE, id=project.id)
+        )
 
 
 class TaskDuplicateView(BaseFormView):

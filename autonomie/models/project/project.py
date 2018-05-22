@@ -292,3 +292,7 @@ class Project(Node):
     @classmethod
     def get_code_list_with_labels(cls, company_id):
         return cls._autonomie_service.get_code_list_with_labels(cls, company_id)
+
+    @classmethod
+    def get_customer_projects(cls, customer_id):
+        return cls._autonomie_service.get_customer_projects(cls, customer_id)

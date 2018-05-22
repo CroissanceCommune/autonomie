@@ -241,16 +241,18 @@ var TaskAddProxy = {
         _.each(this.ui, function(value, key){
             this_.ui[key] = this_.$el.find(value);
         });
-        this.ui.customer.off('change.customer');
-        this.ui.customer.on(
-            'change.customer',
-            _.bind(this.customerChange, this)
-        );
-        this.ui.project.off('change.project');
-        this.ui.project.on(
-            'change.project',
-            _.bind(this.projectChange, this)
-        );
+        if (this.ui.project.length > 0){
+            this.ui.customer.off('change.customer');
+            this.ui.customer.on(
+                'change.customer',
+                _.bind(this.customerChange, this)
+            );
+            this.ui.project.off('change.project');
+            this.ui.project.on(
+                'change.project',
+                _.bind(this.projectChange, this)
+            );
+        }
         if (this.ui.phase.find('option').length == 0){
             this.toggle_phase([]);
         }

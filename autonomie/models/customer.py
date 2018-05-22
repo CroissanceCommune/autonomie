@@ -500,6 +500,9 @@ class Customer(DBBASE, PersistentACLMixin):
     def label_query(cls):
         return cls._autonomie_service.label_query(cls)
 
+    def get_project_ids(self):
+        return self._autonomie_service.get_project_ids(self)
+
 
 COMPANY_FORM_GRID = (
     (

@@ -124,3 +124,14 @@ class ProjectService(object):
         query = query.filter_by(company_id=company_id)
         query = query.filter(project_class.code != None)
         return query.all()
+
+    @classmethod
+    def get_customer_projects(cls, project_class, customer_id):
+        from autonomie.models.customer import Customer
+        query = project_class.query().options(load_only('id', 'name', 'code'))
+        query = query.filter(
+            project_class.customers.any(
+                Customer.id == customer_id
+            )
+        )
+        return query.all()

@@ -125,15 +125,10 @@ def deferred_project_type_widget(node, kw):
         return deform.widget.RadioChoiceWidget(values=values)
 
 
-@colander.deferred
-def deferred_business_type_widget(node, kw):
+def _collect_business_types(request):
     """
-    Build a BusinessType checkbox list widget on bind
-
-    Only show active businesstypes than can be associated to the current's
-    project type
+    collect business types accessible for the current user
     """
-    request = kw['request']
     ptype_id = request.context.project_type_id
 
     business_types_query = BusinessType.query_for_select()
@@ -147,27 +142,52 @@ def deferred_business_type_widget(node, kw):
     for business_type in business_types_query:
         if not business_type.private or \
                 request.has_permission('add.%s' % business_type.name):
-            values.append((business_type.id, business_type.label))
+            values.append(business_types_query)
+    return values
 
+
+@colander.deferred
+def deferred_business_type_widget(node, kw):
+    """
+    Build a BusinessType checkbox list widget on bind
+
+    Only show active businesstypes than can be associated to the current's
+    project type
+    """
+    request = kw['request']
+    business_types = _collect_business_types(request)
+    values = []
+    for business_type in business_types:
+        values.append((business_type.id, business_type.label))
     return deform.widget.CheckboxChoiceWidget(values=values)
 
 
 @colander.deferred
 def deferred_business_type_description(node, kw):
     request = kw['request']
-    ptype_id = request.context.project_type_id
+    business_types = _collect_business_types(request)
+    count = len(business_types)
+    if count == 0:
+        description = ""
+    else:
+        description = u"Le type d'affaire qui peut être mené dans ce projet "
+        default = request.context.project_type.default_business_type
 
-    business_types_query = BusinessType.query_for_select()
-    business_types_query = business_types_query.filter(
-        BusinessType.project_type_id == ptype_id
-    )
-    description = u"Le type d'affaire qui peut être mené dans ce projet "
-    res = business_types_query.first()
-    if res is not None:
-        description = u"%s (autre que le type par défaut : %s)" % (
-            description, res.label
-        )
+        if default is not None:
+            description = u"%s (autre que le type par défaut : %s)" % (
+                description, default.label
+            )
     return description
+
+
+@colander.deferred
+def deferred_business_type_title(node, kw):
+    request = kw['request']
+    business_types = _collect_business_types(request)
+    if len(business_types) == 0:
+        return ""
+    else:
+        return u"Types d'affaire",
 
 
 def _customize_project_schema(schema):
@@ -195,7 +215,7 @@ def _customize_project_schema(schema):
     if 'business_types' in schema:
         customize(
             "business_types",
-            title=u"Types d'affaires",
+            title=deferred_business_type_title,
             missing=colander.drop,
             children=[forms.get_sequence_child_item_id_node(BusinessType)],
             widget=deferred_business_type_widget,

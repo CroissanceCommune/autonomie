@@ -26,6 +26,13 @@ def _stream_actions(request, item):
         title=u"Enregistrer le PDF",
         icon="fa fa-file-pdf-o"
     )
+    if request.has_permission('duplicate.%s' % item.type_, item):
+        yield Link(
+            request.route_path("/%ss/{id}/duplicate" % item.type_, id=item.id),
+            u"Dupliquer",
+            icon="fa fa-copy"
+        )
+
     if request.has_permission('delete.%s' % item.type_, item):
         yield Link(
             request.route_path("/%ss/{id}/delete" % item.type_, id=item.id),

@@ -142,7 +142,7 @@ def _collect_business_types(request):
     for business_type in business_types_query:
         if not business_type.private or \
                 request.has_permission('add.%s' % business_type.name):
-            values.append(business_types_query)
+            values.append(business_type)
     return values
 
 
@@ -187,7 +187,7 @@ def deferred_business_type_title(node, kw):
     if len(business_types) == 0:
         return ""
     else:
-        return u"Types d'affaire",
+        return u"Types d'affaire"
 
 
 def _customize_project_schema(schema):

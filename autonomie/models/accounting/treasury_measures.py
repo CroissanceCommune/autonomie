@@ -192,7 +192,7 @@ class TreasuryMeasureGrid(DBBASE):
     def last(cls, company_id):
         return cls._autonomie_service.last(cls, company_id)
 
-    def __todict__(self, request):
+    def __json__(self, request):
         """
         Compile the different measures and return a dict representation of
         the grid
@@ -206,7 +206,7 @@ class TreasuryMeasureGrid(DBBASE):
 
         for measure in self.measures:
             measures_dict[measure.measure_type.internal_id] = [
-                measure.__todict__(request)
+                measure.__json__(request)
             ]
 
         ref_treasury = 0
@@ -287,7 +287,7 @@ class TreasuryMeasure(DBBASE):
         ForeignKey('treasury_measure_grid.id', ondelete="cascade")
     )
 
-    def __todict__(self, request):
+    def __json__(self, request):
         return {
             "id": self.id,
             "label": self.label,

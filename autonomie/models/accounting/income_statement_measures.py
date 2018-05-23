@@ -588,7 +588,7 @@ class IncomeStatementMeasure(DBBASE):
         ForeignKey('income_statement_measure_grid.id', ondelete="cascade")
     )
 
-    def __todict__(self, request):
+    def __json__(self, request):
         return {
             "id": self.id,
             "label": self.label,

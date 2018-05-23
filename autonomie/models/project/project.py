@@ -259,14 +259,21 @@ class Project(Node):
     def get_next_cancelinvoice_index(self):
         return self._autonomie_service.get_next_cancelinvoice_index(self)
 
-    def todict(self):
+    def __json__(self, request):
         """
             Return a dict view of this object
         """
-        phases = [phase.todict() for phase in self.phases]
-        business_types = [
-            business_type.todict() for business_type in self.business_types
-        ]
+        phases = [phase.__json__(request) for phase in self.phases]
+        business_types = []
+        if self.project_type.default_business_type:
+            business_types.append(
+                self.project_type.default_business_type.__json__(request)
+            )
+
+        for business_type in self.business_types:
+            if business_type.allowed(request):
+                business_types.append(business_type.__json__(request))
+
         return dict(
             id=self.id,
             name=self.name,
@@ -277,9 +284,6 @@ class Project(Node):
             phases=phases,
             business_types=business_types,
         )
-
-    def __json__(self, request):
-        return self.todict()
 
     @classmethod
     def check_phase_id(cls, project_id, phase_id):

@@ -99,7 +99,7 @@ class BaseProjectType(DBBASE):
         query = query.filter_by(active=True)
         return query
 
-    def todict(self, request):
+    def __json__(self, request):
         res = {
             'id': self.id,
             'name': self.name,
@@ -107,6 +107,20 @@ class BaseProjectType(DBBASE):
             'editable': self.editable,
             'private': self.private,
         }
+        return res
+
+    def allowed(self, request):
+        """
+        Check if the current request allows to access this Type
+
+        :param obj request: The Pyramid request object
+        :rtype: bool
+        """
+        res = False
+        if not self.private:
+            res = True
+        elif request.has_permission('add.%s' % self.name):
+            res = True
         return res
 
 
@@ -239,11 +253,11 @@ class BusinessType(BaseProjectType):
             business_type_id=self.id
         ).count() > 0
 
-    def todict(self, request):
+    def __json__(self, request):
         """
         Dict representation of this element
         """
-        res = BaseProjectType.todict(self, request)
+        res = BaseProjectType.__json__(self, request)
         res['label'] = self.label
         res['project_type_id'] = self.project_type_id
         return res

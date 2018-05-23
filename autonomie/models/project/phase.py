@@ -133,7 +133,7 @@ class Phase(DBBASE, PersistentACLMixin):
         """
         return [doc for doc in self.tasks if doc.type_ == type_]
 
-    def todict(self):
+    def __json__(self, request):
         """
             return a dict version of this object
         """

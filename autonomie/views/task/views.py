@@ -100,6 +100,7 @@ class TaskAddView(BaseFormView):
             phase = Phase.get(phase_id)
         else:
             phase = None
+
         project_id = appstruct['project_id']
         project = Project.get(project_id)
         customer_id = appstruct['customer_id']
@@ -228,8 +229,11 @@ class TaskDuplicateView(BaseFormView):
         logger.debug("# Duplicating a document #")
 
         name = appstruct['name']
-        phase_id = appstruct['phase_id']
-        phase = Phase.get(phase_id)
+        phase_id = appstruct.get('phase_id')
+        if phase_id:
+            phase = Phase.get(phase_id)
+        else:
+            phase = None
         project_id = appstruct['project_id']
         project = Project.get(project_id)
         customer_id = appstruct['customer_id']
@@ -242,7 +246,6 @@ class TaskDuplicateView(BaseFormView):
             customer,
         )
         task.name = name
-        task.course = appstruct['course']
         self.dbsession.add(task)
         self.dbsession.flush()
         logger.debug(

@@ -24,6 +24,7 @@ GROUPS = (
     ('admin', u"Administre l'application", ),
     ('contractor', u'Entrepreneur de la coopérative',),
     ('trainer', u"Entrepreneur - Formateur",),
+    ('constructor', u"Entrepreneur - Peut créer des chantiers",),
 )
 
 

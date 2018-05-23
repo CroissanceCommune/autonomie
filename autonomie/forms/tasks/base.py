@@ -360,7 +360,7 @@ def deferred_business_type_widget(node, kw):
     """
     request = kw['request']
     business_types = _collect_business_types(request)
-    if len(business_types) == 1:
+    if len(business_types) == 0:
         return deform.widget.HiddenWidget()
     else:
         return deform.widget.SelectWidget(

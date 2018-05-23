@@ -52,7 +52,7 @@ var TaskAddProxy = {
         hidden_customer: 'input[name=customer_id]',
         project: 'select[name=project_id]',
         phase: 'select[name=phase_id]',
-        business_type: 'select[name=business_type]',
+        business_type: 'select[name=business_type_id]',
         submit: 'button[type=submit]'
     },
     el: '#deform',
@@ -105,6 +105,7 @@ var TaskAddProxy = {
     updatePhase: function(phases){
         var options = "";
         if (phases){
+            options = "<option value=''>Aucun sous-dossier</option>";
             for (var i = 0; i < phases.length; i++) {
                 var phase = phases[i];
                 options += "<option value='" + phase.id + "'>"  +
@@ -121,7 +122,7 @@ var TaskAddProxy = {
             for (var i = 0; i < business_types.length; i++) {
                 var business_type = business_types[i];
                 options += "<option value='" + business_type.id + "'>"  +
-                    business_type.name +
+                    business_type.label +
                     "</option>";
             }
             this.ui.business_type.html(options);
@@ -188,7 +189,7 @@ var TaskAddProxy = {
         var disabled = true;
         var visible = true;
         if (! _.isUndefined(phases)){
-            if (phases.length <= 1){
+            if (phases.length == 0){
                 visible = false;
             } else {
                 disabled = false;
@@ -217,7 +218,7 @@ var TaskAddProxy = {
         var project_id = this.getProjectId();
         var projects = customer.get('projects');
         this.updateProject(projects, project_id);
-        this.toggle_project(false, projects);
+        this.toggle_project(projects);
     },
     projectChange: function(event){
         this.toggle_phase();
@@ -253,8 +254,11 @@ var TaskAddProxy = {
                 _.bind(this.projectChange, this)
             );
         }
-        if (this.ui.phase.find('option').length == 0){
+        if (this.ui.phase.find('option').length <= 1){
             this.toggle_phase([]);
+        }
+        if (this.ui.business_type.find('option').length <= 1){
+            this.toggle_business_type([]);
         }
     },
     setup: function(){

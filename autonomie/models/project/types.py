@@ -74,6 +74,10 @@ class BaseProjectType(DBBASE):
     active = Column(Boolean(), default=True)
 
     @classmethod
+    def get_default(cls):
+        return cls.query().filter_by(name='default').one()
+
+    @classmethod
     def unique_label(cls, label, type_id):
         """
         Check if a label is unique
@@ -166,6 +170,17 @@ class ProjectType(BaseProjectType):
         info={'colanderalchemy': {'exclude': True}},
     )
 
+    other_business_types = relationship(
+        "BusinessType",
+        secondary=ProjectTypeBusinessType,
+        back_populates="other_project_types",
+        info={
+            'colanderalchemy': {
+                "exclude": True,
+            }
+        }
+    )
+
     @classmethod
     def get_by_name(cls, name):
         return cls.query().filter_by(name=name).first()
@@ -232,6 +247,7 @@ class BusinessType(BaseProjectType):
     other_project_types = relationship(
         "ProjectType",
         secondary=ProjectTypeBusinessType,
+        back_populates="other_business_types",
         info={
             'colanderalchemy': {
                 'title': u"Ce type d'affaire peut également être utilisé "

@@ -103,7 +103,7 @@ class TaskAddView(BaseFormView):
         new_object = self.factory(
             user=self.request.user,
             company=self.context.company,
-            **appstruct,
+            **appstruct
         )
 
         if hasattr(self, "_more_init_attributes"):
@@ -227,7 +227,7 @@ class TaskDuplicateView(BaseFormView):
 
         task = self.context.duplicate(
             user=self.request.user,
-            **appstruct,
+            **appstruct
         )
         self.dbsession.add(task)
         self.dbsession.flush()

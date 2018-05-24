@@ -53,6 +53,8 @@ from .accounting import income_statement_measures
 from .expense import sheet
 from .expense import types
 from .expense import payment
+from .project import business
+from .project import mentions
 from .project import phase
 from .project import project
 from .project import types

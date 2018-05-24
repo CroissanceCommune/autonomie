@@ -28,15 +28,17 @@ from autonomie.tests.tools import Dummy
 TODAY = datetime.date.today()
 
 
-def test_add_invoice(config, get_csrf_request_with_db, project, phase, company,
-                     user, customer, ):
+def test_add_invoice(
+    config, get_csrf_request_with_db, project, phase, company,
+    user, customer, default_business_type,
+):
     from autonomie.models.task.invoice import Invoice
     from autonomie.views.project.routes import PROJECT_ITEM_INVOICE_ROUTE
     from autonomie.views.invoices.invoice import InvoiceAddView
     config.add_route('/invoices/{id}', "/")
     value = {
         "name": u"Facture",
-        'course': True,
+        'business_type_id': default_business_type.id,
         'project_id': project.id,
         'phase_id': phase.id,
         'customer_id': customer.id,
@@ -57,4 +59,4 @@ def test_add_invoice(config, get_csrf_request_with_db, project, phase, company,
     assert invoice.phase_id == phase.id
     assert invoice.customer_id == customer.id
     assert invoice.project_id == project.id
-    assert invoice.course is True
+    assert invoice.business_type_id == default_business_type.id

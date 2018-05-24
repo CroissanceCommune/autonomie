@@ -32,3 +32,9 @@ def test_get_next_cancelinvoice_index(project, cancelinvoice):
 def test_check_phase_id(project, phase):
     from autonomie.models.project import Project
     assert Project.check_phase_id(project.id, phase.id)
+
+
+def test_customer_projects(project, customer):
+    from autonomie.models.project import Project
+
+    assert Project.get_customer_projects(customer.id) == [project]

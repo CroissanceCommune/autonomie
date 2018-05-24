@@ -375,22 +375,20 @@ class Estimation(Task, EstimationCompute):
             all the generated invoices
         """
         inv = Invoice(
-            self.company,
-            self.customer,
-            self.project,
-            user,
-            phase_id=self.phase_id
+            company=self.company,
+            customer=self.customer,
+            project=self.project,
+            user=user,
+            phase_id=self.phase_id,
+            estimation = self,
+            payment_conditions=self.payment_conditions,
+            description=self.description,
+            course=self.course,
+            address=self.address,
+            workplace=self.workplace,
+            mentions=self.mentions,
+            prefix=Config.get_value('invoice_prefix', ''),
         )
-        inv.estimation = self
-
-        # Common args
-        inv.payment_conditions = self.payment_conditions
-        inv.description = self.description
-        inv.course = self.course
-        inv.address = self.address
-        inv.workplace = self.workplace
-        inv.mentions = self.mentions
-        inv.prefix = Config.get_value('invoice_prefix', '')
         return inv
 
     def gen_invoices(self, user):

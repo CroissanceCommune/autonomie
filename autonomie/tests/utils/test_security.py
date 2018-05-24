@@ -12,7 +12,8 @@ from autonomie.tests.tools import (
 
 @pytest.fixture
 def dummy_company():
-    user1 = Dummy(login='user1')
+    login = Dummy(login="user1")
+    user1 = Dummy(login=login)
     company = Dummy(employees=[user1])
     return company
 

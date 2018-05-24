@@ -131,6 +131,11 @@ def populate_project_types(session):
             )
             session.add(ptype)
             session.flush()
+            if name is not 'default':
+                default_btype = BusinessType.get_default()
+                default_btype.other_project_types.append(ptype)
+                session.merge(default_btype)
+                session.flush()
 
         if BusinessType.query().filter_by(name=name).count() == 0:
             session.add(

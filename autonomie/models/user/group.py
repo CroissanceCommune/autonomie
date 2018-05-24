@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
+    Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -62,6 +63,20 @@ class Group(DBBASE):
             info={'colanderalchemy': {'title': u"Libellé"}},
         ),
         group="edit"
+    )
+    primary = deferred(
+        Column(
+            Boolean(),
+            default=False,
+            info={'colanderalchemy': {'exclude': True}},
+        )
+    )
+    editable = deferred(
+        Column(
+            Boolean(),
+            default=False,
+            info={'colanderalchemy': {'exclude': True}},
+        )
     )
     users = relationship(
         'Login',

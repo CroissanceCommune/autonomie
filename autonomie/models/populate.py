@@ -13,18 +13,45 @@ from autonomie_base.models.base import DBSESSION
 logger = logging.getLogger(__name__)
 
 GROUPS = (
-    ('estimation_validation', u"Peut valider ses propres devis", ),
-    ('invoice_validation', u"Peut valider ses propres factures", ),
-    ('estimation_only', u"Ne peut pas créer de factures sans devis"),
-    (
-        "payment_admin",
-        u"Peut saisir/modifier/supprimer les paiements de ses factures",
-    ),
-    ('manager', u"Est membre de l'équipe d'appui", ),
-    ('admin', u"Administre l'application", ),
-    ('contractor', u'Entrepreneur de la coopérative',),
-    ('trainer', u"Entrepreneur - Formateur",),
-    ('constructor', u"Entrepreneur - Peut créer des chantiers",),
+    {
+        'name': 'manager',
+        'label': u"Est membre de l'équipe d'appui",
+        'primary': True,
+    },
+    {
+        'name': 'admin',
+        'label': u"Administre l'application",
+        "primary": True,
+    },
+    {
+        'name': 'contractor',
+        'label': u'Entrepreneur de la coopérative',
+        'primary': True
+    },
+    {
+        'name': 'estimation_validation',
+        'label': u"Peut valider ses propres devis",
+    },
+    {
+        'name': 'invoice_validation',
+        'label': u"Peut valider ses propres factures",
+    },
+    {
+        'name': 'estimation_only',
+        'label': u"Ne peut pas créer de factures sans devis",
+    },
+    {
+        'name': "payment_admin",
+        'label': u"Peut saisir/modifier/supprimer les paiements de ses factures",
+    },
+    {
+        'name': 'trainer',
+        'label': u"Formateur",
+    },
+    {
+        'name': 'constructor',
+        'label': u"Peut initier des chantiers",
+    },
 )
 
 
@@ -56,9 +83,10 @@ def populate_groups(session):
     Populate the groups in the database
     """
     from autonomie.models.user.group import Group
-    for name, label in GROUPS:
-        if session.query(Group.id).filter(Group.name == name).count() == 0:
-            session.add(Group(name=name, label=label))
+    for group in GROUPS:
+        if session.query(Group.id).filter(
+            Group.name == group['name']).count() == 0:
+            session.add(Group(**group))
     session.flush()
 
 

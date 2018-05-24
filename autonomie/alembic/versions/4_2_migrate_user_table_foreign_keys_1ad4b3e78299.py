@@ -70,6 +70,9 @@ def update_database_structure():
     op.execute("UPDATE company set active='1' where old_active='Y'")
     op.execute("UPDATE company set active='0' where old_active='N'")
 
+    op.add_column("groups", sa.Column("primary", sa.Boolean()))
+    op.add_column("groups", sa.Column("editable", sa.Boolean()))
+
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
@@ -78,6 +81,10 @@ def migrate_datas():
     connection = get_bind()
 
     from autonomie.models.user.login import Login
+    op.execute("update groups set editable=0;")
+    op.execute(
+        "update groups set `primary`=1 where name IN ('admin', 'contractor', 'manager')"
+    )
     op.execute('update accounts set civilite="Monsieur"')
 
     for user in connection.execute(user_helper.select()):

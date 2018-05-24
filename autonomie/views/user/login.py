@@ -51,22 +51,27 @@ class LoginAddView(BaseFormView):
             {
                 'login': self.context.email,
                 'user_id': self.context.id,
-                'groups': self.form_config.get_default('groups', [])
+                'primary_group': self.form_config.get_default(
+                    'primary_group', ""
+                ),
+                'groups': self.form_config.get_default('groups', []),
             }
         )
 
     def submit_success(self, appstruct):
         password = appstruct.pop('pwd_hash', None)
         model = self.schema.objectify(appstruct)
-        groups = appstruct.pop('groups', None)
-        if groups:
+        primary_group = appstruct.pop('primary_group', None)
+        groups = appstruct.pop('groups', [])
+        if groups or primary_group:
+            groups = list(groups)
+            groups.append(primary_group)
             model.groups = groups
 
         model.user_id = self.context.id
         model.set_password(password)
         self.dbsession.add(model)
         self.dbsession.flush()
-        print(model.login)
 
         next_step = self.form_config.get_next_step()
         if next_step is not None:
@@ -96,6 +101,7 @@ class LoginEditView(BaseFormView):
         form.set_appstruct(
             {
                 'login': self.current().login,
+                'primary_group': self.current().primary_group(),
                 'groups': self.current().groups,
                 'user_id': self.current().user_id,
             }
@@ -107,8 +113,11 @@ class LoginEditView(BaseFormView):
     def submit_success(self, appstruct):
         password = appstruct.pop('pwd_hash', None)
         model = self.schema.objectify(appstruct, self.current())
-        groups = appstruct.pop('groups', None)
-        if groups is not None:
+        primary_group = appstruct.pop('primary_group', None)
+        groups = appstruct.pop('groups', [])
+        if groups or primary_group:
+            groups = list(groups)
+            groups.append(primary_group)
             model.groups = groups
         if password:
             model.set_password(password)
@@ -185,7 +194,6 @@ def login_view(context, request):
     Return the login view datas
     """
     return dict(login=context.login, title=u"Identifiants rattachés au compte")
-
 
 
 def includeme(config):

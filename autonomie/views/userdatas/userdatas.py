@@ -120,7 +120,7 @@ def userdatas_add_entry_point(context, request):
     """
     config = UserFormConfigState(request.session)
     config.set_steps([USER_USERDATAS_ADD_URL])
-    config.add_defaults({'groups': ['contractor']})
+    config.add_defaults({'primary_group': 'contractor'})
     return HTTPFound(
         request.route_path(
             "/users",

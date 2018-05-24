@@ -22,8 +22,8 @@ def estimation(
         company=company,
         project=project,
         customer=customer,
-        phase=phase,
         user=user,
+        phase=phase,
     )
     dbsession.add(estimation)
     dbsession.flush()
@@ -46,8 +46,8 @@ def invoice(
         company=company,
         project=project,
         customer=customer,
-        phase=phase,
         user=user,
+        phase=phase,
     )
     dbsession.add(invoice)
     dbsession.flush()
@@ -70,8 +70,8 @@ def cancelinvoice(
         company=company,
         project=project,
         customer=customer,
-        phase=phase,
         user=user,
+        phase=phase,
     )
     dbsession.add(cancelinvoice)
     dbsession.flush()

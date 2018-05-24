@@ -94,26 +94,17 @@ class TaskAddView(BaseFormView):
         if self.factory is None:
             raise Exception("Forgot to set the factory attribute")
 
-        name = appstruct['name']
-        phase_id = appstruct.get('phase_id')
-        if phase_id:
-            phase = Phase.get(phase_id)
-        else:
-            phase = None
+        project_id = appstruct.pop('project_id')
+        appstruct['project'] = Project.get(project_id)
 
-        project_id = appstruct['project_id']
-        project = Project.get(project_id)
-        customer_id = appstruct['customer_id']
-        customer = Customer.get(customer_id)
+        customer_id = appstruct.pop('customer_id')
+        appstruct['customer'] = Customer.get(customer_id)
 
         new_object = self.factory(
-            self.context.company,
-            customer,
-            project,
-            phase,
-            self.request.user,
+            user=self.request.user,
+            company=self.context.company,
+            **appstruct,
         )
-        new_object.name = name
 
         if hasattr(self, "_more_init_attributes"):
             self._more_init_attributes(new_object, appstruct)
@@ -228,24 +219,16 @@ class TaskDuplicateView(BaseFormView):
     def submit_success(self, appstruct):
         logger.debug("# Duplicating a document #")
 
-        name = appstruct['name']
-        phase_id = appstruct.get('phase_id')
-        if phase_id:
-            phase = Phase.get(phase_id)
-        else:
-            phase = None
-        project_id = appstruct['project_id']
-        project = Project.get(project_id)
-        customer_id = appstruct['customer_id']
-        customer = Customer.get(customer_id)
+        project_id = appstruct.pop('project_id')
+        appstruct['project'] = Project.get(project_id)
+
+        customer_id = appstruct.pop('customer_id')
+        appstruct['customer'] = Customer.get(customer_id)
 
         task = self.context.duplicate(
-            self.request.user,
-            project,
-            phase,
-            customer,
+            user=self.request.user,
+            **appstruct,
         )
-        task.name = name
         self.dbsession.add(task)
         self.dbsession.flush()
         logger.debug(

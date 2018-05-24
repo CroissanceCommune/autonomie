@@ -33,10 +33,10 @@ def test_set_sold_label(invoice):
 
 def test_duplicate_invoice(dbsession, full_invoice, user):
     newinvoice = full_invoice.duplicate(
-        user,
-        full_invoice.project,
-        full_invoice.phase,
-        full_invoice.customer,
+        user=user,
+        project=full_invoice.project,
+        phase=full_invoice.phase,
+        customer=full_invoice.customer,
     )
     assert len(full_invoice.default_line_group.lines) == len(
         newinvoice.default_line_group.lines
@@ -54,10 +54,10 @@ def test_duplicate_invoice(dbsession, full_invoice, user):
 def test_duplicate_invoice_financial_year(dbsession, full_invoice, user):
     full_invoice.financial_year = 1900
     newinvoice = full_invoice.duplicate(
-        full_invoice.owner,
-        full_invoice.project,
-        full_invoice.phase,
-        full_invoice.customer,
+        user=full_invoice.owner,
+        project=full_invoice.project,
+        phase=full_invoice.phase,
+        customer=full_invoice.customer,
     )
     assert newinvoice.financial_year == datetime.date.today().year
 
@@ -66,10 +66,10 @@ def test_duplicate_invoice_integration(dbsession, invoice):
     dbsession.add(invoice)
     dbsession.flush()
     newest = invoice.duplicate(
-        invoice.owner,
-        invoice.project,
-        invoice.phase,
-        invoice.customer,
+        user=invoice.owner,
+        project=invoice.project,
+        phase=invoice.phase,
+        customer=invoice.customer,
     )
     dbsession.add(newest)
     dbsession.flush()
@@ -99,7 +99,10 @@ def test_official_number_distinct_year(
 ):
     request_with_config.user = invoice.owner
     invoice2 = invoice.duplicate(
-        invoice.owner, invoice.project, invoice.phase, invoice.customer
+        user=invoice.owner,
+        project=invoice.project,
+        phase=invoice.phase,
+        customer=invoice.customer
     )
     invoice.official_number = 150
     invoice.date = datetime.date(2017, 12, 30)
@@ -121,7 +124,10 @@ def test_official_number_same_year(
 ):
     request_with_config.user = invoice.owner
     invoice2 = invoice.duplicate(
-        invoice.owner, invoice.project, invoice.phase, invoice.customer
+        user=invoice.owner,
+        project=invoice.project,
+        phase=invoice.phase,
+        customer=invoice.customer
     )
     invoice.official_number = 150
     invoice.date = datetime.date(2017, 12, 30)

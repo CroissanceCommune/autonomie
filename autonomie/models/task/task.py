@@ -542,7 +542,7 @@ _{s.date:%m%y}"
 
     state_manager = None
 
-    def __init__(self, company, customer, project, phase, user):
+    def __init__(self, company, customer, project, user, **kw):
         company_index = self._get_company_index(company)
         project_index = self._get_project_index(project)
 
@@ -551,11 +551,13 @@ _{s.date:%m%y}"
         self.customer = customer
         self.address = customer.full_address
         self.project = project
-        self.phase = phase
         self.owner = user
         self.status_person = user
         self.date = datetime.date.today()
         self.set_numbers(company_index, project_index)
+
+        for key, value in kw.items():
+            setattr(self, key, value)
 
         # We add a default task line group
         self.line_groups.append(TaskLineGroup(order=0))

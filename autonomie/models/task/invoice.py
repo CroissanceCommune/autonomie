@@ -238,21 +238,20 @@ class Invoice(Task, InvoiceCompute):
             Return a cancel invoice with self's informations
         """
         cancelinvoice = CancelInvoice(
+            user=user,
             company=self.company,
             project=self.project,
             customer=self.customer,
-            phase=self.phase,
-            user=user,
+            phase_id=self.phase_id,
+            address=self.address,
+            workplace=self.workplace,
+            description=self.description,
+            invoice=self,
+            expenses_ht=-1 * self.expenses_ht,
+            financial_year=self.financial_year,
+            prefix=self.prefix,
+            display_units=self.display_units,
         )
-        cancelinvoice.address = self.address
-        cancelinvoice.workplace = self.workplace
-        cancelinvoice.description = self.description
-
-        cancelinvoice.invoice = self
-        cancelinvoice.expenses_ht = -1 * self.expenses_ht
-        cancelinvoice.financial_year = self.financial_year
-        cancelinvoice.prefix = self.prefix
-        cancelinvoice.display_units = self.display_units
 
         cancelinvoice.line_groups = []
         for group in self.line_groups:
@@ -337,19 +336,27 @@ class Invoice(Task, InvoiceCompute):
             self.statuses.append(status_record)
         return self
 
-    def duplicate(self, user, project, phase, customer):
+    def duplicate(self, user, **kw):
         """
-            Duplicate the current invoice
+        Duplicate the current invoice
+
+        Mandatory args :
+
+            user
+
+                The user duplicating this estimation
+
+            customer
+
+            project
         """
         invoice = Invoice(
-            self.company,
-            customer,
-            project,
-            phase,
-            user,
+            user=user,
+            company=self.company,
+            **kw
         )
 
-        if customer.id == self.customer_id:
+        if invoice.customer.id == self.customer_id:
             invoice.address = self.address
         else:
             invoice.address = customer.full_address

@@ -27,8 +27,6 @@
 """
 import datetime
 import logging
-import deform
-import colander
 
 from zope.interface import implementer
 
@@ -177,6 +175,7 @@ class Estimation(Task, EstimationCompute):
         ),
         group='edit'
     )
+    business_type_id = Column(ForeignKey("business_type.id"))
     payment_lines = relationship(
         "PaymentLine",
         order_by='PaymentLine.order',
@@ -195,6 +194,10 @@ class Estimation(Task, EstimationCompute):
         info={
             'colanderalchemy': {'exclude': True},
         }
+    )
+    business_type = relationship(
+        "BusinessType",
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     state_manager = DEFAULT_ACTION_MANAGER['estimation']
@@ -245,19 +248,27 @@ class Estimation(Task, EstimationCompute):
     def check_signed_status_allowed(self, status, request, **kw):
         return self.signed_state_manager.check_allowed(status, self, request)
 
-    def duplicate(self, user, project, phase, customer):
+    def duplicate(self, user, **kw):
         """
-            returns a duplicate estimation object
+        DUplicate the current Estimation object
+
+        Mandatory args :
+
+            user
+
+                The user duplicating this estimation
+
+            customer
+
+            project
         """
         estimation = Estimation(
-            self.company,
-            customer,
-            project,
-            phase,
-            user,
+            user=user,
+            company=self.company,
+            **kw
         )
 
-        if customer.id == self.customer_id:
+        if estimation.customer.id == self.customer_id:
             estimation.address = self.address
         else:
             estimation.address = customer.full_address
@@ -372,8 +383,8 @@ class Estimation(Task, EstimationCompute):
             self.company,
             self.customer,
             self.project,
-            self.phase,
-            user
+            user,
+            phase_id=self.phase_id
         )
         inv.estimation = self
 

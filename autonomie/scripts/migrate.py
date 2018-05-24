@@ -137,6 +137,10 @@ def upgrade(revision, sql_url=None):
     logger.info(u'Upgrading {0}:'.format(pkg_env.location))
 
     def upgrade_func(rev, context):
+        if len(rev) == 0:
+            logger.info(u'No migration scripts added since install.')
+            return []
+
         rev = rev[0]
         if rev == revision:
             logger.info(u'Already up to date.')

@@ -56,6 +56,7 @@ from autonomie.models.task.task import (
     TaskLine,
     TaskLineGroup,
     DiscountLine,
+    Task,
 )
 from autonomie.models.task.estimation import (
     PaymentLine,

@@ -369,9 +369,6 @@ def main(global_config, **settings):
 
     config.commit()
 
-    from autonomie.models.populate import populate_database
-    populate_database()
-
     return config.make_wsgi_app()
 
 

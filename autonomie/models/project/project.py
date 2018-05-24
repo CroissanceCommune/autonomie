@@ -238,27 +238,6 @@ class Project(Node):
 
     _autonomie_service = ProjectService
 
-    def has_tasks(self):
-        return self._autonomie_service.count_tasks(self) > 0
-
-    def is_deletable(self):
-        """
-            Return True if this project could be deleted
-        """
-        return self.archived and not self.has_tasks()
-
-    def get_company_id(self):
-        return self.company_id
-
-    def get_next_estimation_index(self):
-        return self._autonomie_service.get_next_estimation_index(self)
-
-    def get_next_invoice_index(self):
-        return self._autonomie_service.get_next_invoice_index(self)
-
-    def get_next_cancelinvoice_index(self):
-        return self._autonomie_service.get_next_cancelinvoice_index(self)
-
     def __json__(self, request):
         """
             Return a dict view of this object
@@ -284,6 +263,30 @@ class Project(Node):
             phases=phases,
             business_types=business_types,
         )
+
+    def has_tasks(self):
+        return self._autonomie_service.count_tasks(self) > 0
+
+    def is_deletable(self):
+        """
+            Return True if this project could be deleted
+        """
+        return self.archived and not self.has_tasks()
+
+    def get_company_id(self):
+        return self.company_id
+
+    def get_next_estimation_index(self):
+        return self._autonomie_service.get_next_estimation_index(self)
+
+    def get_next_invoice_index(self):
+        return self._autonomie_service.get_next_invoice_index(self)
+
+    def get_next_cancelinvoice_index(self):
+        return self._autonomie_service.get_next_cancelinvoice_index(self)
+
+    def get_used_business_type_ids(self):
+        return self._autonomie_service.get_used_business_type_ids(self)
 
     @classmethod
     def check_phase_id(cls, project_id, phase_id):

@@ -375,10 +375,17 @@ def groups(dbsession):
     from autonomie.models.user.group import Group
     groups = []
     for name in ('contractor', 'manager', 'admin'):
+        group = Group(name=name, label=name, primary=True)
+        dbsession.add(group)
+        dbsession.flush()
+        groups.append(group)
+
+    for name in ('trainer', 'constructor'):
         group = Group(name=name, label=name)
         dbsession.add(group)
         dbsession.flush()
         groups.append(group)
+
     return groups
 
 

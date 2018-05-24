@@ -74,7 +74,7 @@ from autonomie.views.project.lists import (
 )
 
 log = logger = logging.getLogger(__name__)
-ADD_FORM_GRID = (
+ADD_STEP1_FORM_GRID = (
     (
         ('name', 12),
     ),
@@ -85,17 +85,37 @@ ADD_FORM_GRID = (
         ('customers', 12),
     ),
 )
-FORM_GRID = (
-    (
-        ('name', 6),
-    ),
+ADD_STEP2_FORM_GRID = (
     (
         ('description', 4),
         ('', 2),
         ('code', 2),
     ),
     (
+        ('starting_date', 4),
+        ('ending_date', 4),
+    ),
+    (
+        ('definition', 10),
+    ),
+    (
+        ('business_types', 10),
+    )
+)
+EDIT_FORM_GRID = (
+    (
+        ('name', 12),
+    ),
+    (
+        ('project_type_id', 10),
+    ),
+    (
         ('customers', 8),
+    ),
+    (
+        ('description', 4),
+        ('', 2),
+        ('code', 2),
     ),
     (
         ('starting_date', 4),
@@ -330,7 +350,7 @@ class ProjectAddView(BaseAddView, TreeMixin):
     title = u"Ajout d'un nouveau projet"
     schema = get_add_project_schema()
     msg = u"Le projet a été ajouté avec succès"
-    named_form_grid = ADD_FORM_GRID
+    named_form_grid = ADD_STEP1_FORM_GRID
     factory = Project
     route_name = COMPANY_PROJECTS_ROUTE
 
@@ -358,7 +378,7 @@ class ProjectAddView(BaseAddView, TreeMixin):
 
 
 class ProjectAddStep2View(BaseEditView, TreeMixin):
-    named_form_grid = FORM_GRID
+    named_form_grid = ADD_STEP2_FORM_GRID
     add_template_vars = ('title', 'project_codes')
     schema = get_add_step2_project_schema()
     route_name = PROJECT_ITEM_ROUTE
@@ -382,7 +402,7 @@ class ProjectAddStep2View(BaseEditView, TreeMixin):
 
 class ProjectEditView(BaseEditView, TreeMixin):
     add_template_vars = ('project', 'project_codes',)
-    named_form_grid = FORM_GRID
+    named_form_grid = EDIT_FORM_GRID
     schema = get_edit_project_schema()
     route_name = PROJECT_ITEM_ROUTE
 

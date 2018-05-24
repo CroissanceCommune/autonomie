@@ -192,6 +192,23 @@ class ProjectType(BaseProjectType):
         from autonomie.models.project.project import Project
         return Project.query().filter_by(project_type_id=self.id).count() > 0
 
+    def get_other_business_type_ids(self):
+        query = DBSESSION().query(ProjectTypeBusinessType.c.business_type_id)
+        query = query.filter(
+            ProjectTypeBusinessType.c.project_type_id == self.id
+        )
+        return [a[0] for a in query]
+
+    def get_business_type_ids(self):
+        """
+        Collect business type ids that can be associated to this project type
+        """
+        result = []
+        if self.default_business_type:
+            result.append(self.default_business_type.id)
+        result.extend(self.get_other_business_type_ids())
+        return result
+
 
 class BusinessType(BaseProjectType):
     __tablename__ = "business_type"

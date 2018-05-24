@@ -105,6 +105,36 @@ def deferred_default_project_type(node, kw):
     return res
 
 
+def _is_compatible_project_type(project, project_type):
+    """
+    Check the given project type is compatible with the current project
+
+    If the project contains a document which is of associated to a business type
+    that is not provided by the given project_type, we can't move the project to
+    this new type
+    """
+    project_btype_ids = project.get_used_business_type_ids()
+    project_type_btype_ids = project_type.get_business_type_ids()
+    return set(project_btype_ids).issubset(project_type_btype_ids)
+
+
+def _get_project_type_options(request):
+    """
+    collect project type options
+    """
+    project_types = ProjectType.query_for_select()
+
+    context = request.context
+
+    for project_type in project_types:
+        if not project_type.private or \
+                request.has_permission('add.%s' % project_type.name):
+            if isinstance(context, Project):
+                if not _is_compatible_project_type(context, project_type):
+                    continue
+                yield project_type
+
+
 @colander.deferred
 def deferred_project_type_widget(node, kw):
     """
@@ -112,13 +142,11 @@ def deferred_project_type_widget(node, kw):
     Filter project types by active and folowing the associated rights
     """
     request = kw['request']
-    project_types = ProjectType.query_for_select()
+    values = [
+        (project_type.id, project_type.label)
+        for project_type in _get_project_type_options(request)
+    ]
 
-    values = []
-    for project_type in project_types:
-        if not project_type.private or \
-                request.has_permission('add.%s' % project_type.name):
-            values.append((project_type.id, project_type.label))
     if len(values) <= 1:
         return deform.widget.HiddenWidget()
     else:
@@ -284,7 +312,7 @@ def get_edit_project_schema():
     excludes = (
         "_acl", "id", "company_id", "archived", "customers",
         "invoices", "tasks", "estimations", "cancelinvoices",
-        "project_type_id", "project_type", "business_types",
+        "project_type",
     )
     schema = SQLAlchemySchemaNode(Project, excludes=excludes)
     _customize_project_schema(schema)

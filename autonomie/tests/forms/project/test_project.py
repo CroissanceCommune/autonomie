@@ -8,6 +8,16 @@ import colander
 import datetime
 
 
+@pytest.fixture
+def other_project_type(dbsession, other_business_type):
+    from autonomie.models.project.types import ProjectType
+    result = ProjectType(name="other", label="other")
+    result.default_business_type = other_business_type
+    dbsession.add(result)
+    dbsession.flush()
+    return result
+
+
 def test_add_project_schema(customer, project_type):
     from autonomie.forms.project import get_add_project_schema
     schema = get_add_project_schema()
@@ -62,3 +72,39 @@ def test_edit_project_schema(customer, project_type):
     result = schema.deserialize(args)
 
     assert result['name'] == u"Other name"
+
+
+def test_is_compatible_project_type(
+    dbsession,
+    project,
+    customer,
+    user,
+    company,
+    other_project_type,
+    default_business_type,
+    other_business_type,
+):
+    from autonomie.models.task.estimation import Estimation
+    estimation = Estimation(
+        company=company,
+        project=project,
+        customer=customer,
+        user=user,
+        business_type=other_business_type,
+    )
+    dbsession.add(estimation)
+    dbsession.flush()
+
+    from autonomie.forms.project import _is_compatible_project_type
+    assert _is_compatible_project_type(project, other_project_type)
+
+    new_estimation = Estimation(
+        company=company,
+        project=project,
+        customer=customer,
+        user=user,
+        business_type=default_business_type,
+    )
+    dbsession.add(new_estimation)
+    dbsession.flush()
+    assert not _is_compatible_project_type(project, other_project_type)

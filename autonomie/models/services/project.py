@@ -22,6 +22,7 @@
 """
 Query service related to projects
 """
+from sqlalchemy import distinct
 from sqlalchemy.orm import load_only
 from sqlalchemy.sql.expression import func
 from autonomie_base.models.base import DBSESSION
@@ -135,3 +136,17 @@ class ProjectService(object):
             )
         )
         return query.all()
+
+    @classmethod
+    def get_used_business_type_ids(cls, instance):
+        from autonomie.models.task import Task
+
+        return [
+            a[0]
+            for a in DBSESSION().query(
+                distinct(Task.business_type_id)
+            ).filter_by(
+                project_id=instance.id
+            )
+            if a[0] is not None
+        ]

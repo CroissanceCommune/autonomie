@@ -160,6 +160,7 @@ class RootFactory(dict):
         ('statistic_entries', 'statistic_entry', StatisticEntry,),
         ('statistic_criteria', 'statistic_criterion',
             BaseStatisticCriterion,),
+        ('tasks', 'task', Task),
         ('task_lines', 'task_line', TaskLine),
         ('task_line_groups', 'task_line_group', TaskLineGroup),
         ('templates', 'template', Template, ),

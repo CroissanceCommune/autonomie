@@ -191,6 +191,7 @@ class RootFactory(dict):
         ('statistic_criteria', 'statistic_criterion',
             BaseStatisticCriterion,),
         ('business_types', 'business_type', BusinessType),
+        ('tasks', 'task', Task),
         ('task_lines', 'task_line', TaskLine),
         ('task_line_groups', 'task_line_group', TaskLineGroup),
         ('templates', 'template', Template, ),

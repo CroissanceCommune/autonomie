@@ -24,56 +24,6 @@ from autonomie_base.models.base import (
 )
 
 
-class Business(DBBASE, PersistentACLMixin):
-    __tablename__ = "business"
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={'colanderalchemy': {'exclude': True}},
-    )
-
-    name = Column(
-        String(150),
-        info={
-            "colanderalchemy": {
-                "title": u"Nom du sous-projet",
-            }
-        }
-    )
-
-    closed = Column(
-        Boolean(),
-        default=False,
-        info={
-            'colanderalchemy': {
-                'title': u"Ce sous-projet est-il fermé ?"
-            }
-        },
-    )
-
-    business_type_id = Column(
-        ForeignKey('business_type.id'),
-        info={'colanderalchemy': {'title': u"Type d'affaires"}}
-    )
-    project_id = Column(
-        ForeignKey('project.id'),
-        info={'colanderalchemy': {'exclude': True}},
-    )
-
-    business_type = relationship(
-        "BusinessType",
-        info={'colanderalchemy': {'exclude': True}},
-    )
-    project = relationship(
-        "Project",
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {'exclude': True}
-        },
-    )
-
-
 class Phase(DBBASE, PersistentACLMixin):
     """
         Phase d'un projet

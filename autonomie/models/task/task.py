@@ -377,6 +377,8 @@ class Task(Node):
             'export': {'exclude': True},
         }
     )
+    business_id = Column(ForeignKey("business.id"))
+    business_type_id = Column(ForeignKey("business_type.id"))
 
     # Organisationnal Relationships
     status_person = relationship(
@@ -461,6 +463,10 @@ class Task(Node):
             'export': {'related_key': 'label', 'label': u"Client"},
         },
     )
+    business_type = relationship(
+        "BusinessType",
+        info={'colanderalchemy': {'exclude': True}}
+    )
     # Content relationships
     discounts = relationship(
         "DiscountLine",
@@ -523,6 +529,10 @@ class Task(Node):
             'export': {'exclude': True},
         }
     )
+    business = relationship(
+        "Business",
+        info={'colanderalchemy': {'exclude': True}}
+    )
 
     # Not used in latest invoices
     expenses = deferred(
@@ -542,15 +552,15 @@ _{s.date:%m%y}"
 
     state_manager = None
 
-    def __init__(self, company, customer, project, user, **kw):
+    def __init__(self, user, company, **kw):
+        project = kw['project']
         company_index = self._get_company_index(company)
         project_index = self._get_project_index(project)
 
         self.status = 'draft'
         self.company = company
-        self.customer = customer
+        customer = kw['customer']
         self.address = customer.full_address
-        self.project = project
         self.owner = user
         self.status_person = user
         self.date = datetime.date.today()

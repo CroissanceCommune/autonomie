@@ -175,7 +175,6 @@ class Estimation(Task, EstimationCompute):
         ),
         group='edit'
     )
-    business_type_id = Column(ForeignKey("business_type.id"))
     payment_lines = relationship(
         "PaymentLine",
         order_by='PaymentLine.order',
@@ -194,10 +193,6 @@ class Estimation(Task, EstimationCompute):
         info={
             'colanderalchemy': {'exclude': True},
         }
-    )
-    business_type = relationship(
-        "BusinessType",
-        info={'colanderalchemy': {'exclude': True}}
     )
 
     state_manager = DEFAULT_ACTION_MANAGER['estimation']

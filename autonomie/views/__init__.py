@@ -154,23 +154,50 @@ class BaseListClass(BaseView):
             query = method(query, appstruct)
         return query
 
+    def _get_sort_key(self, appstruct):
+        """
+        Retrieve the sort key to use
+
+        :param dict appstruct: Form submitted datas
+        :rtype: str
+        """
+        if 'sort' in self.request.GET:
+            result = self.request.GET['sort']
+        elif 'sort' in appstruct:
+            result = appstruct['sort']
+        else:
+            result = self.default_sort
+        return result
+
+    def _get_sort_direction(self, appstruct):
+        """
+        Retrieve the sort direction to use
+
+        :param dict appstruct: Form submitted datas
+        :rtype: str
+        """
+        if 'direction' in self.request.GET:
+            result = self.request.GET['direction']
+        elif 'direction' in appstruct:
+            result = appstruct['direction']
+        else:
+            result = self.default_direction
+        return result
+
     def _sort(self, query, appstruct):
         """
         Sort the results regarding the default values and
         the sort_columns dict, maybe overriden to provide a custom sort
         method
         """
-        sort_column_key = self.request.GET.get('sort', appstruct['sort'])
+        sort_column_key = self._get_sort_key(appstruct)
+        self.logger.debug("  + Sorting the query : %s" % sort_column_key)
         sort_column = self.sort_columns.get(sort_column_key)
 
-        self.logger.debug("  + Sorting the query : %s" % sort_column_key)
         if sort_column:
-
-            sort_direction = self.request.GET.get(
-                'direction',
-                appstruct['direction']
-            )
+            sort_direction = self._get_sort_direction(appstruct)
             self.logger.debug("  + Direction : %s" % sort_direction)
+
             if sort_direction == 'asc':
                 func = asc
                 query = query.order_by(func(sort_column))
@@ -343,7 +370,12 @@ class BaseListView(BaseListClass):
         """
         Return the current requested page
         """
-        res = self.request.GET.get('page', appstruct['page'])
+        if 'page' in self.request.GET:
+            res = self.request.GET['page']
+        elif 'page' in appstruct:
+            res = appstruct['page']
+        else:
+            res = 1
         return convert_to_int(res)
 
     def _paginate(self, query, appstruct):
@@ -356,7 +388,7 @@ class BaseListView(BaseListClass):
             page_url = partial(get_page_url, request=self.request)
 
             current_page = self._get_current_page(appstruct)
-            items_per_page = convert_to_int(appstruct['items_per_page'])
+            items_per_page = convert_to_int(appstruct.get('items_per_page', 30))
 
             self.logger.debug(
                 " + Page : %s, items per page : %s" % (
@@ -408,15 +440,16 @@ class BaseListView(BaseListClass):
 
         result = dict(records=records, use_paginate=self.use_paginate)
 
-        if self.error is not None:
-            result['form_object'] = self.error
-            result['form'] = self.error.render()
-        else:
-            form = self.get_form(schema)
-            if appstruct and '__formid__' in self.request.GET:
-                form.set_appstruct(appstruct)
-            result['form_object'] = form
-            result['form'] = form.render()
+        if schema is not None:
+            if self.error is not None:
+                result['form_object'] = self.error
+                result['form'] = self.error.render()
+            else:
+                form = self.get_form(schema)
+                if appstruct and '__formid__' in self.request.GET:
+                    form.set_appstruct(appstruct)
+                result['form_object'] = form
+                result['form'] = form.render()
 
         result['title'] = self.title
         result.update(self.more_template_vars(result))

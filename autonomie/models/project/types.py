@@ -24,6 +24,7 @@ from autonomie_base.models.base import (
     default_table_args,
     DBSESSION,
 )
+from autonomie.models.project.business import Business
 
 
 ProjectTypeBusinessType = Table(
@@ -72,10 +73,6 @@ class BaseProjectType(DBBASE):
     )
     editable = Column(Boolean(), default=True)
     active = Column(Boolean(), default=True)
-
-    @classmethod
-    def get_default(cls):
-        return cls.query().filter_by(name='default').one()
 
     @classmethod
     def unique_label(cls, label, type_id):
@@ -182,6 +179,10 @@ class ProjectType(BaseProjectType):
     )
 
     @classmethod
+    def get_default(cls):
+        return cls.query().filter_by(default=True).one()
+
+    @classmethod
     def get_by_name(cls, name):
         return cls.query().filter_by(name=name).first()
 
@@ -274,6 +275,10 @@ class BusinessType(BaseProjectType):
     )
 
     @classmethod
+    def get_default(cls):
+        return ProjectType.get_default().default_business_type
+
+    @classmethod
     def get_by_name(cls, name):
         return cls.query().filter_by(name=name).first()
 
@@ -281,7 +286,6 @@ class BusinessType(BaseProjectType):
         """
         Check if there is a project using this specific type
         """
-        from autonomie.models.project.phase import Business
         return Business.query().filter_by(
             business_type_id=self.id
         ).count() > 0

@@ -190,6 +190,7 @@ class Project(Node):
     )
     businesses = relationship(
         "Business",
+        primaryjoin="Project.id==Business.project_id",
         back_populates="project",
         cascade="all, delete-orphan",
         info={

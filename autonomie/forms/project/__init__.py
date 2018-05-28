@@ -45,7 +45,7 @@ from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
 from autonomie.forms.customer import get_customer_select_node
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def customer_objectify(id_):
@@ -132,7 +132,7 @@ def _get_project_type_options(request):
             if isinstance(context, Project):
                 if not _is_compatible_project_type(context, project_type):
                     continue
-                yield project_type
+            yield project_type
 
 
 @colander.deferred

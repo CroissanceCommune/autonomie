@@ -42,7 +42,8 @@ GROUPS = (
     },
     {
         'name': "payment_admin",
-        'label': u"Peut saisir/modifier/supprimer les paiements de ses factures",
+        'label': u"Peut saisir/modifier/supprimer les paiements \
+de ses factures",
     },
     {
         'name': 'trainer',
@@ -85,7 +86,8 @@ def populate_groups(session):
     from autonomie.models.user.group import Group
     for group in GROUPS:
         if session.query(Group.id).filter(
-            Group.name == group['name']).count() == 0:
+            Group.name == group['name']
+        ).count() == 0:
             session.add(Group(**group))
     session.flush()
 
@@ -144,10 +146,10 @@ def populate_project_types(session):
         ProjectType,
         BusinessType,
     )
-    for name, label, subtype_label, private in (
-        ("default", u"Projet classique", "Affaire simple", False),
-        ("training", u"Convention de formation", "Formation", True),
-        ("construction", u"Chantiers", u"Chantier", True),
+    for name, label, subtype_label, private, default in (
+        ("default", u"Projet classique", "Affaire simple", False, True,),
+        ("training", u"Convention de formation", "Formation", True, False),
+        ("construction", u"Chantiers", u"Chantier", True, False),
     ):
         ptype = ProjectType.query().filter_by(name=name).first()
         if ptype is None:
@@ -156,11 +158,13 @@ def populate_project_types(session):
                 label=label,
                 editable=False,
                 private=private,
+                default=default,
             )
             session.add(ptype)
             session.flush()
             if name is not 'default':
-                default_btype = BusinessType.get_default()
+                default_btype = BusinessType.query().filter_by(
+                    name='default').first()
                 default_btype.other_project_types.append(ptype)
                 session.merge(default_btype)
                 session.flush()

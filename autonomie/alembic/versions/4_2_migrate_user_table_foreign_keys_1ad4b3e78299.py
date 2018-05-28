@@ -82,6 +82,7 @@ def migrate_datas():
 
     from autonomie.models.user.login import Login
     op.execute("update groups set editable=0;")
+    op.execute("update groups set `primary`=0;")
     op.execute(
         "update groups set `primary`=1 where name IN ('admin', 'contractor', 'manager')"
     )

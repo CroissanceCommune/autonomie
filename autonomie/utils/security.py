@@ -97,6 +97,8 @@ from autonomie.models.sale_product import (
     SaleProductCategory,
 )
 from autonomie.models.tva import Tva
+from autonomie.models.career_stage import CareerStage
+from autonomie.models.career_path import CareerPath
 from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
 )
@@ -198,6 +200,8 @@ class RootFactory(dict):
         ('users', 'user', User, ),
         ('userdatas', 'userdatas', UserDatas, ),
         ('workshops', 'workshop', Workshop, ),
+        ('career_stages', 'career_stage', CareerStage, ),
+        ('career_path', 'career_path', CareerPath, ),
     )
     subtrees = ()
 
@@ -911,3 +915,6 @@ def set_models_acl():
     Tva.__acl__ = property(get_base_acl)
     BaseExpenseLine.__acl__ = property(get_expenseline_acl)
     ExpenseType.__acl__ = property(get_base_acl)
+    CareerStage.__acl__ = property(get_base_acl)
+    CareerPath.__acl__ = property(get_base_acl)
+    #CareerPath.__default_acl__ = property(get_userdatas_acl)

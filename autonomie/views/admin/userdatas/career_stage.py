@@ -51,7 +51,7 @@ class CareerStageListView(AdminCrudListView):
     title = u"Configuration des étapes de parcours"
     description = u""
     route_name = CAREER_STAGE_URL
-    columns = [u"Libellé", u"Statut associé", u"Entrée CAE ?", \
+    columns = [u"Libellé", u"Nouvelle situation CAE", u"Entrée CAE ?", \
 u"Contrat ?", u"Sortie ?"]
 
     item_route_name = CAREER_STAGE_ITEM_URL
@@ -62,6 +62,10 @@ u"Contrat ?", u"Sortie ?"]
         :param obj career_stage: The CareerStage object to stream
         :returns: List of labels
         """
+        if career_stage.cae_situation is not None:
+            situation_label = career_stage.cae_situation.label
+        else:
+            situation_label = "<em>Aucune</em>"
         if career_stage.is_entree_cae:
             entree = u"<i class='glyphicon glyphicon-ok-sign'></i>"
         else:
@@ -76,7 +80,7 @@ u"Contrat ?", u"Sortie ?"]
             sortie = ""
         return (
             career_stage.name,
-            career_stage.cae_situation,
+            situation_label,
             entree,
             contrat,
             sortie,
@@ -84,8 +88,8 @@ u"Contrat ?", u"Sortie ?"]
 
     def stream_actions(self, career_stage):
         """
-        Stream the actions available for the given tva object
-        :param obj tva: Tva instance
+        Stream the actions available for the given career_stage object
+        :param obj career_stage: CareerStage instance
         :returns: List of 5-uples (url, label, title, icon, disable)
         """
         yield Link(
@@ -130,26 +134,9 @@ class CareerStageEditView(BaseAdminEditView):
     Edit view
     """
     route_name = CAREER_STAGE_ITEM_URL
-
     schema = get_career_stage_schema()
     factory = CareerStage
     title = u"Modifier"
-
-    def submit_success(self, appstruct):
-        old_products = []
-        for product in self.context.products:
-            if product.id not in [p.get('id') for p in appstruct['products']]:
-                product.active = False
-                old_products.append(product)
-        model = self.schema.objectify(appstruct, self.context)
-        model.products.extend(old_products)
-        self.dbsession.merge(model)
-        self.dbsession.flush()
-
-        if self.msg:
-            self.request.session.flash(self.msg)
-
-        return self.redirect()
 
 
 class CareerStageAddView(BaseAdminAddView):
@@ -167,8 +154,7 @@ def includeme(config):
     Add routes and views
     """
     config.add_route(CAREER_STAGE_URL, CAREER_STAGE_URL)
-    config.add_route(CAREER_STAGE_ITEM_URL, CAREER_STAGE_ITEM_URL, \
-traverse="/career_stage/{id}")
+    config.add_route(CAREER_STAGE_ITEM_URL, CAREER_STAGE_ITEM_URL, traverse="/career_stages/{id}")
 
     config.add_admin_view(
         CareerStageListView,

@@ -86,6 +86,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.user.lists",
     "autonomie.views.userdatas.userdatas",
     "autonomie.views.userdatas.lists",
+    "autonomie.views.userdatas.career_path",
 )
 
 AUTONOMIE_LAYOUTS_MODULES = (

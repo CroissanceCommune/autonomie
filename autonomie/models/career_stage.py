@@ -42,10 +42,10 @@ from autonomie_base.models.base import (
 )
 
 CAREER_STAGE_GRID = (
-    (('active', 6,),),
-    (('name', 12),),
-    (('cae_situation_id', 12),),
-    (('is_entree_cae', 4), ('is_contrat', 4), ('is_sortie', 4)),
+    (('active',12),),
+    (('name',12),),
+    (('cae_situation_id',12),),
+    (('is_entree_cae',4), ('is_contrat',4), ('is_sortie',4))
 )
 
 class CareerStage(DBBASE):
@@ -78,7 +78,7 @@ class CareerStage(DBBASE):
     )
     name = Column(
         "name",
-        String(15),
+        String(100),
         nullable=False,
         info={
             'colanderalchemy': {

@@ -17,7 +17,8 @@ from sqlalchemy.orm import (
     Load,
     joinedload,
 )
-
+from autonomie.models.career_path import CareerPath
+from autonomie.models.career_stage import CareerStage 
 from autonomie.models.user.userdatas import (
     UserDatas,
     SocialDocTypeOption,
@@ -48,6 +49,7 @@ from autonomie.views.userdatas.py3o import (
     record_compilation,
     get_key_from_genshi_error,
 )
+import autonomie.views.userdatas.career_path
 from autonomie.views.user.tools import UserFormConfigState
 
 
@@ -72,7 +74,7 @@ USERDATAS_MENU.add_item(
 USERDATAS_MENU.add_item(
     name="userdatas_parcours",
     label=u'Parcours',
-    route_name=u'/users/{id}/userdatas/history',
+    route_name=u'/users/{id}/userdatas/career_path',
     icon=u'fa fa-history',
     perm='edit.userdatas',
 )
@@ -411,8 +413,8 @@ class UserDatasHistory(BaseView):
             user=self.current_userdatas.user,
             template_history=template_query.all(),
             title=u"Parcours de {0}".format(
-            	format_account(self.current_userdatas.user, False)
-        	)
+                format_account(self.current_userdatas.user, False)
+            )
         )
 
 

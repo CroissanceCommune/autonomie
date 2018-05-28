@@ -57,7 +57,6 @@ UserMenu.add(
 class UserLayout(object):
     """
     Layout for user related pages
-
     Provide the main page structure for user view
     """
     autonomie_version = pkg_resources.get_distribution('autonomie').version
@@ -69,6 +68,8 @@ class UserLayout(object):
             self.current_user_object = context
         elif hasattr(context, 'user'):
             self.current_user_object = context.user
+        elif hasattr(context, 'userdatas'):
+            self.current_user_object = context.userdatas.user
         else:
             raise KeyError(u"Can't retrieve the associated user object, \
                            current context : %s" % context)
@@ -84,4 +85,4 @@ def includeme(config):
         UserLayout,
         template='autonomie:templates/layouts/user.mako',
         name='user'
-    )
+)

@@ -415,8 +415,8 @@ def get_doctypes_schema(userdatas_model):
     """
     Build a form schema for doctypes registration
 
-    :param obj userdatas_model: An instance of userdatas we're building the form
-    for
+    :param obj userdatas_model: An instance of userdatas we're building 
+    the form for
     """
     registered = userdatas_model.doctypes_registrations
     node_schema = SQLAlchemySchemaNode(UserDatasSocialDocTypes)

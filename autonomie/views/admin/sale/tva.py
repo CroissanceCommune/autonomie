@@ -98,6 +98,7 @@ Tva par défaut"
         return Tva.query(include_inactive=True).all()
 
     def more_template_vars(self, result):
+        result['nodata_msg'] = u"Aucun taux de TVA n'a été configuré"
         if result['items']:
             if Tva.get_default() is None:
                 result['warn_msg'] = (

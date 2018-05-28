@@ -31,6 +31,8 @@ from autonomie_base.models.base import DBSESSION
 
 
 import activity
+import career_stage
+import career_path
 import commercial
 import company
 import competence

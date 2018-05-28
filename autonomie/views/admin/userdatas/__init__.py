@@ -27,3 +27,4 @@ def includeme(config):
     config.add_admin_view(UserDatasIndexView, parent=AdminIndexView)
     config.include('.options')
     config.include('.templates')
+    config.include('.career_stage')

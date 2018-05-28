@@ -45,21 +45,13 @@ class MenuItem(object):
 class MenuDropdown(object):
     """
     Dropdown menu
-
     icon
-
         An icon
-
     label
-
         A label (will be used as title on smaller viewports
-
     title
-
         The title shown on hovering the menu entry
-
     default_route
-
         If the menu is disabled, a link to that route will be provided instead
     """
     __type__ = 'dropdown'
@@ -125,6 +117,7 @@ class AttrMenuItem(MenuItem):
     perm_context_attribute
 
         The current context's attribute used as context for the permission check
+
 
         E.g: if the context is a User and perm_context_attribute is "userdatas",
         we will chek the menu permission regarding the related UserDatas

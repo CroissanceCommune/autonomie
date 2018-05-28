@@ -12,6 +12,7 @@ from sqlalchemy import (
 
 from autonomie_base.models.base import DBSESSION
 
+from autonomie.utils.widgets import Link
 from autonomie.models.customer import Customer
 from autonomie.models.project.project import Project
 from autonomie.forms.project import (
@@ -107,66 +108,50 @@ class ProjectListView(BaseListView, TreeMixin):
         :param obj project: A Project instance
         :rtype: generator
         """
-        yield (
+        yield Link(
             self._get_item_url(project),
             u"Voir/Modifier",
-            u"Voir/Modifier",
-            u"pencil",
-            {}
+            icon=u"pencil",
         )
         if self.request.has_permission('add_estimation', project):
-            yield (
+            yield Link(
                 self.request.route_path(
                     PROJECT_ITEM_ESTIMATION_ROUTE,
                     id=project.id,
                     _query={'action': 'add'},
                 ),
                 u"Nouveau devis",
-                u"Créer un devis",
-                u"file",
-                {}
+                icon=u"file",
             )
         if self.request.has_permission('add_invoice', project):
-            yield (
+            yield Link(
                 self.request.route_path(
                     PROJECT_ITEM_INVOICE_ROUTE,
                     id=project.id,
                     _query={'action': 'add'},
                 ),
                 u"Nouvelle facture",
-                u"Créer une facture",
-                u"file",
-                {}
+                icon=u"file",
             )
         if self.request.has_permission('edit_project', project):
             if project.archived:
-                yield (
+                yield Link(
                     self._get_item_url(project, action='archive'),
                     u"Désarchiver le projet",
-                    u"Désarchiver le projet",
-                    u"book",
-                    {}
+                    icon=u"book",
                 )
             else:
-                yield (
+                yield Link(
                     self._get_item_url(project, action='archive'),
                     u"Archiver le projet",
-                    u"Archiver le projet",
-                    u"book",
-                    {}
+                    icon=u"book",
                 )
         if self.request.has_permission('delete_project', project):
-            yield (
+            yield Link(
                 self._get_item_url(project, action='delete'),
                 u"Supprimer",
-                u"Supprimer ce projet",
-                u"trash",
-                {
-                    "onclick": (
-                        u"return confirm('Êtes-vous sûr de "
-                        "vouloir supprimer ce projet ?')"
-                    )
-                }
+                icon=u"trash",
+                confirm=u'Êtes-vous sûr de vouloir supprimer ce projet ?'
             )
 
     @property

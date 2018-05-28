@@ -108,22 +108,8 @@
                                 </ul>
                             </td>
                             <td class='text-right'>
-                                <div class='btn-group'>
-                                    <button
-                                        type="button"
-                                        class="btn btn-default dropdown-toggle"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false">
-                                        Actions <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-right">
-                                        % for url, label, title, icon, options in stream_actions(project):
-                                            ${dropdown_item(url, label, title, icon=icon, **options)}
-                                        % endfor
-                                    </ul>
-                                </div>
-                            </td>
+                        	${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(project))}
+                        	</td>
                         </tr>
                     % endfor
                 % else:

@@ -123,6 +123,8 @@ DEFAULT_PERM = [
     (Deny, "group:manager", ('admin',)),
     (Allow, "group:manager", ALL_PERMISSIONS, ),
     (Allow, "group:contractor", ('visit',), ),
+    (Allow, "group:trainer", ("add.training",)),
+    (Allow, "group:contructor", ("add.construction",)),
 ]
 DEFAULT_PERM_NEW = [
     (Allow, "group:admin", ('admin', 'manage', 'admin_treasury')),
@@ -985,11 +987,14 @@ def get_project_acl(self):
     )
 
     if not self.has_tasks():
-        perms += ('delete_project',)
+        perms += ('delete_project', )
     else:
-        acl.insert(0, (Deny, Everyone, ('delete_project',)))
+        acl.insert(0, (Deny, Everyone, ('delete_project', )))
 
-    acl.append((Deny, 'group:estimation_only', ('add_invoice',)))
+    if not self.project_type.default:
+        perms += ('list.businesses', )
+
+    acl.append((Deny, 'group:estimation_only', ('add_invoice', )))
 
     for user in self.company.employees:
         acl.append((Allow, user.login.login, perms))

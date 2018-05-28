@@ -179,8 +179,12 @@ class Invoice(Task, InvoiceCompute):
         ),
         group="edit"
     )
-
     estimation_id = Column(ForeignKey('estimation.id'))
+    business_id = Column(ForeignKey("business.id"))
+    business = relationship(
+        "Business",
+        info={'colanderalchemy': {'exclude': True}}
+    )
 
     estimation = relationship(
         "Estimation",
@@ -251,6 +255,7 @@ class Invoice(Task, InvoiceCompute):
             financial_year=self.financial_year,
             prefix=self.prefix,
             display_units=self.display_units,
+            business_type_id=self.business_type_id,
         )
 
         cancelinvoice.line_groups = []
@@ -358,8 +363,6 @@ class Invoice(Task, InvoiceCompute):
 
         if invoice.customer.id == self.customer_id:
             invoice.address = self.address
-        else:
-            invoice.address = customer.full_address
 
         invoice.workplace = self.workplace
 
@@ -457,6 +460,11 @@ class CancelInvoice(Task, TaskCompute):
         ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id",
         info={'colanderalchemy': forms.EXCLUDED, }
+    )
+    business_id = Column(ForeignKey("business.id"))
+    business = relationship(
+        "Business",
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     state_manager = DEFAULT_ACTION_MANAGER['cancelinvoice']

@@ -377,7 +377,6 @@ class Task(Node):
             'export': {'exclude': True},
         }
     )
-    business_id = Column(ForeignKey("business.id"))
     business_type_id = Column(ForeignKey("business_type.id"))
 
     # Organisationnal Relationships
@@ -528,10 +527,6 @@ class Task(Node):
             'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         }
-    )
-    business = relationship(
-        "Business",
-        info={'colanderalchemy': {'exclude': True}}
     )
 
     # Not used in latest invoices

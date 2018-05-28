@@ -36,7 +36,13 @@ def update_database_structure():
         )
     )
     op.add_column(
-        'task',
+        'invoice',
+        sa.Column(
+            'business_id', sa.Integer, sa.ForeignKey('business.id')
+        )
+    )
+    op.add_column(
+        'cancelinvoice',
         sa.Column(
             'business_id', sa.Integer, sa.ForeignKey('business.id')
         )

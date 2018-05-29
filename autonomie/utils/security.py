@@ -79,6 +79,7 @@ from autonomie.models.task.invoice import (
     CancelInvoice,
     Payment,
 )
+from autonomie.models.task.mentions import TaskMention
 from autonomie.models.workshop import (
     Workshop,
     Timeslot,
@@ -196,6 +197,7 @@ class RootFactory(dict):
         ('tasks', 'task', Task),
         ('task_lines', 'task_line', TaskLine),
         ('task_line_groups', 'task_line_group', TaskLineGroup),
+        ('task_mentions', 'task_mention', TaskMention),
         ('templates', 'template', Template, ),
         ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
         (
@@ -699,7 +701,10 @@ def get_estimation_default_acl(self):
     admin_perms = ('duplicate.estimation',)
 
     if self.status == 'valid' and self.signed_status != 'aborted':
-        admin_perms += ('geninv.estimation',)
+        if self.project_type.name == 'default':
+            admin_perms += ('geninv.estimation',)
+        else:
+            admin_perms += ('genbusiness.estimation',)
 
     if self.status == 'valid':
         admin_perms += ('set_signed_status.estimation',)
@@ -727,7 +732,10 @@ def get_estimation_default_acl(self):
         if self.status == 'valid':
             perms += ('set_signed_status.estimation', )
             if not self.signed_status == 'aborted':
-                perms += ('geninv.estimation',)
+                if self.project_type.name == 'default':
+                    admin_perms += ('geninv.estimation',)
+                else:
+                    admin_perms += ('genbusiness.estimation',)
 
         if perms:
             acl.append((Allow, user.login.login, perms))
@@ -1106,6 +1114,7 @@ def set_models_acl():
     BaseStatisticCriterion.__acl__ = property(get_base_acl)
     TaskLine.__acl__ = property(get_task_line_acl)
     TaskLineGroup.__acl__ = property(get_task_line_group_acl)
+    TaskMention.__acl__ = property(get_base_acl)
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)

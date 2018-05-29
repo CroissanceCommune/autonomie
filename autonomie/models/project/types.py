@@ -25,6 +25,8 @@ from autonomie_base.models.base import (
     DBSESSION,
 )
 from autonomie.models.project.business import Business
+from autonomie.models.task.mentions import TaskMention
+from autonomie.models.project.mentions import BusinessTypeTaskMention
 
 
 ProjectTypeBusinessType = Table(
@@ -298,3 +300,25 @@ class BusinessType(BaseProjectType):
         res['label'] = self.label
         res['project_type_id'] = self.project_type_id
         return res
+
+    def query_mentions(self, doctype):
+        query = DBSESSION().query(TaskMention)
+        query = query.outerjoin(TaskMention.business_type_rel)
+        query = query.filter(TaskMention.active == True)
+        query = query.filter(
+            BusinessTypeTaskMention.business_type_id == self.id
+        )
+        query = query.filter(
+            BusinessTypeTaskMention.doctype == doctype
+        )
+        return query
+
+    def mandatory_mentions(self, doctype):
+        query = self.query_mentions(doctype)
+        query = query.filter(BusinessTypeTaskMention.mandatory == True)
+        return query.all()
+
+    def optionnal_mentions(self, doctype):
+        query = self.query_mentions(doctype)
+        query = query.filter(BusinessTypeTaskMention.mandatory == False)
+        return query.all()

@@ -13,7 +13,10 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     String,
-    Integer,
+)
+from sqlalchemy.orm import (
+    relationship,
+    backref,
 )
 from autonomie_base.models.base import (
     DBBASE,
@@ -21,44 +24,33 @@ from autonomie_base.models.base import (
 )
 
 
-class ProjectTypeMention(DBBASE):
+class BusinessTypeTaskMention(DBBASE):
     """
-    Table relationnelle entre les types de projet et les mentions de
-    devis/factures
+    Relationship table between BusinessType and TaskMention
     """
-    __tablename__ = "project_type_mention"
+    __tablename__ = "business_type_task_mention"
     __table_args__ = default_table_args
-    project_type_id = Column(
-        ForeignKey('base_project_type.id'),
-        primary_key=True,
-        info={
-            "colanderalchemy": {'title': u"Type de projet"}
-        }
+    task_mention_id = Column(ForeignKey("task_mention.id"), primary_key=True)
+    business_type_id = Column(ForeignKey("business_type.id"), primary_key=True)
+    doctype = Column(String(14), primary_key=True)
+
+    task_mention = relationship(
+        "TaskMention",
+        backref=backref("business_type_rel", cascade='all, delete-orphan'),
     )
-    task_mention_id = Column(
-        ForeignKey('task_mention.id'),
-        primary_key=True,
-        info={
-            "colanderalchemy": {'title': u"Mention"}
-        }
-    )
-    doctypes = Column(
-        String(32),
-        primary_key=True,
-        info={'colanderalchemy': {"title": u"Types de document"}}
+    business_type = relationship(
+        "BusinessType",
+        backref=backref("task_mention_rel", cascade='all, delete-orphan'),
     )
     mandatory = Column(
         Boolean(),
         default=False,
         info={
             'colanderalchemy': {
-                'title': u"Obligatoires ?",
-                "description": u"Si cette mention n'est pas obligatoire, elle "
-                u"sera proposée optionnellement dans le formulaire d'édition "
-                u"associé",
+                'title': u"Obligatoire",
+                "description": u"Si cette mention est obligatoire, elle sera "
+                u"automatiquement intégrée dans les PDFs des documents associés"
+                u" à ces types d'affaires",
             }
         },
-    )
-    order = Column(
-        Integer, default=0, info={'colanderalchemy': {'exclude': True}}
     )

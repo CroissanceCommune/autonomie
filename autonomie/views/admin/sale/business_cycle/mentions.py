@@ -9,10 +9,8 @@ import peppercorn
 import logging
 
 from pyramid.httpexceptions import HTTPFound
-from autonomie.models.project.types import (
-    BusinessTypeTaskMention,
-    BusinessType,
-)
+from autonomie.models.project.mentions import BusinessTypeTaskMention
+from autonomie.models.project.types import BusinessType
 from autonomie.models.task.mentions import TaskMention
 
 from autonomie.forms.admin.sale.business_cycle.mentions import (

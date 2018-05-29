@@ -28,7 +28,6 @@ Configuration générale du module vente:
 import logging
 
 from autonomie.models.task import (
-    TaskMention,
     WorkUnit,
     PaymentConditions,
 )
@@ -54,9 +53,6 @@ class WorkUnitAdminView(BaseWorkUnitAdminView):
     disable = False
 
 
-TaskMentionAdminView = get_model_admin_view(TaskMention, r_path=SALE_URL)
-
-
 BasePaymentModeAdminView = get_model_admin_view(PaymentMode, r_path=SALE_URL)
 
 
@@ -72,7 +68,7 @@ PaymentConditionsAdminView = get_model_admin_view(
 
 def includeme(config):
     for view in (
-        WorkUnitAdminView, TaskMentionAdminView,
+        WorkUnitAdminView,
         PaymentModeAdminView, PaymentConditionsAdminView
     ):
         config.add_route(view.route_name, view.route_name)

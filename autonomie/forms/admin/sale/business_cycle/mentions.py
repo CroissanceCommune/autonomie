@@ -8,7 +8,7 @@ Form schema used to configure BusinessType and TaskMention association
 """
 import colander
 from colanderalchemy import SQLAlchemySchemaNode
-from autonomie.models.project.types import BusinessTypeTaskMention
+from autonomie.models.project.mentions import BusinessTypeTaskMention
 from autonomie.forms import customize_field
 
 

@@ -277,8 +277,13 @@ class AdminOption(BaseAdminFormView):
         """
         Return an optionnal message to help to configure datas
         """
-        calchemy_dict = getattr(self.factory, '__colanderalchemy_config__', {})
-        return calchemy_dict.get('help_msg', '')
+        help_msg = getattr(self, 'help_msg', None)
+        if help_msg is None:
+            calchemy_dict = getattr(
+                self.factory, '__colanderalchemy_config__', {}
+            )
+            help_msg = calchemy_dict.get('help_msg', '')
+        return help_msg
 
     def before(self, form):
         """

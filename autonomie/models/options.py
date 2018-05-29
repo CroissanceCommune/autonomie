@@ -97,6 +97,7 @@ class ConfigurableOption(DBBASE):
         return dict(
             id=self.id,
             label=self.label,
+            active=self.active,
         )
 
 

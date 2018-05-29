@@ -4,11 +4,11 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import os
+from sqlalchemy.orm import load_only
 
 from autonomie.models.task.mentions import (
     TaskMention,
 )
-
 from autonomie.utils.widgets import Link
 from autonomie.forms.admin.sale.mentions import (
     get_admin_task_mention_schema,
@@ -82,12 +82,21 @@ factures"
                 icon=u"check-square-o",
             )
 
+        if not item.is_used:
+            yield Link(
+                self._get_item_url(item, action='delete'),
+                u"Supprimer",
+                icon=u"remove",
+            )
+
     def load_items(self):
         """
         Return the sqlalchemy models representing current queried elements
         :rtype: SQLAlchemy.Query object
         """
-        items = TaskMention.query()
+        items = self.request.dbsession.query(TaskMention).options(
+            load_only('label', 'title')
+        )
         items = items.order_by(self.factory.active).order_by(self.factory.label)
         return items
 

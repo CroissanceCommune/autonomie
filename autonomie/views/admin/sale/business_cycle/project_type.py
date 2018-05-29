@@ -12,7 +12,7 @@ from autonomie.models.project.types import (
 )
 
 from autonomie.utils.widgets import Link
-from autonomie.forms.admin.project import (
+from autonomie.forms.admin.sale.business_cycle.project_type import (
     get_admin_project_type_schema,
     get_admin_business_type_schema,
 )

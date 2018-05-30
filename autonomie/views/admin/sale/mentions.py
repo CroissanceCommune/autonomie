@@ -4,7 +4,10 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import os
+
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import load_only
+from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models.task.mentions import (
     TaskMention,
@@ -38,9 +41,12 @@ factures"
     item_route_name = TASK_MENTION_ITEM_URL
     columns = [
         u"Libellé",
-        u"Titre",
     ]
     factory = TaskMention
+
+    def __init__(self, *args, **kwargs):
+        AdminCrudListView.__init__(self, *args, **kwargs)
+        self.max_order = TaskMention.get_next_order() - 1
 
     @property
     def help_msg(self):
@@ -59,7 +65,6 @@ factures"
 
     def stream_columns(self, item):
         yield item.label
-        yield item.title
 
     def stream_actions(self, item):
         yield Link(
@@ -67,7 +72,23 @@ factures"
             u"Voir/Modifier",
             icon=u"pencil",
         )
+        move_url = self._get_item_url(item, action="move")
         if item.active:
+            if item.order > 0:
+                yield Link(
+                    move_url + "&direction=up",
+                    u"Remonter",
+                    title=u"Remonter dans l'ordre des mentions",
+                    icon=u"arrow-circle-o-up"
+                )
+            if item.order < self.max_order:
+                yield Link(
+                    move_url + "&direction=down",
+                    u"Redescendre",
+                    title=u"Redescendre dans l'ordre des mentions",
+                    icon=u"arrow-circle-o-down"
+                )
+
             yield Link(
                 self._get_item_url(item, action='disable'),
                 u"Désactiver",
@@ -95,9 +116,10 @@ factures"
         :rtype: SQLAlchemy.Query object
         """
         items = self.request.dbsession.query(TaskMention).options(
-            load_only('label', 'title')
+            load_only('label',)
         )
-        items = items.order_by(self.factory.active).order_by(self.factory.label)
+        items = items.order_by(desc(self.factory.active))
+        items = items.order_by(asc(self.factory.order))
         return items
 
     def more_template_vars(self, result):
@@ -105,25 +127,20 @@ factures"
         return result
 
 
-class TaskMentionDisableView(BaseAdminDisableView):
-    """
-    View for TaskMention disable/enable
-    """
-    route_name = TASK_MENTION_ITEM_URL
-
-
-class TaskMentionDeleteView(BaseAdminDeleteView):
-    """
-    TaskMention deletion view
-    """
-    route_name = TASK_MENTION_ITEM_URL
-
-
 class TaskMentionAddView(BaseAdminAddView):
     title = u"Ajouter"
     route_name = TASK_MENTION_URL
     factory = TaskMention
     schema = get_admin_task_mention_schema()
+
+    def before(self, form):
+        """
+        Launched before the form is used
+
+        :param obj form: The form object
+        """
+        pre_filled = {'order': self.factory.get_next_order()}
+        form.set_appstruct(pre_filled)
 
 
 class TaskMentionEditView(BaseAdminEditView):
@@ -136,6 +153,42 @@ class TaskMentionEditView(BaseAdminEditView):
     @property
     def title(self):
         return u"Modifier la mention '{0}'".format(self.context.label)
+
+
+class TaskMentionDisableView(BaseAdminDisableView):
+    """
+    View for TaskMention disable/enable
+    """
+    route_name = TASK_MENTION_ITEM_URL
+
+    def on_enable(self):
+        """
+        on enable we set order to the last one
+        """
+        order = TaskMention.get_next_order()
+        self.context.order = order
+        self.request.dbsession.merge(self.context)
+
+
+class TaskMentionDeleteView(BaseAdminDeleteView):
+    """
+    TaskMention deletion view
+    """
+    route_name = TASK_MENTION_ITEM_URL
+
+
+def move_view(context, request):
+    """
+    Reorder the current context moving it up in the category's hierarchy
+
+    :param obj context: The given IncomeStatementMeasureType instance
+    """
+    action = request.params['direction']
+    if action == 'up':
+        context.move_up()
+    else:
+        context.move_down()
+    return HTTPFound(request.route_path(TASK_MENTION_URL))
 
 
 def includeme(config):
@@ -173,4 +226,9 @@ def includeme(config):
         TaskMentionDeleteView,
         parent=TaskMentionListView,
         request_param="action=delete",
+    )
+    config.add_admin_view(
+        move_view,
+        route_name=TASK_MENTION_ITEM_URL,
+        request_param='action=move',
     )

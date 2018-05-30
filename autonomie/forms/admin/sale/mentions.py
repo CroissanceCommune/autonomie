@@ -20,7 +20,7 @@ def get_admin_task_mention_schema():
     schema = SQLAlchemySchemaNode(
         TaskMention,
         includes=(
-            "label", "help_text", "title", "full_text"
+            "label", "help_text", "title", "full_text", "order",
         )
     )
     customize_field(
@@ -34,4 +34,5 @@ def get_admin_task_mention_schema():
         "full_text",
         widget=deform.widget.TextAreaWidget(cols=80, rows=4),
     )
+    customize_field(schema, "order", widget=deform.widget.HiddenWidget())
     return schema

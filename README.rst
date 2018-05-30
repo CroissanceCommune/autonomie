@@ -38,7 +38,7 @@ Sous Debian:
 
 .. code-block:: console
 
-    apt-get install virtualenvwrapper libmysqlclient-dev build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev python-mysqldb redis-server
+    apt-get install virtualenvwrapper libmariadbclient-dev build-essential libjpeg-dev libfreetype6 libfreetype6-dev zlib1g-dev python-mysqldb redis-server
 
 Sous Fedora:
 

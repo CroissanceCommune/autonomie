@@ -71,6 +71,7 @@ from autonomie.compute.math_utils import (
 )
 from autonomie.models.node import Node
 from autonomie.models.task.mentions import (
+    MANDATORY_TASK_MENTION,
     TASK_MENTION,
 )
 from autonomie.models.tva import (
@@ -493,6 +494,14 @@ class Task(Node):
     mentions = relationship(
         "TaskMention",
         secondary=TASK_MENTION,
+        order_by="TaskMention.order",
+        back_populates="tasks",
+        info={'export': {'exclude': True}},
+    )
+
+    mandatory_mentions = relationship(
+        "TaskMention",
+        secondary=MANDATORY_TASK_MENTION,
         order_by="TaskMention.order",
         back_populates="tasks",
         info={'export': {'exclude': True}},

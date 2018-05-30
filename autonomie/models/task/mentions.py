@@ -42,6 +42,14 @@ TASK_MENTION = sa.Table(
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine'],
 )
+MANDATORY_TASK_MENTION = sa.Table(
+    'mandatory_task_mention_rel',
+    DBBASE.metadata,
+    sa.Column('task_id', sa.Integer, sa.ForeignKey('task.id')),
+    sa.Column('mention_id', sa.Integer, sa.ForeignKey('task_mention.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
 class TaskMention(ConfigurableOption):
@@ -81,18 +89,10 @@ un devis/facture, ce texte apparaitra dans la sortie PDF",
             }
         }
     )
-    tasks = sa.orm.relationship(
-        "Task",
-        secondary=TASK_MENTION,
-        back_populates="mentions",
-        info={
-            'colanderalchemy': {
-                'exclude': True
-            }
-        }
-    )
 
     @property
     def is_used(self):
-        return DBSESSION().query(TASK_MENTION).filter(
-            TASK_MENTION.c.mention_id == self.id).count() > 0
+        return DBSESSION().query(TASK_MENTION.task_id).filter(
+            TASK_MENTION.c.mention_id == self.id).count() > 0 or \
+            DBSESSION().query(MANDATORY_TASK_MENTION.task_id).filter(
+                MANDATORY_TASK_MENTION.c.mention_id == self.id).count() > 0

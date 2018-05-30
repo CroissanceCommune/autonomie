@@ -334,7 +334,7 @@ def _collect_business_types(request):
         result.append(project.project_type.default_business_type)
 
     for business_type in project.business_types:
-        if request.has_permission("add.%s" % business_type.name):
+        if business_type.allowed(request):
             result.append(business_type)
     return result
 

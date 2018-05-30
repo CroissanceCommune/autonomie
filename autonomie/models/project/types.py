@@ -301,12 +301,13 @@ class BusinessType(BaseProjectType):
         res['project_type_id'] = self.project_type_id
         return res
 
-    def query_mentions(self, doctype):
+    @classmethod
+    def _query_mentions(cls, btype_id, doctype):
         query = DBSESSION().query(TaskMention)
         query = query.outerjoin(TaskMention.business_type_rel)
         query = query.filter(TaskMention.active == True)
         query = query.filter(
-            BusinessTypeTaskMention.business_type_id == self.id
+            BusinessTypeTaskMention.business_type_id == btype_id
         )
         query = query.filter(
             BusinessTypeTaskMention.doctype == doctype
@@ -314,11 +315,17 @@ class BusinessType(BaseProjectType):
         return query
 
     def mandatory_mentions(self, doctype):
-        query = self.query_mentions(doctype)
+        query = BusinessType._query_mentions(self.id, doctype)
+        query = query.filter(BusinessTypeTaskMention.mandatory == True)
+        return query.all()
+
+    @classmethod
+    def get_mandatory_mentions(cls, btype_id, doctype):
+        query = cls._query_mentions(btype_id, doctype)
         query = query.filter(BusinessTypeTaskMention.mandatory == True)
         return query.all()
 
     def optionnal_mentions(self, doctype):
-        query = self.query_mentions(doctype)
+        query = BusinessType._query_mentions(self.id, doctype)
         query = query.filter(BusinessTypeTaskMention.mandatory == False)
         return query.all()

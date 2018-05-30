@@ -495,7 +495,6 @@ class Task(Node):
         "TaskMention",
         secondary=TASK_MENTION,
         order_by="TaskMention.order",
-        back_populates="tasks",
         info={'export': {'exclude': True}},
     )
 
@@ -503,7 +502,6 @@ class Task(Node):
         "TaskMention",
         secondary=MANDATORY_TASK_MENTION,
         order_by="TaskMention.order",
-        back_populates="tasks",
         info={'export': {'exclude': True}},
     )
 
@@ -575,6 +573,13 @@ _{s.date:%m%y}"
 
         # We add a default task line group
         self.line_groups.append(TaskLineGroup(order=0))
+
+        if self.business_type_id is not None:
+            from autonomie.models.project.types import BusinessType
+            self.mandatory_mentions = BusinessType.get_mandatory_mentions(
+                self.business_type_id,
+                self.type_,
+            )
 
     def _get_project_index(self, project):
         """

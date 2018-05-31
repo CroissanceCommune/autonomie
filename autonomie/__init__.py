@@ -49,6 +49,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.accompagnement.workshop",
     "autonomie.views.accounting",
     "autonomie.views.auth",
+    "autonomie.views.business",
     "autonomie.views.commercial",
     "autonomie.views.company",
     "autonomie.views.competence",

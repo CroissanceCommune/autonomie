@@ -52,7 +52,6 @@ class Business(Node):
         primary_key=True,
         info={'colanderalchemy': {'exclude': True}},
     )
-
     closed = Column(
         Boolean(),
         default=False,

@@ -4,7 +4,11 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import colander
+from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.forms import customize_field
 from autonomie.forms.lists import BaseListsSchema
+from autonomie.models.project.business import Business
 
 
 def get_list_schema():
@@ -25,4 +29,18 @@ def get_list_schema():
         )
     )
 
+    return schema
+
+
+def get_business_edit_schema():
+    """
+    Build the businedd edition schema
+
+    :rtype: :class:`colander.Schema`
+    """
+    schema = SQLAlchemySchemaNode(
+        Business,
+        includes=('name',)
+    )
+    customize_field(schema, 'name', title=u"Nom de l'affaire")
     return schema

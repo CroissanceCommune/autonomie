@@ -1003,11 +1003,14 @@ def get_project_acl(self):
     else:
         acl.insert(0, (Deny, Everyone, ('delete_project', )))
 
+    admin_perms = perms[:]
     if not self.project_type.default:
         perms += ('list.businesses', )
 
-    acl.append((Allow, "group:admin", perms))
-    acl.append((Allow, "group:manager", perms))
+    admin_perms += ('list.businesses',)
+
+    acl.append((Allow, "group:admin", admin_perms))
+    acl.append((Allow, "group:manager", admin_perms))
 
     acl.append((Deny, 'group:estimation_only', ('add_invoice', )))
 

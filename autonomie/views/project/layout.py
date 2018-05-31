@@ -30,7 +30,7 @@ ProjectMenu.add(
         name="project_estimations",
         label=u'Tous les devis',
         route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
-        icon=u'fa fa-file-o',
+        icon=u'fa fa-files-o',
         perm='list.estimations',
     )
 )
@@ -39,7 +39,7 @@ ProjectMenu.add(
         name="project_invoices",
         label=u'Toutes les factures',
         route_name=PROJECT_ITEM_INVOICE_ROUTE,
-        icon=u'fa fa-file-o',
+        icon=u'fa fa-files-o',
         perm='list.invoices',
     )
 )
@@ -48,7 +48,7 @@ ProjectMenu.add(
         name="project_phases",
         label=u"Document rangés par dossiers",
         route_name=PROJECT_ITEM_PHASE_ROUTE,
-        icon=u'fa fa-folder-o',
+        icon=u'fa fa-folder-open',
         perm='view.project',
     )
 )
@@ -57,7 +57,7 @@ ProjectMenu.add(
         name="project_general",
         label=u'Informations générales',
         route_name=PROJECT_ITEM_GENERAL_ROUTE,
-        icon=u'fa fa-pencil-o',
+        icon=u'fa fa-cog',
         perm='view.project',
     )
 )

@@ -10,5 +10,7 @@ def includeme(config):
     config.include('.layout')
     config.include('.lists')
     config.include('.project')
+    config.include('.estimations')
+    config.include('.invoices')
     config.include('.phases')
     config.include('.business')

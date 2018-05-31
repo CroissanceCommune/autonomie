@@ -35,7 +35,7 @@ ProjectMenu.add(
         name="project_businesses",
         label=u"Liste des affaires",
         route_name=PROJECT_ITEM_BUSINESS_ROUTE,
-        icon=u'fa fa-folder-o',
+        icon=u'fa fa-folder-open',
         perm='list.businesses',
     )
 )

@@ -101,15 +101,8 @@
                                     % endfor
                                     % for invoice in business.invoices:
                                         <li>
-                                            <a href="${request.route_path('/invoices/{id}', id=invoice.id)}">
-                                            Facture n°${invoice.official_number} : ${invoice.name}
-                                            </a>
-                                        </li>
-                                    % endfor
-                                    % for cancelinvoice in business.cancelinvoices:
-                                        <li>
-                                            <a href="${request.route_path('/cancelinvoices/{id}', id=cancelinvoice.id)}">
-                                            Avoir n°${cancelinvoice.official_number} : ${cancelinvoice.name}
+                                            <a href="${request.route_path('/%ss/{id}' % invoice.type_, id=invoice.id)}">
+                                            ${api.format_task_type(invoice)} n°${invoice.official_number} : ${invoice.name}
                                             </a>
                                         </li>
                                     % endfor

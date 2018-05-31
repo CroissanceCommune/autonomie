@@ -180,12 +180,6 @@ class Invoice(Task, InvoiceCompute):
         group="edit"
     )
     estimation_id = Column(ForeignKey('estimation.id'))
-    business_id = Column(ForeignKey("business.id"))
-    business = relationship(
-        "Business",
-        info={'colanderalchemy': {'exclude': True}}
-    )
-
     estimation = relationship(
         "Estimation",
         primaryjoin="Invoice.estimation_id==Estimation.id",
@@ -460,11 +454,6 @@ class CancelInvoice(Task, TaskCompute):
         ),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id",
         info={'colanderalchemy': forms.EXCLUDED, }
-    )
-    business_id = Column(ForeignKey("business.id"))
-    business = relationship(
-        "Business",
-        info={'colanderalchemy': {'exclude': True}}
     )
 
     state_manager = DEFAULT_ACTION_MANAGER['cancelinvoice']

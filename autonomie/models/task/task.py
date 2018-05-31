@@ -55,6 +55,7 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 
 from autonomie.utils.strings import (
@@ -70,6 +71,7 @@ from autonomie.compute.math_utils import (
     amount,
 )
 from autonomie.models.node import Node
+from autonomie.models.project.business import Business
 from autonomie.models.task.mentions import (
     MANDATORY_TASK_MENTION,
     TASK_MENTION,
@@ -379,6 +381,7 @@ class Task(Node):
         }
     )
     business_type_id = Column(ForeignKey("business_type.id"))
+    business_id = Column(ForeignKey("business.id"))
 
     # Organisationnal Relationships
     status_person = relationship(
@@ -467,6 +470,12 @@ class Task(Node):
         "BusinessType",
         info={'colanderalchemy': {'exclude': True}}
     )
+    business = relationship(
+        "Business",
+        primaryjoin="Business.id==Task.business_id",
+        info={'colanderalchemy': {'exclude': True}}
+    )
+
     # Content relationships
     discounts = relationship(
         "DiscountLine",
@@ -567,6 +576,9 @@ _{s.date:%m%y}"
         self.status_person = user
         self.date = datetime.date.today()
         self.set_numbers(company_index, project_index)
+        log.debug(
+            "##################### Here we are, current name : %s" % self.name
+        )
 
         for key, value in kw.items():
             setattr(self, key, value)
@@ -575,11 +587,13 @@ _{s.date:%m%y}"
         self.line_groups.append(TaskLineGroup(order=0))
 
         if self.business_type_id is not None:
-            from autonomie.models.project.types import BusinessType
-            self.mandatory_mentions = BusinessType.get_mandatory_mentions(
-                self.business_type_id,
-                self.type_,
-            )
+            with DBSESSION.no_autoflush:
+                from autonomie.models.project.types import BusinessType
+
+                self.mandatory_mentions = BusinessType.get_mandatory_mentions(
+                    self.business_type_id,
+                    self.type_,
+                )
 
     def _get_project_index(self, project):
         """
@@ -745,6 +759,24 @@ _{s.date:%m%y}"
     @classmethod
     def get_waiting_invoices(cls, *args):
         return cls._autonomie_service.get_waiting_invoices(cls, *args)
+
+    def gen_business(self):
+        """
+        Generate a business based on this Task
+
+        :returns: A new business instance
+        :rtype: :class:`autonomie.models.project.business.Business`
+        """
+        business = Business(
+            name=self.name,
+            project_id=self.project_id,
+            business_type_id=self.business_type_id,
+        )
+        DBSESSION().add(business)
+        DBSESSION().flush()
+        self.business_id = business.id
+        DBSESSION().merge(self)
+        return business
 
 
 class DiscountLine(DBBASE, DiscountLineCompute):

@@ -62,7 +62,6 @@ from autonomie.models.config import Config
 from .invoice import (
     Invoice,
 )
-from autonomie.models.project.business import Business
 from .task import (
     Task,
     TaskLine,
@@ -95,16 +94,6 @@ ESTIMATION_STATES = (
     ('send', u"Envoyé au client"),
     ('aborted', u'Annulé'),
     ('signed', u'Signé'),
-)
-
-
-EstimationBusiness = Table(
-    "estimation_business",
-    DBBASE.metadata,
-    Column("estimation.id", Integer, ForeignKey('estimation.id')),
-    Column("business.id", Integer, ForeignKey('business.id')),
-    mysql_charset=default_table_args['mysql_charset'],
-    mysql_engine=default_table_args['mysql_engine']
 )
 
 
@@ -206,16 +195,6 @@ class Estimation(Task, EstimationCompute):
             'colanderalchemy': {'exclude': True},
         }
     )
-    businesses = relationship(
-        "Business",
-        secondary=EstimationBusiness,
-        order_by="Business.created_at",
-        back_populates="estimations",
-        info={
-            'colanderalchemy': {'exclude': True},
-        }
-    )
-
     state_manager = DEFAULT_ACTION_MANAGER['estimation']
     signed_state_manager = SIGNED_ACTION_MANAGER
     _number_tmpl = u"{s.company.name} {s.date:%Y-%m} D{s.company_index}"
@@ -394,10 +373,10 @@ class Estimation(Task, EstimationCompute):
             all the generated invoices
         """
         inv = Invoice(
+            user=user,
             company=self.company,
             customer=self.customer,
             project=self.project,
-            user=user,
             phase_id=self.phase_id,
             estimation=self,
             payment_conditions=self.payment_conditions,
@@ -511,20 +490,6 @@ class Estimation(Task, EstimationCompute):
 
         invoices.append(invoice)
         return invoices
-
-    def gen_business(self):
-        """
-        Generate a business based on this estimation
-
-        :returns: A new business instance
-        :rtype: :class:`autonomie.models.poroject.business.Business`
-        """
-        business = Business(
-            name=self.name,
-            project_id=self.project_id,
-            business_type_id=self.business_type_id,
-        )
-        return business
 
     def __repr__(self):
         return u"<Estimation id:{s.id} ({s.status}>".format(s=self)

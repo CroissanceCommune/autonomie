@@ -6,15 +6,11 @@
 from sqlalchemy import (
     Column,
     Integer,
-    String,
     ForeignKey,
     Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
-)
-from autonomie_base.models.types import (
-    PersistentACLMixin,
 )
 from autonomie_base.models.base import (
     default_table_args,
@@ -74,32 +70,20 @@ class Business(Node):
     # Relations
     business_type = relationship(
         "BusinessType",
-        info={'colanderalchemy': {'exclude': True}},
     )
     project = relationship(
         "Project",
         primaryjoin="Project.id == Business.project_id",
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {'exclude': True}
-        },
     )
     estimations = relationship(
-        "Estimation",
-        back_populates="businesses",
-        secondary="estimation_business",
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {'exclude': True}
-        },
+        "Task",
+        back_populates="business",
+        primaryjoin="and_(Task.business_id==Business.id, "
+        "Task.type_=='estimation')",
     )
     invoices = relationship(
-        "Invoice",
+        "Task",
         back_populates="business",
-        primaryjoin="Invoice.business_id==Business.id",
-    )
-    cancelinvoices = relationship(
-        "CancelInvoice",
-        back_populates="business",
-        primaryjoin="CancelInvoice.business_id==Business.id",
+        primaryjoin="and_(Task.business_id==Business.id, "
+        "Task.type_.in_(('invoice', 'cancelinvoice')))"
     )

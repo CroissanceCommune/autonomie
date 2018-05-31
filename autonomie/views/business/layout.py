@@ -88,6 +88,14 @@ class BusinessLayout(DefaultLayout):
         )
 
     @property
+    def close_url(self):
+        return self.request.route_path(
+            BUSINESS_ITEM_ROUTE,
+            id=self.current_business_object.id,
+            _query={'action': 'close'}
+        )
+
+    @property
     def businessmenu(self):
         BusinessMenu.set_current(self.current_business_object)
         return BusinessMenu

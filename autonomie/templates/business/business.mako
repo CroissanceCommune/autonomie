@@ -25,22 +25,6 @@
 <div class='row'>
     <div class='col-xs-12'>
         <div class='panel panel-default page-block'>
-            <div class='panel-heading'>
-                <div class='row'>
-                <div class='col-md-3 col-xs-12 bordered'>
-                    <h4>${request.context.name}</h4>
-                    <small>${request.context.business_type.label}</small>
-                    % if request.has_permission("edit.business", request.context):
-                    <a
-                        class='btn btn-default btn-small pull-right'
-                        href="${edit_url}"
-                        >
-                        <i class='fa fa-pencil'></i>
-                    </a>
-                    % endif
-                </div>
-                </div>
-            </div>
             <div class='panel-body'>
             </div>
         </div>

@@ -37,15 +37,16 @@
                     <div class='col-md-9'>
                         <div>${layout.current_business_object.name}</div>
                         <div class='help-text'>${layout.current_business_object.business_type.label}</div>
-                        <div>
+                        <div class'btn-group'>
                         % if request.has_permission("edit.business", layout.current_business_object):
                         <a
-                            class='btn btn-default btn-small pull-right'
+                            class='btn btn-default btn-small'
                             href="${layout.edit_url}"
                             >
                             <i class='fa fa-pencil'></i>
                         </a>
                         % endif
+
                         </div>
                     </div>
                 </div>
@@ -53,6 +54,14 @@
             <div class='col-md-9 hidden-xs'>
             <%block name='businesstitle'>
             </%block>
+                % if request.has_permission('close.business', layout.current_business_object):
+                <a
+                    class='btn btn-default'
+                    href="${layout.close_url}"
+                    >
+                    <i class='fa fa-window-close'></i>&nbsp;Clôturer cette affaire
+                </a>
+                % endif
             </div>
         </div>
     </div>

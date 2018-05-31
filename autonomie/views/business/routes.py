@@ -13,6 +13,7 @@ BUSINESS_ITEM_ESTIMATION_ROUTE = os.path.join(
 )
 BUSINESS_ITEM_INVOICE_ROUTE = os.path.join(BUSINESS_ITEM_ROUTE, "invoices")
 BUSINESS_ITEM_FILE_ROUTE = os.path.join(BUSINESS_ITEM_ROUTE, "files")
+BUSINESS_ITEM_PY3O_ROUTE = os.path.join(BUSINESS_ITEM_ROUTE, "py3o")
 
 
 def includeme(config):
@@ -21,5 +22,6 @@ def includeme(config):
         BUSINESS_ITEM_ESTIMATION_ROUTE,
         BUSINESS_ITEM_INVOICE_ROUTE,
         BUSINESS_ITEM_FILE_ROUTE,
+        BUSINESS_ITEM_PY3O_ROUTE,
     ):
         config.add_route(route, route, traverse="/businesses/{id}")

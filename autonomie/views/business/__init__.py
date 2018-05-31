@@ -4,7 +4,9 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 
+
 def includeme(config):
     config.include('.routes')
     config.include('.layout')
     config.include('.business')
+    config.include('.estimation')

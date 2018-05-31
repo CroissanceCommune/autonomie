@@ -39,6 +39,19 @@
             Générer des factures
         % endif
     </a>
+% elif api.has_permission('genbusiness.estimation'):
+    <a
+        class='btn btn-default btn-block'
+        href="${request.route_path('/estimations/{id}/genbusiness', id=estimation.id)}"
+        title="Générer une affaire au sein de laquelle facturer"
+        >
+        <i class='fa fa-files-o'></i>&nbsp;
+        % if len(estimation.businesses) >= 1:
+            Générer une nouvelle affaire (${estimation.business_type.label})
+        % else:
+            Générer une affaire (${estimation.business_type.label})
+        % endif
+    </a>
 % endif
 % if api.has_permission('duplicate.estimation'):
 <a class='btn btn-default btn-block' href="${request.route_path('/estimations/{id}/duplicate', id=estimation.id)}">

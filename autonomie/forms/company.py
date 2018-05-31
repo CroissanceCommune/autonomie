@@ -333,8 +333,9 @@ def get_list_schema(company=False):
     schema.add(
         colander.SchemaNode(
             colander.Boolean(),
-            name='active',
+            name='include_inactive',
             label=u"Inclure les entreprises désactivées",
+            default=False,
         )
     )
     return schema

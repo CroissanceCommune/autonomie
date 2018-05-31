@@ -68,7 +68,7 @@ from autonomie.forms.company import (
 )
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 ENABLE_MSG = u"L'entreprise {0} a été (ré)activée."
@@ -147,10 +147,10 @@ class CompanyList(BaseListView):
     def query(self):
         return Company.query(active=False)
 
-    def filter_active(self, query, appstruct):
-        active = appstruct.get('active', False)
+    def filter_include_inactive(self, query, appstruct):
+        include_inactive = appstruct.get('include_inactive', False)
 
-        if active in (False, colander.null):
+        if include_inactive in ("false", False, colander.null):
             query = query.filter_by(active=True)
 
         return query

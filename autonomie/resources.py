@@ -319,8 +319,6 @@ expense_resources = Group([expense_js, expense_css])
 # User page related resources
 user_css = get_resource('css/user.css', depends=(main_css, ))
 user_resources = Group([user_css, main_group])
-project_css = get_resource('css/project.css', depends=(main_css, ))
-project_resources = Group([project_css, main_group])
 
 admin_css = get_resource("css/admin.css", depends=(main_css, ))
 admin_resources = Group([admin_css, main_group, tinymce])

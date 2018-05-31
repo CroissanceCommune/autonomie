@@ -13,6 +13,7 @@ from sqlalchemy import (
 from autonomie_base.models.base import DBSESSION
 
 from autonomie.utils.widgets import Link
+from autonomie.models.company import Company
 from autonomie.models.customer import Customer
 from autonomie.models.project.project import Project
 from autonomie.forms.project import (
@@ -67,10 +68,16 @@ class ProjectListView(BaseListView, TreeMixin):
 
     @property
     def url(self):
+        if isinstance(self.context, Company):
+            cid = self.context.id
         if isinstance(self.context, Project):
             cid = self.context.company_id
+        elif hasattr(self.context, 'project'):
+            cid = self.context.project.company_id
         else:
-            cid = self.context.id
+            raise Exception(
+                u"Can't retrieve company id for breadcrumb generation"
+            )
         return self.request.route_path(self.route_name, id=cid)
 
     def query(self):

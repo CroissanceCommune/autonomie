@@ -14,7 +14,7 @@ class PeriodSchema(colander.MappingSchema):
     start = colander.SchemaNode(
         colander.Date(),
         title="",
-        description=u"Émises entre le",
+        description=u"Émis(e) entre le",
         missing=colander.drop,
     )
     end = colander.SchemaNode(

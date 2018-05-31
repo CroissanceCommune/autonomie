@@ -101,7 +101,7 @@
                                 % for user in company.employees:
                                     <li>
                                     % if request.has_permission('view.user', user):
-                                        <a href="${url}">
+                                        <a href="${request.route_path('/users/{id}', id=user.id)}">
                                         ${api.format_account(user)}
                                         </a>
                                         % if user.login is None:

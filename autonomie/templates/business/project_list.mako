@@ -1,9 +1,8 @@
 <%doc>
- * Copyright (C) 2012-2013 Croissance Commune
+    * Copyright (C) 2012-2016 Croissance Commune
  * Authors:
        * Arezki Feth <f.a@majerti.fr>;
        * Miotte Julien <j.m@majerti.fr>;
-       * Pettier Gabriel;
        * TJEBBES Gaston <g.t@majerti.fr>
 
  This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -25,22 +24,11 @@
 <%namespace file="/base/utils.mako" import="dropdown_item"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
-<%block name='content'>
+<%block name='mainblock'>
 <div class='row page-header-block'>
-% if addform is not None:
-    <button class='btn btn-primary primary-action' data-target="#project-forms" aria-expanded="false" aria-controls="project-forms" data-toggle='collapse'>
-            <i class='glyphicon glyphicon-plus'></i>
-            Ajouter un projet
-        </button>
-        <div class='collapse row' id="project-forms">
-            <div class='col-md-12 col-lg-6'>
-                <h2>Ajouter un projet</h2>
-                ${addform|n}
-            </div>
-        </div>
-% endif
 </div>
 
+% if form is not UNDEFINED and form:
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
         <a  href='#filter-form'
@@ -72,6 +60,7 @@
         </div>
     </div>
 </div>
+% endif
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
         ${records.item_count} Résultat(s)
@@ -81,58 +70,55 @@
             <thead>
                 <tr>
                     <th class="visible-lg">${sortable(u"Créé le", "created_at")}</th>
-                    <th>${sortable(u"Code", "code")}</th>
                     <th>${sortable(u"Nom", "name")}</th>
-                    <th>Clients</th>
+                    <th>Documents</th>
+                    <th>CA</th>
                     <th class="actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 % if records:
-                    % for id, project in records:
-                        <tr class='tableelement' id="${project.id}">
-                            <% url = request.route_path("project", id=project.id) %>
-                            <% onclick = "document.location='{url}'".format(url=url) %>
-                            <td onclick="${onclick}" class="visible-lg rowlink" >${api.format_date(project.created_at)}</td>
-                            <td onclick="${onclick}" class='rowlink'>${project.code}</td>
-                            <td onclick="${onclick}" class='rowlink'>
-                                % if project.archived:
-                                    <span class='label label-warning'>Ce projet est archivé</span>
-                                % endif
-                                ${project.name}
+                    % for id, business in records:
+                    <tr class='tableelement'>
+                        <tr class='tableelement'>
+                            <td>
+                                ${api.format_date(business.created_at)}
                             </td>
-                            <td onclick="${onclick}" class='rowlink'>
+                            <td>
+                                % if business.closed:
+                                    <span class='label label-warning'>Cette affaire est close</span>
+                                % endif
+                                ${business.name}
+                            </td>
+                            <td>
                                 <ul>
-                                    % for customer in project.customers:
+                                    % for estimation in business.estimations:
                                         <li>
-                                        ${customer.get_label()}
+                                        <a href="${request.route_path('/estimations/{id}', id=estimation.id)}">
+                                        Devis : ${estimation.name}
+                                        </a>
+                                        </li>
+                                    % endfor
+                                    % for invoice in business.invoices:
+                                        <li>
+                                            <a href="${request.route_path('/%ss/{id}' % invoice.type_, id=invoice.id)}">
+                                            ${api.format_task_type(invoice)} n°${invoice.official_number} : ${invoice.name}
+                                            </a>
                                         </li>
                                     % endfor
                                 </ul>
                             </td>
+                            <td>
+                            </td>
                             <td class='text-right'>
-                                <div class='btn-group'>
-                                    <button
-                                        type="button"
-                                        class="btn btn-default dropdown-toggle"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false">
-                                        Actions <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-right">
-                                        % for url, label, title, icon, options in stream_actions(project):
-                                            ${dropdown_item(url, label, title, icon=icon, **options)}
-                                        % endfor
-                                    </ul>
-                                </div>
+                        	${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(business))}
                             </td>
                         </tr>
                     % endfor
                 % else:
                     <tr>
                         <td colspan='6'>
-                            Aucun projet n'a été créé pour l'instant
+                            Aucune affaire n'a été initiée pour l'instant
                         </td>
                     </tr>
                 % endif

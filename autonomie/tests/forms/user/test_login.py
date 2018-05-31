@@ -37,7 +37,8 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
         {
             'login': 'test2',
             'pwd_hash': 'oo',
-            'groups': ['contractor'],
+            'primary_group': 'contractor',
+            'groups': ['trainer'],
             'user_id': 3
         }
     )
@@ -49,7 +50,8 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
             {
                 'login': 'test2',
                 'pwd_hash': '',
-                'groups': ['contractor'],
+                'primary_group': 'contractor',
+                'groups': ['trainer'],
                 'user_id': 3
             }
         )
@@ -59,7 +61,8 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
             {
                 'login': 'login',
                 'pwd_hash': 'ooo',
-                'groups': ['contractor'],
+                'primary_group': 'contractor',
+                'groups': ['trainer'],
                 'user_id': 3
             }
         )
@@ -68,7 +71,8 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
             {
                 'login': 'test2',
                 'pwd_hash': 'ooo',
-                'groups': [],
+                'primary_group': '',
+                'groups': ['trainer'],
                 'user_id': 3
             }
         )
@@ -99,7 +103,8 @@ def test_edit_schema_login_context(
         {
             'login': 'test2',
             'pwd_hash': '',
-            'groups': ['manager'],
+            'primary_group': "manager",
+                'groups': ['trainer'],
             'user_id': user2.id,
         }
     )
@@ -110,7 +115,8 @@ def test_edit_schema_login_context(
         {
             'login': 'test2',
             'pwd_hash': 'notpwd2',
-            'groups': ['contractor'],
+            'primary_group': "manager",
+            'groups': ['trainer'],
             'user_id': user2.id,
         }
     )
@@ -123,7 +129,8 @@ def test_edit_schema_login_context(
             {
                 'login': 'login',
                 'pwd_hash': '',
-                'groups': ['contractor'],
+                'primary_group': "manager",
+                'groups': ['trainer'],
                 'user_id': user2.id,
             }
         )
@@ -134,19 +141,32 @@ def test_edit_schema_login_context(
             {
                 'login': 'test2',
                 'pwd_hash': 'ooo',
-                'groups': ['contractor'],
+                'primary_group': "manager",
+                'groups': ['trainer'],
                 'user_id': user.id
             }
         )
 
+    # wrong primary group
+    with pytest.raises(colander.Invalid):
+        schema.deserialize(
+            {
+                'login': 'test2',
+                'pwd_hash': 'ooo',
+                "primary_group": "falseone",
+                'groups': ['trainer'],
+                'user_id': user2.id,
+            }
+        )
     # wrong group
     with pytest.raises(colander.Invalid):
         schema.deserialize(
             {
                 'login': 'test2',
                 'pwd_hash': 'ooo',
-                'groups': ['unknown group'],
+                "primary_group": "contractor",
                 'user_id': user2.id,
+                "groups": ["falseone"],
             }
         )
 
@@ -176,7 +196,8 @@ def test_edit_schema_user_context(
         {
             'login': 'test2',
             'pwd_hash': '',
-            'groups': ['manager'],
+            "primary_group": "contractor",
+            'groups': ['trainer'],
             'user_id': user2.id,
         }
     )
@@ -187,7 +208,8 @@ def test_edit_schema_user_context(
         {
             'login': 'test2',
             'pwd_hash': 'notpwd2',
-            'groups': ['contractor'],
+            "primary_group": "contractor",
+            'groups': ['trainer'],
             'user_id': user2.id,
         }
     )
@@ -200,8 +222,9 @@ def test_edit_schema_user_context(
             {
                 'login': login.login,
                 'pwd_hash': '',
-                'groups': ['contractor'],
+                "primary_group": "contractor",
                 'user_id': user2.id,
+                'groups': ['trainer'],
             }
         )
 
@@ -211,7 +234,7 @@ def test_edit_schema_user_context(
             {
                 'login': 'test2',
                 'pwd_hash': '',
-                'groups': ['contractor'],
+                "primary_group": "contractor",
                 'user_id': user.id
             }
         )
@@ -222,6 +245,19 @@ def test_edit_schema_user_context(
             {
                 'login': 'test2',
                 'pwd_hash': '',
+                'primary_group': 'unknown group',
+                'groups': ['trainer'],
+                'user_id': user2.id,
+            }
+        )
+
+    # wrong group
+    with pytest.raises(colander.Invalid):
+        schema.deserialize(
+            {
+                'login': 'test2',
+                'pwd_hash': '',
+                "primary_group": "contractor",
                 'groups': ['unknown group'],
                 'user_id': user2.id,
             }

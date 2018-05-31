@@ -18,7 +18,10 @@ from autonomie.models.task import (
     Estimation,
     Task,
 )
-from autonomie.views import BaseListView
+from autonomie.views import (
+    BaseListView,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,7 @@ logger = logging.getLogger(__name__)
 class GlobalEstimationList(BaseListView):
     title = u"Devis de la CAE"
     add_template_vars = (u'title', 'is_admin',)
-    schema = get_list_schema(is_global=True)
+    schema = get_list_schema(is_global=True, excludes=('status',))
     sort_columns = dict(
         date=Estimation.date,
         customer=Customer.name,
@@ -56,7 +59,6 @@ class GlobalEstimationList(BaseListView):
         )
         query = query.outerjoin(Task.company)
         query = query.outerjoin(Task.customer)
-        query = query.filter(Estimation.status == 'valid')
         return query
 
     def filter_date(self, query, appstruct):
@@ -106,17 +108,24 @@ class GlobalEstimationList(BaseListView):
             query = query.filter(Estimation.customer_id == customer_id)
         return query
 
-    def filter_status(self, query, appstruct):
+    def filter_signed_status(self, query, appstruct):
         """
-            Filter estimations by status
+        Filter estimations by signed status
         """
-        status = appstruct['status']
-        logger.info("  + Status filtering : %s" % status)
+        status = appstruct['signed_status']
+        logger.info("  + Signed status filtering : %s" % status)
         if status == 'geninv':
             query = query.filter(Estimation.geninv == True)
         elif status != 'all':
             query = query.filter(Estimation.signed_status == status)
 
+        return query
+
+    def filter_status(self, query, appstruct):
+        """
+        Filter the estimations by status
+        """
+        query = query.filter(Estimation.status == 'valid')
         return query
 
     def more_template_vars(self, response_dict):
@@ -135,9 +144,14 @@ class GlobalEstimationList(BaseListView):
         return ret_dict
 
 
-class EstimationList(GlobalEstimationList):
-    schema = get_list_schema(is_global=False)
+class CompanyEstimationList(GlobalEstimationList):
     is_admin = False
+    schema = get_list_schema(is_global=False, excludes=("company_id",))
+    add_template_vars = (u'title', 'is_admin', "with_draft", )
+
+    @property
+    def with_draft(self):
+        return True
 
     @property
     def title(self):
@@ -150,6 +164,17 @@ class EstimationList(GlobalEstimationList):
         Return the current context's company id
         """
         return self.request.context.id
+
+    def filter_status(self, query, appstruct):
+        """
+        Filter the estimations by status
+        """
+        status = appstruct.get('status', 'all')
+        logger.info("  + Status filtering : %s" % status)
+        if status != 'all':
+            query = query.filter(Estimation.status == status)
+
+        return query
 
 
 def add_routes(config):
@@ -173,7 +198,7 @@ def add_views(config):
     """
     # Estimation list related views
     config.add_view(
-        EstimationList,
+        CompanyEstimationList,
         route_name="company_estimations",
         renderer="estimations.mako",
         permission="list_estimations",

@@ -28,7 +28,7 @@ def customer2(dbsession, company2):
     from autonomie.models.customer import Customer
     customer = Customer(
         name=u"customer 2",
-        code=u"CUST2",
+        code=u"CUS2",
         lastname=u"Lastname2",
         firstname=u"Firstname2",
         address=u"1th street",
@@ -42,9 +42,9 @@ def customer2(dbsession, company2):
 
 
 @pytest.fixture
-def project2(dbsession, company2, customer2):
+def project2(dbsession, company2, customer2, project_type):
     from autonomie.models.project import Project
-    project = Project(name=u"Project 2")
+    project = Project(name=u"Project 2", project_type=project_type)
     project.company = company2
     project.customers = [customer2]
     dbsession.add(project)
@@ -64,15 +64,17 @@ def phase2(dbsession, project2):
     return phase
 
 
-def test_new_task_schema(project, customer, phase, company, phase2, project2):
+def test_new_task_schema(
+    project, customer, phase, company, phase2, project2, default_business_type):
     import colander
     from pyramid.testing import DummyRequest
     from autonomie.tests.tools import Dummy
     from autonomie.forms.tasks.base import get_new_task_schema
+    from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
     schema = get_new_task_schema()
     req = DummyRequest(
         context=project,
-        matched_route=Dummy(name='project_estimations'),
+        matched_route=Dummy(name=PROJECT_ITEM_ESTIMATION_ROUTE),
         current_company=company,
     )
     schema = schema.bind(request=req)
@@ -82,7 +84,7 @@ def test_new_task_schema(project, customer, phase, company, phase2, project2):
         'customer_id': str(customer.id),
         'project_id': str(project.id),
         'phase_id': str(phase.id),
-        'course': str(1)
+        'business_type_id': str(default_business_type.id),
     })
 
     assert result == {
@@ -90,7 +92,7 @@ def test_new_task_schema(project, customer, phase, company, phase2, project2):
         'customer_id': customer.id,
         'project_id': project.id,
         'phase_id': phase.id,
-        'course': 1,
+        "business_type_id": default_business_type.id
     }
     with pytest.raises(colander.Invalid):
         schema.deserialize({
@@ -98,7 +100,7 @@ def test_new_task_schema(project, customer, phase, company, phase2, project2):
             'customer_id': str(customer.id),
             'project_id': str(project.id),
             'phase_id': str(phase2.id),
-            'course': str(1)
+            "business_type_id": str(default_business_type.id)
         })
 
     with pytest.raises(colander.Invalid):
@@ -107,5 +109,13 @@ def test_new_task_schema(project, customer, phase, company, phase2, project2):
             'customer_id': str(customer.id),
             'project_id': str(project2.id),
             'phase_id': str(phase2.id),
-            'course': str(1)
+            "business_type_id": str(default_business_type.id)
+        })
+
+    with pytest.raises(colander.Invalid):
+        schema.deserialize({
+            'name': u'Facture',
+            'customer_id': str(customer.id),
+            'project_id': str(project2.id),
+            'phase_id': str(phase2.id),
         })

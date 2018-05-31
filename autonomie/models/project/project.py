@@ -60,6 +60,15 @@ ProjectCustomer = Table(
     mysql_engine=default_table_args['mysql_engine']
 )
 
+ProjectBusinessType = Table(
+    'project_business_type',
+    DBBASE.metadata,
+    Column("project_id", Integer, ForeignKey('project.id')),
+    Column("business_type_id", Integer, ForeignKey('business_type.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine']
+)
+
 
 class Project(Node):
     """
@@ -77,13 +86,23 @@ class Project(Node):
 
     code = Column(
         String(4),
-        info={'colanderalchemy': {'title': u"Code"}},
+        info={
+            'colanderalchemy': {
+                'title': u"Code",
+                'description': u"Max 4 caractères."
+            }
+        },
     )
 
-    type = deferred(
+    description = deferred(
         Column(
             String(150),
-            info={'colanderalchemy': {'title': u"Type de projet"}},
+            info={
+                'colanderalchemy': {
+                    'title': u"Description succinte",
+                    "description": u"Max 150 caractères",
+                }
+            },
         ),
         group='edit'
     )
@@ -158,7 +177,27 @@ class Project(Node):
             'export': {'exclude': True},
         }
     )
-
+    business_types = relationship(
+        "BusinessType",
+        secondary=ProjectBusinessType,
+        info={
+            "colanderalchemy": {
+                "title": u"Types de sous-projet proposés",
+                "description": u"Types d'affaires que l'on peut utiliser "
+                "dans ce projet",
+            }
+        }
+    )
+    businesses = relationship(
+        "Business",
+        primaryjoin="Project.id==Business.project_id",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        }
+    )
     tasks = relationship(
         "Task",
         primaryjoin="Task.project_id==Project.id",
@@ -200,6 +239,32 @@ class Project(Node):
 
     _autonomie_service = ProjectService
 
+    def __json__(self, request):
+        """
+            Return a dict view of this object
+        """
+        phases = [phase.__json__(request) for phase in self.phases]
+        business_types = []
+        if self.project_type.default_business_type:
+            business_types.append(
+                self.project_type.default_business_type.__json__(request)
+            )
+
+        for business_type in self.business_types:
+            if business_type.allowed(request):
+                business_types.append(business_type.__json__(request))
+
+        return dict(
+            id=self.id,
+            name=self.name,
+            code=self.code,
+            definition=self.definition,
+            description=self.description,
+            archived=self.archived,
+            phases=phases,
+            business_types=business_types,
+        )
+
     def has_tasks(self):
         return self._autonomie_service.count_tasks(self) > 0
 
@@ -221,23 +286,8 @@ class Project(Node):
     def get_next_cancelinvoice_index(self):
         return self._autonomie_service.get_next_cancelinvoice_index(self)
 
-    def todict(self):
-        """
-            Return a dict view of this object
-        """
-        phases = [phase.todict() for phase in self.phases]
-        return dict(
-            id=self.id,
-            name=self.name,
-            code=self.code,
-            definition=self.definition,
-            type=self.type,
-            archived=self.archived,
-            phases=phases,
-        )
-
-    def __json__(self, request):
-        return self.todict()
+    def get_used_business_type_ids(self):
+        return self._autonomie_service.get_used_business_type_ids(self)
 
     @classmethod
     def check_phase_id(cls, project_id, phase_id):
@@ -246,3 +296,11 @@ class Project(Node):
     @classmethod
     def label_query(cls):
         return cls._autonomie_service.label_query(cls)
+
+    @classmethod
+    def get_code_list_with_labels(cls, company_id):
+        return cls._autonomie_service.get_code_list_with_labels(cls, company_id)
+
+    @classmethod
+    def get_customer_projects(cls, customer_id):
+        return cls._autonomie_service.get_customer_projects(cls, customer_id)

@@ -304,12 +304,12 @@ class Company(DBBASE, PersistentACLMixin):
             query = query.filter(cls.active == True)
         return query.order_by(cls.name)
 
-    def todict(self):
+    def __json__(self, request):
         """
             return a dict representation
         """
-        customers = [customer.todict() for customer in self.customers]
-        projects = [project.todict() for project in self.projects]
+        customers = [customer.__json__(request) for customer in self.customers]
+        projects = [project.__json__(request) for project in self.projects]
         return dict(id=self.id,
                     name=self.name,
                     goal=self.goal,
@@ -321,9 +321,6 @@ class Company(DBBASE, PersistentACLMixin):
                     IBAN=self.IBAN,
                     customers=customers,
                     projects=projects)
-
-    def __json__(self, request):
-        return self.todict()
 
     def get_tasks(self):
         """

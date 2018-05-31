@@ -70,6 +70,9 @@ def update_database_structure():
     op.execute("UPDATE company set active='1' where old_active='Y'")
     op.execute("UPDATE company set active='0' where old_active='N'")
 
+    op.add_column("groups", sa.Column("primary", sa.Boolean()))
+    op.add_column("groups", sa.Column("editable", sa.Boolean()))
+
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
@@ -78,6 +81,11 @@ def migrate_datas():
     connection = get_bind()
 
     from autonomie.models.user.login import Login
+    op.execute("update groups set editable=0;")
+    op.execute("update groups set `primary`=0;")
+    op.execute(
+        "update groups set `primary`=1 where name IN ('admin', 'contractor', 'manager')"
+    )
     op.execute('update accounts set civilite="Monsieur"')
 
     for user in connection.execute(user_helper.select()):
@@ -94,6 +102,9 @@ def migrate_datas():
                 login.id, user.id
             )
         )
+    op.drop_column("accounts", "login")
+    op.drop_column("accounts", "password")
+    op.drop_column("accounts", "active")
 
 
     from autonomie.models.user.user import User
@@ -125,9 +136,6 @@ def migrate_datas():
 def clean_database():
     op.execute("ALTER TABLE user_groups DROP INDEX IF EXISTS `user_id`")
     op.drop_column('user_groups', 'user_id')
-    op.drop_column("accounts", "login")
-    op.drop_column("accounts", "password")
-    op.drop_column("accounts", "active")
     op.drop_column('invoice', 'deposit')
 
 

@@ -26,7 +26,10 @@ import logging
 
 from pyramid.events import NewRequest
 
-from autonomie.utils.widgets import ActionMenu
+from autonomie.utils.widgets import (
+    ActionMenu,
+    Navigation,
+)
 from autonomie.i18n import translate
 
 logger = logging.getLogger(__name__)
@@ -51,7 +54,10 @@ def add_request_attributes(event):
     """
     request = event.request
     request.translate = translate
+    # Old stuff will be deprecated with the time
     request.actionmenu = ActionMenu()
+    # Use this one instead
+    request.navigation = Navigation()
     request.popups = {}
 
 

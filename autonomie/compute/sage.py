@@ -312,8 +312,9 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
         """
             Return the invoice number
         """
+        prefix = self.invoice.prefix or ""
         return u"{0}{1}".format(
-            self.invoice.prefix,
+            prefix,
             self.invoice.official_number,
         )
 
@@ -366,7 +367,7 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             Return the value of the libelle column
         """
         return u"{0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -465,7 +466,7 @@ class SageContribution(BaseInvoiceBookEntryFactory):
     @property
     def libelle(self):
         return u"{0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -572,7 +573,7 @@ class SageAssurance(BaseInvoiceBookEntryFactory):
     @property
     def libelle(self):
         return u"{0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -654,7 +655,7 @@ class SageCGScop(BaseInvoiceBookEntryFactory):
     @property
     def libelle(self):
         return u"{0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -736,7 +737,7 @@ class SageContributionOrganic(BaseInvoiceBookEntryFactory):
     @property
     def libelle(self):
         return u"Contribution Organic {0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -821,7 +822,7 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
     @property
     def libelle(self):
         return u"RG COOP {0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -905,7 +906,7 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
     @property
     def libelle(self):
         return u"RG {0} {1}".format(
-            self.invoice.customer.name,
+            self.invoice.customer.label,
             self.company.name,
         )
 
@@ -1394,7 +1395,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
     def libelle(self):
         return u"{0} / Rgt {1}".format(
             self.company.name,
-            self.invoice.customer.name,
+            self.invoice.customer.label,
         )
 
     @property

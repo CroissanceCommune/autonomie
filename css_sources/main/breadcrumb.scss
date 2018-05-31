@@ -1,9 +1,15 @@
- .breadcrumb-arrow {
+@import 'colors.scss';
+.local-navigation{
+}
+.breadcrumb-arrow {
+   margin-top: 3px;
+   margin-left: 3px;
+   margin-bottom: 5px;
     height: 36px;
     padding: 0;
     line-height: 36px;
     list-style: none;
-    background-color: #e6e9ed
+    background-color: $breadcrumb-bkg-color;
 }
 .breadcrumb-arrow li:first-child a {
     border-radius: 4px 0 0 4px;
@@ -12,7 +18,6 @@
 }
 .breadcrumb-arrow li, .breadcrumb-arrow li a, .breadcrumb-arrow li span {
     display: inline-block;
-//   vertical-align: top
 }
 .breadcrumb-arrow li:not(:first-child) {
     margin-left: -5px

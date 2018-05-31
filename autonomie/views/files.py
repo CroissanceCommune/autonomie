@@ -145,7 +145,6 @@ class FileView(BaseView, FileViewRedirectMixin):
         )
 
     def __call__(self):
-        self.populate_actionmenu()
         return dict(
             title=u"Fichier {0}".format(self.context.name),
             file=self.context,

@@ -17,9 +17,9 @@ def test_estimation_set_numbers(full_estimation):
 def test_duplicate_estimation(dbsession, full_estimation):
     newestimation = full_estimation.duplicate(
         full_estimation.owner,
-        full_estimation.project,
-        full_estimation.phase,
-        full_estimation.customer,
+        project=full_estimation.project,
+        phase=full_estimation.phase,
+        customer=full_estimation.customer,
     )
     for key in "customer", "address", "expenses_ht", "workplace":
         assert getattr(newestimation, key) == getattr(full_estimation, key)

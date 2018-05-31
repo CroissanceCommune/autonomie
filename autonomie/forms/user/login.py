@@ -106,13 +106,60 @@ def deferred_password_validator(node, kw):
     return get_auth_validator(login)
 
 
-def get_groups(request):
+def get_primary_groups(request):
     """
-    Collect groups
+    Collect non primary groups
 
     :returns: available groups as a list of 2-uples (name, label)
     """
-    groups = Group.query().options(load_only(Group.id, Group.label)).all()
+    groups = Group.query().options(
+        load_only(Group.id, Group.label)
+    ).filter_by(primary=True).all()
+    return [
+        (group.name, group.label) for group in groups
+        if request.has_permission(u"addgroup.{0}".format(group.name))
+    ]
+
+
+@colander.deferred
+def _deferred_primary_group_validator(node, kw):
+    """
+    Build a validator for group name validation
+
+    :param obj node: The form schema node
+    :param dict kw: The form schema bind params
+
+    :returns: A colander validator
+    """
+    request = kw['request']
+    groups = get_primary_groups(request)
+    return colander.OneOf([group[0] for group in groups])
+
+
+@colander.deferred
+def _deferred_primary_group_widget(node, kw):
+    """
+    Build a select widget for groups
+
+    :param obj node: The form schema node
+    :param dict kw: The form schema bind params
+
+    :returns: A deform widget
+    """
+    request = kw['request']
+    groups = get_primary_groups(request)
+    return deform.widget.RadioChoiceWidget(values=groups)
+
+
+def get_groups(request):
+    """
+    Collect non primary groups
+
+    :returns: available groups as a list of 2-uples (name, label)
+    """
+    groups = Group.query().options(
+        load_only(Group.id, Group.label)
+    ).filter_by(primary=False).all()
     return [
         (group.name, group.label) for group in groups
         if request.has_permission(u"addgroup.{0}".format(group.name))
@@ -132,7 +179,7 @@ def _deferred_group_validator(node, kw):
     request = kw['request']
     groups = get_groups(request)
     validator = colander.ContainsOnly([group[0] for group in groups])
-    return colander.All(colander.Length(min=1), validator)
+    return validator
 
 
 @colander.deferred
@@ -238,11 +285,20 @@ def get_add_edit_schema(edit=False):
 
     schema.add(
         colander.SchemaNode(
+            colander.String(),
+            name="primary_group",
+            validator=_deferred_primary_group_validator,
+            widget=_deferred_primary_group_widget,
+            title=u"Rôle de l'utilisateur",
+        )
+    )
+    schema.add(
+        colander.SchemaNode(
             colander.Set(),
             name="groups",
             validator=_deferred_group_validator,
             widget=_deferred_group_widget,
-            title=u"Groupes de l'utilisateur",
+            title=u"Droits spécifiques",
         )
     )
 

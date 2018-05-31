@@ -1,9 +1,8 @@
 <%doc>
- * Copyright (C) 2012-2013 Croissance Commune
+    * Copyright (C) 2012-2016 Croissance Commune
  * Authors:
        * Arezki Feth <f.a@majerti.fr>;
        * Miotte Julien <j.m@majerti.fr>;
-       * Pettier Gabriel;
        * TJEBBES Gaston <g.t@majerti.fr>
 
  This file is part of Autonomie : Progiciel de gestion de CAE.
@@ -21,35 +20,29 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-
 <%inherit file="${context['main_template'].uri}" />
-<%namespace file="base/utils.mako" import="format_text" />
-<%block name='content'>
+<%block name='mainblock'>
 <div class='row'>
-    <div class='col-md-6 col-md-offset-3'>
+    <div class='col-xs-12'>
         <div class='panel panel-default page-block'>
-        <div class='panel-heading'>
-        ${title}
-        </div>
-        <div class='panel-body'>
-        ${form|n}
-        </div>
-        </div>
-    </div>
-    <div class='col-md-3'>
-        <div class='panel panel-default page-block'>
-        <div class='panel-heading'>
-            Codes projet utilisés
-        </div>
-        <div class='panel-body'>
-        <ul>
-            % for project in projects:
-                <li>
-                ${project.code.upper()} (${project.name})
-                </li>
-            % endfor
-        </ul>
-        </div>
+            <div class='panel-heading'>
+                <div class='row'>
+                <div class='col-md-3 col-xs-12 bordered'>
+                    <h4>${request.context.name}</h4>
+                    <small>${request.context.business_type.label}</small>
+                    % if request.has_permission("edit.business", request.context):
+                    <a
+                        class='btn btn-default btn-small pull-right'
+                        href="${edit_url}"
+                        >
+                        <i class='fa fa-pencil'></i>
+                    </a>
+                    % endif
+                </div>
+                </div>
+            </div>
+            <div class='panel-body'>
+            </div>
         </div>
     </div>
 </div>

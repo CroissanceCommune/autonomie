@@ -6,17 +6,6 @@
 import pytest
 from autonomie.tests.tools import DummyForm
 
-@pytest.fixture(scope="module")
-def groups(dbsession):
-    from autonomie.models.user.group import Group
-    groups = []
-    for i in 'contractor', 'admin', 'manager':
-        group = Group(name=i, label=i)
-        dbsession.add(group)
-        groups.append(group)
-    dbsession.flush()
-    return groups
-
 
 class TestLoginAddView():
     def test_before(self, get_csrf_request_with_db, user):
@@ -59,7 +48,8 @@ class TestLoginAddView():
         appstruct = {
             'pwd_hash': 'password',
             'login': 'test1@email.fr',
-            'groups': ['contractor'],
+            'primary_group': 'contractor',
+            'groups': ['trainer'],
         }
 
         view = LoginAddView(req)
@@ -68,7 +58,7 @@ class TestLoginAddView():
         assert result.code == 302
         assert result.location == '/users/{0}'.format(user.id)
 
-        assert new_login.groups == ['contractor']
+        assert new_login.groups == ['trainer', 'contractor']
         assert new_login.auth('password')
 
     def test_submit_success_next_step(
@@ -207,13 +197,17 @@ class TestUserLoginEditView:
 
         appstruct = {
             'pwd_hash': 'new_password',
-            'login': 'test1@email.fr'
+            'login': 'test1@email.fr',
+            'primary_group': 'manager',
+            'groups': ['constructor', 'trainer'],
         }
         view = UserLoginEditView(req)
         result = view.submit_success(appstruct)
         assert result.code == 302
         assert result.location == '/users/{0}/login'.format(login.user_id)
         assert login.login == 'test1@email.fr'
+        assert login.primary_group() == 'manager'
+        assert login.groups == ['constructor', 'trainer', 'manager']
 
 
 class TestLoginDisableView:

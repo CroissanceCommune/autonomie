@@ -26,3 +26,4 @@ def includeme(config):
         parent=SaleIndexView,
     )
     config.include('.project_type')
+    config.include('.mentions')

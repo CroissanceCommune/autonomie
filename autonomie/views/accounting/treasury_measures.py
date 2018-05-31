@@ -60,14 +60,14 @@ class CompanyTreasuryMeasuresListView(BaseListView):
         last_grid_object = TreasuryMeasureGrid.last(company_id)
         last_grid = None
         if last_grid_object is not None:
-            last_grid = last_grid_object.__todict__(self.request)
+            last_grid = last_grid_object.__json__(self.request)
         return last_grid
 
     @property
     def current_grid(self):
         if isinstance(self.context, TreasuryMeasureGrid):
             current_grid_object = self.context
-            current_grid = current_grid_object.__todict__(self.request)
+            current_grid = current_grid_object.__json__(self.request)
         else:
             current_grid = self.last_grid
         return current_grid

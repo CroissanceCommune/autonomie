@@ -134,6 +134,19 @@ class Login(DBBASE):
             return self.pwd_hash == self._encode_pass(password)
         return False
 
+    def primary_group(self):
+        """
+        Find a group that should be primary in the login's groups
+
+        :returns: The group name
+        :rtype: str
+        """
+        result = ""
+        for group in self._groups:
+            if group.primary:
+                result = group.name
+        return result
+
     @classmethod
     def query(cls, only_active=True):
         """

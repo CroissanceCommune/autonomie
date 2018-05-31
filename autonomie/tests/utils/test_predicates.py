@@ -85,15 +85,15 @@ def test_check_secret():
 
 
 def test_api_key_authentication(request, settings):
-    from autonomie.utils.predicates import ApiKeyAuthentication
+    from autonomie.utils.predicates import ApiKeyAuthenticationPredicate
 
     settings['key'] = 'secret'
     timestamp = request.headers['timestamp'] = time.time()
     request.headers['Authorization'] = "HMAC-MD5 " + \
         md5(u"%s-secret" % timestamp).hexdigest()
 
-    api = ApiKeyAuthentication('key', None)
+    api = ApiKeyAuthenticationPredicate('key', None)
     assert api(None, request)
 
-    api = ApiKeyAuthentication('wrongkey', None)
+    api = ApiKeyAuthenticationPredicate('wrongkey', None)
     assert not api(None, request)

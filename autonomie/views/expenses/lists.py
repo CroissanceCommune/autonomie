@@ -5,7 +5,6 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import colander
 import datetime
-import deform
 import logging
 
 from collections import OrderedDict
@@ -29,7 +28,6 @@ from autonomie.forms.expense import (
 
 from autonomie.views import (
     BaseListView,
-    submit_btn,
 )
 from autonomie.views.expenses.utils import get_payment_form
 
@@ -70,7 +68,7 @@ class ExpenseList(BaseListView):
         return form_name
 
     def query(self):
-        query = ExpenseSheet.query().outerjoin(ExpenseSheet.user)
+        query = ExpenseSheet.query().distinct().outerjoin(ExpenseSheet.user)
         return query
 
     def filter_search(self, query, appstruct):
@@ -119,21 +117,6 @@ def expense_configured():
     for factory in (ExpenseType, ExpenseKmType, ExpenseTelType):
         length += factory.query().count()
     return length > 0
-
-
-def get_period_form(request, action_url=""):
-    """
-        Return a form to select the period of the expense sheet
-    """
-    schema = PeriodSelectSchema().bind(request=request)
-    form = deform.Form(
-        schema=schema,
-        buttons=(submit_btn,),
-        method='GET',
-        formid='period_form',
-        action=action_url,
-    )
-    return form
 
 
 def get_expensesheet_years(company):

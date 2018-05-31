@@ -64,6 +64,12 @@ Téléchargement et installation de l'application
 Éditer le fichier development.ini et configurer votre logiciel (Accès à la base
 de données, différents répertoires de ressources statiques ...).
 
+Initialiser la base de données
+
+.. code-block:: console
+
+    autonomie-admin development.ini syncdb
+
 Puis lancer l'application web
 
 .. code-block:: console
@@ -90,6 +96,25 @@ Puis créer un compte administrateur
 .. code-block:: console
 
     autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
+
+
+Mise à jour
+-----------
+
+La mise à jour d'Autonomie s'effectue en deux temps (il est préférable de
+sauvegarder vos données avant de lancer les commandes suivantes)
+
+Mise à jour de la structure de données
+
+.. code-block:: console
+
+    autonomie-migrate app.ini upgrade
+
+Configuration des données par défaut dans la base de données
+
+.. code-block:: console
+
+    autonomie-admin app.ini syncdb
 
 
 Développement

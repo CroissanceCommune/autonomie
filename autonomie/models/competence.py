@@ -43,7 +43,7 @@ from autonomie_base.models.base import (
 )
 from autonomie.forms import (
     EXCLUDED,
-    get_deferred_select,
+    get_deferred_model_select,
     get_hidden_field_conf,
 )
 
@@ -244,7 +244,7 @@ référence à chaque échéance.",
         info={
             'colanderalchemy': {
                 "title": u"Niveau de référence",
-                "widget": get_deferred_select(
+                "widget": get_deferred_model_select(
                     CompetenceScale,
                     mandatory=True,
                     keys=('value', 'label'),

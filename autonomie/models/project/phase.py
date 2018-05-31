@@ -8,13 +8,13 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
+    Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
     backref,
 )
 
-from autonomie import forms
 from autonomie_base.models.types import (
     PersistentACLMixin,
 )
@@ -33,12 +33,12 @@ class Phase(DBBASE, PersistentACLMixin):
     id = Column(
         Integer,
         primary_key=True,
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     project_id = Column(
         ForeignKey('project.id'),
-        info={'colanderalchemy': forms.EXCLUDED},
+        info={'colanderalchemy': {'exclude': True}},
     )
 
     name = Column("name", String(150), default=u'Phase par défaut')
@@ -49,12 +49,12 @@ class Phase(DBBASE, PersistentACLMixin):
             "phases",
             cascade="all, delete-orphan",
             info={
-                'colanderalchemy': forms.EXCLUDED,
+                'colanderalchemy': {'exclude': True},
                 'export': {'exclude': True}
             },
         ),
         info={
-            'colanderalchemy': forms.EXCLUDED,
+            'colanderalchemy': {'exclude': True},
             'export': {'exclude': True}
         },
     )
@@ -83,9 +83,18 @@ class Phase(DBBASE, PersistentACLMixin):
         """
         return [doc for doc in self.tasks if doc.type_ == type_]
 
-    def todict(self):
+    def __json__(self, request):
         """
             return a dict version of this object
         """
         return dict(id=self.id,
                     name=self.name)
+
+    def label(self):
+        """
+        Return a label representing this phase
+        """
+        if self.is_default():
+            return u"Dossier par défaut"
+        else:
+            return self.name

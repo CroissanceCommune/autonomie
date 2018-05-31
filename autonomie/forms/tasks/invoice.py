@@ -78,9 +78,20 @@ from autonomie.forms.tasks.lists import (
 from autonomie.forms.tasks.task import get_add_edit_task_schema
 
 
-STATUS_OPTIONS = (("both", u"Filtrer par statut de paiement", ),
-                  ("paid", u"Les factures payées", ),
-                  ("notpaid", u"Seulement les impayés", ))
+PAID_STATUS_OPTIONS = (
+    ("all", u"Filtrer par statut de paiement", ),
+    ("paid", u"Les factures payées", ),
+    ("notpaid", u"Seulement les impayés", )
+)
+
+STATUS_OPTIONS = (
+    ('all', u"Filtrer par statut", ),
+    ('draft', u"Brouillon"),
+    ('wait', u"En attente de validation"),
+    ('invalid', u"Invalide"),
+    ('valid', u"Valide"),
+)
+
 
 TYPE_OPTIONS = (
     ("both", u"Filtrer par factures/avoirs", ),
@@ -244,28 +255,41 @@ def get_set_product_schema(lines):
 
 
 # INVOICE LIST RELATED SCHEMAS
-def get_list_schema(is_admin=False):
+def get_list_schema(is_global=False, excludes=()):
     """
     Return a schema for invoice listing
 
-    is_admin
+    is_global
 
-        If True, we don't provide the company selection node and we reduce the
-        customers to the current company's
+        If True, customer select is only related to the current company
     """
     schema = forms.lists.BaseListsSchema().clone()
 
-    schema.insert(
-        0,
-        colander.SchemaNode(
-            colander.String(),
-            name='status',
-            widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
-            validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
-            missing='both',
-            default='both',
+    if 'paid_status' not in excludes:
+        schema.insert(
+            0,
+            colander.SchemaNode(
+                colander.String(),
+                name='paid_status',
+                widget=deform.widget.SelectWidget(values=PAID_STATUS_OPTIONS),
+                validator=colander.OneOf([s[0] for s in PAID_STATUS_OPTIONS]),
+                missing='all',
+                default='all',
+            )
         )
-    )
+
+    if 'status' not in excludes:
+        schema.insert(
+            0,
+            colander.SchemaNode(
+                colander.String(),
+                name='status',
+                widget=deform.widget.SelectWidget(values=STATUS_OPTIONS),
+                validator=colander.OneOf([s[0] for s in STATUS_OPTIONS]),
+                missing='all',
+                default='all',
+            )
+        )
 
     schema.insert(
         0,
@@ -279,9 +303,10 @@ def get_list_schema(is_admin=False):
         )
     )
 
-    schema.insert(0, customer_node(is_admin))
+    if 'customer' not in excludes:
+        schema.insert(0, customer_node(is_global))
 
-    if is_admin:
+    if 'company_id' not in excludes:
         schema.insert(
             0,
             company_node(
@@ -319,19 +344,20 @@ def get_list_schema(is_admin=False):
         )
     )
 
-    def get_year_options(kw):
-        values = invoice.get_invoice_years(kw)
-        values.insert(0, u'')
-        return values
+    if 'year' not in excludes:
+        def get_year_options(kw):
+            values = invoice.get_invoice_years(kw)
+            values.insert(0, u'')
+            return values
 
-    node = forms.year_select_node(
-        name='year',
-        query_func=get_year_options,
-        missing=-1,
-        description=u"Année fiscale"
-    )
+        node = forms.year_select_node(
+            name='year',
+            query_func=get_year_options,
+            missing=-1,
+            description=u"Année fiscale"
+        )
 
-    schema.insert(0, node)
+        schema.insert(0, node)
 
     schema['search'].description = u"Identifiant du document"
 

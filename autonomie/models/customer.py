@@ -424,11 +424,11 @@ class Customer(DBBASE, PersistentACLMixin):
         """
         return self.company.id
 
-    def todict(self):
+    def __json__(self, request):
         """
             :returns: a dict version of the customer object
         """
-        projects = [project.todict() for project in self.projects]
+        projects = [project.__json__(request) for project in self.projects]
         return dict(
             id=self.id,
             code=self.code,
@@ -448,9 +448,6 @@ class Customer(DBBASE, PersistentACLMixin):
             archived=self.archived,
             company_id=self.company_id,
         )
-
-    def __json__(self, request):
-        return self.todict()
 
     @property
     def full_address(self):
@@ -499,6 +496,9 @@ class Customer(DBBASE, PersistentACLMixin):
     @classmethod
     def label_query(cls):
         return cls._autonomie_service.label_query(cls)
+
+    def get_project_ids(self):
+        return self._autonomie_service.get_project_ids(self)
 
 
 COMPANY_FORM_GRID = (

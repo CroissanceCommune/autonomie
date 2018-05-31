@@ -125,3 +125,16 @@ class CustomerService(object):
             "company_id",
         ))
         return query
+
+    @classmethod
+    def get_project_ids(cls, customer):
+        """
+        Collect the ids of the projects attached to the given customer
+        """
+        from autonomie.models.project.project import ProjectCustomer
+        return [p.project_id
+                for p in DBSESSION().query(
+                    ProjectCustomer
+                ).filter_by(
+                    customer_id=customer.id
+                ).all()]

@@ -67,6 +67,7 @@ from autonomie.views.csv_import import (
     CsvFileUploadView,
     ConfigFieldAssociationView,
 )
+from autonomie.views.project.routes import COMPANY_PROJECTS_ROUTE
 
 logger = log = logging.getLogger(__name__)
 
@@ -204,7 +205,7 @@ class CustomersListView(CustomersListTools, BaseListView):
 
         yield (
             self.request.route_path(
-                "company_projects",
+                COMPANY_PROJECTS_ROUTE,
                 id=customer.company.id,
                 _query=dict(action="add", customer=customer.id)
             ),
@@ -292,17 +293,23 @@ def customer_delete(request):
     return HTTPFound(request.referer)
 
 
-def customer_view(request):
+def customer_view(context, request):
     """
         Return the view of a customer
     """
     populate_actionmenu(request)
-    title = u"Client : {0}".format(request.context.get_label())
+    title = u"Client : {0}".format(context.get_label())
     if request.context.code:
-        title += u" {0}".format(request.context.code)
+        title += u" {0}".format(context.code)
+
     return dict(
         title=title,
-        customer=request.context
+        customer=request.context,
+        add_project_url=request.route_path(
+            COMPANY_PROJECTS_ROUTE,
+            id=context.company.id,
+            _query={'action': 'add', 'customer': context.id}
+        )
     )
 
 

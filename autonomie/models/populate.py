@@ -13,17 +13,46 @@ from autonomie_base.models.base import DBSESSION
 logger = logging.getLogger(__name__)
 
 GROUPS = (
-    ('estimation_validation', u"Peut valider ses propres devis", ),
-    ('invoice_validation', u"Peut valider ses propres factures", ),
-    ('estimation_only', u"Ne peut pas créer de factures sans devis"),
-    (
-        "payment_admin",
-        u"Peut saisir/modifier/supprimer les paiements de ses factures",
-    ),
-    ('manager', u"Est membre de l'équipe d'appui", ),
-    ('admin', u"Administre l'application", ),
-    ('contractor', u'Entrepreneur de la coopérative',),
-    ('trainer', u"Entrepreneur - Formateur",),
+    {
+        'name': 'manager',
+        'label': u"Est membre de l'équipe d'appui",
+        'primary': True,
+    },
+    {
+        'name': 'admin',
+        'label': u"Administre l'application",
+        "primary": True,
+    },
+    {
+        'name': 'contractor',
+        'label': u'Entrepreneur de la coopérative',
+        'primary': True
+    },
+    {
+        'name': 'estimation_validation',
+        'label': u"Peut valider ses propres devis",
+    },
+    {
+        'name': 'invoice_validation',
+        'label': u"Peut valider ses propres factures",
+    },
+    {
+        'name': 'estimation_only',
+        'label': u"Ne peut pas créer de factures sans devis",
+    },
+    {
+        'name': "payment_admin",
+        'label': u"Peut saisir/modifier/supprimer les paiements \
+de ses factures",
+    },
+    {
+        'name': 'trainer',
+        'label': u"Formateur",
+    },
+    {
+        'name': 'constructor',
+        'label': u"Peut initier des chantiers",
+    },
 )
 
 
@@ -55,9 +84,11 @@ def populate_groups(session):
     Populate the groups in the database
     """
     from autonomie.models.user.group import Group
-    for name, label in GROUPS:
-        if session.query(Group.id).filter(Group.name == name).count() == 0:
-            session.add(Group(name=name, label=label))
+    for group in GROUPS:
+        if session.query(Group.id).filter(
+            Group.name == group['name']
+        ).count() == 0:
+            session.add(Group(**group))
     session.flush()
 
 
@@ -111,19 +142,42 @@ def populate_accounting_income_statement_measure_types(session):
 
 
 def populate_project_types(session):
-    from autonomie.models.project.types import ProjectType
-    for name, label, private in (
-        ("default", u"Projet classique", False),
-        ("training", u"Formation", True),
-        ("construction", u"Chantier", False),
+    from autonomie.models.project.types import (
+        ProjectType,
+        BusinessType,
+    )
+    for name, label, subtype_label, private, default in (
+        ("default", u"Projet classique", "Affaire simple", False, True,),
+        ("training", u"Convention de formation", "Formation", True, False),
+        ("construction", u"Chantiers", u"Chantier", True, False),
     ):
-        if ProjectType.query().filter_by(name=name).count() == 0:
+        ptype = ProjectType.query().filter_by(name=name).first()
+        if ptype is None:
+            ptype = ProjectType(
+                name=name,
+                label=label,
+                editable=False,
+                private=private,
+                default=default,
+            )
+            session.add(ptype)
+            session.flush()
+            if name is not 'default':
+                default_btype = BusinessType.query().filter_by(
+                    name='default').first()
+                default_btype.other_project_types.append(ptype)
+                session.merge(default_btype)
+                session.flush()
+
+        if BusinessType.query().filter_by(name=name).count() == 0:
             session.add(
-                ProjectType(
+                BusinessType(
                     name=name,
-                    label=label,
+                    label=subtype_label,
                     editable=False,
                     private=private,
+                    project_type_id=ptype.id,
+
                 )
             )
     session.flush()
@@ -140,6 +194,7 @@ def populate_database():
         populate_groups,
         populate_accounting_treasury_measure_types,
         populate_accounting_income_statement_measure_types,
+        populate_project_types,
     ):
         try:
             func(session)

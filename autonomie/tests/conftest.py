@@ -375,10 +375,17 @@ def groups(dbsession):
     from autonomie.models.user.group import Group
     groups = []
     for name in ('contractor', 'manager', 'admin'):
+        group = Group(name=name, label=name, primary=True)
+        dbsession.add(group)
+        dbsession.flush()
+        groups.append(group)
+
+    for name in ('trainer', 'constructor'):
         group = Group(name=name, label=name)
         dbsession.add(group)
         dbsession.flush()
         groups.append(group)
+
     return groups
 
 
@@ -521,9 +528,39 @@ def individual_customer(dbsession, company):
 
 
 @fixture
-def project(dbsession, company, customer):
+def default_business_type(dbsession):
+    from autonomie.models.project.types import BusinessType
+    bus = BusinessType(name="default", label=u"Cycle court")
+    dbsession.add(bus)
+    dbsession.flush()
+    return bus
+
+
+@fixture
+def other_business_type(dbsession):
+    from autonomie.models.project.types import BusinessType
+    bus = BusinessType(name="other", label=u"Cycle long")
+    dbsession.add(bus)
+    dbsession.flush()
+    return bus
+
+
+@fixture
+def project_type(dbsession, default_business_type, other_business_type):
+    from autonomie.models.project.types import ProjectType
+    proj = ProjectType(name="default", label=u"Par défaut")
+    proj.other_business_types.append(other_business_type)
+    proj.default_business_type = default_business_type
+    dbsession.add(proj)
+    dbsession.flush()
+    default_business_type.project_type = proj
+    return proj
+
+
+@fixture
+def project(dbsession, company, customer, project_type):
     from autonomie.models.project import Project
-    project = Project(name=u"Project")
+    project = Project(name=u"Project", project_type=project_type)
     project.company = company
     project.customers = [customer]
     dbsession.add(project)

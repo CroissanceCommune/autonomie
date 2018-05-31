@@ -187,8 +187,11 @@ def invoice(def_tva, tva):
     group = DummyGroup(lines=(line1, line2, line3,))
 
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
-    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
-                     compte_cg='CG_CUSTOMER')
+    customer = Dummy(
+        label="customer",
+        compte_tiers="CUSTOMER",
+        compte_cg='CG_CUSTOMER'
+    )
     invoice = TaskCompute()
     invoice.default_tva = def_tva.value
     invoice.expenses_tva = def_tva.value
@@ -230,7 +233,7 @@ def invoice_bug363(def_tva, tva10):
 
     group = DummyGroup(lines=lines)
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
-    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
+    customer = Dummy(label="customer", compte_tiers="CUSTOMER",
                      compte_cg='CG_CUSTOMER')
     invoice = TaskCompute()
     invoice.default_tva = def_tva.value
@@ -266,7 +269,7 @@ def invoice_bug400(def_tva, tva20):
 
     group = DummyGroup(lines=lines)
     company = Dummy(name="company", code_compta='COMP_CG', contribution=None)
-    customer = Dummy(name="customer", compte_tiers="CUSTOMER",
+    customer = Dummy(label="customer", compte_tiers="CUSTOMER",
                      compte_cg='CG_CUSTOMER')
     invoice = TaskCompute()
     invoice.default_tva = def_tva.value
@@ -790,7 +793,7 @@ class TestCustomAssurance(BaseBookEntryTest):
                 compte_cg_debit='CG_ASSUR',
                 compte_cg_credit='CG_ASSUR',
                 percentage=5,
-                label_template=u"{client.name} {entreprise.name}"
+                label_template=u"{client.label} {entreprise.name}"
             )
         )
 
@@ -847,7 +850,7 @@ class TestCustomCGScop(BaseBookEntryTest):
                 compte_cg_debit='CG_SCOP',
                 compte_cg_credit='CG_DEB',
                 percentage=5,
-                label_template=u"{client.name} {entreprise.name}"
+                label_template=u"{client.label} {entreprise.name}"
             )
         )
 
@@ -905,7 +908,7 @@ class TestCustomBookEntryFactory(BaseBookEntryTest):
                 compte_cg_debit='CG_ORGA',
                 compte_cg_credit='CG_DEB_ORGA',
                 percentage=5,
-                label_template=u"Contribution Organic {client.name} \
+                label_template=u"Contribution Organic {client.label} \
 {entreprise.name}"
             )
         )

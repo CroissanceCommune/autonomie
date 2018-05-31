@@ -55,6 +55,7 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 
 from autonomie.utils.strings import (
@@ -70,7 +71,9 @@ from autonomie.compute.math_utils import (
     amount,
 )
 from autonomie.models.node import Node
+from autonomie.models.project.business import Business
 from autonomie.models.task.mentions import (
+    MANDATORY_TASK_MENTION,
     TASK_MENTION,
 )
 from autonomie.models.tva import (
@@ -377,6 +380,8 @@ class Task(Node):
             'export': {'exclude': True},
         }
     )
+    business_type_id = Column(ForeignKey("business_type.id"))
+    business_id = Column(ForeignKey("business.id"))
 
     # Organisationnal Relationships
     status_person = relationship(
@@ -461,6 +466,16 @@ class Task(Node):
             'export': {'related_key': 'label', 'label': u"Client"},
         },
     )
+    business_type = relationship(
+        "BusinessType",
+        info={'colanderalchemy': {'exclude': True}}
+    )
+    business = relationship(
+        "Business",
+        primaryjoin="Business.id==Task.business_id",
+        info={'colanderalchemy': {'exclude': True}}
+    )
+
     # Content relationships
     discounts = relationship(
         "DiscountLine",
@@ -489,7 +504,13 @@ class Task(Node):
         "TaskMention",
         secondary=TASK_MENTION,
         order_by="TaskMention.order",
-        back_populates="tasks",
+        info={'export': {'exclude': True}},
+    )
+
+    mandatory_mentions = relationship(
+        "TaskMention",
+        secondary=MANDATORY_TASK_MENTION,
+        order_by="TaskMention.order",
         info={'export': {'exclude': True}},
     )
 
@@ -542,23 +563,37 @@ _{s.date:%m%y}"
 
     state_manager = None
 
-    def __init__(self, company, customer, project, phase, user):
+    def __init__(self, user, company, **kw):
+        project = kw['project']
         company_index = self._get_company_index(company)
         project_index = self._get_project_index(project)
 
         self.status = 'draft'
         self.company = company
-        self.customer = customer
+        customer = kw['customer']
         self.address = customer.full_address
-        self.project = project
-        self.phase = phase
         self.owner = user
         self.status_person = user
         self.date = datetime.date.today()
         self.set_numbers(company_index, project_index)
+        log.debug(
+            "##################### Here we are, current name : %s" % self.name
+        )
+
+        for key, value in kw.items():
+            setattr(self, key, value)
 
         # We add a default task line group
         self.line_groups.append(TaskLineGroup(order=0))
+
+        if self.business_type_id is not None:
+            with DBSESSION.no_autoflush:
+                from autonomie.models.project.types import BusinessType
+
+                self.mandatory_mentions = BusinessType.get_mandatory_mentions(
+                    self.business_type_id,
+                    self.type_,
+                )
 
     def _get_project_index(self, project):
         """
@@ -724,6 +759,24 @@ _{s.date:%m%y}"
     @classmethod
     def get_waiting_invoices(cls, *args):
         return cls._autonomie_service.get_waiting_invoices(cls, *args)
+
+    def gen_business(self):
+        """
+        Generate a business based on this Task
+
+        :returns: A new business instance
+        :rtype: :class:`autonomie.models.project.business.Business`
+        """
+        business = Business(
+            name=self.name,
+            project_id=self.project_id,
+            business_type_id=self.business_type_id,
+        )
+        DBSESSION().add(business)
+        DBSESSION().flush()
+        self.business_id = business.id
+        DBSESSION().merge(self)
+        return business
 
 
 class DiscountLine(DBBASE, DiscountLineCompute):

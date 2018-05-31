@@ -9,7 +9,6 @@ Common utilities used for task edition
 from autonomie.models.task import (
     PaymentConditions,
     WorkUnit,
-    TaskMention,
 )
 from autonomie.models.tva import (
     Tva,
@@ -24,10 +23,11 @@ def json_mentions(request):
     :param obj request: The current request object
     :returns: List of TaskMenion in their json repr
     """
-    query = TaskMention.query()
-    query = query.filter_by(active=True)
-    query = query.order_by(TaskMention.order)
-    return [item.__json__(request) for item in query]
+    context = request.context
+    doctype = context.type_
+    business_type = context.business_type
+    mentions = business_type.optionnal_mentions(doctype)
+    return [item.__json__(request) for item in mentions]
 
 
 def json_tvas(request):

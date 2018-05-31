@@ -25,6 +25,7 @@
 """
     Root factory <=> Acl handling
 """
+import logging
 from pyramid.security import (
     Allow,
     Deny,
@@ -37,6 +38,7 @@ from sqlalchemy.orm import (
     load_only,
 )
 
+from autonomie_base.models.base import DBSESSION
 from autonomie_celery.models import (
     Job,
 )
@@ -61,11 +63,14 @@ from autonomie.models.project import (
 )
 from autonomie.models.project.types import (
     ProjectType,
+    BusinessType,
 )
+from autonomie.models.project.business import Business
 from autonomie.models.task.task import (
     TaskLine,
     TaskLineGroup,
     DiscountLine,
+    Task,
 )
 from autonomie.models.task.estimation import (
     PaymentLine,
@@ -76,6 +81,7 @@ from autonomie.models.task.invoice import (
     CancelInvoice,
     Payment,
 )
+from autonomie.models.task.mentions import TaskMention
 from autonomie.models.workshop import (
     Workshop,
     Timeslot,
@@ -117,15 +123,21 @@ from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureGrid,
 )
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS, ),
     (Deny, "group:manager", ('admin',)),
     (Allow, "group:manager", ALL_PERMISSIONS, ),
     (Allow, "group:contractor", ('visit',), ),
+    (Allow, "group:trainer", ("add.training",)),
+    (Allow, "group:constructor", ("add.construction",)),
 ]
 DEFAULT_PERM_NEW = [
     (Allow, "group:admin", ('admin', 'manage', 'admin_treasury')),
     (Allow, "group:manager", ('manage', 'admin_treasury')),
+    (Allow, "group:trainer", ("add.training",)),
+    (Allow, "group:constructor", ("add.construction",)),
 ]
 
 
@@ -186,8 +198,12 @@ class RootFactory(dict):
         ('statistic_entries', 'statistic_entry', StatisticEntry,),
         ('statistic_criteria', 'statistic_criterion',
             BaseStatisticCriterion,),
+        ('businesses', 'business', Business),
+        ('business_types', 'business_type', BusinessType),
+        ('tasks', 'task', Task),
         ('task_lines', 'task_line', TaskLine),
         ('task_line_groups', 'task_line_group', TaskLineGroup),
+        ('task_mentions', 'task_mention', TaskMention),
         ('templates', 'template', Template, ),
         ('templatinghistory', 'templatinghistory', TemplatingHistory, ),
         (
@@ -703,7 +719,10 @@ def get_estimation_default_acl(self):
     admin_perms = ('duplicate.estimation',)
 
     if self.status == 'valid' and self.signed_status != 'aborted':
-        admin_perms += ('geninv.estimation',)
+        if self.project.project_type.default:
+            admin_perms += ('geninv.estimation',)
+        else:
+            admin_perms += ('genbusiness.estimation',)
 
     if self.status == 'valid':
         admin_perms += ('set_signed_status.estimation',)
@@ -731,7 +750,10 @@ def get_estimation_default_acl(self):
         if self.status == 'valid':
             perms += ('set_signed_status.estimation', )
             if not self.signed_status == 'aborted':
-                perms += ('geninv.estimation',)
+                if self.project.project_type.default:
+                    perms += ('geninv.estimation',)
+                else:
+                    perms += ('genbusiness.estimation',)
 
         if perms:
             acl.append((Allow, user.login.login, perms))
@@ -947,25 +969,43 @@ def get_phase_acl(self):
     """
     Return acl for a phase
     """
-    return get_project_acl(self.project)
+    acl = DEFAULT_PERM[:]
+
+    perms = ("edit.phase",)
+    if DBSESSION().query(Task.id).filter_by(phase_id=self.id).count() == 0:
+        perms += ('delete.phase',)
+    else:
+        acl.insert(0, (Deny, Everyone, ('delete.phase',)))
+
+    for user in self.project.company.employees:
+        acl.append((Allow, user.login.login, perms))
+
+    return acl
 
 
 def get_project_acl(self):
     """
     Return acl for a project
     """
-    acl = DEFAULT_PERM[:]
+    acl = DEFAULT_PERM_NEW[:]
 
     perms = (
         'view_project',
+        'view.project',
         'edit_project',
-        'add_project',
+        'edit.project',
         'edit_phase',
+        'edit.phase',
         'add_phase',
+        'add.phase',
         'add_estimation',
+        'add.estimation',
         'add_invoice',
+        'add.invoice',
         'list_estimations',
+        'list.estimations',
         'list_invoices',
+        'list.invoices',
         'view.file',
         'add.file',
         'edit.file',
@@ -973,13 +1013,48 @@ def get_project_acl(self):
     )
 
     if not self.has_tasks():
-        perms += ('delete_project',)
+        perms += ('delete_project', )
     else:
-        acl.insert(0, (Deny, Everyone, ('delete_project',)))
+        acl.insert(0, (Deny, Everyone, ('delete_project', )))
 
-    acl.append((Deny, 'group:estimation_only', ('add_invoice',)))
+    admin_perms = perms[:]
+    if not self.project_type.default:
+        perms += ('list.businesses', )
+
+    admin_perms += ('list.businesses',)
+
+    acl.append((Allow, "group:admin", admin_perms))
+    acl.append((Allow, "group:manager", admin_perms))
+
+    acl.append((Deny, 'group:estimation_only', ('add_invoice', )))
 
     for user in self.company.employees:
+        acl.append((Allow, user.login.login, perms))
+
+    return acl
+
+
+def get_business_acl(self):
+    """
+    Compute the acl for the Business object
+    """
+    acl = get_project_acl(self.project)
+
+    perms = ('view.business', 'add.file',)
+    admin_perms = ('view.business',)
+
+    if not self.closed:
+        admin_perms += ('edit.business', 'add.invoice', 'close.business',)
+        perms += ('edit.business', 'add.invoice',)
+
+        if not self.invoices and not self.cancelinvoices:
+            perms += ('delete.business',)
+            admin_perms += ('delete.business',)
+
+    acl.append((Allow, 'group:admin', admin_perms))
+    acl.append((Allow, 'group:manager', perms))
+
+    for user in self.project.company.employees:
         acl.append((Allow, user.login.login, perms))
 
     return acl
@@ -1060,6 +1135,8 @@ def set_models_acl():
     """
     Activity.__default_acl__ = property(get_activity_acl)
     AccountingOperationUpload.__acl__ = property(get_base_acl)
+    Business.__default_acl__ = property(get_business_acl)
+    BusinessType.__acl__ = property(get_base_acl)
     CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acl)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)
@@ -1088,6 +1165,7 @@ def set_models_acl():
     BaseStatisticCriterion.__acl__ = property(get_base_acl)
     TaskLine.__acl__ = property(get_task_line_acl)
     TaskLineGroup.__acl__ = property(get_task_line_group_acl)
+    TaskMention.__acl__ = property(get_base_acl)
     Template.__default_acl__ = property(get_base_acl)
     TemplatingHistory.__default_acl__ = property(get_base_acl)
     Timeslot.__default_acl__ = property(get_base_acl)

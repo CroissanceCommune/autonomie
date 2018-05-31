@@ -403,7 +403,7 @@ def get_hidden_field_conf(title=None):
     return res
 
 
-def get_deferred_select_validator(model, id_key='id', filters=[]):
+def get_deferred_model_select_validator(model, id_key='id', filters=[]):
     """
     Return a deferred validator based on the given model
 
@@ -433,8 +433,47 @@ def get_deferred_select_validator(model, id_key='id', filters=[]):
     return deferred_validator
 
 
-def get_deferred_select(model, multi=False, mandatory=False,
-                        keys=('id', 'label'), filters=[]):
+get_deferred_select_validator = get_deferred_model_select_validator
+
+
+def get_model_select_option_values(model, keys, filters=(), add_default=True):
+    """
+    Build an option list that can be used by SelectWidget and CheckboxListWidget
+
+    :param obj model: The model to query
+    :param tuple keys: A 2-uple (idkey, labelkey) to query on the model (it's
+    possible to pass callables getting the model as only argument)
+    :param list filters: List of 2-uples (key, value)
+    :param bool add_default: Should we add a default void value
+    :returns: a list of 2-uples
+    """
+    key1, key2 = keys
+
+    values = []
+    if add_default:
+        values.append(('', ''))
+
+    query = model.query()
+    for key, value in filters:
+        query = query.filter(getattr(model, key) == value)
+
+    for instance in query:
+        if callable(key1):
+            key = key1(instance)
+        else:
+            key = getattr(instance, key1)
+
+        if callable(key2):
+            label = key2(instance)
+        else:
+            label = getattr(instance, key2)
+        values.append((key, label))
+    return values
+
+
+def get_deferred_model_select(
+    model, multi=False, mandatory=False, keys=('id', 'label'), filters=[]
+):
     """
     Return a deferred select widget based on the given model
 
@@ -465,28 +504,54 @@ def get_deferred_select(model, multi=False, mandatory=False,
         """
         The deferred function that will be fired on schema binding
         """
-        key1, key2 = keys
-
-        values = []
-        if not mandatory:
-            values.append(('', ''))
-
-        query = model.query()
-        for key, value in filters:
-            query = query.filter(getattr(model, key) == value)
-
-        for instance in query:
-            if callable(key1):
-                key = key1(instance)
-            else:
-                key = getattr(instance, key1)
-
-            if callable(key2):
-                label = key2(instance)
-            else:
-                label = getattr(instance, key2)
-            values.append((key, label))
+        values = get_model_select_option_values(
+            model,
+            keys,
+            filters,
+            add_default=not mandatory
+        )
         return deform.widget.SelectWidget(values=values, multi=multi)
+    return deferred_widget
+
+
+get_deferred_select = get_deferred_model_select
+
+
+def get_deferred_model_select_checkbox(
+    model, keys=('id', 'label'), filters=[], widget_options={}
+):
+    """
+    Return a deferred select widget based on the given model
+
+        model
+
+            Option model having at least two attributes id and label
+
+        keys
+
+            a 2-uple describing the (value, label) of the select's options
+
+        filters
+
+            list of 2-uples allowing to filter the model query
+            (attr/value)
+
+        widget_options
+
+            deform widget options
+    """
+    @colander.deferred
+    def deferred_widget(binding_datas, request):
+        """
+        The deferred function that will be fired on schema binding
+        """
+        values = get_model_select_option_values(
+            model, keys, filters, add_default=False
+        )
+        return deform.widget.CheckboxChoiceWidget(
+            values=values,
+            **widget_options
+        )
     return deferred_widget
 
 
@@ -574,7 +639,7 @@ negative_validator = colander.Range(
 )
 
 
-class CustomSchemaNode(colander.SchemaNode):
+class CustomModelSchemaNode(colander.SchemaNode):
     """
     Using colanderalchemy, it generates a schema regarding a given model, for
     relationships, it provides a schema for adding related datas.  We want to
@@ -589,14 +654,38 @@ class CustomSchemaNode(colander.SchemaNode):
         """
         Return the datas needed to fill the form
         """
-        return instance.id
+        return getattr(instance, self.name)
 
-    def objectify(self, id):
+    def objectify(self, value):
         """
         Return the related object that have been configured
         """
         from autonomie_base.models.base import DBSESSION
-        return DBSESSION().query(self.model).get(id)
+        res = DBSESSION().query(self.model).filter(
+            getattr(self.model, self.name) == value
+        ).first()
+        if res is None:
+            res = colander.null
+        return res
+
+
+def get_sequence_child_item_id_node(model, **kw):
+    """
+    Build a child item SchemaNode compatible with colanderalchemy's serialization technic
+    it provides a node with dictify and objectify methods
+
+    It can be used when editing M2M or O2M relationships
+
+    :param obj model: The model we relay
+    """
+    if 'name' not in kw:
+        kw['name'] = 'id'
+
+    return CustomModelSchemaNode(
+        colander.Integer(),
+        model=model,
+        **kw
+    )
 
 
 def get_sequence_child_item(
@@ -634,15 +723,46 @@ def get_sequence_child_item(
         missing = colander.required
 
     return [
-        CustomSchemaNode(
-            colander.Integer(),
-            name='id',
-            widget=get_deferred_select(model, keys=child_attrs),
+        get_sequence_child_item_id_node(
+            widget=get_deferred_model_select(model, keys=child_attrs),
             missing=missing,
             model=model,
-            validator=get_deferred_select_validator(model)
+            validator=get_deferred_model_select_validator(model)
         )
     ]
+
+
+class CustomModelSequenceSchemaNode(colander.SchemaNode):
+    def __init__(self, *args, **kw):
+        colander.SchemaNode.__init__(self, *args, **kw)
+
+    def dictify(self, values):
+        return [val.id for val in values]
+
+    def objectify(self, ids):
+        from autonomie_base.models.base import DBSESSION
+        return DBSESSION().query(self.model).filter(
+            self.model.id.in_(ids)
+        ).all()
+
+
+def get_model_checkbox_list_node(
+    model, model_attrs=('id', 'label'), filters=[], **kw
+):
+    """
+    Build a colander node representing a list of items presented in a checkbox
+    list
+    """
+    widget_options = kw.pop('widget_options', {})
+    return CustomModelSequenceSchemaNode(
+        colander.Set(),
+        model=model,
+        widget=get_deferred_model_select_checkbox(
+            model, keys=model_attrs, filters=filters,
+            widget_options=widget_options
+        ),
+        **kw
+    )
 
 
 def customize_field(schema, field_name, widget=None, validator=None, **kw):
@@ -665,4 +785,17 @@ def customize_field(schema, field_name, widget=None, validator=None, **kw):
 
         for attr, value in kw.items():
             setattr(schema[field_name], attr, value)
+    return schema
+
+
+def reorder_schema(schema, child_order):
+    """
+    reorder a schema folowwing the child_order
+
+    :param obj schema: The colander schema :class:`colander.Schema`
+    :param tuple child_order: The children order
+    :returns: The schema
+    :rtype: :class:`colander.Schema`
+    """
+    schema.children = [schema[node_name] for node_name in child_order]
     return schema

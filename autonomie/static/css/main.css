@@ -94,6 +94,9 @@ nav.sidebar-menu .subnav li {
       padding: 10px 15px; }
 
 .breadcrumb-arrow {
+  margin-top: 3px;
+  margin-left: 3px;
+  margin-bottom: 5px;
   height: 36px;
   padding: 0;
   line-height: 36px;
@@ -193,6 +196,15 @@ table.opa tfoot td {
 
 .status-table td.status-td {
   width: 16px; }
+
+.status-table .status-draft {
+  background: repeating-linear-gradient(45deg, #ededed, #ededed 10px, #dddddd 10px, #dddddd 20px); }
+
+.status-table .status-wait {
+  background: repeating-linear-gradient(45deg, #ffb266, #ffb266 10px, #ffd790 10px, #ffd790 20px); }
+
+.status-table .status-invalid {
+  background: repeating-linear-gradient(45deg, #f9aaaa, #f9aaaa 10px, #f8c3c3 10px, #f8c3c3 20px); }
 
 .status-table .signed-status-signed, .status-table .justified-True:not(.status-valid), .status-table .job-planned {
   background-color: #7db9fd; }

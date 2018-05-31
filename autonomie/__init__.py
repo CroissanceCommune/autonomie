@@ -44,10 +44,12 @@ from autonomie.utils.filedepot import (
 
 
 AUTONOMIE_MODULES = (
+    "autonomie.views",
     "autonomie.views.accompagnement.activity",
     "autonomie.views.accompagnement.workshop",
     "autonomie.views.accounting",
     "autonomie.views.auth",
+    "autonomie.views.business",
     "autonomie.views.commercial",
     "autonomie.views.company",
     "autonomie.views.competence",
@@ -67,7 +69,6 @@ AUTONOMIE_MODULES = (
     "autonomie.views.invoices.lists",
     "autonomie.views.invoices.rest_api",
     "autonomie.views.job",
-    "autonomie.views.json",
     "autonomie.views.manage",
     "autonomie.views.payment",
     "autonomie.views.sale_product",
@@ -99,6 +100,8 @@ AUTONOMIE_PANELS_MODULES = (
     'autonomie.panels.files',
     'autonomie.panels.sidebar',
     "autonomie.panels.widgets",
+    "autonomie.panels.navigation",
+    "autonomie.panels.project",
 )
 
 AUTONOMIE_EVENT_MODULES = (
@@ -366,9 +369,6 @@ def main(global_config, **settings):
     config.configure_celery(global_config['__file__'])
 
     config.commit()
-
-    from autonomie.models.populate import populate_database
-    populate_database()
 
     return config.make_wsgi_app()
 

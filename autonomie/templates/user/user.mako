@@ -202,6 +202,5 @@
     % endif
 </div>
 </div>
-<hr />
 % endif
 </%block>

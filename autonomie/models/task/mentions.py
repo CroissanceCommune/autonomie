@@ -22,12 +22,12 @@
 """
 Modèle pour les mentions dans les devis et factures
 """
-import deform
 import sqlalchemy as sa
 
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 from autonomie.models.options import (
     ConfigurableOption,
@@ -42,6 +42,14 @@ TASK_MENTION = sa.Table(
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine'],
 )
+MANDATORY_TASK_MENTION = sa.Table(
+    'mandatory_task_mention_rel',
+    DBBASE.metadata,
+    sa.Column('task_id', sa.Integer, sa.ForeignKey('task.id')),
+    sa.Column('mention_id', sa.Integer, sa.ForeignKey('task_mention.id')),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
 class TaskMention(ConfigurableOption):
@@ -49,33 +57,16 @@ class TaskMention(ConfigurableOption):
         "title": u"Mentions facultatives des devis/factures",
         "description": u"Configurer les mentions que les entrepreneurs \
 peuvent faire figurer dans leurs devis/factures",
-        "help_msg": u"Configurer des mentions facultatives pour les devis et \
-factures, celles-ci sont proposées aux entrepreneurs dans les formulaires et \
-insérées dans les sorties PDF.<br /> \
-<b>Libellé</b>: Libellé dans le formulaire<br />\
-<b>Titre</b>: Le titre du bloc contenant les mentions dans le PDF <br />\
-<b>Texte à afficher dans les PDF</b>: Texte affiché dans la sortie PDF \
-si l'entrepreneur a ajouté cette mention à son devis/sa facture<br />.\
-<br />\
-<b>Note</b> : La suppression d'une mention depuis l'interface entraine sa \
-désactivation<br />\
-<b>Attention</b> : La modification des textes entrainent la modification \
-des documents (devis/factures) associés, préférez la suppression \
-(désactivation) et l'ajout de nouvelle mention",
-        "validation_msg": u"Les mentions facultatives ont bien été configurées",
-        "seq_widget_options": {
-            "add_subitem_text_template": u"Ajouter une mention",
-            "min_len": 0
-        },
     }
     id = get_id_foreignkey_col('configurable_option.id')
     title = sa.Column(
         sa.String(255),
+        default="",
         info={
             'colanderalchemy': {
-                "title": u"Titre",
-                "description": u"Titre du bloc contenant les mentions dans \
-la sortie pdf",
+                "title": u"Titre à afficher dans les PDF",
+                "description": u"Texte apparaissant sous forme de titre \
+dans la sortie PDF (facultatif)"
             }
         }
     )
@@ -84,19 +75,24 @@ la sortie pdf",
         info={
             'colanderalchemy': {
                 "title": u"Texte à afficher dans les PDF",
-                "description": u"Si l'entrepreneur a ajouté cette mention à \
-son devis/sa facture, ce texte apparaitra dans la sortie PDF",
-                'widget': deform.widget.TextAreaWidget(cols=80, rows=4)
+                "description": u"Si cette mention a été ajoutée à \
+un devis/facture, ce texte apparaitra dans la sortie PDF",
             }
         },
     )
-    tasks = sa.orm.relationship(
-        "Task",
-        secondary=TASK_MENTION,
-        back_populates="mentions",
+    help_text = sa.Column(
+        sa.String(255),
         info={
-            'colanderalchemy': {
-                'exclude': True
+            "colanderalchemy": {
+                "title": u"Texte d'aide à l'utilisation",
+                "description": u"Aide fournie à l'entrepreneur dans l'interface"
             }
         }
     )
+
+    @property
+    def is_used(self):
+        return DBSESSION().query(TASK_MENTION.task_id).filter(
+            TASK_MENTION.c.mention_id == self.id).count() > 0 or \
+            DBSESSION().query(MANDATORY_TASK_MENTION.task_id).filter(
+                MANDATORY_TASK_MENTION.c.mention_id == self.id).count() > 0

@@ -27,8 +27,6 @@
 """
 import datetime
 import logging
-import deform
-import colander
 
 from zope.interface import implementer
 
@@ -41,6 +39,7 @@ from sqlalchemy import (
     Text,
     Boolean,
     Date,
+    Table,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -196,7 +195,6 @@ class Estimation(Task, EstimationCompute):
             'colanderalchemy': {'exclude': True},
         }
     )
-
     state_manager = DEFAULT_ACTION_MANAGER['estimation']
     signed_state_manager = SIGNED_ACTION_MANAGER
     _number_tmpl = u"{s.company.name} {s.date:%Y-%m} D{s.company_index}"
@@ -245,22 +243,28 @@ class Estimation(Task, EstimationCompute):
     def check_signed_status_allowed(self, status, request, **kw):
         return self.signed_state_manager.check_allowed(status, self, request)
 
-    def duplicate(self, user, project, phase, customer):
+    def duplicate(self, user, **kw):
         """
-            returns a duplicate estimation object
+        DUplicate the current Estimation object
+
+        Mandatory args :
+
+            user
+
+                The user duplicating this estimation
+
+            customer
+
+            project
         """
         estimation = Estimation(
-            self.company,
-            customer,
-            project,
-            phase,
-            user,
+            user=user,
+            company=self.company,
+            **kw
         )
 
-        if customer.id == self.customer_id:
+        if estimation.customer.id == self.customer_id:
             estimation.address = self.address
-        else:
-            estimation.address = customer.full_address
 
         estimation.workplace = self.workplace
 
@@ -369,22 +373,21 @@ class Estimation(Task, EstimationCompute):
             all the generated invoices
         """
         inv = Invoice(
-            self.company,
-            self.customer,
-            self.project,
-            self.phase,
-            user
+            user=user,
+            company=self.company,
+            customer=self.customer,
+            project=self.project,
+            phase_id=self.phase_id,
+            estimation=self,
+            payment_conditions=self.payment_conditions,
+            description=self.description,
+            course=self.course,
+            address=self.address,
+            workplace=self.workplace,
+            mentions=self.mentions,
+            prefix=Config.get_value('invoice_prefix', ''),
+            business_type_id=self.business_type_id,
         )
-        inv.estimation = self
-
-        # Common args
-        inv.payment_conditions = self.payment_conditions
-        inv.description = self.description
-        inv.course = self.course
-        inv.address = self.address
-        inv.workplace = self.workplace
-        inv.mentions = self.mentions
-        inv.prefix = Config.get_value('invoice_prefix', '')
         return inv
 
     def gen_invoices(self, user):

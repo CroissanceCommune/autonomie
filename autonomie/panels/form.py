@@ -20,12 +20,17 @@ def help_message_panel(context, request, parent_tmpl_dict):
     """
     result = {}
 
-    result['help_message'] = parent_tmpl_dict.get(
-        'help_message',
-        parent_tmpl_dict.get('help_msg')
-    )
-    result['warn_message'] = parent_tmpl_dict.get('warn_message')
-    result['info_message'] = parent_tmpl_dict.get('info_message')
+    for key, other_key in (
+        ('help_message', 'help_msg'),
+        ('warn_message', 'warn_msg'),
+        ('info_message', 'info_msg'),
+        ('error_message', 'error_msg'),
+    ):
+        value = parent_tmpl_dict.get(key)
+        if value is None:
+            value = parent_tmpl_dict.get(other_key)
+        result[key] = value
+
     return result
 
 

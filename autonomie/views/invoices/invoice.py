@@ -29,7 +29,6 @@ import logging
 import datetime
 
 from pyramid.httpexceptions import HTTPFound
-from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie_base.utils.date import format_date
 
@@ -58,6 +57,7 @@ from autonomie.views import (
     add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
+from autonomie.views.project.routes import PROJECT_ITEM_INVOICE_ROUTE
 
 from autonomie.views.task.views import (
     TaskAddView,
@@ -69,6 +69,7 @@ from autonomie.views.task.views import (
     TaskSetMetadatasView,
     TaskSetProductsView,
     TaskSetDraftView,
+    TaskMoveToPhaseView,
 )
 
 
@@ -87,7 +88,6 @@ class InvoiceAddView(TaskAddView):
         """
         Add Invoice's specific attribute while adding this task
         """
-        invoice.course = appstruct['course']
         invoice.financial_year = datetime.date.today().year
         invoice.prefix = self.request.config.get('invoiceprefix', '')
         return invoice
@@ -410,12 +410,6 @@ def add_routes(config):
     add module related routes
     """
     config.add_route(
-        'project_invoices',
-        '/projects/{id:\d+}/invoices',
-        traverse='/projects/{id}'
-    )
-
-    config.add_route(
         '/invoices/{id}',
         '/invoices/{id:\d+}',
         traverse='/invoices/{id}',
@@ -438,6 +432,7 @@ def add_routes(config):
         'set_metadatas',
         'attach_estimation',
         'set_draft',
+        'move',
     ):
         config.add_route(
             '/invoices/{id}/%s' % action,
@@ -451,9 +446,11 @@ def includeme(config):
 
     config.add_view(
         InvoiceAddView,
-        route_name="project_invoices",
+        route_name=PROJECT_ITEM_INVOICE_ROUTE,
         renderer='tasks/add.mako',
         permission='add_invoice',
+        request_param="action=add",
+        layout='default'
     )
 
     config.add_view(
@@ -554,4 +551,9 @@ def includeme(config):
         route_name="/invoices/{id}/attach_estimation",
         permission="view.invoice",
         renderer='base/formpage.mako',
+    )
+    config.add_view(
+        TaskMoveToPhaseView,
+        route_name="/invoices/{id}/move",
+        permission="view.invoice",
     )

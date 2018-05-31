@@ -40,6 +40,10 @@ from autonomie.views import (
     submit_btn,
     cancel_btn,
 )
+from autonomie.views.project.routes import (
+    PROJECT_ITEM_PHASE_ROUTE,
+    PROJECT_ITEM_ROUTE,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -51,7 +55,7 @@ def get_project_redirect_btn(request, id_):
     """
     return ViewLink(
         u"Revenir au projet",
-        path="project",
+        path=PROJECT_ITEM_ROUTE,
         id=id_
     )
 
@@ -63,7 +67,10 @@ def populate_actionmenu(request):
     if request.context.type_ == 'project':
         project_id = request.context.id
     else:
-        project_id = request.context.phase.project_id
+        if request.context.phase:
+            project_id = request.context.phase.project_id
+        else:
+            project_id = request.context.project_id
     request.actionmenu.add(get_project_redirect_btn(request, project_id))
 
 
@@ -87,22 +94,17 @@ class TaskAddView(BaseFormView):
         if self.factory is None:
             raise Exception("Forgot to set the factory attribute")
 
-        name = appstruct['name']
-        phase_id = appstruct['phase_id']
-        phase = Phase.get(phase_id)
-        project_id = appstruct['project_id']
-        project = Project.get(project_id)
-        customer_id = appstruct['customer_id']
-        customer = Customer.get(customer_id)
+        project_id = appstruct.pop('project_id')
+        appstruct['project'] = Project.get(project_id)
+
+        customer_id = appstruct.pop('customer_id')
+        appstruct['customer'] = Customer.get(customer_id)
 
         new_object = self.factory(
-            self.context.company,
-            customer,
-            project,
-            phase,
-            self.request.user,
+            user=self.request.user,
+            company=self.context.company,
+            **appstruct
         )
-        new_object.name = name
 
         if hasattr(self, "_more_init_attributes"):
             self._more_init_attributes(new_object, appstruct)
@@ -195,7 +197,9 @@ class TaskDeleteView(BaseView):
             message = self.msg.format(context=self.context)
             self.request.session.flash(message)
 
-        return HTTPFound(self.request.route_path('project', id=project.id))
+        return HTTPFound(
+            self.request.route_path(PROJECT_ITEM_ROUTE, id=project.id)
+        )
 
 
 class TaskDuplicateView(BaseFormView):
@@ -215,22 +219,16 @@ class TaskDuplicateView(BaseFormView):
     def submit_success(self, appstruct):
         logger.debug("# Duplicating a document #")
 
-        name = appstruct['name']
-        phase_id = appstruct['phase_id']
-        phase = Phase.get(phase_id)
-        project_id = appstruct['project_id']
-        project = Project.get(project_id)
-        customer_id = appstruct['customer_id']
-        customer = Customer.get(customer_id)
+        project_id = appstruct.pop('project_id')
+        appstruct['project'] = Project.get(project_id)
+
+        customer_id = appstruct.pop('customer_id')
+        appstruct['customer'] = Customer.get(customer_id)
 
         task = self.context.duplicate(
-            self.request.user,
-            project,
-            phase,
-            customer,
+            user=self.request.user,
+            **appstruct
         )
-        task.name = name
-        task.course = appstruct['course']
         self.dbsession.add(task)
         self.dbsession.flush()
         logger.debug(
@@ -243,6 +241,29 @@ class TaskDuplicateView(BaseFormView):
             self.request.route_path(
                 '/%ss/{id}' % self.context.type_,
                 id=task.id
+            )
+        )
+
+
+class TaskMoveToPhaseView(BaseView):
+    """
+    View used to move a document to a specific directory/phase
+
+    expects a get arg "phase" containing the destination phase_id
+    """
+    def __call__(self):
+        phase_id = self.request.params.get('phase')
+        if phase_id:
+            phase = Phase.get(phase_id)
+            if phase in self.context.project.phases:
+                self.context.phase_id = phase_id
+                self.request.dbsession.merge(self.context)
+
+        return HTTPFound(
+            self.request.route_path(
+                PROJECT_ITEM_PHASE_ROUTE,
+                id=self.context.project_id,
+                _query={'phase': phase_id}
             )
         )
 

@@ -27,12 +27,14 @@
 """
 import logging
 import os
+from sqlalchemy.orm.exc import NoResultFound
 from autonomie.scripts.utils import (
     command,
     get_value,
 )
 from autonomie_base.models.base import DBSESSION
 from autonomie.forms.user.user import User
+from autonomie.forms.user.login import Login
 
 
 PWD_LENGTH = 10
@@ -45,7 +47,7 @@ def get_pwd():
     return os.urandom(PWD_LENGTH).encode('base-64')
 
 
-def user_add(arguments, env):
+def user_add_command(arguments, env):
     """
         Add a user in the database
     """
@@ -58,43 +60,62 @@ def user_add(arguments, env):
     password = get_value(arguments, 'pwd', get_pwd())
     password = password.decode('utf-8')
 
+    login = Login(login=login)
+    login.set_password(password)
+
+    group = get_value(arguments, 'group', None)
+    if group:
+        try:
+            login.groups.append(group)
+        except NoResultFound:
+            print(
+                u"""
+
+ERROR : group %s doesn't exist, did you launched the syncdb command :
+
+    autonomie-admin <fichier.ini> syncdb
+                """ % (
+                    group,
+                )
+            )
+            return
+
+    db = DBSESSION()
+    db.add(login)
+    db.flush()
+
+
     firstname = get_value(arguments, 'firstname', 'Admin')
     lastname = get_value(arguments, 'lastname', 'Majerti')
     email = get_value(arguments, 'email', 'admin@example.com')
-    group = get_value(arguments, 'group', None)
     user = User(
         login=login,
         firstname=firstname,
         lastname=lastname,
         email=email
     )
-
-    if group:
-        user.groups.append(group)
-
-    user.set_password(password)
-    db = DBSESSION()
     db.add(user)
     db.flush()
     print(u"""
-    Account created :
+    User Account created :
           ID        : {0.id}
-          Login     : {0.login}
+          Login     : {0.login.login}
           Firstname : {0.firstname}
           Lastname  : {0.lastname}
           Email     : {0.email}
-          Groups    : {0.groups}
+          Groups    : {0.login.groups}
           """.format(user))
 
     if 'pwd' not in arguments:
         print(u"""
-          Password  : {0}""".format(password))
+          Password  : {0}""".format(password)
+              )
 
     logger.debug(u"-> Done")
     return user
 
 
-def test_mail(arguments, env):
+def test_mail_command(arguments, env):
     """
     Test tool for mail sending
     """
@@ -114,14 +135,24 @@ Bonne et belle journée !!!"""
     )
 
 
+def syncdb_command(arguments, env):
+    """
+    Populate the database
+    """
+    from autonomie.models.populate import populate_database
+    populate_database()
+
+
 def autonomie_admin_cmd():
     """Autonomie administration tool
     Usage:
         autonomie-admin <config_uri> useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--email=<email>] [--group=<group>]
         autonomie-admin <config_uri> testmail [--to=<mailadress>]
+        autonomie-admin <config_uri> syncdb
 
     o useradd : Add a user in the database
-    o testmail : Send a test mail to autonomie@majerti.fr
+    o testmail : Send a test mail to the given address
+    o syncdb : Populate the database with the initial datas
 
     Options:
 
@@ -129,9 +160,11 @@ def autonomie_admin_cmd():
     """
     def callback(arguments, env):
         if arguments['useradd']:
-            func = user_add
+            func = user_add_command
         elif arguments['testmail']:
-            func = test_mail
+            func = test_mail_command
+        elif arguments['syncdb']:
+            func = syncdb_command
         return func(arguments, env)
     try:
         return command(callback, autonomie_admin_cmd.__doc__)

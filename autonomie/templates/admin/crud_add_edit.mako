@@ -28,25 +28,14 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name='content'>
-        <div class='row'>
-            <div class='col-md-8 col-md-offset-2'>
-<div class='panel panel-default'>
-    <div class='panel-heading'>
-    ${title}
-    </div>
-    <div class='panel-body'>
-                % if warn_msg is not UNDEFINED:
-                    <div class="alert alert-warning">
-                        <i class='glyphicon glyphicon-warning-sign'></i>
-                        ${warn_msg|n}
-                    </div>
-                % endif
-                % if help_msg is not UNDEFINED:
-                    <div class="alert alert-info">
-                        <i class='glyphicon glyphicon-question-sign'></i>
-                        ${help_msg|n}
-                    </div>
-                % endif
+<div class='row'>
+    <div class='col-md-8 col-md-offset-2'>
+        <div class='panel panel-default'>
+            <div class='panel-heading'>
+            ${title}
+            </div>
+            <div class='panel-body'>
+                ${request.layout_manager.render_panel('help_message_panel', parent_tmpl_dict=context.kwargs)}
                 ${form|n}
             </div>
         </div>

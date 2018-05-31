@@ -12,6 +12,7 @@ from autonomie.compute import math_utils
 from autonomie_base.utils.date import (
     format_date,
 )
+from autonomie_base.utils.ascii import force_ascii
 
 
 SINGLE_STATUS_LABELS = {
@@ -410,3 +411,16 @@ def format_civilite(civilite_str):
     elif civilite_str.lower() == u'mr&mme':
         res = u"M. et Mme"
     return res
+
+
+def format_lower_ascii(original_str):
+    """
+    Generate a lower ascii only string from the original one
+    :param str original_str: The string to modify
+    :returns: A modified string
+    :rtype: str
+    """
+    result = original_str.lower()
+    result = force_ascii(result)
+    result = result.replace(' ', '_')
+    return result

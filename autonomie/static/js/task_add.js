@@ -51,7 +51,9 @@ var TaskAddProxy = {
         customer: 'select[name=customer_id]',
         hidden_customer: 'input[name=customer_id]',
         project: 'select[name=project_id]',
-        phase: 'select[name=phase_id]'
+        phase: 'select[name=phase_id]',
+        business_type: 'select[name=business_type_id]',
+        submit: 'button[type=submit]'
     },
     el: '#deform',
     updateProject: function(projects, current_id){
@@ -64,11 +66,11 @@ var TaskAddProxy = {
         );
         var selected = current_id;
 
-        if (_.isUndefined(findone)){
-            selected = projects[0].id;
-        }
         var options = "";
-        if (projects){
+        if (projects && (projects.length > 0)){
+            if (_.isUndefined(findone)){
+                selected = projects[0].id;
+            }
             for (var i = 0; i < projects.length; i++) {
                 var project = projects[i];
                 options += "<option value='" + project.id;
@@ -83,25 +85,54 @@ var TaskAddProxy = {
                 }
                 options += "</option>";
             }
+            this.ui.project.html(options);
+            this.ui.project.effect('highlight', {}, 1200);
+            this.enableForm(true);
+            // If the previously selected project is still in the list we don't
+            // change
+            if (_.isUndefined(findone)){
+                this.ui.project.change();
+            }
+        } else {
+            this.ui.project.html("");
+            this.enableForm(false);
+            this.ui.project.change();
         }
-        this.ui.project.html(options);
-        this.ui.project.effect('highlight', {}, 1200);
-        this.ui.project.change();
+    },
+    enableForm: function(value){
+        this.ui.submit.attr('disabled', !value);
     },
     updatePhase: function(phases){
         var options = "";
         if (phases){
+            options = "<option value=''>Aucun sous-dossier</option>";
             for (var i = 0; i < phases.length; i++) {
                 var phase = phases[i];
                 options += "<option value='" + phase.id + "'>"  +
                     phase.name +
                     "</option>";
             }
+            this.ui.phase.html(options);
+            this.ui.phase.effect('highlight', {}, 1200);
         }
-        this.ui.phase.html(options);
-        this.ui.phase.effect('highlight', {}, 1200);
+    },
+    updateBusinessType: function(business_types){
+        var options = "";
+        if (business_types){
+            for (var i = 0; i < business_types.length; i++) {
+                var business_type = business_types[i];
+                options += "<option value='" + business_type.id + "'>"  +
+                    business_type.label +
+                    "</option>";
+            }
+            this.ui.business_type.html(options);
+            this.ui.business_type.effect('highlight', {}, 1200);
+        }
     },
     getProjectId: function(){
+        /*
+         * Return the current project selected id
+         */
         var current_id = this.ui.project.children('option:selected').val();
         return parseInt(current_id, 10);
     },
@@ -125,31 +156,85 @@ var TaskAddProxy = {
         var customer = this.collection.findWhere({id: current_id});
         return customer;
     },
-    toggle_project:function(value){
-        if (_.isUndefined(value)){
-            value = true;
+    getPhaseId: function(){
+        var current_id = this.ui.phase.children('option:selected').val();
+        return parseInt(current_id, 10);
+    },
+    findPhase: function(){
+        var project = this.findProject();
+        var current_id = this.getPhaseId();
+        var phase = project.phases.findWhere({id: current_id});
+        return phase;
+    },
+    getBusinessCycleId: function(){
+        var current_id = this.ui.phase.children('option:selected').val();
+        return parseInt(current_id, 10);
+    },
+    findPhase: function(){
+        var project = this.findProject();
+        var current_id = this.getPhaseId();
+        var phase = project.phases.findWhere({id: current_id});
+        return phase;
+    },
+    toggle_project:function(projects){
+        var value = true;
+        if (! _.isUndefined(projects)){
+            if (projects.length > 1){
+                value = false;
+            }
         }
         this.ui.project.attr('disabled', value);
     },
-    toggle_phase:function(value){
-        if (_.isUndefined(value)){
-            value = true;
+    toggle_phase:function(phases){
+        var disabled = true;
+        var visible = true;
+        if (! _.isUndefined(phases)){
+            if (phases.length == 0){
+                visible = false;
+            } else {
+                disabled = false;
+            }
         }
-        this.ui.phase.attr('disabled', value);
+        this.ui.phase.attr('disabled', disabled);
+        this.ui.phase.parent().toggle(visible);
+    },
+    toggle_business_type:function(business_types){
+        var disabled = true;
+        var visible = true;
+        if (! _.isUndefined(business_types)){
+            if (business_types.length <= 1){
+                visible = false;
+            }
+            disabled = false;
+        }
+        this.ui.business_type.attr('disabled', disabled);
+        this.ui.business_type.parent().toggle(visible);
     },
     customerChange: function(event){
         this.toggle_phase();
         this.toggle_project();
+        this.toggle_business_type();
         var customer = this.findCustomer();
         var project_id = this.getProjectId();
-        this.updateProject(customer.get('projects'), project_id);
-        this.toggle_project(false);
+        var projects = customer.get('projects');
+        this.updateProject(projects, project_id);
+        this.toggle_project(projects);
     },
     projectChange: function(event){
         this.toggle_phase();
+        this.toggle_business_type();
         var project = this.findProject();
-        this.updatePhase(project.get('phases'));
-        this.toggle_phase(false);
+        if (!_.isUndefined(project)){
+            var phases = project.get('phases');
+            this.updatePhase(phases);
+            this.toggle_phase(phases);
+            var business_types = project.get('business_types');
+            this.updateBusinessType(business_types);
+            this.toggle_business_type(business_types);
+        } else {
+            this.updatePhase([]);
+            this.updateBusinessType([]);
+        }
     },
     setupUi: function(){
         var this_ = this;
@@ -157,17 +242,24 @@ var TaskAddProxy = {
         _.each(this.ui, function(value, key){
             this_.ui[key] = this_.$el.find(value);
         });
-        this.ui.customer.off('change.customer');
-        this.ui.customer.on(
-            'change.customer',
-            _.bind(this.customerChange, this)
-        );
-        this.ui.project.off('change.project');
-        this.ui.project.on(
-            'change.project',
-            _.bind(this.projectChange, this)
-        );
-        this.ui.customer.change();
+        if (this.ui.project.length > 0){
+            this.ui.customer.off('change.customer');
+            this.ui.customer.on(
+                'change.customer',
+                _.bind(this.customerChange, this)
+            );
+            this.ui.project.off('change.project');
+            this.ui.project.on(
+                'change.project',
+                _.bind(this.projectChange, this)
+            );
+        }
+        if (this.ui.phase.find('option').length <= 1){
+            this.toggle_phase([]);
+        }
+        if (this.ui.business_type.find('option').length <= 1){
+            this.toggle_business_type([]);
+        }
     },
     setup: function(){
         this.collection = new CustomerCollection();

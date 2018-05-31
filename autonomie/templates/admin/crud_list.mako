@@ -48,18 +48,7 @@
         ${request.layout_manager.render_panel(link.panel_name, context=link)}
     % endfor
     % endif
-    % if warn_msg is not UNDEFINED and warn_msg is not None:
-    <br />
-    <br />
-    <div class="alert alert-danger">
-        <i class='fa fa-warning'></i>&nbsp;${warn_msg|n}
-    </div>
-    % endif
-    % if help_msg is not UNDEFINED and help_msg is not None:
-    <div class="alert alert-info">
-        <i class='fa fa-help'></i>&nbsp;${help_msg|n}
-    </div>
-    % endif
+    ${request.layout_manager.render_panel('help_message_panel', parent_tmpl_dict=context.kwargs)}
 </div>
 </%block>
 <%block name='content'>

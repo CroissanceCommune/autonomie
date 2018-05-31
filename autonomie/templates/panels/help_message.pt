@@ -16,6 +16,11 @@
           <i class='fa fa-warning fa-2x'></i>&nbsp;${structure:warn_message}
         </div>
         <div
+          tal:condition="error_message"
+          class="alert alert-danger">
+          <i class='fa fa-warning fa-2x'></i>&nbsp;${structure:error_message}
+        </div>
+        <div
           tal:condition="help_message"
           class="alert alert-info">
           <i class='fa fa-question-circle fa-2x'></i>&nbsp;${structure:help_message}

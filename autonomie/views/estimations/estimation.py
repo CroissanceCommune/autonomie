@@ -75,6 +75,7 @@ from autonomie.views import (
     add_panel_page_view,
 )
 from autonomie.views.files import FileUploadView
+from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
 from autonomie.views.task.views import (
     TaskAddView,
     TaskEditView,
@@ -84,6 +85,7 @@ from autonomie.views.task.views import (
     TaskDuplicateView,
     TaskSetMetadatasView,
     TaskSetDraftView,
+    TaskMoveToPhaseView,
 )
 
 log = logger = logging.getLogger(__name__)
@@ -101,7 +103,6 @@ class EstimationAddView(TaskAddView):
         """
         Add Estimation's specific attribute while adding this task
         """
-        estimation.course = appstruct['course']
         estimation.payment_lines = [PaymentLine(description='Solde', amount=0)]
         return estimation
 
@@ -226,12 +227,15 @@ class EstimationAttachInvoiceView(BaseFormView):
 
 def estimation_geninv_view(context, request):
     """
-    Invoice generation view
+    Invoice generation view : used in shorthanded workflow
 
     :param obj context: The current context (estimation)
     """
+    business = context.gen_business()
+
     invoices = context.gen_invoices(request.user)
     for invoice in invoices:
+        invoice.business = business
         request.dbsession.add(invoice)
 
     context.geninv = True
@@ -247,16 +251,22 @@ def estimation_geninv_view(context, request):
     )
 
 
+def estimation_genbusiness_view(context, request):
+    """
+    Business generation view : used in long handed workflows
+
+    :param obj context: The current estimation
+    """
+    business = context.gen_business()
+    request.dbsession.add(business)
+    request.dbsession.flush()
+    return HTTPFound(request.route_path("/businesses/{id}", id=business.id))
+
+
 def add_routes(config):
     """
     Add module's specific routes
     """
-    config.add_route(
-        'project_estimations',
-        '/projects/{id:\d+}/estimations',
-        traverse='/projects/{id}',
-    )
-
     config.add_route(
         '/estimations/{id}',
         '/estimations/{id:\d+}',
@@ -274,9 +284,11 @@ def add_routes(config):
         'duplicate',
         'admin',
         'geninv',
+        'genbusiness',
         'set_metadatas',
         'attach_invoices',
         'set_draft',
+        'move',
     ):
         config.add_route(
             '/estimations/{id}/%s' % action,
@@ -290,9 +302,11 @@ def includeme(config):
 
     config.add_view(
         EstimationAddView,
-        route_name="project_estimations",
+        route_name=PROJECT_ITEM_ESTIMATION_ROUTE,
         renderer='tasks/add.mako',
         permission='add_estimation',
+        request_param="action=add",
+        layout="default"
     )
 
     config.add_view(
@@ -356,10 +370,21 @@ def includeme(config):
     )
 
     config.add_view(
+        estimation_genbusiness_view,
+        route_name="/estimations/{id}/genbusiness",
+        permission='genbusiness.estimation',
+    )
+
+    config.add_view(
         EstimationSetMetadatasView,
         route_name="/estimations/{id}/set_metadatas",
         permission='view.estimation',
         renderer='tasks/add.mako',
+    )
+    config.add_view(
+        TaskMoveToPhaseView,
+        route_name="/estimations/{id}/move",
+        permission='view.estimation',
     )
     config.add_view(
         TaskSetDraftView,

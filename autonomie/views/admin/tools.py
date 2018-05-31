@@ -40,38 +40,9 @@ from autonomie.views import (
     BaseEditView,
     DisableView,
     DeleteView,
+    TreeMixinMetaClass,
 )
 logger = logging.getLogger(__name__)
-
-
-class TreeMixinMetaClass(type):
-    """
-    Metaclasse qui attache un attribut children spécifique à chaque classe fille
-    créée
-
-
-    LE problème d'origine :
-
-        class A:
-            children = []
-
-        class B(A):
-            pass
-
-        B.children.append('o')
-        A.children
-        ['o']
-
-    Avec cette métaclasse
-
-    A.children = []
-    """
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super(TreeMixinMetaClass, cls).__new__(
-            cls, clsname, bases, attrs
-        )
-        newclass.children = []
-        return newclass
 
 
 class AdminTreeMixin:
@@ -80,9 +51,13 @@ class AdminTreeMixin:
 
 
     class MyAdminView(BaseView, AdminTreeMixin):
-        children = []
-        parent = ParentView
-        route_name = "/admin/myadminview"
+        route_name = "/adminumyadminview"
+
+    config.add_admin_view(MyAdminView, parent=ParentViewClass)
+
+    route_name
+
+        current route_name
 
     children
 
@@ -91,10 +66,6 @@ class AdminTreeMixin:
     parent
 
         weakref to the parent view
-
-    route_name
-
-        current route_name
     """
     __metaclass__ = TreeMixinMetaClass
     route_name = None
@@ -306,8 +277,13 @@ class AdminOption(BaseAdminFormView):
         """
         Return an optionnal message to help to configure datas
         """
-        calchemy_dict = getattr(self.factory, '__colanderalchemy_config__', {})
-        return calchemy_dict.get('help_msg', '')
+        help_msg = getattr(self, 'help_msg', None)
+        if help_msg is None:
+            calchemy_dict = getattr(
+                self.factory, '__colanderalchemy_config__', {}
+            )
+            help_msg = calchemy_dict.get('help_msg', '')
+        return help_msg
 
     def before(self, form):
         """

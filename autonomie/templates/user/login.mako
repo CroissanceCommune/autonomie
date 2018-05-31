@@ -43,7 +43,7 @@ pour se connecter à Autonomie
             href="${request.route_path('/users/{id}/login/edit', id=login.user_id)}"
             class='btn btn-default btn-primary primary-action'
             >
-            <i class='fa fa-pencil'></i>&nbsp;Modifier (mot passe/identifiant)
+            <i class='fa fa-pencil'></i>&nbsp;Modifier (identifiant / mot de passe / groupes)
         </a>
 
         <a

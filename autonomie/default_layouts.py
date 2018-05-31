@@ -18,16 +18,18 @@ class DefaultLayout(object):
     autonomie_version = pkg_resources.get_distribution('autonomie').version
 
     def __init__(self, context, request):
-        logger.debug("In the default layout")
         main_group.need()
+        self.context = context
+        self.request = request
 
 
 class OpaLayout(object):
     autonomie_version = pkg_resources.get_distribution('autonomie').version
 
     def __init__(self, context, request):
-        logger.debug("In the opa layout")
         opa_group.need()
+        self.context = context
+        self.request = request
 
 
 def includeme(config):

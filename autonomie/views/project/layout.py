@@ -6,21 +6,17 @@
 
 import logging
 
-import pkg_resources
 from autonomie.models.project.project import Project
 from autonomie.utils.menu import (
     MenuItem,
     Menu,
 )
-from autonomie.resources import (
-    project_resources,
-)
+from autonomie.default_layouts import DefaultLayout
 from autonomie.views.project.routes import (
     PROJECT_ITEM_ROUTE,
     PROJECT_ITEM_ESTIMATION_ROUTE,
     PROJECT_ITEM_INVOICE_ROUTE,
     PROJECT_ITEM_PHASE_ROUTE,
-    PROJECT_ITEM_BUSINESS_ROUTE,
     PROJECT_ITEM_GENERAL_ROUTE,
 )
 
@@ -58,15 +54,6 @@ ProjectMenu.add(
 )
 ProjectMenu.add(
     MenuItem(
-        name="project_businesses",
-        label=u"Liste des affaires",
-        route_name=PROJECT_ITEM_BUSINESS_ROUTE,
-        icon=u'fa fa-folder-o',
-        perm='list.businesses',
-    )
-)
-ProjectMenu.add(
-    MenuItem(
         name="project_general",
         label=u'Informations générales',
         route_name=PROJECT_ITEM_GENERAL_ROUTE,
@@ -76,18 +63,15 @@ ProjectMenu.add(
 )
 
 
-class ProjectLayout(object):
+class ProjectLayout(DefaultLayout):
     """
     Layout for project related pages
 
     Provide the main page structure for project view
     """
-    autonomie_version = pkg_resources.get_distribution('autonomie').version
 
     def __init__(self, context, request):
-        project_resources.need()
-        self.context = context
-        self.request = request
+        DefaultLayout.__init__(self, context, request)
         if isinstance(context, Project):
             self.current_project_object = context
         elif hasattr(context, 'project'):

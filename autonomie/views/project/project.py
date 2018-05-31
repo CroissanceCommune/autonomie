@@ -167,7 +167,6 @@ class ProjectByPhaseView(BaseView, TreeMixin):
 
     def __init__(self, *args, **kw):
         BaseView.__init__(self, *args, **kw)
-        remember_navigation_history(self.request, self.context.id)
 
     @property
     def url(self):
@@ -308,6 +307,7 @@ class ProjectByPhaseView(BaseView, TreeMixin):
         return result
 
     def __call__(self):
+        remember_navigation_history(self.request, self.context.id)
         self.populate_navigation()
         phases = self.context.phases
         tasks_by_phase = self._collect_documents_by_phase(phases)

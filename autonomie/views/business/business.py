@@ -6,6 +6,7 @@
 from pyramid.httpexceptions import HTTPFound
 from autonomie.forms.project.business import get_business_edit_schema
 
+from autonomie.utils.navigation import NavigationHandler
 from autonomie.views import (
     TreeMixin,
     BaseView,
@@ -21,11 +22,36 @@ from autonomie.views.business.routes import (
 from autonomie.views.project.business import BusinessListView
 
 
+def remember_navigation_history(request, business_id):
+    """
+    Remember the last page the user has visited inside a project
+
+    :param obj request: The request object
+    """
+    keyword = "/businesses/%s" % business_id
+    handler = NavigationHandler(request, keyword)
+    handler.remember()
+
+
+def retrieve_navigation_history(request, project_id):
+    """
+    Retrieve the last page the user has visited inside a project
+
+    :param obj request: The request object
+    """
+    keyword = "/businesses/%s" % project_id
+    handler = NavigationHandler(request, keyword)
+    return handler.last()
+
+
 class BusinessView(BaseView, TreeMixin):
     """
     Single business view
     """
     route_name = BUSINESS_ITEM_ROUTE
+
+    def __init__(self, *args, **kw):
+        BaseView.__init__(self, *args, **kw)
 
     @property
     def title(self):
@@ -44,6 +70,7 @@ class BusinessView(BaseView, TreeMixin):
 
     def __call__(self):
         self.populate_navigation()
+        remember_navigation_history(self.request, self.context.id)
         return dict(
             title=self.title,
             edit_url=self.request.route_path(
@@ -88,7 +115,6 @@ def close_business_view(context, request):
     """
     context.closed = True
     request.dbsession.merge(context)
-
     return HTTPFound(request.route_path(BUSINESS_ITEM_ROUTE, id=context.id))
 
 

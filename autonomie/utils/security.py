@@ -25,6 +25,7 @@
 """
     Root factory <=> Acl handling
 """
+import logging
 from pyramid.security import (
     Allow,
     Deny,
@@ -119,6 +120,8 @@ from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureTypeCategory,
     IncomeStatementMeasureGrid,
 )
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS, ),
@@ -970,7 +973,7 @@ def get_project_acl(self):
     """
     Return acl for a project
     """
-    acl = DEFAULT_PERM[:]
+    acl = DEFAULT_PERM_NEW[:]
 
     perms = (
         'view_project',
@@ -1002,6 +1005,9 @@ def get_project_acl(self):
 
     if not self.project_type.default:
         perms += ('list.businesses', )
+
+    acl.append((Allow, "group:admin", perms))
+    acl.append((Allow, "group:manager", perms))
 
     acl.append((Deny, 'group:estimation_only', ('add_invoice', )))
 

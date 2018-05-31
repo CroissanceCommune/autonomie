@@ -90,8 +90,9 @@ USERDATAS_MENU.add_item(
     name="userdatas_parcours",
     label=u'Parcours',
     route_name=u'/users/{id}/userdatas/career_path',
+    other_route_name=u'career_path',
     icon=u'fa fa-history',
-    perm='edit.userdatas',
+    perm='view.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_doctypes",

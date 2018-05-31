@@ -32,19 +32,25 @@
     <table class='table table-condensed'>
         <thead><tr>
             <th>Date</th>
-            <th style="min-width:50%;">Etape</th>
-            <th>Echéance</th>
+            <th>&Eacute;chéance</th>
+            <th>&Eacute;tape</th>
+            <th>Nouvelle situation</th>
             <th>&nbsp;</th>
         </tr></thead>
         <tbody>
             % if career_path:
                 % for stage in career_path:
                     <% edit_url = request.route_path('career_path', id=stage.id, _query=dict(action='edit')) %>
-                    <% del_url = "" %>
+                    <% del_url = request.route_path('career_path', id=stage.id, _query=dict(action='delete')) %>
                     <tr>
                         <td>${api.format_date(stage.start_date)}</td>
-                        <td>${stage.career_stage.name}</td>
                         <td>${api.format_date(stage.end_date)}</td>
+                        <td>${stage.career_stage.name}</td>                        
+                        <td class="text-muted">
+                            % if stage.cae_situation is not None:
+                                <small>${stage.cae_situation.label}</small>
+                            % endif
+                        </td>
                         <td class='text-right'>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -52,7 +58,11 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right">
                                     <li><a href="${edit_url}"><i class="fa fa-pencil"></i>&nbsp;Voir/Modifier</a></li>
-                                    <li><a href="${del_url}"><i class="fa fa-remove"></i>&nbsp;Supprimer</a></li>
+                                    <li>
+                                        <a href="${del_url}" onclick="return confirm('Êtes vous sûr de vouloir supprimer cette étape de parcours ?')">
+                                            <span class="text-danger"><i class="fa fa-remove"></i>&nbsp;Supprimer</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </td>

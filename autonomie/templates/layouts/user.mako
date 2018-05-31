@@ -31,7 +31,7 @@
                     </div>
                     <div class='col-md-9'>
                         <div>${api.format_civilite(layout.current_user_object.civilite)}&nbsp;${api.format_account(layout.current_user_object)}</div>
-                        <div>${format_mail(layout.current_user_object.email)}</div>
+                        <div><small>${format_mail(layout.current_user_object.email)}</small></div>
                         <div>
                         % if request.has_permission("edit.user", layout.current_user_object):
                         <a

@@ -25,7 +25,6 @@
             class='disabled'
         % endif
         >
-            % if elem.enabled(_context, request):
             <a
                 title='${elem.title}'
             % if elem.enabled(_context, request):
@@ -35,9 +34,7 @@
             % endif
                 >
                 <i class="${elem.icon}"></i>&nbsp;<span class='hidden-xs'>${elem.label|n}</span>
-            % if elem.enabled(_context, request):
             </a>
-            % endif
         </li>
     % endif
 </%def>
@@ -82,8 +79,4 @@
 ${render_dropdown(menu_item)}
 % else:
 ${render_item(menu_item)}
-<<<<<<< HEAD
 % endif
-=======
-% endif
->>>>>>> dev_kilya

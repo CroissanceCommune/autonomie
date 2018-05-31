@@ -33,11 +33,17 @@ from sqlalchemy.orm import (
 from autonomie.views import (
     BaseFormView,
     BaseView,
+    DeleteView,
 )
 from autonomie.utils.strings import format_account
 from autonomie.models.career_path import CareerPath
 from autonomie.models.career_stage import CareerStage 
-from autonomie.forms.user.career_path import StageSchema
+from autonomie.forms.user.career_path import (
+    get_add_stage_schema,
+    get_edit_stage_schema,
+    get_edit_contrat_stage_schema,
+    get_edit_sortie_stage_schema,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +82,7 @@ class CareerPathAddStage(BaseFormView):
     Career path add stage view
     """
     title = u"Ajout d'une nouvelle étape"
-    schema = StageSchema()
+    schema = get_add_stage_schema()
 
     @property
     def current_userdatas(self):
@@ -87,10 +93,20 @@ class CareerPathAddStage(BaseFormView):
         model.userdatas_id = self.current_userdatas.id
         model = self.dbsession.merge(model)
         self.dbsession.flush()
-        self.session.flash(
-            u"L'étape a bien été ajoutée au parcours"
-        )
-        return HTTPFound(self.request.current_route_path(_query=''))
+
+        # Update CareerPath with chosen CareerStage's data
+        model.cae_situation_id = model.career_stage.cae_situation_id
+        model.is_entree_cae = model.career_stage.is_entree_cae
+        model.is_contrat = model.career_stage.is_contrat
+        model.is_sortie = model.career_stage.is_sortie
+        model = self.dbsession.merge(model)
+        self.dbsession.flush()
+
+        if model.is_contrat or model.is_sortie:
+            return HTTPFound(self.request.route_path('career_path', id=model.id, _query=''))
+        else:
+            self.session.flash(u"L'étape de parcours a bien été ajoutée")
+            return HTTPFound(self.request.current_route_path(_query=''))
 
 class UserCareerPathAddStage(CareerPathAddStage):
     @property
@@ -103,19 +119,41 @@ class CareerPathEditStage(BaseFormView):
     Career path edit stage view
     """
     title = u"Modification d'une étape de parcours"
-    schema = StageSchema()
+    _schema = None
 
     @property
     def current_userdatas(self):
-        return self.context
+        return self.context.userdatas
+
+    # Schema is here a property since we need to build it dynamically 
+    # regarding the current request
+    @property
+    def schema(self):
+        """
+        The getter for our schema property
+        """
+        if self._schema is None:
+            if self.context.is_contrat:
+                self._schema = get_edit_contrat_stage_schema()
+            elif self.context.is_sortie:
+                self._schema = get_edit_sortie_stage_schema()
+            else:
+                self._schema = get_edit_stage_schema()
+        self._schema.title = self.context.career_stage.name
+        if self.context.cae_situation is not None:
+            self._schema.title += ' ( => ' + self.context.cae_situation.label + ' )'
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        """
+        A setter for the schema property
+        The BaseClass in pyramid_deform gets and sets the schema attribute 
+        that is here transformed as a property
+        """
+        self._schema = value
 
     def before(self, form):
-        #form.set_appstruct(self.schema.dictify(self.current_userdatas))
-        print "AAAAAAAAAAAAAAAAAAA"
-        print self
-        print self.context
-        print self.request.context
-        print "AAAAAAAAAAAAAAAAAAA"
         appstruct = self.request.context.appstruct()
         form.set_appstruct(appstruct)
 
@@ -125,14 +163,28 @@ class CareerPathEditStage(BaseFormView):
         model = self.dbsession.merge(model)
         self.dbsession.flush()
         self.session.flash(
-            u"L'étape de parcours a bien été modifiée"
+            u"L'étape de parcours a bien été enregistrée"
         )
-        return HTTPFound(self.request.current_route_path(_query=''))
+        return HTTPFound(
+            self.request.route_path('/users/{id}/userdatas/career_path', id=self.context.userdatas_id)
+        )
 
 class UserCareerPathEditStage(CareerPathEditStage):
     @property
     def current_userdatas(self):
         return self.context.userdatas
+
+
+class CareerPathDeleteStage(DeleteView):
+    """
+    Career path delete stage view
+    """
+    delete_msg = u"L'étape a bien été supprimée"
+    
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path('/users/{id}/userdatas/career_path', id=self.context.userdatas_id)
+        )
 
 
 def add_routes(config):
@@ -198,32 +250,14 @@ def add_views(config):
         renderer="/userdatas/career_path_form.mako",
         layout="user"
     )
-
-    # config.add_view(
-    #     UserCareerPathEditStage,
-    #     route_name="/users/{id}/userdatas/career_path",
-    #     permission="edit.userdatas",
-    #     request_param='action=edit_stage',
-    #     renderer="/userdatas/career_path_form.mako",
-    #     layout="user"
-    # )
-
-    # config.add_view(
-    #     CareerPathDeleteStage,
-    #     route_name="/userdatas/{id}/career_path",
-    #     permission="edit.userdatas",
-    #     request_param='action=del_stage',
-    #     renderer="/userdatas/career_path.mako",
-    #     layout="user"
-    # )
-    # config.add_view(
-    #     UserCareerPathDeleteStage,
-    #     route_name="/users/{id}/userdatas/career_path",
-    #     permission="edit.userdatas",
-    #     request_param='action=del_stage',
-    #     renderer="/userdatas/career_path.mako",
-    #     layout="user"
-    # )
+    config.add_view(
+        CareerPathDeleteStage,
+        route_name="career_path",
+        permission="edit.userdatas",
+        request_param='action=delete',
+        renderer="/userdatas/career_path.mako",
+        layout="user"
+    )
 
 
 def includeme(config):

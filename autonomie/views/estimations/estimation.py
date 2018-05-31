@@ -227,12 +227,17 @@ class EstimationAttachInvoiceView(BaseFormView):
 
 def estimation_geninv_view(context, request):
     """
-    Invoice generation view
+    Invoice generation view : used in shorthanded workflow
 
     :param obj context: The current context (estimation)
     """
+    business = context.gen_business()
+    request.dbsession.add(business)
+    request.dbsession.flush()
+
     invoices = context.gen_invoices(request.user)
     for invoice in invoices:
+        invoice.business = business
         request.dbsession.add(invoice)
 
     context.geninv = True
@@ -246,6 +251,18 @@ def estimation_geninv_view(context, request):
     return HTTPFound(
         request.route_path('/invoices/{id}', id=invoices[0].id)
     )
+
+
+def estimation_genbusiness_view(context, request):
+    """
+    Business generation view : used in long handed workflows
+
+    :param obj context: The current estimation
+    """
+    business = context.gen_business()
+    request.dbsession.add(business)
+    request.dbsession.flush()
+    return HTTPFound(request.route_path("/businesses/{id}", id=business.id))
 
 
 def add_routes(config):
@@ -269,6 +286,7 @@ def add_routes(config):
         'duplicate',
         'admin',
         'geninv',
+        'genbusiness',
         'set_metadatas',
         'attach_invoices',
         'set_draft',
@@ -351,6 +369,12 @@ def includeme(config):
         estimation_geninv_view,
         route_name="/estimations/{id}/geninv",
         permission='geninv.estimation',
+    )
+
+    config.add_view(
+        estimation_genbusiness_view,
+        route_name="/estimations/{id}/genbusiness",
+        permission='genbusiness.estimation',
     )
 
     config.add_view(

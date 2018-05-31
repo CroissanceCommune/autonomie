@@ -64,6 +64,7 @@ from autonomie.models.project.types import (
     ProjectType,
     BusinessType,
 )
+from autonomie.models.project.business import Business
 from autonomie.models.task.task import (
     TaskLine,
     TaskLineGroup,
@@ -192,6 +193,7 @@ class RootFactory(dict):
         ('statistic_entries', 'statistic_entry', StatisticEntry,),
         ('statistic_criteria', 'statistic_criterion',
             BaseStatisticCriterion,),
+        ('businesses', 'business', Business),
         ('business_types', 'business_type', BusinessType),
         ('tasks', 'task', Task),
         ('task_lines', 'task_line', TaskLine),
@@ -1009,6 +1011,32 @@ def get_project_acl(self):
     return acl
 
 
+def get_business_acl(self):
+    """
+    Compute the acl for the Business object
+    """
+    acl = get_project_acl(self.project)
+
+    perms = ('view.business', 'add.file',)
+    admin_perms = ('view.business',)
+
+    if not self.closed:
+        admin_perms += ('edit.business', 'add.invoice', 'close.business',)
+        perms += ('edit.business', 'add.invoice',)
+
+        if not self.invoices and not self.cancelinvoices:
+            perms += ('delete.business',)
+            admin_perms += ('delete.business',)
+
+    acl.append((Allow, 'group:admin', admin_perms))
+    acl.append((Allow, 'group:manager', perms))
+
+    for user in self.project.company.employees:
+        acl.append((Allow, user.login.login, perms))
+
+    return acl
+
+
 def get_file_acl(self):
     """
     Compute the acl for a file object
@@ -1084,6 +1112,8 @@ def set_models_acl():
     """
     Activity.__default_acl__ = property(get_activity_acl)
     AccountingOperationUpload.__acl__ = property(get_base_acl)
+    Business.__default_acl__ = property(get_business_acl)
+    BusinessType.__acl__ = property(get_base_acl)
     CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acl)
     Company.__default_acl__ = property(get_company_acl)
     CompetenceGrid.__acl__ = property(get_competence_acl)
@@ -1104,7 +1134,6 @@ def set_models_acl():
     Phase.__acl__ = property(get_phase_acl)
     Project.__default_acl__ = property(get_project_acl)
     ProjectType.__acl__ = property(get_base_acl)
-    BusinessType.__acl__ = property(get_base_acl)
     SaleProductCategory.__acl__ = property(get_product_acl)
     SaleProduct.__acl__ = property(get_product_acl)
     SaleProductGroup.__acl__ = property(get_product_acl)

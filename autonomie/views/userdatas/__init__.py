@@ -3,3 +3,4 @@ def includeme(config):
     config.include('.lists')
     config.include(".userdatas")
     config.include(".filelist")
+    config.include(".career_path")

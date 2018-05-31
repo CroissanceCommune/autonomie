@@ -8,7 +8,7 @@
 class MenuItem(object):
     __type__ = 'item'
 
-    def __init__(self, name, route_name, icon, label, title=None, perm=None):
+    def __init__(self, name, route_name, icon, label, title=None, perm=None, other_route_name=None):
         self.name = name
 
         if title is None:
@@ -19,6 +19,7 @@ class MenuItem(object):
         self.icon = icon
         self.label = label
         self.route_name = route_name
+        self.other_route_name = other_route_name
         self.perm = perm
 
     def url(self, context, request):
@@ -34,7 +35,11 @@ class MenuItem(object):
         return True
 
     def selected(self, context, request):
-        return request.matched_route.name == self.route_name
+        if request.matched_route.name == self.route_name:
+            return True
+        if request.matched_route.name == self.other_route_name:
+            return True
+        return False
 
     def has_permission(self, context, request):
         if self.perm is not None:
@@ -45,21 +50,13 @@ class MenuItem(object):
 class MenuDropdown(object):
     """
     Dropdown menu
-
     icon
-
         An icon
-
     label
-
         A label (will be used as title on smaller viewports
-
     title
-
         The title shown on hovering the menu entry
-
     default_route
-
         If the menu is disabled, a link to that route will be provided instead
     """
     __type__ = 'dropdown'
@@ -79,9 +76,9 @@ class MenuDropdown(object):
         self.default_route = default_route
         self.perm = perm
 
-    def add_item(self, name, route_name, icon, label, title=None, perm=None):
+    def add_item(self, name, route_name, icon, label, title=None, perm=None, other_route_name=None):
         self.items.append(
-            MenuItem(name, route_name, icon, label, title, perm=perm)
+            MenuItem(name, route_name, icon, label, title, perm=perm, other_route_name=other_route_name)
         )
 
     def enabled(self, context, request):
@@ -125,6 +122,7 @@ class AttrMenuItem(MenuItem):
     perm_context_attribute
 
         The current context's attribute used as context for the permission check
+
 
         E.g: if the context is a User and perm_context_attribute is "userdatas",
         we will chek the menu permission regarding the related UserDatas

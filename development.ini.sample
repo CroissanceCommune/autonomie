@@ -20,6 +20,7 @@ pyramid.includes =
                     pyramid_celery
                     js.deform
                     deform_extensions
+                    pyramid_methodrewrite
 
 ####  MAIL FROM WITHIN THE APPLICATION ####
 # Add this one to pyramid.includes if you configured a mailbox

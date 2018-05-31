@@ -102,6 +102,8 @@ from autonomie.models.sale_product import (
     SaleProductCategory,
 )
 from autonomie.models.tva import Tva
+from autonomie.models.career_stage import CareerStage
+from autonomie.models.career_path import CareerPath
 from autonomie.models.accounting.operations import (
     AccountingOperationUpload,
 )
@@ -204,6 +206,8 @@ class RootFactory(dict):
         ('users', 'user', User, ),
         ('userdatas', 'userdatas', UserDatas, ),
         ('workshops', 'workshop', Workshop, ),
+        ('career_stages', 'career_stage', CareerStage, ),
+        ('career_path', 'career_path', CareerPath, ),
     )
     subtrees = ()
 
@@ -563,7 +567,6 @@ def get_user_acl(self):
     Collect acl for a user context
     :returns: A list of user aces (in the format expected by Pyramid)
     """
-    print("Getting user acls !!!")
     acl = DEFAULT_PERM_NEW[:]
 
     acl.extend(_get_admin_user_base_acl(self))
@@ -586,6 +589,17 @@ def get_userdatas_acl(self):
     if self.user is not None:
         acl.extend(_get_admin_userdatas_base_acl(self.user))
         acl.extend(_get_userdatas_base_acl(self.user))
+    return acl
+
+
+def get_career_path_acl(self):
+    """
+    Collect acl for a CareerPath context
+    :returns: A list of user aces (in the format expected by Pyramid)
+    """
+    acl = get_userdatas_acl(self.userdatas)
+    if self.userdatas.user is not None:
+        acl = get_user_acl(self.userdatas.user)
     return acl
 
 
@@ -1090,3 +1104,5 @@ def set_models_acl():
     Tva.__acl__ = property(get_base_acl)
     BaseExpenseLine.__acl__ = property(get_expenseline_acl)
     ExpenseType.__acl__ = property(get_base_acl)
+    CareerStage.__acl__ = property(get_base_acl)
+    CareerPath.__acl__ = property(get_career_path_acl)

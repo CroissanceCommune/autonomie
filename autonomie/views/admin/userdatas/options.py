@@ -21,6 +21,7 @@ from autonomie.models.user.userdatas import (
     CaeSituationOption,
     TypeSortieOption,
     AntenneOption,
+    TypeContratOption,
 )
 from autonomie.views.admin.tools import (
     get_model_admin_view,
@@ -51,6 +52,7 @@ def includeme(config):
         MotifSortieOption,
         SocialDocTypeOption,
         TypeSortieOption,
+        TypeContratOption,
     ):
         view = get_model_admin_view(model, r_path=USERDATAS_URL)
         config.add_route(view.route_name, view.route_name)

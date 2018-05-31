@@ -195,7 +195,8 @@ class CaeSituationOption(ConfigurableOption):
         default=False,
         info={
             'colanderalchemy': {
-                'title': u'Donne droit à un compte Autonomie',
+                'title': '',
+                'label': u'Donne droit à un compte Autonomie',
                 'description': u"Si un porteur de projet a ce statut, \
 un compte Autonomie lui sera automatiquement associé"
             }
@@ -221,6 +222,17 @@ class TypeSortieOption(ConfigurableOption):
     __colanderalchemy_config__ = {
         'title': u"Type de sortie",
         'validation_msg': u"Les types de sortie ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
+class TypeContratOption(ConfigurableOption):
+    """
+    Possible values for contract type (parcours)
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Type de contrat",
+        'validation_msg': u"Les types de contrat ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
 

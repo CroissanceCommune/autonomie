@@ -232,8 +232,6 @@ def estimation_geninv_view(context, request):
     :param obj context: The current context (estimation)
     """
     business = context.gen_business()
-    request.dbsession.add(business)
-    request.dbsession.flush()
 
     invoices = context.gen_invoices(request.user)
     for invoice in invoices:

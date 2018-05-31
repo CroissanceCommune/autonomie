@@ -17,8 +17,28 @@ from autonomie.views import (
     BaseListView,
     TreeMixin,
 )
-from autonomie.views.project.routes import PROJECT_ITEM_BUSINESS_ROUTE
+from autonomie.utils.menu import (
+    MenuItem,
+)
+from autonomie.views.project.layout import ProjectMenu
+from autonomie.views.project.routes import (
+    PROJECT_ITEM_BUSINESS_ROUTE,
+)
+from autonomie.views.business.routes import (
+    BUSINESS_ITEM_ROUTE,
+)
 from autonomie.views.project.lists import ProjectListView
+
+
+ProjectMenu.add(
+    MenuItem(
+        name="project_businesses",
+        label=u"Liste des affaires",
+        route_name=PROJECT_ITEM_BUSINESS_ROUTE,
+        icon=u'fa fa-folder-o',
+        perm='list.businesses',
+    )
+)
 
 
 class BusinessListView(BaseListView, TreeMixin):
@@ -34,10 +54,28 @@ class BusinessListView(BaseListView, TreeMixin):
     default_sort = "name"
     default_direction = "asc"
     route_name = PROJECT_ITEM_BUSINESS_ROUTE
+    item_route_name = BUSINESS_ITEM_ROUTE
+
+    @property
+    def title(self):
+        return u"Affaires du projet {0}".format(self.current().name)
+
+    @property
+    def url(self):
+        if hasattr(self.context, 'project_id'):
+            return self.request.route_path(
+                self.route_name, id=self.context.project_id
+            )
+        else:
+            return self.request.route_path(
+                self.route_name, id=self.context.id
+            )
 
     def current(self):
-        print(self.context.__acl__)
-        return self.context
+        if hasattr(self.context, 'project'):
+            return self.context.project
+        else:
+            return self.context
 
     def query(self):
         query = DBSESSION().query(distinct(Business.id), Business)
@@ -52,7 +90,7 @@ class BusinessListView(BaseListView, TreeMixin):
 
     def stream_actions(self, item):
         yield Link(
-            "#",  # self._get_item_url(item),
+            self._get_item_url(item),
             u"Voir/Modifier",
             icon=u"pencil",
         )
@@ -62,7 +100,7 @@ def includeme(config):
     config.add_tree_view(
         BusinessListView,
         parent=ProjectListView,
-        renderer="autonomie:templates/project/businesses.mako",
+        renderer="autonomie:templates/business/project_list.mako",
         permission="list.businesses",
         layout='project',
     )

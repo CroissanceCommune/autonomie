@@ -700,7 +700,7 @@ def get_estimation_default_acl(self):
     admin_perms = ('duplicate.estimation',)
 
     if self.status == 'valid' and self.signed_status != 'aborted':
-        if self.project_type.name == 'default':
+        if self.project.project_type.default:
             admin_perms += ('geninv.estimation',)
         else:
             admin_perms += ('genbusiness.estimation',)
@@ -731,10 +731,10 @@ def get_estimation_default_acl(self):
         if self.status == 'valid':
             perms += ('set_signed_status.estimation', )
             if not self.signed_status == 'aborted':
-                if self.project_type.name == 'default':
-                    admin_perms += ('geninv.estimation',)
+                if self.project.project_type.default:
+                    perms += ('geninv.estimation',)
                 else:
-                    admin_perms += ('genbusiness.estimation',)
+                    perms += ('genbusiness.estimation',)
 
         if perms:
             acl.append((Allow, user.login.login, perms))

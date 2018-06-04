@@ -35,7 +35,7 @@
                         <i class='fa fa-folder-open fa-4x'></i>
                     </div>
                     <div class='col-md-9'>
-                        <div>${layout.current_project_object.name}</div>
+                        <div>Projet : ${layout.current_project_object.name}</div>
                         <div class='help-text'>${layout.current_project_object.description}</div>
                         <div>
                         % if request.has_permission("edit.project", layout.current_project_object):

@@ -15,6 +15,7 @@ Database
 Autonomie uses a Mysql database.
 
 To access it, we use the following libraries:
+
 * SQLAlchemy : ORM for database object representation
 * Alembic : Database migration (downgrade/upgrade)
 * Python MysqlDB

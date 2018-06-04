@@ -32,3 +32,4 @@ def includeme(config):
     config.include('.accounting')
     config.include('.tva')
     config.include('.receipts')
+    config.include('.numbers')

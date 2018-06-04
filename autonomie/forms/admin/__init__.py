@@ -278,7 +278,34 @@ abandons de créance dans les notes de dépense",
                 ("10", u"Résultat de l'entreprise"),
             )
         )
-    }
+    },
+    "invoice_number_template": {
+        "title": u"Format du numéro de facture",
+        "description": u"Peut contenir des caractères (préfixes, \
+séparateurs… etc), ainsi que des variables et séquences. Ex: {AAAA}-{SEQYEAR}."
+    },
+    "global_sequence_init_value": {
+        "title": u"Valeur à laquelle on initialise de la séquence globale",
+        "section": u"Séquence globale (SEQGLOBAL)",
+    },
+    "year_sequence_init_value": {
+        "title": u"Valeur à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQYEAR)",
+    },
+    "year_sequence_init_date": {
+        "title": u"Date à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQYEAR)",
+        "widget": deform.widget.DateInputWidget(),
+    },
+    "month_sequence_init_value": {
+        "title": u"Valeur à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQMONTH)",
+    },
+    "month_sequence_init_date": {
+        "title": u"Date à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQMONTH)",
+        "widget": deform.widget.DateInputWidget(),
+    },
 }
 
 

@@ -293,7 +293,7 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
         self.session.execute("Update accounts set session_datas='{}'")
         counter = itertools.count()
         found_contractor = False
-        for u in self.session.query(Login).join(User).filter_by(active=True):
+        for u in self.session.query(Login).join(User).filter(Login.active==True):
             index = counter.next()
             if index == 1:
                 u.login = u"admin1"
@@ -316,9 +316,10 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             if u.user.has_userdatas():
                 u.user.userdatas.coordonnees_lastname = u.user.lastname
                 u.user.userdatas.coordonnees_firstname = u.user.firstname
-                u.user.userdatas.coordonnees_email1 = u.email
+                u.user.userdatas.coordonnees_email1 = u.user.email
 
-        for u in self.session.query(Login).join(User).filter_by(active=False):
+        for u in self.session.query(Login).join(User).filter(Login.active==False
+                                                             ):
             index = counter.next()
             u.login = u"user_{0}".format(index)
             u.user.lastname = self.faker.last_name()
@@ -326,12 +327,12 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             u.user.email = self.faker.ascii_safe_email()
             u.set_password(u.login)
             if u.user.has_userdatas():
-                u.user.userdatas.coordonnees_lastname = u.lastname
-                u.user.userdatas.coordonnees_firstname = u.firstname
-                u.user.userdatas.coordonnees_email1 = u.email
+                u.user.userdatas.coordonnees_lastname = u.user.lastname
+                u.user.userdatas.coordonnees_firstname = u.user.firstname
+                u.user.userdatas.coordonnees_email1 = u.user.email
 
     def _an_userdatas(self):
-        from autonomie.models.user import (
+        from autonomie.models.user.userdatas import (
             UserDatas,
             CompanyDatas,
             AntenneOption,
@@ -343,8 +344,8 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
                 u.coordonnees_email1 = self.faker.ascii_safe_email()
             u.coordonnees_ladies_lastname = self.faker.last_name_female()
             u.coordonnees_email2 = self.faker.ascii_safe_email()
-            u.coordonnees_tel = self.faker.phone_number()
-            u.coordonnees_mobile = self.faker.phone_number()
+            u.coordonnees_tel = self.faker.phone_number()[:14]
+            u.coordonnees_mobile = self.faker.phone_number()[:14]
             u.coordonnees_address = self.faker.street_address()
             u.coordonnees_zipcode = self._zipcode()
             u.coordonnees_city = self.faker.city()
@@ -352,7 +353,7 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             u.coordonnees_birthplace_zipcode = self._zipcode()
             u.coordonnees_secu = u"0 00 00 000 000 00"
             u.coordonnees_emergency_name = self.faker.name()
-            u.coordonnees_emergency_phone = self.faker.phone_number()
+            u.coordonnees_emergency_phone = self.faker.phone_number()[:14]
             u.parcours_goals = self.faker.text()
         for datas in self.session.query(CompanyDatas):
             datas.title = self.faker.company()

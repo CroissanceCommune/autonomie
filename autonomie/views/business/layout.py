@@ -13,6 +13,7 @@ from autonomie.utils.menu import (
 from autonomie.default_layouts import DefaultLayout
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
+    BUSINESS_ITEM_OVERVIEW_ROUTE,
     BUSINESS_ITEM_ESTIMATION_ROUTE,
     BUSINESS_ITEM_INVOICE_ROUTE,
     BUSINESS_ITEM_FILE_ROUTE,
@@ -26,7 +27,7 @@ BusinessMenu.add(
     MenuItem(
         name='overview',
         label=u"Vue générale",
-        route_name=BUSINESS_ITEM_ROUTE,
+        route_name=BUSINESS_ITEM_OVERVIEW_ROUTE,
         icon="fa fa-line-chart",
         perm="view.business",
     )
@@ -54,7 +55,7 @@ BusinessMenu.add(
         name='business_files',
         label=u"Fichiers rattachés",
         route_name=BUSINESS_ITEM_FILE_ROUTE,
-        icon=u"fa fa-folder-open",
+        icon=u"fa fa-briefcase",
     )
 )
 

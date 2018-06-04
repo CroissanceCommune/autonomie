@@ -28,6 +28,7 @@ from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
 )
 from autonomie.views.project.lists import ProjectListView
+from autonomie.views.project.project import remember_navigation_history
 
 
 ProjectMenu.add(
@@ -78,6 +79,7 @@ class BusinessListView(BaseListView, TreeMixin):
             return self.context
 
     def query(self):
+        remember_navigation_history(self.request, self.context.id)
         query = DBSESSION().query(distinct(Business.id), Business)
         query = query.filter_by(project_id=self.current().id)
         return query

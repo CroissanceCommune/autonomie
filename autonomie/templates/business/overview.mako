@@ -26,6 +26,9 @@
     <div class='col-xs-12'>
         <div class='panel panel-default page-block'>
             <div class='panel-body'>
+                % if layout.current_business_object.closed:
+                <div class='alert alert-success'>Cette affaire est clôturée</div>
+                % endif
             </div>
         </div>
     </div>

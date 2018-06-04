@@ -27,16 +27,25 @@
 </%block>
 <%block name='content'>
 <div class='panel panel-default page-block'>
-    <div class='panel-heading'>
+    <div class='panel-heading '>
         <div class='row'>
             <div class='col-md-3 col-xs-12 bordered'>
                 <div class='row'>
                     <div class='col-md-3 text-center'>
+                    % if layout.current_business_object.closed:
+                        <i class='fa fa-folder fa-4x'></i>
+                    % else:
                         <i class='fa fa-folder-open fa-4x'></i>
+                    % endif
                     </div>
                     <div class='col-md-9'>
-                        <div>${layout.current_business_object.name}</div>
-                        <div class='help-text'>${layout.current_business_object.business_type.label}</div>
+                        <div>Affaire : ${layout.current_business_object.name}</div>
+                        <div class='help-text'>
+                        ${layout.current_business_object.business_type.label}
+                        % if layout.current_business_object.closed:
+                        (clôturée)
+                        % endif
+                        </div>
                         <div class'btn-group'>
                         % if request.has_permission("edit.business", layout.current_business_object):
                         <a

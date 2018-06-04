@@ -21,21 +21,6 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
-<%namespace file="/base/utils.mako" import="format_filetable" />
 <%block name="mainblock">
-% if request.has_permission('add.file'):
-<div class='alert alert-info'>
-    <i class='fa fa-question-circle fa-2x'></i>
-    Cette liste présente l'ensemble des documents déposés rattachés à cette affaire ou aux documents (devis/factures) qui lui sont associées<br />
-    <br />
-    <br />
-    <a class='btn btn-success'
-    href="${request.route_path('/businesses/{id}', id=current_business.id, _query=dict(action='attach_file'))}"
-    title="Rattacher un document à cette affaire">
-    <i class="glyphicon glyphicon-plus"></i>
-    Déposer un document
-</a>
-</div>
-% endif
-${format_filetable(current_business.children)}
+${request.layout_manager.render_panel("filetable", files=files, add_url=add_url, help_message=help_message)}
 </%block>

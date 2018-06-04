@@ -16,8 +16,6 @@ from sqlalchemy.orm import (
     Load,
     joinedload,
 )
-from autonomie.models.career_path import CareerPath
-from autonomie.models.career_stage import CareerStage 
 from autonomie.models.user.userdatas import (
     UserDatas,
     SocialDocTypeOption,
@@ -55,7 +53,6 @@ from autonomie.views.userdatas.routes import (
     USERDATAS_EDIT_URL,
     USERDATAS_DOCTYPES_URL,
     USERDATAS_PY3O_URL,
-    USERDATAS_MYDOCUMENTS_URL,
     USERDATAS_HISTORY_URL,
     USER_USERDATAS_URL,
     USER_USERDATAS_ADD_URL,
@@ -99,7 +96,7 @@ USERDATAS_MENU.add_item(
     label=u'Documents sociaux',
     route_name=USER_USERDATAS_DOCTYPES_URL,
     icon=u'fa fa-check-square-o',
-    perm='doctypes.userdatas',
+    perm='doctype.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_py3o",

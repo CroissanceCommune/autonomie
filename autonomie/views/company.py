@@ -123,7 +123,7 @@ class CompanyDisableView(DisableView):
                 user_url = self.request.route_path(
                     '/users/{id}/login', id=user.id
                 )
-                self.request.flash(
+                self.request.session.flash(
                     u"Les identifiants de <a href='{0}'>{1}</a> ont été \
                     désactivés".format(user_url, user.label)
                 )

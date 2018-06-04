@@ -44,9 +44,9 @@
 % endif
 % if request.has_permission('admin_company'):
     % if request.context.active:
-    <% label = u"Désarchiver" %>
+    <% label = u"Désactiver" %>
     % else :
-    <% label = u"Archiver" %>
+    <% label = u"Ré-activer" %>
     % endif
     <a
         class='btn btn-default btn-block'

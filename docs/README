@@ -1,4 +1,15 @@
-To build the docs: 'make'.
+Pour génerer la doc au format HTML :
+
+1. Installer les dépendences
+
+    pip install -r doc-requirements.txt
+
+2. Compiler la doc:
+
+    make html
+
+3. Le résultat est dans build/html/
+
 
 Extensions: using http domain extension for sphinx:
 * url : https://bitbucket.org/birkenfeld/sphinx-contrib

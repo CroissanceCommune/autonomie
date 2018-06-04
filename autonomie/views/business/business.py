@@ -18,6 +18,7 @@ from autonomie.views.project.routes import (
 )
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
+    BUSINESS_ITEM_OVERVIEW_ROUTE,
 )
 from autonomie.views.project.business import BusinessListView
 
@@ -44,11 +45,21 @@ def retrieve_navigation_history(request, project_id):
     return handler.last()
 
 
-class BusinessView(BaseView, TreeMixin):
+def business_entry_point_view(context, request):
+    """
+    Project entry point view only redirects to the most appropriate page
+    """
+    last = retrieve_navigation_history(request, context.id)
+    if last is None:
+        last = request.route_path(BUSINESS_ITEM_OVERVIEW_ROUTE, id=context.id)
+    return HTTPFound(last)
+
+
+class BusinessOverviewView(BaseView, TreeMixin):
     """
     Single business view
     """
-    route_name = BUSINESS_ITEM_ROUTE
+    route_name = BUSINESS_ITEM_OVERVIEW_ROUTE
 
     def __init__(self, *args, **kw):
         BaseView.__init__(self, *args, **kw)
@@ -119,16 +130,21 @@ def close_business_view(context, request):
 
 
 def includeme(config):
+    config.add_view(
+        business_entry_point_view,
+        route_name=BUSINESS_ITEM_ROUTE,
+        permission="view.business",
+    )
     config.add_tree_view(
-        BusinessView,
+        BusinessOverviewView,
         parent=BusinessListView,
-        renderer="autonomie:templates/business/business.mako",
+        renderer="autonomie:templates/business/overview.mako",
         permission="view.business",
         layout='business',
     )
     config.add_tree_view(
         BusinessEditView,
-        parent=BusinessView,
+        parent=BusinessOverviewView,
         renderer="autonomie:templates/base/formpage.mako",
         request_param="action=edit",
         permission="edit.business",
@@ -142,6 +158,7 @@ def includeme(config):
     )
     config.add_view(
         close_business_view,
+        route_name=BUSINESS_ITEM_ROUTE,
         request_param="action=close",
         permission="close.business",
         layout="default"

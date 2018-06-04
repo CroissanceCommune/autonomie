@@ -23,20 +23,5 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="format_filetable" />
 <%block name="mainblock">
-% if request.has_permission('addfile.userdatas'):
-<div class='alert alert-info'>
-    <i class='fa fa-question-circle fa-2x'></i>
-    Cette liste présente l'ensemble des documents déposés dans Autonomie ainsi que l'ensemble des documents générés depuis l'onglet Génération de documents.<br />
-    Ces documents sont visibles par l'entrepreneur.
-    <br />
-    <br />
-    <a class='btn btn-success'
-    href="${request.route_path('/userdatas/{id}', id=current_userdatas.id, _query=dict(action='attach_file'))}"
-    title="Déposer un document dans autonomie">
-    <i class="glyphicon glyphicon-plus"></i>
-    Déposer un document
-</a>
-</div>
-% endif
-${format_filetable(current_userdatas.children)}
+${request.layout_manager.render_panel("filetable", files=files, add_url=add_url, help_message=help_message, add_perm="addfile.userdatas")}
 </%block>

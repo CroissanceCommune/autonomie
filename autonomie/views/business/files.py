@@ -12,6 +12,7 @@ from sqlalchemy.orm import (
 from pyramid.httpexceptions import HTTPFound
 
 from autonomie.models import files
+from autonomie.models.task import Task
 
 from autonomie.views import (
     BaseView,
@@ -45,6 +46,9 @@ class BusinessFileAddView(FileUploadView, TreeMixin):
 
 class BusinessFilesView(BaseView, TreeMixin):
     route_name = BUSINESS_ITEM_FILE_ROUTE
+    help_message = u"""
+    Liste des documents rattachés à l'affaire courante ou à un des documents
+    qui la composent."""
 
     @property
     def current_business(self):
@@ -52,18 +56,31 @@ class BusinessFilesView(BaseView, TreeMixin):
 
     def __call__(self):
         self.populate_navigation()
+
+        ids = [i[0] for i in self.request.dbsession.query(Task.id).filter_by(
+            business_id=self.current_business.id
+        )]
+
+        ids.append(self.current_business.id)
+
         query = files.File.query().options(load_only(
             "description",
             "name",
             "updated_at",
             "id",
         ))
-        query = query.filter_by(parent_id=self.current_business.id)
+        query = query.filter(files.File.parent_id.in_(ids))
 
         return dict(
             title=u"Documents rattachés à cette affaire",
             files=query,
             current_business=self.current_business,
+            add_url=self.request.route_path(
+                BUSINESS_ITEM_ROUTE,
+                id=self.current_business.id,
+                _query={'action': 'attach_file'},
+            ),
+            help_message=self.help_message,
         )
 
 

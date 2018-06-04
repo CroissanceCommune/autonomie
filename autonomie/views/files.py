@@ -83,6 +83,7 @@ class FileViewRedirectMixin(object):
     """
     NODE_TYPE_ROUTES = {
         'activity': u"activity",
+        'business': '/businesses/{id}/files',
         'cancelinvoice': "/cancelinvoices/{id}.html",
         'estimation': "/estimations/{id}.html",
         'expensesheet': "/expenses/{id}",
@@ -94,6 +95,7 @@ class FileViewRedirectMixin(object):
 
     NODE_TYPE_LABEL = {
         'activity': u'au rendez-vous',
+        'business': u"à l'affaire",
         'cancelinvoice': u"à l'avoir",
         'estimation': u'au devis',
         "expensesheet": u"à la note de dépense",

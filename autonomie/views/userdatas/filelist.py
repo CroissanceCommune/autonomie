@@ -44,6 +44,12 @@ class UserDatasFileAddView(FileUploadView):
 
 
 class UserDatasFileList(BaseView):
+    help_message = u"""
+    Cette liste présente l'ensemble des documents déposés dans Autonomie ainsi
+    que l'ensemble des documents générés depuis l'onglet Génération de
+    documents.<br />Ces documents sont visibles par l'entrepreneur.
+    """
+
     @property
     def current_userdatas(self):
         return self.context
@@ -60,7 +66,12 @@ class UserDatasFileList(BaseView):
         return dict(
             title=u"Portefeuille de documents",
             files=query,
-            current_userdatas=self.current_userdatas,
+            add_url=self.request.route_path(
+                '/userdatas/{id}',
+                id=self.current_userdatas.id,
+                _query=dict(action='attach_file')
+            ),
+            help_message=self.help_message,
         )
 
 

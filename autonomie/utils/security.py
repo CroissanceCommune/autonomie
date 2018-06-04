@@ -1007,6 +1007,7 @@ def get_project_acl(self):
         'list_invoices',
         'list.invoices',
         'view.file',
+        'list.files',
         'add.file',
         'edit.file',
         "delete.file",

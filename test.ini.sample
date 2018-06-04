@@ -27,6 +27,17 @@ testdb.drop=echo "DROP DATABASE IF EXISTS testautonomie"|mysql -uroot
 # testdb.adddb=sudo -u postgres psql -c "CREATE DATABASE IF NOT EXISTS testautonomie owner testautonomie;
 # testdb.drop=sudo -u postgres psql -c "DROP DATABASE 'testautonomie'
 
+#### BEGIN VAGRANT CONFIG BLOCK
+# Uncomment the following lines, to use tests if you are using Vagrant
+sqlalchemy.url = mysql://autonomie:autonomie@127.0.0.1:13306/testautonomie?charset=utf8
+sqlalchemy.echo=False
+
+testdb.connect=echo 'quit' | vagrant ssh -c 'sudo mysql -uroot --password=root'
+testdb.adddb=echo "CREATE DATABASE IF NOT EXISTS testautonomie; GRANT ALL PRIVILEGES on testautonomie.* to 'autonomie';FLUSH PRIVILEGES;" | vagrant ssh -c 'sudo mysql -uroot --password=root'
+testdb.adduser=
+testdb.drop=echo "DROP DATABASE IF EXISTS testautonomie"| vagrant ssh -c 'sudo mysql -uroot --password=root'
+#### END VAGRANT CONFIG BLOCK
+
 session.longtimeout=3600
 cache.regions = default_term, second, short_term, long_term
 cache.type = memory

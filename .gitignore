@@ -11,6 +11,7 @@ data
 dist
 /build/
 .ropeproject
+.vagrant/
 tobeignored
 node_modules
 /mail/

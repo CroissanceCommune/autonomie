@@ -132,6 +132,36 @@ suivantes
     cp development.ini.sample development.ini
 
 
+Base de données avec Vagrant
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Pour héberger la base de données dans une machine virtuelle jettable et
+reproductible sans toucher à la machine hôte, une configuration Vagrant est
+disponible. Pour l'utiliser :
+
+.. code-block:: console
+
+    apt install virtualbox vagrant
+
+Et pour lancer cette machine :
+
+.. code-block:: console
+
+    vagrant up
+
+Un serveur MariaDB est alors installé et configuré (port local 13306 de l'hôte
+local, base: autonomie, login: autonomie, password: autonomie).
+
+Des configurations adaptées à vagrant sont commentées dans ``test.ini.sample`` et
+``developement.ini.sample``.
+
+Au besoin, la base peut être remise à zéro avec :
+
+.. code-block:: console
+
+    vagrant provision
+
+
 Tests
 ------
 

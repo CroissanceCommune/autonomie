@@ -70,6 +70,16 @@ Initialiser la base de données
 
     autonomie-admin development.ini syncdb
 
+.. note::
+
+    L'application synchronise automatiquement les modèles de données.
+
+Puis créer un compte administrateur
+
+.. code-block:: console
+
+    autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
+
 Puis lancer l'application web
 
 .. code-block:: console
@@ -86,17 +96,6 @@ Voir :
 https://github.com/CroissanceCommune/autonomie_celery
 
 pour plus d'informations.
-
-.. note::
-
-    L'application synchronise automatiquement les modèles de données.
-
-Puis créer un compte administrateur
-
-.. code-block:: console
-
-    autonomie-admin development.ini useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--group=<group>] [--email=<email>]
-
 
 Mise à jour
 -----------

@@ -193,7 +193,8 @@ class ProjectType(BaseProjectType):
         Check if there is a project using this specific type
         """
         from autonomie.models.project.project import Project
-        return Project.query().filter_by(project_type_id=self.id).count() > 0
+        query = Project.query().filter_by(project_type_id=self.id)
+        return DBSESSION().query(query.exists()).scalar()
 
     def get_other_business_type_ids(self):
         query = DBSESSION().query(ProjectTypeBusinessType.c.business_type_id)
@@ -288,9 +289,8 @@ class BusinessType(BaseProjectType):
         """
         Check if there is a project using this specific type
         """
-        return Business.query().filter_by(
-            business_type_id=self.id
-        ).count() > 0
+        query = Business.query().filter_by(business_type_id=self.id)
+        return DBSESSION().query(query.exists()).scalar()
 
     def __json__(self, request):
         """

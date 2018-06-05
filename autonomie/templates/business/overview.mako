@@ -29,6 +29,25 @@
                 % if layout.current_business_object.closed:
                 <div class='alert alert-success'>Cette affaire est clôturée</div>
                 % endif
+                <h3>Devis de référence</h3>
+                % if not estimations:
+                    <em>Aucun devis n'est associé à cette affaire</em>
+                % endif
+                % for estimation in estimations:
+                <div>
+                    Devis :
+                    <a
+                        class="link"
+                        href="${request.route_path('/estimations/{id}', id=estimation.id)}"
+                        >
+                        ${estimation.name} (${estimation.internal_number})
+                    </a>
+                </div>
+                % endfor
+                <h3>Indicateurs</h3>
+                % for indicator in indicators:
+                TODO
+                % endfor
             </div>
         </div>
     </div>

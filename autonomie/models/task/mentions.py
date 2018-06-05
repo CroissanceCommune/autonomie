@@ -92,7 +92,15 @@ un devis/facture, ce texte apparaitra dans la sortie PDF",
 
     @property
     def is_used(self):
-        return DBSESSION().query(TASK_MENTION.task_id).filter(
-            TASK_MENTION.c.mention_id == self.id).count() > 0 or \
-            DBSESSION().query(MANDATORY_TASK_MENTION.task_id).filter(
-                MANDATORY_TASK_MENTION.c.mention_id == self.id).count() > 0
+        task_query = DBSESSION().query(TASK_MENTION.task_id).filter(
+            TASK_MENTION.c.mention_id == self.id
+        )
+
+        mandatory_query = DBSESSION().query(
+            MANDATORY_TASK_MENTION.task_id
+        ).filter(
+            MANDATORY_TASK_MENTION.c.mention_id == self.id
+        )
+
+        return DBSESSION().query(task_query.exists()).scalar() or \
+            DBSESSION().query(mandatory_query.exists()).scalar()

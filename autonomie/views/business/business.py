@@ -88,7 +88,9 @@ class BusinessOverviewView(BaseView, TreeMixin):
                 self.route_name,
                 id=self.context.id,
                 _query={'action': 'edit'}
-            )
+            ),
+            estimations=self.context.estimations,
+            indicators=[],  # self.context.indicators,
         )
 
 

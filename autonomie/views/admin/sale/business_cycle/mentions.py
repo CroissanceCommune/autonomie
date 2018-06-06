@@ -31,7 +31,9 @@ BUSINESS_MENTION_URL = os.path.join(BUSINESS_URL, "business_type_task_mention")
 
 class BusinessTypeTaskMentionView(BaseView, AdminTreeMixin):
     route_name = BUSINESS_MENTION_URL
-    title = u"Configuration des mentions obligatoires/facultatives"
+    title = u"Mentions obligatoires/facultatives"
+    description = u"Les mentions qui sont intégrées dans les documents étapes \
+(devis/factures), par type d'affaire."
 
     @property
     def help_message(self):
@@ -103,8 +105,11 @@ class BusinessTypeTaskMentionSetView(BaseView, AdminTreeMixin):
                 appstruct = schema.deserialize(values)
             except colander.Invalid:
                 logger.exception(u"Error while validating association datas")
-                self.request.session.flash(u"Une erreur est survenue, veuillez "
-                                           u"contacter votre administrateur")
+                self.request.session.flash(
+                    u"Une erreur est survenue, veuillez "
+                    u"contacter votre administrateur",
+                    'error',
+                )
             else:
                 for datas in appstruct['items']:
                     mandatory = datas.get('mandatory')

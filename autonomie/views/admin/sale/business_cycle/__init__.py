@@ -27,3 +27,4 @@ def includeme(config):
     )
     config.include('.project_type')
     config.include('.mentions')
+    config.include('.file_types')

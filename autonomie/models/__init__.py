@@ -56,6 +56,7 @@ from .expense import sheet
 from .expense import types
 from .expense import payment
 from .project import business
+from .project import file_types
 from .project import mentions
 from .project import phase
 from .project import project

@@ -53,6 +53,7 @@ from autonomie.models.competence import (
 from autonomie.models.customer import Customer
 from autonomie.models.files import (
     File,
+    FileType,
     Template,
     TemplatingHistory,
 )
@@ -168,6 +169,7 @@ class RootFactory(dict):
         ("expense_types", "expense_type", ExpenseType,),
         ('expense_payments', 'expense_payment', ExpensePayment, ),
         ('files', 'file', File, ),
+        ('file_types', 'file_type', FileType, ),
         ('invoices', 'invoice', Invoice, ),
         (
             'income_statement_measure_grids',
@@ -1150,6 +1152,7 @@ def set_models_acl():
     ExpenseSheet.__default_acl__ = property(get_expense_sheet_default_acl)
     ExpensePayment.__acl__ = property(get_expense_payment_acl)
     File.__default_acl__ = property(get_file_acl)
+    FileType.__acl__ = property(get_base_acl)
     Invoice.__default_acl__ = property(get_invoice_default_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
     Login.__acl__ = property(get_login_acl)

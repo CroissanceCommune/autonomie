@@ -92,12 +92,12 @@ un devis/facture, ce texte apparaitra dans la sortie PDF",
 
     @property
     def is_used(self):
-        task_query = DBSESSION().query(TASK_MENTION.task_id).filter(
+        task_query = DBSESSION().query(TASK_MENTION.c.task_id).filter(
             TASK_MENTION.c.mention_id == self.id
         )
 
         mandatory_query = DBSESSION().query(
-            MANDATORY_TASK_MENTION.task_id
+            MANDATORY_TASK_MENTION.c.task_id
         ).filter(
             MANDATORY_TASK_MENTION.c.mention_id == self.id
         )

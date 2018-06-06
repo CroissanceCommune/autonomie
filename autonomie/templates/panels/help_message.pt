@@ -25,5 +25,5 @@
           class="alert alert-info">
           <i class='fa fa-question-circle fa-2x'></i>&nbsp;${structure:help_message}
         </div>
-    </div
+    </div>
 </div>

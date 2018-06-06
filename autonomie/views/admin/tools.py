@@ -23,6 +23,7 @@ import logging
 import os
 
 from pyramid.httpexceptions import HTTPFound
+from sqlalchemy.orm.query import Query
 
 from autonomie.models.config import Config
 from autonomie.forms import flatten_appstruct
@@ -500,6 +501,9 @@ class AdminCrudListView(BaseView, AdminTreeMixin):
 
     def __call__(self):
         items = self.load_items()
+        # We ensure we return a list
+        if isinstance(items, Query):
+            items = items.all()
 
         result = dict(
             breadcrumb=self.breadcrumb,

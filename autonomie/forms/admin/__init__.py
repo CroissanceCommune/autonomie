@@ -50,6 +50,51 @@ HEADER_RESIZER = ImageResizer(4, 1)
 
 
 CONFIGURATION_KEYS = {
+    'coop_cgv': {
+        "title": u"Conditions générales de vente",
+        "description": u"Les conditions générales sont placées en dernière \
+page des documents (devis/factures/avoirs)",
+        "widget": forms.richtext_widget(admin=True)
+    },
+    'coop_pdffootertitle': {
+        'title': u"Titre du pied de page",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    'coop_pdffootertext': {
+        'title': u"Contenu du pied de page",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    'coop_pdffootercourse': {
+        'title': u"Pied de page spécifique aux formations",
+        "description": u"Ce contenu ne s'affiche que sur les documents liés à \
+des formations",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    "coop_estimationheader": {
+        "title": u"Cadre d'information spécifique (en entête des devis)",
+        "description": u"Permet d'afficher un texte avant la description des \
+prestations ex : <font color='red'>Le RIB a changé</font>",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    "coop_estimationfooter": {
+        "title": u"Informations sur l'acceptation des devis",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    "coop_invoiceheader": {
+        "title": u"Cadre d'information spécifique (en entête des factures)",
+        "description": u"Permet d'afficher un texte avant la description des \
+prestations ex : <font color='red'>Le RIB a changé</font>",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    "coop_invoicepayment": {
+        "title": u"Informations de paiement pour les factures",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+    },
+    "coop_invoicelate": {
+        "title": u"Informations sur les retards de paiement",
+        "widget": deform.widget.TextAreaWidget(rows=4),
+        "description": u"Le contenu du cadre 'Retard de paiement'"
+    },
     'cae_admin_mail': {
         "title": u"Adresse e-mail de contact pour les notifications Autonomie",
         "description": (
@@ -322,139 +367,6 @@ def build_config_appstruct(request, keys):
             else:
                 appstruct[key] = value
     return appstruct
-
-
-class EstimationConfig(colander.MappingSchema):
-    """
-        Schema for estimation configuration
-    """
-    header = forms.textarea_node(
-        title=u"Cadre d'information spécifique (en entête des devis)",
-        missing=u"",
-        description=u"Permet d'afficher un texte avant la description des \
-prestations ex : <font color='red'>Le RIB a changé</font>"
-    )
-    footer = forms.textarea_node(
-        title=u"Informations sur l'acceptation des devis",
-        missing=u"",
-        description=u"Contenu du cadre 'Acceptation du devis'"
-    )
-
-
-class InvoiceConfig(colander.MappingSchema):
-    """
-        Schema for invoice configuration
-    """
-    prefix = colander.SchemaNode(
-        colander.String(),
-        title=u"Préfixer les numéros de facture",
-        missing=u"",
-        description=u"Permet d'associer un préfixe aux numéros des factures \
-nouvellement créées (ex : F_2016_)"
-    )
-    header = forms.textarea_node(
-        title=u"Cadre d'information spécifique (en entête des factures)",
-        missing=u"",
-        description=u"Permet d'afficher un texte avant la description des \
-prestations ex : <font color='red'>Le RIB a changé</font>"
-    )
-    payment = forms.textarea_node(
-        title=u"Information de paiement pour les factures",
-        missing=u"",
-        description=u"Utilisez '%ENTREPRENEUR%' pour voir figurer le nom de \
-l'entrepreneur dans les factures PDF"
-    )
-    late = forms.textarea_node(
-        title=u"Informations sur les retards de paiement",
-        missing=u"",
-        description=u"Le contenu du cadre 'Retard de paiement'"
-    )
-
-
-class DocumentConfig(colander.MappingSchema):
-    """
-        Schema for document (estimation/invoice ...) configuration
-    """
-    cgv = forms.textarea_node(
-        title=u"Conditions générales de vente",
-        description=u"Les conditions générales sont placées en dernière \
-page des documents (devis/factures/avoirs)",
-        missing=u'',
-        richwidget=True,
-    )
-    footertitle = forms.textarea_node(
-        title=u"Titre du pied de page",
-        missing=u"",
-    )
-    footercourse = forms.textarea_node(
-        title=u"Pied de page des documents liées aux formations",
-        missing=u"",
-        description=u"Ce contenu ne s'affiche que sur les documents liés à \
-des formations"
-    )
-    footercontent = forms.textarea_node(
-        title=u"Contenu du pied de page",
-        missing=u"",
-    )
-
-    estimation = EstimationConfig(title=u'Devis')
-    invoice = InvoiceConfig(title=u"Factures")
-
-
-class FileTypeConfig(colander.SequenceSchema):
-    name = colander.SchemaNode(
-        colander.String(),
-        title=u"",
-    )
-
-
-class FileTypesConfig(colander.MappingSchema):
-    """
-        Configure file types that may be attached
-    """
-    types = FileTypeConfig(
-        title=u"Libellé",
-        description=u"Utilisé dans les interfaces de dépôt de document pour \
-spécifier un type (PV de travaux, Bdc ...). Ces libellés permettent \
-d'identifier plus facilement les documents attachés aux factures",
-    )
-
-
-class SiteConfig(colander.MappingSchema):
-    """
-        Site configuration
-        logos ...
-    """
-    logo = colander.SchemaNode(
-        deform.FileData(),
-        widget=files.deferred_upload_widget,
-        title=u"Choisir un logo",
-        validator=validate_image_mime,
-        missing=colander.drop,
-        description=u"Charger un fichier de type image *.png *.jpeg \
-*.jpg ...")
-    welcome = forms.textarea_node(
-        title=u"Texte d'accueil",
-        richwidget=True,
-        missing=u'',
-        admin=True,
-    )
-    cae_admin_mail = colander.SchemaNode(
-        colander.String(),
-        title=CONFIGURATION_KEYS['cae_admin_mail']['title'],
-        description=CONFIGURATION_KEYS['cae_admin_mail']['description'],
-        validator=forms.mail_validator(),
-        missing=u""
-    )
-
-
-class MainConfig(colander.MappingSchema):
-    """
-        Schema for forms.site configuration
-    """
-    site = SiteConfig()
-    document = DocumentConfig(title=u'Document (devis et factures)')
-    attached_filetypes = FileTypesConfig(title=u"Type des documents attachés")
 
 
 TVA_UNIQUE_VALUE_MSG = u"Veillez à utiliser des valeurs différentes pour les \
@@ -738,92 +650,6 @@ class WorkshopConfigSchema(colander.Schema):
     )
 
 
-class CaeConfig(colander.MappingSchema):
-    """
-        Cae configuration form schema
-    """
-    pass
-
-
-class SageExportConfig(colander.MappingSchema):
-    """
-        Sage export modules selection form schema
-    """
-    pass
-
-
-def get_config_appstruct(request, config_dict, logo):
-    """
-        transform Config datas to ConfigSchema compatible appstruct
-    """
-    appstruct = {
-        'site':     {'welcome': '', 'cae_admin_mail': ''},
-        'document': {
-            'estimation': {
-                'header': '',
-                'footer': '',
-            },
-            'invoice': {
-                'prefix': '',
-                'header': '',
-                'payment': '',
-                'late': ''
-            },
-            'footertitle': '',
-            'footercourse': '',
-            'footercontent': '',
-            'cgv': '',
-        },
-        "attached_filetypes": {}
-    }
-    if logo is not None:
-        appstruct['site']['logo'] = {
-            'uid': logo.id,
-            'filename': logo.name,
-            'preview_url': request.route_path(
-                'public',
-                name="logo.png",
-            )
-        }
-    appstruct['site']['welcome'] = config_dict.get('welcome', '')
-    appstruct['site']['cae_admin_mail'] = config_dict.get('cae_admin_mail', '')
-    appstruct['document']['footertitle'] = config_dict.get(
-        'coop_pdffootertitle', ''
-    )
-    appstruct['document']['footercourse'] = config_dict.get(
-        'coop_pdffootercourse', ''
-    )
-    appstruct['document']['footercontent'] = config_dict.get(
-        'coop_pdffootertext', ''
-    )
-    appstruct['document']['cgv'] = config_dict.get('coop_cgv', '')
-
-    appstruct['document']['estimation']['header'] = config_dict.get(
-        'coop_estimationheader', ''
-    )
-    appstruct['document']['estimation']['footer'] = config_dict.get(
-        'coop_estimationfooter', ''
-    )
-
-    appstruct['document']['invoice']['prefix'] = config_dict.get(
-        'invoiceprefix', ''
-    )
-    appstruct['document']['invoice']['header'] = config_dict.get(
-        'coop_invoiceheader', ''
-    )
-    appstruct['document']['invoice']['payment'] = config_dict.get(
-        'coop_invoicepayment', ''
-    )
-    appstruct['document']['invoice']['late'] = config_dict.get(
-        'coop_invoicelate', ''
-    )
-
-    appstruct["attached_filetypes"]['types'] = json.loads(
-        config_dict.get('attached_filetypes', "[]")
-    )
-    return appstruct
-
-
 def load_filetypes_from_config(config):
     """
         Return filetypes configured in databas
@@ -832,56 +658,6 @@ def load_filetypes_from_config(config):
     if not isinstance(attached_filetypes, list):
         attached_filetypes = []
     return attached_filetypes
-
-
-def get_config_dbdatas(appstruct):
-    """
-        Returns dict with db compatible datas
-    """
-    dbdatas = {}
-    dbdatas['coop_pdffootertitle'] = appstruct.get(
-        'document', {}).get(
-            'footertitle'
-        )
-    dbdatas['coop_pdffootercourse'] = appstruct.get(
-        'document', {}).get(
-            'footercourse')
-    dbdatas['coop_pdffootertext'] = appstruct.get(
-        'document', {}).get(
-            'footercontent')
-    dbdatas['coop_cgv'] = appstruct.get(
-        'document', {}).get('cgv')
-
-    dbdatas['coop_estimationheader'] = appstruct.get(
-        'document', {}).get(
-            'estimation', {}).get('header')
-    dbdatas['coop_estimationfooter'] = appstruct.get(
-        'document', {}).get(
-            'estimation', {}).get('footer')
-
-    dbdatas['invoiceprefix'] = appstruct.get(
-        'document', {})\
-        .get('invoice', {})\
-        .get('prefix')
-    dbdatas['coop_invoiceheader'] = appstruct.get(
-        'document', {}).get(
-            'invoice', {}).get('header')
-    dbdatas['coop_invoicepayment'] = appstruct.get(
-        'document', {}).get(
-            'invoice', {}).get('payment')
-    dbdatas['coop_invoicelate'] = appstruct.get(
-        'document', {}).get(
-            'invoice', {}).get('late')
-    dbdatas['welcome'] = appstruct.get('site', {}).get(
-        'welcome')
-    dbdatas['cae_admin_mail'] = appstruct.get('site', {}).get(
-        'cae_admin_mail'
-    )
-
-    dbdatas['attached_filetypes'] = json.dumps(
-        appstruct.get('attached_filetypes', {}).get('types',  [])
-    )
-    return dbdatas
 
 
 def get_element_by_name(list_, name):

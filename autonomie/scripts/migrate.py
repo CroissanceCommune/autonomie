@@ -225,7 +225,7 @@ def fetch_head():
     fetch(None)
 
 
-def revision(message):
+def revision(message, empty=False):
     command_args = dict(
         message=message,
         autogenerate=True,
@@ -247,7 +247,8 @@ def revision(message):
 
     def get_rev(rev, context):
         # autogen._produce_migration_diffs(context, template_args, imports)
-        revision_context.run_autogenerate(rev, context)
+        if not empty:
+            revision_context.run_autogenerate(rev, context)
         return []
 
     env.run_env(
@@ -268,12 +269,12 @@ def migrate():
         migrate <config_uri> list
         migrate <config_uri> upgrade [--rev=<rev>]
         migrate <config_uri> fetch [--rev=<rev>]
-        migrate <config_uri> revision [--m=<message>]
+        migrate <config_uri> revision [--m=<message>] [--empty]
         migrate <config_uri> downgrade [--rev=<rev>]
 
     o list : all the revisions
     o upgrade : upgrade the app to the latest revision
-    o revision : auto-generate a migration file with the given message
+    o revision : create a migration file with the given message (trying to detect changes, unless --empty is used)
     o fetch : set the revision
     o downgrade : downgrade the database
 
@@ -291,7 +292,7 @@ def migrate():
             args = (arguments['--rev'],)
             func = fetch
         elif arguments['revision']:
-            args = (arguments['--m'],)
+            args = (arguments['--m'], arguments['--empty'])
             func = revision
         elif arguments['downgrade']:
             args = (arguments['--rev'],)

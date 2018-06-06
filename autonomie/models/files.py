@@ -53,6 +53,10 @@ from autonomie_base.models.base import (
 )
 from autonomie_base.models.types import PersistentACLMixin
 from autonomie.models.node import Node
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
 from autonomie.utils.filedepot import _to_fieldstorage
 from autonomie.export.utils import detect_file_headers
 from autonomie.forms import EXCLUDED
@@ -70,6 +74,8 @@ class File(Node):
     data = Column(UploadedFileField)
     mimetype = Column(String(100))
     size = Column(Integer)
+    file_type_id = Column(Integer, ForeignKey('file_type.id'), nullable=True)
+    file_type = relationship("FileType")
 
     def getvalue(self):
         """
@@ -137,6 +143,19 @@ class File(Node):
             "size": self.size,
             "mimetype": self.mimetype,
         }
+
+
+class FileType(ConfigurableOption):
+    __colanderalchemy_config__ = {
+        'title': u"Type de documents utilisés dans Autonomie",
+        'validation_msg': u"Les types de documents ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+    @property
+    def is_used(self):
+        query = DBSESSION().query(File).filter_by(file_type_id=self.id)
+        return DBSESSION().query(query.exists()).scalar()
 
 
 class Template(File):

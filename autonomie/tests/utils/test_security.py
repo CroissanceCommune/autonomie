@@ -19,13 +19,21 @@ def dummy_company():
 
 
 @pytest.fixture
-def estimation(dummy_company):
+def dummy_project():
+    project_type = Dummy(default=True)
+    project = Dummy(project_type=project_type)
+    return project
+
+
+@pytest.fixture
+def estimation(dummy_company, dummy_project):
     return Dummy(
         status='draft',
         company=dummy_company,
         signed_status='waiting',
         geninv=False,
         type_='estimation',
+        project=dummy_project,
     )
 
 

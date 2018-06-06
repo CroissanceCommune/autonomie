@@ -34,77 +34,71 @@
                 <form method='POST'
                     class="deform  deform" accept-charset="utf-8"
                     enctype="multipart/form-data">
+                    <input type='hidden' name='__start__' value='items:sequence' />
+                    % for business_type in business_types:
+                    <h2 class='text-center'>${business_type.label}</h2>
                     <table class='table table-bordered table-striped'>
                         <thead>
                             <tr>
-                            <th class='text-right'>Types d'affaire</th>
-                            % for business_type in business_types:
-                                <th colspan='3' class='text-center'>${business_type.label}</th>
-                            % endfor
-                            </tr>
-                            <tr>
                             <th>Mentions</th>
-                            % for business_type in business_types:
-                                <th>Devis</th>
-                                <th>Factures</th>
-                                <th>Avoirs</th>
-                            % endfor
+                            <th>Devis</th>
+                            <th>Factures</th>
+                            <th>Avoirs</th>
                             </tr>
                         </thead>
                         <tbody>
-                        <input type='hidden' name='__start__' value='items:sequence' />
                         % for mention in mentions:
                             <% mention_items = items.get(mention.id, {}) %>
                             <tr>
                             <td><b>${mention.label}</b></td>
-                            % for business_type in business_types:
-                                <% btype_items = mention_items.get(business_type.id, {}) %>
-                                % for doctype in ('estimation', 'invoice', 'cancelinvoice'):
-                                <% mandatory = btype_items.get(doctype, -1) %>
-                                <% tag_id = "mandatory_%s_%s_%s" % (mention.id, business_type.id, doctype) %>
-                                <td>
-                                <input type='hidden' name='__start__' value='item:mapping' />
-                                    <input type='hidden' name='task_mention_id' value='${mention.id}' />
-                                    <input type='hidden' name='business_type_id' value='${business_type.id}'/>
-                                    <input type='hidden' name='doctype' value='${doctype}' />
-                                     <input type='hidden' name='__start__' value='mandatory:rename'>
-                                    <div class='radio'>
-                                    <label>
-                                        <input type='radio' name='${tag_id}' value=''
-                                        % if mandatory == -1:
-                                        checked
-                                        % endif
-                                        />&nbsp;Non utilisée
-                                    </label>
-                                    </div>
-                                    <div class='radio'>
-                                    <label>
-                                        <input type='radio' name='${tag_id}' value='false'
-                                        % if not mandatory:
-                                        checked
-                                        % endif
-                                        />&nbsp;Facultative
-                                    </label>
-                                    </div>
-                                    <div class='radio'>
-                                    <label>
-                                        <input type='radio' name='${tag_id}' value='true'
-                                        % if mandatory == True:
-                                        checked
-                                        % endif
-                                        />&nbsp;Obligatoire
-                                    </label>
-                                    </div>
-                                     <input type='hidden' name='__end__' value='mandatory:rename'>
-                                <input type='hidden' name='__end__' value='item:mapping' />
-                                </td>
-                                % endfor
+                            <% btype_items = mention_items.get(business_type.id, {}) %>
+                            % for doctype in ('estimation', 'invoice', 'cancelinvoice'):
+                            <% mandatory = btype_items.get(doctype, -1) %>
+                            <% tag_id = "mandatory_%s_%s_%s" % (mention.id, business_type.id, doctype) %>
+                            <td>
+                            <input type='hidden' name='__start__' value='item:mapping' />
+                                <input type='hidden' name='task_mention_id' value='${mention.id}' />
+                                <input type='hidden' name='business_type_id' value='${business_type.id}'/>
+                                <input type='hidden' name='doctype' value='${doctype}' />
+                                 <input type='hidden' name='__start__' value='mandatory:rename'>
+                                <div class='radio'>
+                                <label>
+                                    <input type='radio' name='${tag_id}' value=''
+                                    % if mandatory == -1:
+                                    checked
+                                    % endif
+                                    />&nbsp;Non utilisée
+                                </label>
+                                </div>
+                                <div class='radio'>
+                                <label>
+                                    <input type='radio' name='${tag_id}' value='false'
+                                    % if not mandatory:
+                                    checked
+                                    % endif
+                                    />&nbsp;Facultative
+                                </label>
+                                </div>
+                                <div class='radio'>
+                                <label>
+                                    <input type='radio' name='${tag_id}' value='true'
+                                    % if mandatory == True:
+                                    checked
+                                    % endif
+                                    />&nbsp;Obligatoire
+                                </label>
+                                </div>
+                                 <input type='hidden' name='__end__' value='mandatory:rename'>
+                            <input type='hidden' name='__end__' value='item:mapping' />
+                            </td>
                             % endfor
                             </tr>
                         % endfor
-                        <input type='hidden' name='__end__' value='items:sequence' />
                         </tbody>
                     </table>
+                    <hr />
+                    % endfor
+                    <input type='hidden' name='__end__' value='items:sequence' />
                     <div class='form-actions'>
                        <button id="deformsubmit" class="btn btn-primary " value="submit" type="submit" name="submit"> Enregistrer </button>
                     </div>

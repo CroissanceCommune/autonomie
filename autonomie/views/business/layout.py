@@ -14,7 +14,7 @@ from autonomie.default_layouts import DefaultLayout
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
     BUSINESS_ITEM_OVERVIEW_ROUTE,
-    BUSINESS_ITEM_ESTIMATION_ROUTE,
+    # BUSINESS_ITEM_ESTIMATION_ROUTE,
     BUSINESS_ITEM_INVOICE_ROUTE,
     BUSINESS_ITEM_FILE_ROUTE,
 )
@@ -32,15 +32,15 @@ BusinessMenu.add(
         perm="view.business",
     )
 )
-BusinessMenu.add(
-    MenuItem(
-        name='business_estimations',
-        label=u"Devis",
-        route_name=BUSINESS_ITEM_ESTIMATION_ROUTE,
-        icon=u"fa fa-files-o",
-        perm="list.estimations",
-    )
-)
+# BusinessMenu.add(
+#     MenuItem(
+#         name='business_estimations',
+#         label=u"Devis",
+#         route_name=BUSINESS_ITEM_ESTIMATION_ROUTE,
+#         icon=u"fa fa-files-o",
+#         perm="list.estimations",
+#     )
+# )
 BusinessMenu.add(
     MenuItem(
         name='business_invoices',

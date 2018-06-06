@@ -345,6 +345,54 @@ def get_fileupload_widget(store_url, store_path, session,
     )
 
 
+def public_file_appstruct(request, config_key, file_object):
+    """
+    Build a form appstruct suitable for a colander File Node from a ConfigFile
+    instance
+
+    :param obj request: The Pyramid request
+    :param str config_key: The config key under which the file is stored :param
+    obj file_object: A :class:`autonomie.models.files.ConfigFile` instance
+    :rtype: dict
+    """
+    if file_object is None:
+        raise Exception("file_appstruct should not be called with a None "
+                        u"file object")
+    else:
+        return {
+            "uid": file_object.id,
+            "filename": file_object.name,
+            "preview_url": request.route_path(
+                "public",
+                name=config_key
+            )
+        }
+
+
+def file_appstruct(request, file_id):
+    """
+    Build a form appstruct suitable for a colander File Node from a File
+    instance
+
+    :param obj request: The Pyramid request
+    :param int file_id: The id of a :class:`autonomie.models.files.File`
+    instance
+    :rtype: dict
+    """
+    if file_id is None:
+        raise Exception("file_appstruct should not be called with a None "
+                        u"file object")
+    else:
+        return {
+            "uid": file_id,
+            "filename": u"%s.png" % file_id,
+            "preview_url": request.route_path(
+                "filepng",
+                id=file_id
+            )
+        }
+
+
 def flatten_appstruct(appstruct):
     """
         return a flattened appstruct, suppose all keys in the dict and subdict
@@ -671,8 +719,8 @@ class CustomModelSchemaNode(colander.SchemaNode):
 
 def get_sequence_child_item_id_node(model, **kw):
     """
-    Build a child item SchemaNode compatible with colanderalchemy's serialization technic
-    it provides a node with dictify and objectify methods
+    Build a child item SchemaNode compatible with colanderalchemy's
+    serialization technic it provides a node with dictify and objectify methods
 
     It can be used when editing M2M or O2M relationships
 

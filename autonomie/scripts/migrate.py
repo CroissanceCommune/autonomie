@@ -193,22 +193,18 @@ def list_all():
     print(u'{0}:'.format(pkg_env.pkg_name))
     revisions = list(pkg_env.script_dir.walk_revisions())
     revisions.reverse()
-    for script in revisions:
-        print(u"  - {0} -> {1}: {2}".format(
-            script.down_revision,
-            script.revision,
-            script.doc,
-            ))
 
-    def current_revision(rev, context):
-        """
-            print the current revision
-        """
-        print(u"  - The Current Revision: {0}".format(rev))
+    def print_list(rev, context):
+        for script in revisions:
+            print(u"{}  {} → {}: {}".format(
+                u'▶' if script.revision in rev else ' ',
+                script.down_revision,
+                script.revision,
+                script.doc,
+                ))
         return []
-    pkg_env.run_env(current_revision)
-    print
-    print migrate.__doc__
+
+    pkg_env.run_env(print_list)
 
 
 def fetch(revision=None):

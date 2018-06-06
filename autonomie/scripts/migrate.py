@@ -205,8 +205,6 @@ def list_all():
         return []
 
     pkg_env.run_env(print_list)
-    print
-    print migrate.__doc__
 
 
 def fetch(revision=None):

@@ -133,6 +133,36 @@ textarea_node_validator = colander.Function(
 )
 
 
+def richtext_widget(options=None, widget_options=None, admin=False):
+    """
+    Return a text area widget
+    """
+    options = options or {}
+    widget_options = widget_options or {}
+    plugins = [
+        "lists",
+        "searchreplace visualblocks fullscreen",
+        # "contextmenu paste"
+    ]
+    menubar = False
+    if admin:
+        plugins.append("insertdatetime searchreplace code table")
+        plugins.append("advlist link autolink")
+        menubar = True
+
+    options.update({
+        'content_css': "/fanstatic/fanstatic/css/richtext.css",
+        'language': "fr_FR",
+        'menubar': menubar,
+        'plugins': plugins
+    })
+
+    return deform.widget.RichTextWidget(
+        options=options.items(),
+        **widget_options
+    )
+
+
 def textarea_node(**kw):
     """
     Return a node for storing Text objects
@@ -154,33 +184,10 @@ def textarea_node(**kw):
     widget_options = kw.pop('widget_options', {})
 
     if kw.pop('richwidget', None):
-
         # If the admin option is set,
         admin_field = kw.pop('admin', False)
-
-        plugins = [
-            "lists",
-            "searchreplace visualblocks fullscreen",
-            # "contextmenu paste"
-        ]
-        menubar = False
-        if admin_field:
-            plugins.append("insertdatetime searchreplace code table")
-            plugins.append("advlist link autolink")
-            menubar = True
-
         options = kw.pop("richtext_options", {})
-        options.update({
-            'content_css': "/fanstatic/fanstatic/css/richtext.css",
-            'language': "fr_FR",
-            'menubar': menubar,
-            'plugins': plugins
-        })
-
-        wid = deform.widget.RichTextWidget(
-            options=options.items(),
-            **widget_options
-        )
+        wid = richtext_widget(options, widget_options, admin=admin_field)
     else:
         widget_options.setdefault("rows", 4)
         wid = deform.widget.TextAreaWidget(**widget_options)

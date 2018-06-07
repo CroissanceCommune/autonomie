@@ -120,6 +120,7 @@
     <thead>
         <tr>
             <th>${sortable("Nom", "lastname")}</th>
+            <th>Situation CAE</th>
             <th>Accompagnateur</th>
             <th class="actions">Actions</th>
         </tr>
@@ -132,6 +133,11 @@
             <tr class='${css}tr'>
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_account(userdata)}
+                </td>
+                <td onclick="${onclick}" class="rowlink">
+                    % if userdata.situation_situation:
+                        ${userdata.situation_situation.label}
+                    % endif
                 </td>
                 <td onclick="${onclick}" class="rowlink">
                     ${api.format_account(userdata.situation_follower)}

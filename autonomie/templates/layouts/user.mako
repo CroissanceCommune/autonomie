@@ -30,8 +30,16 @@
                         <i class='fa fa-user fa-4x'></i>
                     </div>
                     <div class='col-md-9'>
-                        <div>${api.format_civilite(layout.current_user_object.civilite)}&nbsp;${api.format_account(layout.current_user_object)}</div>
+                        <div>
+                            % if layout.current_user_object.civilite:
+                                ${api.format_civilite(layout.current_user_object.civilite)}&nbsp;
+                            % endif
+                            ${api.format_account(layout.current_user_object)}
+                        </div>
                         <div><small>${format_mail(layout.current_user_object.email)}</small></div>
+                        % if layout.current_user_object.userdatas and layout.current_user_object.userdatas.situation_situation:
+                            <div><small><strong>${layout.current_user_object.userdatas.situation_situation.label}</strong></small></div>
+                        % endif
                         <div>
                         % if request.has_permission("edit.user", layout.current_user_object):
                         <a

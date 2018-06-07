@@ -184,7 +184,7 @@ def customize_schema(schema):
     customize = functools.partial(customize_field, schema)
     customize(
         'situation_situation_id',
-        get_deferred_select(CaeSituationOption)
+        deform.widget.HiddenWidget()
     )
 
     customize(

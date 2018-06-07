@@ -236,6 +236,13 @@ class Project(Node):
         }
     )
     project_type = relationship("ProjectType")
+    company = relationship(
+        "Company",
+        info={
+            'colanderalchemy': {'exclude': True},
+            "export": {'exclude': True}
+        }
+    )
 
     _autonomie_service = ProjectService
 

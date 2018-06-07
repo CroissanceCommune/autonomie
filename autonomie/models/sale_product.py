@@ -88,10 +88,6 @@ class SaleProductCategory(DBBASE):
     )
     company = relationship(
         "Company",
-        backref=backref(
-            'sale_catalog',
-            order_by="SaleProductCategory.title",
-        ),
         info={
             'export': {'exclude': True},
         }

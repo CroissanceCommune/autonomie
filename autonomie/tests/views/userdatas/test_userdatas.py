@@ -16,7 +16,7 @@ def test_userdatas_add_entry_point(config, get_csrf_request_with_db):
 
     assert req.session['user_form']['callback_urls'] == \
         ['/users/{id}/userdatas/add']
-    assert req.session['user_form']['defaults']['groups'] == ['contractor']
+    assert req.session['user_form']['defaults']['primary_group'] == 'contractor'
 
 
 def test_userdatas_add_view(config, user, get_csrf_request_with_db):

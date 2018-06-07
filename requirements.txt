@@ -1,5 +1,5 @@
 alembic==0.8.2
-autonomie_base==4.1.0
+autonomie_base==4.2.0a
 autonomie_celery==4.2.0a
 Beaker==1.6.4
 bleach==1.4.1
@@ -55,7 +55,7 @@ reportlab==3.1.44
 repoze.lru==0.6
 simplejson==3.3.1
 sqla_inspect==0.4.3
-SQLAlchemy==1.0.8
+SQLAlchemy==1.1
 transaction==2.1.2
 translationstring==1.2
 Unidecode==0.04.17
@@ -69,4 +69,4 @@ zope.component==4.0.1
 zope.deprecation==4.1.2
 zope.event==4.0.1
 zope.interface==4.1.2
-zope.sqlalchemy==0.7.1
+zope.sqlalchemy==0.7.7

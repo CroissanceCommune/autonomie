@@ -267,15 +267,23 @@
     <%block name="notes_and_conditions">
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>
-    % for mention in task.mentions:
-        <div class="title">
+    % for mentions in (task.mandatory_mentions, task.mentions):
+        % for mention in mentions:
+            % if mention.title:
+            <div class="title">
             ${mention.title}
-        </div>
-        % if mention.full_text is not None:
-            <div class='content'>
-                ${format_text(mention.full_text)}
             </div>
-        % endif
+                % if mention.full_text is not None:
+                    <div class='content'>
+                        ${format_text(mention.full_text)}
+                    </div>
+                % endif
+            % else:
+                % if mention.full_text is not None:
+                <div class='content'>${format_text(mention.full_text)}</div>
+                % endif
+            % endif
+        % endfor
     % endfor
     <%block name="end_document">
     ## Add infos at the end of the document

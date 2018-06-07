@@ -425,7 +425,7 @@ class ProjectEditView(BaseEditView, TreeMixin):
     def redirect(self):
         return HTTPFound(
             self.request.route_path(
-                PROJECT_ITEM_GENERAL_ROUTE,
+                PROJECT_ITEM_ROUTE,
                 id=self.context.id
             )
         )

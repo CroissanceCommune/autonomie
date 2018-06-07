@@ -16,7 +16,7 @@ from autonomie.views.project.project import (
 )
 
 
-class ProjectEstimationList(CompanyEstimationList, TreeMixin):
+class ProjectEstimationListView(CompanyEstimationList, TreeMixin):
     route_name = PROJECT_ITEM_ESTIMATION_ROUTE
     schema = get_list_schema(
         is_global=False,
@@ -53,7 +53,7 @@ class ProjectEstimationList(CompanyEstimationList, TreeMixin):
 
 def includeme(config):
     config.add_tree_view(
-        ProjectEstimationList,
+        ProjectEstimationListView,
         parent=ProjectListView,
         renderer="project/estimations.mako",
         permission="list_estimations",

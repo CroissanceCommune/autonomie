@@ -25,6 +25,10 @@ import pytest
 
 from autonomie.views.project.routes import (
     PROJECT_ITEM_ROUTE,
+    PROJECT_ITEM_PHASE_ROUTE,
+    PROJECT_ITEM_ESTIMATION_ROUTE,
+    PROJECT_ITEM_INVOICE_ROUTE,
+    PROJECT_ITEM_BUSINESS_ROUTE,
 )
 
 
@@ -49,6 +53,53 @@ def customer2(dbsession, company):
 def getone():
     from autonomie.models.project import Project
     return Project.query().first()
+
+
+def test_entry_point_view(user, project, get_csrf_request_with_db, config):
+    from autonomie.views.project.project import (
+        remember_navigation_history,
+        project_entry_point_view,
+        ProjectPhaseListView,
+    )
+    from autonomie.views.project.estimation import (
+        ProjectEstimationListView,
+    )
+    from autonomie.views.project.invoice import (
+        ProjectInvoiceListView,
+    )
+    from autonomie.views.project.business import (
+        ProjectBusinessListView,
+    )
+
+    for route in (
+        PROJECT_ITEM_ROUTE,
+        PROJECT_ITEM_PHASE_ROUTE,
+        PROJECT_ITEM_ESTIMATION_ROUTE,
+        PROJECT_ITEM_INVOICE_ROUTE,
+        PROJECT_ITEM_BUSINESS_ROUTE,
+    ):
+        config.add_route(route, route)
+
+    req = get_csrf_request_with_db()
+    req.user = user
+    res = project_entry_point_view(project, req)
+    assert res.location == PROJECT_ITEM_PHASE_ROUTE.format(id=project.id)
+
+    for view, route in (
+        (ProjectPhaseListView, PROJECT_ITEM_PHASE_ROUTE),
+        (ProjectEstimationListView, PROJECT_ITEM_ESTIMATION_ROUTE),
+        (ProjectInvoiceListView, PROJECT_ITEM_INVOICE_ROUTE),
+        (ProjectBusinessListView, PROJECT_ITEM_BUSINESS_ROUTE),
+    ):
+        url = route.format(id=project.id)
+        req = get_csrf_request_with_db(current_route_path=url)
+        req.context = project
+        req.user = user
+        view(project, req).__call__()
+        res = project_entry_point_view(project, req)
+        assert res.location == url
+
+
 
 
 def test_project_add(

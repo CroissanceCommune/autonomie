@@ -80,7 +80,6 @@ def test_sync_user_to_userdatas(dbsession, user, userdatas):
     assert userdatas.coordonnees_email1 == 'newemail@mail.fr'
 
 
-@pytest.mark.xfail(reason=u"No way found to do 2-way data sync until now")
 def test_sync_userdatas_to_user(dbsession, user, userdatas):
     userdatas.coordonnees_lastname = 'New Lastname'
     userdatas.coordonnees_firstname = 'New Firstname'

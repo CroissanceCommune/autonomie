@@ -57,7 +57,6 @@ def getone():
 
 def test_entry_point_view(user, project, get_csrf_request_with_db, config):
     from autonomie.views.project.project import (
-        remember_navigation_history,
         project_entry_point_view,
         ProjectPhaseListView,
     )

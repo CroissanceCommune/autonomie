@@ -35,7 +35,6 @@ from sqlalchemy import (
 
 from sqlalchemy.orm import (
     relationship,
-    backref,
     deferred,
 )
 from sqlalchemy.event import listen
@@ -125,13 +124,6 @@ class User(DBBASE, PersistentACLMixin):
     companies = relationship(
         "Company",
         secondary=COMPANY_EMPLOYEE,
-        backref=backref(
-            "employees",
-            info={
-                'colanderalchemy': get_excluded_colanderalchemy(u'Employés'),
-                'export': {'exclude': True}
-            },
-        ),
         info={
             'colanderalchemy': get_excluded_colanderalchemy(u'Entreprises'),
             'export': {'exclude': True}

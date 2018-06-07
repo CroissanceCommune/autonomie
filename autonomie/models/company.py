@@ -58,7 +58,11 @@ from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
 )
+from autonomie.models.tools import (
+    get_excluded_colanderalchemy,
+)
 from autonomie.models.services.company import CompanyService
+from autonomie.models.user.user import COMPANY_EMPLOYEE
 
 log = logging.getLogger(__name__)
 
@@ -162,34 +166,6 @@ class Company(DBBASE, PersistentACLMixin):
         group='edit'
     )
 
-    customers = relationship(
-        "Customer",
-        order_by="Customer.code",
-        back_populates="company",
-    )
-
-    projects = relationship(
-        "Project",
-        order_by="Project.id",
-        backref=backref(
-            "company",
-            info={
-                'colanderalchemy': {'exclude': True},
-                "export": {'exclude': True}
-            }
-        ),
-    )
-    tasks = relationship(
-        "Task",
-        primaryjoin="Task.company_id==Company.id",
-        order_by='Task.date',
-        back_populates="company",
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {'exclude': True},
-        },
-    )
-
     code_compta = deferred(
         Column(
             String(30),
@@ -209,12 +185,6 @@ class Company(DBBASE, PersistentACLMixin):
             'export': {'exclude': True}
         },
     )
-    header_file = relationship(
-        "File",
-        primaryjoin="File.id==Company.header_id",
-        backref=backref('company_header_backref', uselist=False),
-    )
-
     logo_id = Column(
         ForeignKey('file.id'),
         info={
@@ -222,16 +192,29 @@ class Company(DBBASE, PersistentACLMixin):
             'export': {'exclude': True}
         },
     )
-    logo_file = relationship(
-        "File",
-        primaryjoin="File.id==Company.logo_id",
-        backref=backref('company_logo_backref', uselist=False),
-    )
-
     cgv = deferred(
         Column(Text, default=''),
         group='edit',
     )
+    # Relationships
+    header_file = relationship(
+        "File",
+        primaryjoin="File.id==Company.header_id",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        },
+    )
+
+    logo_file = relationship(
+        "File",
+        primaryjoin="File.id==Company.logo_id",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        },
+    )
+
     activities = relationship(
         "CompanyActivity",
         secondary=COMPANY_ACTIVITY,
@@ -249,6 +232,63 @@ class Company(DBBASE, PersistentACLMixin):
             'export': {'exclude': True},
         },
     )
+
+    customers = relationship(
+        "Customer",
+        order_by="Customer.code",
+        back_populates="company",
+        info={
+            'colanderalchemy': {'exclude': True},
+            "export": {'exclude': True}
+        }
+    )
+
+    projects = relationship(
+        "Project",
+        order_by="Project.id",
+        back_populates="company",
+        info={
+            'colanderalchemy': {'exclude': True},
+            "export": {'exclude': True}
+        },
+    )
+    tasks = relationship(
+        "Task",
+        primaryjoin="Task.company_id==Company.id",
+        order_by='Task.date',
+        back_populates="company",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
+        },
+    )
+    employees = relationship(
+        "User",
+        secondary=COMPANY_EMPLOYEE,
+        back_populates="companies",
+        info={
+            'colanderalchemy': get_excluded_colanderalchemy(u'Employés'),
+            'export': {'exclude': True}
+        },
+    )
+    sale_catalog = relationship(
+        "SaleProductCategory",
+        order_by="SaleProductCategory.title",
+        back_populates="company",
+        info={
+            'export': {'exclude': True},
+        }
+    )
+    expense = relationship(
+        "ExpenseSheet",
+        order_by="ExpenseSheet.month",
+        cascade="all, delete-orphan",
+        back_populates="company",
+        info={
+            'export': {'exclude': True},
+        }
+    )
+
 
     _autonomie_service = CompanyService
 

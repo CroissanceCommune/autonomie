@@ -297,14 +297,7 @@ class ExpenseSheet(Node, ExpenseCompute):
             "colanderalchemy": {"title": u"Dépenses kilométriques"}
         }
     )
-    company = relationship(
-        "Company",
-        backref=backref(
-            "expenses",
-            order_by="ExpenseSheet.month",
-            cascade="all, delete-orphan",
-        )
-    )
+    company = relationship("Company")
     user = relationship(
         "User",
         primaryjoin="ExpenseSheet.user_id==User.id",

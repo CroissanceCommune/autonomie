@@ -30,7 +30,7 @@ from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
 from autonomie import models
-
+from autonomie.models.populate import populate_database
 from autonomie.utils.widgets import ActionMenu
 from autonomie.tests.tools import DummyRouteContext, DummyRoute
 
@@ -225,7 +225,7 @@ def content(connection, settings):
     """
     sets up some default content
     """
-    from transaction import commit
+    from transaction import commit, begin
     from autonomie_base.models.base import (
         DBBASE,
     )
@@ -236,6 +236,9 @@ def content(connection, settings):
     adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
+    commit()
+    begin()
+    populate_database()
     commit()
 
 

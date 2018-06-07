@@ -162,7 +162,7 @@ def project_entry_point_view(context, request):
     return HTTPFound(last)
 
 
-class ProjectByPhaseView(BaseView, TreeMixin):
+class ProjectPhaseListView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_PHASE_ROUTE
 
     def __init__(self, *args, **kw):
@@ -481,7 +481,7 @@ def includeme(config):
         permission='view.project',
     )
     config.add_tree_view(
-        ProjectByPhaseView,
+        ProjectPhaseListView,
         parent=ProjectListView,
         renderer='project/phases.mako',
         permission='view_project',

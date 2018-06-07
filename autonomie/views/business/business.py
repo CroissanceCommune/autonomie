@@ -20,7 +20,7 @@ from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
     BUSINESS_ITEM_OVERVIEW_ROUTE,
 )
-from autonomie.views.project.business import BusinessListView
+from autonomie.views.project.business import ProjectBusinessListView
 
 
 def remember_navigation_history(request, business_id):
@@ -139,7 +139,7 @@ def includeme(config):
     )
     config.add_tree_view(
         BusinessOverviewView,
-        parent=BusinessListView,
+        parent=ProjectBusinessListView,
         renderer="autonomie:templates/business/overview.mako",
         permission="view.business",
         layout='business',

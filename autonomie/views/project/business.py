@@ -42,7 +42,7 @@ ProjectMenu.add(
 )
 
 
-class BusinessListView(BaseListView, TreeMixin):
+class ProjectBusinessListView(BaseListView, TreeMixin):
     """
     View listing businesses
     """
@@ -100,7 +100,7 @@ class BusinessListView(BaseListView, TreeMixin):
 
 def includeme(config):
     config.add_tree_view(
-        BusinessListView,
+        ProjectBusinessListView,
         parent=ProjectListView,
         renderer="autonomie:templates/business/project_list.mako",
         permission="list.businesses",

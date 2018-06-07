@@ -31,7 +31,10 @@ from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
 from autonomie import models
 from autonomie.models.populate import populate_database
-from autonomie.utils.widgets import ActionMenu
+from autonomie.utils.widgets import (
+    ActionMenu,
+    Navigation,
+)
 from autonomie.tests.tools import DummyRouteContext, DummyRoute
 
 HERE = os.path.dirname(__file__)
@@ -294,6 +297,7 @@ def get_csrf_request(config, pyramid_request):
         csrf_token.return_value = def_csrf
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
+        pyramid_request.navigation = Navigation()
 
         if current_route_path:
             if not current_route_name:
@@ -343,6 +347,7 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         csrf_token.return_value = def_csrf
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
+        pyramid_request.navigation = Navigation()
 
         if current_route_path:
             if not current_route_name:

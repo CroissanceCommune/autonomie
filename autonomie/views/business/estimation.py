@@ -9,7 +9,7 @@ from autonomie.forms.tasks.estimation import get_list_schema
 from autonomie.views.estimations.lists import CompanyEstimationList
 from autonomie.views import TreeMixin
 from autonomie.views.business.routes import BUSINESS_ITEM_ESTIMATION_ROUTE
-from autonomie.views.project.business import BusinessListView
+from autonomie.views.project.business import ProjectBusinessListView
 from autonomie.views.business.business import (
     remember_navigation_history,
 )
@@ -53,7 +53,7 @@ class BusinessEstimationList(CompanyEstimationList, TreeMixin):
 def includeme(config):
     config.add_tree_view(
         BusinessEstimationList,
-        parent=BusinessListView,
+        parent=ProjectBusinessListView,
         renderer="project/estimations.mako",
         permission="list.estimations",
         layout="business"

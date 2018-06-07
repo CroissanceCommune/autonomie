@@ -15,7 +15,7 @@ from autonomie.views.invoices.lists import (
     CompanyInvoicesOdsView,
     filter_all_status,
 )
-from autonomie.views.project.business import BusinessListView
+from autonomie.views.project.business import ProjectBusinessListView
 from autonomie.views.business.business import (
     remember_navigation_history,
 )
@@ -106,7 +106,7 @@ class BusinessInvoicesOdsView(CompanyInvoicesOdsView):
 def includeme(config):
     config.add_tree_view(
         BusinessInvoicesListView,
-        parent=BusinessListView,
+        parent=ProjectBusinessListView,
         renderer="autonomie:templates/project/invoices.mako",
         permission='list.invoices',
         layout="business",

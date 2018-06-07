@@ -115,8 +115,8 @@ class BaseListClass(BaseView):
     grid = None
     filter_button_label = u"Filtrer"
 
-    def __init__(self, request):
-        BaseView.__init__(self, request)
+    def __init__(self, *args, **kwargs):
+        BaseView.__init__(self, *args, **kwargs)
         self.error = None
 
     def _get_bind_params(self):

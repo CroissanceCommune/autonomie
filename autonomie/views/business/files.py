@@ -24,7 +24,7 @@ from autonomie.views.business.routes import (
     BUSINESS_ITEM_FILE_ROUTE,
     BUSINESS_ITEM_ROUTE,
 )
-from autonomie.views.project.business import BusinessListView
+from autonomie.views.project.business import ProjectBusinessListView
 from autonomie.views.business.business import BusinessOverviewView
 
 
@@ -95,7 +95,7 @@ def includeme(config):
     )
     config.add_tree_view(
         BusinessFilesView,
-        parent=BusinessListView,
+        parent=ProjectBusinessListView,
         permission="list.files",
         renderer="autonomie:templates/business/files.mako",
         layout="business",

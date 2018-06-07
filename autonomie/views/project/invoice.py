@@ -28,7 +28,7 @@ from autonomie.views.project.routes import (
 logger = logging.getLogger(__name__)
 
 
-class ProjectInvoicesListView(CompanyInvoicesListView, TreeMixin):
+class ProjectInvoiceListView(CompanyInvoicesListView, TreeMixin):
     """
     Invoice list for one given company
     """
@@ -105,7 +105,7 @@ class ProjectInvoicesOdsView(CompanyInvoicesOdsView):
 
 def includeme(config):
     config.add_tree_view(
-        ProjectInvoicesListView,
+        ProjectInvoiceListView,
         parent=ProjectListView,
         renderer="project/invoices.mako",
         permission='list_invoices',

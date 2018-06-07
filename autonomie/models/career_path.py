@@ -22,6 +22,7 @@
 """
     Model for career path
 """
+import logging
 import colander
 import deform
 import deform_extensions
@@ -36,12 +37,15 @@ from sqlalchemy import (
     Text,
     not_,
 )
+from sqlalchemy.event import listen
 from sqlalchemy.orm import relationship
 from autonomie.models.tools import get_excluded_colanderalchemy
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
+
+logger = logging.getLogger(__name__)
 
 PERIOD_OPTIONS = (
     ('', '',),
@@ -251,3 +255,22 @@ porteur cette nouvelle situation sera proposée par défaut"
         q = super(CareerPath, cls).query()
         q = q.filter(CareerPath.userdatas_id == user)
         return q.order_by(CareerPath.start_date.desc())
+
+
+def update_user_situation_cae(mapper, connection, target):
+    """
+    Update - if needed - the CAE situation of the user
+    when it's career path change
+    """
+    if target.cae_situation_id is not None:
+        from autonomie.models.user.userdatas import UserDatas
+        user = UserDatas.query().filter(UserDatas.id==target.userdatas_id).first()
+        situation = user.get_cae_situation_from_career_path(target.start_date)
+        if user.situation_situation_id != situation.id:
+            logger.debug(u"Update CAE situation of the user %s to '%s'" % (target.userdatas_id, situation.label))
+            connection.execute("UPDATE user_datas SET situation_situation_id=%s WHERE id=%s" % (situation.id, user.id))
+
+
+listen(CareerPath, "after_insert", update_user_situation_cae)
+listen(CareerPath, "after_update", update_user_situation_cae)
+listen(CareerPath, "after_delete", update_user_situation_cae)

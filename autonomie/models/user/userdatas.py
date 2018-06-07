@@ -1390,6 +1390,25 @@ class UserDatas(Node):
             companies.append(company)
         return companies
 
+    def get_cae_situation_from_career_path(self, date):
+        """
+        Return the CaeSituation of the current user
+        at the given date computed from the career path
+        """
+        from autonomie.models.career_path import CareerPath
+        from autonomie.models.user.userdatas import CaeSituationOption
+        if date is None:
+            date=datetime.date.today()
+        last_situation_path = CareerPath.query(self.id).filter(
+            CareerPath.start_date <= date
+        ).filter(
+            CareerPath.cae_situation_id != None
+        ).first()
+        situation = CaeSituationOption.query().filter(
+            CaeSituationOption.id == last_situation_path.cae_situation_id
+        ).first()
+        return situation
+
 
 # multi-valued user-datas
 class ExternalActivityDatas(DBBASE):

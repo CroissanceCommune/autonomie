@@ -56,7 +56,10 @@ from autonomie_base.consts import (
 from autonomie.utils.strings import (
     format_name,
 )
-from autonomie.models.tools import get_excluded_colanderalchemy
+from autonomie.models.tools import (
+    set_attribute,
+    get_excluded_colanderalchemy,
+)
 
 
 COMPANY_EMPLOYEE = Table(
@@ -288,9 +291,13 @@ class User(DBBASE, PersistentACLMixin):
 # Registering event handlers to keep datas synchronized
 def sync_user_to_userdatas(source_key, userdatas_key):
     def handler(target, value, oldvalue, initiator):
-        if source_key == initiator.key:
-            if target.userdatas is not None:
-                setattr(target.userdatas, userdatas_key, value)
+        parentclass = initiator.parent_token.parent.class_
+        if parentclass is User:
+            if source_key == initiator.key:
+                if target.userdatas is not None:
+                    set_attribute(
+                        target.userdatas, userdatas_key, value, initiator
+                    )
     return handler
 
 

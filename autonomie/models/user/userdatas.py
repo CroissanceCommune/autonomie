@@ -40,6 +40,7 @@ from autonomie.models.options import (
     ConfigurableOption,
     get_id_foreignkey_col,
 )
+from autonomie.models.tools import set_attribute
 from autonomie.models.user.user import User
 # (célibataire, marié, veuf, divorcé, séparé, vie maritale, pacsé) .
 
@@ -1876,26 +1877,27 @@ listen(UserDatas.situation_situation_id, "set", add_situation_change_handler)
 
 def sync_userdatas_to_user(source_key, user_key):
     def handler(target, value, oldvalue, initiator):
-        if initiator.key == source_key:
-            if hasattr(target, 'user') and target.user is not None:
-                if value != oldvalue:
-                    setattr(target.user, user_key, value)
+        parentclass = initiator.parent_token.parent.class_
+        if parentclass is UserDatas:
+            if initiator.key == source_key:
+                if hasattr(target, 'user') and target.user is not None:
+                    if value != oldvalue:
+                        set_attribute(target.user, user_key, value, initiator)
     return handler
 
 
-# Problem with infinite loops here
-# listen(
-#     UserDatas.coordonnees_firstname,
-#     'set',
-#     sync_userdatas_to_user('coordonnees_firstname', 'firstname')
-# )
-# listen(
-#     UserDatas.coordonnees_lastname,
-#     'set',
-#     sync_userdatas_to_user('coordonnees_lastname', 'lastname')
-# )
-# listen(
-#     UserDatas.coordonnees_email1,
-#     'set',
-#     sync_userdatas_to_user('coordonnees_email1', 'email')
-# )
+listen(
+    UserDatas.coordonnees_firstname,
+    'set',
+    sync_userdatas_to_user('coordonnees_firstname', 'firstname')
+)
+listen(
+    UserDatas.coordonnees_lastname,
+    'set',
+    sync_userdatas_to_user('coordonnees_lastname', 'lastname')
+)
+listen(
+    UserDatas.coordonnees_email1,
+    'set',
+    sync_userdatas_to_user('coordonnees_email1', 'email')
+)

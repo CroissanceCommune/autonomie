@@ -424,3 +424,14 @@ def format_lower_ascii(original_str):
     result = force_ascii(result)
     result = result.replace(' ', '_')
     return result
+
+
+def compile_template_str(template_string, template_context):
+    """
+    Compile the template string and merge the context
+
+    :param str template_string: The string to templatize
+    :param dict template: templating context
+    :rtype: str
+    """
+    return template_string.format(**template_context)

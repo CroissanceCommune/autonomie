@@ -26,8 +26,15 @@
     Panels used for task rendering
 
 """
+
+from sqla_inspect.py3o import SqlaContext
+from autonomie.models.company import Company
+
 from autonomie.utils.strings import major_status
 from autonomie.views.render_api import status_icon
+
+
+CompanySerializer = SqlaContext(Company)
 
 
 def task_panel(context, request, task=None, bulk=False):
@@ -39,6 +46,9 @@ def task_panel(context, request, task=None, bulk=False):
     tvas = task.get_tvas()
     # Check if we've got multiple positive tvas in our task
     multiple_tvas = len([val for val in tvas if val]) > 1
+
+    tmpl_context = CompanySerializer.compile_obj(task.project.company)
+
     return dict(
         task=task,
         project=task.project,
@@ -47,6 +57,7 @@ def task_panel(context, request, task=None, bulk=False):
         tvas=tvas,
         config=request.config,
         bulk=bulk,
+        mention_tmpl_context=tmpl_context,
     )
 
 

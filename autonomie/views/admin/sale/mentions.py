@@ -61,6 +61,23 @@ factures"
     doivent être utilisées en vous rendant dans <br /> <a class='link'
     href='{0}'>Configuration générale -> Module Ventes -> Cycle d'affaires ->
     Configuration des mentions obligatoires/facultatives</a>
+    <br />
+    <br />
+    Des variables sont disponibles pour compléter les mentions :
+        <ul>
+        <li>
+        <code>{{name}}</code> : Nom de l'activité
+        </li>
+        <li>
+        <code>{{RIB}}</code> : RIB spécifique de l'activité
+        </li>
+        <li>
+        <code>{{IBAN}}</code>: IBAN spécifique de l'activité
+        </li>
+        <li>
+        <code>{{code_compta}}</code> : Code analytique de l'activité
+        </li>
+        </ul>
     """.format(self.request.route_path(BUSINESS_MENTION_URL))
 
     def stream_columns(self, item):

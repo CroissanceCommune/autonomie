@@ -275,12 +275,14 @@
             </div>
                 % if mention.full_text is not None:
                     <div class='content'>
-                        ${format_text(mention.full_text)}
+                        ${format_text(api.compile_template_str(mention.full_text, mention_tmpl_context))}
                     </div>
                 % endif
             % else:
                 % if mention.full_text is not None:
-                <div class='content'>${format_text(mention.full_text)}</div>
+                <div class='content'>
+                    ${format_text(api.compile_template_str(mention.full_text, mention_tmpl_context))}
+                </div>
                 % endif
             % endif
         % endfor

@@ -46,7 +46,7 @@
 
     formulaire :
 
-    phase, course, displayUnits
+    phase, displayUnits
     lignes de prestation descr, cout qtité, unité, tva
     lignes de remise descr, cout, tva (seulement les tvas utilisées dans
                                                     les lignes au-dessus)
@@ -99,7 +99,6 @@ MAIN_INFOS_GRID = (
     (('address', 6),),
     (('description', 12),),
     (('workplace', 6), (('mention_ids', 6)),),
-    (('course', 12),),
     (('display_units', 12),),
 )
 

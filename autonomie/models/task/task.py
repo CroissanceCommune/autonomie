@@ -778,6 +778,9 @@ _{s.date:%m%y}"
         DBSESSION().merge(self)
         return business
 
+    def is_training(self):
+        return self.business_type.name == 'training'
+
 
 class DiscountLine(DBBASE, DiscountLineCompute):
     """

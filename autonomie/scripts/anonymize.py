@@ -386,6 +386,12 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
         self.session.execute("delete from csv_import_job")
         self.session.execute("delete from job")
 
+    def _an_task_mentions(self):
+        from autonomie.models.task.mentions import TaskMention
+        for mention in TaskMention.query():
+            mention.full_text = self.faker.paragraph(nb_sentences=3)
+            self.session.merge(mention)
+
     def run(self, module_key=None):
         if module_key is not None:
             if not module_key.startswith('_an_'):

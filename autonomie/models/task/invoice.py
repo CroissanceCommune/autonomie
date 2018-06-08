@@ -149,23 +149,8 @@ class Invoice(Task, InvoiceCompute):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'invoice', }
     id = Column(ForeignKey('task.id'), primary_key=True)
-    paid_status = Column(
-        String(10),
-        default='waiting',
-        info={'colanderalchemy': {'title': u'Statut de la facture', }},
-    )
 
-    # Common with only estimations
-    course = deferred(
-        Column(
-            Integer,
-            info={'colanderalchemy': {'title': u"Concerne une formation"}},
-            nullable=False,
-            default=0
-        ),
-        group='edit'
-    )
-    # Common with only cancelinvoices
+    # Common with CancelInvoice
     financial_year = Column(
         Integer,
         info={'colanderalchemy': {'title': u"Année fiscale de référence"}},
@@ -179,6 +164,13 @@ class Invoice(Task, InvoiceCompute):
         ),
         group="edit"
     )
+
+    # Specific to Invoice
+    paid_status = Column(
+        String(10),
+        default='waiting',
+        info={'colanderalchemy': {'title': u'Statut de la facture', }},
+    )
     estimation_id = Column(ForeignKey('estimation.id'))
     estimation = relationship(
         "Estimation",
@@ -188,6 +180,7 @@ class Invoice(Task, InvoiceCompute):
             'export': {'exclude': True},
         },
     )
+
     state_manager = DEFAULT_ACTION_MANAGER['invoice']
 
     paid_states = ('resulted',)
@@ -363,7 +356,6 @@ class Invoice(Task, InvoiceCompute):
         invoice.description = self.description
 
         invoice.payment_conditions = self.payment_conditions
-        invoice.course = self.course
         invoice.display_units = self.display_units
         invoice.expenses_ht = self.expenses_ht
         invoice.financial_year = datetime.date.today().year
@@ -386,7 +378,6 @@ class Invoice(Task, InvoiceCompute):
 
         datas.update(
             dict(
-                course=self.course,
                 financial_year=self.financial_year,
                 exported=self.exported,
                 estimation_id=self.estimation_id,
@@ -420,18 +411,7 @@ class CancelInvoice(Task, TaskCompute):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-
-    invoice_id = Column(
-        Integer,
-        ForeignKey('invoice.id'),
-        info={
-            'colanderalchemy': {
-                'title': u"Identifiant de la facture associée",
-            }
-        },
-        default=None
-    )
-
+    # Common with Invoice
     financial_year = Column(
         Integer,
         info={'colanderalchemy': {'title': u"Année fiscale de référence"}},
@@ -446,6 +426,17 @@ class CancelInvoice(Task, TaskCompute):
         group="edit"
     )
 
+    # Specific to CancelInvoice
+    invoice_id = Column(
+        Integer,
+        ForeignKey('invoice.id'),
+        info={
+            'colanderalchemy': {
+                'title': u"Identifiant de la facture associée",
+            }
+        },
+        default=None
+    )
     invoice = relationship(
         "Invoice",
         backref=backref(

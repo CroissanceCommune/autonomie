@@ -134,17 +134,6 @@ class Estimation(Task, EstimationCompute):
         },
         default=0
     )
-    course = deferred(
-        Column(
-            Integer,
-            nullable=False,
-            info={
-                'colanderalchemy': {'title': u"Concerne une formation ?"}
-            },
-            default=0
-        ),
-        group='edit'
-    )
 
     # Specific to estimations
     exclusions = deferred(
@@ -274,7 +263,6 @@ class Estimation(Task, EstimationCompute):
         estimation.payment_conditions = self.payment_conditions
         estimation.exclusions = self.exclusions
         estimation.manualDeliverables = self.manualDeliverables
-        estimation.course = self.course
         estimation.display_units = self.display_units
         estimation.expenses_ht = self.expenses_ht
         estimation.paymentDisplay = self.paymentDisplay
@@ -381,7 +369,6 @@ class Estimation(Task, EstimationCompute):
             estimation=self,
             payment_conditions=self.payment_conditions,
             description=self.description,
-            course=self.course,
             address=self.address,
             workplace=self.workplace,
             mentions=self.mentions,
@@ -507,7 +494,6 @@ class Estimation(Task, EstimationCompute):
                 exclusions=self.exclusions,
                 manual_deliverables=self.manualDeliverables,
                 manualDeliverables=self.manualDeliverables,
-                course=self.course,
                 paymentDisplay=self.paymentDisplay,
                 payment_times=payment_times,
                 payment_lines=[

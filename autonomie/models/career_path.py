@@ -44,6 +44,7 @@ from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
+from autonomie.models.career_stage import STAGE_TYPE_OPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -59,10 +60,11 @@ CAREER_PATH_GRID = (
     (('career_stage_id',12),),
     (('start_date',6), ('end_date',6)),
     (('cae_situation_id',12),),
-    (('is_entree_cae',4), ('is_contrat',4), ('is_sortie',4)),
+    (('stage_type',6),),
     (('type_contrat_id',6), ('employee_quality_id',6)),
     (('taux_horaire',6), ('num_hours',6)),
     (('goals_amount',6), ('goals_period',6)),
+    (('amendment_number',6),),
     (('type_sortie_id',6), ('motif_sortie_id',6)),
 )
 
@@ -112,7 +114,6 @@ class CareerPath(DBBASE):
     )
     career_stage_id = Column(
         ForeignKey('career_stage.id'),
-        nullable=False,
         info={'colanderalchemy': {'title': u"Type d'étape"}}
     )
     career_stage = relationship(
@@ -146,35 +147,15 @@ porteur cette nouvelle situation sera proposée par défaut"
             'export': {'related_key': 'label'},
         },
     )
-    is_entree_cae = Column(
-        Boolean(),
-        default=False,
+    stage_type = Column(
+        String(15),
         info={
-            'colanderalchemy': {
-                'title': '',
-                'label': u'Correspond à une entrée dans la coopérative'
+            'colanderalchemy': {'title': u"Type d'étape"},
+            'export': {
+                'formatter': lambda val: dict(STAGE_TYPE_OPTIONS).get(val),
+                'stats': {'options': STAGE_TYPE_OPTIONS},
             }
-        },
-    )
-    is_contrat = Column(
-        Boolean(),
-        default=False,
-        info={
-            'colanderalchemy': {
-                'title': '',
-                'label': u'Correspond à un contrat de travail'
-            }
-        },
-    )
-    is_sortie = Column(
-        Boolean(),
-        default=False,
-        info={
-            'colanderalchemy': {
-                'title': '',
-                'label': u'Correspond à une sortie de la coopérative'
-            }
-        },
+        }
     )
     type_contrat_id = Column(
         ForeignKey('type_contrat_option.id'),
@@ -226,6 +207,10 @@ porteur cette nouvelle situation sera proposée par défaut"
                 'stats': {'options': PERIOD_OPTIONS},
             }
         }
+    )
+    amendment_number = Column(
+        Integer(),
+        info={'colanderalchemy': {'title': u"Numéro de l'avenant"}}
     )
     type_sortie_id = Column(
         ForeignKey('type_sortie_option.id'),

@@ -18,7 +18,7 @@ class InvoiceConfigView(BaseConfigView):
     title = u"Informations spécifiques aux devis"
     description = u"Configurer les champs spécifiques aux devis dans les \
 sorties PDF"
-    keys = ["coop_invoiceheader", "coop_invoicepayment", "coop_invoicelate"]
+    keys = ["coop_invoiceheader"]
     schema = get_config_schema(keys)
     validation_msg = u"Vos modifications ont été enregistrées"
     route_name = INVOICE_ROUTE

@@ -18,7 +18,7 @@ class EstimationConfigView(BaseConfigView):
     title = u"Informations spécifiques aux devis"
     description = u"Configurer les champs spécifiques aux devis dans les \
 sorties PDF"
-    keys = ["coop_estimationheader", "coop_estimationfooter"]
+    keys = ["coop_estimationheader",]
     schema = get_config_schema(keys)
     validation_msg = u"Vos modifications ont été enregistrées"
     route_name = ESTIMATION_ROUTE

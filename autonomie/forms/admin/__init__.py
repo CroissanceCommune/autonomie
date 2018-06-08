@@ -76,24 +76,11 @@ des formations",
 prestations ex : <font color='red'>Le RIB a changé</font>",
         "widget": deform.widget.TextAreaWidget(rows=4),
     },
-    "coop_estimationfooter": {
-        "title": u"Informations sur l'acceptation des devis",
-        "widget": deform.widget.TextAreaWidget(rows=4),
-    },
     "coop_invoiceheader": {
         "title": u"Cadre d'information spécifique (en entête des factures)",
         "description": u"Permet d'afficher un texte avant la description des \
 prestations ex : <font color='red'>Le RIB a changé</font>",
         "widget": deform.widget.TextAreaWidget(rows=4),
-    },
-    "coop_invoicepayment": {
-        "title": u"Informations de paiement pour les factures",
-        "widget": deform.widget.TextAreaWidget(rows=4),
-    },
-    "coop_invoicelate": {
-        "title": u"Informations sur les retards de paiement",
-        "widget": deform.widget.TextAreaWidget(rows=4),
-        "description": u"Le contenu du cadre 'Retard de paiement'"
     },
     'cae_admin_mail': {
         "title": u"Adresse e-mail de contact pour les notifications Autonomie",

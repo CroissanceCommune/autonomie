@@ -56,21 +56,4 @@
 %if task.payment_conditions:
     ${table(u"Conditions de paiement", task.payment_conditions)}
 % endif
-% if config.get('coop_invoicepayment'):
-    <% paymentinfo = config.get('coop_invoicepayment')%>
-    % if company.IBAN is not None:
-        <% paymentinfo = paymentinfo.replace(u"%IBAN%", company.IBAN) %>
-    % endif
-    % if company.RIB is not None:
-        <% paymentinfo = paymentinfo.replace(u"%RIB%", company.RIB) %>
-    % endif
-    % if company.name is not None:
-        <% paymentinfo = paymentinfo.replace(u"%ENTREPRENEUR%", company.name) %>
-    % endif
-    ${table(u"Mode de paiement", paymentinfo)}
-%endif
-% if config.get('coop_invoicelate'):
-    <% tolate = config.get('coop_invoicelate').replace(u"%ENTREPRENEUR%", company.name) %>
-    ${table(u"Retard de paiement", tolate)}
-% endif
 </%block>

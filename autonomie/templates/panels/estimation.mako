@@ -127,11 +127,6 @@
         ${table(u"Conditions de paiement", task.payment_conditions)}
     % endif
 % endif
-% if config.get('coop_estimationfooter'):
-    <div class='row keep_with_next'>
-        ${table(u"Acceptation du devis", config.get('coop_estimationfooter'))}
-    </div>
-%endif
 </%block>
 <%block name="end_document">
 <table style='width:100%; margin-bottom: 5px;'>

@@ -3,6 +3,9 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import datetime
+
+from mock import MagicMock
 import pytest
 
 
@@ -188,6 +191,14 @@ def full_invoice(
 
 
 @pytest.fixture
+def invoice_20170707(dbsession, invoice):
+    invoice.date = datetime.date(2017, 7, 7)
+    invoice = dbsession.merge(invoice)
+    dbsession.flush()
+    return invoice
+
+
+@pytest.fixture
 def sale_product(dbsession):
     from autonomie.models.sale_product import SaleProduct
     s = SaleProduct(
@@ -213,3 +224,10 @@ def global_seq_1(dbsession, invoice):
     dbsession.add(s)
     dbsession.flush()
     return s
+
+
+@pytest.fixture
+def DummySequence():
+    ds = MagicMock()
+    ds.get_next_index = MagicMock(return_value=12)
+    return ds

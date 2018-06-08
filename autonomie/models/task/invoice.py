@@ -105,7 +105,7 @@ class InvoiceService(object):
         query = query.filter(extract('year', Task.date) == year)
         last = query.first()[0]
         if last:
-            next_ = last + 1
+            next_ = int(last) + 1
 
         return next_
 

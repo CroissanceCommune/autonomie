@@ -274,7 +274,7 @@ class Task(Node):
         group='edit',
     )
     official_number = Column(
-        Integer,
+        String(255),
         info={
             'colanderalchemy': {
                 "title": u"Identifiant du document (facture/avoir)",

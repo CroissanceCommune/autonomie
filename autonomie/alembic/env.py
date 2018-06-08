@@ -43,6 +43,7 @@ def run_migrations_online():
     context.configure(
         connection=connection,
         target_metadata=DBBASE.metadata,
+        compare_type=True,
     )
 
     try:

@@ -10,6 +10,7 @@ Create Date: 2018-06-05 16:27:08.014127
 revision = '11a62732db65'
 down_revision = '44f964dc36a2'
 
+import logging
 from alembic import op
 import sqlalchemy as sa
 
@@ -27,6 +28,7 @@ def update_database_structure():
 
 
 def migrate_datas():
+    logger = logging.getLogger("alembic.autonomie")
     from autonomie_base.models.base import DBSESSION
     session = DBSESSION()
     from autonomie.models.config import Config
@@ -36,9 +38,12 @@ def migrate_datas():
         File,
         FileType,
     )
-    json_str = Config.get("attached_filetypes", "[]")
-    print(json_str)
-    configured_filetypes = json.loads(json_str)
+    json_str = Config.get_value("attached_filetypes", "[]")
+    try:
+        configured_filetypes = json.loads(json_str)
+    except:
+        logger.exception(u"Error in json str : %s" % json_str)
+        configured_filetypes = []
     if configured_filetypes:
         result = []
         for filetype_label in configured_filetypes:

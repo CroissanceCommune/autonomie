@@ -130,3 +130,24 @@ suivantes
     # Ici on install autonomie en mode developpement
     python setup.py develop
     cp development.ini.sample development.ini
+
+
+Tests
+------
+
+Installer les dépendances de test
+
+.. code-block:: console
+
+    pip install -r test_requirements.txt
+
+Copier et personaliser le fichier de configuration
+
+.. code-block:: console
+    cp test.ini.sample test.ini
+
+Lancer les tests
+
+.. code-block:: console
+
+   py.test autonomie/tests

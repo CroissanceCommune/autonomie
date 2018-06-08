@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from sqlalchemy import (
+    func,
     Column,
     ForeignKey,
     Integer,
@@ -8,6 +9,7 @@ from sqlalchemy import (
 )
 
 from autonomie_base.models.base import (
+    DBSESSION,
     DBBASE,
     default_table_args,
 )
@@ -35,3 +37,24 @@ class SequenceNumber(DBBASE):
     task = Column(Integer, ForeignKey('task.id'), nullable=False)
     sequence = Column(String(100), nullable=False)
     index = Column(Integer, nullable=False)
+
+
+class GlobalInvoiceSequence(object):
+    db_key = SequenceNumber.SEQUENCE_INVOICE_GLOBAL
+
+    @classmethod
+    def get_latest_index(cls, invoice):
+        """
+        :rtype: int or None
+        """
+        q = DBSESSION().query(func.Max(SequenceNumber.index))
+        q = q.filter_by(sequence=cls.db_key)
+        return q.scalar()
+
+    @classmethod
+    def get_next_index(cls, invoice):
+        latest = cls.get_latest_index(invoice)
+        if latest is None:
+            return 0
+        else:
+            return latest + 1

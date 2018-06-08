@@ -29,5 +29,4 @@ def test_operation_post(config, get_csrf_request_with_db, company):
     assert result.debit == 15
     assert result.credit == 15
     assert result.balance == 25
-    assert result.id == 1
     assert result.company_id == company.id

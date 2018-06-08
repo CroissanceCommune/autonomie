@@ -63,15 +63,19 @@ def _add_business_to_all_invoices(session):
         Estimation, Invoice,
     )
     logger.debug(u"Adding business to estimations")
+    eindex = 0
+    iindex = 0
     for e in Estimation.query().options(
         sa.orm.load_only('id', 'name', 'business_type_id', 'project_id')
     ):
+        eindex += 1
         invoices = Invoice.query().options(
             sa.orm.load_only('id')
         ).filter_by(estimation_id=e.id).all()
         if invoices:
             business = e.gen_business()
             for invoice in invoices:
+                iindex += 1
                 op.execute(
                     u"update task set business_id=%s where id=%s" % (
                         business.id,
@@ -85,11 +89,15 @@ def _add_business_to_all_invoices(session):
                         invoice.id
                     )
                 )
+    logger.debug(" + %s estimations treated" % eindex)
+    logger.debug(" + %s invoices treated" % iindex)
 
     logger.debug(u"Adding business to direct invoices")
+    iindex = 0
     for invoice in Invoice.query().options(
         sa.orm.load_only('id', 'name', 'business_type_id', 'project_id')
-    ).filter_by(estimation_id=None).all():
+    ).filter_by(estimation_id=None):
+        iindex += 1
         business = invoice.gen_business()
 
         op.execute(
@@ -99,6 +107,7 @@ def _add_business_to_all_invoices(session):
                 invoice.id
             )
         )
+    logger.debug(" + %s invoices treated" % iindex)
 
     session.flush()
 
@@ -120,9 +129,27 @@ def migrate_datas():
     default_ptype_id = ProjectType.get_default().id
     default_btype_id = BusinessType.get_default().id
 
+    course_ptype_id = ProjectType.query().filter_by(name='training').first().id
+    course_btype_id = BusinessType.query().filter_by(name='training').first().id
+
     op.execute("update project set project_type_id=%s" % default_ptype_id)
+
     op.execute("update task set version='4.1'")
-    op.execute("update task set business_type_id=%s" % default_btype_id)
+
+    for typ_ in ('estimation', 'invoice'):
+        query = "update task join {type_} on {type_}.id=task.id set \
+business_type_id={btype_id} where {type_}.course={course}"
+        op.execute(
+            query.format(type_=typ_, btype_id=default_btype_id, course=0)
+        )
+        op.execute(
+            query.format(type_=typ_, btype_id=course_btype_id, course=1)
+        )
+
+        query2 = "update project set project_type_id={ptype_id} where \
+(select count(task.id) from task join {type_} on {type_}.id=task.id \
+where {type_}.course=1 and task.project_id=project.id ) > 0;"
+        op.execute(query2.format(type_=typ_, ptype_id=course_ptype_id,))
 
     _add_business_to_all_invoices(session)
 

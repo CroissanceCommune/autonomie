@@ -199,6 +199,13 @@ def invoice_20170707(dbsession, invoice):
 
 
 @pytest.fixture
+def invoice_20170808(dbsession, invoice):
+    invoice.date = datetime.date(2017, 8, 8)
+    invoice = dbsession.merge(invoice)
+    dbsession.flush()
+    return invoice
+
+@pytest.fixture
 def sale_product(dbsession):
     from autonomie.models.sale_product import SaleProduct
     s = SaleProduct(
@@ -219,7 +226,7 @@ def global_seq_1(dbsession, invoice):
     s = SequenceNumber(
         sequence=SequenceNumber.SEQUENCE_INVOICE_GLOBAL,
         index=0,
-        task=invoice.parent,
+        task=invoice.id,
     )
     dbsession.add(s)
     dbsession.flush()

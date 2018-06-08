@@ -30,7 +30,6 @@ from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
 from autonomie import models
-from autonomie.models.populate import populate_database
 from autonomie.utils.widgets import (
     ActionMenu,
     Navigation,
@@ -239,9 +238,6 @@ def content(connection, settings):
     adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
-    commit()
-    begin()
-    populate_database()
     commit()
 
 

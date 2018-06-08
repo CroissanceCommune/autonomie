@@ -406,11 +406,7 @@ class UserDatas(Node):
     situation_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
         info={
-            'colanderalchemy':
-            {
-                'title': u"Situation actuelle dans la CAE",
-                'section': u'Synthèse',
-            }
+            'colanderalchemy': {'exclude': True},
         }
     )
 

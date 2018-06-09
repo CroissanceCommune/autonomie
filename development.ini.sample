@@ -132,7 +132,7 @@ default_shell = ipython
 
 # Begin logging configuration
 [loggers]
-keys = root, sqlalchemy, alembic, celery
+keys = root, sqlalchemy, alembic, celery, colanderalchemy
 
 [handlers]
 keys = console, file, sqlfile, celery_file
@@ -170,6 +170,12 @@ qualname = autonomie.celery
 level = DEBUG
 handlers = sqlfile
 qualname = alembic
+
+[logger_colanderalchemy]
+level = INFO
+handlers = file, console
+qualname = colanderalchemy
+propagate=0
 
 [handler_console]
 class = autonomie.log.CustomStreamHandler

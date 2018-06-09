@@ -150,21 +150,6 @@ def deferred_financial_year_widget(node, kw):
         return deform.widget.HiddenWidget()
 
 
-@colander.deferred
-def deferred_prefix_widget(node, kw):
-    request = kw['request']
-    if has_permission('manage', request.context, request):
-        return deform.widget.TextInputWidget()
-    else:
-        return deform.widget.HiddenWidget()
-
-
-@colander.deferred
-def deferred_default_prefix(node, kw):
-    request = kw['request']
-    return request.config.get('invoiceprefix', '')
-
-
 FINANCIAL_YEAR = colander.SchemaNode(
     colander.Integer(),
     name="financial_year",
@@ -174,22 +159,11 @@ FINANCIAL_YEAR = colander.SchemaNode(
 )
 
 
-PREFIX = colander.SchemaNode(
-    colander.String(),
-    name="prefix",
-    title=u"Préfixe du numéro de facture",
-    widget=deferred_prefix_widget,
-    default=deferred_default_prefix,
-    missing="",
-)
-
-
 class FinancialYearSchema(colander.MappingSchema):
     """
         colander Schema for financial year setting
     """
     financial_year = FINANCIAL_YEAR
-    prefix = PREFIX
 
 
 class ProductTaskLine(colander.MappingSchema):

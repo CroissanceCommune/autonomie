@@ -88,7 +88,6 @@ class SageSingleInvoiceExportPage(BaseExportView):
     @property
     def title(self):
         return "Export de la facture {0}{1} au format CSV".format(
-            self.context.prefix,
             self.context.official_number,
         )
 

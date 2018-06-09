@@ -66,7 +66,6 @@
                 <% paid_status = getattr(document, 'paid_status', 'resulted') %>
                 <% date = document.date %>
                 <% type_ = document.type_ %>
-                <% prefix = document.prefix %>
                 <% official_number = document.official_number %>
                 % if is_admin_view:
                     <% company = document.get_company() %>
@@ -81,7 +80,7 @@
                         <br />
                         </td>
             <td>
-                ${prefix}${official_number}
+                ${official_number}
             </td>
             % if is_admin_view:
                 <td>

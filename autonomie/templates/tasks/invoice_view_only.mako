@@ -68,7 +68,7 @@
     <% invoice = request.context %>
     <h2>${invoice.name}</h2>
     <p class='lead'>
-    Cette facture porte le numéro <b>${invoice.prefix}${invoice.official_number}</b>
+    Cette facture porte le numéro <b>${invoice.official_number}</b>
     </p>
 </%block>
 <%block name='moretabs'>
@@ -117,7 +117,7 @@
                     <a href="${request.route_path('/cancelinvoices/{id}.html', id=cancelinvoice.id)}">
                         ${cancelinvoice.internal_number}
                         % if cancelinvoice.official_number:
-                        (${cancelinvoice.prefix}${cancelinvoice.official_number})
+                        (${cancelinvoice.official_number})
                         % endif
                     </a> a été généré depuis cette facture.
                 </p>
@@ -145,7 +145,7 @@
         </a>
         % endif
         <br />
-        Elle porte le numéro ${invoice.prefix}${invoice.official_number}.
+        Elle porte le numéro ${invoice.official_number}.
         </div>
         <% url = request.route_path('/export/treasury/invoices/{id}', id=invoice.id, _query={'force': True}) %>
             % if invoice.exported:
@@ -225,7 +225,7 @@
                             L'avoir : \
                             <a href="${request.route_path('/cancelinvoices/{id}.html', id=cancelinvoice.id)}">
                                 ${cancelinvoice.internal_number}
-                                (numéro ${cancelinvoice.prefix}${cancelinvoice.official_number})
+                                (numéro ${cancelinvoice.official_number})
                                 d'un montant TTC de ${api.format_amount(cancelinvoice.ttc, precision=5)|n} €
                             </a> a été généré depuis cette facture.
                         </p>

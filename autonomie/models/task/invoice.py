@@ -231,7 +231,6 @@ class Invoice(Task, InvoiceCompute):
             invoice=self,
             expenses_ht=-1 * self.expenses_ht,
             financial_year=self.financial_year,
-            prefix=self.prefix,
             display_units=self.display_units,
             business_type_id=self.business_type_id,
         )

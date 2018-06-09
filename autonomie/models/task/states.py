@@ -166,8 +166,6 @@ def set_financial_year(request, task, **kw):
     """
     if 'financial_year' in kw:
         task.financial_year = kw['financial_year']
-    if 'prefix' in kw:
-        task.prefix = kw['prefix']
     return task
 
 

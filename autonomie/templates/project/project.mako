@@ -105,7 +105,7 @@
     <td
         onclick="document.location='${view_url}'"
         class='rowlink'>
-        ${task.prefix}${task.official_number}
+        ${task.official_number}
     </td>
     <td
         onclick="document.location='${view_url}'"
@@ -140,9 +140,9 @@
     <td
         onclick="document.location='${view_url}'"
         class='rowlink'>
-    ${task.prefix}${task.official_number}
+    ${task.official_number}
     % if task.invoice:
-        (lié à la facture ${task.invoice.prefix}${task.invoice.official_number})
+        (lié à la facture ${task.invoice.official_number})
     % endif
     </td>
     <td

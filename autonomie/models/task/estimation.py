@@ -372,7 +372,6 @@ class Estimation(Task, EstimationCompute):
             address=self.address,
             workplace=self.workplace,
             mentions=self.mentions,
-            prefix=Config.get_value('invoice_prefix', ''),
             business_type_id=self.business_type_id,
         )
         return inv

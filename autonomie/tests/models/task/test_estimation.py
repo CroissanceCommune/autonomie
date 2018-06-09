@@ -73,16 +73,6 @@ def test_gen_invoice_ref450(dbsession, full_estimation):
             assert line.product_id is not None
 
 
-def test_geninvoice_ref504(dbsession, full_estimation):
-    from autonomie.models.config import Config
-    Config.set('invoice_prefix', 'TEST')
-    invoices = full_estimation.gen_invoices(full_estimation.owner)
-    for invoice in invoices:
-        assert invoice.prefix == 'TEST'
-
-
-
-
 def test_duplicate_payment_line(payment_line):
     newline = payment_line.duplicate()
     for i in ('order', 'description', 'amount'):

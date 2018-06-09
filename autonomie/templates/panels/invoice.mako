@@ -36,7 +36,7 @@
     </div>
 </%def>
 <%block name='information'>
-<strong>Facture N°</strong>${task.prefix}${task.official_number}<br />
+<strong>Facture N°</strong>${task.official_number}<br />
 <strong>Libellé : </strong>${task.internal_number}<br />
 % if task.estimation is not None:
     <strong>Cette facture est associée au devis : </strong>${task.estimation.internal_number}<br />

@@ -188,7 +188,6 @@ class InvoiceListTools(object):
                 "customer_id",
                 "official_number",
                 "internal_number",
-                "prefix",
                 "status",
                 Invoice.paid_status,
             )

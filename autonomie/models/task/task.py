@@ -370,16 +370,6 @@ class Task(Node):
         ),
         group='edit',
     )
-    prefix = Column(
-        String(15),
-        default='',
-        info={
-            "colanderalchemy": {
-                'title': u"Préfixe du numéro de facture",
-            },
-            'export': {'exclude': True},
-        }
-    )
     business_type_id = Column(ForeignKey("business_type.id"))
     business_id = Column(ForeignKey("business.id"))
 
@@ -665,7 +655,6 @@ _{s.date:%m%y}"
             address=self.address,
             workplace=self.workplace,
             payment_conditions=self.payment_conditions,
-            prefix=self.prefix,
             status_history=[
                 status.__json__(request) for status in self.statuses
             ],

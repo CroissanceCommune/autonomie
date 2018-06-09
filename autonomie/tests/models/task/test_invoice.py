@@ -152,7 +152,6 @@ def test_gen_cancelinvoice(dbsession, full_invoice, user):
     assert cinv.total_ht() == -1 * full_invoice.total_ht()
     today = datetime.date.today()
     assert cinv.date == today
-    assert cinv.prefix == full_invoice.prefix
     assert cinv.financial_year == full_invoice.financial_year
     assert cinv.mentions == full_invoice.mentions
     assert cinv.address == full_invoice.address

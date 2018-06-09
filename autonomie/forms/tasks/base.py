@@ -95,7 +95,7 @@ TASKTYPES_LABELS = {
 
 
 MAIN_INFOS_GRID = (
-    (('date', 6), ('financial_year', 3), ('prefix', 3), ),
+    (('date', 6), ('financial_year', 3), ),
     (('address', 6),),
     (('description', 12),),
     (('workplace', 6), (('mention_ids', 6)),),
@@ -624,5 +624,4 @@ def task_after_bind(node, kw):
     :param dict kw: The bind arguments
     """
     if not has_set_treasury_perm(kw):
-        remove_childnode(node, 'prefix')
         remove_childnode(node, 'financial_year')

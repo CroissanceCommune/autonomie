@@ -108,7 +108,7 @@ def estimation(
 
 
 @pytest.fixture
-def invoice(
+def mk_invoice(
     dbsession,
     tva,
     unity,
@@ -118,17 +118,25 @@ def invoice(
     user,
     phase,
 ):
-    from autonomie.models.task.invoice import Invoice
-    invoice = Invoice(
-        company=company,
-        project=project,
-        customer=customer,
-        phase=phase,
-        user=user,
-    )
-    dbsession.add(invoice)
-    dbsession.flush()
-    return invoice
+    def _mk_invoice(date=None):
+        from autonomie.models.task.invoice import Invoice
+        invoice = Invoice(
+            company=company,
+            project=project,
+            customer=customer,
+            phase=phase,
+            user=user,
+            date=date,
+        )
+        dbsession.add(invoice)
+        dbsession.flush()
+        return invoice
+    return _mk_invoice
+
+
+@pytest.fixture
+def invoice(mk_invoice):
+    return mk_invoice()
 
 
 @pytest.fixture
@@ -189,21 +197,13 @@ def full_invoice(
     dbsession.flush()
     return invoice
 
+@pytest.fixture
+def invoice_20170707(mk_invoice):
+    return mk_invoice(date=datetime.date(2017, 7, 7))
 
 @pytest.fixture
-def invoice_20170707(dbsession, invoice):
-    invoice.date = datetime.date(2017, 7, 7)
-    invoice = dbsession.merge(invoice)
-    dbsession.flush()
-    return invoice
-
-
-@pytest.fixture
-def invoice_20170808(dbsession, invoice):
-    invoice.date = datetime.date(2017, 8, 8)
-    invoice = dbsession.merge(invoice)
-    dbsession.flush()
-    return invoice
+def invoice_20170808(dbsession, mk_invoice):
+    return mk_invoice(date=datetime.date(2017, 7, 7))
 
 @pytest.fixture
 def sale_product(dbsession):

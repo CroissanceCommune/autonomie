@@ -13,7 +13,7 @@ pyramid.includes =
                     autonomie_celery
                     pyramid_tm
                     pyramid_services
-                    pyramid_mailer
+                    pyramid_mailer.debug
                     pyramid_layout
                     pyramid_mako
                     pyramid_chameleon

@@ -14,3 +14,5 @@ dist
 tobeignored
 node_modules
 /mail/
+/test.ini
+/.pytest_cache

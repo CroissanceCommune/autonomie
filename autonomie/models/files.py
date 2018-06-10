@@ -157,6 +157,10 @@ class FileType(ConfigurableOption):
         query = DBSESSION().query(File).filter_by(file_type_id=self.id)
         return DBSESSION().query(query.exists()).scalar()
 
+    @classmethod
+    def get_by_label(cls, label):
+        return cls.query().filter_by(label=label).first()
+
 
 class Template(File):
     """

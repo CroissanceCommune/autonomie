@@ -21,7 +21,6 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
-import tempfile
 from pytest import fixture
 from paste.deploy.loadwsgi import appconfig
 from pyramid import testing
@@ -30,6 +29,9 @@ from mock import Mock
 from pyramid_beaker import BeakerSessionFactoryConfig
 from sqlalchemy import engine_from_config
 from autonomie import models
+from autonomie.utils.filedepot import (
+    configure_filedepot,
+)
 from autonomie.utils.widgets import (
     ActionMenu,
     Navigation,
@@ -173,6 +175,7 @@ def config(request, pyramid_request, settings, registry):
             config.include(include)
     set_cache_regions_from_settings(settings)
     request.addfinalizer(testing.tearDown)
+    configure_filedepot(settings)
 
     from autonomie import setup_services
     setup_services(config, settings)
@@ -227,7 +230,7 @@ def content(connection, settings):
     """
     sets up some default content
     """
-    from transaction import commit, begin
+    from transaction import commit
     from autonomie_base.models.base import (
         DBBASE,
     )

@@ -39,7 +39,19 @@ mako.imports = from markupsafe import escape_silent
 mako.default_filters = escape_silent
 autonomie.ftpdir=%(here)s/autonomie/tests/datas/
 pyramid_deform.tempdir=%(here)s/autonomie/tests/datas/
+autonomie.depot_path=%(here)s/autonomie/tests/datas/
 
 [pipeline:main]
 pipeline =
     autonomie
+
+# Begin logging configuration
+[loggers]
+keys = root
+
+[handlers]
+keys = console
+
+[logger_root]
+level = DEBUG
+handlers = console

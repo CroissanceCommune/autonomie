@@ -39,7 +39,7 @@ mako.imports = from markupsafe import escape_silent
 mako.default_filters = escape_silent
 autonomie.ftpdir=%(here)s/autonomie/tests/datas/
 pyramid_deform.tempdir=%(here)s/autonomie/tests/datas/
-autonomie.depot_path=%(here)s/autonomie/tests/datas/
+autonomie.depot_path=%(here)s/autonomie/tests/datas/filedepot/
 
 [pipeline:main]
 pipeline =

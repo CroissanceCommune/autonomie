@@ -17,3 +17,4 @@ node_modules
 /test.ini
 /.pytest_cache
 /docs/build/
+autonomie/tests/datas/filedepot

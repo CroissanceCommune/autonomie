@@ -204,7 +204,14 @@ class BaseConfigView(BaseAdminFormView):
             logger.debug(u"{0} : {1}".format(key, value))
 
         self.request.session.flash(self.validation_msg)
-        return HTTPFound(self.back_link)
+        back_link = self.back_link
+        if back_link is not None:
+            result = HTTPFound(self.back_link)
+        else:
+            logger.error(u"This view %s is not able to provide a back_link "
+                         u"after validation" % self)
+            result = None
+        return result
 
 
 class AdminOption(BaseAdminFormView):
@@ -557,21 +564,49 @@ class BaseAdminAddView(BaseAddView, AdminTreeMixin):
     add_template_vars = ('help_msg', 'breadcrumb', 'back_link')
 
     def redirect(self, model=None):
-        return HTTPFound(self.back_link)
+        back_link = self.back_link
+        if back_link is not None:
+            result = HTTPFound(self.back_link)
+        else:
+            logger.error(u"This view %s is not able to provide a back_link "
+                         u"after validation" % self)
+            result = None
+        return result
 
 
 class BaseAdminEditView(BaseEditView, AdminTreeMixin):
     add_template_vars = ('help_msg', 'breadcrumb', 'back_link')
 
     def redirect(self):
-        return HTTPFound(self.back_link)
+        back_link = self.back_link
+        if back_link is not None:
+            result = HTTPFound(self.back_link)
+        else:
+            logger.error(u"This view %s is not able to provide a back_link "
+                         u"after validation" % self)
+            result = None
+        return result
 
 
 class BaseAdminDisableView(DisableView, AdminTreeMixin):
     def redirect(self):
-        return HTTPFound(self.back_link)
+        back_link = self.back_link
+        if back_link is not None:
+            result = HTTPFound(self.back_link)
+        else:
+            logger.error(u"This view %s is not able to provide a back_link "
+                         u"after validation" % self)
+            result = None
+        return result
 
 
 class BaseAdminDeleteView(DeleteView, AdminTreeMixin):
     def redirect(self):
-        return HTTPFound(self.back_link)
+        back_link = self.back_link
+        if back_link is not None:
+            result = HTTPFound(self.back_link)
+        else:
+            logger.error(u"This view %s is not able to provide a back_link "
+                         u"after validation" % self)
+            result = None
+        return result

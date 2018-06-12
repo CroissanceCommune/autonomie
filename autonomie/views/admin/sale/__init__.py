@@ -25,10 +25,10 @@ unités de prestation ..."
 def includeme(config):
     config.add_route(SALE_URL, SALE_URL)
     config.add_admin_view(SaleIndexView, parent=AdminIndexView)
+    config.include('.forms')
+    config.include('.mentions')
     config.include('.pdf')
     config.include('.business_cycle')
-    config.include('.forms')
     config.include('.accounting')
     config.include('.tva')
     config.include('.receipts')
-    config.include('.mentions')

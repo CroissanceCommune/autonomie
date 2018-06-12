@@ -55,7 +55,6 @@ from autonomie.forms import (
 
 USERDATAS_FORM_GRIDS = {
     u"Synthèse": (
-        (('situation_situation_id', 6),),
         (('situation_follower_id', 6), ('situation_antenne_id', 6)),
         (('situation_societariat_entrance', 6),),
     ),
@@ -182,10 +181,6 @@ def customize_schema(schema):
     :param obj schema: A UserDatas schema
     """
     customize = functools.partial(customize_field, schema)
-    customize(
-        'situation_situation_id',
-        deform.widget.HiddenWidget()
-    )
 
     customize(
         'situation_antenne_id',

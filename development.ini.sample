@@ -13,7 +13,7 @@ pyramid.includes =
                     autonomie_celery
                     pyramid_tm
                     pyramid_services
-                    pyramid_mailer
+                    pyramid_mailer.debug
                     pyramid_layout
                     pyramid_mako
                     pyramid_chameleon
@@ -132,7 +132,7 @@ default_shell = ipython
 
 # Begin logging configuration
 [loggers]
-keys = root, sqlalchemy, alembic, celery
+keys = root, sqlalchemy, alembic, celery, colanderalchemy
 
 [handlers]
 keys = console, file, sqlfile, celery_file
@@ -171,6 +171,12 @@ level = DEBUG
 handlers = sqlfile
 qualname = alembic
 
+[logger_colanderalchemy]
+level = INFO
+handlers = file, console
+qualname = colanderalchemy
+propagate=0
+
 [handler_console]
 class = autonomie.log.CustomStreamHandler
 args = (sys.stderr,)
@@ -206,7 +212,7 @@ formatter = sqlfile
 format = %(message)s
 
 [formatter_generic]
-format = %(ip)s - %(asctime)-15s %(levelname)-5.5s %(message)s ([%(name)s.%(funcName)s:%(lineno)d])
+format = %(asctime)-15s %(levelname)-5.5s %(message)s ([%(name)s.%(funcName)s:%(lineno)d])
 # End logging configuration
 #Alembic conf
 [alembic]

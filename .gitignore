@@ -13,4 +13,7 @@ dist
 .ropeproject
 tobeignored
 node_modules
+/mail/
+/test.ini
+/.pytest_cache
 /docs/build/

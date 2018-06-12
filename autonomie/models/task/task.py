@@ -576,9 +576,6 @@ _{s.date:%m%y}"
         self.status_person = user
         self.date = datetime.date.today()
         self.set_numbers(company_index, project_index)
-        log.debug(
-            "##################### Here we are, current name : %s" % self.name
-        )
 
         for key, value in kw.items():
             setattr(self, key, value)

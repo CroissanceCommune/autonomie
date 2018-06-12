@@ -55,10 +55,6 @@ def customize_schema(schema):
         get_deferred_select(CareerStage, keys=('id', 'name'))
     )
     customize(
-        'cae_situation_id',
-        get_deferred_select(CaeSituationOption)
-    )
-    customize(
         'type_contrat_id',
         get_deferred_select(TypeContratOption)
     )
@@ -92,34 +88,6 @@ def customize_schema(schema):
     )
 
 
-def customize_edit_schema(schema):
-    """
-    Customize the form schema for edition
-    :param obj schema: A CareerPath schema
-    """
-    customize = functools.partial(customize_field, schema)
-    customize(
-        "career_stage_id",
-        deform.widget.HiddenWidget()
-    )
-    customize(
-        "cae_situation_id",
-        deform.widget.HiddenWidget()
-    )
-    customize(
-        "is_entree_cae",
-        deform.widget.HiddenWidget()
-    )
-    customize(
-        "is_contrat",
-        deform.widget.HiddenWidget()
-    )
-    customize(
-        "is_sortie",
-        deform.widget.HiddenWidget()
-    )
-
-
 def get_add_stage_schema():
     """
     Return a schema for adding a new career path's stage
@@ -127,85 +95,50 @@ def get_add_stage_schema():
     """
     schema = SQLAlchemySchemaNode(
         CareerPath,
-        excludes=(
-            'userdatas_id',
-            'cae_situation_id',
-            'is_entree_cae',
-            'is_contrat',
-            'is_sortie',
-            'type_contrat_id',
-            'employee_quality_id',
-            'taux_horaire',
-            'num_hours',
-            'goals_amount',
-            'goals_period',
-            'type_sortie_id',
-            'motif_sortie_id',
+        (
+            'start_date',
+            'end_date',
+            'career_stage_id',
         )
     )
     customize_schema(schema)
     return schema
 
 
-def get_edit_stage_schema():
+def get_edit_stage_schema(stage_type):
     """
     Return a schema for editing career path's stage
-    wich is nor 'contrat' nor 'sortie' type
+    related to the stage's type
     """
-    schema = SQLAlchemySchemaNode(
-        CareerPath,
-        excludes=(
-            'userdatas_id',
+    fields = [
+        'id',
+        'start_date',
+        'end_date',
+    ]
+    if stage_type == "contract":
+        fields.extend([
             'type_contrat_id',
             'employee_quality_id',
             'taux_horaire',
             'num_hours',
             'goals_amount',
             'goals_period',
-            'type_sortie_id',
-            'motif_sortie_id',
-        )
-    )
-    customize_schema(schema)
-    customize_edit_schema(schema)
-    return schema
-
-
-def get_edit_contrat_stage_schema():
-    """
-    Return a schema for editing career path's stage
-    wich is 'contrat' type
-    """
-    schema = SQLAlchemySchemaNode(
-        CareerPath,
-        excludes=(
-            'userdatas_id',
-            'type_sortie_id',
-            'motif_sortie_id',
-        )
-    )
-    customize_schema(schema)
-    customize_edit_schema(schema)
-    return schema
-    
-
-def get_edit_sortie_stage_schema():
-    """
-    Return a schema for editing career path's stage
-    wich is 'sortie' type
-    """
-    schema = SQLAlchemySchemaNode(
-        CareerPath,
-        excludes=(
-            'userdatas_id',
+        ])
+    elif stage_type == "amendment":
+        fields.extend([
             'type_contrat_id',
             'employee_quality_id',
             'taux_horaire',
             'num_hours',
             'goals_amount',
             'goals_period',
-        )
-    )
+            'amendment_number',
+        ])
+    elif stage_type == "exit":
+        fields.extend([
+            'type_sortie_id',
+            'motif_sortie_id',
+        ])
+    schema = SQLAlchemySchemaNode(CareerPath, fields)
     customize_schema(schema)
-    customize_edit_schema(schema)
     return schema

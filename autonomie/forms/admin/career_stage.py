@@ -20,11 +20,15 @@
 
 import functools
 from colanderalchemy import SQLAlchemySchemaNode
-from autonomie.models.career_stage import CareerStage
+from autonomie.models.career_stage import (
+    CareerStage,
+    STAGE_TYPE_OPTIONS
+)
 from autonomie.models.user.userdatas import CaeSituationOption
 from autonomie.forms import (
     customize_field,
     get_deferred_select,
+    get_select,
 )
 
 
@@ -38,6 +42,10 @@ def customize_schema(schema):
         'cae_situation_id',
         get_deferred_select(CaeSituationOption)
     )
+    customize(
+        "stage_type",
+        get_select(STAGE_TYPE_OPTIONS)
+    )
 
 
 def get_career_stage_schema():
@@ -46,9 +54,7 @@ def get_career_stage_schema():
         includes=(
             "name", 
             "cae_situation_id",
-            "is_entree_cae",
-            "is_contrat",
-            "is_sortie",
+            "stage_type",
         )
     )
     customize_schema(schema)

@@ -41,11 +41,19 @@ from autonomie_base.models.base import (
     default_table_args,
 )
 
+STAGE_TYPE_OPTIONS = (
+    ('', 'Autre',),
+    ('entry', u'Entrée CAE',),
+    ('contract', u'Contrat de travail',),
+    ('amendment', u'Avenant contrat de travail',),
+    ('exit', u'Sortie CAE',),
+)
+
 CAREER_STAGE_GRID = (
     (('active',12),),
     (('name',12),),
     (('cae_situation_id',12),),
-    (('is_entree_cae',4), ('is_contrat',4), ('is_sortie',4))
+    (('stage_type',12),)
 )
 
 class CareerStage(DBBASE):
@@ -53,12 +61,7 @@ class CareerStage(DBBASE):
     Different career stages
     """
     __colanderalchemy_config__ = {
-        'title': u"Etapes de parcours",
-        'help_msg': u"Configurez les étapes de parcours qui pourront être ajoutées \
-        aux dossiers des porteurs de projet.<br /><br /> \
-        <b>Note :</b> La nouvelle situation dans la CAE correspond au statut du porteur \
-        après l'affectation de l'étape.",
-        'validation_msg': u"Les étapes de parcours ont bien été configurés",
+        'validation_msg': u"Les étapes de parcours ont bien été configurées",
         'widget': deform_extensions.GridFormWidget(named_grid=CAREER_STAGE_GRID)
     }
     __tablename__ = 'career_stage'
@@ -67,7 +70,9 @@ class CareerStage(DBBASE):
         'id',
         Integer,
         primary_key=True,
-        info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
+        info={
+            'colanderalchemy': {'widget': deform.widget.HiddenWidget()}
+        },
     )
     active = Column(
         Boolean(),
@@ -81,19 +86,16 @@ class CareerStage(DBBASE):
         String(100),
         nullable=False,
         info={
-            'colanderalchemy': {
-                'title': u'Libellé de l\'étape',
-                }
+            'colanderalchemy': {'title': u"Libellé de l'étape"}
         },
     )
     cae_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
         info={
-            'colanderalchemy':
-            {
+            'colanderalchemy': {
                 'title': u"Nouvelle situation dans la CAE",
                 'description': u"Lorsque cette étape sera affectée à un \
-porteur cette nouvelle situation sera proposée par défaut"
+porteur de projet cette situation lui sera automatiquement attribuée"
             }
         }
     )
@@ -107,35 +109,15 @@ porteur cette nouvelle situation sera proposée par défaut"
             'export': {'related_key': 'label'},
         },
     )
-    is_entree_cae = Column(
-        Boolean(),
-        default=False,
+    stage_type = Column(
+        String(15),
         info={
-            'colanderalchemy': {
-                'title': '',
-                'label': u'Correspond à une entrée dans la coopérative'
+            'colanderalchemy': {'title': u"Type d'étape"},
+            'export': {
+                'formatter': lambda val: dict(STAGE_TYPE_OPTIONS).get(val),
+                'stats': {'options': STAGE_TYPE_OPTIONS},
             }
-        },
-    )
-    is_contrat = Column(
-        Boolean(),
-        default=False,
-        info={
-            'colanderalchemy': {
-                'title': '',
-                'label': u'Correspond à un contrat de travail'
-            }
-        },
-    )
-    is_sortie = Column(
-        Boolean(),
-        default=False,
-        info={
-            'colanderalchemy': {
-                'title': '',
-                'label': u'Correspond à une sortie de la coopérative'
-            }
-        },
+        }
     )
 
     @classmethod

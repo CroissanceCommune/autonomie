@@ -23,7 +23,10 @@ Career stages administration tools
 """
 import os
 from pyramid.httpexceptions import HTTPFound
-from autonomie.models.career_stage import CareerStage
+from autonomie.models.career_stage import (
+    CareerStage,
+    STAGE_TYPE_OPTIONS
+)
 from autonomie.views import BaseView
 from autonomie.utils.widgets import Link
 from autonomie.forms.admin.career_stage import get_career_stage_schema
@@ -51,8 +54,7 @@ class CareerStageListView(AdminCrudListView):
     title = u"Configuration des étapes de parcours"
     description = u""
     route_name = CAREER_STAGE_URL
-    columns = [u"Libellé", u"Nouvelle situation CAE", u"Entrée CAE ?", \
-u"Contrat ?", u"Sortie ?"]
+    columns = [u"Libellé", u"Nouvelle situation CAE", u"Type d'étape"]
 
     item_route_name = CAREER_STAGE_ITEM_URL
 
@@ -62,28 +64,16 @@ u"Contrat ?", u"Sortie ?"]
         :param obj career_stage: The CareerStage object to stream
         :returns: List of labels
         """
+        situation_label = "<small class='text-muted'>Aucune</small>"
         if career_stage.cae_situation is not None:
             situation_label = career_stage.cae_situation.label
-        else:
-            situation_label = "<em>Aucune</em>"
-        if career_stage.is_entree_cae:
-            entree = u"<i class='glyphicon glyphicon-ok-sign'></i>"
-        else:
-            entree = ""
-        if career_stage.is_contrat:
-            contrat = u"<i class='glyphicon glyphicon-ok-sign'></i>"
-        else:
-            contrat = ""
-        if career_stage.is_sortie:
-            sortie = u"<i class='glyphicon glyphicon-ok-sign'></i>"
-        else:
-            sortie = ""
+        stage_type_label = "<small class='text-muted'>Autre</small>"
+        if career_stage.stage_type is not None:
+            stage_type_label = dict(STAGE_TYPE_OPTIONS)[career_stage.stage_type]
         return (
             career_stage.name,
             situation_label,
-            entree,
-            contrat,
-            sortie,
+            stage_type_label,
         )
 
     def stream_actions(self, career_stage):
@@ -136,7 +126,7 @@ class CareerStageEditView(BaseAdminEditView):
     route_name = CAREER_STAGE_ITEM_URL
     schema = get_career_stage_schema()
     factory = CareerStage
-    title = u"Modifier"
+    title = u"Modifier une étape de parcours"
 
 
 class CareerStageAddView(BaseAdminAddView):
@@ -146,7 +136,7 @@ class CareerStageAddView(BaseAdminAddView):
     route_name = CAREER_STAGE_URL
     schema = get_career_stage_schema()
     factory = CareerStage
-    title = u"Ajouter"
+    title = u"Ajouter une étape de parcours"
 
 
 def includeme(config):

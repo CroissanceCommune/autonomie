@@ -36,19 +36,22 @@
                             % endif
                             ${api.format_account(layout.current_user_object)}
                         </div>
-                        <div><small>${format_mail(layout.current_user_object.email)}</small></div>
-                        % if layout.current_user_object.userdatas and layout.current_user_object.userdatas.situation_situation:
-                            <div><small><strong>${layout.current_user_object.userdatas.situation_situation.label}</strong></small></div>
-                        % endif
-                        <div>
-                        % if request.has_permission("edit.user", layout.current_user_object):
-                        <a
-                            class='btn btn-default btn-small pull-right'
-                            href="${request.route_path('/users/{id}/edit', id=layout.current_user_object.id)}"
-                            >
-                            <i class='fa fa-pencil'></i>
-                        </a>
-                        % endif
+                        <div><small class="text-primary">${format_mail(layout.current_user_object.email)}</small></div>
+                        <div style="margin:.5em 0;">
+                            % if layout.current_user_object.userdatas and layout.current_user_object.userdatas.situation_situation:
+                                <small><strong>${layout.current_user_object.userdatas.situation_situation.label}</strong></small>
+                            % endif
+                            % if layout.current_user_object.userdatas and layout.current_user_object.userdatas.situation_societariat_entrance:
+                                <span class="label label-success">Sociétaire</span>
+                            % endif
+                            % if request.has_permission("edit.user", layout.current_user_object):
+                            <a
+                                class='btn btn-default btn-small pull-right'
+                                href="${request.route_path('/users/{id}/edit', id=layout.current_user_object.id)}"
+                                >
+                                <i class='fa fa-pencil'></i>
+                            </a>
+                            % endif
                         </div>
                     </div>
                 </div>

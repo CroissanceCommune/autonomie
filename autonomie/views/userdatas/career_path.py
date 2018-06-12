@@ -41,8 +41,6 @@ from autonomie.models.career_stage import CareerStage
 from autonomie.forms.user.career_path import (
     get_add_stage_schema,
     get_edit_stage_schema,
-    get_edit_contrat_stage_schema,
-    get_edit_sortie_stage_schema,
 )
 
 logger = logging.getLogger(__name__)
@@ -96,13 +94,11 @@ class CareerPathAddStage(BaseFormView):
 
         # Update CareerPath with chosen CareerStage's data
         model.cae_situation_id = model.career_stage.cae_situation_id
-        model.is_entree_cae = model.career_stage.is_entree_cae
-        model.is_contrat = model.career_stage.is_contrat
-        model.is_sortie = model.career_stage.is_sortie
+        model.stage_type = model.career_stage.stage_type
         model = self.dbsession.merge(model)
         self.dbsession.flush()
 
-        if model.is_contrat or model.is_sortie:
+        if model.stage_type is not None:
             return HTTPFound(self.request.route_path('career_path', id=model.id, _query=''))
         else:
             self.session.flash(u"L'étape de parcours a bien été ajoutée")
@@ -133,12 +129,7 @@ class CareerPathEditStage(BaseFormView):
         The getter for our schema property
         """
         if self._schema is None:
-            if self.context.is_contrat:
-                self._schema = get_edit_contrat_stage_schema()
-            elif self.context.is_sortie:
-                self._schema = get_edit_sortie_stage_schema()
-            else:
-                self._schema = get_edit_stage_schema()
+            self._schema = get_edit_stage_schema(self.context.stage_type)
         self._schema.title = self.context.career_stage.name
         if self.context.cae_situation is not None:
             self._schema.title += ' ( => ' + self.context.cae_situation.label + ' )'

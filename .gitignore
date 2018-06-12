@@ -13,3 +13,4 @@ dist
 .ropeproject
 tobeignored
 node_modules
+/docs/build/

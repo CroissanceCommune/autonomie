@@ -21,6 +21,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
+<%namespace file="/base/utils.mako" import="table_btn"/>
 <%block name="mainblock">
 % for template in templates:
 <% url = request.current_route_path(_query=dict(template_id=template.id)) %>
@@ -46,4 +47,42 @@
     </a>
 % endif
 </div>
+<hr/>
+<h4>Documents générés depuis Autonomie</h4>
+<span class='help-block'>
+    <i class='fa fa-question-circle fa-2x'></i>
+    Chaque fois qu'un utilisateur génère un document depuis cette page, une entrée est ajoutée à l'historique.<br />
+    Si nécessaire, pour rendre plus pertinente cette liste, vous pouvez supprimer certaines entrées.
+</span>
+<table class='table table-stripped table-condensed'>
+    <thead>
+        <th>Nom du document</th>
+        <th>Généré par</th>
+        <th>Date</th>
+        <th class='text-right'>Actions</th>
+    </thead>
+    <tbody>
+        % if template_history is not UNDEFINED and template_history:
+            % for history in template_history:
+                % if history.template is not None:
+                    <tr>
+                        <td>${history.template.description}</td>
+                        <td>${api.format_account(history.user)}</td>
+                        <td>${api.format_datetime(history.created_at)}</td>
+                        <td class='text-right'>
+                            <% url = request.route_path('/templatinghistory/{id}', id=history.id, _query=dict(action='delete')) %>
+                            ${table_btn(url, \
+                            u"Supprimer cette entrée",\
+                            u"Supprimer cette entrée de l'historique", \
+                            icon='trash', \
+                            css_class="btn-danger")}
+                        </td>
+                    </tr>
+                % endif
+            % endfor
+        % else:
+            <tr><td colspan='4'>Aucun document n'a été généré</td></tr>
+        % endif
+    </tbody>
+</table>
 </%block>

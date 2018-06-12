@@ -345,14 +345,6 @@ def customize_schema(schema):
             widget=get_deferred_select(CompanyActivity)
         )
 
-    if 'situation_history' in schema:
-        child_schema = schema['situation_history'].children[0]
-        customize_field(
-            child_schema,
-            'situation_id',
-            get_deferred_select(CaeSituationOption),
-        )
-
     for key in (
         'parcours_date_diagnostic', 'parcours_convention_cape',
         'parcours_dpae', 'parcours_contract_history'

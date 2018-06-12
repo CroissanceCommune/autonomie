@@ -53,13 +53,12 @@ from autonomie.views.userdatas.routes import (
     USERDATAS_EDIT_URL,
     USERDATAS_DOCTYPES_URL,
     USERDATAS_PY3O_URL,
-    USERDATAS_HISTORY_URL,
+    USERDATAS_MYDOCUMENTS_URL,
     USER_USERDATAS_URL,
     USER_USERDATAS_ADD_URL,
     USER_USERDATAS_EDIT_URL,
     USER_USERDATAS_DOCTYPES_URL,
     USER_USERDATAS_PY3O_URL,
-    USER_USERDATAS_HISTORY_URL,
 )
 from autonomie.views.admin.userdatas.templates import TEMPLATE_URL
 from autonomie.views.user.tools import UserFormConfigState
@@ -104,13 +103,6 @@ USERDATAS_MENU.add_item(
     route_name=USER_USERDATAS_PY3O_URL,
     icon=u'fa fa-puzzle-piece',
     perm='py3o.userdatas',
-)
-USERDATAS_MENU.add_item(
-    name="userdatas_history",
-    label=u'Historique',
-    route_name=USER_USERDATAS_HISTORY_URL,
-    icon=u'fa fa-history',
-    perm='history.userdatas',
 )
 
 
@@ -369,8 +361,18 @@ votre administrateur",
         else:
             available_templates = files.Template.query()
             available_templates = available_templates.filter_by(active=True)
+            template_query = files.TemplatingHistory.query()
+            template_query = template_query.options(
+                Load(files.TemplatingHistory).load_only('id', 'created_at'),
+                joinedload("user").load_only('firstname', 'lastname'),
+                joinedload('template').load_only('name'),
+            )
+            template_query = template_query.filter_by(
+                userdatas_id=self.current_userdatas.id
+            )
             return dict(
                 templates=available_templates.all(),
+                template_history=template_query.all(),
                 title=self.title,
                 current_userdatas=self.current_userdatas,
                 admin_url=self.admin_url,
@@ -378,47 +380,6 @@ votre administrateur",
 
 
 class UserUserDatasFileGeneration(UserDatasFileGeneration):
-    @property
-    def current_userdatas(self):
-        return self.context.userdatas
-
-
-class UserDatasHistory(BaseView):
-
-    @property
-    def current_userdatas(self):
-        return self.context
-
-    def __call__(self):
-        status_query = CaeSituationChange.query()
-        status_query = status_query.options(
-            Load(CaeSituationChange).load_only("date", "id"),
-            joinedload("situation").load_only("label"),
-        )
-        status_query = status_query.filter_by(
-            userdatas_id=self.current_userdatas.id
-        )
-        template_query = files.TemplatingHistory.query()
-        template_query = template_query.options(
-            Load(files.TemplatingHistory).load_only('id', 'created_at'),
-            joinedload("user").load_only('firstname', 'lastname'),
-            joinedload('template').load_only('name'),
-        )
-        template_query = template_query.filter_by(
-            userdatas_id=self.current_userdatas.id
-        )
-
-        return dict(
-            status_history=status_query.all(),
-            user=self.current_userdatas.user,
-            template_history=template_query.all(),
-            title=u"Parcours de {0}".format(
-                format_account(self.current_userdatas.user, False)
-            )
-        )
-
-
-class UserUserDatasHistory(UserDatasHistory):
     @property
     def current_userdatas(self):
         return self.context.userdatas
@@ -490,20 +451,6 @@ def add_views(config):
         permission="py3o.userdatas",
         renderer="/userdatas/py3o.mako",
         layout='user',
-    )
-    config.add_view(
-        UserDatasHistory,
-        route_name=USERDATAS_HISTORY_URL,
-        permission="history.userdatas",
-        renderer="/userdatas/history.mako",
-        layout="user"
-    )
-    config.add_view(
-        UserUserDatasHistory,
-        route_name=USER_USERDATAS_HISTORY_URL,
-        permission="history.userdatas",
-        renderer="/userdatas/history.mako",
-        layout="user"
     )
 
 

@@ -390,20 +390,6 @@ class UserDatas(Node):
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
-    situation_history = relationship(
-        "CaeSituationChange",
-        order_by="CaeSituationChange.date",
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                "flatten": [
-                    ('date', u'Date'),
-                    ('situation.label', u"Situation"),
-                ],
-                'label': u"Changement de situation",
-            },
-        },
-    )
     situation_situation_id = Column(
         ForeignKey("cae_situation_option.id"),
         info={
@@ -1871,23 +1857,6 @@ def salary_compute(mapper, connection, target):
 
 listen(UserDatas, "before_insert", salary_compute, propagate=True)
 listen(UserDatas, "before_update", salary_compute, propagate=True)
-
-
-def add_situation_change_handler(target, value, oldvalue, initiator):
-    """
-    Handler for the situation Change handling
-    """
-    if value != oldvalue:
-        if value is not NO_VALUE and value is not None:
-            target.situation_history.append(
-                CaeSituationChange(
-                    date=datetime.date.today(),
-                    situation_id=value,
-                )
-            )
-
-
-listen(UserDatas.situation_situation_id, "set", add_situation_change_handler)
 
 
 def sync_userdatas_to_user(source_key, user_key):

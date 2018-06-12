@@ -31,7 +31,7 @@ def migrate_datas():
     business_type_ids = [b[0] for b in session.query(BusinessType.id)]
 
     # for each fixed config key we now use mentions
-    for doctype, key, label, title in (
+    for index, (doctype, key, label, title) in enumerate((
         (
             'estimation',
             'coop_estimationfooter',
@@ -50,10 +50,11 @@ def migrate_datas():
             u"Informations sur les retards de paiement",
             u"Retard de paiement",
         )
-    ):
+    )):
         # We retrieve the configurated value
         value = Config.get_value(key, "")
         mention = TaskMention(
+            order=index,
             label=label,
             title=title,
             full_text=value.replace(

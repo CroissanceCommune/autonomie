@@ -24,7 +24,7 @@ def migrate_datas():
     conn = get_bind()
     # Fill SequenceNumber for existing invoices
     op.execute("""
-    INSERT INTO task_sequence_number (`task`, `index`, `sequence`)
+    INSERT INTO task_sequence_number (`task_id`, `index`, `sequence`)
       SELECT task.id, official_number, 'invoice_year' from task
         LEFT JOIN invoice on task.id = invoice.id
         LEFT JOIN cancelinvoice on cancelinvoice.id = task.id

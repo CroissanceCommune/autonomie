@@ -108,7 +108,7 @@ class InvoiceNumberService(object):
             sn = SequenceNumber(
                 sequence=sequence.db_key,
                 index=next_index,
-                task=invoice.id,
+                task_id=invoice.id,
             )
             db.add(sn)
 

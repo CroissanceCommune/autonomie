@@ -34,7 +34,7 @@ class SequenceNumber(DBBASE):
     ]
 
     id = Column("id", Integer, primary_key=True)
-    task = Column(Integer, ForeignKey('task.id'), nullable=False)
+    task_id = Column(Integer, ForeignKey('task.id'), nullable=False)
     sequence = Column(String(100), nullable=False)
     index = Column(Integer, nullable=False)
 

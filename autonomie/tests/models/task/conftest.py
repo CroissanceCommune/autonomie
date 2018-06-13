@@ -226,7 +226,7 @@ def global_seq_1(dbsession, invoice):
     s = SequenceNumber(
         sequence=SequenceNumber.SEQUENCE_INVOICE_GLOBAL,
         index=0,
-        task=invoice.id,
+        task_id=invoice.id,
     )
     dbsession.add(s)
     dbsession.flush()

@@ -38,7 +38,7 @@ def migrate_datas():
     default_format = Config(
         app='autonomie',
         name='invoice_number_template',
-        value=prefix + '{SEQGLOBAL}'
+        value=prefix + '{SEQYEAR}'
     )
     session.add(default_format)
     session.flush()

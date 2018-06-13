@@ -283,6 +283,7 @@ abandons de créance dans les notes de dépense",
         "title": u"Format du numéro de facture",
         "description": u"Peut contenir des caractères (préfixes, \
 séparateurs… etc), ainsi que des variables et séquences. Ex: {AAAA}-{SEQYEAR}."
+        "missing": colander.required,
     },
     "global_sequence_init_value": {
         "title": u"Valeur à laquelle on initialise de la séquence globale",
@@ -318,7 +319,7 @@ def get_config_key_schemanode(key, ui_conf):
         colander.String(),
         title=ui_conf.get('title', key),
         description=ui_conf.get('description'),
-        missing=u"",
+        missing=ui_conf.get('missing', u""),
         name=key,
         widget=ui_conf.get('widget'),
     )

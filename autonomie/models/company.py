@@ -211,6 +211,15 @@ class Company(DBBASE, PersistentACLMixin):
     header_file = relationship(
         "File",
         primaryjoin="File.id==Company.header_id",
+        # backref utilisé pour le calcul des acls
+        backref=backref(
+            "company_header_backref",
+            uselist=False,
+            info={
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True}
+            },
+        ),
         info={
             'colanderalchemy': {'exclude': True},
             'export': {'exclude': True}
@@ -220,6 +229,16 @@ class Company(DBBASE, PersistentACLMixin):
     logo_file = relationship(
         "File",
         primaryjoin="File.id==Company.logo_id",
+        # backref utilisé pour le calcul des acls
+        backref=backref(
+            "company_logo_backref",
+            uselist=False,
+            info={
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True}
+            },
+        ),
+        uselist=False,
         info={
             'colanderalchemy': {'exclude': True},
             'export': {'exclude': True}
@@ -320,10 +339,10 @@ class Company(DBBASE, PersistentACLMixin):
             from autonomie.models.files import File
             self.header_file = File()
 
+        self.header_file.name = appstruct.get('name', 'header.png')
         for key, value in appstruct.items():
             setattr(self.header_file, key, value)
-        if 'name' not in appstruct:
-            self.header_file.name = 'header.png'
+
         self.header_file.description = 'Header'
 
     @property
@@ -336,10 +355,9 @@ class Company(DBBASE, PersistentACLMixin):
             from autonomie.models.files import File
             self.logo_file = File()
 
+        self.logo_file.name = appstruct.get('name', 'logo.png')
         for key, value in appstruct.items():
             setattr(self.logo_file, key, value)
-        if 'name' not in appstruct:
-            self.logo_file.name = 'logo.png'
         self.logo_file.description = 'Logo'
 
     @classmethod

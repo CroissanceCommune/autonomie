@@ -49,6 +49,16 @@ log = logging.getLogger(__name__)
 HEADER_RESIZER = ImageResizer(4, 1)
 
 
+def invoice_number_template_validator(node, value):
+    from autonomie.models.services.invoice_sequence_number import (
+        InvoiceNumberService,
+    )
+    try:
+        InvoiceNumberService.validate_template(value)
+    except ValueError as e:
+        raise colander.Invalid(node, str(e))
+
+
 CONFIGURATION_KEYS = {
     'coop_cgv': {
         "title": u"Conditions générales de vente",
@@ -282,8 +292,9 @@ abandons de créance dans les notes de dépense",
     "invoice_number_template": {
         "title": u"Format du numéro de facture",
         "description": u"Peut contenir des caractères (préfixes, \
-séparateurs… etc), ainsi que des variables et séquences. Ex: {AAAA}-{SEQYEAR}."
+séparateurs… etc), ainsi que des variables et séquences. Ex: {AAAA}-{SEQYEAR}.",
         "missing": colander.required,
+        "validator": invoice_number_template_validator,
     },
     "global_sequence_init_value": {
         "title": u"Valeur à laquelle on initialise de la séquence globale",
@@ -322,6 +333,7 @@ def get_config_key_schemanode(key, ui_conf):
         missing=ui_conf.get('missing', u""),
         name=key,
         widget=ui_conf.get('widget'),
+        validator=ui_conf.get('validator', None),
     )
 
 

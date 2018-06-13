@@ -1,9 +1,15 @@
+from datetime import date
+
 import pytest
+
 from autonomie.models.services.invoice_sequence_number import (
     InvoiceNumberFormatter,
     InvoiceNumberService,
 )
-from autonomie.models.task.sequence_number import GlobalInvoiceSequence
+from autonomie.models.task.sequence_number import (
+    GlobalInvoiceSequence,
+    YearInvoiceSequence,
+)
 
 
 def test_global_invoice_sequence_next_first(invoice):
@@ -14,6 +20,23 @@ def test_global_invoice_sequence_next_first(invoice):
 def test_global_invoice_sequence_next_then(invoice, global_seq_1):
     seq_num = GlobalInvoiceSequence.get_next_index(invoice)
     assert seq_num == 1
+
+
+def test_year_invoice_sequence(mk_invoice, set_year_seq_index):
+    YIS = YearInvoiceSequence
+
+    assert YIS.get_next_index(mk_invoice(date=date(2017, 1, 1))) == 0
+    set_year_seq_index(index=0, year=2017)
+    assert YIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 1
+    set_year_seq_index(index=1, year=2017)
+
+    assert YIS.get_next_index(mk_invoice(date=date(2018, 2, 1))) == 0
+    set_year_seq_index(index=0, year=2018)
+
+    assert YIS.get_next_index(mk_invoice(date=date(2018, 2, 1))) == 1
+    set_year_seq_index(index=1, year=2018)
+
+    assert YIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 2
 
 
 def test_invoice_number_formatter(invoice_20170707, DummySequence):

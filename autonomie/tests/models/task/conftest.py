@@ -234,6 +234,25 @@ def global_seq_1(dbsession, invoice):
 
 
 @pytest.fixture
+def set_year_seq_index(dbsession, mk_invoice):
+    """ Initialize a year seq to a given index
+    """
+    from autonomie.models.task.sequence_number import SequenceNumber
+
+    def _set_year_seq_index(index, year):
+        s = SequenceNumber(
+            sequence=SequenceNumber.SEQUENCE_INVOICE_YEAR,
+            index=index,
+            task_id=mk_invoice(date=datetime.date(year, 1, 1)).id,
+        )
+        dbsession.add(s)
+        dbsession.flush()
+        return s
+
+    return _set_year_seq_index
+
+
+@pytest.fixture
 def DummySequence():
     ds = MagicMock()
     ds.get_next_index = MagicMock(return_value=12)

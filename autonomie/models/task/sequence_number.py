@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from sqlalchemy import (
+    extract,
     func,
     Column,
     ForeignKey,
@@ -64,3 +65,22 @@ class GlobalInvoiceSequence(AbstractInvoiceSequence):
         q = q.filter_by(sequence=cls.db_key)
         return q.scalar()
 
+
+class YearInvoiceSequence(AbstractInvoiceSequence):
+    db_key = SequenceNumber.SEQUENCE_INVOICE_YEAR
+
+    @classmethod
+    def get_latest_index(cls, invoice):
+        """
+        :rtype: int or None
+        """
+        from autonomie.models.task import Task
+
+        assert invoice.date is not None, "validated invoice should have a date"
+        year = invoice.date.year
+        q = DBSESSION().query(func.Max(SequenceNumber.index))
+        q = q.filter_by(sequence=cls.db_key)
+        q = q.join((Task, Task.id == SequenceNumber.task_id))
+        q = q.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
+        q = q.filter(extract('year', Task.date) == year)
+        return q.scalar()

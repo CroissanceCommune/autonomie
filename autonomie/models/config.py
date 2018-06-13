@@ -27,10 +27,8 @@
     Autonomie's welcome message
     Documents footers, headers ...
 """
-from cStringIO import StringIO
 import datetime
-from dateutil.parser import parse
-
+import cStringIO
 from sqlalchemy import (
     Column,
     Text,
@@ -93,6 +91,10 @@ class ConfigFiles(DBBASE):
         instance = cls.get(key)
         if instance is None:
             instance = cls(key=key)
+
+        if "name" in appstruct:
+            instance.name = appstruct['name']
+
         for attr_name, attr_value in appstruct.items():
             setattr(instance, attr_name, attr_value)
         if instance.id is not None:
@@ -114,8 +116,12 @@ class ConfigFiles(DBBASE):
 
     @classmethod
     def _set_data(cls, target, value, oldvalue, initiator):
+        if isinstance(value, (cStringIO.InputType, file)):
+            value.seek(0)
+            value = value.read()
+
         if isinstance(value, bytes):
-            value = _to_fieldstorage(fp=StringIO(value),
+            value = _to_fieldstorage(fp=cStringIO.StringIO(value),
                                      filename=target.filename,
                                      size=len(value))
 

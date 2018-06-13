@@ -1,14 +1,14 @@
 """change task.official_number int->str
 
 Revision ID: 29e53cf4579a
-Revises: 1e1a970ad004
+Revises: 41261dd0a613
 Create Date: 2018-06-06 18:11:23.345748
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '29e53cf4579a'
-down_revision = '1e1a970ad004'
+down_revision = '41261dd0a613'
 
 from alembic import op
 import sqlalchemy as sa

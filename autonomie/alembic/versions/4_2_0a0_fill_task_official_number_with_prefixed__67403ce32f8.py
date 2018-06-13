@@ -24,22 +24,13 @@ def migrate_datas():
     conn = get_bind()
 
     from autonomie.models.task import Task
-
-    q = Task.query().filter(
-        Task.official_number != None,  # noqa E711
-        Task.type_.in_(('invoice', 'cancelinvoice')),
-    )
-
-    # The goal here is to have in official_numbre what would have appeared
-    # on invoices (prefix + number if the invoice defines a prefix).
-    for task in q:
-        task.official_number = '{}{}'.format(
-            task.prefix or '',
-            task.official_number,
-        )
-        session.merge(task)
-
-    session.flush()
+    op.execute("""
+    UPDATE task
+      LEFT JOIN invoice on task.id = invoice.id
+      LEFT JOIN cancelinvoice on cancelinvoice.id = task.id
+      SET official_number = CONCAT(IFNULL(prefix, ''), official_number)
+      WHERE (cancelinvoice.id IS NOT NULL) OR (invoice.id IS NOT NULL)
+    ;""")
 
 def upgrade():
     update_database_structure()

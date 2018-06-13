@@ -54,6 +54,8 @@ def update_database_structure():
     if column_exists("task", "type_"):
         op.drop_column("task", "type_")
 
+    op.execute("alter table task MODIFY `phase_id` int(11) DEFAULT NULL;")
+
 
 def _add_business_to_all_invoices(session):
     """

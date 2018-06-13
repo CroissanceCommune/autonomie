@@ -183,6 +183,13 @@ def populate_project_types(session):
     session.flush()
 
 
+def populate_invoice_number_template(session):
+    from autonomie.models.config import Config
+    if not Config.get_value("invoice_number_template"):
+        Config.set("invoice_number_template", "{SEQGLOBAL}")
+    session.flush()
+
+
 def populate_database():
     """
     Populate the database with default values
@@ -195,6 +202,7 @@ def populate_database():
         populate_accounting_treasury_measure_types,
         populate_accounting_income_statement_measure_types,
         populate_project_types,
+        populate_invoice_number_template,
     ):
         try:
             func(session)

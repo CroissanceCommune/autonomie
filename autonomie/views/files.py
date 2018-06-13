@@ -182,10 +182,7 @@ class FileUploadView(BaseFormView):
         fileupload_js.need()
 
         come_from = self.request.referrer
-        parent_id = self._parent_id()
-
         appstruct = {
-            'parent_id': parent_id,
             'come_from': come_from,
         }
         form.set_appstruct(appstruct)
@@ -196,6 +193,9 @@ class FileUploadView(BaseFormView):
         """
         # Inserting in the database
         file_object = self.factory()
+        file_object.name = appstruct['name']
+        file_object.parent_id = self._parent_id()
+
         forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
         self.request.dbsession.flush()

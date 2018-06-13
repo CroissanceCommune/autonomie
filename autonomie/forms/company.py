@@ -30,7 +30,6 @@ import logging
 import deform
 
 import deform_extensions
-from deform import FileData
 from sqlalchemy.orm import load_only
 
 from autonomie_base.models.base import DBSESSION
@@ -41,7 +40,6 @@ from autonomie.models.company import (
 
 from autonomie.models.customer import Customer
 
-from autonomie.forms.validators import validate_image_mime
 from autonomie import forms
 from autonomie.forms.customer import build_customer_values
 from autonomie.forms import (
@@ -158,24 +156,16 @@ class CompanySchema(colander.MappingSchema):
             title=u'Téléphone portable',
             missing=u'')
 
-    logo = colander.SchemaNode(
-        FileData(),
-        widget=files.deferred_upload_widget,
+    logo = files.ImageNode(
         title="Choisir un logo",
-        validator=validate_image_mime,
         missing=colander.drop,
-        description=u"Charger un fichier de type image *.png *.jpeg \
-*.jpg ...")
-
-    header = colander.SchemaNode(
-        FileData(),
+    )
+    header = files.ImageNode(
         widget=deferred_upload_header_widget,
         title=u'Entête des fichiers PDF',
-        validator=validate_image_mime,
         missing=colander.drop,
-        description=u"Charger un fichier de type image *.png *.jpeg \
-*.jpg ... Le fichier est idéalement au format 20/4 (par exemple 1000px x \
-200 px)",
+        description=u"Le fichier est idéalement au format 5/1 (par exemple \
+1000px x 200 px)",
     )
 
     # Fields specific to the treasury

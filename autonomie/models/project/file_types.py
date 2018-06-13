@@ -15,6 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     relationship,
     backref,
+    load_only,
 )
 from autonomie_base.models.base import (
     DBBASE,
@@ -66,3 +67,26 @@ class BusinessTypeFileType(DBBASE):
             }
         }
     )
+
+    @classmethod
+    def get_file_type_options(cls, business_type_id, doctype):
+        """
+        Collect FileTypes associated to (business_type_id, doctype)
+
+        :param int business_type_id: The business type id
+        :param str doctype: One of the available doctypes
+        :returns: A :class:`sqlalchemy.orm.Query`
+        """
+        id_query = cls.query('file_type_id')
+        id_query = id_query.filter_by(business_type_id=business_type_id)
+        id_query = id_query.filter_by(doctype=doctype)
+        ids = [i[0] for i in id_query]
+
+        result = []
+        if ids is not None:
+            from autonomie.models.files import FileType
+            query = FileType.query().options(load_only('id', 'label')).filter(
+                FileType.id.in_(ids)
+            )
+            result = query.all()
+        return result

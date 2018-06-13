@@ -44,8 +44,8 @@ fichier dans Autonomie"
 
     @property
     def help_msg(self):
-        from autonomie.views.admin.sale.business_cycle.mentions import (
-            BUSINESS_MENTION_URL
+        from autonomie.views.admin.sale.business_cycle.file_types import (
+            BUSINESS_FILETYPE_URL,
         )
         return u"""
     Configurez les types de fichier proposés dans les formulaires de dépôt de
@@ -57,7 +57,7 @@ fichier dans Autonomie"
     d'affaires.<br /> <a class='link'
     href='{0}'>Configuration générale -> Module Ventes -> Cycle d'affaires ->
     Configuration des fichiers obligatoires/facultatives</a>
-    """.format(self.request.route_path(BUSINESS_MENTION_URL))
+    """.format(self.request.route_path(BUSINESS_FILETYPE_URL))
 
     def stream_columns(self, item):
         yield item.label

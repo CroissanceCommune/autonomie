@@ -38,9 +38,8 @@ from autonomie.models.competence import (
     CompetenceScale,
 )
 from autonomie import forms
-from autonomie.forms import files
+from autonomie.forms.files import ImageNode
 from autonomie.forms.widgets import CleanMappingWidget, CleanSequenceWidget
-from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
 from autonomie.utils.strings import safe_unicode
 
@@ -621,31 +620,14 @@ class WorkshopInfo1Seq(colander.SequenceSchema):
     )
 
 
-def get_file_dl_node(title, additionnal_description=""):
-    """
-    Return a file download node
-    """
-    description = u"Charger un fichier de type image *.png *.jpeg *.jpg ... \
-{0}".format(additionnal_description)
-
-    return colander.SchemaNode(
-        deform.FileData(),
-        widget=files.deferred_upload_widget,
-        title=title,
-        validator=validate_image_mime,
-        missing=colander.drop,
-        description=description,
-    )
-
-
 class ActivityConfigSchema(colander.Schema):
     """
     The schema for activity types configuration
     """
-    header_img = get_file_dl_node(title=u'En-tête des sortie PDF')
-    footer_img = get_file_dl_node(
-        u'Image du pied de page des sorties PDF',
-        u"Vient se placer au-dessus du texte du pied de page",
+    header_img = ImageNode(title=u'En-tête des sortie PDF')
+    footer_img = ImageNode(
+        title=u'Image du pied de page des sorties PDF',
+        description=u"Vient se placer au-dessus du texte du pied de page",
     )
     footer = forms.textarea_node(
         title=u"Texte du pied de page des sorties PDF",
@@ -675,10 +657,10 @@ class ActivityConfigSchema(colander.Schema):
 
 
 class WorkshopConfigSchema(colander.Schema):
-    header_img = get_file_dl_node(title=u'En-tête des sortie PDF')
-    footer_img = get_file_dl_node(
-        u'Image du pied de page des sorties PDF',
-        u"Vient se placer au-dessus du texte du pied de page",
+    header_img = ImageNode(title=u'En-tête des sortie PDF')
+    footer_img = ImageNode(
+        title=u'Image du pied de page des sorties PDF',
+        description=u"Vient se placer au-dessus du texte du pied de page",
     )
     footer = forms.textarea_node(
         title=u"Texte du pied de page des sorties PDF",
@@ -843,7 +825,7 @@ def deferred_deadlines_default(node, kw):
 
 
 class CompetencePrintConfigSchema(colander.Schema):
-    header_img = get_file_dl_node(title=u'En-tête de la sortie imprimable')
+    header_img = ImageNode(title=u'En-tête de la sortie imprimable')
 
 
 def get_admin_schema(factory):

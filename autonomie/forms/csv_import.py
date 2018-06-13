@@ -34,11 +34,10 @@ import logging
 import colander
 import json
 import deform
-import pyramid_deform
 
 from deform_extensions import DisabledInput
 from autonomie_celery.tasks import csv_import
-from autonomie import forms
+from autonomie.forms.files import FileNode
 
 
 IMPORTATION_TYPE_OPTIONS = (
@@ -70,16 +69,6 @@ IMPORTATION_TYPE_OPTIONS = (
 
 
 log = logging.getLogger(__name__)
-
-
-@colander.deferred
-def deferred_temporary_upload_widget(node, kw):
-    """
-    Return a file upload widget that stores the datas in the current session
-    """
-    request = kw['request']
-    tmpstore = pyramid_deform.SessionFileUploadTempStore(request)
-    return forms.files.CustomFileUploadWidget(tmpstore)
 
 
 def check_csv_content(node, value):
@@ -135,9 +124,7 @@ class CsvFileUploadSchema(colander.Schema):
     """
     Csv import first step schema
     """
-    csv_file = colander.SchemaNode(
-        deform.FileData(),
-        widget=deferred_temporary_upload_widget,
+    csv_file = FileNode(
         title=u"Fichier csv",
         description=u"Fichier csv contenant les données à importer (delimiter: \
 ';' quotechar: '\"'), le fichier doit être enregistré au format utf-8",
@@ -175,6 +162,31 @@ de champs pour l'étape 2",
         missing=csv_import.DEFAULT_QUOTECHAR,
     )
 
+    def validator(self, node, value):
+        """
+        Validate the csv file upload ensuring the datas is in the format
+        described by delimiter an quotechar
+        """
+        quotechar = value['quotechar']
+        delimiter = value['delimiter']
+        csv_file_obj = value['csv_file'].get('fp')
+        csv_file_obj.seek(0)
+        csv_data = csv_import.get_csv_reader(
+            csv_file_obj,
+            delimiter=delimiter,
+            quotechar=quotechar,
+        )
+        try:
+            first_line = csv_data.next()
+            csv_file_obj.seek(0)
+        except:
+            raise colander.Invalid(node, u"Ce fichier semble vide")
+        keys = first_line.keys()
+        if not first_line or None in keys or len(keys) < 2:
+            message = u"Les données de ce fichier ne semblent pas être au \
+bon format."
+            raise colander.Invalid(node, message)
+
 
 def get_csv_file_upload_schema(request):
     """
@@ -209,6 +221,7 @@ def deferred_id_key_widget(node, kw):
         values=zip(csv_headers, csv_headers),
     )
 
+
 @colander.deferred
 def deferred_seq_widget(node, kw):
     """
@@ -239,7 +252,7 @@ class AssociationEntry(colander.MappingSchema):
 
 
 class AssociationEntries(colander.SequenceSchema):
-    entry = AssociationEntry( title=u"Champ du fichier csv")
+    entry = AssociationEntry(title=u"Champ du fichier csv")
 
 
 class AssociationSchema(colander.MappingSchema):
@@ -259,7 +272,7 @@ base de données.",
 définir quel champ doit être utilisé pour retrouver des entrées existantes \
 dans la base de données.",
         widget=deferred_id_key_widget,
-        missing="id", # par défaut on identifie grâce à l'attribut id
+        missing="id",  # par défaut on identifie grâce à l'attribut id
     )
     entries = AssociationEntries(
         widget=deferred_seq_widget,
@@ -286,6 +299,7 @@ d'administration, et qu'aucun option ne correspond, une nouvelle option \
 sera créée automatiquement.",
         default=False,
     )
+
 
 def check_record_name(form, values):
     """

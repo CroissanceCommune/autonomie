@@ -26,15 +26,23 @@ Form schema for file handling
 """
 import colander
 import deform
-import simplejson as json
 import cStringIO as StringIO
+from sqlalchemy.orm import load_only
 
-from pyramid.threadlocal import get_current_registry
 from pyramid_deform import SessionFileUploadTempStore
+
+from autonomie.models.task import Task
+from autonomie.models.files import (
+    File,
+    FileType,
+)
+from autonomie.models.project.business import Business
+from autonomie.models.project.file_types import BusinessTypeFileType
 
 from autonomie.compute.math_utils import convert_to_int
 from autonomie.utils.strings import human_readable_filesize
 from autonomie import forms
+from autonomie.forms.validators import validate_image_mime
 
 
 class CustomFileUploadWidget(deform.widget.FileUploadWidget):
@@ -99,81 +107,119 @@ class SessionDBFileUploadTempStore(SessionFileUploadTempStore):
             return fbuf
 
 
-@colander.deferred
-def deferred_upload_widget(node, kw):
-    request = kw['request']
-    tmpstore = SessionDBFileUploadTempStore(request)
-    return CustomFileUploadWidget(tmpstore)
-
-
-@colander.deferred
-def deferred_filetype_select(node, kw):
-    request = kw['request']
-    filetypes = json.loads(request.config.get('attached_filetypes', '[]'))
-    filetypes.insert(0, "")
-    values = zip(filetypes, filetypes)
-    return deform.widget.SelectWidget(values=values)
-
-
-def get_max_allowedfilesize():
+class FileNode(colander.SchemaNode):
     """
-    Return the max allowed filesize configured in autonomie
+    A main file upload node class
     """
-    default = 1048576  # 1MB
-    settings = get_current_registry().settings
-    size = settings.get("autonomie.maxfilesize", default)
-    return convert_to_int(size, default)
+    schema_type = deform.FileData
+    title = u"Choix du fichier",
+    default_max_size = 1048576
+    _max_allowed_file_size = None
+
+    def validator(self, node, value):
+        """
+        Build a file size validator
+        """
+        request = self.bindings['request']
+        max_filesize = self._get_max_allowed_file_size(request)
+        file_obj = value.get('fp')
+        if file_obj:
+            file_obj.seek(0)
+            size = len(file_obj.read())
+            if size > max_filesize:
+                message = u"Ce fichier est trop volumineux"
+                raise colander.Invalid(node, message)
+
+    def _get_max_allowed_file_size(self, request):
+        """
+        Return the max allowed filesize configured in autonomie
+        """
+        if self._max_allowed_file_size is None:
+            settings = request.registry.settings
+            size = settings.get("autonomie.maxfilesize", self.default_max_size)
+            self._max_allowed_file_size = convert_to_int(
+                size, self.default_max_size
+            )
+        return self._max_allowed_file_size
+
+    @colander.deferred
+    def widget(self, kw):
+        request = kw['request']
+        tmpstore = SessionDBFileUploadTempStore(request)
+        return CustomFileUploadWidget(tmpstore)
+
+    def after_bind(self, node, kw):
+        size = self._get_max_allowed_file_size(kw['request'])
+        if not getattr(self, 'description', ''):
+            self.description = ""
+
+        self.description += u" Taille maximale : {0}".format(
+            human_readable_filesize(size)
+        )
 
 
-@colander.deferred
-def file_description(node, kw):
-    """
-        Return the file upload field description
-    """
-    size = get_max_allowedfilesize()
-    return u"Taille maximale : {0}".format(human_readable_filesize(size))
+class ImageNode(FileNode):
+    def validator(self, node, value):
+        FileNode.validator(self, node, value)
+        validate_image_mime(node, value)
+
+    def after_bind(self, node, kw):
+        if not getattr(self, 'description', ''):
+            self.description = ""
+
+        self.description += u"Charger un fichier de type image \
+(*.png *.jpeg *.jpg)"
 
 
-@colander.deferred
-def filesize_validator(node, value):
-    """
-    Validates the file's size
-    """
-    file_obj = value.get('fp')
-    if file_obj:
-        file_obj.seek(0)
-        max_filesize = get_max_allowedfilesize()
-        size = len(file_obj.read())
-        if size > max_filesize:
-            message = u"Ce fichier est trop volumineux"
-            raise colander.Invalid(node, message)
+class FileTypeNode(colander.SchemaNode):
+    title = u"Type de fichier"
+    schema_type = colander.Int
+
+    def __init__(self, *args, **kwargs):
+        colander.SchemaNode.__init__(self, *args, **kwargs)
+        self.types = []
+
+    @colander.deferred
+    def widget(self, kw):
+        context = kw['request'].context
+        available_types = self._collect_available_types(context)
+        if available_types:
+            choices = [(t.id, t.label) for t in available_types]
+            choices.insert(0, ('', ''))
+            widget = deform.widget.SelectWidget(values=choices)
+        else:
+            widget = deform.widget.HiddenWidget()
+        return widget
+
+    def _collect_available_types(self, context):
+        """
+        Collect file types that may be loaded for the given context
+
+        :param obj context: The current object we're attaching a file to
+        :returns: A list of FileType instances
+        """
+        result = []
+        if isinstance(context, File):
+            context = context.parent
+
+        if isinstance(context, Task) or isinstance(context, Business):
+            business_type_id = context.business_type_id
+
+            result = BusinessTypeFileType.get_file_type_options(
+                business_type_id, context.type_
+            )
+        else:
+            result = FileType.query().options(load_only('id', 'label')).all()
+        return result
 
 
 class FileUploadSchema(colander.Schema):
-    parent_id = colander.SchemaNode(
-        colander.Integer(),
-        widget=deform.widget.HiddenWidget(),
-        missing=colander.drop,
-    )
-
     come_from = forms.come_from_node()
 
-    filetype = colander.SchemaNode(
-        colander.String(),
-        widget=deferred_filetype_select,
-        missing="",
-        title=u"Type de fichier",
-    )
+    filetype = FileTypeNode(missing="")
+    upload = FileNode()
 
     description = colander.SchemaNode(colander.String())
-
-    upload = colander.SchemaNode(
-        deform.FileData(),
-        widget=deferred_upload_widget,
-        title=u"Choix du fichier",
-        description=file_description,
-        validator=filesize_validator,
-    )
 
 
 def get_template_upload_schema():

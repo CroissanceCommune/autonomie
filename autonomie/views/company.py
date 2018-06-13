@@ -302,7 +302,7 @@ class CompanyEdit(BaseFormView):
 
     def submit_success(self, appstruct):
         """
-            Edit the database entry and return redirect
+        Edit the database entry and return redirect
         """
         self.request.context.activities = fetch_activities_objects(appstruct)
         company = merge_session_with_post(self.request.context, appstruct)

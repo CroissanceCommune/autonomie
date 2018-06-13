@@ -23,13 +23,12 @@
 
 $(
   function(){
-  console.log("Here we are");
     var description_input = $('input[name=description]');
-    var filetype_select = $('select[name=filetype]');
-    filetype_select.change(
+    var file_input = $('input[type=file]');
+    file_input.change(
       function(){
-        var val = filetype_select.children('option:selected').val();
-        description_input.val(val);
+        var filename = this.value.replace(/^.*[\\\/]/, '');
+        description_input.val(filename);
       }
     );
   }

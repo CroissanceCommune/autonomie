@@ -39,18 +39,7 @@ class SequenceNumber(DBBASE):
     index = Column(Integer, nullable=False)
 
 
-class GlobalInvoiceSequence(object):
-    db_key = SequenceNumber.SEQUENCE_INVOICE_GLOBAL
-
-    @classmethod
-    def get_latest_index(cls, invoice):
-        """
-        :rtype: int or None
-        """
-        q = DBSESSION().query(func.Max(SequenceNumber.index))
-        q = q.filter_by(sequence=cls.db_key)
-        return q.scalar()
-
+class AbstractInvoiceSequence(object):
     @classmethod
     def get_next_index(cls, invoice):
         latest = cls.get_latest_index(invoice)
@@ -58,3 +47,20 @@ class GlobalInvoiceSequence(object):
             return 0
         else:
             return latest + 1
+
+
+class GlobalInvoiceSequence(AbstractInvoiceSequence):
+    db_key = SequenceNumber.SEQUENCE_INVOICE_GLOBAL
+
+    @classmethod
+    def get_latest_index(cls, invoice):
+        """
+        :rtype: int or None
+        """
+        from autonomie.models.task import Task
+
+        q = DBSESSION().query(func.Max(SequenceNumber.index))
+        q = q.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
+        q = q.filter_by(sequence=cls.db_key)
+        return q.scalar()
+

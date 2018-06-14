@@ -196,6 +196,17 @@ class Company(DBBASE, PersistentACLMixin):
         Column(Text, default=''),
         group='edit',
     )
+
+    # sequences related, used for counters initialization on migration from
+    # another system (eg: WinScop). Contain the latest index already assigned.
+    month_company_sequence_init_value = deferred(
+        Column(Integer),
+    )
+
+    month_company_sequence_init_date = deferred(
+        Column(Date),
+    )
+
     # Relationships
     header_file = relationship(
         "File",

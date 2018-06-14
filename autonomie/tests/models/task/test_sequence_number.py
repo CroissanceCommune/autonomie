@@ -8,6 +8,7 @@ from autonomie.models.services.invoice_sequence_number import (
 )
 from autonomie.models.task.sequence_number import (
     GlobalInvoiceSequence,
+    MonthInvoiceSequence,
     YearInvoiceSequence,
 )
 
@@ -37,6 +38,26 @@ def test_year_invoice_sequence(mk_invoice, set_year_seq_index):
     set_year_seq_index(index=1, year=2018)
 
     assert YIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 2
+
+
+def test_month_invoice_sequence(mk_invoice, set_month_seq_index):
+    MIS = MonthInvoiceSequence
+
+    assert MIS.get_next_index(mk_invoice(date=date(2017, 1, 1))) == 0
+    set_month_seq_index(index=0, year=2017, month=1)
+
+    # same year same month
+    assert MIS.get_next_index(mk_invoice(date=date(2017, 1, 1))) == 1
+    set_month_seq_index(index=1, year=2017, month=1)
+
+    # same year different month
+    assert MIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 0
+    set_month_seq_index(index=1, year=2017, month=2)
+
+    # same month different year
+    assert MIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 0
+    set_month_seq_index(index=0, year=2018, month=1)
+    assert MIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 1
 
 
 def test_invoice_number_formatter(invoice_20170707, DummySequence):

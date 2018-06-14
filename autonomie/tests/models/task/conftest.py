@@ -269,6 +269,22 @@ def set_year_seq_index(dbsession, set_seq_index):
 
 
 @pytest.fixture
+def set_month_seq_index(dbsession, set_seq_index):
+    """ Initialize a month seq to a given index
+    """
+    from autonomie.models.task.sequence_number import SequenceNumber
+
+    def _set_month_seq_index(index, year, month):
+        return set_seq_index(
+            index=index,
+            month=month,
+            year=year,
+            sequence=SequenceNumber.SEQUENCE_INVOICE_MONTH,
+        )
+    return _set_month_seq_index
+
+
+@pytest.fixture
 def DummySequence():
     ds = MagicMock()
     ds.get_next_index = MagicMock(return_value=12)

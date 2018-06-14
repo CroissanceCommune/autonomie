@@ -80,3 +80,15 @@ class YearInvoiceSequence(GlobalInvoiceSequence):
         q = q.join((Task, Task.id == SequenceNumber.task_id))
         q = q.filter(extract('year', Task.date) == invoice.date.year)
         return q
+
+
+class MonthInvoiceSequence(YearInvoiceSequence):
+    db_key = SequenceNumber.SEQUENCE_INVOICE_MONTH
+
+    @classmethod
+    def _query(cls, invoice):
+        from autonomie.models.task import Task
+
+        q = super(MonthInvoiceSequence, cls)._query(invoice)
+        q = q.filter(extract('month', Task.date) == invoice.date.month)
+        return q

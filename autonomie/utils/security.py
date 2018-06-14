@@ -504,7 +504,7 @@ def _get_admin_userdatas_base_acl(self):
         'filelist.userdatas',
         'py3o.userdatas',
         'history.userdatas',
-        'doctype.userdatas',
+        'doctypes.userdatas',
         'view.file',
         'edit.file',
         'delete.file',

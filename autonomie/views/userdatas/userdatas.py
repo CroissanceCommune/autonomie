@@ -214,6 +214,9 @@ class UserDatasEditView(BaseFormView):
         )
         return HTTPFound(self.request.current_route_path())
 
+    def cancel_success(self, appstruct):
+        return HTTPFound(self.request.current_route_path())
+
 
 class UserUserDatasEditView(UserDatasEditView):
     @property

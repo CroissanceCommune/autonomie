@@ -429,13 +429,13 @@ def add_views(config):
     config.add_view(
         UserDatasDocTypeView,
         route_name=USERDATAS_DOCTYPES_URL,
-        permission="doctype.userdatas",
+        permission="doctypes.userdatas",
         renderer="/base/formpage.mako",
     )
     config.add_view(
         UserUserDatasDocTypeView,
         route_name=USER_USERDATAS_DOCTYPES_URL,
-        permission="doctype.userdatas",
+        permission="doctypes.userdatas",
         renderer="/userdatas/doctypes.mako",
         layout='user',
     )

@@ -111,18 +111,6 @@ class SocialStatusOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
-class EmployeeQualityOption(ConfigurableOption):
-    """
-    Different values for employee quality
-    """
-    __colanderalchemy_config__ = {
-        'title': u"Qualité du salarié",
-        'validation_msg': u"Les qualité du salarié ont bien été configurées",
-        "help_msg": u"Configurer les options possibles pour définir la qualité\
- d'un salarié (cadre, employé ...)",
-    }
-    id = get_id_foreignkey_col('configurable_option.id')
-
 
 class ActivityTypeOption(ConfigurableOption):
     """
@@ -203,40 +191,7 @@ un compte Autonomie lui sera automatiquement associé"
             }
         },
     )
-
-
-class MotifSortieOption(ConfigurableOption):
-    """
-    Possible values for exit motivation
-    """
-    __colanderalchemy_config__ = {
-        'title': u"Motif de sortie",
-        'validation_msg': u"Les motifs de sortie ont bien été configurés",
-    }
-    id = get_id_foreignkey_col('configurable_option.id')
-
-
-class TypeSortieOption(ConfigurableOption):
-    """
-    Possible values for exit form
-    """
-    __colanderalchemy_config__ = {
-        'title': u"Type de sortie",
-        'validation_msg': u"Les types de sortie ont bien été configurés",
-    }
-    id = get_id_foreignkey_col('configurable_option.id')
-
-
-class TypeContratOption(ConfigurableOption):
-    """
-    Possible values for contract type (parcours)
-    """
-    __colanderalchemy_config__ = {
-        'title': u"Type de contrat",
-        'validation_msg': u"Les types de contrat ont bien été configurés",
-    }
-    id = get_id_foreignkey_col('configurable_option.id')
-
+    
 
 class SocialDocTypeOption(ConfigurableOption):
     """
@@ -809,6 +764,17 @@ class UserDatas(Node):
         }
     )
 
+    statut_end_rights_date = Column(
+        Date(),
+        info={
+            'colanderalchemy':
+            {
+                'title': u'Date de fin de droit',
+                'section': u'Statut',
+            }
+        }
+    )
+
     statut_handicap_allocation_expiration = Column(
         Date(),
         default=None,
@@ -850,17 +816,6 @@ class UserDatas(Node):
                 }
             }
         ),
-    )
-
-    statut_end_rights_date = Column(
-        Date(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Date de fin de droit',
-                'section': u'Statut',
-            }
-        }
     )
 
     # ACTIVITÉ : cf cahier des charges
@@ -939,7 +894,7 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u'Prescripteur',
-                'section': u'Parcours',
+                'section': u'Synthèse',
             }
         }
     )
@@ -957,7 +912,7 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u'Nom du prescripteur',
-                'section': u'Parcours',
+                'section': u'Synthèse',
             }
         }
     )
@@ -968,37 +923,7 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u'Date info coll',
-                'section': u'Parcours',
-            }
-        }
-    )
-
-    parcours_date_diagnostic = relationship(
-        "DateDiagnosticDatas",
-        cascade="all, delete-orphan",
-        backref=backref(
-            'userdatas',
-            info={
-                'export': {
-                    'related_key': u"export_label",
-                    "keep_key": True,
-                    "label": u"Porteur de projet",
-                    "stats": {'exclude': True},
-                }
-            }
-        ),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Date diagnostic',
-                'section': u'Parcours',
-            },
-            'import': {
-                "related_key": "date",
-                "formatter": str_to_date
-            },
-            'export': {
-                'flatten': [('date', u"Date")],
+                'section': u'Synthèse',
             }
         }
     )
@@ -1009,7 +934,7 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u'Motif de non admission en CAE',
-                'section': u'Parcours',
+                'section': u'Synthèse',
             }
         }
     )
@@ -1024,209 +949,13 @@ class UserDatas(Node):
         },
     )
 
-    parcours_convention_cape = relationship(
-        "DateConventionCAPEDatas",
-        cascade='all, delete-orphan',
-        backref=backref(
-            'userdatas',
-            info={
-                'export': {
-                    'related_key': u"export_label",
-                    "keep_key": True,
-                    "label": u"Porteur de projet",
-                    "stats": {'exclude': True},
-                }
-            }
-        ),
-        info={
-            'colanderalchemy': {
-                "title": u"Date convention CAPE",
-                'section': u'Parcours',
-            },
-            'import': {
-                'related_key': 'date',
-                "formatter": str_to_date
-            },
-            'export': {
-                'flatten': [('date', u"Date")],
-            }
-        }
-    )
-
-    parcours_dpae = relationship(
-        "DateDPAEDatas",
-        cascade='all, delete-orphan',
-        backref=backref(
-            'userdatas',
-            info={
-                'export': {
-                    'related_key': u"export_label",
-                    "keep_key": True,
-                    "label": u"Porteur de projet",
-                    "stats": {'exclude': True},
-                }
-            }
-        ),
-        info={
-            'colanderalchemy': {
-                "title": u"Date DPAE",
-                'section': u'Parcours',
-            },
-            'import': {
-                'related_key': 'date',
-                "formatter": str_to_date
-            },
-            'export': {
-                'flatten': [('date', u"Date")],
-            }
-        }
-    )
-
-    parcours_contract_type = Column(
-        String(4),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Type de contrat',
-                'section': u'Parcours',
-            },
-            'export': {
-                'formatter': lambda val: dict(CONTRACT_OPTIONS).get(val),
-                'stats': {'options': CONTRACT_OPTIONS},
-            }
-        }
-    )
-
-    parcours_start_date = Column(
-        Date(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Date de début de contrat",
-                'description': u'Date du Cdi ou du début de Cdd',
-                "section": u"Parcours",
-            }
-        }
-    )
-
-    parcours_end_date = Column(
-        Date(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Date de fin de contrat",
-                'description': u'Date de fin de Cdd',
-                "section": u"Parcours",
-            }
-        }
-    )
-
-    parcours_contract_history = relationship(
-        "ContractHistory",
-        cascade='all, delete-orphan',
-        info={
-            'colanderalchemy': {
-                "title": u"Avenants au contrat de travail",
-                'section': u'Parcours',
-            },
-            'export': {
-                'flatten': [
-                    ('date', u"Date"),
-                    ('number', u"Numéro d'avenant"),
-                ],
-            }
-        }
-    )
-
-    # To be removed in version > 3.3.0
-    parcours_last_avenant = Column(
-        Date(),
-        info={'colanderalchemy': {'exclude': True}},
-    )
-
-    parcours_taux_horaire = Column(
-        Float(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Taux horaire',
-                'section': u'Parcours',
-            }
-        }
-    )
-
-    parcours_taux_horaire_letters = Column(
-        String(250),
-        info={
-            'colanderalchemy':
-            {
-                'title': u'Taux horaire (en lettres)',
-                'section': u'Parcours',
-            }
-        }
-    )
-
-    parcours_num_hours = Column(
-        Float(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Nombre d'heures",
-                "section": u"Parcours",
-            }
-        }
-    )
-
-    parcours_salary = Column(
-        Float(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Salaire brut",
-                'section': u'Parcours',
-                'description': u"Ce champ est rempli automatiquement",
-            }
-        }
-    )
-
-    parcours_salary_letters = Column(
-        String(100),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Salaire en lettres",
-                'section': u'Parcours',
-            }
-        }
-    )
-
-    parcours_employee_quality_id = Column(
-        ForeignKey('employee_quality_option.id'),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Qualité du salarié",
-                'section': u'Parcours',
-            }
-        }
-    )
-    parcours_employee_quality = relationship(
-        'EmployeeQualityOption',
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(
-                u"Qualité du salarié"
-            ),
-            'export': {'related_key': 'label'},
-        }
-    )
-
     parcours_goals = Column(
         Text(),
         info={
             'colanderalchemy':
             {
                 'title': u"Objectifs",
-                "section": u"Parcours",
+                "section": u"Activité",
             }
         }
     )
@@ -1237,7 +966,7 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u"Aptitude",
-                'section': u'Parcours',
+                'section': u'Activité',
             }
         }
     )
@@ -1254,7 +983,7 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u"Date de la visite médicale",
-                'section': u'Parcours',
+                'section': u'Activité',
             }
         }
     )
@@ -1265,59 +994,9 @@ class UserDatas(Node):
             'colanderalchemy':
             {
                 'title': u"Date limite",
-                'section': u'Parcours',
+                'section': u'Activité',
             }
         }
-    )
-
-    # SORTIE
-    sortie_date = Column(
-        Date(),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Date de sortie",
-                'section': u'Sortie',
-            }
-        }
-    )
-
-    sortie_motif_id = Column(
-        ForeignKey('motif_sortie_option.id'),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Motif de sortie",
-                'section': u'Sortie',
-            }
-        }
-    )
-
-    sortie_motif = relationship(
-        'MotifSortieOption',
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(u"Motif de sortie"),
-            'export': {'related_key': 'label'},
-        },
-    )
-
-    sortie_type_id = Column(
-        ForeignKey('type_sortie_option.id'),
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Type de sortie",
-                'section': u'Sortie',
-            }
-        }
-    )
-
-    sortie_type = relationship(
-        'TypeSortieOption',
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(u"Type de sortie"),
-            'export': {'related_key': 'label'},
-        },
     )
 
     @property
@@ -1533,247 +1212,6 @@ class CompanyDatas(DBBASE):
     )
 
 
-class DateDiagnosticDatas(DBBASE):
-    __colanderalchemy_config__ = {
-        'title': u"une date de diagnostic",
-    }
-    __tablename__ = 'date_diagnostic_datas'
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.HiddenWidget(),
-                'missing': None
-            },
-            'export': {'exclude': True},
-        }
-    )
-    date = Column(
-        Date(),
-        info={
-            'colanderalchemy': {
-                "title": u'Date du diagnostic',
-            }
-        },
-        nullable=False
-    )
-    userdatas_id = Column(
-        ForeignKey("user_datas.id"),
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                'label': u"Identifiant Autonomie",
-                'stats': {'exclude': True},
-            }
-        }
-    )
-
-
-class DateConventionCAPEDatas(DBBASE):
-    __colanderalchemy_config__ = {
-        'title': u"une date de convention CAPE",
-    }
-    __tablename__ = 'date_convention_cape_datas'
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.HiddenWidget(),
-                'missing': None
-            },
-            'export': {'exclude': True},
-        }
-    )
-    date = Column(
-        Date(),
-        info={
-            "colanderalchemy": {
-                "title": u'Date de la convention',
-            }
-        },
-        nullable=False,
-    )
-    end_date = Column(
-        Date(),
-        info={
-            "colanderalchemy": {
-                "title": u'Date de fin de la convention',
-            }
-        }
-    )
-    userdatas_id = Column(
-        ForeignKey("user_datas.id"),
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                'label': u"Identifiant Autonomie",
-                'stats': {'exclude': True},
-            }
-        }
-    )
-
-
-class DateDPAEDatas(DBBASE):
-    __colanderalchemy_config__ = {
-        'title': u"une date de DPAE",
-    }
-    __tablename__ = 'date_dpae_datas'
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.HiddenWidget(),
-                'missing': None
-            },
-            'export': {'exclude': True},
-        }
-    )
-    date = Column(
-        Date(),
-        info={
-            'colanderalchemy': {
-                "title": u'Date de la DPAE',
-            }
-        },
-        nullable=False,
-    )
-    userdatas_id = Column(
-        ForeignKey("user_datas.id"),
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                'label': u"Identifiant autonomie",
-                'stats': {'exclude': True},
-            }
-        }
-    )
-
-
-class CaeSituationChange(DBBASE):
-    """
-    Used to store cae status change
-    """
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.HiddenWidget(),
-                'missing': None
-            },
-            'export': {'exclude': True},
-        }
-    )
-    date = Column(
-        Date(),
-        info={
-            'colanderalchemy': {
-                "title": u'Date du changement de situation',
-            }
-        },
-        nullable=False,
-
-    )
-    userdatas_id = Column(
-        ForeignKey("user_datas.id"),
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                'label': u"Identifiant autonomie",
-                'stats': {'exclude': True},
-            }
-        }
-    )
-    situation_id = Column(
-        ForeignKey("cae_situation_option.id"),
-        nullable=False,
-        info={
-            'colanderalchemy':
-            {
-                'title': u"Situation dans la CAE",
-            }
-        }
-    )
-    situation = relationship(
-        "CaeSituationOption",
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(
-                u"Situation dans la CAE"
-            ),
-            'export': {'related_key': 'label'},
-        },
-    )
-
-
-class ContractHistory(DBBASE):
-    """
-    Used to store history of contract updates
-    """
-    __colanderalchemy_config__ = {
-        'title': u"un avenant",
-    }
-    __table_args__ = default_table_args
-    id = Column(
-        Integer,
-        primary_key=True,
-        info={
-            'colanderalchemy': {
-                'widget': deform.widget.HiddenWidget(),
-                'missing': None
-            },
-            'export': {'exclude': True},
-        }
-    )
-    date = Column(
-        Date(),
-        info={
-            'colanderalchemy': {
-                "title": u"Date d'effet",
-            }
-        },
-        nullable=False,
-    )
-    number = Column(
-        Integer,
-        info={
-            'colanderalchemy': {
-                "title": u"Numéro",
-            }
-        },
-        nullable=False,
-    )
-    userdatas_id = Column(
-        ForeignKey("user_datas.id"),
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                'label': u"Identifiant autonomie",
-                'stats': {'exclude': True},
-            }
-        }
-    )
-    userdatas = relationship(
-        "UserDatas",
-        back_populates='parcours_contract_history',
-        info={
-            'colanderalchemy': {'exclude': True},
-            'export': {
-                'related_key': u"export_label",
-                "keep_key": True,
-                "label": u"Historique des avenants",
-                "stats": {'exclude': True},
-            }
-        }
-    )
-
-
 class SocialStatusDatas(DBBASE):
     """
     Used to store multiple social status
@@ -1840,24 +1278,7 @@ class SocialStatusDatas(DBBASE):
             'export': {'related_key': 'label'}
         }
     )
-
-
-def salary_compute(mapper, connection, target):
-    """
-    Compute the salary of a user
-    """
-    val1 = target.parcours_taux_horaire
-    val2 = target.parcours_num_hours
-    try:
-        res = val1 * val2
-    except:
-        res = 0
-    target.parcours_salary = res
-
-
-listen(UserDatas, "before_insert", salary_compute, propagate=True)
-listen(UserDatas, "before_update", salary_compute, propagate=True)
-
+    
 
 def sync_userdatas_to_user(source_key, user_key):
     def handler(target, value, oldvalue, initiator):

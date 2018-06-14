@@ -20,7 +20,6 @@ from autonomie.models.user.userdatas import (
     UserDatas,
     SocialDocTypeOption,
     UserDatasSocialDocTypes,
-    CaeSituationChange,
 )
 from autonomie.models import files
 from autonomie.forms.user.userdatas import (

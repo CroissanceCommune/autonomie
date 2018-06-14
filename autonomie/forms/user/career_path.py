@@ -31,13 +31,11 @@ from autonomie.forms import (
     get_deferred_select,
     get_select,
 )
+from autonomie.models.user.userdatas import CaeSituationOption
 from autonomie.models.career_stage import CareerStage
 from autonomie.models.career_path import (
     CareerPath,
     PERIOD_OPTIONS,
-)
-from autonomie.models.user.userdatas import (
-    CaeSituationOption,
     TypeContratOption,
     EmployeeQualityOption,
     TypeSortieOption,

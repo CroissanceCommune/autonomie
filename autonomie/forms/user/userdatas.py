@@ -29,10 +29,7 @@ from autonomie.models.user.userdatas import (
     PcsOption,
     PrescripteurOption,
     NonAdmissionOption,
-    EmployeeQualityOption,
     ParcoursStatusOption,
-    MotifSortieOption,
-    TypeSortieOption,
     STATUS_OPTIONS,
     CONTRACT_OPTIONS,
     UserDatasSocialDocTypes,
@@ -55,8 +52,19 @@ from autonomie.forms import (
 
 USERDATAS_FORM_GRIDS = {
     u"Synthèse": (
-        (('situation_follower_id', 6), ('situation_antenne_id', 6)),
-        (('situation_societariat_entrance', 6),),
+        (
+            ('situation_follower_id',6), 
+            ('situation_antenne_id',6), 
+        ),
+        (
+            ('parcours_prescripteur_id', 6),
+            ('parcours_prescripteur_name', 6),
+        ),
+        (
+            ('parcours_date_info_coll', 3),
+            ('situation_societariat_entrance',3),
+            ('parcours_non_admission_id', 6),
+        ),
     ),
     u"Coordonnées": (
         (
@@ -108,47 +116,38 @@ USERDATAS_FORM_GRIDS = {
             ('coordonnees_identifiant_interne', 3),
         ),
     ),
-    u"Parcours": (
+    u"Statut": (
         (
-            ('parcours_prescripteur_id', 3),
-            ('parcours_prescripteur_name', 3),
+            ('social_statuses', 12),
         ),
         (
-            ('parcours_date_info_coll', 3),
+            ('today_social_statuses', 12),
         ),
         (
-            ('parcours_date_diagnostic', 12),
+            ('statut_end_rights_date', 4),
         ),
         (
-            ('parcours_non_admission_id', 3),
+            ('statut_handicap_allocation_expiration', 4),
         ),
         (
-            ('parcours_convention_cape', 6),
-            ('parcours_dpae', 6),
+            ('statut_external_activity', 12),
+        ),
+    ),
+    u"Activité": (
+        (
+            ('activity_typologie_id', 12),
         ),
         (
-            ('parcours_contract_type', 3),
-            ('parcours_start_date', 3),
-            ('parcours_end_date', 3),
+            ('activity_pcs_id', 12),
         ),
         (
-            ('parcours_taux_horaire', 3),
-            ('parcours_taux_horaire_letters', 3),
-            ('parcours_num_hours', 3),
-            ('parcours_salary', 3),
+            ('activity_companydatas', 12),
         ),
         (
-            ('parcours_salary_letters', 6),
-            ('parcours_employee_quality_id', 3),
+            ('parcours_goals', 12),
         ),
         (
-            ('parcours_contract_history', 6),
-        ),
-        (
-            ('parcours_goals', 6),
-        ),
-        (
-            ('parcours_status_id', 6),
+            ('parcours_status_id', 12),
         ),
         (
             ('parcours_medical_visit', 3),
@@ -277,26 +276,6 @@ def customize_schema(schema):
         get_deferred_select(NonAdmissionOption),
     )
 
-    customize(
-        "parcours_contract_type",
-        get_select(CONTRACT_OPTIONS)
-    )
-
-    customize(
-        "parcours_salary",
-        deform.widget.TextInputWidget(readonly=True),
-    )
-
-    customize(
-        "parcours_employee_quality_id",
-        get_deferred_select(EmployeeQualityOption),
-    )
-
-    customize("parcours_goals", deform.widget.TextAreaWidget())
-    customize('parcours_status_id', get_deferred_select(ParcoursStatusOption))
-    customize('sortie_motif_id', get_deferred_select(MotifSortieOption))
-    customize("sortie_type_id", get_deferred_select(TypeSortieOption))
-
     if 'social_statuses' in schema:
         child_schema = schema['social_statuses'].children[0]
         child_schema.widget = CleanMappingWidget()
@@ -345,13 +324,8 @@ def customize_schema(schema):
             widget=get_deferred_select(CompanyActivity)
         )
 
-    for key in (
-        'parcours_date_diagnostic', 'parcours_convention_cape',
-        'parcours_dpae', 'parcours_contract_history'
-    ):
-        if key in schema:
-            child_schema = schema[key].children[0]
-            child_schema.widget = CleanMappingWidget()
+    customize("parcours_goals", deform.widget.TextAreaWidget())
+    customize('parcours_status_id', get_deferred_select(ParcoursStatusOption))
 
 
 def get_add_edit_schema():

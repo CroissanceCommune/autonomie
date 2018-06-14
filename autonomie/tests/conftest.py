@@ -510,6 +510,15 @@ def company(mk_company):
 
 
 @fixture
+def company2(mk_company):
+    return mk_company(
+        name=u"Company2",
+        email=u"company2@c.fr",
+        code_compta="1USER",
+    )
+
+
+@fixture
 def customer(dbsession, company):
     from autonomie.models.customer import Customer
     customer = Customer(

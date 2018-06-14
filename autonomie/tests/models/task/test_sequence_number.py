@@ -9,6 +9,7 @@ from autonomie.models.services.invoice_sequence_number import (
 from autonomie.models.task.sequence_number import (
     GlobalInvoiceSequence,
     MonthInvoiceSequence,
+    MonthCompanyInvoiceSequence,
     YearInvoiceSequence,
 )
 
@@ -58,6 +59,34 @@ def test_month_invoice_sequence(mk_invoice, set_month_seq_index):
     assert MIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 0
     set_month_seq_index(index=0, year=2018, month=1)
     assert MIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 1
+
+
+def test_month_company_invoice_sequence(
+        mk_invoice,
+        set_month_company_seq_index,
+        company,
+        company2,
+):
+    MCIS = MonthCompanyInvoiceSequence
+
+    # company
+    assert MCIS.get_next_index(mk_invoice(date(2017, 1, 1), company)) == 0
+    set_month_company_seq_index(index=0, year=2017, month=1, company=company)
+
+    # same year same month, company
+    assert MCIS.get_next_index(mk_invoice(date(2017, 1, 1), company)) == 1
+    set_month_company_seq_index(index=1, year=2017, month=1, company=company)
+
+    # same year same month, company2
+    assert MCIS.get_next_index(mk_invoice(date(2017, 1, 1), company2)) == 0
+    set_month_company_seq_index(index=1, year=2017, month=1, company=company2)
+
+    # same year different month, company
+    assert MCIS.get_next_index(mk_invoice(date(2017, 2, 1), company)) == 0
+    set_month_company_seq_index(index=1, year=2017, month=1, company=company)
+
+    # same month different year company
+    assert MCIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 0
 
 
 def test_invoice_number_formatter(invoice_20170707, DummySequence):

@@ -118,7 +118,7 @@ def mk_invoice(
     user,
     phase,
 ):
-    def _mk_invoice(date=None):
+    def _mk_invoice(date=None, company=company):
         from autonomie.models.task.invoice import Invoice
         invoice = Invoice(
             company=company,
@@ -234,16 +234,19 @@ def global_seq_1(dbsession, invoice):
 
 
 @pytest.fixture
-def set_seq_index(dbsession, mk_invoice):
+def set_seq_index(dbsession, mk_invoice, company):
     """ Initialize a year seq to a given index
     """
     from autonomie.models.task.sequence_number import SequenceNumber
 
-    def _set_seq_index(index, year, month, sequence):
+    def _set_seq_index(index, year, month, sequence, company=company):
         s = SequenceNumber(
             sequence=sequence,
             index=index,
-            task_id=mk_invoice(date=datetime.date(year, 1, 1)).id,
+            task_id=mk_invoice(
+                date=datetime.date(year, month, 1),
+                company=company,
+            ).id,
         )
         dbsession.add(s)
         dbsession.flush()
@@ -282,6 +285,24 @@ def set_month_seq_index(dbsession, set_seq_index):
             sequence=SequenceNumber.SEQUENCE_INVOICE_MONTH,
         )
     return _set_month_seq_index
+
+
+@pytest.fixture
+def set_month_company_seq_index(dbsession, set_seq_index):
+    """ Initialize a month seq to a given index for a given company
+    """
+    from autonomie.models.task.sequence_number import SequenceNumber
+
+    def _set_month_company_seq_index(index, year, month, company):
+        return set_seq_index(
+            index=index,
+            month=month,
+            year=year,
+            sequence=SequenceNumber.SEQUENCE_INVOICE_MONTH_COMPANY,
+            company=company,
+        )
+    return _set_month_company_seq_index
+
 
 
 @pytest.fixture

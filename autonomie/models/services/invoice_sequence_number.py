@@ -4,6 +4,7 @@ from autonomie_base.models.base import DBSESSION
 from autonomie.models.task.sequence_number import (
     GlobalInvoiceSequence,
     MonthInvoiceSequence,
+    MonthCompanyInvoiceSequence,
     SequenceNumber,
     YearInvoiceSequence,
 )
@@ -49,6 +50,7 @@ class InvoiceNumberService(object):
         'SEQGLOBAL': GlobalInvoiceSequence,
         'SEQYEAR': YearInvoiceSequence,
         'SEQMONTH': MonthInvoiceSequence,
+        'SEQMONTHANA': MonthCompanyInvoiceSequence,
     }
     ALLOWED_KEYS = ALLOWED_VARS + SEQUENCES_MAP.keys()
 

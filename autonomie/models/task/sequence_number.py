@@ -92,3 +92,15 @@ class MonthInvoiceSequence(YearInvoiceSequence):
         q = super(MonthInvoiceSequence, cls)._query(invoice)
         q = q.filter(extract('month', Task.date) == invoice.date.month)
         return q
+
+
+class MonthCompanyInvoiceSequence(MonthInvoiceSequence):
+    db_key = SequenceNumber.SEQUENCE_INVOICE_MONTH_COMPANY
+
+    @classmethod
+    def _query(cls, invoice):
+        from autonomie.models.task import Task
+
+        q = super(MonthCompanyInvoiceSequence, cls)._query(invoice)
+        q = q.filter(Task.company == invoice.company)
+        return q

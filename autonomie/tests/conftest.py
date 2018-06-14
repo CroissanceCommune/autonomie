@@ -481,20 +481,32 @@ def login(dbsession, user):
 
 
 @fixture
-def company(dbsession, user):
-    from autonomie.models.company import Company
-    company = Company(
+def mk_company(dbsession, user):
+
+    def _mk_company(name, email, code_compta):
+        from autonomie.models.company import Company
+        company = Company(
+            name=name,
+            email=email,
+            code_compta=code_compta,
+        )
+        company.employees = [user]
+        dbsession.add(company)
+        dbsession.flush()
+        user.companies = [company]
+        dbsession.merge(user)
+        dbsession.flush()
+        return company
+    return _mk_company
+
+
+@fixture
+def company(mk_company):
+    return mk_company(
         name=u"Company",
         email=u"company@c.fr",
         code_compta="0USER",
     )
-    company.employees = [user]
-    dbsession.add(company)
-    dbsession.flush()
-    user.companies = [company]
-    user = dbsession.merge(user)
-    dbsession.flush()
-    return company
 
 
 @fixture

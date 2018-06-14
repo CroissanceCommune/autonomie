@@ -40,7 +40,9 @@ class SequenceNumber(DBBASE):
     index = Column(Integer, nullable=False)
 
 
-class AbstractInvoiceSequence(object):
+class GlobalInvoiceSequence(object):
+    db_key = SequenceNumber.SEQUENCE_INVOICE_GLOBAL
+
     @classmethod
     def get_next_index(cls, invoice):
         latest = cls.get_latest_index(invoice)
@@ -49,38 +51,32 @@ class AbstractInvoiceSequence(object):
         else:
             return latest + 1
 
+    @classmethod
+    def _query(cls, invoice):
+        from autonomie.models.task import Task
 
-class GlobalInvoiceSequence(AbstractInvoiceSequence):
-    db_key = SequenceNumber.SEQUENCE_INVOICE_GLOBAL
+        q = DBSESSION().query(func.Max(SequenceNumber.index))
+        q = q.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
+        q = q.filter_by(sequence=cls.db_key)
+        return q
 
     @classmethod
     def get_latest_index(cls, invoice):
         """
         :rtype: int or None
         """
-        from autonomie.models.task import Task
-
-        q = DBSESSION().query(func.Max(SequenceNumber.index))
-        q = q.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
-        q = q.filter_by(sequence=cls.db_key)
-        return q.scalar()
+        return cls._query(invoice).scalar()
 
 
-class YearInvoiceSequence(AbstractInvoiceSequence):
+class YearInvoiceSequence(GlobalInvoiceSequence):
     db_key = SequenceNumber.SEQUENCE_INVOICE_YEAR
 
     @classmethod
-    def get_latest_index(cls, invoice):
-        """
-        :rtype: int or None
-        """
+    def _query(cls, invoice):
         from autonomie.models.task import Task
 
         assert invoice.date is not None, "validated invoice should have a date"
-        year = invoice.date.year
-        q = DBSESSION().query(func.Max(SequenceNumber.index))
-        q = q.filter_by(sequence=cls.db_key)
+        q = super(YearInvoiceSequence, cls)._query(invoice)
         q = q.join((Task, Task.id == SequenceNumber.task_id))
-        q = q.filter(Task.type_.in_(('invoice', 'cancelinvoice')))
-        q = q.filter(extract('year', Task.date) == year)
-        return q.scalar()
+        q = q.filter(extract('year', Task.date) == invoice.date.year)
+        return q

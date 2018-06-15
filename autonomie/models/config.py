@@ -28,6 +28,9 @@
     Documents footers, headers ...
 """
 from cStringIO import StringIO
+import datetime
+from dateutil.parser import parse
+
 from sqlalchemy import (
     Column,
     Text,
@@ -164,12 +167,16 @@ class Config(DBBASE):
         return result
 
     @classmethod
-    def get_value(cls, keyname, default=None):
+    def get_value(cls, keyname, default=None, type_=str):
         config = cls.get(keyname)
         result = None
 
         if config is not None:
             result = config.value
+            if type_ is datetime.date:
+                result = datetime.datetime.strptime(result, "%Y-%m-%d")
+            elif type_ is int:
+                result = int(result)
         elif default:
             result = default
         return result

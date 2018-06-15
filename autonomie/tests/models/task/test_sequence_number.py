@@ -24,6 +24,20 @@ def test_global_invoice_sequence_next_then(invoice, global_seq_1):
     assert seq_num == 1
 
 
+def test_global_invoice_sequence_initialization(
+        invoice,
+        set_global_seq_index,
+):
+    from autonomie.models.config import Config
+    Config.set('global_sequence_init_value', 12)
+
+    assert GlobalInvoiceSequence.get_next_index(invoice) == 13
+
+    # ignore initialization if there is an actual SequenceNumber
+    set_global_seq_index(index=20)
+    assert GlobalInvoiceSequence.get_next_index(invoice) == 21
+
+
 def test_year_invoice_sequence(mk_invoice, set_year_seq_index):
     YIS = YearInvoiceSequence
 
@@ -39,6 +53,27 @@ def test_year_invoice_sequence(mk_invoice, set_year_seq_index):
     set_year_seq_index(index=1, year=2018)
 
     assert YIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 2
+
+
+def test_year_invoice_sequence_initialization(
+        mk_invoice,
+        set_year_seq_index,
+):
+    YIS = YearInvoiceSequence
+
+    from autonomie.models.config import Config
+    Config.set('year_sequence_init_value', 12)
+    Config.set('year_sequence_init_date', date(2017, 2, 1))
+
+    # year with initialization
+    assert YIS.get_next_index(mk_invoice(date=date(2017, 6, 1))) == 13
+
+    # year without initialization
+    assert YIS.get_next_index(mk_invoice(date=date(2018, 3, 1))) == 0
+
+    # ignore initialization if there is an actual SequenceNumber
+    set_year_seq_index(index=20, year=2017)
+    assert YIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 21
 
 
 def test_month_invoice_sequence(mk_invoice, set_month_seq_index):
@@ -59,6 +94,27 @@ def test_month_invoice_sequence(mk_invoice, set_month_seq_index):
     assert MIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 0
     set_month_seq_index(index=0, year=2018, month=1)
     assert MIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 1
+
+
+def test_month_invoice_sequence_initialization(
+        mk_invoice,
+        set_month_seq_index,
+):
+    MIS = MonthInvoiceSequence
+
+    from autonomie.models.config import Config
+    Config.set('month_sequence_init_value', 12)
+    Config.set('month_sequence_init_date', date(2017, 2, 1))
+
+    # month with initialization
+    assert MIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 13
+
+    # month without initialization
+    assert MIS.get_next_index(mk_invoice(date=date(2017, 3, 1))) == 0
+
+    # ignore initialization if there is an actual SequenceNumber
+    set_month_seq_index(index=20, year=2017, month=2)
+    assert MIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 21
 
 
 def test_month_company_invoice_sequence(
@@ -87,6 +143,35 @@ def test_month_company_invoice_sequence(
 
     # same month different year company
     assert MCIS.get_next_index(mk_invoice(date=date(2018, 1, 1))) == 0
+
+
+def test_month_company_invoice_sequence_initialization(
+        mk_invoice,
+        set_month_company_seq_index,
+        company,
+        company2,
+        dbsession,
+):
+    MCIS = MonthCompanyInvoiceSequence
+    company.month_company_sequence_init_value = 12
+    company.month_company_sequence_init_date = date(2017, 2, 1)
+    dbsession.merge(company)
+
+    # month with initialization
+    assert MCIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 13
+
+    # month with initialization, on other company
+    assert MCIS.get_next_index(mk_invoice(
+        date=date(2017, 2, 1),
+        company=company2,
+    )) == 0
+
+    # month without initialization
+    assert MCIS.get_next_index(mk_invoice(date=date(2017, 3, 1))) == 0
+
+    # ignore initialization if there is an actual SequenceNumber
+    set_month_company_seq_index(index=20, year=2017, month=2, company=company)
+    assert MCIS.get_next_index(mk_invoice(date=date(2017, 2, 1))) == 21
 
 
 def test_invoice_number_formatter(invoice_20170707, DummySequence):

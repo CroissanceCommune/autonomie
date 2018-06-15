@@ -254,6 +254,21 @@ def set_seq_index(dbsession, mk_invoice, company):
 
     return _set_seq_index
 
+@pytest.fixture
+def set_global_seq_index(dbsession, set_seq_index):
+    """ Initialize the global seq to a given index
+    """
+    from autonomie.models.task.sequence_number import SequenceNumber
+
+    def _set_global_seq_index(index):
+        return set_seq_index(
+            index=index,
+            year=2017,
+            month=1,
+            sequence=SequenceNumber.SEQUENCE_INVOICE_GLOBAL,
+        )
+    return _set_global_seq_index
+
 
 @pytest.fixture
 def set_year_seq_index(dbsession, set_seq_index):

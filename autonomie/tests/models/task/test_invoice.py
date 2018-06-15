@@ -90,58 +90,7 @@ def test_valid_invoice(config, dbsession, invoice, request_with_config, user):
     dbsession.merge(invoice)
     dbsession.flush()
     invoice.set_status('valid', request_with_config)
-    assert invoice.official_number == 1
-
-
-def test_official_number_distinct_year(
-    config, dbsession, invoice, request_with_config,
-    user
-):
-    request_with_config.user = invoice.owner
-    invoice2 = invoice.duplicate(
-        user=invoice.owner,
-        project=invoice.project,
-        phase=invoice.phase,
-        customer=invoice.customer
-    )
-    invoice.official_number = 150
-    invoice.date = datetime.date(2017, 12, 30)
-    dbsession.add(invoice)
-    dbsession.flush()
-
-    invoice2.date = datetime.date(2018, 1, 1)
-    dbsession.add(invoice2)
-    dbsession.flush()
-    invoice2.set_status('wait', request_with_config)
-    dbsession.merge(invoice2)
-    dbsession.flush()
-    invoice2.set_status('valid', request_with_config)
-    assert invoice2.official_number == 1
-
-def test_official_number_same_year(
-    config, dbsession, invoice, request_with_config,
-    user
-):
-    request_with_config.user = invoice.owner
-    invoice2 = invoice.duplicate(
-        user=invoice.owner,
-        project=invoice.project,
-        phase=invoice.phase,
-        customer=invoice.customer
-    )
-    invoice.official_number = 150
-    invoice.date = datetime.date(2017, 12, 30)
-    dbsession.add(invoice)
-    dbsession.flush()
-
-    invoice2.date = datetime.date(2017, 12, 31)
-    dbsession.add(invoice2)
-    dbsession.flush()
-    invoice2.set_status('wait', request_with_config)
-    dbsession.merge(invoice2)
-    dbsession.flush()
-    invoice2.set_status('valid', request_with_config)
-    assert invoice2.official_number == 151
+    assert invoice.official_number == '0'
 
 
 def test_gen_cancelinvoice(dbsession, full_invoice, user):

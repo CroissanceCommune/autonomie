@@ -50,7 +50,7 @@ pyramid-mako==1.0.2
 pyramid-methodrewrite==0.2.3
 pyramid_services
 pyramid-tm==2.2
-pytest==2.6.4
+pytest==3.6.1
 reportlab==3.1.44
 repoze.lru==0.6
 simplejson==3.3.1

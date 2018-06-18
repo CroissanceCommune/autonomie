@@ -234,7 +234,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Autonomie', u'Autonomie Documentation',
-   u'Tjebbes Gaston, Arezki Feth, Miotte Julien', 'Autonomie', 'One line description of project.',
+   u'Tjebbes Gaston, Arezki Feth, Miotte Julien, Delalande Jocelyn', 'Autonomie', 'One line description of project.',
    'Miscellaneous'),
 ]
 

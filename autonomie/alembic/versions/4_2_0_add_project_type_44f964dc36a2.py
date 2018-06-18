@@ -49,10 +49,18 @@ def update_database_structure():
             "version", sa.Integer,
         )
     )
-    if column_exists("task", "name"):
-        op.drop_column("task", "name")
-    if column_exists("task", "type_"):
-        op.drop_column("task", "type_")
+
+    for tbl, column in (
+        ("task", "name"),
+        ("task", "type_"),
+        ("project", "client_id"),
+        ("project", "name"),
+        ("project", "creationDate"),
+        ('project', "updateDate"),
+        ('project', "dispatchType"),
+    ):
+        if column_exists(tbl, column):
+            op.drop_column(tbl, column)
 
     op.execute("alter table task MODIFY `phase_id` int(11) DEFAULT NULL;")
 

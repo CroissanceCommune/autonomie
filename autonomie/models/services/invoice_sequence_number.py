@@ -117,8 +117,7 @@ class InvoiceNumberService(object):
                 task_id=invoice.id,
             )
             db.add(sn)
-
+        db.flush()
         invoice.official_number = invoice_number
         db.merge(invoice)
         return invoice_number
-        # FIXME: should I flush ?

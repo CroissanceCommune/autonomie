@@ -141,6 +141,48 @@ def populate_accounting_income_statement_measure_types(session):
         session.flush()
 
 
+def populate_bookentry_config(session):
+    from autonomie.models.config import Config
+    initial_values = [
+        (
+            'bookentry_facturation_label_template',
+            '{invoice.customer.label} {company.name}'
+        ),
+        (
+            'bookentry_contribution_label_template',
+            "{invoice.customer.label} {company.name}"
+        ),
+        (
+            'bookentry_rg_interne_label_template',
+            "RG COOP {invoice.customer.label} {company.name}"
+        ),
+        (
+            'bookentry_rg_client_label_template',
+            "RG {invoice.customer.label} {company.name}"
+        ),
+        (
+            'bookentry_expense_label_template',
+            "{beneficiaire}/frais {expense_date:%-m %Y}"
+        ),
+        (
+            'bookentry_payment_label_template',
+            "{company.name} / Rgt {invoice.customer.label}"
+        ),
+        (
+            'bookentry_expense_payment_main_label_template',
+            "{LASTNAME} / REMB FRAIS {expense_date:%B/%Y}"
+        ),
+        (
+            'bookentry_expense_payment_waiver_label_template',
+            "Abandon de créance {LASTNAME} {expense_date:%B/%Y}"
+        ),
+
+    ]
+
+    for key, val in initial_values:
+        Config.set(key, val)
+
+
 def populate_project_types(session):
     from autonomie.models.project.types import (
         ProjectType,
@@ -201,6 +243,7 @@ def populate_database():
         populate_groups,
         populate_accounting_treasury_measure_types,
         populate_accounting_income_statement_measure_types,
+        populate_bookentry_config,
         populate_project_types,
         populate_invoice_number_template,
     ):

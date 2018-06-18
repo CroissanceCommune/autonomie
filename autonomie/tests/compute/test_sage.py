@@ -90,6 +90,22 @@ def app_config():
         "compte_cg_waiver_ndf": "COMPTE_CG_WAIVER",
         'receipts_active_tva_module': True,
         'receipts_code_journal': "JOURNAL_RECEIPTS",
+        'bookentry_facturation_label_template':
+            u'{invoice.customer.label} {company.name}',
+        'bookentry_contribution_label_template':
+            u"{invoice.customer.label} {company.name}",
+        'bookentry_rg_interne_label_template':
+            u"RG COOP {invoice.customer.label} {company.name}",
+        'bookentry_rg_client_label_template':
+            u"RG {invoice.customer.label} {company.name}",
+        'bookentry_expense_label_template':
+            u"{beneficiaire}/frais {expense_date:%-m %Y}",
+        'bookentry_payment_label_template':
+            u"{company.name} / Rgt {invoice.customer.label}",
+        'bookentry_expense_payment_main_label_template':
+            u"{LASTNAME} / REMB FRAIS {expense_date:%B/%Y}",
+        'bookentry_expense_payment_waiver_label_template':
+            u"Abandon de créance {LASTNAME} {expense_date:%B/%Y}",
     }
 
 

@@ -57,7 +57,7 @@ class GlobalInvoiceSequence(object):
         if latest is None:
             initial_value = cls._get_initial_value(invoice)
             if initial_value is None:
-                return 0
+                return 1
             else:
                 return initial_value + 1
         else:

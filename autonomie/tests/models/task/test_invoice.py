@@ -90,7 +90,7 @@ def test_valid_invoice(config, dbsession, invoice, request_with_config, user):
     dbsession.merge(invoice)
     dbsession.flush()
     invoice.set_status('valid', request_with_config)
-    assert invoice.official_number == '0'
+    assert invoice.official_number == '1'
 
 
 def test_gen_cancelinvoice(dbsession, full_invoice, user):

@@ -225,7 +225,7 @@ def global_seq_1(dbsession, invoice):
     from autonomie.models.task.sequence_number import SequenceNumber
     s = SequenceNumber(
         sequence=SequenceNumber.SEQUENCE_INVOICE_GLOBAL,
-        index=0,
+        index=1,
         task_id=invoice.id,
     )
     dbsession.add(s)

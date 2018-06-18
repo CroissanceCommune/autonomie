@@ -38,7 +38,8 @@
 % endif
 <table class="table table-striped table-hover">
     <thead>
-        <th>Description</th>
+        <th>Document parent</th>
+        <th>Type de document</th>
         <th>Nom du fichier</th>
         <th>Déposé le</th>
         <th class="actions">Actions</th>
@@ -46,7 +47,11 @@
     <tbody>
     % for doc in files:
         <tr>
-            <td>${doc.description}</td>
+            <td>${parent_label(doc)}</td>
+            <td>
+            % if doc.file_type_id:
+            ${doc.file_type.label}
+            % endif
             <td>${doc.name}</td>
             <td>${api.format_date(doc.updated_at)}</td>
             <td class='text-right'>

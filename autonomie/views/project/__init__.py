@@ -14,3 +14,4 @@ def includeme(config):
     config.include('.invoice')
     config.include('.phase')
     config.include('.business')
+    config.include('.files')

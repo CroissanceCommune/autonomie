@@ -84,11 +84,11 @@ class FileViewRedirectMixin(object):
     NODE_TYPE_ROUTES = {
         'activity': u"activity",
         'business': '/businesses/{id}/files',
-        'cancelinvoice': "/cancelinvoices/{id}.html",
-        'estimation': "/estimations/{id}.html",
+        'cancelinvoice': "/cancelinvoices/{id}",
+        'estimation': "/estimations/{id}",
         'expensesheet': "/expenses/{id}",
-        'invoice': "/invoices/{id}.html",
-        'project': "project",
+        'invoice': "/invoices/{id}",
+        'project': "/projects/{id}/files",
         'userdata': "/users/{id}/userdatas/filelist",
         "workshop": u"workshop",
     }
@@ -146,12 +146,18 @@ class FileView(BaseView, FileViewRedirectMixin):
             "file", id=self.context.id, _query={'action': 'delete'}
         )
 
+    def download_url(self):
+        return self.request.route_path(
+            "file", id=self.context.id, _query={'action': 'download'}
+        )
+
     def __call__(self):
         return dict(
             title=u"Fichier {0}".format(self.context.name),
             file=self.context,
             edit_url=self.edit_url(),
             delete_url=self.delete_url(),
+            download_url=self.download_url(),
             navigation=self.populate_actionmenu(),
         )
 
@@ -166,17 +172,23 @@ class FileUploadView(BaseFormView):
     By getting the referrer url from the request object, we provide the
     redirection to the original page when the file is added
 
+
+    file_requirement_service
+
+        If the file's parent has a file_requirement_service respecting
+        :class:`autonomie.interfaces.IFileRequirementService`
+        its register method will be called
     """
     factory = File
     schema = FileUploadSchema()
     title = u"Téléverser un fichier"
     valid_msg = UPLOAD_OK_MSG
 
-    def _parent_id(self):
+    def _parent(self):
         """
-            Returns the file parent's id
+        Returns the new file's parent
         """
-        return self.request.context.id
+        return self.context
 
     def before(self, form):
         fileupload_js.need()
@@ -187,18 +199,29 @@ class FileUploadView(BaseFormView):
         }
         form.set_appstruct(appstruct)
 
+    def _update_file_requirements(self, file_object):
+        """
+        Update the file requirements for the given object
+
+        :param obj file_object: The new :class:`autonomie.models.files.File`
+        """
+        parent = self._parent()
+        if hasattr(parent, "file_requirement_service"):
+            parent.file_requirement_service.register(parent, file_object)
+
     def persist_to_database(self, appstruct):
         """
-            Execute actions on the database
+        Execute actions on the database
         """
         # Inserting in the database
         file_object = self.factory()
         file_object.name = appstruct['name']
-        file_object.parent_id = self._parent_id()
+        file_object.parent_id = self._parent().id
 
         forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
         self.request.dbsession.flush()
+        self._update_file_requirements(file_object)
         self.request.session.flash(self.valid_msg)
 
     def redirect(self, come_from=None):
@@ -237,25 +260,28 @@ class FileEditView(FileUploadView):
     """
     valid_msg = EDIT_OK_MSG
 
+    def _parent(self):
+        return self.context.parent
+
     @property
     def title(self):
         """
             The form title
         """
-        return u"Modifier le fichier {0}".format(self.request.context.name)
+        return u"Modifier le fichier {0}".format(self.context.name)
 
     def format_dbdatas(self):
         """
             format the database file object to match the form schema
         """
-        filedict = self.request.context.appstruct()
+        filedict = self.context.appstruct()
 
         filedict['upload'] = {
             'filename': filedict['name'],
-            'uid': str(self.request.context.id),
+            'uid': str(self.context.id),
             'preview_url': self.request.route_url(
                 'file',
-                id=self.request.context.id,
+                id=self.context.id,
                 _query={'action': 'download'}
             )
         }
@@ -277,9 +303,10 @@ class FileEditView(FileUploadView):
         form.set_appstruct(appstruct)
 
     def persist_to_database(self, appstruct):
-        forms.merge_session_with_post(self.request.context, appstruct)
-        self.request.dbsession.merge(self.request.context)
+        forms.merge_session_with_post(self.context, appstruct)
+        self.request.dbsession.merge(self.context)
         self.request.session.flash(self.valid_msg)
+        self._update_file_requirements(self.context)
 
 
 def get_add_file_link(

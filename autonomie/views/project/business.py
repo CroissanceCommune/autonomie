@@ -17,10 +17,6 @@ from autonomie.views import (
     BaseListView,
     TreeMixin,
 )
-from autonomie.utils.menu import (
-    MenuItem,
-)
-from autonomie.views.project.layout import ProjectMenu
 from autonomie.views.project.routes import (
     PROJECT_ITEM_BUSINESS_ROUTE,
 )
@@ -29,17 +25,6 @@ from autonomie.views.business.routes import (
 )
 from autonomie.views.project.lists import ProjectListView
 from autonomie.views.project.project import remember_navigation_history
-
-
-ProjectMenu.add(
-    MenuItem(
-        name="project_businesses",
-        label=u"Liste des affaires",
-        route_name=PROJECT_ITEM_BUSINESS_ROUTE,
-        icon=u'fa fa-folder-open',
-        perm='list.businesses',
-    )
-)
 
 
 class ProjectBusinessListView(BaseListView, TreeMixin):

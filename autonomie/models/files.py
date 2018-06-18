@@ -39,6 +39,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     relationship,
     backref,
+    aliased,
+    contains_eager,
+    load_only,
 )
 
 from depot.fields.sqlalchemy import (
@@ -74,6 +77,7 @@ class File(Node):
     data = Column(UploadedFileField)
     mimetype = Column(String(100))
     size = Column(Integer)
+    status = Column(String(10), default='draft')
     file_type_id = Column(Integer, ForeignKey('file_type.id'), nullable=True)
     file_type = relationship("FileType")
 
@@ -135,6 +139,38 @@ class File(Node):
 
         return newvalue
 
+    @classmethod
+    def query_for_filetable(cls):
+        """
+        Build a File query for filetable display
+
+        Query only columns used for generic display
+
+        :rtype: :class:`sqlalchemy.orm.Query`
+        """
+        query = cls.query().options(
+            load_only(
+                "description",
+                "name",
+                "id",
+                "updated_at",
+            )
+        )
+        # On charge le nom du Node parent, comme File est également un Node, on
+        # doit fournir un alias à sqlalchemy pour qu'il ajoute un as et sache
+        # quelle action effectuer sur quel Node de sa query
+        node_alias = aliased(Node)
+        query = query.join(node_alias, cls.parent)
+        query = query.outerjoin(cls.file_type)
+        query = query.options(
+            contains_eager(cls.parent, alias=node_alias).load_only(
+                "id",
+                "name",
+                "type_",
+            )
+        )
+        return query
+
     def __json__(self, requets):
         return {
             "id": self.id,
@@ -142,6 +178,7 @@ class File(Node):
             "name": self.name,
             "size": self.size,
             "mimetype": self.mimetype,
+            "status": self.status,
         }
 
 

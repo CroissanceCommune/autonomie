@@ -530,10 +530,3 @@ def includeme(config):
         request_param="action=archive",
         permission='edit_project',
     )
-    config.add_view(
-        FileUploadView,
-        route_name=PROJECT_ITEM_ROUTE,
-        renderer='base/formpage.mako',
-        permission='edit_project',
-        request_param='action=attach_file',
-    )

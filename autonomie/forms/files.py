@@ -112,7 +112,7 @@ class FileNode(colander.SchemaNode):
     A main file upload node class
     """
     schema_type = deform.FileData
-    title = u"Choix du fichier",
+    title = u"Choix du fichier"
     default_max_size = 1048576
     _max_allowed_file_size = None
 
@@ -216,7 +216,7 @@ class FileTypeNode(colander.SchemaNode):
 class FileUploadSchema(colander.Schema):
     come_from = forms.come_from_node()
 
-    filetype = FileTypeNode(missing="")
+    file_type_id = FileTypeNode(missing="")
     upload = FileNode()
 
     description = colander.SchemaNode(colander.String())
@@ -228,6 +228,6 @@ def get_template_upload_schema():
     """
     def add_description(node, kw):
         node['upload'].description += u" Le fichier doit être au format ODT"
-        del node['filetype']
+        del node['file_type_id']
     schema = FileUploadSchema(after_bind=add_description)
     return schema

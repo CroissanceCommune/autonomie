@@ -121,6 +121,14 @@ class Node(DBBASE, PersistentACLMixin):
             'export': {'exclude': True},
         },
     )
+    files = relationship(
+        "File",
+        primaryjoin="Node.id==File.parent_id",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
+        },
+    )
 
     type_ = Column(
         'type_',
@@ -135,3 +143,14 @@ class Node(DBBASE, PersistentACLMixin):
             'export': {'exclude': True}
         },
     )
+
+    NODE_LABELS = {
+        "estimation": u"Devis",
+        "invoice": u"Facture",
+        "cancelinvoice": u"Avoir",
+        "business": u"Affaire",
+        "project": u"Projet",
+        "expense_sheet": u"Note de dépenses",
+        "workshop": u"Atelier",
+        "activity": u"Rendez-vous",
+    }

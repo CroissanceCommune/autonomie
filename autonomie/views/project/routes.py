@@ -15,6 +15,7 @@ PROJECT_ITEM_GENERAL_ROUTE = os.path.join(PROJECT_ITEM_ROUTE, 'general')
 PROJECT_ITEM_INVOICE_ROUTE = os.path.join(PROJECT_ITEM_ROUTE, 'invoices')
 PROJECT_ITEM_INVOICE_EXPORT_ROUTE = PROJECT_ITEM_INVOICE_ROUTE + ".{extension}"
 PROJECT_ITEM_BUSINESS_ROUTE = os.path.join(PROJECT_ITEM_ROUTE, 'businesses')
+PROJECT_ITEM_FILE_ROUTE = os.path.join(PROJECT_ITEM_ROUTE, 'files')
 PHASE_ROUTE = "/phases"
 PHASE_ITEM_ROUTE = os.path.join(PHASE_ROUTE, "{id}")
 
@@ -33,6 +34,7 @@ def includeme(config):
         PROJECT_ITEM_INVOICE_ROUTE,
         PROJECT_ITEM_INVOICE_EXPORT_ROUTE,
         PROJECT_ITEM_BUSINESS_ROUTE,
+        PROJECT_ITEM_FILE_ROUTE,
     ):
         config.add_route(route, route, traverse='/projects/{id}')
     config.add_route(

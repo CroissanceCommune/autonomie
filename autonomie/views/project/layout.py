@@ -18,6 +18,8 @@ from autonomie.views.project.routes import (
     PROJECT_ITEM_INVOICE_ROUTE,
     PROJECT_ITEM_PHASE_ROUTE,
     PROJECT_ITEM_GENERAL_ROUTE,
+    PROJECT_ITEM_BUSINESS_ROUTE,
+    PROJECT_ITEM_FILE_ROUTE,
 )
 
 
@@ -25,6 +27,24 @@ logger = logging.getLogger(__name__)
 
 
 ProjectMenu = Menu(name="projectmenu")
+ProjectMenu.add(
+    MenuItem(
+        name="project_businesses",
+        label=u"Liste des affaires",
+        route_name=PROJECT_ITEM_BUSINESS_ROUTE,
+        icon=u'fa fa-folder-open',
+        perm='list.businesses',
+    )
+)
+ProjectMenu.add(
+    MenuItem(
+        name="project_phases",
+        label=u"Document rangés par dossiers",
+        route_name=PROJECT_ITEM_PHASE_ROUTE,
+        icon=u'fa fa-folder-open',
+        perm='view.project',
+    )
+)
 ProjectMenu.add(
     MenuItem(
         name="project_estimations",
@@ -45,20 +65,20 @@ ProjectMenu.add(
 )
 ProjectMenu.add(
     MenuItem(
-        name="project_phases",
-        label=u"Document rangés par dossiers",
-        route_name=PROJECT_ITEM_PHASE_ROUTE,
-        icon=u'fa fa-folder-open',
-        perm='view.project',
-    )
-)
-ProjectMenu.add(
-    MenuItem(
         name="project_general",
         label=u'Informations générales',
         route_name=PROJECT_ITEM_GENERAL_ROUTE,
         icon=u'fa fa-cog',
         perm='view.project',
+    )
+)
+ProjectMenu.add(
+    MenuItem(
+        name="project_files",
+        label=u'Fichiers rattachés',
+        route_name=PROJECT_ITEM_FILE_ROUTE,
+        icon=u"fa fa-briefcase",
+        perm='list.files',
     )
 )
 

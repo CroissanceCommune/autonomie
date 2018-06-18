@@ -10,7 +10,7 @@ from autonomie.models.task.sequence_number import (
 )
 
 
-ALLOWED_VARS = ['AAAA', 'AA', 'MM', 'ANA']
+ALLOWED_VARS = ['YYYY', 'YY', 'MM', 'ANA']
 
 
 class InvoiceNumberFormatter(string.Formatter):
@@ -23,9 +23,9 @@ class InvoiceNumberFormatter(string.Formatter):
         self._sequences_map = sequences_map
 
     def _get_var_value(self, key):
-        if key == 'AAAA':
+        if key == 'YYYY':
             return '{:%Y}'.format(self._invoice.date)
-        elif key == 'AA':
+        elif key == 'YY':
             return '{:%y}'.format(self._invoice.date)
         elif key == 'MM':
             return '{:%m}'.format(self._invoice.date)

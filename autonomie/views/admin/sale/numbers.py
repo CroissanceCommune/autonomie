@@ -39,8 +39,8 @@ class NumberingConfigView(BaseConfigView):
 <p>Plusieurs variables et séquences chronologiques sont à disposition.</p>\
 <h3>Variables :</h3>\
 <ul>\
-<li><code>{AAAA}</code> : année, sur 4 digits</li>\
-<li><code>{AA}</code> : année, sur 2 digits</li>\
+<li><code>{YYYY}</code> : année, sur 4 digits</li>\
+<li><code>{YY}</code> : année, sur 2 digits</li>\
 <li><code>{MM}</code> : mois, sur 2 digits</li>\
 <li><code>{ANA}</code> : code analytique de l'activité</li>\
 </ul>\

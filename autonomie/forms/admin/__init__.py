@@ -292,7 +292,7 @@ abandons de créance dans les notes de dépense",
     "invoice_number_template": {
         "title": u"Format du numéro de facture",
         "description": u"Peut contenir des caractères (préfixes, \
-séparateurs… etc), ainsi que des variables et séquences. Ex: {AAAA}-{SEQYEAR}.",
+séparateurs… etc), ainsi que des variables et séquences. Ex: {YYYY}-{SEQYEAR}.",
         "missing": colander.required,
         "validator": invoice_number_template_validator,
     },

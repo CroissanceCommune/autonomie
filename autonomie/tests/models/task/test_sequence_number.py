@@ -180,12 +180,12 @@ def test_invoice_number_formatter(invoice_20170707, DummySequence):
         sequences_map={'DUMMY': DummySequence},
     )
     assert fmt.format('') == ''
-    assert fmt.format('{AAAA}') == '2017'
-    assert fmt.format('{AA}') == '17'
+    assert fmt.format('{YYYY}') == '2017'
+    assert fmt.format('{YY}') == '17'
     assert fmt.format('{MM}') == '07'
     assert fmt.format('{ANA}') == '0USER'
     assert fmt.format('{DUMMY}') == '12'
-    assert fmt.format('@{DUMMY}-{AAAA}') == '@12-2017'
+    assert fmt.format('@{DUMMY}-{YYYY}') == '@12-2017'
 
     with pytest.raises(KeyError):
         assert fmt.format('{DONOTEXIST}')
@@ -194,14 +194,14 @@ def test_invoice_number_formatter(invoice_20170707, DummySequence):
 def test_invoice_number_service_validation():
     InvoiceNumberService.validate_template('')
     InvoiceNumberService.validate_template('aaa')
-    InvoiceNumberService.validate_template('@{SEQGLOBAL}-{AAAA}')
+    InvoiceNumberService.validate_template('@{SEQGLOBAL}-{YYYY}')
 
     with pytest.raises(ValueError):
         InvoiceNumberService.validate_template('@{DONOTEXIST}')
 
 
 def test_invoice_number_service_generation(invoice_20170707, invoice_20170808):
-    tpl = 'FC-{AAAA}{MM}-{SEQGLOBAL}'
+    tpl = 'FC-{YYYY}{MM}-{SEQGLOBAL}'
 
     InvoiceNumberService.assign_number(invoice_20170707, tpl)
     InvoiceNumberService.assign_number(invoice_20170808, tpl)

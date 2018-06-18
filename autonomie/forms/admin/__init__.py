@@ -142,32 +142,6 @@ entrepreneurs à la CAE",
         "description": u"",
         "section": u"Configuration des comptes RRR"
     },
-    "compte_cg_assurance": {
-        "title": u"Compte de charge assurance",
-        "description": u"",
-        "section": u"Module Assurance",
-    },
-    "compte_cgscop": {
-        "title": u"Compte de charge CG Scop",
-        "description": u"",
-        "section": u"Module CGSCOP",
-    },
-    'compte_cg_debiteur': {
-        "title": u"Compte de contrepartie CGSCOP",
-        "description": u"",
-        "section": u"Module CGSCOP",
-    },
-    "compte_cg_organic": {
-        "title": u"Compte de charge Organic",
-        "description": u"Compte CG pour la contribution à l'Organic",
-        "section": u"Module Contribution à l'Organic",
-    },
-    "compte_cg_debiteur_organic": {
-        "title": u"Compte de contrepartie Organic",
-        "description": u"Compte CG de débiteur pour la contribution à \
-l'Organic",
-        "section": u"Module Contribution à l'Organic",
-    },
     'compte_rg_interne': {
         "title": u"Compte CG RG Interne",
         "description": u"",
@@ -184,24 +158,6 @@ l'Organic",
 0 et 100). Elle peut être individualisée sur les pages entreprises.",
         "section": u"Module Contribution",
     },
-    'taux_assurance': {
-        "title": u"Taux d'assurance",
-        "description": u"(nombre entre 0 et 100) Requis pour le module \
-d'écritures Assurance",
-        "section": u"Module Assurance",
-    },
-    'taux_cgscop': {
-        "title": u"Taux CGSCOP",
-        "description": u"(nombre entre 0 et 100) Requis pour le module \
-d'écritures CGSCOP",
-        "section": u"Module CGSCOP",
-    },
-    'taux_contribution_organic': {
-        "title": u"Taux de Contribution à l'Organic",
-        "description": "(nombre entre 0 et 100) Requis pour le module \
-d'écritures Contribution Organic",
-        "section": u"Module Contribution à l'Organic",
-    },
     'taux_rg_interne': {
         "title": u"Taux RG Interne",
         "description": u"(nombre entre 0 et 100) Requis pour les écritures \
@@ -216,21 +172,6 @@ d'écriture RG Client",
     },
     'sage_contribution': {
         "title": u"Module contribution",
-        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
-        "section": u"Activation des modules d'export Sage",
-    },
-    'sage_assurance': {
-        "title": u"Module assurance",
-        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
-        "section": u"Activation des modules d'export Sage",
-    },
-    'sage_cgscop': {
-        "title": u"Module CGSCOP",
-        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
-        "section": u"Activation des modules d'export Sage",
-    },
-    'sage_organic': {
-        "title": u"Module Contribution organic",
         "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
         "section": u"Activation des modules d'export Sage",
     },

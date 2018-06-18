@@ -36,7 +36,6 @@ from autonomie.compute.sage import (
     SageInvoice,
     SageFacturation,
     SageContribution,
-    SageAssurance,
     SageRGInterne,
     SageRGClient,
     CustomBookEntryFactory,

@@ -77,7 +77,6 @@ class File(Node):
     data = Column(UploadedFileField)
     mimetype = Column(String(100))
     size = Column(Integer)
-    status = Column(String(10), default='draft')
     file_type_id = Column(Integer, ForeignKey('file_type.id'), nullable=True)
     file_type = relationship("FileType")
 
@@ -178,7 +177,6 @@ class File(Node):
             "name": self.name,
             "size": self.size,
             "mimetype": self.mimetype,
-            "status": self.status,
         }
 
 

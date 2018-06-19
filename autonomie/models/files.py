@@ -192,7 +192,14 @@ class FileType(ConfigurableOption):
     @property
     def is_used(self):
         query = DBSESSION().query(File).filter_by(file_type_id=self.id)
-        return DBSESSION().query(query.exists()).scalar()
+        file_exists = DBSESSION().query(query.exists()).scalar()
+
+        from autonomie.models.indicators import SaleFileRequirement
+        indicator_query = DBSESSION().query(SaleFileRequirement).filter_by(
+            file_type_id=self.id
+        )
+        indicator_exists = DBSESSION().query(indicator_query.exists()).scalar()
+        return file_exists or indicator_exists
 
     @classmethod
     def get_by_label(cls, label):

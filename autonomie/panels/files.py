@@ -7,7 +7,7 @@ from autonomie.utils.widgets import Link
 from autonomie.models.node import Node
 
 
-def _stream_actions(request, item):
+def stream_actions(request, item):
     """
     Collect actions available for the given item
     """
@@ -37,9 +37,9 @@ def _stream_actions(request, item):
         )
 
 
-def filelist_tab_panel(context, request, title, add_url=None):
+def task_file_tab_panel(context, request, title, add_url=None):
     """
-    render a bootstrap panel used to display a filelist
+    render a bootstrap panel used to display a files attached to a task
 
     :param obj context: The context for which we display the files
     :param str title: The title to give to this tab
@@ -58,10 +58,12 @@ def filelist_tab_panel(context, request, title, add_url=None):
             id=context.id,
             _query=query,
         )
+
     return dict(
         title=title,
-        files=context.children,
         add_url=add_url,
+        files=context.files,
+        stream_actions=stream_actions,
     )
 
 
@@ -104,7 +106,7 @@ def filetable_panel(
     return dict(
         files=files,
         add_url=add_url,
-        stream_actions=_stream_actions,
+        stream_actions=stream_actions,
         add_perm=add_perm,
         help_message=help_message,
         parent_label=parent_label,
@@ -113,9 +115,9 @@ def filetable_panel(
 
 def includeme(config):
     config.add_panel(
-        filelist_tab_panel,
-        'filelist_tab',
-        renderer='panels/filelist_tab.mako',
+        task_file_tab_panel,
+        'task_file_tab',
+        renderer='panels/task_file_tab.mako',
     )
     config.add_panel(
         filetable_panel,

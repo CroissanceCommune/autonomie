@@ -233,6 +233,7 @@ class Invoice(Task, InvoiceCompute):
             financial_year=self.financial_year,
             display_units=self.display_units,
             business_type_id=self.business_type_id,
+            business_id=self.business_id,
         )
 
         cancelinvoice.line_groups = []

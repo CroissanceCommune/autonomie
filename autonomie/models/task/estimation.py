@@ -373,6 +373,7 @@ class Estimation(Task, EstimationCompute):
             workplace=self.workplace,
             mentions=self.mentions,
             business_type_id=self.business_type_id,
+            business_id=self.business_id,  # if set we pass it to the invoice
         )
         return inv
 

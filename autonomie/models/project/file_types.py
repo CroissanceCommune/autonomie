@@ -34,9 +34,8 @@ class BusinessTypeFileType(DBBASE):
     """
     __tablename__ = "business_type_file_type"
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    file_type_id = Column(ForeignKey("file_type.id"))
-    business_type_id = Column(ForeignKey("business_type.id"))
+    file_type_id = Column(ForeignKey("file_type.id"), primary_key=True)
+    business_type_id = Column(ForeignKey("business_type.id"), primary_key=True)
 
     # estimation/invoice/cancelinvoice/business
     doctype = Column(String(14), primary_key=True)
@@ -113,10 +112,3 @@ class BusinessTypeFileType(DBBASE):
             )
             result = query.all()
         return result
-
-    @classmethod
-    def find(cls, file_type_id, btype_id, doctype):
-        query = cls.query().filter_by(business_type_id=btype_id)
-        query = query.filter_by(file_type_id=file_type_id)
-        query = query.filter_by(doctype=doctype)
-        return query.first()

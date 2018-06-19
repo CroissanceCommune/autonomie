@@ -229,6 +229,9 @@ class TaskDuplicateView(BaseFormView):
             user=self.request.user,
             **appstruct
         )
+        if hasattr(self, "_after_task_duplicate"):
+            self._after_task_duplicate(task, appstruct)
+
         self.dbsession.add(task)
         self.dbsession.flush()
         logger.debug(
@@ -290,6 +293,12 @@ class TaskHtmlView(BaseView):
         """
         return []
 
+    def _collect_file_indicators(self):
+        """
+        Collect file requirements attached to the given context
+        """
+        return self.context.file_requirements
+
     def __call__(self):
         task_html_pdf_css.need()
         # If the task is editable, we go the edit page
@@ -302,11 +311,11 @@ class TaskHtmlView(BaseView):
             )
 
         populate_actionmenu(self.request)
-
         return dict(
             title=self.title,
             task=self.context,
             actions=self.actions(),
+            indicators=self._collect_file_indicators(),
         )
 
 

@@ -104,6 +104,7 @@ class EstimationAddView(TaskAddView):
         Add Estimation's specific attribute while adding this task
         """
         estimation.payment_lines = [PaymentLine(description='Solde', amount=0)]
+        estimation.initialize_business_datas()
         return estimation
 
     def _after_flush(self, estimation):
@@ -171,6 +172,10 @@ class EstimationPdfView(TaskPdfView):
 class EstimationDuplicateView(TaskDuplicateView):
     label = u"le devis"
 
+    def _after_task_duplicate(task, appstruct):
+        task.initialize_business_datas()
+        return task
+
 
 class EstimationSetMetadatasView(TaskSetMetadatasView):
     @property
@@ -235,7 +240,7 @@ def estimation_geninv_view(context, request):
 
     invoices = context.gen_invoices(request.user)
     for invoice in invoices:
-        invoice.business = business
+        invoice.initialize_business_datas(business)
         request.dbsession.add(invoice)
 
     context.geninv = True

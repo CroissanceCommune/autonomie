@@ -90,6 +90,8 @@ class InvoiceAddView(TaskAddView):
         """
         invoice.financial_year = datetime.date.today().year
         invoice.prefix = self.request.config.get('invoiceprefix', '')
+        business = invoice.gen_business()
+        invoice.initialize_business_datas(business)
         return invoice
 
     def _after_flush(self, invoice):
@@ -138,6 +140,10 @@ class InvoiceHtmlView(TaskHtmlView):
 class InvoiceDuplicateView(TaskDuplicateView):
     label = u"la facture"
 
+    def _after_task_duplicate(self, task, appstruct):
+        business = task.gen_business()
+        task.initialize_business_datas(business)
+        return task
 
 class InvoicePdfView(TaskPdfView):
     pass
@@ -149,6 +155,7 @@ def gencinv_view(context, request):
     """
     try:
         cancelinvoice = context.gen_cancelinvoice(request.user)
+        cancelinvoice.initialize_business_datas()
         request.dbsession.add(cancelinvoice)
         request.dbsession.flush()
     except:

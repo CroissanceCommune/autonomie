@@ -37,7 +37,13 @@ def _get_business_type_file_type_schema():
         'requirement_type',
         typ=colander.String(12),
         validator=colander.OneOf(
-            ('global_mandatory', 'mandatory', 'recommended', 'optionnal'),
+            (
+                'business_mandatory',
+                'project_mandatory',
+                'mandatory',
+                'recommended',
+                'optionnal'
+            ),
         ),
         missing=colander.drop,
     )

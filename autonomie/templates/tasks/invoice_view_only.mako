@@ -64,7 +64,7 @@
 
 </%block>
 
-<%block name='before_tabs'>
+<%block name='before_actions'>
     <% invoice = request.context %>
     <h2>${invoice.name}</h2>
     <p class='lead'>

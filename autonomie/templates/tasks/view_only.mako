@@ -37,6 +37,18 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
     <div class='panel-body'>
         <div class='row'>
             <div class='col-xs-12 col-md-3'>
+                <span class='hidden-xs' style='float:left'>
+                <i class='fa fa-file fa-4x'></i>&nbsp;
+                </span>
+                % if hasattr(next, 'before_actions'):
+                ${next.before_actions()}
+                % endif
+                % if task.business_type.name != 'default':
+                <p class='lead'>
+                Affaire de type : ${task.business_type.label}
+                </p>
+                % endif
+                <hr />
                 <a class='btn btn-primary primary-action btn-block'
                     href="${request.route_path('/%ss/{id}.pdf' % request.context.type_, id=request.context.id)}"
                     >
@@ -51,9 +63,6 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                 </div>
             </div>
             <div class='col-xs-12 col-md-9'>
-                % if hasattr(next, 'before_tabs'):
-                ${next.before_tabs()}
-                % endif
 
                 <div class="nav-tabs-responsive">
                     <ul class="nav nav-tabs" role="tablist">
@@ -89,9 +98,13 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                     <div role='tabpanel' class="tab-pane active row" id="summary">
                         <div class='col-xs-12 col-md-6'>
                             <i class='glyphicon glyphicon-${api.status_icon(request.context)}'></i> ${api.format_status(request.context)}
+                            % if indicators:
+                            ${request.layout_manager.render_panel('task_indicators')}
+                            % endif
                             % if hasattr(next, 'before_summary'):
                                 ${next.before_summary()}
                             % endif
+
                             <h3>Informations générales</h3>
                             <dl class='dl-horizontal'>
                                 <dt>Nom du document</dt>
@@ -147,7 +160,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                     <!-- attached files tab -->
                     % if api.has_permission('view.file'):
                         <% title = u"Liste des fichiers attachés à cette facture" %>
-                       ${request.layout_manager.render_panel('filelist_tab', title=title)}
+                       ${request.layout_manager.render_panel('task_file_tab', title=title)}
                     % endif
 
                 </div>

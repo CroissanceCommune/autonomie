@@ -48,7 +48,7 @@
 % endif
 </%block>
 
-<%block name='before_tabs'>
+<%block name='before_actions'>
     <% cancelinvoice = request.context %>
     <h2>${cancelinvoice.name}</h2>
     <p class='lead'>

@@ -72,11 +72,9 @@
 
 </%block>
 
-<%block name='before_tabs'>
+<%block name='before_actions'>
     <% estimation = request.context %>
-    <h3>
-    ${estimation.name}
-    </h3>
+    <h2>${estimation.name}</h2>
 
 % if api.has_permission('set_signed_status.estimation'):
     <div

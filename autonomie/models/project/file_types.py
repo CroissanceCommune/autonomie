@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Boolean,
+    Integer,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -33,8 +34,9 @@ class BusinessTypeFileType(DBBASE):
     """
     __tablename__ = "business_type_file_type"
     __table_args__ = default_table_args
-    file_type_id = Column(ForeignKey("file_type.id"), primary_key=True)
-    business_type_id = Column(ForeignKey("business_type.id"), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    file_type_id = Column(ForeignKey("file_type.id"))
+    business_type_id = Column(ForeignKey("business_type.id"))
 
     # estimation/invoice/cancelinvoice/business
     doctype = Column(String(14), primary_key=True)
@@ -46,9 +48,10 @@ class BusinessTypeFileType(DBBASE):
         "BusinessType",
         backref=backref("file_type_rel", cascade='all, delete-orphan'),
     )
-    # global_mandatory / mandatory / optionnal / recommended
+    # project_mandatory / business_mandatory / mandatory / optionnal /
+    # recommended
     requirement_type = Column(
-        String(17),
+        String(20),
         default=False,
         info={
             'colanderalchemy': {
@@ -67,6 +70,26 @@ class BusinessTypeFileType(DBBASE):
             }
         }
     )
+    # requirement qui implique un indicateur de statut
+    STATUS_REQUIREMENT_TYPES = (
+        'project_mandatory',
+        'business_mandatory',
+        'mandatory',
+        'recommended',
+    )
+
+    @classmethod
+    def get_file_requirements(cls, business_type_id, doctype, mandatory=False):
+        """
+        Collect file requirements related to a given business_type
+        """
+        query = cls.query().filter_by(business_type_id=business_type_id)
+        query = query.filter_by(doctype=doctype)
+        if mandatory:
+            query = query.filter(
+                cls.requirement_type.in_(cls.STATUS_REQUIREMENT_TYPES)
+            )
+        return query
 
     @classmethod
     def get_file_type_options(cls, business_type_id, doctype):
@@ -90,3 +113,10 @@ class BusinessTypeFileType(DBBASE):
             )
             result = query.all()
         return result
+
+    @classmethod
+    def find(cls, file_type_id, btype_id, doctype):
+        query = cls.query().filter_by(business_type_id=btype_id)
+        query = query.filter_by(file_type_id=file_type_id)
+        query = query.filter_by(doctype=doctype)
+        return query.first()

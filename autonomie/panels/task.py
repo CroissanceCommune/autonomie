@@ -32,6 +32,7 @@ from autonomie.models.company import Company
 
 from autonomie.utils.strings import major_status
 from autonomie.views.render_api import status_icon
+from autonomie.panels.files import stream_actions
 
 
 CompanySerializer = SqlaContext(Company)
@@ -123,6 +124,17 @@ def task_title_panel(context, request, title):
     )
 
 
+def task_indicators_panel(context, request):
+    """
+    Show the indicators for the given Task context
+    """
+    indicators = context.file_requirements
+    return dict(
+        indicators=indicators,
+        stream_actions=stream_actions,
+    )
+
+
 def includeme(config):
     """
         Pyramid's inclusion mechanism
@@ -135,5 +147,10 @@ def includeme(config):
     config.add_panel(
         task_title_panel,
         "task_title_panel",
-        renderer="panels/task_title_panel.mako",
+        renderer="autonomie:templates/panels/task/title.mako",
+    )
+    config.add_panel(
+        task_indicators_panel,
+        "task_indicators",
+        renderer="autonomie:templates/panels/task/indicators.mako",
     )

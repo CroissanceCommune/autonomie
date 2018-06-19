@@ -20,6 +20,7 @@ from autonomie.models.user.userdatas import (
     UserDatas,
     SocialDocTypeOption,
     UserDatasSocialDocTypes,
+    get_default_cae_situation,
 )
 from autonomie.models import files
 from autonomie.forms.user.userdatas import (
@@ -140,6 +141,7 @@ def userdatas_add_view(context, request):
     user_datas.coordonnees_lastname = context.lastname
     user_datas.coordonnees_firstname = context.firstname
     user_datas.coordonnees_email1 = context.email
+    user_datas.situation_situation_id = get_default_cae_situation()
     request.dbsession.add(user_datas)
     request.dbsession.flush()
     return HTTPFound(

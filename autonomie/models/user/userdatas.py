@@ -176,6 +176,10 @@ class CaeSituationOption(ConfigurableOption):
     __colanderalchemy_config__ = {
         'title': u"Situation dans la CAE",
         'validation_msg': u"Les types de situations ont bien été configurés",
+        'help_msg': u"Ce sont les différents statuts que peuvent prendre les \
+        porteurs de projet peuvent avoir pendant leur parcours au sein de la \
+        coopérative.<br /><br /><b>La première situation (dans l'ordre ci-dessous) \
+        sera affectée par défaut aux nouveaux porteurs de projet.</b>"
     }
     id = get_id_foreignkey_col('configurable_option.id')
     # Is this element related to the integration process of a PP
@@ -191,6 +195,13 @@ un compte Autonomie lui sera automatiquement associé"
             }
         },
     )
+
+def get_default_cae_situation():
+    situation = CaeSituationOption.query().order_by(CaeSituationOption.order).first()
+    if situation is not None:
+        return situation.id
+    else:
+        return None
     
 
 class SocialDocTypeOption(ConfigurableOption):

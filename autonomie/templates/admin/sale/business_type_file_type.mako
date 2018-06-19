@@ -40,7 +40,9 @@
                     <table class='table table-bordered table-striped'>
                         <thead>
                             <th>Types de fichier</th>
-                            <th>Affaire</th>
+                            % if business_type.name != 'default':
+                                <th>Affaire</th>
+                            % endif
                             <th>Devis</th>
                             <th>Factures</th>
                             <th>Avoirs</th>
@@ -53,6 +55,9 @@
                             <td><b>${file_type.label}</b></td>
                                 <% btype_items = file_type_items.get(business_type.id, {}) %>
                                 % for doctype in ('business', 'estimation', 'invoice', 'cancelinvoice'):
+                                    % if business_type.name == 'default' and doctype == 'business':
+                                    <% continue %>
+                                    % endif
                                 <% requirement_type = btype_items.get(doctype, {}).get('requirement_type', -1) %>
                                 <% validation = btype_items.get(doctype, {}).get('validation') %>
                                 <% tag_id = "requirement_type_%s_%s_%s" % (file_type.id, business_type.id, doctype) %>
@@ -76,7 +81,8 @@
                                         ('optionnal', u'Est Proposé dans le formulaire de dépot de fichier'), \
                                         ('recommended', u'Recommandé'), \
                                         ('mandatory', u'Requis systématiquement pour la validation'), \
-                                        ('global_mandatory', u"Globalement requis dans l'affaire pour la validation")):
+                                        ('business_mandatory', u"Globalement requis dans le/la {0} pour la validation".format(business_type.label)), \
+                                        ('project_mandatory', u"Globalement requis dans le projet pour la validation")):
                                         <div class='radio'>
                                         <label>
                                             <input type='radio' name='${tag_id}' value='${option}'

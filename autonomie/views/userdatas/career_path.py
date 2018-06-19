@@ -38,6 +38,7 @@ from autonomie.views import (
 from autonomie.utils.strings import format_account
 from autonomie.models.career_path import CareerPath
 from autonomie.models.career_stage import CareerStage 
+from autonomie.models.user.login import Login
 from autonomie.forms.user.career_path import (
     get_add_stage_schema,
     get_edit_stage_schema,
@@ -98,11 +99,19 @@ class CareerPathAddStage(BaseFormView):
         model = self.dbsession.merge(model)
         self.dbsession.flush()
 
+        # Redirect to login or stage's edition if needed
+        dest_route = self.request.current_route_path(_query='')
+        if model.career_stage.cae_situation.is_integration:
+            login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
+            if login is None:
+                dest_route = self.request.route_path('/users/{id}/login', id=self.context.userdatas.id)
         if model.stage_type is not None:
-            return HTTPFound(self.request.route_path('career_path', id=model.id, _query=''))
-        else:
-            self.session.flash(u"L'étape de parcours a bien été ajoutée")
-            return HTTPFound(self.request.current_route_path(_query=''))
+            if model.stage_type in ("contract", "amendment", "exit") : 
+                dest_route = self.request.route_path('career_path', id=model.id, _query='')
+
+        self.session.flash(u"L'étape de parcours a bien été ajoutée")
+        return HTTPFound(dest_route)
+
 
 class UserCareerPathAddStage(CareerPathAddStage):
     @property
@@ -153,12 +162,19 @@ class CareerPathEditStage(BaseFormView):
         model.userdatas_id = self.current_userdatas.id
         model = self.dbsession.merge(model)
         self.dbsession.flush()
-        self.session.flash(
-            u"L'étape de parcours a bien été enregistrée"
-        )
+        self.session.flash(u"L'étape de parcours a bien été enregistrée")
+        dest = u"userdatas/career_path"
+
+        # Redirect to login management if new CAE situation is integration and no active login
+        if self.context.cae_situation.is_integration:
+            login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
+            if login is None:
+                dest = u"login"
+
         return HTTPFound(
-            self.request.route_path('/users/{id}/userdatas/career_path', id=self.context.userdatas_id)
+            self.request.route_path('/users/{id}/%s' % dest, id=self.context.userdatas_id)
         )
+
 
 class UserCareerPathEditStage(CareerPathEditStage):
     @property

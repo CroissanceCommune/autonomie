@@ -72,6 +72,12 @@ from autonomie.compute.math_utils import (
 )
 from autonomie.models.node import Node
 from autonomie.models.project.business import Business
+from autonomie.models.services.task_mentions import (
+    TaskMentionService,
+)
+from autonomie.models.services.sale_file_requirements import (
+    TaskFileRequirementService,
+)
 from autonomie.models.task.mentions import (
     MANDATORY_TASK_MENTION,
     TASK_MENTION,
@@ -144,6 +150,8 @@ class Task(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'task'}
     _autonomie_service = TaskService
+    file_requirement_service = TaskFileRequirementService
+    mention_service = TaskMentionService
 
     id = Column(
         Integer,
@@ -573,14 +581,18 @@ _{s.date:%m%y}"
         # We add a default task line group
         self.line_groups.append(TaskLineGroup(order=0))
 
-        if self.business_type_id is not None:
-            with DBSESSION.no_autoflush:
-                from autonomie.models.project.types import BusinessType
+    def initialize_business_datas(self, business=None):
+        """
+        Initialize the business datas related to this task
 
-                self.mandatory_mentions = BusinessType.get_mandatory_mentions(
-                    self.business_type_id,
-                    self.type_,
-                )
+        :param obj business: instance of
+        :class:`autonomie.models.project.business.Business`
+        """
+        if business is not None:
+            self.business = business
+
+        self.file_requirement_service.populate(self)
+        self.mention_service.populate(self)
 
     def _get_project_index(self, project):
         """

@@ -86,3 +86,20 @@ class IInvoiceService(Interface):
         Callback launched after invoice validation
         """
         pass
+
+
+class IFileRequirementService(Interface):
+    """
+    Describe the way a File Requirement service should work
+    """
+    def populate(parent_object):
+        """
+        Populate the parent_object with File Requirements
+        """
+        pass
+
+    def register(sale_node, file_object):
+        """
+        Register the file_object against the associated indicators
+        """
+        pass

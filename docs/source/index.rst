@@ -19,6 +19,7 @@ Contents:
     models
     rest
     apidoc/modules
+    migration
 
 .. include:: components.rst
 

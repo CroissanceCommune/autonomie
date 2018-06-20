@@ -71,7 +71,6 @@ class SageCsvWriter(CsvExporter):
 class SageInvoiceCsvWriter(SageCsvWriter):
     """
     Sage invoice csv writer
-    Add the handling of the invoice prefix in invoice number formatting
     """
     amount_precision = 5
     headers = (

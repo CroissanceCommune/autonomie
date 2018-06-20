@@ -41,12 +41,23 @@ from autonomie.forms import files
 from autonomie.forms.widgets import CleanMappingWidget, CleanSequenceWidget
 from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
+from autonomie.utils.strings import safe_unicode
 
 
 log = logging.getLogger(__name__)
 
 
 HEADER_RESIZER = ImageResizer(4, 1)
+
+
+def invoice_number_template_validator(node, value):
+    from autonomie.models.services.invoice_sequence_number import (
+        InvoiceNumberService,
+    )
+    try:
+        InvoiceNumberService.validate_template(value)
+    except ValueError as e:
+        raise colander.Invalid(node, str(e))
 
 
 CONFIGURATION_KEYS = {
@@ -278,7 +289,42 @@ abandons de créance dans les notes de dépense",
                 ("10", u"Résultat de l'entreprise"),
             )
         )
-    }
+    },
+    "invoice_number_template": {
+        "title": u"Gabarit du numéro de facture",
+        "description": u"Peut contenir des caractères (préfixes, \
+séparateurs… etc), ainsi que des variables et séquences. Ex: {YYYY}-{SEQYEAR}.",
+        "missing": colander.required,
+        "validator": invoice_number_template_validator,
+    },
+    "global_sequence_init_value": {
+        "title": u"Valeur à laquelle on initialise de la séquence globale",
+        "section": u"Séquence globale (SEQGLOBAL)",
+        "type": colander.Int(),
+        "validator": colander.Range(min=0),
+    },
+    "year_sequence_init_value": {
+        "title": u"Valeur à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQYEAR)",
+        "type": colander.Int(),
+        "validator": colander.Range(min=0),
+    },
+    "year_sequence_init_date": {
+        "title": u"Date à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQYEAR)",
+        "widget": deform.widget.DateInputWidget(),
+    },
+    "month_sequence_init_value": {
+        "title": u"Valeur à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQMONTH)",
+        "type": colander.Int(),
+        "validator": colander.Range(min=0),
+    },
+    "month_sequence_init_date": {
+        "title": u"Date à laquelle on initialise la séquence annuelle",
+        "section": u"Séquence annuelle (SEQMONTH)",
+        "widget": deform.widget.DateInputWidget(),
+    },
 }
 
 
@@ -288,12 +334,13 @@ def get_config_key_schemanode(key, ui_conf):
     This key should appear in the dict here above CONFIGURATION_KEYS
     """
     return colander.SchemaNode(
-        colander.String(),
+        ui_conf.get('type', colander.String()),
         title=ui_conf.get('title', key),
         description=ui_conf.get('description'),
-        missing=u"",
+        missing=ui_conf.get('missing', u""),
         name=key,
         widget=ui_conf.get('widget'),
+        validator=ui_conf.get('validator', None),
     )
 
 
@@ -315,10 +362,12 @@ def get_config_schema(keys):
         node = get_config_key_schemanode(key, ui_conf)
 
         if "section" in ui_conf:  # This element should be shown in a mapping
-            section_name = ui_conf['section']
+
+            section_title = ui_conf['section']
+            section_name = safe_unicode(section_title)
             if section_name not in mappings:
                 mappings[section_name] = mapping = colander.Schema(
-                    title=section_name,
+                    title=section_title,
                     name=section_name,
                 )
                 schema.add(mapping)

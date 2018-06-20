@@ -63,6 +63,10 @@ from autonomie.compute.task import (
     TaskCompute,
     InvoiceCompute,
 )
+from autonomie.models.config import Config
+from autonomie.models.services.invoice_sequence_number import (
+    InvoiceNumberService,
+)
 from autonomie.models.tva import (
     Product,
 )
@@ -91,36 +95,23 @@ class InvoiceService(object):
     """
     Service for invoice and cancelinvoice management
     """
-    def _get_next_official_number(self, year=None):
-        """
-        Return the next available official number
-
-        :param int year: The year we'd like to query a number for
-        """
-        next_ = 1
-        if year is None:
-            year = datetime.date.today().year
-
-        query = DBSESSION().query(func.max(Task.official_number))
-        query = query.filter(extract('year', Task.date) == year)
-        last = query.first()[0]
-        if last:
-            next_ = last + 1
-
-        return next_
-
     def valid_callback(self, task):
         """
         Validation callback (launched after task validation)
 
-        Set the date to current
         Set the official number
 
         :param obj task: The task object
         """
+        template = Config.get_value('invoice_number_template', None)
+        assert template is not None, \
+            'invoice_number_template setting should be set'
+
         if task.official_number is None:
-            official_number = self._get_next_official_number(task.date.year)
-            task.official_number = official_number
+            InvoiceNumberService.assign_number(
+                task,
+                template,
+            )
 
 
 def translate_invoices(invoicequery, from_point):
@@ -240,7 +231,6 @@ class Invoice(Task, InvoiceCompute):
             invoice=self,
             expenses_ht=-1 * self.expenses_ht,
             financial_year=self.financial_year,
-            prefix=self.prefix,
             display_units=self.display_units,
             business_type_id=self.business_type_id,
         )

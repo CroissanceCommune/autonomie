@@ -52,7 +52,7 @@
     <% cancelinvoice = request.context %>
     <h2>${cancelinvoice.name}</h2>
     <p class='lead'>
-    Cet avoir porte le numéro <b>${cancelinvoice.prefix}${cancelinvoice.official_number}</b>
+    Cet avoir porte le numéro <b>${cancelinvoice.official_number}</b>
     </p>
 </%block>
 <%block name='moretabs'>
@@ -97,7 +97,7 @@
             </a>
             % endif
             <br />
-            Il porte le numéro ${cancelinvoice.prefix}${cancelinvoice.official_number}.
+            Il porte le numéro ${cancelinvoice.official_number}.
             </div>
             <% url = request.route_path('/export/treasury/invoices/{id}', id=cancelinvoice.id, _query={'force': True}) %>
             % if cancelinvoice.exported:

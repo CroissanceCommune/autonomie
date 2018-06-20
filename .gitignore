@@ -18,3 +18,4 @@ node_modules
 /.pytest_cache
 /docs/build/
 autonomie/tests/datas/filedepot
+package-lock.json

@@ -63,7 +63,6 @@ class InvoiceRestView(TaskRestView):
 
         if self.request.has_permission('set_treasury.invoice'):
             sections['general']['financial_year'] = True
-            sections['general']['prefix'] = True
             sections['tasklines']['product'] = True
 
         return sections
@@ -135,7 +134,6 @@ class CancelInvoiceRestView(TaskRestView):
         """
         if self.request.has_permission('set_treasury.invoice'):
             sections['general']['financial_year'] = True
-            sections['general']['prefix'] = True
             sections['tasklines']['product'] = True
         return sections
 

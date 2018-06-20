@@ -62,7 +62,6 @@ class TaskCompute(object):
     expenses_ht = 0
     expenses_tva = -1
     round_floor = False
-    prefix = ""
 
     def floor(self, amount):
         return math_utils.floor_to_precision(amount, self.round_floor)

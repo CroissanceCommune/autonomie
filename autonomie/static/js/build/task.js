@@ -5321,7 +5321,7 @@ webpackJsonp([2],[
 	    regions: {
 	        status_history: '.status_history',
 	        name: '.name',
-	        prefix: '.prefix',
+	        course: '.course',
 	        financial_year: '.financial_year'
 	    },
 	    childViewTriggers: {
@@ -5351,13 +5351,12 @@ webpackJsonp([2],[
 	            value: this.model.get('name'),
 	            field_name: 'name'
 	        }));
-	        if (_.has(this.section, 'prefix')) {
-	            this.showChildView('prefix', new _InputWidget2.default({
-	                title: "Préfixe du numéro de facture",
-	                value: this.model.get('prefix'),
-	                field_name: 'prefix'
-	            }));
-	        }
+	        this.showChildView('course', new _CheckboxWidget2.default({
+	            label: "Ce document concerne-t-il une formation professionelle continue ?",
+	            title: "Formation professionnelle",
+	            value: this.model.get('course'),
+	            field_name: 'course'
+	        }));
 	        if (_.has(this.section, 'financial_year')) {
 	            this.showChildView('financial_year', new _InputWidget2.default({
 	                title: "Année comptable de référence",
@@ -5943,7 +5942,7 @@ webpackJsonp([2],[
 	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
 	    + "\n                </a>\n            </li>\n";
 	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='prefix'></div>\n            </div>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n";
+	  var stack1, buffer = "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-12 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n            <div class='col-md-6 col-md-6 col-xs-12'>\n                <div class='course'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.attachments : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "</div>\n";
@@ -11073,7 +11072,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var CommonModel = _BaseModel2.default.extend({
-	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'prefix', 'display_units'],
+	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'course', 'display_units'],
 	    validation: {
 	        date: {
 	            required: true,

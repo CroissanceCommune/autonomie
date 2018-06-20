@@ -41,7 +41,7 @@ const GeneralView = Mn.View.extend({
     regions: {
         status_history: '.status_history',
         name: '.name',
-        prefix: '.prefix',
+        course: '.course',
         financial_year: '.financial_year',
     },
     childViewTriggers: {
@@ -74,16 +74,15 @@ const GeneralView = Mn.View.extend({
                 field_name: 'name',
             })
         );
-        if (_.has(this.section, 'prefix')){
-            this.showChildView(
-                'prefix',
-                new InputWidget({
-                    title: "Préfixe du numéro de facture",
-                    value: this.model.get('prefix'),
-                    field_name: 'prefix',
-                })
-            );
-        }
+        this.showChildView(
+            'course',
+            new CheckboxWidget({
+                label: "Ce document concerne-t-il une formation professionelle continue ?",
+                title: "Formation professionnelle",
+                value: this.model.get('course'),
+                field_name: 'course',
+            })
+        );
         if (_.has(this.section, 'financial_year')){
             this.showChildView(
                 'financial_year',

@@ -182,9 +182,8 @@ class InvoiceSetTreasuryiew(BaseEditView):
     """
     factory = Invoice
     schema = get_add_edit_invoice_schema(
-        includes=('prefix', 'financial_year',),
-        title=u"Modifier l'année fiscale de référence et le préfixe "
-        u"du numéro de facture",
+        includes=('financial_year',),
+        title=u"Modifier l'année fiscale de référence du numéro de facture",
     )
 
     def redirect(self):

@@ -121,7 +121,7 @@
                     <a href="${request.route_path('/invoices/{id}.html', id=invoice.id)}">
                         ${invoice.internal_number}
                         % if invoice.official_number:
-                        (${invoice.prefix}${invoice.official_number})
+                        (${invoice.official_number})
                         % endif
                     </a> a été générée depuis ce devis.
                 </p>

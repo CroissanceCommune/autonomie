@@ -300,10 +300,14 @@ séparateurs… etc), ainsi que des variables et séquences. Ex: {YYYY}-{SEQYEAR
     "global_sequence_init_value": {
         "title": u"Valeur à laquelle on initialise de la séquence globale",
         "section": u"Séquence globale (SEQGLOBAL)",
+        "type": colander.Int(),
+        "validator": colander.Range(min=0),
     },
     "year_sequence_init_value": {
         "title": u"Valeur à laquelle on initialise la séquence annuelle",
         "section": u"Séquence annuelle (SEQYEAR)",
+        "type": colander.Int(),
+        "validator": colander.Range(min=0),
     },
     "year_sequence_init_date": {
         "title": u"Date à laquelle on initialise la séquence annuelle",
@@ -313,6 +317,8 @@ séparateurs… etc), ainsi que des variables et séquences. Ex: {YYYY}-{SEQYEAR
     "month_sequence_init_value": {
         "title": u"Valeur à laquelle on initialise la séquence annuelle",
         "section": u"Séquence annuelle (SEQMONTH)",
+        "type": colander.Int(),
+        "validator": colander.Range(min=0),
     },
     "month_sequence_init_date": {
         "title": u"Date à laquelle on initialise la séquence annuelle",
@@ -328,7 +334,7 @@ def get_config_key_schemanode(key, ui_conf):
     This key should appear in the dict here above CONFIGURATION_KEYS
     """
     return colander.SchemaNode(
-        colander.String(),
+        ui_conf.get('type', colander.String()),
         title=ui_conf.get('title', key),
         description=ui_conf.get('description'),
         missing=ui_conf.get('missing', u""),

@@ -31,7 +31,6 @@ const CommonModel = BaseModel.extend({
         'payment_times',
         'paymentDisplay',
         'financial_year',
-        'course',
         'display_units',
     ],
     validation: {

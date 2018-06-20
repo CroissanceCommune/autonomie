@@ -35,7 +35,7 @@ class NumberingConfigView(BaseConfigView):
     schema = get_config_schema(keys)
 
     info_message = u"""
-<p>Il est possible de personaliser le format du numéro de facture.</p>\
+<p>Il est possible de personaliser le gabarit du numéro de facture.</p>\
 <p>Plusieurs variables et séquences chronologiques sont à disposition.</p>\
 <h3>Variables :</h3>\
 <ul>\
@@ -49,7 +49,7 @@ class NumberingConfigView(BaseConfigView):
 <li><code>{SEQGLOBAL}</code> : numéro de séquence global (aucun ràz)</li>\
 <li><code>{SEQYEAR}</code> : numéro de séquence annuel (ràz chaque année)</li>\
 <li><code>{SEQMONTH}</code> : numéro de séquence mensuel (ràz chaque mois)</li>\
-<li><code>{SEQMONTHANA}</code>: numéro de séquence par activité et par mois (ràz chaque mois)</li>\
+<li><code>{SEQMONTHANA}</code>: numéro de séquence par enseigne et par mois (ràz chaque mois)</li>\
 </ul>\
 <p>Dans le cas d'une migration depuis un autre outil de gestion, il est possible d'initialiser les séquences à une valeur différente de zéro.</p>\
     """

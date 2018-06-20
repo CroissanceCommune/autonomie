@@ -11,7 +11,7 @@ Par défaut (sur les nouvelles installations), les factures sont numérotés ave
 une séquence chronologique globale, non liée ni à une année, ni à une activité,
 et sans préfixe (1, 2, 3…).
 
-Schéma de n° de facture
+Gabarit de n° de facture
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Il est possible de configurer l'usage de séquences plus complexes, pour
@@ -21,7 +21,7 @@ depuis l'écran ``/admin/sales/numbering``.
 
 .. note::
 
-   Le format de n° de facture utilise la `syntaxe de formatage Python`_, il est
+   Le gabarit de n° de facture utilise la `syntaxe de formatage Python`_, il est
    donc possible d'en utiliser les options avancées (remplissage, alignement…).
 
 
@@ -43,7 +43,7 @@ attribué par autonomie sera le *43*.
 
 .. note::
 
-   Les séquences par mois et par activité (``{SEQMONTHANA}``) font exception :
+   Les séquences par mois et par enseigne (``{SEQMONTHANA}``) font exception :
    elles ne disposent pas d'écran permettant de les initialiser,
    l'initialisation se fait directement en base, pour chaque activité : table
    ``company``, colonne ``month_company_sequence_init_value``.
@@ -51,7 +51,7 @@ attribué par autonomie sera le *43*.
 Exemple : migration depuis WinScop
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Configurer le format de numéro de facture à
+- Configurer le gabarit de numéro de facture à
   ``FC{SEQYEAR:0>4}-{YY}{MM}{SEQMONTHANA:0>3}-{ANA}`` (interface d'admin)
 - Initialiser la séquences ``SEQYEAR`` (interface d'admin)
 - Initialiser pour chaque activité sa séquence mensuelle (en base)

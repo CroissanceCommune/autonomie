@@ -41,6 +41,7 @@ from autonomie.forms import files
 from autonomie.forms.widgets import CleanMappingWidget, CleanSequenceWidget
 from autonomie.forms.validators import validate_image_mime
 from autonomie.utils.image import ImageResizer
+from autonomie.utils.strings import safe_unicode
 
 
 log = logging.getLogger(__name__)
@@ -355,10 +356,12 @@ def get_config_schema(keys):
         node = get_config_key_schemanode(key, ui_conf)
 
         if "section" in ui_conf:  # This element should be shown in a mapping
-            section_name = ui_conf['section']
+
+            section_title = ui_conf['section']
+            section_name = safe_unicode(section_title)
             if section_name not in mappings:
                 mappings[section_name] = mapping = colander.Schema(
-                    title=section_name,
+                    title=section_title,
                     name=section_name,
                 )
                 schema.add(mapping)

@@ -3,11 +3,14 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+#       * Delalande Jocelyn;
 """
 Common translation strings
 """
 import locale
 import calendar
+import unicodedata
+
 from autonomie.compute import math_utils
 from autonomie_base.utils.date import (
     format_date,
@@ -424,6 +427,20 @@ def format_lower_ascii(original_str):
     result = force_ascii(result)
     result = result.replace(' ', '_')
     return result
+
+
+def safe_unicode(unicode_str):
+    """
+    Replace special chars to their ascii counterpart.
+
+    This does modify the string (remove accents…) and is only intended for
+    non-human-facing strings.
+
+    :type unicode_str: unicode
+    :rtype: unicode
+    """
+    normalized = unicodedata.normalize('NFKD', unicode_str)
+    return normalized.encode('ascii', 'ignore').decode()
 
 
 def compile_template_str(template_string, template_context):

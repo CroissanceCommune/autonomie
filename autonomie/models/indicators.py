@@ -134,6 +134,30 @@ class SaleFileRequirement(Indicator):
         else:
             self.validation_status = 'none'
 
+    def merge_indicator(self, indicator):
+        """
+        Merge the given SaleFileRequirement with the current one
+
+        if a file has been provided, we call the set_file method that handles
+        the status
+        if no file has been provided, the indicator may have been forced, we
+        register that status
+
+        :param obj indicator: an instance of the current class
+        """
+        result = self
+        # on a un fichier
+        if indicator.file_id is not None:
+            result = self.set_file(
+                indicator.file_id,
+                validated=indicator.validated,
+            )
+            # on récupère l'état de validation du fichier déposé
+            if indicator.validation == self.validation:
+                self.validation_status= indicator.validation_status
+
+        return result
+
     def set_file(self, file_id, validated=False):
         """
         Attach a file_id to this indicator

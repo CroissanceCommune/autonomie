@@ -212,6 +212,11 @@ class FileTypeNode(colander.SchemaNode):
             result = FileType.query().options(load_only('id', 'label')).all()
         return result
 
+    def after_bind(self, node, kw):
+        get_params = kw['request'].GET
+        if 'file_type_id' in get_params:
+            self.default = int(get_params["file_type_id"])
+
 
 class FileUploadSchema(colander.Schema):
     come_from = forms.come_from_node()

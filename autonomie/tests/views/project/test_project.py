@@ -99,8 +99,6 @@ def test_entry_point_view(user, project, get_csrf_request_with_db, config):
         assert res.location == url
 
 
-
-
 def test_project_add(
     company, get_csrf_request_with_db, config, customer,
     project_type
@@ -127,9 +125,10 @@ def test_project_add(
 
 
 def test_project_add_step2(
-    project, get_csrf_request_with_db, config, other_business_type,
+    project, get_csrf_request_with_db, config, mk_business_type,
     default_business_type,
 ):
+    other_business_type = mk_business_type(name="other")
     from autonomie.views.project.project import ProjectAddStep2View
     config.add_route(PROJECT_ITEM_ROUTE, PROJECT_ITEM_ROUTE)
     req = get_csrf_request_with_db()

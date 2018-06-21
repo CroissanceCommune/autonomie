@@ -558,21 +558,66 @@ def individual_customer(dbsession, company):
 
 
 @fixture
-def default_business_type(dbsession):
+def mk_business_type(dbsession):
+    """
+    Return a BusinessType builder
+
+    def test_test(mk_business_type):
+        btype = mk_business_type(name="test")
+    """
     from autonomie.models.project.types import BusinessType
-    bus = BusinessType(name="default", label=u"Cycle court")
-    dbsession.add(bus)
-    dbsession.flush()
-    return bus
+
+    def func(name, label=None):
+        label = label or name
+        model = BusinessType(name=name, label=label)
+        dbsession.add(model)
+        dbsession.flush()
+        return model
+    return func
 
 
 @fixture
-def other_business_type(dbsession):
-    from autonomie.models.project.types import BusinessType
-    bus = BusinessType(name="other", label=u"Cycle long")
-    dbsession.add(bus)
-    dbsession.flush()
-    return bus
+def default_business_type(dbsession, mk_business_type):
+    return mk_business_type(name="default", label=u"Cycle court")
+
+
+@fixture
+def other_business_type(dbsession, mk_business_type):
+    return mk_business_type(name="other", label=u"Cycle long")
+
+
+@fixture
+def mk_file_type(dbsession):
+    """
+    Return a BusinessType builder
+
+    def test_test(mk_file_type):
+        ftype = mk_file_type(label="File type")
+    """
+    from autonomie.models.files import FileType
+
+    def func(label):
+        model = FileType(label=label)
+        dbsession.add(model)
+        dbsession.flush()
+        return model
+    return func
+
+@fixture
+def mk_business_type_file_types(dbsession):
+    from autonomie.models.project.file_types import BusinessTypeFileType
+
+    def func(file_type, business_type, doctype, req_type):
+        model = BusinessTypeFileType(
+            file_type_id=file_type.id,
+            business_type_id=business_type.id,
+            doctype=doctype,
+            req_type=req_type
+        )
+        dbsession.add(model)
+        dbsession.flush()
+        return model
+    return func
 
 
 @fixture

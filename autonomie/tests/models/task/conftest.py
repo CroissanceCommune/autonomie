@@ -10,6 +10,12 @@ import pytest
 
 
 @pytest.fixture
+def invoice_base_config(dbsession):
+    from autonomie.models.config import Config
+    Config.set('invoice_number_template', '{SEQYEAR}')
+
+
+@pytest.fixture
 def product_without_tva(dbsession):
     from autonomie.models.tva import Product
     product = Product(name='product', compte_cg='122')
@@ -197,13 +203,16 @@ def full_invoice(
     dbsession.flush()
     return invoice
 
+
 @pytest.fixture
 def invoice_20170707(mk_invoice):
     return mk_invoice(date=datetime.date(2017, 7, 7))
 
+
 @pytest.fixture
 def invoice_20170808(dbsession, mk_invoice):
     return mk_invoice(date=datetime.date(2017, 7, 7))
+
 
 @pytest.fixture
 def sale_product(dbsession):
@@ -253,6 +262,7 @@ def set_seq_index(dbsession, mk_invoice, company):
         return s
 
     return _set_seq_index
+
 
 @pytest.fixture
 def set_global_seq_index(dbsession, set_seq_index):
@@ -317,7 +327,6 @@ def set_month_company_seq_index(dbsession, set_seq_index):
             company=company,
         )
     return _set_month_company_seq_index
-
 
 
 @pytest.fixture

@@ -80,7 +80,9 @@ def test_duplicate_invoice_integration(dbsession, invoice):
     assert newest.company_id == invoice.company_id
 
 
-def test_valid_invoice(config, dbsession, invoice, request_with_config, user):
+def test_valid_invoice(
+    config, invoice_base_config, dbsession, invoice, request_with_config, user
+):
     request_with_config.user = user
     dbsession.add(invoice)
     dbsession.flush()

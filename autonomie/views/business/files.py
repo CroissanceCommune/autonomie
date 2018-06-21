@@ -10,6 +10,7 @@ from autonomie.models.task import Task
 
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_FILE_ROUTE,
+    BUSINESS_ITEM_ADD_FILE_ROUTE,
 )
 from autonomie.views.project.business import ProjectBusinessListView
 from autonomie.views.project.files import (
@@ -20,7 +21,7 @@ from autonomie.views.business.business import BusinessOverviewView
 
 
 class BusinessFileAddView(ProjectFileAddView):
-    route_name = BUSINESS_ITEM_FILE_ROUTE
+    route_name = BUSINESS_ITEM_ADD_FILE_ROUTE
 
 
 class BusinessFilesView(ProjectFilesView):
@@ -48,7 +49,6 @@ def includeme(config):
         BusinessFileAddView,
         parent=BusinessOverviewView,
         permission="add.file",
-        request_param="action=attach_file",
         layout='default',
         renderer="autonomie:templates/base/formpage.mako",
     )

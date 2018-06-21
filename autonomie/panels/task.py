@@ -30,6 +30,8 @@
 from sqla_inspect.py3o import SqlaContext
 from autonomie.models.company import Company
 
+from autonomie.models.task import Task
+from autonomie.models.project.business import Business
 from autonomie.utils.strings import major_status
 from autonomie.views.render_api import status_icon
 from autonomie.panels.files import stream_actions
@@ -129,9 +131,19 @@ def task_indicators_panel(context, request):
     Show the indicators for the given Task context
     """
     indicators = context.file_requirements
+    if isinstance(context, Task):
+        file_add_route = "/%ss/{id}/addfile" % (context.type_,)
+    elif isinstance(context, Business):
+        file_add_route = "/businesses/{id}/addfile"
+
+    file_add_url = request.route_path(
+        file_add_route,
+        id=context.id,
+    )
     return dict(
         indicators=indicators,
         stream_actions=stream_actions,
+        file_add_url=file_add_url,
     )
 
 

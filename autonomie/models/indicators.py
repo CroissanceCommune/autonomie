@@ -22,6 +22,7 @@ from sqlalchemy.orm import (
 
 from autonomie_base.models.base import (
     DBBASE,
+    DBSESSION,
     default_table_args,
 )
 
@@ -74,6 +75,10 @@ class Indicator(DBBASE):
     def force(self):
         self.forced = True
 
+    @property
+    def validated(self):
+        return self.validation_status == 'valid' or self.forced
+
 
 class SaleFileRequirement(Indicator):
     """
@@ -96,7 +101,8 @@ class SaleFileRequirement(Indicator):
 
     file_object = relationship(
         "File",
-        primaryjoin="SaleFileRequirement.file_id==File.id"
+        primaryjoin="SaleFileRequirement.file_id==File.id",
+        backref="sale_requirements",
     )
     node = relationship(
         "Node",
@@ -104,3 +110,51 @@ class SaleFileRequirement(Indicator):
         backref="file_requirements",
     )
     file_type = relationship("FileType")
+
+    def __init__(self, *args, **kwargs):
+        Indicator.__init__(self, *args, **kwargs)
+        self.set_default_status()
+        self.set_default_validation_status()
+
+    def set_default_status(self):
+        """
+        Set the default status regarding the requirement type
+        """
+        if self.requirement_type == 'recommended':
+            self.status = 'warning'
+        else:
+            self.status = 'danger'
+
+    def set_default_validation_status(self):
+        """
+        Set the default validation status regarding the validation attribute
+        """
+        if not self.validation:
+            self.validation_status = 'valid'
+        else:
+            self.validation_status = 'none'
+
+    def set_file(self, file_id, validated=False):
+        """
+        Attach a file_id to this indicator
+
+        :param int file_id: An id of a file persisted to database
+        :param bool validated: True if this file been validated in another
+        indicator
+        """
+        self.file_id = file_id
+        if not validated and self.validation:
+            self.validation_status = 'wait'
+            self.status = 'warning'
+        else:
+            self.status = 'success'
+        return DBSESSION().merge(self)
+
+    def remove_file(self):
+        """
+        Remove file reference from this indicator
+        """
+        self.file_id = None
+        self.set_default_status()
+        self.set_default_validation_status()
+        return DBSESSION().merge(self)

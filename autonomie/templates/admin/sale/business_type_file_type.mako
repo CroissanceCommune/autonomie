@@ -83,6 +83,10 @@
                                         ('mandatory', u'Requis systématiquement pour la validation'), \
                                         ('business_mandatory', u"Globalement requis dans le/la {0} pour la validation".format(business_type.label)), \
                                         ('project_mandatory', u"Globalement requis dans le projet pour la validation")):
+                                        % if doctype == 'business' and option == 'mandatory':
+                                        <% continue %>
+                                        % endif
+
                                         <div class='radio'>
                                         <label>
                                             <input type='radio' name='${tag_id}' value='${option}'

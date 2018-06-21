@@ -11,7 +11,6 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Boolean,
-    Integer,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -69,12 +68,18 @@ class BusinessTypeFileType(DBBASE):
             }
         }
     )
+    PROJECT_MANDATORY = 'project_mandatory'
+    BUSINESS_MANDATORY = "business_mandatory"
+    MANDATORY = "mandatory"
+    RECOMMENDED = "recommended"
+    OPTIONNAL = "optionnal"
+
     # requirement qui implique un indicateur de statut
     STATUS_REQUIREMENT_TYPES = (
-        'project_mandatory',
-        'business_mandatory',
-        'mandatory',
-        'recommended',
+        PROJECT_MANDATORY,
+        BUSINESS_MANDATORY,
+        MANDATORY,
+        RECOMMENDED,
     )
 
     @classmethod

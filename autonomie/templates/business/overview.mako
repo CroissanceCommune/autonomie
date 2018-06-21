@@ -44,10 +44,11 @@
                     </a>
                 </div>
                 % endfor
+                % if request.context.file_requirements:
                 <h3>Indicateurs</h3>
-                % for indicator in indicators:
-                TODO
-                % endfor
+                ${request.layout_manager.render_panel('task_indicators')}
+                % endif
+
             </div>
         </div>
     </div>

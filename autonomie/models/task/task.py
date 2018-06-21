@@ -770,6 +770,7 @@ _{s.date:%m%y}"
             project_id=self.project_id,
             business_type_id=self.business_type_id,
         )
+        business.file_requirement_service.populate(self)
         DBSESSION().add(business)
         DBSESSION().flush()
         self.business_id = business.id

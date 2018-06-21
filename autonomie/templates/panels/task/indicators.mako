@@ -34,6 +34,12 @@
     ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(request, indicator.file_object))}
     % else:
     <b>Un fichier ${indicator.file_type.label} est manquant</b>
+    <button
+        class='btn btn-default'
+        onclick="openPopup('${file_add_url}?file_type_id=${indicator.file_type_id}')"
+        >
+            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un fichier
+    </button>
     % endif
     <hr />
 </div>

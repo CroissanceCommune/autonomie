@@ -329,6 +329,13 @@ def get_add_file_link(
 class FileDeleteView(DeleteView, FileViewRedirectMixin):
     delete_msg = u"Le fichier a été supprimé"
 
+    def on_delete(self):
+        parent = self.context
+        if hasattr(parent, "file_requirement_service"):
+            parent.file_requirement_service.register(
+                parent, self.context
+            )
+
     def redirect(self):
         return HTTPFound(self.back_url())
 

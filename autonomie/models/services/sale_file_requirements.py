@@ -61,7 +61,7 @@ class SaleFileRequirementService(object):
 
     @classmethod
     def on_populate(cls, node):
-        raise NotImplemented()
+        pass
 
     @classmethod
     def check_project_files(cls, node):
@@ -77,9 +77,7 @@ class SaleFileRequirementService(object):
 
         if node.project is not None:
             for indicator in node.file_requirements:
-                if indicator.requirement_type in (
-                    'project_mandatory'
-                ):
+                if indicator.requirement_type == 'project_mandatory':
                     for file_object in node.project.files:
                         if file_object.file_type_id == indicator.file_type_id:
                             indicator.set_file(file_object.id)
@@ -209,10 +207,7 @@ class TaskFileRequirementService(SaleFileRequirementService):
                 ):
                     for file_req in task.business.file_requirements:
                         if file_req.file_type_id == indicator.file_type_id:
-                            indicator.set_file(
-                                file_req.file_id,
-                                validated=file_req.validated
-                            )
+                            indicator.merge_indicator(file_req)
 
     @classmethod
     def get_related_indicators(cls, node, file_object):
@@ -247,10 +242,7 @@ class BusinessFileRequirementService(SaleFileRequirementService):
             for indicator in business.file_requirements:
                 for file_req in task.file_requirements:
                     if file_req.file_type_id == indicator.file_type_id:
-                        indicator.set_file(
-                            file_req.file_id,
-                            validated=file_req.validated
-                        )
+                        indicator.merge_indicator(file_req)
 
     @classmethod
     def get_related_indicators(cls, node, file_object):

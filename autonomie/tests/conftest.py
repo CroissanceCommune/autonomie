@@ -582,11 +582,6 @@ def default_business_type(dbsession, mk_business_type):
 
 
 @fixture
-def other_business_type(dbsession, mk_business_type):
-    return mk_business_type(name="other", label=u"Cycle long")
-
-
-@fixture
 def mk_file_type(dbsession):
     """
     Return a BusinessType builder
@@ -603,16 +598,49 @@ def mk_file_type(dbsession):
         return model
     return func
 
+
 @fixture
 def mk_business_type_file_types(dbsession):
+    """
+    Build a Business - FileType requirement
+
+    file_type
+
+        A previously generated file_type instance
+
+    business_type
+
+        A previously generated business_type instance
+
+    doctype
+
+        business/estimation/invoice/cancelinvoice
+
+    req_type
+
+        project_mandatory/business_mandatory/mandatory/recommended/optionnal
+
+    validation
+
+        Should the file type be validated (default False)
+
+
+    def test_test(mk_business_type_file_types, mk_business_type, mk_file_type):
+        ftype = mk_file_type("file type")
+        btype = mk_business_type("btype")
+        # ftype is mandatory for each invoice inside businesses of type btype
+        req = mk_business_type_file_types(ftype, btype, 'invoice', 'mandatory')
+
+    """
     from autonomie.models.project.file_types import BusinessTypeFileType
 
-    def func(file_type, business_type, doctype, req_type):
+    def func(file_type, business_type, doctype, req_type, validation=False):
         model = BusinessTypeFileType(
             file_type_id=file_type.id,
             business_type_id=business_type.id,
             doctype=doctype,
-            req_type=req_type
+            requirement_type=req_type,
+            validation=validation,
         )
         dbsession.add(model)
         dbsession.flush()

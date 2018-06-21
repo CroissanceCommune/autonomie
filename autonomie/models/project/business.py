@@ -16,6 +16,9 @@ from autonomie_base.models.base import (
     default_table_args,
 )
 from autonomie.models.node import Node
+from autonomie.models.services.sale_file_requirements import (
+    BusinessFileRequirementService,
+)
 
 
 class Business(Node):
@@ -41,6 +44,7 @@ class Business(Node):
     __tablename__ = "business"
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': "business"}
+    file_requirement_service = BusinessFileRequirementService
 
     id = Column(
         Integer,
@@ -74,6 +78,11 @@ class Business(Node):
     project = relationship(
         "Project",
         primaryjoin="Project.id == Business.project_id",
+    )
+    tasks = relationship(
+        "Task",
+        primaryjoin="Task.business_id==Business.id",
+        back_populates="business"
     )
     estimations = relationship(
         "Task",

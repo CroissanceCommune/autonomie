@@ -49,6 +49,9 @@ from autonomie_base.models.base import (
 )
 from autonomie.models.node import Node
 from autonomie.models.services.project import ProjectService
+from autonomie.models.services.sale_file_requirements import (
+    ProjectFileRequirementService,
+)
 
 
 ProjectCustomer = Table(
@@ -245,6 +248,7 @@ class Project(Node):
     )
 
     _autonomie_service = ProjectService
+    file_requirement_service = ProjectFileRequirementService
 
     def __json__(self, request):
         """

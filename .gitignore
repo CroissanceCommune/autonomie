@@ -19,3 +19,4 @@ node_modules
 /docs/build/
 autonomie/tests/datas/filedepot
 package-lock.json
+autonomie/tests/datas/*-*-*-*-*/

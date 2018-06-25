@@ -340,7 +340,7 @@ def build_config_appstruct(request, keys):
             ui_conf = CONFIGURATION_KEYS[key]
 
             if "section" in ui_conf:
-                appstruct.setdefault(ui_conf['section'], {})[key] = value
+                appstruct.setdefault(safe_unicode(ui_conf['section']), {})[key] = value
             else:
                 appstruct[key] = value
     return appstruct

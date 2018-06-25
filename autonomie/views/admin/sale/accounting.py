@@ -33,7 +33,7 @@ BaseSaleAccountingCustomView = get_model_admin_view(
 
 
 class SaleAccountingIndex(BaseAdminIndexView):
-    title = u"Configuration comptables du module Vente"
+    title = u"Configuration comptable du module Vente"
     description = u"Configurer la génération des écritures de vente"
     route_name = ACCOUNTING_URL
 

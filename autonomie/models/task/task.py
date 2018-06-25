@@ -568,8 +568,9 @@ _{s.date:%m%y}"
 
         self.status = 'draft'
         self.company = company
-        customer = kw['customer']
-        self.address = customer.full_address
+        if 'customer' in kw:
+            customer = kw['customer']
+            self.address = customer.full_address
         self.owner = user
         self.status_person = user
         self.date = datetime.date.today()

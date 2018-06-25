@@ -29,35 +29,59 @@ def btypes(mk_business_type):
 
 
 @pytest.fixture
-def mk_dummy_invoice(mk_business_type_file_types, ftypes, btypes):
+def file_instance(dbsession, ftypes):
+    from autonomie.models.files import File
+    node = File(name="file01", file_type_id=ftypes['ftype1'].id, size=13,
+                mimetype="text", )
+    node.data = "test content"
+    dbsession.add(node)
+    dbsession.flush()
+    return node
+
+
+@pytest.fixture
+def mk_invoice(
+    dbsession, user, company, project,
+    mk_business_type_file_types, ftypes, btypes,
+):
     from autonomie.models.services.sale_file_requirements import (
         SaleFileRequirementService,
     )
+    from autonomie.models.task import Invoice
 
-    def func(req_type='mandatory', validation=False, business=None, project=None):
-        mk_business_type_file_types(
-            ftypes['ftype1'], btypes['default'], 'invoice', req_type, validation
-        )
-        node = Dummy(
-            file_requirements=[],
-            type_='invoice',
+    def func(req_type='mandatory', validation=False, add_req=True, **kwargs):
+        if add_req:
+            mk_business_type_file_types(
+                ftypes['ftype1'],
+                btypes['default'],
+                'invoice',
+                req_type,
+                validation
+            )
+        if 'project' not in kwargs:
+            kwargs['project'] = project
+        node = Invoice(
+            user=user,
+            company=company,
             business_type_id=btypes['default'].id,
-            business=business,
-            project=project,
+            **kwargs
         )
+        dbsession.add(node)
+        dbsession.flush()
         SaleFileRequirementService.populate(node)
         return node
     return func
 
 
 @pytest.fixture
-def mk_dummy_business(mk_business_type_file_types, ftypes, btypes):
+def mk_business(dbsession, mk_business_type_file_types, ftypes, btypes):
+    from autonomie.models.services.sale_file_requirements import (
+        SaleFileRequirementService,
+    )
+    from autonomie.models.project.business import Business
+
     def func(req_type="mandatory", validation=False, tasks=[], project=None):
-        from autonomie.models.services.sale_file_requirements import (
-            SaleFileRequirementService,
-        )
-        business_node = Dummy(
-            type_='business',
+        business_node = Business(
             file_requirements=[],
             business_type_id=btypes['default'].id,
             tasks=tasks,
@@ -67,21 +91,21 @@ def mk_dummy_business(mk_business_type_file_types, ftypes, btypes):
             ftypes['ftype1'], btypes['default'], 'business',
             req_type, validation
         )
+        dbsession.add(business_node)
+        dbsession.flush()
         SaleFileRequirementService.populate(business_node)
         return business_node
     return func
 
 
 @pytest.fixture
-def dummy_project(ftypes):
-    node = Dummy(
-        files=[Dummy(file_type_id=ftypes['ftype1'].id, id=1)]
-    )
-    return node
+def project_with_file(project, file_instance):
+    project.files = [file_instance]
+    return project
 
 
-def test_base_populate(mk_dummy_invoice, ftypes):
-    node = mk_dummy_invoice()
+def test_base_populate(mk_invoice, ftypes):
+    node = mk_invoice()
     assert len(node.file_requirements) == 1
     assert node.file_requirements[0].requirement_type == 'mandatory'
     assert node.file_requirements[0].file_type_id == ftypes['ftype1'].id
@@ -89,15 +113,15 @@ def test_base_populate(mk_dummy_invoice, ftypes):
     assert node.file_requirements[0].validation_status == 'valid'
 
 
-def test_populate_recommended(mk_dummy_invoice):
-    node = mk_dummy_invoice('recommended')
+def test_populate_recommended(mk_invoice):
+    node = mk_invoice('recommended')
     assert node.file_requirements[0].requirement_type == 'recommended'
     assert node.file_requirements[0].status == 'warning'
     assert node.file_requirements[0].validation_status == 'valid'
 
 
-def test_populate_validation(mk_dummy_invoice):
-    node = mk_dummy_invoice(validation=True)
+def test_populate_validation(mk_invoice):
+    node = mk_invoice(validation=True)
     assert node.file_requirements[0].status == 'danger'
     assert node.file_requirements[0].validation_status == 'none'
 
@@ -115,66 +139,121 @@ def test_populate_void(mk_business_type_file_types, ftypes, btypes):
     assert len(node.file_requirements) == 0
 
 
-def test_check_task_files_no_ok(mk_dummy_invoice, mk_dummy_business):
-    invoice = mk_dummy_invoice()
-    business = mk_dummy_business(tasks=[invoice])
+def test_check_task_files_no_ok(mk_invoice, mk_business):
+    invoice = mk_invoice()
+    business = mk_business(tasks=[invoice])
     BusinessFileRequirementService.check_task_files(business)
     assert business.file_requirements[0].status == 'danger'
 
 
-def test_check_task_files_ok(mk_dummy_invoice, mk_dummy_business):
-    invoice = mk_dummy_invoice()
+def test_check_task_files_ok(mk_invoice, mk_business, file_instance):
+    invoice = mk_invoice()
     invoice.file_requirements[0].status = 'success'
-    invoice.file_requirements[0].file_id = 1
+    invoice.file_requirements[0].file_id = file_instance.id
 
-    business = mk_dummy_business(tasks=[invoice])
+    business = mk_business(tasks=[invoice])
     BusinessFileRequirementService.check_task_files(business)
     assert business.file_requirements[0].status == 'success'
-    assert business.file_requirements[0].file_id == 1
+    assert business.file_requirements[0].file_id == file_instance.id
 
 
-def test_check_task_files_validation_wait(mk_dummy_invoice, mk_dummy_business):
-    invoice = mk_dummy_invoice()
+def test_check_task_files_validation_wait(
+    mk_invoice, mk_business, file_instance
+):
+    invoice = mk_invoice()
     invoice.file_requirements[0].status = 'warning'
-    invoice.file_requirements[0].file_id = 1
+    invoice.file_requirements[0].file_id = file_instance.id
     invoice.file_requirements[0].validation_status = 'wait'
 
-    business = mk_dummy_business(validation=True, tasks=[invoice])
+    business = mk_business(validation=True, tasks=[invoice])
     BusinessFileRequirementService.check_task_files(business)
     assert business.file_requirements[0].status == 'warning'
     assert business.file_requirements[0].validation_status == 'wait'
-    assert business.file_requirements[0].file_id == 1
+    assert business.file_requirements[0].file_id == file_instance.id
 
 
-def test_check_business_files_scope_ok(mk_dummy_business, mk_dummy_invoice):
-    business = mk_dummy_business()
-    invoice = mk_dummy_invoice(business=business)
+def test_check_business_files_scope_ok(
+    mk_business, mk_invoice, file_instance
+):
+    business = mk_business()
+    invoice = mk_invoice(business_id=business.id)
     TaskFileRequirementService.check_business_files(invoice)
 
     assert invoice.file_requirements[0].status == "danger"
 
 
-def test_check_business_files_scope_nook(mk_dummy_business, mk_dummy_invoice):
-    business = mk_dummy_business()
+def test_check_business_files_scope_nook(
+    mk_business, mk_invoice, file_instance
+):
+    business = mk_business()
     business.file_requirements[0].status = "success"
-    business.file_requirements[0].file_id = 1
+    business.file_requirements[0].file_id = file_instance.id
 
-    invoice = mk_dummy_invoice("business_mandatory", business=business)
+    invoice = mk_invoice("business_mandatory", business_id=business.id)
     TaskFileRequirementService.check_business_files(invoice)
 
     assert invoice.file_requirements[0].status == "success"
 
 
-def test_check_project_files_scope_ok(mk_dummy_invoice, dummy_project):
-    invoice = mk_dummy_invoice(project=dummy_project)
+def test_check_project_files_scope_ok(mk_invoice, project_with_file):
+    invoice = mk_invoice(project=project_with_file)
     TaskFileRequirementService.check_project_files(invoice)
-    print(invoice.file_requirements[0].requirement_type)
 
     assert invoice.file_requirements[0].status == "danger"
 
 
-def test_check_project_files_scope_nook(mk_dummy_invoice, dummy_project):
-    invoice = mk_dummy_invoice('project_mandatory', project=dummy_project)
+def test_check_project_files_scope_nook(mk_invoice, project_with_file):
+    invoice = mk_invoice('project_mandatory', project=project_with_file)
     TaskFileRequirementService.check_project_files(invoice)
 
     assert invoice.file_requirements[0].status == "success"
+
+
+def test_check_project_business_files_scope_ok(
+    mk_invoice, mk_business, project, file_instance
+):
+    other_business = mk_business("project_mandatory", project=project)
+    other_business.file_requirements[0].status = 'success'
+    other_business.file_requirements[0].file_id = file_instance.id
+
+    invoice = mk_invoice("project_mandatory", project=project)
+    TaskFileRequirementService.check_project_files(invoice)
+
+    assert invoice.file_requirements[0].status == "success"
+
+
+def test_check_project_business_files_scope_nook(
+    mk_invoice, mk_business, project, file_instance
+):
+    other_business = mk_business("project_mandatory", project=project)
+    other_business.file_requirements[0].status = 'success'
+    other_business.file_requirements[0].file_id = file_instance.id
+
+    invoice = mk_invoice("business_mandatory", project=project)
+    TaskFileRequirementService.check_project_files(invoice)
+
+    assert invoice.file_requirements[0].status == "danger"
+
+
+def test_check_project_task_files_scope_ok(mk_invoice, project, file_instance):
+    other_invoice = mk_invoice("project_mandatory", project=project)
+    other_invoice.file_requirements[0].status = 'success'
+    other_invoice.file_requirements[0].file_id = file_instance.id
+
+    invoice = mk_invoice("project_mandatory", add_req=False, project=project)
+    TaskFileRequirementService.check_project_files(invoice)
+
+    assert invoice.file_requirements[0].status == "success"
+
+
+def test_check_project_task_files_scope_nook(
+    mk_invoice, project, file_instance
+):
+    other_invoice = mk_invoice("business_mandatory", project=project)
+    other_invoice.file_requirements[0].status = 'success'
+    other_invoice.file_requirements[0].file_id = file_instance.id
+
+    invoice = mk_invoice("business_mandatory", add_req=False, project=project)
+    TaskFileRequirementService.check_project_files(invoice)
+
+    assert invoice.file_requirements[0].status == "danger"

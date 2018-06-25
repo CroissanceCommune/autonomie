@@ -649,9 +649,10 @@ def mk_business_type_file_types(dbsession):
 
 
 @fixture
-def project_type(dbsession, default_business_type, other_business_type):
+def project_type(dbsession, default_business_type, mk_business_type):
     from autonomie.models.project.types import ProjectType
     proj = ProjectType(name="default", label=u"Par défaut")
+    other_business_type = mk_business_type(name="other", label=u"Cycle long")
     proj.other_business_types.append(other_business_type)
     proj.default_business_type = default_business_type
     dbsession.add(proj)

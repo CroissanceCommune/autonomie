@@ -10,6 +10,7 @@ Service managing file requirements :
 
     Tasks (Invoice, Estimation, CancelInvoice)
 """
+from sqlalchemy import or_
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.project.file_types import BusinessTypeFileType
 from autonomie.models.indicators import SaleFileRequirement
@@ -71,16 +72,26 @@ class SaleFileRequirementService(object):
 
         :param obj node: A :class:`autonomie.models.node.Node` instance
         """
-        # FIXME : dans les checks, on devrait regarder si les requirements
-        # requierent aussi validation, si oui, ça va devenir compliqué.
-        # Peut être devrait-on oublié la partie validation ?
-
         if node.project is not None:
             for indicator in node.file_requirements:
                 if indicator.requirement_type == 'project_mandatory':
                     for file_object in node.project.files:
                         if file_object.file_type_id == indicator.file_type_id:
                             indicator.set_file(file_object.id)
+                    if hasattr(node, "business_id"):
+                        business_id = node.business_id
+                        task_id = node.id
+                    else:  # it's a business
+                        business_id = node.id
+                        task_id = None
+
+                    for existing in cls.query_existing_project_indicators(
+                        node.project_id,
+                        indicator.file_type_id,
+                        task_id=task_id,
+                        business_id=business_id
+                    ):
+                        indicator.merge_indicator(existing)
 
     @classmethod
     def register(cls, node, file_object, action="add"):
@@ -104,82 +115,123 @@ class SaleFileRequirementService(object):
                 cls.on_file_remove(node, file_object)
 
     @classmethod
-    def get_mandatory_indicators(cls, task_id, file_object):
+    def get_mandatory_indicators(cls, task_id, file_type_id):
         """
         Update mandatory indicator types
         """
         result = SaleFileRequirement.query().filter_by(
             node_id=task_id
         ).filter_by(
-            file_type_id=file_object.file_type_id
+            file_type_id=file_type_id
         ).filter_by(
             requirement_type=BusinessTypeFileType.MANDATORY
         ).all()
         return result
 
     @classmethod
-    def get_business_mandatory_indicators(cls, business_id, file_object):
+    def query_existing_business_indicators(
+        cls, business_id, file_type_id, task_id=None
+    ):
+        """
+        Build a query for indicators related to a given business
+        Excludes indicators related to task_id
+
+        :param int business_id: The business id
+        :param int file_type_id: The type of file the indicators are related to
+        :param int task_id: The id of the task to exclude from the query
+        """
+        from autonomie.models.task import Task
+        tasks_id_query = DBSESSION().query(Task.id).filter_by(
+            business_id=business_id
+        )
+        if task_id is not None:
+            tasks_id_query = tasks_id_query.filter(Task.id != task_id)
+
+        query = SaleFileRequirement.query().filter_by(
+            file_type_id=file_type_id
+        )
+        return query.filter(
+            or_(
+                SaleFileRequirement.node_id == business_id,
+                SaleFileRequirement.node_id.in_(tasks_id_query)
+            )
+        )
+
+    @classmethod
+    def query_existing_project_indicators(
+        cls, project_id, file_type_id, task_id=None, business_id=None
+    ):
+        """
+        Build a query for indicators related to a given project
+        Excludes indicators related to task_id
+
+        :param int project_id: The Project id
+        :param int file_type_id: The type of file the indicators are related to
+        :param int task_id: The id of the task to exclude from the query
+        :param int business_id: The id of the business to exclude from the query
+        """
+        from autonomie.models.task import Task
+        from autonomie.models.project.business import Business
+        tasks_id_query = DBSESSION().query(Task.id).filter_by(
+            project_id=project_id
+        )
+        if task_id:
+            tasks_id_query = tasks_id_query.filter(Task.id != task_id)
+
+        businesses_id_query = DBSESSION().query(Business.id).filter_by(
+            project_id=project_id
+        )
+        if business_id:
+            businesses_id_query = businesses_id_query.filter(
+                Business.id != business_id
+            )
+        return SaleFileRequirement.query().filter(
+            or_(
+                SaleFileRequirement.node_id.in_(businesses_id_query),
+                SaleFileRequirement.node_id.in_(tasks_id_query),
+            )
+        )
+
+    @classmethod
+    def get_business_mandatory_indicators(cls, business_id, file_type_id):
         """
         Update business_mandatory and under indicator types
         """
-        from autonomie.models.task import Task
-        result = SaleFileRequirement.query().filter_by(
-            node_id=business_id
-        ).filter_by(
-            file_type_id=file_object.file_type_id
-        ).all()
-
-        task_ids = [i[0] for i in DBSESSION().query(Task.id).filter_by(
-            business_id=business_id
-        )]
-        task_indicators = SaleFileRequirement.query().filter(
-            SaleFileRequirement.node_id.in_(task_ids)
-        ).filter_by(
-            file_type_id=file_object.file_type_id
-        ).filter_by(
+        query = cls.query_existing_business_indicators(
+            business_id, file_type_id
+        )
+        query = query.filter_by(
             requirement_type=BusinessTypeFileType.BUSINESS_MANDATORY
-        ).all()
-        result.extend(task_indicators)
-        return result
+        )
+        return query
 
     @classmethod
-    def get_project_mandatory_indicators(cls, project_id, file_object):
+    def get_project_mandatory_indicators(cls, project_id, file_type_id):
         """
         Update project_mandatory and under indicator types
         """
-        from autonomie.models.task import Task
-        business_ids = [
-            i[0] for i in DBSESSION().query(Task.id).filter_by(
-                project_id=project_id
-            )
-        ]
-        result = SaleFileRequirement.query().filter(
-            SaleFileRequirement.node_id.in_(business_ids)
-        ).filter_by(
+        query = cls.query_existing_project_indicators(
+            project_id, file_type_id
+        )
+        query = query.filter_by(
             requirement_type=BusinessTypeFileType.PROJECT_MANDATORY
-        ).all()
-
-        task_ids = [i[0] for i in DBSESSION().query(Task.id).filter_by(
-            project_id=project_id
-        )]
-        task_indicators = SaleFileRequirement.query().filter(
-                SaleFileRequirement.node_id.in_(task_ids)
-            ).filter_by(
-                file_type_id=file_object.file_type_id
-            ).filter_by(
-                requirement_type=BusinessTypeFileType.PROJECT_MANDATORY
-            ).all()
-        result.extend(task_indicators)
-        return result
+        )
+        return query.all()
 
     @classmethod
     def on_file_add(cls, node, file_object):
-        for indicator in cls.get_related_indicators(node, file_object):
+        for indicator in cls.get_related_indicators(
+            node,
+            file_object.file_type_id
+        ):
             indicator.set_file(file_object)
 
     @classmethod
     def on_file_remove(cls, node, file_object):
-        for indicator in cls.get_related_indicators(node, file_object):
+        for indicator in cls.get_related_indicators(
+            node,
+            file_object.file_type_id,
+        ):
             indicator.remove_file(file_object)
 
 
@@ -199,28 +251,31 @@ class TaskFileRequirementService(SaleFileRequirementService):
 
         :param obj task: A :class:`autonomie.models.node.Node` instance
         """
-        if task.business is not None:
+        if task.business_id is not None:
             for indicator in task.file_requirements:
                 if indicator.requirement_type in (
                     'business_mandatory',
                     'project_mandatory'
                 ):
-                    for file_req in task.business.file_requirements:
-                        if file_req.file_type_id == indicator.file_type_id:
-                            indicator.merge_indicator(file_req)
+                    for existing in cls.query_existing_business_indicators(
+                        task.business_id,
+                        indicator.file_type_id,
+                        task_id=task.id
+                    ):
+                        indicator.merge_indicator(existing)
 
     @classmethod
-    def get_related_indicators(cls, node, file_object):
+    def get_related_indicators(cls, node, file_type_id):
         indicators = cls.get_mandatory_indicators(
-            node.id, file_object
+            node.id, file_type_id
         )
         indicators.extend(
             cls.get_business_mandatory_indicators(
-                node.business_id, file_object
+                node.business_id, file_type_id
             )
         )
         indicators.extend(
-            cls.get_project_mandatory_indicators(node.project_id, file_object)
+            cls.get_project_mandatory_indicators(node.project_id, file_type_id)
         )
         return indicators
 
@@ -245,12 +300,12 @@ class BusinessFileRequirementService(SaleFileRequirementService):
                         indicator.merge_indicator(file_req)
 
     @classmethod
-    def get_related_indicators(cls, node, file_object):
+    def get_related_indicators(cls, node, file_type_id):
         indicators = cls.get_business_mandatory_indicators(
-            node.id, file_object
+            node.id, file_type_id
         )
         indicators.extend(
-            cls.get_project_mandatory_indicators(node.project_id, file_object)
+            cls.get_project_mandatory_indicators(node.project_id, file_type_id)
         )
         return indicators
 
@@ -265,8 +320,8 @@ class ProjectFileRequirementService(SaleFileRequirementService):
         return node
 
     @classmethod
-    def get_related_indicators(cls, node, file_object):
+    def get_related_indicators(cls, node, file_type_id):
         indicators = cls.get_project_mandatory_indicators(
-            node.id, file_object
+            node.id, file_type_id
         )
         return indicators

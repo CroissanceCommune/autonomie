@@ -40,6 +40,7 @@ class ExpenseAccountingView(BaseConfigView):
     title = u"Export comptable des notes de dépense"
     route_name = EXPENSE_ACCOUNTING_URL
     keys = (
+        'bookentry_expense_label_template',
         "code_journal_ndf",
         "compte_cg_ndf",
     )
@@ -54,6 +55,8 @@ class ExpensePaymentAccountingView(BaseConfigView):
 (paiement des notes de dépense)"
     route_name = EXPENSE_PAYMENT_ACCOUNTING_URL
     keys = (
+        'bookentry_expense_payment_main_label_template',
+        'bookentry_expense_payment_waiver_label_template',
         "code_journal_waiver_ndf",
         "compte_cg_waiver_ndf",
         "code_tva_ndf",

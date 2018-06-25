@@ -170,6 +170,45 @@ RG Interne",
 d'écriture RG Client",
         "section": u"Module RG Client",
     },
+    'bookentry_facturation_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Module Facturation",
+    },
+    'bookentry_payment_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Encaissements",
+    },
+    'bookentry_rg_client_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Module RG Client",
+    },
+    'bookentry_rg_interne_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Module RG Interne",
+    },
+    'bookentry_contribution_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Module Contribution",
+    },
+    'bookentry_expense_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+    },
+    'bookentry_expense_payment_main_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Paiement des notes de dépenses",
+    },
+    'bookentry_expense_payment_waiver_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': u"Pour l'export CSV des factures",
+        "section": u"Abandon de créance",
+    },
     'sage_contribution': {
         "title": u"Module contribution",
         "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
@@ -207,16 +246,20 @@ entrepreneurs",
         "description": u"Code journal utilisé pour l'export des abandons \
 de créance, si ce champ n'est pas rempli, le code journal d'export des notes \
 de dépense est utilisé. Les autres exports de décaissement utilisent \
-le code journal de la banque concernée."
+    le code journal de la banque concernée.",
+        "section": u"Abandon de créance",
+
     },
     "compte_cg_waiver_ndf": {
         "title": u"Compte abandons de créance",
         "description": u"Compte de comptabilité générale spécifique aux \
 abandons de créance dans les notes de dépense",
+        "section": u"Abandon de créance",
     },
     "code_tva_ndf": {
         "title": u"Code TVA utilisé pour les décaissements",
-        "description": u"Le code TVA utilisé pour l'export des décaissements"
+        "description": u"Le code TVA utilisé pour l'export des décaissements",
+        "section": u"Paiement des notes de dépenses",
     },
     "treasury_measure_ui": {
         "title": u"Indicateur à mettre en évidence",

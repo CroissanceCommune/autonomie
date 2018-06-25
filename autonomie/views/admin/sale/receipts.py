@@ -35,6 +35,7 @@ class MainReceiptConfig(BaseConfigView):
 
     keys = (
         'receipts_active_tva_module',
+        'bookentry_payment_label_template',
     )
     schema = get_config_schema(keys)
     validation_msg = u"L'export comptable des encaissement a bien été \

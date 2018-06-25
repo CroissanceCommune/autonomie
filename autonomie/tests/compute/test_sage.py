@@ -70,6 +70,8 @@ class DummyInvoice(Dummy, InvoiceCompute):
 @pytest.fixture
 def app_config():
     return {
+        'sage_contribution':'1',
+        'sage_rginterne':'1',
         'code_journal': 'CODE_JOURNAL',
         'compte_cg_contribution': 'CG_CONTRIB',
         'compte_rrr': 'CG_RRR',
@@ -1034,12 +1036,8 @@ class TestSageRGClient(BaseBookEntryTest):
 
 
 class TestSageExport():
-    def test_modules(self, config_request):
-        config = {
-            'sage_contribution':'1',
-            'sage_rginterne':'1',
-        }
-        config_request.config = config
+    def test_modules(self, config_request, app_config):
+        config_request.config = app_config
         exporter = InvoiceExport(None, config_request)
         assert len(exporter.modules) == 3
         sage_factories = [SageFacturation, SageContribution, SageRGInterne]

@@ -224,10 +224,20 @@ class BaseSageBookEntryFactory(object):
     # Tells us if we need to add analytic entries to our output (double_lines)
     static_columns = ()
     _part_key = None
+    _label_template_key = None
 
     def __init__(self, context, request):
         self.config = request.config
         self.company = None
+        if self._label_template_key:
+            self.label_template = self.config.get(
+                self._label_template_key,
+                None,
+            )
+            assert self.label_template is not None, \
+                '"{}" Config key should be set'.format(
+                    self._label_template_key
+                )
 
     def get_base_entry(self):
         """
@@ -319,8 +329,6 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
     def libelle(self):
         """
             Return the label for our book entry
-
-            The sub classes should define label_template.
         """
         try:
             return self.label_template.format(
@@ -378,7 +386,7 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             * Montant
     """
 
-    label_template = u"{invoice.customer.label} {company.name}"
+    _label_template_key = 'bookentry_facturation_label_template'
 
     @property
     def num_analytique(self):
@@ -471,8 +479,7 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         The contribution module
     """
     _part_key = "contribution_cae"
-
-    label_template = u"{invoice.customer.label} {company.name}"
+    _label_template_key = "bookentry_contribution_label_template"
 
     def get_amount(self, product):
         """
@@ -573,8 +580,7 @@ class SageRGInterne(BaseInvoiceBookEntryFactory):
         The RGINterne module
     """
     _part_key = "taux_rg_interne"
-
-    label_template = u"RG COOP {invoice.customer.label} {company.name}"
+    _label_template_key = "bookentry_rg_interne_label_template"
 
     def get_amount(self, product):
         """
@@ -652,8 +658,7 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
         The Rg client module
     """
     _part_key = "taux_rg_client"
-
-    label_template = u"RG {invoice.customer.label} {company.name}"
+    _label_template_key = "bookentry_rg_client_label_template"
 
     def get_amount(self, product):
         """
@@ -872,7 +877,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
         'credit',
     )
 
-    label_template = u"{beneficiaire}/frais {expense.month} {expense.year}"
+    _label_template_key = "bookentry_expense_label_template"
 
     def set_expense(self, expense):
         self.expense = expense
@@ -900,6 +905,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
         return self.label_template.format(
             beneficiaire=format_account(self.expense.user, reverse=False),
             expense=self.expense,
+            expense_date=datetime.date(self.expense.year, self.expense.month, 1)
         )
 
 
@@ -1103,7 +1109,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
         'credit',
     )
 
-    label_template = u"{company.name} / Rgt {invoice.customer.label}"
+    _label_template_key = "bookentry_payment_label_template"
 
     def set_payment(self, payment):
         self.invoice = payment.invoice
@@ -1296,6 +1302,8 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
         'credit',
     )
 
+    _label_template_key = "bookentry_expense_payment_main_label_template"
+
     @property
     def libelle(self):
         return self.label_template.format(
@@ -1350,6 +1358,9 @@ class SageExpensePaymentWaiver(SageExpensePaymentMain):
     """
     Module d'export pour les paiements par abandon de créance
     """
+
+    _label_template_key = 'bookentry_expense_payment_waiver_label_template'
+
     def set_static_cols(self):
         SageExpensePaymentMain.set_static_cols(self)
         self.code_journal = self.config.get('code_journal_waiver_ndf')

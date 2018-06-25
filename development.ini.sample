@@ -41,6 +41,8 @@ pyramid.includes =
 
 #### DATABASE ACCESS CONFIGURATION ####
 sqlalchemy.url = mysql://autonomie:autonomie@localhost/autonomie?charset=utf8
+# Uncomment the following line to use vagrant
+sqlalchemy.url = mysql://autonomie:autonomie@127.0.0.1:13306/autonomie?charset=utf8
 sqlalchemy.echo=False
 #sqlalchemy.encoding=UTF8
 # Those variables should be improved to fit your configuration

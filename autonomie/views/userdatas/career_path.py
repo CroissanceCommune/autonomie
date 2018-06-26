@@ -166,10 +166,11 @@ class CareerPathEditStage(BaseFormView):
         dest = u"userdatas/career_path"
 
         # Redirect to login management if new CAE situation is integration and no active login
-        if self.context.cae_situation.is_integration:
-            login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
-            if login is None:
-                dest = u"login"
+        if self.context.cae_situation is not None:
+            if self.context.cae_situation.is_integration:
+                login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
+                if login is None:
+                    dest = u"login"
 
         return HTTPFound(
             self.request.route_path('/users/{id}/%s' % dest, id=self.context.userdatas_id)

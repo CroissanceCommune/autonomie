@@ -302,7 +302,7 @@ def update_user_situation_cae(mapper, connection, target):
     if target.cae_situation_id is not None:
         from autonomie.models.user.userdatas import UserDatas
         user = UserDatas.query().filter(UserDatas.id==target.userdatas_id).first()
-        situation = user.get_cae_situation_from_career_path(target.start_date)
+        situation = user.get_cae_situation_from_career_path(None)
         if user.situation_situation_id != situation.id:
             logger.debug(u"Update CAE situation of the user %s to '%s'" % (target.userdatas_id, situation.label))
             connection.execute("UPDATE user_datas SET situation_situation_id=%s WHERE id=%s" % (situation.id, user.id))

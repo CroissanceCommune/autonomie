@@ -74,6 +74,7 @@ class Indicator(DBBASE):
 
     def force(self):
         self.forced = True
+        self.status = "success"
 
     @property
     def validated(self):
@@ -154,7 +155,7 @@ class SaleFileRequirement(Indicator):
             )
             # on récupère l'état de validation du fichier déposé
             if indicator.validation == self.validation:
-                self.validation_status= indicator.validation_status
+                self.validation_status = indicator.validation_status
 
         return result
 
@@ -173,6 +174,20 @@ class SaleFileRequirement(Indicator):
         else:
             self.status = 'success'
         return DBSESSION().merge(self)
+
+    def update_file(self, file_id):
+        """
+        The file file_id was updated, we update the indicator if it was related
+        to this file and if needed (if the current requirement needs validation)
+
+        :param int file_id: An id of a file persisted to database
+        :param bool validated: True if this file been validated in another
+        indicator
+        """
+        if self.file_id == file_id and self.validation:
+            self.validation_status = 'wait'
+            self.status = 'warning'
+            DBSESSION().merge(self)
 
     def remove_file(self):
         """

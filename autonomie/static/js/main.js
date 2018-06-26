@@ -382,27 +382,30 @@ function dismissPopup(win, options){
     var default_options = {refresh: true};
     _.extend(default_options, options);
     win.close();
+    if (!_.isUndefined(default_options.force_reload)){
+        window.location.reload();
+    } else {
+        var new_content = "";
 
-    var new_content = "";
+        if (!_.isUndefined(default_options.message)){
+            new_content += "<div class='alert alert-success text-center'>";
+            new_content += default_options.message;
+        } else if (!_.isUndefined(default_options.error)){
+            new_content += "<div class='alert alert-danger text-center'>";
+            new_content += default_options.error;
+        }
 
-    if (!_.isUndefined(default_options.message)){
-        new_content += "<div class='alert alert-success text-center'>";
-        new_content += default_options.message;
-    } else if (!_.isUndefined(default_options.error)){
-        new_content += "<div class='alert alert-danger text-center'>";
-        new_content += default_options.error;
+        if (default_options.refresh){
+            new_content += "&nbsp;<a href='#' onclick='window.location.reload();'><i class='glyphicon glyphicon-refresh'></i> Rafraîchir</a>";
+        }
+
+        new_content += '</div>';
+        var dest_tag = $('#popupmessage');
+        if (dest_tag.length == 0){
+            dest_tag = $('.pagetitle');
+        }
+        dest_tag.after(new_content);
     }
-
-    if (default_options.refresh){
-        new_content += "&nbsp;<a href='#' onclick='window.location.reload();'><i class='glyphicon glyphicon-refresh'></i> Rafraîchir</a>";
-    }
-
-    new_content += '</div>';
-    var dest_tag = $('#popupmessage');
-    if (dest_tag.length == 0){
-        dest_tag = $('.pagetitle');
-    }
-    dest_tag.after(new_content);
 }
 
 $(setupMainBehaviours);

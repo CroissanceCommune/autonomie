@@ -632,12 +632,26 @@ class BaseFormView(FormView):
 
         if "popup" in self.request.GET:
             if isinstance(result, HTTPFound):
-                msg = self.request.session.pop_flash(queue="")
-                if msg:
-                    self.logger.debug("We've got an HTTPFound result")
-                    set_close_popup_response(self.request, msg[0])
-                    return self.request.response
+                self.add_popup_response()
+                return self.request.response
         return result
+
+    def add_popup_response(self):
+        """
+        Add custom response string to the request Pop message or refresh parent
+        page regarding the options if a message was set in the queue, it's shown
+        with a refresh link, else we fully reload the page
+
+        """
+        self.logger.debug("Building a popup_close response")
+        msg = self.request.session.pop_flash(queue="")
+        if msg:
+            set_close_popup_response(
+                self.request,
+                msg[0],
+            )
+        else:
+            set_close_popup_response(self.request, force_reload=True)
 
     def _more_template_vars(self):
         """
@@ -876,6 +890,8 @@ class DeleteView(BaseView):
     redirect_route = None
 
     def __call__(self):
+        if hasattr(self, "on_before_delete"):
+            self.on_before_delete()
         self.request.dbsession.delete(self.context)
         self.request.session.flash(self.delete_msg)
 

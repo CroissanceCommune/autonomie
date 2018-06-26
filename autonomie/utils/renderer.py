@@ -95,9 +95,17 @@ def customize_renderers(config):
     configure_export()
 
 
-def set_close_popup_response(request, message=None, error=None, refresh=True):
+def set_close_popup_response(
+    request, message=None, error=None, refresh=True, force_reload=False
+):
     """
     Write directly js code inside the request reponse's body to call popup close
+
+    :param obj request: The Pyramid request object
+    :param str message: The information message we want to return
+    :param str error: The optionnal error messahe to send
+    :param bool refresh: Should a refresh link be included
+    :param bool force_reload: Shoud we reload the parent window automatically ?
     """
     options = u"{"
     refresh = refresh and 'true' or 'false'
@@ -106,6 +114,8 @@ def set_close_popup_response(request, message=None, error=None, refresh=True):
         options += u""", message: "%s" """ % message
     if error is not None:
         options += u""", error: "%s" """ % error
+    if force_reload:
+        options += u""", force_reload: true"""
     options += u"}"
 
     request.response.text = u"""<!DOCTYPE html>

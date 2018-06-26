@@ -64,6 +64,7 @@ AUTONOMIE_MODULES = (
     "autonomie.views.files",
     "autonomie.views.holiday",
     "autonomie.views.index",
+    "autonomie.views.indicators",
     "autonomie.views.invoices.invoice",
     "autonomie.views.invoices.cancelinvoice",
     "autonomie.views.invoices.lists",
@@ -175,8 +176,6 @@ def get_groups(login, request):
         res = []
         for group in user.login.groups:
             res.append('group:{0}'.format(group))
-
-    logger.debug("Groups : %s" % res)
 
     return res
 

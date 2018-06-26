@@ -42,6 +42,7 @@ from autonomie_base.models.base import DBSESSION
 from autonomie_celery.models import (
     Job,
 )
+from autonomie.models.services.find_company import FindCompanyService
 from autonomie.models.config import ConfigFiles
 from autonomie.models.activity import Activity
 from autonomie.models.company import Company
@@ -93,6 +94,7 @@ from autonomie.models.expense.sheet import (
 )
 from autonomie.models.expense.payment import ExpensePayment
 from autonomie.models.expense.types import ExpenseType
+from autonomie.models.indicators import SaleFileRequirement
 
 from autonomie.models.user.login import Login
 from autonomie.models.user.user import User
@@ -185,6 +187,11 @@ class RootFactory(dict):
             'income_statement_measure_categories',
             'income_statement_measure_category',
             IncomeStatementMeasureTypeCategory,
+        ),
+        (
+            'sale_file_requirements',
+            'sale_file_requirement',
+            SaleFileRequirement,
         ),
         ('jobs', 'job', Job, ),
         ('logins', 'login', Login, ),
@@ -1129,6 +1136,50 @@ def get_accounting_measure_acl(self):
     return []
 
 
+def get_indicator_acl(self):
+    """
+    Compile Indicator acl
+    """
+    acl = DEFAULT_PERM_NEW[:]
+    admin_perms = ()
+    if self.status != 'success':
+        admin_perms += ("force.indicator",)
+
+    if self.validation:
+        if self.validation_status != 'valid':
+            admin_perms += (
+                "valid.indicator",
+            )
+    acl.append((Allow, 'group:admin', admin_perms))
+    acl.append((Allow, 'group:manager', admin_perms))
+    return acl
+
+
+def get_sale_file_requirement_acl(self):
+    """
+    Compile acl for SaleFileRequirement instances
+    """
+    # Si le parent est validé et l'indicateur est ok, on ne peut plus modifier
+    if hasattr(self.node, 'status') and self.node.status == 'valid':
+        if self.status == 'success':
+            return []
+    acl = get_indicator_acl(self)
+
+    admin_perms = ('add.file', 'edit.file')
+    user_perms = ('add.file', 'edit.file')
+
+    employee_logins = FindCompanyService.find_employees_login_from_node(
+        self.node
+    )
+
+    for login in employee_logins:
+        acl.append((Allow, login, user_perms))
+
+    acl.append((Allow, 'group:admin', admin_perms))
+    acl.append((Allow, 'group:manager', admin_perms))
+    return acl
+
+
 def set_models_acl():
     """
     Add acl to the db objects used as context
@@ -1154,6 +1205,7 @@ def set_models_acl():
     File.__default_acl__ = property(get_file_acl)
     FileType.__acl__ = property(get_base_acl)
     Invoice.__default_acl__ = property(get_invoice_default_acl)
+    SaleFileRequirement.__acl__ = property(get_sale_file_requirement_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
     Login.__acl__ = property(get_login_acl)
     Payment.__default_acl__ = property(get_payment_default_acl)

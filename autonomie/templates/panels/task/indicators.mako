@@ -26,20 +26,42 @@
     <span class='btn btn-circle btn-${indicator.status}'>
     <i class="fa icon-${indicator.status}"></i>
     </span>&nbsp;
-    % if indicator.file_id:
     ${indicator.file_type.label} :
-    <a href="${request.route_path('file', id=indicator.file_object.id, _query={'action': 'download'})}">
-        ${indicator.file_object.name} (${api.human_readable_filesize(indicator.file_object.size)})
-    </a>
-    ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(request, indicator.file_object))}
+
+    % if indicator.file_id:
+        <a href="${request.route_path('file', id=indicator.file_object.id, _query={'action': 'download'})}">
+            ${indicator.file_object.name} (${api.human_readable_filesize(indicator.file_object.size)})
+        </a>
+        ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(request, indicator.file_object))}
+        % if request.has_permission('valid.indicator', indicator):
+        <a
+            href="${request.route_path(force_route, id=indicator.id, _query={'action': 'force'})}"
+            class='btn btn-default'
+            >
+                <i class='fa fa-lock'></i>&nbsp;Valider le fichier fournit
+        </a>
+        % endif
+    % elif indicator.forced:
+        Cet indicateur a été forcé manuellement
     % else:
-    <b>Un fichier ${indicator.file_type.label} est manquant</b>
+        <b>Aucun fichier fourni</b>
+    % endif
+    % if request.has_permission('add.file', indicator):
     <button
         class='btn btn-default'
         onclick="openPopup('${file_add_url}?file_type_id=${indicator.file_type_id}')"
         >
             <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un fichier
     </button>
+    % endif
+    % if request.has_permission('force.indicator', indicator):
+    <a
+        href="${request.route_path(force_route, id=indicator.id, _query={'action': 'force'})}"
+        class='btn btn-default'
+        onclick="return confirm('Êtes-vous sûr de vouloir forcer cet indicateur (il apparaîtra désormais comme valide) ?');"
+        >
+            <i class='fa fa-lock'></i>&nbsp;Forcer cet indicateur
+    </a>
     % endif
     <hr />
 </div>

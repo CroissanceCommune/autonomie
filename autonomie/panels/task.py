@@ -140,10 +140,14 @@ def task_indicators_panel(context, request):
         file_add_route,
         id=context.id,
     )
+
+    force_route = "/sale_file_requirements/{id}"
+
     return dict(
         indicators=indicators,
         stream_actions=stream_actions,
         file_add_url=file_add_url,
+        force_route=force_route,
     )
 
 

@@ -257,3 +257,86 @@ def test_check_project_task_files_scope_nook(
     TaskFileRequirementService.check_project_files(invoice)
 
     assert invoice.file_requirements[0].status == "danger"
+
+
+def test_get_mandatory_indicators_mandatory(
+    mk_invoice, mk_business, ftypes
+):
+    invoice = mk_invoice("mandatory")
+
+    result = TaskFileRequirementService.get_mandatory_indicators(
+        invoice.id, ftypes['ftype1'].id
+    )
+    assert len(result) == 1
+
+
+def test_get_mandatory_indicators_recommended(
+    mk_invoice, mk_business, ftypes
+):
+    invoice = mk_invoice("recommended")
+
+    result = TaskFileRequirementService.get_mandatory_indicators(
+        invoice.id, ftypes['ftype1'].id
+    )
+    assert len(result) == 1
+
+
+def test_get_business_mandatory_indicators_task(
+    mk_invoice, mk_business, ftypes
+):
+    invoice1 = mk_invoice("business_mandatory")
+    business = mk_business("business_mandatory", tasks=[invoice1])
+
+    result = TaskFileRequirementService.get_business_mandatory_indicators(
+        business.id, ftypes['ftype1'].id
+    )
+    assert len(result) == 2
+
+
+def test_get_business_mandatory_indicators_notask(
+    mk_invoice, mk_business, ftypes
+):
+    invoice1 = mk_invoice("mandatory")
+    business = mk_business("business_mandatory", tasks=[invoice1])
+
+    result = TaskFileRequirementService.get_business_mandatory_indicators(
+        business.id, ftypes['ftype1'].id
+    )
+    assert len(result) == 1
+
+
+def test_get_project_mandatory_indicators_task(
+    mk_invoice, mk_business, ftypes, project
+):
+    mk_invoice("project_mandatory", project=project)
+    result = TaskFileRequirementService.get_project_mandatory_indicators(
+        project.id, ftypes['ftype1'].id
+    )
+    assert len(result) == 1
+
+
+def test_get_project_mandatory_indicators_business(
+    mk_invoice, mk_business, ftypes, project
+):
+    mk_business("project_mandatory", project=project)
+    result = TaskFileRequirementService.get_project_mandatory_indicators(
+        project.id, ftypes['ftype1'].id
+    )
+    assert len(result) == 1
+
+
+def test_get_file_related_indicators(
+    dbsession, mk_invoice, mk_business, file_instance
+):
+    invoice = mk_invoice("mandatory")
+    invoice.file_requirements[0].file_id = file_instance.id
+    dbsession.merge(invoice.file_requirements[0])
+    business = mk_business()
+    business.file_requirements[0].file_id = file_instance.id
+    dbsession.merge(business.file_requirements[0])
+
+    res = SaleFileRequirementService.get_file_related_indicators(
+        file_instance.id
+    )
+    dbsession.delete(file_instance)
+    assert len(res) == 2

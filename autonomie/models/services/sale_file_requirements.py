@@ -109,8 +109,10 @@ class SaleFileRequirementService(object):
         # NB : si on a un update d'un fichier qui requiert validation, on doit
         # mettre à jour l'info sur les autres indicateurs
         if file_object.file_type_id:
-            if action in ('add', 'update'):
+            if action == 'add':
                 cls.on_file_add(node, file_object)
+            elif action == 'update':
+                cls.on_file_update(node, file_object)
             elif action == "delete":
                 cls.on_file_remove(node, file_object)
 
@@ -123,8 +125,13 @@ class SaleFileRequirementService(object):
             node_id=task_id
         ).filter_by(
             file_type_id=file_type_id
-        ).filter_by(
-            requirement_type=BusinessTypeFileType.MANDATORY
+        ).filter(
+            SaleFileRequirement.requirement_type.in_(
+                (
+                    BusinessTypeFileType.MANDATORY,
+                    BusinessTypeFileType.RECOMMENDED,
+                )
+            )
         ).all()
         return result
 
@@ -203,7 +210,7 @@ class SaleFileRequirementService(object):
         query = query.filter_by(
             requirement_type=BusinessTypeFileType.BUSINESS_MANDATORY
         )
-        return query
+        return query.all()
 
     @classmethod
     def get_project_mandatory_indicators(cls, project_id, file_type_id):
@@ -219,20 +226,35 @@ class SaleFileRequirementService(object):
         return query.all()
 
     @classmethod
+    def get_file_related_indicators(cls, file_id):
+        """
+        Return indicators related to the given file object
+        """
+        return SaleFileRequirement.query().filter_by(file_id=file_id).all()
+
+    @classmethod
     def on_file_add(cls, node, file_object):
         for indicator in cls.get_related_indicators(
             node,
             file_object.file_type_id
         ):
-            indicator.set_file(file_object)
+            indicator.set_file(file_object.id)
+
+    @classmethod
+    def on_file_update(cls, node, file_object):
+        for indicator in cls.get_related_indicators(
+            node,
+            file_object.file_type_id
+        ):
+            indicator.update_file(file_object.id)
 
     @classmethod
     def on_file_remove(cls, node, file_object):
-        for indicator in cls.get_related_indicators(
-            node,
-            file_object.file_type_id,
+        for indicator in cls.get_file_related_indicators(
+            file_object.id
         ):
-            indicator.remove_file(file_object)
+            print("  Indicator : %s" % indicator)
+            indicator.remove_file()
 
 
 class TaskFileRequirementService(SaleFileRequirementService):

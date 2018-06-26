@@ -1,3 +1,4 @@
+#-*-coding:utf-8-*- 
 """4.2.0a : Migrate parcours data
 
 Revision ID: 2a66d798c55d
@@ -131,11 +132,11 @@ def migrate_datas(situations_ids, stages_ids):
         FROM user_datas")
     for u in userdatas:
         # Diagnotic
-        diagnotics = cnx.execute("SELECT date FROM date_diagnostic_datas WHERE userdatas_id=%s" % u.id)
+        diagnotics = cnx.execute("SELECT date FROM date_diagnostic_datas WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
         for diagnotic in diagnotics:
             session.add(CareerPath(userdatas_id=u.id, career_stage_id=stages_ids[0], start_date=diagnotic.date))
         # CAPE
-        capes = cnx.execute("SELECT date, end_date FROM date_convention_cape_datas WHERE userdatas_id=%s" % u.id)
+        capes = cnx.execute("SELECT date, end_date FROM date_convention_cape_datas WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
         for cape in capes:
             session.add(CareerPath(
                 userdatas_id=u.id, 
@@ -146,11 +147,12 @@ def migrate_datas(situations_ids, stages_ids):
                 stage_type="entry"
             ))
         # DPAE
-        dpaes = cnx.execute("SELECT date FROM date_dpae_datas WHERE userdatas_id=%s" % u.id)
+        dpaes = cnx.execute("SELECT date FROM date_dpae_datas WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
         for dpae in dpaes:
             session.add(CareerPath(userdatas_id=u.id, career_stage_id=stages_ids[2], start_date=dpae.date))
         # Contrat
         if u.parcours_start_date:
+            from autonomie.models.career_path import TypeContratOption
             cdi_type = session.query(TypeContratOption).filter(
                 TypeContratOption.label==u.parcours_contract_type.upper()
             ).first()
@@ -172,7 +174,7 @@ def migrate_datas(situations_ids, stages_ids):
             ))
         # Avenant contrat
         if u.parcours_last_avenant:
-            avenants = cnx.execute("SELECT date, number FROM contract_history WHERE userdatas_id=%s" % u.id)
+            avenants = cnx.execute("SELECT date, number FROM contract_history WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
             for avenant in avenants:
                 model_avenant = CareerPath(
                     userdatas_id=u.id, 
@@ -197,7 +199,7 @@ def migrate_datas(situations_ids, stages_ids):
                 motif_sortie_id=u.sortie_motif_id
             ))
         # Historique des situations
-        changes = cnx.execute("SELECT date, situation_id FROM cae_situation_change WHERE userdatas_id=%s" % u.id)
+        changes = cnx.execute("SELECT date, situation_id FROM cae_situation_change WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
         for change in changes:
             session.add(CareerPath(userdatas_id=u.id, start_date=change.date, cae_situation_id=change.situation_id))
         # Sauvegarde du parcours de l'utilisateur

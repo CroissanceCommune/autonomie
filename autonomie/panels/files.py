@@ -25,16 +25,18 @@ def stream_actions(request, item):
             u"Télécharger",
             icon="download",
         )
-    if request.has_permission('delete.file', item):
-        yield Link(
-            request.route_path(
-                'file', id=item.id, _query=dict(action='delete')
-            ),
-            u"Supprimer",
-            confirm=u"Êtes-vous sûr de vouloir définitivement supprimer "
-            u"ce fichier ?",
-            icon="trash",
-        )
+
+    if request.context.id == item.parent_id:
+        if request.has_permission('delete.file', item):
+            yield Link(
+                request.route_path(
+                    'file', id=item.id, _query=dict(action='delete')
+                ),
+                u"Supprimer",
+                confirm=u"Êtes-vous sûr de vouloir définitivement supprimer "
+                u"ce fichier ?",
+                icon="trash",
+            )
 
 
 def task_file_tab_panel(context, request, title, add_url=None):

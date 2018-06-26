@@ -182,7 +182,6 @@ class FileUploadView(BaseFormView):
     factory = File
     schema = FileUploadSchema()
     title = u"Téléverser un fichier"
-    valid_msg = UPLOAD_OK_MSG
 
     def _parent(self):
         """
@@ -199,15 +198,18 @@ class FileUploadView(BaseFormView):
         }
         form.set_appstruct(appstruct)
 
-    def _update_file_requirements(self, file_object):
+    def _update_file_requirements(self, file_object, action='add'):
         """
         Update the file requirements for the given object
 
         :param obj file_object: The new :class:`autonomie.models.files.File`
+        :param bool edit: Are we editing an existing file ?
         """
         parent = self._parent()
         if hasattr(parent, "file_requirement_service"):
-            parent.file_requirement_service.register(parent, file_object)
+            parent.file_requirement_service.register(
+                parent, file_object, action=action
+            )
 
     def persist_to_database(self, appstruct):
         """
@@ -222,7 +224,6 @@ class FileUploadView(BaseFormView):
         self.request.dbsession.add(file_object)
         self.request.dbsession.flush()
         self._update_file_requirements(file_object)
-        self.request.session.flash(self.valid_msg)
 
     def redirect(self, come_from=None):
         """
@@ -305,8 +306,7 @@ class FileEditView(FileUploadView):
     def persist_to_database(self, appstruct):
         forms.merge_session_with_post(self.context, appstruct)
         self.request.dbsession.merge(self.context)
-        self.request.session.flash(self.valid_msg)
-        self._update_file_requirements(self.context)
+        self._update_file_requirements(self.context, action="update")
 
 
 def get_add_file_link(
@@ -329,11 +329,11 @@ def get_add_file_link(
 class FileDeleteView(DeleteView, FileViewRedirectMixin):
     delete_msg = u"Le fichier a été supprimé"
 
-    def on_delete(self):
-        parent = self.context
+    def on_before_delete(self):
+        parent = self.context.parent
         if hasattr(parent, "file_requirement_service"):
             parent.file_requirement_service.register(
-                parent, self.context
+                parent, self.context, action='delete'
             )
 
     def redirect(self):

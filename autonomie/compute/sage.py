@@ -1143,6 +1143,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
         return self.label_template.format(
             company=self.company,
             invoice=self.invoice,
+            payment=self.payment,
         )
 
     @property

@@ -77,7 +77,9 @@ indiqué (taux de contribution).\
         <p>Il est possible de personaliser les libellés comptables à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
         <ul>\
         <li><code>{invoice.customer.label}</code> : nom du client facturé</li>\
+        <li><code>{invoice.customer.code}</code> : code du client facturé</li>\
         <li><code>{company.name}</code> : nom de l'enseigne destinataire du paiement</li>\
+        <li><code>{company.code_compta}</code> : code analytique de l'enseigne destinataire du paiement</li>\
         <li><code>{invoice.official_number}</code> : numéro de facture</li>\
         </ul>
         <h4>Utilisation des variables</h4>\

@@ -48,7 +48,9 @@ EXPENSE_INFO_MESSAGE=u"""
         <li><code>{expense_date:%-m/%Y}</code> : produira <code>6/2017</code> pour Juin 2017</li>\
         <li><code>{expense_date:%m/%Y}</code> : produira <code>06/2017</code> pour Juin 2017</li>\
         </ul>\
-        </li>\
+    </li>\
+    <li>\
+        <code>{expense.description}</code> : motif de la dépense</li>\
     </ul>\
     """
 

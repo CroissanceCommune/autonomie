@@ -682,7 +682,11 @@ _{s.date:%m%y}"
                 group.__json__(request) for group in self.line_groups
             ],
             attachments=[
-                f.__json__(request)for f in self.children if f.type_ == 'file'
+                file_.__json__(request) for file_ in self.files
+            ],
+            file_requirements=[
+                file_req.__json__(request)
+                for file_req in self.file_requirements
             ]
         )
 

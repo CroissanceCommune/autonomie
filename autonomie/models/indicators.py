@@ -80,6 +80,14 @@ class Indicator(DBBASE):
     def validated(self):
         return self.validation_status == 'valid' or self.forced
 
+    def __json__(self, request):
+        return dict(
+            id=self.id,
+            status=self.status,
+            validation_status=self.validation_status,
+            forced=self.forced,
+        )
+
 
 class SaleFileRequirement(Indicator):
     """
@@ -197,3 +205,17 @@ class SaleFileRequirement(Indicator):
         self.set_default_status()
         self.set_default_validation_status()
         return DBSESSION().merge(self)
+
+    def __json__(self, request):
+        result = Indicator.__json__(self, request)
+        result.update(
+            dict(
+                validation=self.validation,
+                file_type_id=self.file_type_id,
+                requirement_type=self.requirement_type,
+                doctype=self.doctype,
+                file_id=self.file_id,
+                file_type=self.file_type.__json__(request),
+            )
+        )
+        return result

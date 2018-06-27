@@ -1,0 +1,17 @@
+<div style="border: 1px solid #dedede">
+<button class='btn btn-{{status}}'>
+<i class="fa icon-{{ status }}"></i>
+</button>
+{{{ label }}}
+
+{{#if has_view}}
+<span class='link btn-view'>
+    Voir le fichier
+</span>
+{{/if}}
+{{#if has_add}}
+<span class='link btn-add'>
+    Ajouter un fichier
+</span>
+{{/if}}
+</div>

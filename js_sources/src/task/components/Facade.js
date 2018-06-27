@@ -10,6 +10,7 @@
  */
 import Mn from 'backbone.marionette';
 
+import FileRequirementCollection from '../models/FileRequirementCollection.js';
 import CommonModel from "../models/CommonModel.js";
 import TaskGroupCollection from '../models/TaskGroupCollection.js';
 import DiscountCollection from '../models/DiscountCollection.js';
@@ -55,6 +56,11 @@ const FacadeClass = Mn.Object.extend({
         var discounts = form_datas['discounts'];
         this.collections['discounts'] = new DiscountCollection(discounts);
         this.computeTotals();
+
+        var file_requirements = form_datas['file_requirements'];
+        this.collections['file_requirements'] = new FileRequirementCollection(
+            file_requirements
+        );
 
         if (_.has(form_datas, 'payment_lines')){
             var payment_lines = form_datas['payment_lines'];

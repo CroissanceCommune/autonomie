@@ -23,24 +23,10 @@ const AnchorWidget = Mn.View.extend({
         'click @ui.anchor': "onClick",
     },
     onClick() {
-        console.log("Clicked");
-        console.log(this.model);
         var options = this.model.get('option');
         if (options.popup){
-            var screen_width =  screen.width;
-            var screen_height = screen.height;
-
-            var width = getPercent(screen_width, 60);
-            var height = getPercent(screen_height, 60);
-            var url = options.url;
-            var title = options.title;
-            window.open(
-                url + "?popup=true",
-                title,
-                "width=" + width + ",height=" + height
-            );
+            window.openPopup(options.url);
         }
-
     }
 });
 

@@ -11,6 +11,7 @@
 import Mn from 'backbone.marionette';
 import Radio from 'backbone.radio';
 
+import FileBlockView from "./FileBlockView.js";
 import GeneralView from "./GeneralView.js";
 import CommonView from "./CommonView.js";
 import TaskBlockView from './TaskBlockView.js';
@@ -36,6 +37,7 @@ const MainView = Mn.View.extend({
     regions: {
         errors: '.errors',
         modalRegion: '#modalregion',
+        file_requirements: "#file_requirements",
         general: '#general',
         common: '#common',
         tasklines: '#tasklines',
@@ -58,6 +60,18 @@ const MainView = Mn.View.extend({
     initialize: function(options){
         this.config = Radio.channel('config');
         this.facade = Radio.channel('facade');
+    },
+    showFileBlock: function(){
+        var section = this.config.request(
+            'get:form_section', 'file_requirements'
+        );
+        var collection = this.facade.request(
+            'get:collection', 'file_requirements'
+        );
+        var view = new FileBlockView(
+            {collection: collection, section:section}
+        );
+        this.showChildView('file_requirements', view);
     },
     showGeneralBlock: function(){
         var section = this.config.request('get:form_section', 'general');
@@ -129,6 +143,9 @@ const MainView = Mn.View.extend({
     onRender: function() {
         var totalmodel = this.facade.request('get:totalmodel');
         var view;
+        if (this.config.request('has:form_section', 'file_requirements')){
+            this.showFileBlock();
+        }
         if (this.config.request('has:form_section', 'general')){
             this.showGeneralBlock();
         }

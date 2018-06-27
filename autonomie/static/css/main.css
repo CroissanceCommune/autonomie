@@ -674,3 +674,8 @@ header .navbar .nav > li > a {
 
 a.link {
   text-decoration: underline; }
+
+div.link, span.link {
+  text-decoration: underline;
+  color: #2196f3;
+  cursor: pointer; }

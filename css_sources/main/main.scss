@@ -292,3 +292,8 @@ header .navbar .nav > li > a{
 a.link{
   text-decoration: underline;
 }
+div.link, span.link{
+  text-decoration: underline;
+  color: $font-blue1;
+  cursor: pointer;
+}

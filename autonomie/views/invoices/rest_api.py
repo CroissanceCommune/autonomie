@@ -6,6 +6,7 @@
 """
 Rest views for invoices and cancelinvoices
 """
+import os
 import logging
 import colander
 
@@ -27,6 +28,7 @@ from autonomie.views.task.rest_api import (
     TaskLineGroupRestView,
     TaskLineRestView,
     DiscountLineRestView,
+    TaskFileRequirementRestView,
 )
 from autonomie.views.task.utils import json_payment_conditions
 
@@ -178,25 +180,16 @@ def add_invoice_routes(config):
 
     :param obj config: Pyramid config object
     """
-    config.add_route(
-        "/api/v1/invoices",
-        "/api/v1/invoices",
-    )
-    config.add_route(
-        "/api/v1/invoices/{id}",
-        "/api/v1/invoices/{id:\d+}",
-        traverse='/invoices/{id}'
-    )
-    config.add_route(
-        "/api/v1/invoices/{id}/task_line_groups",
-        "/api/v1/invoices/{id}/task_line_groups",
-        traverse='/invoices/{id}'
-    )
-    config.add_route(
-        "/api/v1/invoices/{id}/discount_lines",
-        "/api/v1/invoices/{id}/discount_lines",
-        traverse='/invoices/{id}'
-    )
+    COLLECTION_ROUTE = "/api/v1/invoices"
+    config.add_route(COLLECTION_ROUTE, COLLECTION_ROUTE)
+    ITEM_ROUTE = os.path.join(COLLECTION_ROUTE, "{id}")
+    config.add_route(ITEM_ROUTE, ITEM_ROUTE, traverse='/invoices/{id}')
+    for collection in (
+        'task_line_groups', 'discount_lines', 'file_requirements'
+    ):
+        route = os.path.join(ITEM_ROUTE, collection)
+        config.add_route(route, route, traverse='/invoices/{id}')
+
     config.add_route(
         "/api/v1/invoices/{eid}/task_line_groups/{id}",
         "/api/v1/invoices/{eid}/task_line_groups/{id:\d+}",
@@ -225,20 +218,16 @@ def add_cancelinvoice_routes(config):
 
     :param obj config: Pyramid config object
     """
-    config.add_route(
-        "/api/v1/cancelinvoices",
-        "/api/v1/cancelinvoices",
-    )
-    config.add_route(
-        "/api/v1/cancelinvoices/{id}",
-        "/api/v1/cancelinvoices/{id:\d+}",
-        traverse='/cancelinvoices/{id}'
-    )
-    config.add_route(
-        "/api/v1/cancelinvoices/{id}/task_line_groups",
-        "/api/v1/cancelinvoices/{id}/task_line_groups",
-        traverse='/cancelinvoices/{id}'
-    )
+    COLLECTION_ROUTE = "/api/v1/cancelinvoices"
+    config.add_route(COLLECTION_ROUTE, COLLECTION_ROUTE)
+    ITEM_ROUTE = os.path.join(COLLECTION_ROUTE, "{id}")
+    config.add_route(ITEM_ROUTE, ITEM_ROUTE, traverse='/cancelinvoices/{id}')
+    for collection in (
+        'task_line_groups', 'discount_lines', 'file_requirements'
+    ):
+        route = os.path.join(ITEM_ROUTE, collection)
+        config.add_route(route, route, traverse='/cancelinvoices/{id}')
+
     config.add_route(
         "/api/v1/cancelinvoices/{eid}/task_line_groups/{id}",
         "/api/v1/cancelinvoices/{eid}/task_line_groups/{id:\d+}",
@@ -357,6 +346,16 @@ def add_invoice_views(config):
         permission='edit.invoice',
         xhr=True,
     )
+    # File requirements views
+    config.add_view(
+        TaskFileRequirementRestView,
+        route_name="/api/v1/invoices/{id}/file_requirements",
+        attr="collection_get",
+        request_method="GET",
+        renderer="json",
+        permission="view.invoice",
+        xhr=True,
+    )
 
 
 def add_cancelinvoice_views(config):
@@ -439,6 +438,16 @@ def add_cancelinvoice_views(config):
         request_method='POST',
         renderer='json',
         permission='edit.cancelinvoice',
+        xhr=True,
+    )
+    # File requirements views
+    config.add_view(
+        TaskFileRequirementRestView,
+        route_name="/api/v1/cancelinvoices/{id}/file_requirements",
+        attr="collection_get",
+        request_method="GET",
+        renderer="json",
+        permission="view.cancelinvoice",
         xhr=True,
     )
 

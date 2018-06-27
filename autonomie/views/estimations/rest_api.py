@@ -9,6 +9,7 @@ Estimation rest views :
     1- Edit estimation
     2- Return form options for estimation build
 """
+import os
 import logging
 import colander
 
@@ -34,6 +35,7 @@ from autonomie.views.task.rest_api import (
     TaskLineGroupRestView,
     TaskLineRestView,
     DiscountLineRestView,
+    TaskFileRequirementRestView,
 )
 from autonomie.views.task.utils import json_payment_conditions
 from autonomie.views.status import (
@@ -314,30 +316,17 @@ def add_routes(config):
 
     :param obj config: Pyramid config object
     """
-    config.add_route(
-        "/api/v1/estimations",
-        "/api/v1/estimations",
-    )
-    config.add_route(
-        "/api/v1/estimations/{id}",
-        "/api/v1/estimations/{id:\d+}",
-        traverse='/estimations/{id}'
-    )
-    config.add_route(
-        "/api/v1/estimations/{id}/task_line_groups",
-        "/api/v1/estimations/{id}/task_line_groups",
-        traverse='/estimations/{id}'
-    )
-    config.add_route(
-        "/api/v1/estimations/{id}/discount_lines",
-        "/api/v1/estimations/{id}/discount_lines",
-        traverse='/estimations/{id}'
-    )
-    config.add_route(
-        "/api/v1/estimations/{id}/payment_lines",
-        "/api/v1/estimations/{id}/payment_lines",
-        traverse='/estimations/{id}'
-    )
+    COLLECTION_ROUTE = "/api/v1/estimations"
+    config.add_route(COLLECTION_ROUTE, COLLECTION_ROUTE)
+    ITEM_ROUTE = os.path.join(COLLECTION_ROUTE, "{id}")
+    config.add_route(ITEM_ROUTE, ITEM_ROUTE, traverse='/estimations/{id}')
+    for collection in (
+        'task_line_groups', 'discount_lines',
+        'payment_lines', 'file_requirements'
+    ):
+        route = os.path.join(ITEM_ROUTE, collection)
+        config.add_route(route, route, traverse='/estimations/{id}')
+
     config.add_route(
         "/api/v1/estimations/{eid}/task_line_groups/{id}",
         "/api/v1/estimations/{eid}/task_line_groups/{id:\d+}",
@@ -483,6 +472,16 @@ def add_views(config):
         add_rights="edit.estimation",
         edit_rights='edit.estimation',
         delete_rights='edit.estimation',
+    )
+    # File requirements views
+    config.add_view(
+        TaskFileRequirementRestView,
+        route_name="/api/v1/estimations/{id}/file_requirements",
+        attr="collection_get",
+        request_method="GET",
+        renderer="json",
+        permission="view.estimation",
+        xhr=True,
     )
 
 

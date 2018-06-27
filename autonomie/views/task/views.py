@@ -134,18 +134,15 @@ class TaskEditView(BaseView):
             _query=dict(action='jstree')
         )
 
-    def context_url(self):
-        return self.request.route_path(
-            '/api/v1/' + self.request.context.type_ + 's/{id}',
-            id=self.request.context.id
-        )
-
-    def form_config_url(self):
+    def context_url(self, _query={}):
         return self.request.route_path(
             '/api/v1/' + self.request.context.type_ + 's/{id}',
             id=self.request.context.id,
-            _query={'form_config': '1'}
+            _query=_query,
         )
+
+    def form_config_url(self):
+        return self.context_url(_query={'form_config': '1'})
 
     def __call__(self):
         if not self.request.has_permission('edit.%s' % self.context.type_):

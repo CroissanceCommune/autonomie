@@ -127,6 +127,11 @@ class TaskRestView(BaseRestView):
         if hasattr(self, '_more_form_sections'):
             sections = self._more_form_sections(sections)
 
+        if self.context.file_requirements:
+            sections['file_requirements'] = {
+                'edit': True,
+            }
+
         form_config['sections'] = sections
         return form_config
 
@@ -198,7 +203,7 @@ class TaskRestView(BaseRestView):
                     "title": u"Attacher un fichier à ce document",
                     "css": "btn btn-default",
                     "icon": "fa fa-files-o",
-                    "attrs": "target=_blank",
+                    "popup": True,
                 }
             })
         url = self.request.route_path(
@@ -445,3 +450,8 @@ class DiscountLineRestView(BaseRestView):
                 self.context.discounts.append(line)
             self.request.dbsession.merge(self.context)
         return lines
+
+
+class TaskFileRequirementRestView(BaseRestView):
+    def collection_get(self):
+        return self.context.file_requirements

@@ -24,14 +24,14 @@
 <%inherit file="${context['main_template'].uri}" />
 <%block name='afteractionmenu'>
 <div class='row page-header-block'>
-    % if navigation:
+    % if navigation and not request.is_popup:
     <ul class="breadcrumb breadcrumb-arrow">
         <li><a href='${navigation.url}'><i class='fa fa-chevron-left'></i></a></li>
-        % endif
         <li>
         <a href="${navigation.url}">${navigation.title}</a>
         </li>
     </ul>
+    % endif
     <div class='page-header-block'>
     <a
         class='btn btn-primary primary-action'

@@ -24,7 +24,7 @@
 
 <%inherit file="${context['main_template'].uri}" />
 <%block name='content'>
-% if 'popup' in request.GET:
+% if request.is_popup:
 <div class='text-center'>
     <h2>
     Modification du client ${request.context.label}

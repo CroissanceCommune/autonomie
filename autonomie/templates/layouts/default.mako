@@ -44,7 +44,7 @@
   <body
       class="${request.matched_route.name}-view"
       >
-    % if 'popup' not in request.GET:
+    % if not request.is_popup:
         ${request.layout_manager.render_panel('menu')}
         ${request.layout_manager.render_panel('submenu')}
         <%block name="headtitle">
@@ -114,10 +114,12 @@
         <i class="fa fa-circle-o-notch fa-spin"></i>
     </div>
     <div id='login_form' style='display:none'></div>
+    % if not request.is_popup:
     <footer id='page-footer-block'>
     Autonomie v${layout.autonomie_version}
     <%block name='footer' />
     </footer>
+    % endif
     <script type='text/javascript'>
         $( function() {
             console.log("In the js func");

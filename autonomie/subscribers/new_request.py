@@ -59,6 +59,11 @@ def add_request_attributes(event):
     # Use this one instead
     request.navigation = Navigation()
     request.popups = {}
+    if 'popup' in request.params:
+        logger.info("Relative window is a popup")
+        request.is_popup = True
+    else:
+        request.is_popup = False
 
 
 def includeme(config):

@@ -660,7 +660,7 @@ class BaseFormView(FormView, PopupMixin):
         if isinstance(result, dict):
             result.update(self._more_template_vars())
 
-        if "popup" in self.request.GET:
+        if self.request.is_popup:
             if isinstance(result, HTTPFound):
                 self.add_popup_response()
                 return self.request.response
@@ -916,7 +916,7 @@ class DeleteView(BaseView, PopupMixin):
         elif self.redirect_route is not None:
             result = HTTPFound(self.request.route_path(self.redirect_route))
 
-        if "popup" in self.request.GET:
+        if self.request.is_popup:
             if isinstance(result, HTTPFound):
                 self.add_popup_response()
                 return self.request.response

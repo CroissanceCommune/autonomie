@@ -16,8 +16,10 @@ Contents:
     ftp
     hacking
     js_templates
+    javascript
     models
     rest
+    computing
     apidoc/modules
     migration
 

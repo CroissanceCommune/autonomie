@@ -1,3 +1,6 @@
+API REST
+========
+
 .. http:get:: /users/(int:user_id)/posts/(tag)
 
    The posts tagged with `tag` that the user (`user_id`) wrote.

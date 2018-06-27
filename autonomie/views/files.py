@@ -136,20 +136,19 @@ class FileView(BaseView, FileViewRedirectMixin):
     def populate_actionmenu(self):
         return Link(self.back_url(), self.get_label())
 
+    def get_file_path(self, action):
+        params = self.request.GET
+        params['action'] = action
+        return self.request.current_route_path(_query=params)
+
     def edit_url(self):
-        return self.request.route_path(
-            "file", id=self.context.id, _query={'action': 'edit'}
-        )
+        return self.get_file_path("edit")
 
     def delete_url(self):
-        return self.request.route_path(
-            "file", id=self.context.id, _query={'action': 'delete'}
-        )
+        return self.get_file_path("delete")
 
     def download_url(self):
-        return self.request.route_path(
-            "file", id=self.context.id, _query={'action': 'download'}
-        )
+        return self.get_file_path("download")
 
     def __call__(self):
         return dict(

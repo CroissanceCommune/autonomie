@@ -172,41 +172,49 @@ d'écriture RG Client",
     },
     'bookentry_facturation_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Module Facturation",
     },
     'bookentry_payment_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Encaissements",
     },
     'bookentry_rg_client_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Module RG Client",
     },
     'bookentry_rg_interne_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Module RG Interne",
     },
     'bookentry_contribution_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Module Contribution",
     },
     'bookentry_expense_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
     },
     'bookentry_expense_payment_main_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Paiement des notes de dépenses",
     },
     'bookentry_expense_payment_waiver_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Pour l'export CSV des factures",
+        'description': u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page",
         "section": u"Abandon de créance",
     },
     'sage_contribution': {

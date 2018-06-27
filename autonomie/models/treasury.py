@@ -67,19 +67,20 @@ exports des factures.
 les variables associées)</li>\
         <li>Un taux de contribution (pourcentage prélevé sur le <b>HT</b>)</li>\
         </ul>\
+        <p>\
         Pour chaque module, 8 lignes seront générées (4 lignes \
 analytiques et 4 lignes générales).
         Le montant du débit et du crédit seront calculés selon le pourcentage \
-indiqué (taux de contribution).
+indiqué (taux de contribution).\
+        </p>
         <h4>Variables utilisables dans les gabarits de libellés</h4>\
+        <p>Il est possible de personaliser les libellés comptables à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
         <ul>\
-        <li>invoice.customer.label</li>\
-        <li>company.name</li>\
-        <li>invoice.official_number</li>\
+        <li><code>{invoice.customer.label}</code> : nom du client facturé</li>\
+        <li><code>{company.name}</code> : nom de l'enseigne destinataire du paiement</li>\
+        <li><code>{invoice.official_number}</code> : numéro de facture</li>\
         </ul>
         <h4>Utilisation des variables</h4>\
-        Les variables s'utilise au sein des gabarits de libellés en les \
-entourant par des accolades {}.
         ex : "Contribution {entreprise.name} {client.name} {numero_facture}"
         """,
         'widget': deform_extensions.GridMappingWidget(named_grid=GRID)

@@ -36,13 +36,13 @@ EXPENSE_ACCOUNTING_URL = os.path.join(EXPENSE_URL, 'accounting')
 EXPENSE_PAYMENT_ACCOUNTING_URL = os.path.join(EXPENSE_URL, 'payment_accounting')
 
 EXPENSE_INFO_MESSAGE=u"""
-<h3>Libellés d'écritures comptables</h3>\
-    <p>Il est possible de les personaliser à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
+<h4>Variables utilisables dans les gabarits de libellés</h4>\
+    <p>Il est possible de personaliser les libellés comptables à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
     <ul>\
-    <li><code>{beneficiaire}</code> : les noms/prénoms de la personne ayant avancé les frais</li>\
-    <li><code>{beneficiaire_LASTNAME}</code> : le nom, en capitales, de la personne ayant avancé les frais</li>\
+    <li><code>{beneficiaire}</code> : nom/prénoms de la personne ayant avancé les frais</li>\
+    <li><code>{beneficiaire_LASTNAME}</code> : nom, en capitales, de la personne ayant avancé les frais</li>\
     <li>\
-        <code>{expense_date}</code> : la date de la note de dépense, qu'il est posisble de formatter de différentes manières :\
+        <code>{expense_date}</code> : date de la note de dépense, qu'il est posisble de formatter de différentes manières :\
         <ul>\
         <li><code>{expense_date:%-m %Y}</code> : produira <code>6 2017</code> pour Juin 2017</li>\
         <li><code>{expense_date:%-m/%Y}</code> : produira <code>6/2017</code> pour Juin 2017</li>\

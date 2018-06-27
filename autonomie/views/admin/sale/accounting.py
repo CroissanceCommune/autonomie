@@ -73,32 +73,30 @@ modules prédéfinis"
         'sage_rgclient',
     )
     schema = get_config_schema(keys)
-    info_message = u"""
-Configurez les exports comptables de votre CAE.
-<h3>Champs indispensables aux exports</h3>\
+    info_message = u"""\
+<p>Configurez les exports comptables de votre CAE.</p>
+<h4>Champs indispensables aux exports</h4>\
     <ul>\
         <li>Code journal</li>\
         <li>Numéro analytique de la CAE</li>\
         <li>Compte banque de l'entrepreneur</li>\
-    </ul>\
-<h3>champs relatifs aux frais et remises</h3>\
+    </ul>
+<h4>Champs relatifs aux frais et remises</h4>\
     <ul>\
-<li>Compte de frais annexes</li>\
-<li>Compte RRR (Rabais, Remises et Ristournes)</li>\
-    </ul>\
-<h3>Configurez et activez des modules de retenues optionnels</h3>\
+      <li>Compte de frais annexes</li>\
+      <li>Compte RRR (Rabais, Remises et Ristournes)</li>\
+    </ul>
+<h4>Configurez et activez des modules de retenues optionnels</h4>\
         <ul>\
     <li>Module de contribution à la CAE</li>\
     <li>Module RG Externe (spécifique bâtiment)</li>\
     <li>Module RG Interne (spécifique bâtiment)</li>\
-    </ul>\
-<h3>Libellés d'écritures comptables</h3>\
-    <p>\
-    Plusieurs variables sont disponibles :\
-    </p>\
+    </ul>
+<h4>Variables utilisables dans les gabarits de libellés</h4>\
+    <p>Il est possible de personaliser les libellés comptables à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
     <ul>\
-    <li><code>{invoice.customer.label}</code> : le nom du client destinataire de la facture</li>\
-    <li><code>{company.name}</code> : le nom de l'enseigne établissant la facture</li>\
+      <li><code>{invoice.customer.label}</code> : nom du client facturé</li>\
+      <li><code>{company.name}</code> : nom de l'enseigne établissant la facture</li>\
     </ul>\
     """
 

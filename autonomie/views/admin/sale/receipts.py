@@ -45,11 +45,11 @@ configuré"
   Configurer l'export des encaissements (le code journal\
   utilisé est celui de la banque associé à chaque encaissement)\
 </p>\
-<h3>Libellés d'écritures comptables</h3>\
-    <p>Il est possible de les personaliser à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
+<h4>Variables utilisables dans les gabarits de libellés</h4>\
+    <p>Il est possible de personaliser les libellés comptables à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
     <ul>\
-    <li><code>{invoice.customer.label}</code> : le nom du client émetteur du paiement</li>\
-    <li><code>{company.name}</code> : le nom de l'enseigne destinataire du paiement</li>\
+    <li><code>{invoice.customer.label}</code> : nom du client émetteur du paiement</li>\
+    <li><code>{company.name}</code> : nom de l'enseigne destinataire du paiement</li>\
     </ul>\
 """
 

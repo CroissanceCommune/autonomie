@@ -71,6 +71,7 @@ class Indicator(DBBASE):
         info={'colanderalchemy': {'exclude': True}},
         nullable=False,
     )
+    VALIDATION_STATUS = ('invalid', 'valid', 'wait', 'none')
 
     def force(self):
         self.forced = True
@@ -79,6 +80,17 @@ class Indicator(DBBASE):
     @property
     def validated(self):
         return self.validation_status == 'valid' or self.forced
+
+    def set_validation_status(self, status):
+        if status not in self.VALIDATION_STATUS:
+            raise Exception("Invalid validation status")
+
+        self.validation_status = status
+        if status == "valid":
+            self.status = "success"
+        else:
+            self.status = "warning"
+        return DBSESSION.merge(self)
 
     def __json__(self, request):
         return dict(

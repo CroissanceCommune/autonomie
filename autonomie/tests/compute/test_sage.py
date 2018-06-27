@@ -105,9 +105,9 @@ def app_config():
         'bookentry_payment_label_template':
             u"{company.name} / Rgt {invoice.customer.label}",
         'bookentry_expense_payment_main_label_template':
-            u"{LASTNAME} / REMB FRAIS {expense_date:%B/%Y}",
+            u"{beneficiaire_LASTNAME} / REMB FRAIS {expense_date:%B/%Y}",
         'bookentry_expense_payment_waiver_label_template':
-            u"Abandon de créance {LASTNAME} {expense_date:%B/%Y}",
+            u"Abandon de créance {beneficiaire_LASTNAME} {expense_date:%B/%Y}",
     }
 
 

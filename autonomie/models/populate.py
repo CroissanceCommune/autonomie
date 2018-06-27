@@ -170,11 +170,11 @@ def populate_bookentry_config(session):
         ),
         (
             'bookentry_expense_payment_main_label_template',
-            "{LASTNAME} / REMB FRAIS {expense_date:%B/%Y}"
+            "{beneficiaire_LASTNAME} / REMB FRAIS {expense_date:%B/%Y}"
         ),
         (
             'bookentry_expense_payment_waiver_label_template',
-            "Abandon de créance {LASTNAME} {expense_date:%B/%Y}"
+            "Abandon de créance {beneficiaire_LASTNAME} {expense_date:%B/%Y}"
         ),
 
     ]

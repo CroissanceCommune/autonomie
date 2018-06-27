@@ -904,6 +904,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
     def libelle(self):
         return self.label_template.format(
             beneficiaire=format_account(self.expense.user, reverse=False),
+            beneficiaire_LASTNAME=self.expense.user.lastname.upper(),
             expense=self.expense,
             expense_date=datetime.date(self.expense.year, self.expense.month, 1)
         )
@@ -1307,7 +1308,8 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
     @property
     def libelle(self):
         return self.label_template.format(
-            LASTNAME=self.expense.user.lastname.upper(),
+            beneficiaire=format_account(self.expense.user, reverse=False),
+            beneficiaire_LASTNAME=self.expense.user.lastname.upper(),
             expense=self.expense,
             expense_date=datetime.date(self.expense.year, self.expense.month, 1)
         )

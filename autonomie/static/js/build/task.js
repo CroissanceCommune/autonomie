@@ -3194,44 +3194,62 @@ webpackJsonp([2],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 20);
+	
+	var _backbone4 = _interopRequireDefault(_backbone3);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/FileRequirementView.mustache */ 109); /*
-	                                                                     * File Name : FileRequirementView.js
-	                                                                     *
-	                                                                     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	                                                                     * Company : Majerti ( http://www.majerti.fr )
-	                                                                     *
-	                                                                     * This software is distributed under GPLV3
-	                                                                     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                                     *
-	                                                                     */
-	
+	/*
+	 * File Name : FileRequirementView.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var template = __webpack_require__(/*! ./templates/FileRequirementView.mustache */ 109);
 	
 	var FileRequirementView = _backbone2.default.View.extend({
 	    template: template,
 	    ui: {
 	        add_button: 'span.btn-add',
-	        view_button: "span.btn-view"
+	        view_button: "span.btn-view",
+	        valid_button: "button.btn-validate"
 	    },
 	    events: {
 	        "click @ui.add_button": "onAdd",
-	        "click @ui.view_button": "onView"
+	        "click @ui.view_button": "onView",
+	        "click @ui.valid_button": "onValidate"
+	    },
+	    initialize: function initialize(options) {
+	        var config_channel = _backbone4.default.channel('config');
+	        this.section = config_channel.request('get:form_section', 'file_requirements');
 	    },
 	    templateContext: function templateContext() {
 	        return {
 	            has_view: this.model.hasFile(),
-	            has_add: this.model.missingFile()
+	            has_add: this.model.missingFile(),
+	            has_valid_link: this.model.hasFile() && this.model.get('validation') && this.section.can_validate,
+	            label: this.model.label()
 	        };
 	    },
 	    onFilePopupCallback: function onFilePopupCallback(options) {
 	        this.model.collection.fetch();
 	    },
+	    getCurrentUrl: function getCurrentUrl() {
+	        return window.location.href.replace('#', '').split('?')[0];
+	    },
 	    onAdd: function onAdd() {
-	        window.openPopup(window.location.href + "/addfile?file_type_id=" + this.model.get('file_type_id'), this.onFilePopupCallback.bind(this));
+	        window.openPopup(this.getCurrentUrl() + "/addfile?file_type_id=" + this.model.get('file_type_id'), this.onFilePopupCallback.bind(this));
 	    },
 	    onView: function onView() {
 	        window.openPopup("/files/" + this.model.get("file_id"), this.onFilePopupCallback.bind(this));
+	    },
+	    onValidate: function onValidate() {
+	        this.model.validate();
 	    }
 	});
 	exports.default = FileRequirementView;
@@ -3249,6 +3267,8 @@ webpackJsonp([2],[
 	  return "<span class='link btn-view'>\n    Voir le fichier\n</span>\n";
 	  },"3":function(depth0,helpers,partials,data) {
 	  return "<span class='link btn-add'>\n    Ajouter un fichier\n</span>\n";
+	  },"5":function(depth0,helpers,partials,data) {
+	  return "<button class='btn btn-info btn-validate'>\n    Valider le fichier fourni\n</button>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div style=\"border: 1px solid #dedede\">\n<button class='btn btn-"
 	    + escapeExpression(((helper = (helper = helpers.status || (depth0 != null ? depth0.status : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"status","hash":{},"data":data}) : helper)))
@@ -3261,6 +3281,8 @@ webpackJsonp([2],[
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.has_view : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.has_add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.has_valid_link : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "</div>\n";
 	},"useData":true});
@@ -6043,7 +6065,6 @@ webpackJsonp([2],[
 	        if (value == 1 || value == '1') {
 	            checked = true;
 	        }
-	        console.log(this.model);
 	
 	        this.showChildView("content", new _CheckboxWidget2.default({
 	            title: "",
@@ -9132,10 +9153,22 @@ webpackJsonp([2],[
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	/*
+	 * File Name : FileRequirementModel.js
+	 *
+	 * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
 	var FileRequirementModel = _backbone2.default.Model.extend({
-	    initialize: function initialize() {
+	    label: function label() {
 	        var status = this.get('status');
 	        var requirement_type = this.get('requirement_type');
 	        var file_id = this.get('file_id');
@@ -9155,7 +9188,7 @@ webpackJsonp([2],[
 	        } else if (forced) {
 	            label += "La validation a été forcée";
 	        }
-	        this.set({ label: label });
+	        return label;
 	    },
 	    missingFile: function missingFile() {
 	        var status = this.get('status');
@@ -9163,17 +9196,12 @@ webpackJsonp([2],[
 	    },
 	    hasFile: function hasFile() {
 	        return this.has('file_id');
+	    },
+	    validate: function validate() {
+	        var serverRequest = (0, _tools.ajax_call)(this.url() + '?action=validation_status', { "validation_status": "valid" }, "POST");
+	        serverRequest.then(this.fetch.bind(this));
 	    }
-	}); /*
-	     * File Name : FileRequirementModel.js
-	     *
-	     * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
-	     * Company : Majerti ( http://www.majerti.fr )
-	     *
-	     * This software is distributed under GPLV3
-	     * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	     *
-	     */
+	});
 	exports.default = FileRequirementModel;
 
 /***/ }),

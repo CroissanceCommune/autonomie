@@ -9,10 +9,11 @@
  *
  */
 import Bb from 'backbone';
+import { ajax_call } from '../../tools.js';
 
 
 const FileRequirementModel = Bb.Model.extend({
-    initialize(){
+    label(){
         let status = this.get('status');
         let requirement_type = this.get('requirement_type');
         let file_id = this.get('file_id');
@@ -32,7 +33,7 @@ const FileRequirementModel = Bb.Model.extend({
         } else if (forced){
             label += "La validation a été forcée";
         }
-        this.set({label: label});
+        return label;
     },
     missingFile(){
         let status = this.get('status');
@@ -40,6 +41,14 @@ const FileRequirementModel = Bb.Model.extend({
     },
     hasFile(){
         return this.has('file_id');
+    },
+    validate(){
+        var serverRequest = ajax_call(
+            this.url() + '?action=validation_status',
+            {"validation_status": "valid"},
+            "POST"
+        );
+        serverRequest.then(this.fetch.bind(this));
     }
 });
 export default FileRequirementModel;

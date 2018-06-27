@@ -19,7 +19,7 @@ const FileCollectionView = Mn.CollectionView.extend({
     childView: FileRequirementView,
     collectionEvents: {
         'sync': 'render'
-    },
+    }
 });
 
 const FileBlockView = Mn.View.extend({
@@ -30,7 +30,7 @@ const FileBlockView = Mn.View.extend({
         files: '.files',
     },
     onRender: function(){
-        var view = new FileCollectionView({ collection: this.collection});
+        var view = new FileCollectionView({collection: this.collection});
         this.showChildView('files', view);
     }
 });

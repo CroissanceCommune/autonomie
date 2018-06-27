@@ -29,7 +29,6 @@ const DisplayUnitsView = Mn.View.extend({
         if ((value == 1)|| (value == '1')){
             checked = true;
         }
-        console.log(this.model);
 
         this.showChildView(
             "content",

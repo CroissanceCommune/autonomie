@@ -241,15 +241,16 @@ def add_rest_views(
     if collection_view_rights is None:
         collection_view_rights = view_rights
 
-    config.add_view(
-        factory,
-        attr='get',
-        route_name=route_name,
-        renderer="json",
-        request_method='GET',
-        permission=view_rights,
-        xhr=True,
-    )
+    if hasattr(factory, "get"):
+        config.add_view(
+            factory,
+            attr='get',
+            route_name=route_name,
+            renderer="json",
+            request_method='GET',
+            permission=view_rights,
+            xhr=True,
+        )
     if hasattr(factory, 'collection_get'):
         config.add_view(
             factory,
@@ -260,43 +261,45 @@ def add_rest_views(
             permission=collection_view_rights,
             xhr=True,
         )
-
-    config.add_view(
-        factory,
-        attr='post',
-        route_name=collection_route_name,
-        renderer="json",
-        request_method='POST',
-        permission=add_rights,
-        xhr=True,
-    )
-    config.add_view(
-        factory,
-        attr='put',
-        route_name=route_name,
-        renderer="json",
-        request_method='PUT',
-        permission=edit_rights,
-        xhr=True
-    )
-    config.add_view(
-        factory,
-        attr='put',
-        route_name=route_name,
-        renderer="json",
-        request_method='PATCH',
-        permission=edit_rights,
-        xhr=True
-    )
-    config.add_view(
-        factory,
-        attr='delete',
-        route_name=route_name,
-        renderer="json",
-        request_method='DELETE',
-        permission=delete_rights,
-        xhr=True
-    )
+    if hasattr(factory, 'post'):
+        config.add_view(
+            factory,
+            attr='post',
+            route_name=collection_route_name,
+            renderer="json",
+            request_method='POST',
+            permission=add_rights,
+            xhr=True,
+        )
+    if hasattr(factory, 'put'):
+        config.add_view(
+            factory,
+            attr='put',
+            route_name=route_name,
+            renderer="json",
+            request_method='PUT',
+            permission=edit_rights,
+            xhr=True
+        )
+        config.add_view(
+            factory,
+            attr='put',
+            route_name=route_name,
+            renderer="json",
+            request_method='PATCH',
+            permission=edit_rights,
+            xhr=True
+        )
+    if hasattr(factory, 'delete'):
+        config.add_view(
+            factory,
+            attr='delete',
+            route_name=route_name,
+            renderer="json",
+            request_method='DELETE',
+            permission=delete_rights,
+            xhr=True
+        )
 
 
 def make_redirect_view(route_name, with_id=True):

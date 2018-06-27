@@ -75,23 +75,31 @@ modules prédéfinis"
     schema = get_config_schema(keys)
     info_message = u"""
 Configurez les exports comptables de votre CAE.
-Configurez les champs indispensables aux exports :\
+<h3>Champs indispensables aux exports</h3>\
     <ul>\
         <li>Code journal</li>\
         <li>Numéro analytique de la CAE</li>\
         <li>Compte banque de l'entrepreneur</li>\
     </ul>\
-Configurez les champs relatifs aux frais et remises:\
+<h3>champs relatifs aux frais et remises</h3>\
     <ul>\
 <li>Compte de frais annexes</li>\
 <li>Compte RRR (Rabais, Remises et Ristournes)</li>\
     </ul>\
-    Configurez et activez des modules de retenues optionnels :\
+<h3>Configurez et activez des modules de retenues optionnels</h3>\
         <ul>\
     <li>Module de contribution à la CAE</li>\
     <li>Module RG Externe (spécifique bâtiment)</li>\
     <li>Module RG Interne (spécifique bâtiment)</li>\
-    </ul>
+    </ul>\
+<h3>Libellés d'écritures comptables</h3>\
+    <p>\
+    Plusieurs variables sont disponibles :\
+    </p>\
+    <ul>\
+    <li><code>{invoice.customer.label}</code> : le nom du client destinataire de la facture</li>\
+    <li><code>{company.name}</code> : le nom de l'enseigne établissant la facture</li>\
+    </ul>\
     """
 
 

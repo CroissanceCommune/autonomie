@@ -40,8 +40,18 @@ class MainReceiptConfig(BaseConfigView):
     schema = get_config_schema(keys)
     validation_msg = u"L'export comptable des encaissement a bien été \
 configuré"
-    message = u"Configurer l'export des encaissements (le code journal \
-utilisé est celui de la banque associé à chaque encaissement)"
+    info_message = u"""\
+<p>\
+  Configurer l'export des encaissements (le code journal\
+  utilisé est celui de la banque associé à chaque encaissement)\
+</p>\
+<h3>Libellés d'écritures comptables</h3>\
+    <p>Il est possible de les personaliser à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
+    <ul>\
+    <li><code>{invoice.customer.label}</code> : le nom du client émetteur du paiement</li>\
+    <li><code>{company.name}</code> : le nom de l'enseigne destinataire du paiement</li>\
+    </ul>\
+"""
 
 
 def add_routes(config):

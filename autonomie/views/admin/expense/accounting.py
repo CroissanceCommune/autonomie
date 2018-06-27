@@ -35,6 +35,23 @@ from autonomie.views.admin.expense import (
 EXPENSE_ACCOUNTING_URL = os.path.join(EXPENSE_URL, 'accounting')
 EXPENSE_PAYMENT_ACCOUNTING_URL = os.path.join(EXPENSE_URL, 'payment_accounting')
 
+EXPENSE_INFO_MESSAGE=u"""
+<h3>Libellés d'écritures comptables</h3>\
+    <p>Il est possible de les personaliser à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
+    <ul>\
+    <li><code>{beneficiaire}</code> : les noms/prénoms de la personne ayant avancé les frais</li>\
+    <li><code>{beneficiaire_LASTNAME}</code> : le nom, en capitales, de la personne ayant avancé les frais</li>\
+    <li>\
+        <code>{expense_date}</code> : la date de la note de dépense, qu'il est posisble de formatter de différentes manières :\
+        <ul>\
+        <li><code>{expense_date:%-m %Y}</code> : produira <code>6 2017</code> pour Juin 2017</li>\
+        <li><code>{expense_date:%-m/%Y}</code> : produira <code>6/2017</code> pour Juin 2017</li>\
+        <li><code>{expense_date:%m/%Y}</code> : produira <code>06/2017</code> pour Juin 2017</li>\
+        </ul>\
+        </li>\
+    </ul>\
+    """
+
 
 class ExpenseAccountingView(BaseConfigView):
     title = u"Export comptable des notes de dépense"
@@ -48,6 +65,7 @@ class ExpenseAccountingView(BaseConfigView):
     validation_msg = u"L'export comptable des notes de dépense a bien été \
 configuré"
     redirect_route_name = EXPENSE_URL
+    info_message = EXPENSE_INFO_MESSAGE
 
 
 class ExpensePaymentAccountingView(BaseConfigView):
@@ -65,6 +83,7 @@ class ExpensePaymentAccountingView(BaseConfigView):
     validation_msg = u"L'export comptable des décaissements a bien été \
 configuré"
     redirect_route_name = EXPENSE_URL
+    info_message = EXPENSE_INFO_MESSAGE
 
 
 def includeme(config):

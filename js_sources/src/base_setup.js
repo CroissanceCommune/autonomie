@@ -14,9 +14,11 @@
  */
 import _ from 'underscore';
 import $ from 'jquery';
+import { attachTools } from "./tools.js";
 import 'bootstrap/js/dropdown.js';
 
 $(function(){
+    attachTools();
     var company_menu = $('#company-select-menu');
     if (!_.isNull(company_menu)){
         company_menu.on('change', function(){

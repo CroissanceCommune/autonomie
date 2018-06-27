@@ -120,6 +120,25 @@ def come_from_node(**kw):
     )
 
 
+def deferred_default_popup(node, kw):
+    """
+    Check if the popup key is present in get or post params and return its id
+    """
+    return kw['request'].params.get('popup', '')
+
+
+def popup_node(**kw):
+    """
+    Return a form node for storing the come_from page url
+    """
+    return colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        missing=colander.drop,
+        default=deferred_default_popup
+    )
+
+
 def _textarea_node_validator(value):
     """
     Check that the given value is not void (it could contain void html tags)

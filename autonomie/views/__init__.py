@@ -321,6 +321,36 @@ def get_page_url(request, page):
     return request.current_route_path(_query=args)
 
 
+class PopupMixin(object):
+    """
+    Provide methods for handling popup related actions
+    """
+
+    def add_popup_response(self):
+        """
+        Add custom response string to the request :
+            Pop message
+            or
+            Refresh parent page
+
+        regarding the options
+        if
+        a message was set in the queue, it's shown with a refresh link
+        else
+        we fully reload the page
+
+        """
+        self.logger.debug("Building a popup_close response")
+        msg = self.request.session.pop_flash(queue="")
+        if msg:
+            set_close_popup_response(
+                self.request,
+                msg[0],
+            )
+        else:
+            set_close_popup_response(self.request, force_reload=True)
+
+
 class BaseListView(BaseListClass):
     """
     A base list view used to provide an easy way to build list views
@@ -525,7 +555,7 @@ class BaseOdsView(BaseCsvView):
     writer = SqlaOdsExporter
 
 
-class BaseFormView(FormView):
+class BaseFormView(FormView, PopupMixin):
     """
         Allows to easily build form views
 
@@ -635,23 +665,6 @@ class BaseFormView(FormView):
                 self.add_popup_response()
                 return self.request.response
         return result
-
-    def add_popup_response(self):
-        """
-        Add custom response string to the request Pop message or refresh parent
-        page regarding the options if a message was set in the queue, it's shown
-        with a refresh link, else we fully reload the page
-
-        """
-        self.logger.debug("Building a popup_close response")
-        msg = self.request.session.pop_flash(queue="")
-        if msg:
-            set_close_popup_response(
-                self.request,
-                msg[0],
-            )
-        else:
-            set_close_popup_response(self.request, force_reload=True)
 
     def _more_template_vars(self):
         """
@@ -877,7 +890,7 @@ class DisableView(BaseView):
             return HTTPFound(self.request.route_path(self.redirect_route))
 
 
-class DeleteView(BaseView):
+class DeleteView(BaseView, PopupMixin):
     """
     main deletion view
 
@@ -899,9 +912,15 @@ class DeleteView(BaseView):
             self.on_delete()
 
         if hasattr(self, 'redirect'):
-            return self.redirect()
+            result = self.redirect()
         elif self.redirect_route is not None:
-            return HTTPFound(self.request.route_path(self.redirect_route))
+            result = HTTPFound(self.request.route_path(self.redirect_route))
+
+        if "popup" in self.request.GET:
+            if isinstance(result, HTTPFound):
+                self.add_popup_response()
+                return self.request.response
+        return result
 
 
 class DuplicateView(BaseView):

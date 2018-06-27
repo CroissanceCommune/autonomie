@@ -2,6 +2,7 @@ require('jquery');
 import _ from 'underscore';
 import $ from 'jquery';
 import { parseDate } from './date.js';
+import { getPercent } from './math.js';
 
 var datepicker = require("jquery-ui/ui/widgets/datepicker");
 
@@ -183,4 +184,64 @@ export const hideLoader = function(){
      * Show a loading box
      */
     $('#loading-box').hide();
+}
+function openPopup(url, title, callback){
+    var screen_width =  screen.width;
+    var screen_height = screen.height;
+    var width = getPercent(screen_width, 60);
+    var height = getPercent(screen_height, 60);
+    var uniq_id = _.uniqueId('popup');
+    if (_.indexOf(url, '?') != -1){
+        url = url + "&popup=" + uniq_id;
+    } else {
+        url = url + "?popup=" + uniq_id;
+    }
+
+    var new_win = window.open(url, uniq_id, "width=" + width + ",height=" + height);
+    if (!_.isUndefined(callback)){
+        window.popupCallbacks[uniq_id] = callback;
+    }
+}
+
+function dismissPopup(win, options){
+    var callback = window.popupCallbacks[win.name];
+    if (!_.isUndefined(callback)){
+        callback(options);
+        delete window.popupCallbacks[win.name];
+    } else {
+        var default_options = {refresh: true};
+        _.extend(default_options, options);
+        if (!_.isUndefined(default_options.force_reload)){
+            window.location.reload();
+        } else {
+            var new_content = "";
+
+            if (!_.isUndefined(default_options.message)){
+                new_content += "<div class='alert alert-success text-center'>";
+                new_content += default_options.message;
+            } else if (!_.isUndefined(default_options.error)){
+                new_content += "<div class='alert alert-danger text-center'>";
+                new_content += default_options.error;
+            }
+
+            if (default_options.refresh){
+                new_content += "&nbsp;<a href='#' onclick='window.location.reload();'><i class='glyphicon glyphicon-refresh'></i> Rafraîchir</a>";
+            }
+
+            new_content += '</div>';
+            var dest_tag = $('#popupmessage');
+            if (dest_tag.length == 0){
+                dest_tag = $('.pagetitle');
+            }
+            dest_tag.after(new_content);
+        }
+    }
+
+    win.close();
+}
+
+export const attachTools = function(){
+    window.dismissPopup = dismissPopup;
+    window.openPopup = openPopup;
+    window.popupCallbacks = {};
 }

@@ -220,6 +220,7 @@ class FileTypeNode(colander.SchemaNode):
 
 class FileUploadSchema(colander.Schema):
     come_from = forms.come_from_node()
+    popup = forms.popup_node()
 
     file_type_id = FileTypeNode(missing=colander.drop)
     upload = FileNode()

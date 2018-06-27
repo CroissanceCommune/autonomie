@@ -22,6 +22,7 @@ Contents:
     computing
     apidoc/modules
     migration
+    classes
 
 .. include:: components.rst
 

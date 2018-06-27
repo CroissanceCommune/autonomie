@@ -190,6 +190,15 @@ def add_invoice_routes(config):
         route = os.path.join(ITEM_ROUTE, collection)
         config.add_route(route, route, traverse='/invoices/{id}')
 
+    FILE_REQ_ITEM_ROUTE = os.path.join(
+        COLLECTION_ROUTE, "{eid}", "file_requirements", "{id}"
+    )
+    config.add_route(
+        FILE_REQ_ITEM_ROUTE,
+        FILE_REQ_ITEM_ROUTE,
+        traverse="/sale_file_requirements/{id}",
+    )
+
     config.add_route(
         "/api/v1/invoices/{eid}/task_line_groups/{id}",
         "/api/v1/invoices/{eid}/task_line_groups/{id:\d+}",
@@ -227,6 +236,15 @@ def add_cancelinvoice_routes(config):
     ):
         route = os.path.join(ITEM_ROUTE, collection)
         config.add_route(route, route, traverse='/cancelinvoices/{id}')
+
+    FILE_REQ_ITEM_ROUTE = os.path.join(
+        COLLECTION_ROUTE, "{eid}", "file_requirements", "{id}"
+    )
+    config.add_route(
+        FILE_REQ_ITEM_ROUTE,
+        FILE_REQ_ITEM_ROUTE,
+        traverse="/sale_file_requirements/{id}",
+    )
 
     config.add_route(
         "/api/v1/cancelinvoices/{eid}/task_line_groups/{id}",
@@ -347,13 +365,22 @@ def add_invoice_views(config):
         xhr=True,
     )
     # File requirements views
+    add_rest_views(
+        config,
+        route_name="/api/v1/invoices/{eid}/file_requirements/{id}",
+        collection_route_name="/api/v1/invoices/{id}/file_requirements",
+        factory=TaskFileRequirementRestView,
+        collection_view_rights="view.invoice",
+        view_rights="view.indicator",
+    )
     config.add_view(
         TaskFileRequirementRestView,
-        route_name="/api/v1/invoices/{id}/file_requirements",
-        attr="collection_get",
-        request_method="GET",
-        renderer="json",
-        permission="view.invoice",
+        route_name="/api/v1/invoices/{eid}/file_requirements/{id}",
+        attr="validation_status",
+        permission="valid.indicator",
+        request_method="POST",
+        request_param="action=validation_status",
+        renderer='json',
         xhr=True,
     )
 
@@ -441,13 +468,22 @@ def add_cancelinvoice_views(config):
         xhr=True,
     )
     # File requirements views
+    add_rest_views(
+        config,
+        route_name="/api/v1/cancelinvoices/{eid}/file_requirements/{id}",
+        collection_route_name="/api/v1/cancelinvoices/{id}/file_requirements",
+        factory=TaskFileRequirementRestView,
+        collection_view_rights="view.cancelinvoice",
+        view_rights="view.indicator",
+    )
     config.add_view(
         TaskFileRequirementRestView,
-        route_name="/api/v1/cancelinvoices/{id}/file_requirements",
-        attr="collection_get",
-        request_method="GET",
-        renderer="json",
-        permission="view.cancelinvoice",
+        route_name="/api/v1/cancelinvoices/{eid}/file_requirements/{id}",
+        attr="validation_status",
+        permission="valid.indicator",
+        request_method="POST",
+        request_param="action=validation_status",
+        renderer='json',
         xhr=True,
     )
 

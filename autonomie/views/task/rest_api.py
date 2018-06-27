@@ -23,6 +23,7 @@ from autonomie.forms.tasks.task import (
     get_add_edit_taskline_schema,
     get_add_edit_discountline_schema,
 )
+from autonomie.utils.rest import RestError
 from autonomie.views import BaseRestView
 from autonomie.views.task.utils import (
     json_tvas,
@@ -130,7 +131,10 @@ class TaskRestView(BaseRestView):
         if self.context.file_requirements:
             sections['file_requirements'] = {
                 'edit': True,
+                "can_validate": False,
             }
+            if self.request.has_permission("valid.%s" % self.context.type_):
+                sections['file_requirements']['can_validate'] = True
 
         form_config['sections'] = sections
         return form_config
@@ -455,3 +459,13 @@ class DiscountLineRestView(BaseRestView):
 class TaskFileRequirementRestView(BaseRestView):
     def collection_get(self):
         return self.context.file_requirements
+
+    def get(self):
+        return self.context
+
+    def validation_status(self):
+        validation_status = self.request.json_body.get('validation_status')
+        if validation_status in self.context.VALIDATION_STATUS:
+            return self.context.set_validation_status(validation_status)
+        else:
+            return RestError(['Statut inconnu'])

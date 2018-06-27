@@ -327,6 +327,15 @@ def add_routes(config):
         route = os.path.join(ITEM_ROUTE, collection)
         config.add_route(route, route, traverse='/estimations/{id}')
 
+    FILE_REQ_ITEM_ROUTE = os.path.join(
+        COLLECTION_ROUTE, "{eid}", "file_requirements", "{id}"
+    )
+    config.add_route(
+        FILE_REQ_ITEM_ROUTE,
+        FILE_REQ_ITEM_ROUTE,
+        traverse="/sale_file_requirements/{id}",
+    )
+
     config.add_route(
         "/api/v1/estimations/{eid}/task_line_groups/{id}",
         "/api/v1/estimations/{eid}/task_line_groups/{id:\d+}",
@@ -474,13 +483,22 @@ def add_views(config):
         delete_rights='edit.estimation',
     )
     # File requirements views
+    add_rest_views(
+        config,
+        route_name="/api/v1/estimations/{eid}/file_requirements/{id}",
+        collection_route_name="/api/v1/estimations/{id}/file_requirements",
+        factory=TaskFileRequirementRestView,
+        collection_view_rights="view.estimations",
+        view_rights="view.indicator",
+    )
     config.add_view(
         TaskFileRequirementRestView,
-        route_name="/api/v1/estimations/{id}/file_requirements",
-        attr="collection_get",
-        request_method="GET",
-        renderer="json",
-        permission="view.estimation",
+        route_name="/api/v1/estimations/{eid}/file_requirements/{id}",
+        attr="validation_status",
+        permission="valid.indicator",
+        request_method="POST",
+        request_param="action=validation_status",
+        renderer='json',
         xhr=True,
     )
 

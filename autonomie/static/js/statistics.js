@@ -136,7 +136,7 @@ AutonomieApp.module('Statistic', function(Statistic, App, Backbone, Marionette, 
     },
     _open_csv_popup: function(){
         var csv_url = this.model.csv_url();
-        openPopup(csv_url, this.model.title);
+        window.openPopup(csv_url, this.model.title);
     }
   });
 

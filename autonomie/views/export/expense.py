@@ -30,17 +30,17 @@ logger = logging.getLogger(__name__)
 CONFIG_ERROR_MSG = u"""Veuillez vous assurer que tous les éléments de
 configuration nécessaire à l'export des notes de dépense ont
 bien été fournis : <br />
-<a onclick="openPopup('{0}');" href='#'>
+<a onclick="window.openPopup('{0}');" href='#'>
     Configuration des notes de dépense
 </a><br/>
-<a onclick="openPopup('{1}');" href='#'>
+<a onclick="window.openPopup('{1}');" href='#'>
     Configuration comptable du module vente
 </a>"""
 
 
 COMPANY_ERROR_MSG = u"""Le code analytique de l'entreprise {0} n'a pas été
 configuré
-<a onclick="openPopup('{1}');" href='#'>
+<a onclick="window.openPopup('{1}');" href='#'>
     Voir l'entreprise
 </a>"""
 

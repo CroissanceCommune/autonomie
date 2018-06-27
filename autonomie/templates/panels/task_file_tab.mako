@@ -33,7 +33,7 @@
 <div role="tabpanel" class="tab-pane row" id="attached_files">
     <div class="col-xs-12">
         <button class='btn btn-primary primary-action'
-            onclick="openPopup('${add_url}')"
+            onclick="window.openPopup('${add_url}')"
             title="Attacher un fichier">
             <i class='glyphicon glyphicon-plus-sign'></i>
             Attacher un fichier

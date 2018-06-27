@@ -77,13 +77,13 @@
             Après l'import, des indicateurs sont générés depuis les écritures et en fonction de la configuration <br />
             <a
                 class='link'
-                onclick="openPopup('/admin/accounting/treasury_measure_types');"
+                onclick="window.openPopup('/admin/accounting/treasury_measure_types');"
                 href='#'>
                 Configuration-> Configuration du module Fichiers comptables -> Configuration des indicateurs de trésorerie
             </a>&nbsp;Pour les États de trésorerie (générés depuis la balance analytique)<br />
             <a
                 class='link'
-                onclick="openPopup('/admin/accounting/treasury_measure_types');"
+                onclick="window.openPopup('/admin/accounting/treasury_measure_types');"
                 href='#'>
                 Configuration-> Configuration du module Fichiers comptables -> Configuration des indicateurs de compte de résultat
             </a>&nbsp;Pour les Comptes de résultat (générés depuis le grand livre)
@@ -95,7 +95,7 @@
                 <a
                 class='link'
                 href="#"
-                onclick="openPopup('/admin/main');">
+                onclick="window.openPopup('/admin/main');">
                     Configuration -> Configuration générale
                 </a>
             <br />

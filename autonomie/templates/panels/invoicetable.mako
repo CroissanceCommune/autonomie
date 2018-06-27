@@ -159,7 +159,7 @@
                 % endif
                 <% url = request.route_path('/%ss/{id}/addfile' % type_, id=id_)  %>
                   <button class='btn btn-default'
-                     onclick="openPopup('${url}')"
+                     onclick="window.openPopup('${url}')"
                       title="Attacher un fichier">
                       <i class='glyphicon glyphicon-plus'></i>
                   </button>

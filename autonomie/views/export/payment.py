@@ -31,11 +31,11 @@ PAYMENT_VOID_ERROR_MSG = u"Il n'y a aucun encaissement à exporter"
 PAYMENT_CUSTOMER_ERROR_MSG = u"""Un encaissement de la facture {0} n'est pas
 exportable : Des informations sur le client {1} (compte général ou compte tiers)
 sont manquantes
- <a onclick="openPopup('{2}');" href='#'>Voir le client</a>"""
+ <a onclick="window.openPopup('{2}');" href='#'>Voir le client</a>"""
 
 PAYMENT_BANK_ERROR_MSG = u"""Un encaissement de la facture {0}
 n'est pas exportable : L'encaissement n'est associé à aucune banque
-<a onclick="openPopup('{1}');" href='#'>
+<a onclick="window.openPopup('{1}');" href='#'>
     Voir l'encaissement
 </a>"""
 

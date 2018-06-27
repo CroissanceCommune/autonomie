@@ -363,7 +363,7 @@ function setupMainBehaviours(){
   };
 }
 
-function openPopup(url, title){
+window.openPopup = function(url, title){
     var screen_width =  screen.width;
     var screen_height = screen.height;
     var width = getPercent(screen_width, 60);
@@ -378,7 +378,7 @@ function openPopup(url, title){
     var new_win = window.open(url, title, "width=" + width + ",height=" + height);
 }
 
-function dismissPopup(win, options){
+window.dismissPopup = function(win, options){
     var default_options = {refresh: true};
     _.extend(default_options, options);
     win.close();

@@ -49,7 +49,7 @@
     % if request.has_permission('add.file', indicator):
     <button
         class='btn btn-default'
-        onclick="openPopup('${file_add_url}?file_type_id=${indicator.file_type_id}')"
+        onclick="window.openPopup('${file_add_url}?file_type_id=${indicator.file_type_id}')"
         >
             <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un fichier
     </button>

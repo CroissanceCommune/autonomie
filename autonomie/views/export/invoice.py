@@ -55,26 +55,26 @@ logger = logging.getLogger(__name__)
 
 MISSING_PRODUCT_ERROR_MSG = u"""Le document {0} n'est pas exportable :
  des comptes produits sont manquants
-<a onclick="openPopup('{1}');" href='#'>
+<a onclick="window.openPopup('{1}');" href='#'>
         Voir le document
 </a>"""
 
 COMPANY_ERROR_MSG = u"""Le document {0} n'est pas exportable :
 Le code analytique de l'entreprise {1} n'a pas été configuré
-<a onclick="openPopup('{2}');" href='#'>
+<a onclick="window.openPopup('{2}');" href='#'>
     Voir l'entreprise
 </a>"""
 
 CUSTOMER_ERROR_MSG = u"""Le document {0} n'est pas exportable :
 Le compte général du client {1} n'a pas été configuré
-<a onclick="openPopup('{2}');" href='#'>
+<a onclick="window.openPopup('{2}');" href='#'>
     Voir le client
 </a>"""
 
 
 MISSING_RRR_CONFIG_ERROR_MSG = u"""Le document {0} n'est pas exportable :
 Il contient des remises et les comptes RRR ne sont pas configurés.
-<a onclick="openPopup('{1}');" href='#'>
+<a onclick="window.openPopup('{1}');" href='#'>
 Configurer les comptes RRR
 </a>"""
 

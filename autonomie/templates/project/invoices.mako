@@ -41,7 +41,7 @@
         %>
         <a
             class='btn btn-default btn-small'
-            onclick="openPopup('${url}');"
+            onclick="window.openPopup('${url}');"
             href='#'
             title="Export au format Excel"
             >
@@ -54,7 +54,7 @@
         %>
         <a
             class='btn btn-default btn-small'
-            onclick="openPopup('${url}');"
+            onclick="window.openPopup('${url}');"
             href='#'
             title="Export au formt Open document"
             >
@@ -67,7 +67,7 @@
         %>
         <a
             class='btn btn-default btn-small'
-            onclick="openPopup('${url}');"
+            onclick="window.openPopup('${url}');"
             href='#'
             title="Export au formt csv"
             >

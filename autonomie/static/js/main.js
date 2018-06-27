@@ -363,7 +363,7 @@ function setupMainBehaviours(){
   };
 }
 
-window.openPopup = function(url, title){
+window.openPopup = function(url){
     var screen_width =  screen.width;
     var screen_height = screen.height;
     var width = getPercent(screen_width, 60);
@@ -375,7 +375,7 @@ window.openPopup = function(url, title){
         url = url + "?popup=" + uniq_id;
     }
 
-    var new_win = window.open(url, title, "width=" + width + ",height=" + height);
+    var new_win = window.open(url, uniq_id, "width=" + width + ",height=" + height);
 }
 
 window.dismissPopup = function(win, options){

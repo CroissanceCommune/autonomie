@@ -185,7 +185,7 @@ export const hideLoader = function(){
      */
     $('#loading-box').hide();
 }
-function openPopup(url, title, callback){
+function openPopup(url, callback){
     var screen_width =  screen.width;
     var screen_height = screen.height;
     var width = getPercent(screen_width, 60);
@@ -197,7 +197,11 @@ function openPopup(url, title, callback){
         url = url + "?popup=" + uniq_id;
     }
 
-    var new_win = window.open(url, uniq_id, "width=" + width + ",height=" + height);
+    var new_win = window.open(
+        url,
+        uniq_id,
+        "width=" + width + ",height=" + height
+    );
     if (!_.isUndefined(callback)){
         window.popupCallbacks[uniq_id] = callback;
     }

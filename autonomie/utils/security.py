@@ -1141,7 +1141,7 @@ def get_indicator_acl(self):
     Compile Indicator acl
     """
     acl = DEFAULT_PERM_NEW[:]
-    admin_perms = ()
+    admin_perms = ('view.indicator',)
     if self.status != 'success':
         admin_perms += ("force.indicator",)
 
@@ -1160,13 +1160,18 @@ def get_sale_file_requirement_acl(self):
     Compile acl for SaleFileRequirement instances
     """
     # Si le parent est validé et l'indicateur est ok, on ne peut plus modifier
-    if hasattr(self.node, 'status') and self.node.status == 'valid':
-        if self.status == 'success':
-            return []
-    acl = get_indicator_acl(self)
+    user_perms = ('view.indicator',)
+    admin_perms = ()
 
-    admin_perms = ('add.file', 'edit.file')
-    user_perms = ('add.file', 'edit.file')
+    locked = False
+    if self.status == 'success':
+        if hasattr(self.node, 'status') and self.node.status == 'valid':
+            locked = True
+
+    if not locked:
+        acl = get_indicator_acl(self)
+        admin_perms += ('add.file', 'edit.file')
+        user_perms += ('add.file', 'edit.file')
 
     employee_logins = FindCompanyService.find_employees_login_from_node(
         self.node

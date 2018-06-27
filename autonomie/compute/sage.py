@@ -332,9 +332,10 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
         """
         try:
             return self.label_template.format(
-                client=self.invoice.customer,
                 company=self.company,
                 invoice=self.invoice,
+                # backward compatibility
+                client=self.invoice.customer,
                 # backward compatibility:
                 num_facture=self.invoice.official_number,
                 # backward compatibility:

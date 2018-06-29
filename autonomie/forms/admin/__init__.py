@@ -317,6 +317,11 @@ séparateurs… etc), ainsi que des variables et séquences. Ex: {YYYY}-{SEQYEAR
         "section": u"Séquence annuelle (SEQMONTH)",
         "widget": deform.widget.DateInputWidget(),
     },
+    "accounting_label_maxlength": {
+        "title": u"Taille maximum des libellés d'écriture (troncature)",
+        "description": u"Autonomie tronquera les libellés d'écriture comptable exportés à cette longueur. Dépend de votre logiciel de comptabilité. Ex :  30 pour quadra, 35 pour sage, 25 pour ciel. Mettre à zéro pour désactiver la troncature.",
+        "type": colander.Int(),
+    },
 }
 
 

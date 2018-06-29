@@ -331,8 +331,8 @@ class InvoicePaymentView(BaseFormView):
             appstruct.pop('payment_amount')
             # si on a plusieurs tva :
             for tva_payment in appstruct['tvas']:
-                remittance_amount = appstruct['remittance_amount']
-                tva_payment['remittance_amount'] = remittance_amount
+                bank_remittance_id = appstruct['bank_remittance_id']
+                tva_payment['bank_remittance_id'] = bank_remittance_id
                 tva_payment['date'] = appstruct['date']
                 tva_payment['mode'] = appstruct['mode']
                 tva_payment['bank_id'] = appstruct.get('bank_id')

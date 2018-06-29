@@ -51,7 +51,7 @@ configuré"
     <li><code>{invoice.customer.label}</code> : nom du client émetteur du paiement</li>\
     <li><code>{invoice.customer.code}</code> : code du client émetteur du paiement</li>\
     <li><code>{company.name}</code> : nom de l'enseigne destinataire du paiement</li>\
-    <li><code>{payment.remittance_amount}</code> : identifiant de la remise en banque</li>\
+    <li><code>{payment.bank_remittance_id}</code> : identifiant de la remise en banque</li>\
     </ul>\
 """
 

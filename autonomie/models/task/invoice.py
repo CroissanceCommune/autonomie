@@ -526,7 +526,7 @@ class Payment(DBBASE, PersistentACLMixin):
         info={'colanderalchemy': {"title": u"Montant"}},
 
     )
-    remittance_amount = Column(
+    bank_remittance_id = Column(
         String(255),
         info={'colanderalchemy': {'title': u"Identifiant de remise en banque"}},
     )
@@ -621,8 +621,8 @@ def get_invoice_years(kw):
             updated_at=self.updated_at,
             mode=self.mode,
             amount=math_utils.integer_to_amount(self.amount),
-            remittance_amount=self.remittance_amount,
-            label=self.remittance_amount,
+            bank_remittance_id=self.bank_remittance_id,
+            label=self.bank_remittance_id,
             date=self.date,
             exported=self.exported,
             task_id=self.task_id,

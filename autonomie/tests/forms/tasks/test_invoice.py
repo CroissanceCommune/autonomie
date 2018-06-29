@@ -137,15 +137,15 @@ def test_payment_amount():
         schema.deserialize(value)
 
 
-def test_payment_remittance_amount():
-    schema = get_add_edit_payment_schema(includes=('remittance_amount',))
+def test_payment_bank_remittance_id():
+    schema = get_add_edit_payment_schema(includes=('bank_remittance_id',))
     schema = schema.bind()
 
     value = {}
     with pytest.raises(colander.Invalid):
         schema.deserialize(value)
 
-    value = {'remittance_amount': "test"}
+    value = {'bank_remittance_id': "test"}
     assert schema.deserialize(value) == value
 
     value = {}
@@ -220,7 +220,7 @@ def test_payment(mode, tva, bank):
     value = {
         'mode': mode.label,
         "amount": 12.5,
-        "remittance_amount": u"Remittance",
+        "bank_remittance_id": u"Remittance",
         "date": NOW.isoformat(),
         "tva_id": tva.id,
         "bank_id": bank.id,
@@ -231,7 +231,7 @@ def test_payment(mode, tva, bank):
     expected_value = {
         'mode': mode.label,
         "amount": 1250000,
-        "remittance_amount": u"Remittance",
+        "bank_remittance_id": u"Remittance",
         "date": NOW,
         "tva_id": tva.id,
         "bank_id": bank.id,

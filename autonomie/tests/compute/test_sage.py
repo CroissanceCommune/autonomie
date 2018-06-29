@@ -367,7 +367,7 @@ def bank():
 @pytest.fixture
 def payment(invoice, def_tva, bank):
     p = Dummy(
-        remittance_amount=10000,
+        bank_remittance_id=10000,
         amount=10000000,
         mode=u"chèque",
         date=datetime.date.today(),

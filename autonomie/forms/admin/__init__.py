@@ -31,6 +31,7 @@ import simplejson as json
 import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
+from speaklater import make_lazy_string
 
 from autonomie.models.config import Config
 from autonomie.models.competence import (
@@ -58,6 +59,23 @@ def invoice_number_template_validator(node, value):
         InvoiceNumberService.validate_template(value)
     except ValueError as e:
         raise colander.Invalid(node, str(e))
+
+
+@make_lazy_string
+def help_text_libelle_comptable():
+    """
+    Hack to allow dynamic content in a description field description.
+    """
+    base = u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page."
+    maxlength = Config.get_value('accounting_label_maxlength', None)
+    if maxlength:
+        return u"{} NB : les libellés sont tronqués à ".format(base) + \
+            u"{} caractères au moment de l'export.".format(maxlength) + \
+            u"Il est possible de changer cette taille dans  " +\
+            u"Configuration → Logiciel de comptabilité."
+    else:
+        return base
 
 
 CONFIGURATION_KEYS = {
@@ -172,49 +190,41 @@ d'écriture RG Client",
     },
     'bookentry_facturation_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Module Facturation",
     },
     'bookentry_payment_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Encaissements",
     },
     'bookentry_rg_client_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Module RG Client",
     },
     'bookentry_rg_interne_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Module RG Interne",
     },
     'bookentry_contribution_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Module Contribution",
     },
     'bookentry_expense_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
     },
     'bookentry_expense_payment_main_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Paiement des notes de dépenses",
     },
     'bookentry_expense_payment_waiver_label_template': {
         'title': u"Gabarit pour les libellés d'écriture",
-        'description': u"Les variables disponibles \
-pour la génération des écritures sont décrites en haut de page",
+        'description': help_text_libelle_comptable,
         "section": u"Abandon de créance",
     },
     'sage_contribution': {

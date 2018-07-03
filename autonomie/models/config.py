@@ -131,6 +131,23 @@ class ConfigFiles(DBBASE):
         return newvalue
 
 
+def _type_value(v, type_=str):
+    """
+    Optionally type the returned value.
+
+    Meant to be used for config keys, with well-known types, not in the wild
+    (no error handling for that).
+    """
+    result = v
+
+    if type_ is datetime.date:
+        result = datetime.datetime.strptime(result, "%Y-%m-%d")
+    elif type_ is int:
+        result = int(result)
+
+    return result
+
+
 class Config(DBBASE):
     """
         Table containing the main configuration
@@ -172,11 +189,7 @@ class Config(DBBASE):
         result = None
 
         if config is not None:
-            result = config.value
-            if type_ is datetime.date:
-                result = datetime.datetime.strptime(result, "%Y-%m-%d")
-            elif type_ is int:
-                result = int(result)
+            result = _type_value(config.value, type_=type_)
         elif default:
             result = default
         return result
@@ -196,12 +209,21 @@ class Config(DBBASE):
         DBSESSION().merge(instance)
 
 
+class TypableDict(dict):
+    def get_value(self, keyname, default=None, type_=str):
+        v = self.get(keyname, default)
+        if v is None:
+            return v
+        else:
+            return _type_value(v, type_)
+
+
 def get_config():
     """
-        Return a dictionnary with the config objects
+        Return a dict-like with the config objects
     """
-    return dict((entry.name, entry.value)
-                for entry in Config.query().all())
+    return TypableDict((entry.name, entry.value)
+                       for entry in Config.query().all())
 
 
 def get_admin_mail():

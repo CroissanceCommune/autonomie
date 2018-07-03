@@ -36,7 +36,15 @@
                     </div>
                     <div class='col-md-9'>
                         <div>Projet : ${layout.current_project_object.name}</div>
-                        <div class='help-text'>${layout.current_project_object.description}</div>
+                        <div class='help-text'>
+                        % if layout.current_project_object.description:
+                            ${layout.current_project_object.description}
+                        % endif
+                            % if layout.current_project_object.project_type.name != 'default':
+                            <br />
+                            ${layout.current_project_object.project_type.label}
+                            % endif
+                        </div>
                         <div>
                         % if request.has_permission("edit.project", layout.current_project_object):
                         <a

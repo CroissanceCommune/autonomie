@@ -112,6 +112,12 @@ class ProjectListView(BaseListView, TreeMixin):
             )
         return query
 
+    def filter_project_type(self, query, appstruct):
+        val = appstruct.get('project_type_id')
+        if val:
+            query = query.filter(Project.project_type_id == val)
+        return query
+
     def stream_actions(self, project):
         """
         Stream actions available for the given project

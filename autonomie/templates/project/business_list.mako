@@ -26,6 +26,18 @@
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name='mainblock'>
 <div class='row page-header-block'>
+% if request.has_permission('add.estimation'):
+    <a class='btn btn-primary primary-action'
+        href='${add_estimation_url}'>
+        <i class='fa fa-plus-circle'></i>&nbsp;Créer un devis
+    </a>
+% endif
+% if request.has_permission('add.invoice'):
+    <a class='btn btn-primary primary-action'
+        href='${add_invoice_url}'>
+        <i class='fa fa-plus-circle'></i>&nbsp;Créer une facture
+    </a>
+% endif
 </div>
 
 % if form is not UNDEFINED and form:

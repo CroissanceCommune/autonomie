@@ -19,6 +19,8 @@ from autonomie.views import (
 )
 from autonomie.views.project.routes import (
     PROJECT_ITEM_BUSINESS_ROUTE,
+    PROJECT_ITEM_ESTIMATION_ROUTE,
+    PROJECT_ITEM_INVOICE_ROUTE,
 )
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
@@ -31,7 +33,11 @@ class ProjectBusinessListView(BaseListView, TreeMixin):
     """
     View listing businesses
     """
-    add_template_vars = ('stream_actions', )
+    add_template_vars = (
+        'stream_actions',
+        'add_estimation_url',
+        'add_invoice_url',
+    )
     schema = None
     sort_columns = {
         "created_at": Business.created_at,
@@ -48,14 +54,23 @@ class ProjectBusinessListView(BaseListView, TreeMixin):
 
     @property
     def url(self):
-        if hasattr(self.context, 'project_id'):
-            return self.request.route_path(
-                self.route_name, id=self.context.project_id
-            )
-        else:
-            return self.request.route_path(
-                self.route_name, id=self.context.id
-            )
+        return self.request.route_path(self.route_name, id=self.context.id)
+
+    @property
+    def add_estimation_url(self):
+        return self.request.route_path(
+            PROJECT_ITEM_ESTIMATION_ROUTE,
+            id=self.context.id,
+            _query={'action': 'add'},
+        )
+
+    @property
+    def add_invoice_url(self):
+        return self.request.route_path(
+            PROJECT_ITEM_INVOICE_ROUTE,
+            id=self.context.id,
+            _query={'action': 'add'},
+        )
 
     def current(self):
         if hasattr(self.context, 'project'):
@@ -87,7 +102,7 @@ def includeme(config):
     config.add_tree_view(
         ProjectBusinessListView,
         parent=ProjectListView,
-        renderer="autonomie:templates/business/project_list.mako",
+        renderer="autonomie:templates/project/business_list.mako",
         permission="list.businesses",
         layout='project',
     )

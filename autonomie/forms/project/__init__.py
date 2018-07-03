@@ -312,7 +312,7 @@ def get_edit_project_schema():
     excludes = (
         "_acl", "id", "company_id", "archived", "customers",
         "invoices", "tasks", "estimations", "cancelinvoices",
-        "project_type",
+        "project_type", "file_requirements",
     )
     schema = SQLAlchemySchemaNode(Project, excludes=excludes)
     _customize_project_schema(schema)
@@ -331,22 +331,45 @@ class PhaseSchema(colander.MappingSchema):
     )
 
 
+@colander.deferred
+def deferred_project_type_select_widget(node, kw):
+    """
+    Load the appropriate widget for project type selection
+    """
+    request = kw['request']
+    values = [
+        (project_type.id, project_type.label)
+        for project_type in _get_project_type_options(request)
+    ]
+
+    if len(values) <= 1:
+        return deform.widget.HiddenWidget()
+    else:
+        values.insert(0, ('', u"Tous les types de projet"))
+        return deform.widget.SelectWidget(values=values)
+
+
+class ProjectListSchema(BaseListsSchema):
+    project_type_id = colander.SchemaNode(
+        colander.Integer(),
+        label=u"Type de projet",
+        widget=deferred_project_type_select_widget,
+        missing=colander.drop,
+        insert_before="items_per_page"
+    )
+    archived = colander.SchemaNode(
+        colander.Boolean(),
+        label=u"Inclure les projets archivés",
+        missing=False,
+        insert_before="items_per_page",
+    )
+
+
 def get_list_schema():
     """
     Return the schema for the project search form
     :rtype: colander.Schema
     """
-    schema = BaseListsSchema().clone()
-
+    schema = ProjectListSchema()
     schema['search'].description = u"Projet ou nom du client"
-
-    schema.add(
-        colander.SchemaNode(
-            colander.Boolean(),
-            name='archived',
-            label=u"Inclure les projets archivés",
-            missing=False,
-        )
-    )
-
     return schema

@@ -10,7 +10,10 @@ def force_indicator(context, request):
     """
     Force an indicator (sets forced to True
     """
-    context.force()
+    if context.forced:
+        context.unforce()
+    else:
+        context.force()
     request.dbsession.merge(context)
     return HTTPFound(request.referrer)
 

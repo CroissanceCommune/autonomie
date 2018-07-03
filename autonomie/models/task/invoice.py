@@ -63,14 +63,10 @@ from autonomie.compute.task import (
     TaskCompute,
     InvoiceCompute,
 )
-from autonomie.models.config import Config
-from autonomie.models.services.invoice_sequence_number import (
-    InvoiceNumberService,
-)
 from autonomie.models.tva import (
     Product,
 )
-from .interfaces import (
+from autonomie.interfaces import (
     IMoneyTask,
     IInvoice,
 )
@@ -89,29 +85,6 @@ INVOICE_STATES = (
     ('paid', u'Partiellement payée'),
     ('resulted', u'Soldée'),
 )
-
-
-class InvoiceService(object):
-    """
-    Service for invoice and cancelinvoice management
-    """
-    def valid_callback(self, task):
-        """
-        Validation callback (launched after task validation)
-
-        Set the official number
-
-        :param obj task: The task object
-        """
-        template = Config.get_value('invoice_number_template', None)
-        assert template is not None, \
-            'invoice_number_template setting should be set'
-
-        if task.official_number is None:
-            InvoiceNumberService.assign_number(
-                task,
-                template,
-            )
 
 
 def translate_invoices(invoicequery, from_point):

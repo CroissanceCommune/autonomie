@@ -21,6 +21,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 
 from zope.interface import Interface
+from zope.interface import Attribute
 
 
 class ITreasuryInvoiceProducer(Interface):
@@ -80,14 +81,6 @@ class ITreasuryPaymentWriter(Interface):
         pass
 
 
-class IInvoiceService(Interface):
-    def valid_callback(task):
-        """
-        Callback launched after invoice validation
-        """
-        pass
-
-
 class IFileRequirementService(Interface):
     """
     Describe the way a File Requirement service should work
@@ -103,3 +96,82 @@ class IFileRequirementService(Interface):
         Register the file_object against the associated indicators
         """
         pass
+
+
+class IMoneyTask(Interface):
+    """
+        Interface for task handling money
+    """
+    def lines_total_ht():
+        """
+            Return the sum of the document lines
+        """
+
+    def total_ht():
+        """
+            return the HT total of the document
+        """
+
+    def discount_total_ht():
+        """
+            Return the HT discount
+        """
+
+    def get_tvas():
+        """
+            Return a dict with the tva amounts stored by tva reference
+        """
+
+    def tva_amount():
+        """
+            Return the amount of Tva to be paid
+        """
+
+    def total_ttc():
+        """
+            compute the ttc value before expenses
+        """
+
+    def total():
+        """
+            compute the total to be paid
+        """
+
+    def expenses_amount():
+        """
+            return the TTC expenses
+        """
+
+
+class IInvoice(Interface):
+    """
+        Invoice interface (used to get an uniform invoice list display
+        See templates/invoices.mako (under invoice.model) to see the expected
+        common informations
+    """
+    official_number = Attribute("""official number used in sage""")
+
+    def total_ht():
+        """
+            Return the HT total of the current document
+        """
+
+    def tva_amount():
+        """
+            Return the sum of the tvas
+        """
+
+    def total():
+        """
+            Return the TTC total
+        """
+
+    def get_company():
+        """
+            Return the company this task is related to
+        """
+
+    def get_customer():
+        """
+            Return the customer this document is related to
+        """

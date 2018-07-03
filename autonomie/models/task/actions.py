@@ -6,22 +6,66 @@
 """
 Action objects
 """
-from autonomie import interfaces
+from autonomie.models.config import Config
 from autonomie.models.action_manager import (
     Action,
     ActionManager,
 )
+from autonomie.models.services.invoice_sequence_number import (
+    InvoiceNumberService,
+)
 
 
-def invoice_valid_callback(request, task, **kw):
+def _set_invoice_number(request, task, **kw):
     """
     Set a official number on invoices (or cancelinvoices)
 
     :param obj request: The current pyramid request
-    :param obj context: The current context
+    :param obj task: The current context
     """
-    invoice_service = request.find_service(interfaces.IInvoiceService)
-    invoice_service.valid_callback(task)
+    template = Config.get_value('invoice_number_template', None)
+    assert template is not None, \
+        'invoice_number_template setting should be set'
+
+    if task.official_number is None:
+        InvoiceNumberService.assign_number(
+            task,
+            template,
+        )
+    return task
+
+
+def _force_file_requirement_indicators(request, task, **kw):
+    """
+    Force File requirement to be successfull
+
+    :param obj request: The current pyramid request
+    :param obj task: The current context
+    """
+    task.file_requirement_service.force_all(task)
+    return task
+
+
+def estimation_valid_callback(request, task, **kw):
+    """
+    Estimation validation callback
+
+    :param obj request: The current pyramid request
+    :param obj task: The current context
+    """
+    _force_file_requirement_indicators(request, task, **kw)
+    return task
+
+
+def invoice_valid_callback(request, task, **kw):
+    """
+    Invoice validation callback
+
+    :param obj request: The current pyramid request
+    :param obj task: The current context
+    """
+    _set_invoice_number(request, task, **kw)
+    _force_file_requirement_indicators(request, task, **kw)
     return task
 
 
@@ -31,8 +75,8 @@ def get_status_actions(data_type):
 
     :param str data_type: estimation/invoice/cancelinvoice
 
-    :returns: A state machine that can be used to perform state changes
-    :rtype: class:`autonomie.models.statemachine.StateMachine`
+    :returns: An action manager machine that can be used to perform state changes
+    :rtype: class:`autonomie.models.action_manager.ActionManager`
     """
     manager = ActionManager()
     for status, icon, label, title, css in (
@@ -75,8 +119,11 @@ def get_status_actions(data_type):
             title=title,
             css=css,
         )
-        if status == 'valid' and data_type in ('invoice', 'cancelinvoice'):
-            action.callback = invoice_valid_callback
+        if status == 'valid':
+            if data_type in ('invoice', 'cancelinvoice'):
+                action.callback = invoice_valid_callback
+            else:
+                action.callback = estimation_valid_callback
 
         manager.add(action)
     return manager

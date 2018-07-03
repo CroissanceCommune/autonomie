@@ -55,7 +55,7 @@ from autonomie.compute.task import (
 )
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie.models.tva import Product
-from .interfaces import (
+from autonomie.interfaces import (
     IMoneyTask,
 )
 from autonomie.models.config import Config

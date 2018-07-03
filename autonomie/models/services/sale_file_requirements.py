@@ -117,6 +117,21 @@ class SaleFileRequirementService(object):
                 cls.on_file_remove(node, file_object)
 
     @classmethod
+    def _get_invalid_indicators(cls, node):
+        """
+        Collect indicators attached to node that are not successfully validate
+
+        :param obj node: The associated node
+        """
+        result = SaleFileRequirement.query().filter_by(
+            node_id=node.id
+        ).filter(
+            SaleFileRequirement.status !=
+            SaleFileRequirement.SUCCESS_STATUS
+        ).filter_by(forced=False)
+        return result.all()
+
+    @classmethod
     def get_mandatory_indicators(cls, task_id, file_type_id):
         """
         Update mandatory indicator types
@@ -255,6 +270,17 @@ class SaleFileRequirementService(object):
         ):
             print("  Indicator : %s" % indicator)
             indicator.remove_file()
+
+    @classmethod
+    def force_all(cls, node):
+        """
+        Force all indicators that are not successfull
+
+        :param obj node: The associated node
+        """
+        for indicator in cls._get_invalid_indicators(node):
+            indicator.force()
+            DBSESSION().merge(indicator)
 
 
 class TaskFileRequirementService(SaleFileRequirementService):

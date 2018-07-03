@@ -1172,6 +1172,8 @@ def get_sale_file_requirement_acl(self):
         acl = get_indicator_acl(self)
         admin_perms += ('add.file', 'edit.file')
         user_perms += ('add.file', 'edit.file')
+    else:
+        acl = DEFAULT_PERM_NEW[:]
 
     employee_logins = FindCompanyService.find_employees_login_from_node(
         self.node

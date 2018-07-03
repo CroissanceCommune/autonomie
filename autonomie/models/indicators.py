@@ -42,9 +42,24 @@ class Indicator(DBBASE):
     }
     id = Column(Integer, primary_key=True)
     # danger / warning / success
-    status = Column(String(20), default='danger')
+    DANGER_STATUS = 'danger'
+    WARNING_STATUS = 'warning'
+    SUCCESS_STATUS = 'success'
+    STATUSES = (DANGER_STATUS, WARNING_STATUS, SUCCESS_STATUS)
+    status = Column(String(20), default=DANGER_STATUS)
+
+    VALID_STATUS = 'valid'
+    INVALID_STATUS = 'invalid'
+    WAIT_STATUS = 'wait'
+    DEFAULT_STATUS = 'none'
+    VALIDATION_STATUS = (
+        INVALID_STATUS,
+        VALID_STATUS,
+        WAIT_STATUS,
+        DEFAULT_STATUS,
+    )
     # none / invalid / wait / valid
-    validation_status = Column(String(20), default='none')
+    validation_status = Column(String(20), default=DEFAULT_STATUS)
     forced = Column(Boolean(), default=False)
     created_at = Column(
         DateTime(),
@@ -71,11 +86,20 @@ class Indicator(DBBASE):
         info={'colanderalchemy': {'exclude': True}},
         nullable=False,
     )
-    VALIDATION_STATUS = ('invalid', 'valid', 'wait', 'none')
 
     def force(self):
         self.forced = True
         self.status = "success"
+
+    def unforce(self):
+        self.forced = False
+        self.set_default_status()
+
+    def set_default_status(self):
+        """
+        Set the default status to a default 'danger'
+        """
+        self.status = "danger"
 
     @property
     def validated(self):

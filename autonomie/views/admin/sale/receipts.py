@@ -52,7 +52,8 @@ configuré"
     <li><code>{invoice.customer.code}</code> : code du client émetteur du paiement</li>\
     <li><code>{company.name}</code> : nom de l'enseigne destinataire du paiement</li>\
     <li><code>{payment.bank_remittance_id}</code> : identifiant de la remise en banque</li>\
-    </ul>\
+    </ul>
+    <p>NB : Penser à séparer les variables, par exemple par des espaces, sous peine de libellés peu lisibles.</p>\
 """
 
 

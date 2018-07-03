@@ -82,6 +82,7 @@ indiqué (taux de contribution).\
         <li><code>{company.code_compta}</code> : code analytique de l'enseigne destinataire du paiement</li>\
         <li><code>{invoice.official_number}</code> : numéro de facture</li>\
         </ul>
+        <p>NB : Penser à séparer les variables, par exemple par des espaces, sous peine de libellés peu lisibles.</p>\
         <h4>Utilisation des variables</h4>\
         ex : "Contribution {entreprise.name} {client.name} {numero_facture}"
         """,

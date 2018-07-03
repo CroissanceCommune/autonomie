@@ -51,7 +51,8 @@ EXPENSE_INFO_MESSAGE=u"""
     </li>\
     <li>\
         <code>{expense.description}</code> : motif de la dépense</li>\
-    </ul>\
+    </ul>
+    <p>NB : Penser à séparer les variables, par exemple par des espaces, sous peine de libellés peu lisibles.</p>\
     """
 
 

@@ -50,7 +50,9 @@ configuré"
     <ul>\
     <li><code>{invoice.customer.label}</code> : nom du client émetteur du paiement</li>\
     <li><code>{invoice.customer.code}</code> : code du client émetteur du paiement</li>\
+    <li><code>{invoice.official_number}</code> : numéro de facture (pour tronquer à 9 caractères : <code>{invoice.official_number:.9}</code>)</li>\
     <li><code>{company.name}</code> : nom de l'enseigne destinataire du paiement</li>\
+    <li><code>{company.code_compta}</code> : code analytique de l'enseigne destinataire du paiement</li>\
     <li><code>{payment.bank_remittance_id}</code> : identifiant de la remise en banque</li>\
     </ul>
     <p>NB : Penser à séparer les variables, par exemple par des espaces, sous peine de libellés peu lisibles.</p>\

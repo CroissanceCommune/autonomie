@@ -85,10 +85,10 @@ def populate_cae_situations_and_career_stages(session):
         ):
             session.add(
                 CareerStage(
-                    active=active, 
-                    name=name, 
-                    cae_situation_id=cae_situation_id, 
-                    stage_type=stage_type, 
+                    active=active,
+                    name=name,
+                    cae_situation_id=cae_situation_id,
+                    stage_type=stage_type,
                 )
             )
         session.flush()
@@ -115,7 +115,7 @@ def populate_accounting_treasury_measure_types(session):
     from autonomie.models.accounting.treasury_measures import (
         TreasuryMeasureType,
     )
-    if TreasuryMeasureType.query().count() == 0:
+    if session.query(TreasuryMeasureType.id).count() == 0:
         for internal_id, start, label in (
             (1, '5', u"Trésorerie du jour",),
             (2, "42,-421,-425,43,44", u"Impôts, taxes et cotisations dues",),
@@ -141,7 +141,8 @@ def populate_accounting_income_statement_measure_types(session):
     from autonomie.models.accounting.income_statement_measures import (
         IncomeStatementMeasureTypeCategory,
     )
-    if IncomeStatementMeasureTypeCategory.query().count() == 0:
+
+    if session.query(IncomeStatementMeasureTypeCategory.id).count() == 0:
         for order, category in enumerate((
             u"Produits",
             u"Achats",
@@ -223,7 +224,8 @@ def populate_project_types(session):
                 default_btype.other_project_types.append(ptype)
                 session.merge(default_btype)
                 session.flush()
-        if BusinessType.query().filter_by(name=name).count() == 0:
+
+        if session.query(BusinessType.id).filter_by(name=name).count() == 0:
             session.add(
                 BusinessType(
                     name=name,
@@ -249,6 +251,67 @@ def populate_contract_types(session):
         session.add(TypeContratOption(label=u"CESA", order=0))
     session.flush()
 
+
+def _add_filetype_and_reqs(
+    session, business_type_label, filetype, requirements
+):
+    """
+    """
+    from autonomie.models.files import FileType
+    from autonomie.models.project.types import BusinessType
+    from autonomie.models.project.file_types import BusinessTypeFileType
+    if session.query(FileType.id).filter_by(label=filetype).count() == 0:
+        f = FileType(label=filetype)
+        session.add(f)
+        session.flush()
+        btype_id = session.query(BusinessType.id).filter_by(
+            name=business_type_label
+        ).scalar()
+
+        for req_dict in requirements:
+            req = BusinessTypeFileType(
+                file_type_id=f.id,
+                business_type_id=btype_id,
+                doctype=req_dict['doctype'],
+                requirement_type=req_dict['req_type'],
+                validation=req_dict.get('validation', False)
+            )
+            session.add(req)
+        session.flush()
+
+
+def populate_file_types_and_requirements(session):
+    """
+    Add default file types to the database
+    """
+    filetype = "Formation : Convention"
+    requirements = [
+        {
+            'doctype': 'business',
+            'req_type': 'project_mandatory',
+            'validation': True
+        },
+        {
+            'doctype': 'invoice',
+            'req_type': 'project_mandatory',
+        },
+    ]
+    _add_filetype_and_reqs(session, "training", filetype, requirements)
+    filetype = "Formation : Émargement"
+    requirements = [
+        {
+            'doctype': 'business',
+            'req_type': 'business_mandatory',
+            'validation': True
+        },
+        {
+            'doctype': 'invoice',
+            'req_type': 'business_mandatory',
+        },
+    ]
+    _add_filetype_and_reqs(session, "training", filetype, requirements)
+
+
 def populate_invoice_number_template(session):
     from autonomie.models.config import Config
     if not Config.get_value("invoice_number_template"):
@@ -270,6 +333,7 @@ def populate_database():
         populate_bookentry_config,
         populate_project_types,
         populate_contract_types,
+        populate_file_types_and_requirements,
         populate_invoice_number_template,
     ):
         try:

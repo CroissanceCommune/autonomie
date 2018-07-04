@@ -326,7 +326,7 @@ def get_add_file_link(
 
 
 class FileDeleteView(DeleteView, FileViewRedirectMixin):
-    delete_msg = u"Le fichier a été supprimé"
+    delete_msg = None
 
     def on_before_delete(self):
         parent = self.context.parent

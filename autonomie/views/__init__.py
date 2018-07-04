@@ -931,7 +931,8 @@ class DeleteView(BaseView, PopupMixin):
         if hasattr(self, "on_before_delete"):
             self.on_before_delete()
         self.request.dbsession.delete(self.context)
-        self.request.session.flash(self.delete_msg)
+        if self.delete_msg is not None:
+            self.request.session.flash(self.delete_msg)
 
         if hasattr(self, "on_delete"):
             self.on_delete()

@@ -14,6 +14,7 @@ from autonomie.views import (
     BaseEditView,
 )
 from autonomie.views.project.routes import (
+    PROJECT_ITEM_ROUTE,
     PROJECT_ITEM_BUSINESS_ROUTE,
 )
 from autonomie.views.business.routes import (
@@ -49,9 +50,14 @@ def business_entry_point_view(context, request):
     """
     Project entry point view only redirects to the most appropriate page
     """
-    last = retrieve_navigation_history(request, context.id)
-    if last is None:
-        last = request.route_path(BUSINESS_ITEM_OVERVIEW_ROUTE, id=context.id)
+    if context.business_type.label == "default":
+        last = request.route_path(PROJECT_ITEM_ROUTE, id=context.project_id)
+    else:
+        last = retrieve_navigation_history(request, context.id)
+        if last is None:
+            last = request.route_path(
+                BUSINESS_ITEM_OVERVIEW_ROUTE, id=context.id
+            )
     return HTTPFound(last)
 
 

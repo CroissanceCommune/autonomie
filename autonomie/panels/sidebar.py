@@ -22,7 +22,7 @@ def sidebar_panel(context, request, menu):
     }
 
 
-def sidebar_item_panel(context, request, menu_item):
+def sidebar_item_panel(context, request, menu_item, bind_params):
     """
     Collect datas for menu entry display
 
@@ -30,9 +30,12 @@ def sidebar_item_panel(context, request, menu_item):
     :param request: The current request object
     :param obj menu_item: An instance of utils.menu.MenuItem or
     utils.menu.MenuDropdown
+    :param dict bind_params: Binding parameters attached to the parent menu and
+    used to dynamically render some attributes
     """
     return {
-        "menu_item": menu_item
+        "menu_item": menu_item,
+        "bind_params": bind_params,
     }
 
 

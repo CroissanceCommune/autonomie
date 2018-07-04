@@ -3,12 +3,16 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import colander
 
 
 class MenuItem(object):
     __type__ = 'item'
 
-    def __init__(self, name, route_name, icon, label, title=None, perm=None, other_route_name=None):
+    def __init__(
+        self, name, route_name, icon, label, title=None,
+        perm=None, other_route_name=None
+    ):
         self.name = name
 
         if title is None:
@@ -46,6 +50,12 @@ class MenuItem(object):
             return request.has_permission(self.perm)
         return True
 
+    def get_label(self, **params):
+        if isinstance(self.label, colander.deferred):
+            return self.label(self, params)
+        else:
+            return self.label
+
 
 class MenuDropdown(object):
     """
@@ -76,9 +86,20 @@ class MenuDropdown(object):
         self.default_route = default_route
         self.perm = perm
 
-    def add_item(self, name, route_name, icon, label, title=None, perm=None, other_route_name=None):
+    def add_item(
+        self, name, route_name, icon, label, title=None,
+        perm=None, other_route_name=None
+    ):
         self.items.append(
-            MenuItem(name, route_name, icon, label, title, perm=perm, other_route_name=other_route_name)
+            MenuItem(
+                name,
+                route_name,
+                icon,
+                label,
+                title,
+                perm=perm,
+                other_route_name=other_route_name
+            )
         )
 
     def enabled(self, context, request):
@@ -103,6 +124,12 @@ class MenuDropdown(object):
         if self.perm is not None:
             return request.has_permission(self.perm)
         return True
+
+    def get_label(self, **params):
+        if isinstance(self.label, colander.deferred):
+            return self.label(self, params)
+        else:
+            return self.label
 
 
 class AttrMenuItem(MenuItem):
@@ -176,6 +203,7 @@ class Menu(object):
         self.name = name
         self.items = []
         self.current = None
+        self.bind_params = {}
 
     def set_current(self, current):
         self.current = current
@@ -202,3 +230,6 @@ class Menu(object):
                 self.items.insert(index + 1, new_item)
                 return
         raise KeyError(u"Unknown node : %s" % name)
+
+    def bind(self, **kw):
+        self.bind_params = kw

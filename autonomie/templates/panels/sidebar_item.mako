@@ -33,7 +33,7 @@
                 href='#'
             % endif
                 >
-                <i class="${elem.icon}"></i>&nbsp;<span>${elem.label|n}</span>
+                <i class="${elem.icon}"></i>&nbsp;${elem.get_label(**bind_params)|n}
             </a>
         </li>
     % endif
@@ -53,7 +53,7 @@
                 '
                 >
                 <a class='dropdown-toggle' data-toggle='collapse' href='#${elem.name}' role='button' aria-expanded="false">
-                    <i class="${elem.icon}"></i>&nbsp;<span>${elem.label|n}</span>
+                    <i class="${elem.icon}"></i>&nbsp;${elem.get_label(**bind_params)|n}
                     <span class="caret"></span>
                 </a>
                 <ul

@@ -789,7 +789,11 @@ class BaseEditView(BaseFormView):
         return calchemy_dict.get('help_msg', '')
 
     def get_default_appstruct(self):
-        return self.schema.dictify(self.context)
+        """
+        Collect datas that will initially populate the form
+        """
+        model = self.get_context_model()
+        return self.schema.dictify(model)
 
     def before(self, form):
         BaseFormView.before(self, form)
@@ -806,8 +810,19 @@ class BaseEditView(BaseFormView):
         model = self.schema.objectify(appstruct, model)
         return model
 
+    def get_context_model(self):
+        """
+        Return the model we're editing, by default it's the current context but
+        in case of OneToOne relationship, it can be that the context is a
+        related model, Overriding this method we can provide the model to edit
+
+        :returns: The model that will be edited by this view
+        """
+        return self.context
+
     def submit_success(self, appstruct):
-        model = self.merge_appstruct(appstruct, self.context)
+        model = self.get_context_model()
+        model = self.merge_appstruct(appstruct, model)
         self.dbsession.merge(model)
 
         if hasattr(self, 'on_edit'):
@@ -821,6 +836,16 @@ class BaseEditView(BaseFormView):
             return self.redirect()
         elif self.redirect_route is not None:
             return HTTPFound(self.request.route_path(self.redirect_route))
+        else:
+            raise Exception("A redirection strategy should be provided")
+
+    def cancel_success(self, appstruct):
+        if hasattr(self, 'redirect'):
+            return self.redirect()
+        elif self.redirect_route is not None:
+            return HTTPFound(self.request.route_path(self.redirect_route))
+        else:
+            raise Exception("A redirection strategy should be provided")
 
 
 class DisableView(BaseView):

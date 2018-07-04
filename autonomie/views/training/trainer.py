@@ -56,10 +56,10 @@ TRAINER_MENU.add_item(
 )
 TRAINER_MENU.add_item(
     name="trainerdatas_filelist",
-    label=u"Fichier liés à la formation",
+    label=u"Fichiers liés au formateur",
     route_name=USER_TRAINER_FILE_URL,
     icon=u'fa fa-briefcase',
-    perm="view.file",
+    perm="filelist.trainerdatas",
 )
 
 
@@ -74,6 +74,9 @@ def trainerdatas_add_entry_view(context, request):
     trainerdatas = TrainerDatas(user_id=context.id)
     request.dbsession.add(trainerdatas)
     request.dbsession.flush()
+    if context.login is not None:
+        context.login.groups.append('trainer')
+    request.dbsession.merge(context.login)
     return HTTPFound(
         request.route_path(
             USER_TRAINER_EDIT_URL,
@@ -87,7 +90,6 @@ class TrainerDatasEditView(BaseEditView):
     Trainer datas edition view
     """
     schema = get_add_edit_trainerdatas_schema()
-    validation_msg = u"La fiche formateur a bien été enregistrée"
     buttons = (submit_btn, cancel_btn,)
     add_template_vars = ('delete_url', 'current_trainerdatas')
 
@@ -110,9 +112,15 @@ class TrainerDatasEditView(BaseEditView):
         return self.context
 
     def before(self, form):
+        BaseEditView.before(self, form)
         auto_need(form)
         form.widget = AccordionFormWidget(named_grids=FORM_GRID)
-        form.set_appstruct(self.schema.dictify(self.current_trainerdatas))
+
+    def get_context_model(self):
+        return self.current_userdatas
+
+    def redirect(self):
+        return HTTPFound(self.request.current_route_path())
 
 
 class UserTrainerDatasEditView(TrainerDatasEditView):

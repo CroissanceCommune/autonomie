@@ -36,6 +36,7 @@ from autonomie.utils.menu import (
 )
 from autonomie.views import (
     BaseFormView,
+    BaseEditView,
     submit_btn,
     cancel_btn,
     BaseView,
@@ -172,12 +173,11 @@ def ensure_doctypes_rel(userdatas_id, request):
     request.dbsession.flush()
 
 
-class UserDatasEditView(BaseFormView):
+class UserDatasEditView(BaseEditView):
     """
     User datas edition view
     """
     schema = get_add_edit_schema()
-    validation_msg = u"Les informations sociales ont bien été enregistrées"
     buttons = (submit_btn, cancel_btn,)
     add_template_vars = ("current_userdatas", "delete_url")
 
@@ -200,21 +200,14 @@ class UserDatasEditView(BaseFormView):
         )
 
     def before(self, form):
+        BaseEditView.before(self, form)
         auto_need(form)
         form.widget = AccordionFormWidget(named_grids=USERDATAS_FORM_GRIDS)
-        form.set_appstruct(self.schema.dictify(self.current_userdatas))
 
-    def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct, self.current_userdatas)
-        model = self.dbsession.merge(model)
-        self.dbsession.flush()
+    def get_context_model(self):
+        return self.current_userdatas
 
-        self.session.flash(
-            u"Vos modifications ont été enregistrées"
-        )
-        return HTTPFound(self.request.current_route_path())
-
-    def cancel_success(self, appstruct):
+    def redirect(self):
         return HTTPFound(self.request.current_route_path())
 
 

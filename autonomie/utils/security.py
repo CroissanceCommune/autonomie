@@ -1141,7 +1141,7 @@ def get_indicator_acl(self):
     Compile Indicator acl
     """
     acl = DEFAULT_PERM_NEW[:]
-    admin_perms = ('view.indicator',)
+    admin_perms = ('view.indicator', 'force.indicator')
     if self.status != 'success':
         admin_perms += ("force.indicator",)
 
@@ -1170,8 +1170,13 @@ def get_sale_file_requirement_acl(self):
 
     if not locked:
         acl = get_indicator_acl(self)
-        admin_perms += ('add.file', 'edit.file')
-        user_perms += ('add.file', 'edit.file')
+        if self.file_id is None:
+            admin_perms += ("add.file",)
+            user_perms += ("add.file",)
+        else:
+            admin_perms += ("edit.file",)
+            user_perms += ("edit.file",)
+
     else:
         acl = DEFAULT_PERM_NEW[:]
 

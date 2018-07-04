@@ -52,9 +52,15 @@ class ProjectBusinessListView(BaseListView, TreeMixin):
     def title(self):
         return u"Affaires du projet {0}".format(self.current().name)
 
+    def current_id(self):
+        if hasattr(self.context, 'project_id'):
+            return self.context.project_id
+        else:
+            return self.context.id
+
     @property
     def url(self):
-        return self.request.route_path(self.route_name, id=self.context.id)
+        return self.request.route_path(self.route_name, id=self.current_id())
 
     @property
     def add_estimation_url(self):

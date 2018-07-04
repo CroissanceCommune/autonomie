@@ -68,6 +68,7 @@
             </a>
         </div>
     % endif
+</div>
 % elif request.has_permission('set_email.user'):
     <a
         class='btn btn-primary primary-action'
@@ -84,16 +85,15 @@
         <i class='fa fa-lock'></i>&nbsp;Changer de mot de passe
     </a>
 % endif
-</div>
 <hr />
 
 
 % if request.has_permission('admin.company'):
 <div class='row'>
-<div class='col-md-2'>
-<i class='fa fa-building fa-3x fa-border' style='vertical-align:middle'></i>
-</div>
-<div class='col-md-10'>
+    <div class='col-md-2'>
+    <i class='fa fa-building fa-3x fa-border' style='vertical-align:middle'></i>
+    </div>
+    <div class='col-md-10'>
 % if user.companies:
     % if len(user.companies) == 1:
         <span>Ce compte est rattaché à l'entreprise
@@ -129,7 +129,7 @@
 % else:
     <em>Ce compte n'est rattaché à aucune entreprise</em>
 % endif
-</div>
+    </div>
 </div>
 <hr />
 % endif
@@ -165,7 +165,7 @@
             <i class='fa fa-plus-circle'></i>&nbsp;Créer une fiche de gestion sociale
         </a>
     % endif
-</div>
+    </div>
 </div>
 <hr />
 % endif

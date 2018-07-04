@@ -1,9 +1,9 @@
-<div class="modal-dialog" role="document">
+<div class="modal-dialog {{#if has_file_warning}}modal-lg{{/if}}" role="document">
 	<div class="modal-content">
 	  <form class='form' data-url='{{ url }}' method='POST'>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">{{ title }}</h4>
+            <h4 class="modal-title {{#if has_error}}text-danger{{/if}}">{{ title }}</h4>
           </div>
           <div class="modal-body">
                     {{#if ask_for_date }}
@@ -20,14 +20,27 @@
                             </label>
                             </div>
                         </div>
+                        <hr />
                     {{/if}}
+                    {{#if has_file_warning}}
+                    <div class='form-group'>
+                        <div class='files'></div>
+                        <div class='checkbox'>
+                         <label>
+                             <input type="checkbox" name="force_file_validation">&nbsp;Ignorer les fichiers manquant
+                         </label>
+                         </div>
+                    </div>
+                    <hr />
+                    {{/if}}
+                    <br />
                     <div class='form-group'>
                         <label for='comment'>Commentaires</label>
                         <textarea class='form-control' name='comment' rows=4></textarea>
                     </div>
           </div>
           <div class="modal-footer">
-            <button class='btn btn-success primary-action' type='submit' name='submit' value='{{status}}'>{{label}}</button>
+            <button class='btn btn-success primary-action' {{#if has_file_warning}}disabled{{/if}} type='submit' name='submit' value='{{status}}'>{{label}}</button>
             <button class='btn btn-default secondary-action' data-dismiss='modal'>Annuler</button>
           </div>
 	  </form>

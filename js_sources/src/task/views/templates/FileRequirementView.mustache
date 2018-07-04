@@ -5,18 +5,18 @@
 {{{ label }}}
 
 {{#if has_view}}
-<span class='link btn-view'>
-    Voir le fichier
-</span>
+<button class='btn btn-default btn-circle btn-view' title="Voir le fichier">
+    <i class='fa fa-pencil'></i>
+</button>
 {{/if}}
 {{#if has_add}}
-<span class='link btn-add'>
-    Ajouter un fichier
-</span>
+<button class='btn btn-default btn-circle btn-add' title="Déposer un document" >
+    <i class='fa fa-plus'></i>
+</button>
 {{/if}}
 {{#if has_valid_link}}
-<button class='btn btn-info btn-validate'>
-    Valider le fichier fourni
+<button class='btn btn-default btn-circle btn-validate' title="Valider le document fourni ?">
+    <i class='fa fa-check'></i>
 </button>
 {{/if}}
 </div>

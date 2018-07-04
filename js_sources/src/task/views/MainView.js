@@ -66,7 +66,7 @@ const MainView = Mn.View.extend({
             'get:form_section', 'file_requirements'
         );
         var collection = this.facade.request(
-            'get:collection', 'file_requirements'
+            'get:filerequirementcollection'
         );
         var view = new FileBlockView(
             {collection: collection, section:section}

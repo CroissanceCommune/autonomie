@@ -14,7 +14,7 @@ import FileRequirementView from './FileRequirementView.js';
 var template = require("./templates/FileBlockView.mustache");
 
 
-const FileCollectionView = Mn.CollectionView.extend({
+export const FileRequirementCollectionView = Mn.CollectionView.extend({
     tagName: 'div',
     childView: FileRequirementView,
     collectionEvents: {
@@ -30,7 +30,9 @@ const FileBlockView = Mn.View.extend({
         files: '.files',
     },
     onRender: function(){
-        var view = new FileCollectionView({collection: this.collection});
+        var view = new FileRequirementCollectionView(
+            {collection: this.collection}
+        );
         this.showChildView('files', view);
     }
 });

@@ -42,13 +42,27 @@ const FileRequirementModel = Bb.Model.extend({
     hasFile(){
         return this.has('file_id');
     },
-    validate(){
+    setValid(){
         var serverRequest = ajax_call(
             this.url() + '?action=validation_status',
             {"validation_status": "valid"},
             "POST"
         );
         serverRequest.then(this.fetch.bind(this));
+    },
+    error(message){
+        return {'file_requirements': message};
+    },
+    validate(validation_status){
+        let result = true;
+        if (this.get('status') != 'success'){
+            if (this.missingFile()){
+                result = false;
+            } else if (validation_status == 'valid'){
+                result = false;
+            }
+        }
+        return result;
     }
 });
 export default FileRequirementModel;

@@ -16,9 +16,9 @@ var template = require("./templates/FileRequirementView.mustache");
 const FileRequirementView = Mn.View.extend({
     template: template,
     ui: {
-        add_button: 'span.btn-add',
-        view_button: "span.btn-view",
-        valid_button: "button.btn-validate"
+        add_button: '.btn-add',
+        view_button: ".btn-view",
+        valid_button: ".btn-validate"
     },
     events: {
         "click @ui.add_button": "onAdd",

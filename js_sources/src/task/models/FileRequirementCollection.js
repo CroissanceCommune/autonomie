@@ -17,5 +17,15 @@ const FileRequirementCollection = Bb.Collection.extend({
     url: function(){
         return AppOption['context_url'] + '/' + 'file_requirements';
     },
+    validate(status){
+        var result = true;
+        this.each(function(model){
+            var res = model.validate(status);
+            if (! res){
+                result = false;
+            }
+        });
+        return result;
+    }
 });
 export default FileRequirementCollection;

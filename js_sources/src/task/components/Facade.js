@@ -34,9 +34,11 @@ const FacadeClass = Mn.Object.extend({
         'get:model': 'getModelRequest',
         'get:collection': 'getCollectionRequest',
         'get:paymentcollection': 'getPaymentCollectionRequest',
+        'get:filerequirementcollection': 'getFileRequirementCollectionRequest',
         'get:totalmodel': 'getTotalModelRequest',
         'get:status_history_collection': 'getStatusHistory',
         'is:valid': "isDataValid",
+        'has:filewarning': "hasFileWarning",
         'get:attachments': 'getAttachments',
     },
     initialize(options){
@@ -58,7 +60,7 @@ const FacadeClass = Mn.Object.extend({
         this.computeTotals();
 
         var file_requirements = form_datas['file_requirements'];
-        this.collections['file_requirements'] = new FileRequirementCollection(
+        this.file_requirements_collection = new FileRequirementCollection(
             file_requirements
         );
 
@@ -108,6 +110,9 @@ const FacadeClass = Mn.Object.extend({
     },
     getPaymentCollectionRequest(){
         return this.payment_lines_collection;
+    },
+    getFileRequirementCollectionRequest(){
+        return this.file_requirements_collection;
     },
     getTotalModelRequest(){
         return this.totalmodel;
@@ -184,6 +189,9 @@ const FacadeClass = Mn.Object.extend({
             result += model.ttc();
         });
         return result;
+    },
+    hasFileWarning(){
+        return ! this.file_requirements_collection.validate();
     },
     isDataValid(){
         var channel = Radio.channel('facade');

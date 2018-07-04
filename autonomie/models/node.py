@@ -143,6 +143,14 @@ class Node(DBBASE, PersistentACLMixin):
             'export': {'exclude': True}
         },
     )
+    file_requirements = relationship(
+        "SaleFileRequirement",
+        back_populates='node',
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True}
+        },
+    )
 
     NODE_LABELS = {
         "estimation": u"Devis",

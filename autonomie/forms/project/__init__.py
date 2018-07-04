@@ -312,7 +312,7 @@ def get_edit_project_schema():
     excludes = (
         "_acl", "id", "company_id", "archived", "customers",
         "invoices", "tasks", "estimations", "cancelinvoices",
-        "project_type", "file_requirements",
+        "project_type",
     )
     schema = SQLAlchemySchemaNode(Project, excludes=excludes)
     _customize_project_schema(schema)

@@ -152,7 +152,6 @@ class SaleFileRequirement(Indicator):
     node = relationship(
         "Node",
         primaryjoin="SaleFileRequirement.node_id==Node.id",
-        backref="file_requirements",
     )
     file_type = relationship("FileType")
 

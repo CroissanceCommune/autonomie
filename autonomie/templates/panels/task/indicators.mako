@@ -37,8 +37,9 @@
         <a
             href="${request.route_path(force_route, id=indicator.id, _query={'action': 'force'})}"
             class='btn btn-default'
+            title="Valider le fichier fournit"
             >
-                <i class='fa fa-lock'></i>&nbsp;Valider le fichier fournit
+                <i class='fa fa-check'></i>
         </a>
         % endif
     % elif indicator.forced:
@@ -48,19 +49,33 @@
     % endif
     % if request.has_permission('add.file', indicator):
     <button
-        class='btn btn-default'
+        class='btn btn-default btn-circle'
         onclick="window.openPopup('${file_add_url}?file_type_id=${indicator.file_type_id}')"
+        title="Ajouter un fichier"
         >
-            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Ajouter un fichier
+            <i class='fa fa-plus'></i>
     </button>
     % endif
     % if request.has_permission('force.indicator', indicator):
+
     <a
         href="${request.route_path(force_route, id=indicator.id, _query={'action': 'force'})}"
-        class='btn btn-default'
+        class='btn btn-default
+        % if not indicator.forced:
+        btn-success'
         onclick="return confirm('Êtes-vous sûr de vouloir forcer cet indicateur (il apparaîtra désormais comme valide) ?');"
+        title="Forcer cet indicateur"
+        % else:
+        btn-danger'
+        title="Invalider cet indicateur"
+        % endif
         >
-            <i class='fa fa-lock'></i>&nbsp;Forcer cet indicateur
+            % if not indicator.forced:
+            <i class='fa fa-lock'></i>
+            % else:
+            <i class='fa fa-unlock'></i>
+            % endif
+
     </a>
     % endif
     <hr />

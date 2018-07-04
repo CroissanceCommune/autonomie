@@ -1141,11 +1141,11 @@ def get_indicator_acl(self):
     Compile Indicator acl
     """
     acl = DEFAULT_PERM_NEW[:]
-    admin_perms = ('view.indicator', 'force.indicator')
-    if self.status != 'success':
+    admin_perms = ('view.indicator', )
+    if self.status == self.DANGER_STATUS:
         admin_perms += ("force.indicator",)
 
-    if self.validation:
+    elif self.validation:
         if self.validation_status != 'valid':
             admin_perms += (
                 "valid.indicator",
@@ -1164,7 +1164,7 @@ def get_sale_file_requirement_acl(self):
     admin_perms = ()
 
     locked = False
-    if self.status == 'success':
+    if self.status == self.SUCCESS_STATUS:
         if hasattr(self.node, 'status') and self.node.status == 'valid':
             locked = True
 

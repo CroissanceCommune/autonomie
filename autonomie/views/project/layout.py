@@ -5,6 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 
 import logging
+import colander
 
 from autonomie.models.project.project import Project
 from autonomie.utils.menu import (
@@ -27,10 +28,26 @@ logger = logging.getLogger(__name__)
 
 
 ProjectMenu = Menu(name="projectmenu")
+
+
+@colander.deferred
+def deferred_business_list_label(item, kw):
+    """
+    return the label to be used for the given item
+    """
+    proj = kw['current_project']
+    if proj.project_type.name == 'training':
+        return u"Liste des formations"
+    elif proj.project_type.name == "construction":
+        return u"Liste des chantiers"
+    else:
+        return u"Liste des affaires"
+
+
 ProjectMenu.add(
     MenuItem(
         name="project_businesses",
-        label=u"Liste des affaires",
+        label=deferred_business_list_label,
         route_name=PROJECT_ITEM_BUSINESS_ROUTE,
         icon=u'fa fa-folder-open',
         perm='list.businesses',
@@ -116,6 +133,7 @@ class ProjectLayout(DefaultLayout):
     @property
     def projectmenu(self):
         ProjectMenu.set_current(self.current_project_object)
+        ProjectMenu.bind(current_project=self.current_project_object)
         return ProjectMenu
 
 

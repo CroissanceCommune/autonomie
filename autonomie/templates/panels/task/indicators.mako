@@ -20,7 +20,6 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<h3>Éléments requis</h3>
 % for indicator in indicators:
 <div>
     <span class='btn btn-circle btn-${indicator.status}'>
@@ -29,17 +28,24 @@
     ${indicator.file_type.label} :
 
     % if indicator.file_id:
-        <a href="${request.route_path('file', id=indicator.file_object.id, _query={'action': 'download'})}">
+        <a href="#" onclick="openPopup('${request.route_path('file', id=indicator.file_object.id)}')">
             ${indicator.file_object.name} (${api.human_readable_filesize(indicator.file_object.size)})
         </a>
-        ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(request, indicator.file_object))}
         % if request.has_permission('valid.indicator', indicator):
+        &nbsp;<em>fichier en attente de validation</em>
         <a
-            href="${request.route_path(force_route, id=indicator.id, _query={'action': 'force'})}"
-            class='btn btn-default'
+            href="${request.route_path(force_route, id=indicator.id, _query={'action': 'validation_status', 'validation_status': 'valid'})}"
+            class='btn btn-success btn-circle'
             title="Valider le fichier fournit"
             >
-                <i class='fa fa-check'></i>
+                <i class='fa fa-eye'></i>
+        </a>
+        <a
+            href="${request.route_path(force_route, id=indicator.id, _query={'action': 'validation_status', 'validation_status': 'valid'})}"
+            class='btn btn-danger btn-circle'
+            title="Invalider le fichier fournit"
+            >
+                <i class='fa fa-close'></i>
         </a>
         % endif
     % elif indicator.forced:
@@ -57,23 +63,23 @@
     </button>
     % endif
     % if request.has_permission('force.indicator', indicator):
-
+    &nbsp;
+    &nbsp;
+    &nbsp;
     <a
         href="${request.route_path(force_route, id=indicator.id, _query={'action': 'force'})}"
-        class='btn btn-default
+        class='btn btn-warning btn-circle'
         % if not indicator.forced:
-        btn-success'
         onclick="return confirm('Êtes-vous sûr de vouloir forcer cet indicateur (il apparaîtra désormais comme valide) ?');"
         title="Forcer cet indicateur"
         % else:
-        btn-danger'
         title="Invalider cet indicateur"
         % endif
         >
             % if not indicator.forced:
-            <i class='fa fa-lock'></i>
+            <i class='fa fa-flash'></i>
             % else:
-            <i class='fa fa-unlock'></i>
+            <i class='fa fa-undo'></i>
             % endif
 
     </a>

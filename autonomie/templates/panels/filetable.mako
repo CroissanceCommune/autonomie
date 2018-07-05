@@ -27,14 +27,14 @@
 </div>
 % endif
 % if request.has_permission(add_perm):
-<a
+<button
     class='btn btn-primary primary-action'
-    href="${add_url}"
+    onclick='openPopup("${add_url}");'
     title="Déposer un document dans autonomie"
     >
     <i class="glyphicon glyphicon-plus"></i>
     Déposer un document
-</a>
+</button>
 % endif
 <table class="table table-striped table-hover">
     <thead>

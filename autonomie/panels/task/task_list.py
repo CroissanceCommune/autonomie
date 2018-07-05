@@ -26,6 +26,23 @@ from autonomie.models.task import (
 from autonomie.utils.widgets import Link
 
 
+def _get_item_url(request, item, subpath=None, action=None):
+    """
+    Build an url to access the item
+    """
+    route = "/%ss/{id}" % item.type_
+    if subpath is not None:
+        route += "%s" % subpath
+
+    query = {}
+    if action:
+        query['action'] = action
+    return request.route_path(
+        route,
+        id=item.id,
+        _query=query
+    )
+
 def _stream_invoice_actions(request, item):
     """
     Stream actions available for invoices
@@ -33,54 +50,14 @@ def _stream_invoice_actions(request, item):
     :param obj request: The Pyramid request object
     :param obj item: The Invoice or CancelInvoice instance
     """
-    yield Link(
-        request.route_path(
-            "/%ss/{id}.pdf" % item.type_,
-            id=item.id
-        ),
-        u"PDF",
-        icon='file-pdf-o',
-        popup=True,
-    )
-    yield Link(
-        request.route_path(
-            "/%ss/{id}" % item.type_,
-            id=item.id
-        ),
-        u"Voir",
-        icon='pencil',
-    )
-    if request.has_permission('add.file', item):
-        yield Link(
-            request.route_path(
-                "/%ss/{id}/addfile" % item.type_,
-                id=item.id,
-            ),
-            u"Ajouter un fichier",
-            icon='file-text',
-            popup=True,
-        )
     if request.has_permission('add_payment.invoice', item):
         yield Link(
-            request.route_path(
-                "/%ss/{id}/addpayment" % item.type_,
-                id=item.id,
-            ),
+            _get_item_url(request, item, subpath="/addpayment"),
             u"Enregistrer un encaissement",
             icon='money',
             popup=True,
         )
 
-    if request.has_permission('delete.%s' % item.type_, item):
-        yield Link(
-            request.route_path(
-                "/%ss/{id}/delete" % item.type_,
-                id=item.id,
-            ),
-            u"Supprimer",
-            icon='trash',
-            confirm=u"Êtes-vous sûr de vouloir supprimer ce document ?"
-        )
 
 
 def _stream_estimation_actions(request, item):
@@ -90,52 +67,54 @@ def _stream_estimation_actions(request, item):
     :param obj request: The Pyramid request object
     :param obj item: The Estimation instance
     """
+    # TODO : générer les factures ...
+    pass
+
+
+def stream_actions(request, item):
     yield Link(
-        request.route_path(
-            "/%ss/{id}.pdf" % item.type_,
-            id=item.id
-        ),
+        _get_item_url(request, item, subpath=".pdf"),
         u"PDF",
         icon='file-pdf-o',
         popup=True,
     )
     yield Link(
-        request.route_path(
-            "/%ss/{id}" % item.type_,
-            id=item.id
-        ),
+        _get_item_url(request, item),
         u"Voir",
         icon='pencil',
     )
     if request.has_permission('add.file', item):
         yield Link(
-            request.route_path(
-                "/%ss/{id}/addfile" % item.type_,
-                id=item.id,
-            ),
+            _get_item_url(request, item, subpath="/addfile"),
             u"Ajouter un fichier",
             icon='file-text',
             popup=True,
         )
+    yield Link(
+        request.route_path("company", id=item.company_id),
+        u"Voir l'enseigne %s" % item.company.name,
+        icon="user",
+    )
+    yield Link(
+        request.route_path("customer", id=item.customer_id),
+        u"Voir le client %s" % item.customer.get_label(),
+        icon="building-o",
+    )
 
     if request.has_permission('delete.%s' % item.type_, item):
         yield Link(
-            request.route_path(
-                "/%ss/{id}/delete" % item.type_,
-                id=item.id,
-            ),
+            _get_item_url(request, item, subpath="/delete"),
             u"Supprimer",
             icon='trash',
             confirm=u"Êtes-vous sûr de vouloir supprimer ce document ?"
         )
-
-
-def stream_actions(request, item):
     if isinstance(item, (Invoice, CancelInvoice)):
         func = _stream_invoice_actions
     else:
         func = _stream_estimation_actions
-    return func(request, item)
+
+    for i in func(request, item):
+        yield i
 
 
 def task_list_panel(

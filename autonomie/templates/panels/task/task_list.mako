@@ -84,11 +84,7 @@
             </td>
             % if is_admin_view:
                 <td>
-                    <a
-                        href="${request.route_path('company', id=company_id)}"
-                        title="Voir l'entreprise">
-                        ${company_name}
-                    </a>
+                    ${company_name}
                 </td>
             % endif
             <td>
@@ -97,7 +93,7 @@
             <td>
                 <a href="${request.route_path('/%ss/{id}.html' % type_, id=id_)}"
                     title='Voir le document'>
-                    ${internal_number} (<small>${name}</small>)
+                    ${internal_number} <br />(<small>${name}</small>)
                 </a>
                 % if not is_admin_view:
                     <% description = document.description %>
@@ -107,9 +103,7 @@
                 % endif
             </td>
             <td class='invoice_company_name'>
-                <a href="${request.route_path("customer", id=customer_id)}">
-                    ${customer_name}
-                </a>
+                ${customer_name}
             </td>
             <td>
                 <strong>${api.format_amount(ht, precision=5)|n}&nbsp;€</strong>
@@ -124,7 +118,7 @@
                 % if len(document.payments) == 1 and paid_status == 'resulted':
                     <% payment = document.payments[0] %>
                     <% url = request.route_path('payment', id=payment.id) %>
-                    <a href="${url}">
+                    <a href="#dummy" onclick="openPopup('${url}')">
                     Le ${api.format_date(payment.date)}
                     (${api.format_paymentmode(payment.mode)})
                     </a>
@@ -133,7 +127,7 @@
                         % for payment in document.payments:
                     <% url = request.route_path('payment', id=payment.id) %>
                             <li>
-                                <a href="${url}">
+                                <a href="#dummy" onclick="openPopup('${url}')">
                                     ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
                                     le ${api.format_date(payment.date)}
                                     (${api.format_paymentmode(payment.mode)})

@@ -39,13 +39,12 @@
                     % endif
                     </div>
                     <div class='col-md-9'>
-                        <div>Affaire : ${layout.current_business_object.name}</div>
-                        <div class='help-text'>
-                        ${layout.current_business_object.business_type.label}
+                        <div>${layout.current_business_object.business_type.label}  : ${layout.current_business_object.name}</div>
                         % if layout.current_business_object.closed:
-                        (clôturée)
-                        % endif
+                        <div class='help-text'>
+                        Cette affaire est clôturée
                         </div>
+                        % endif
                         <div class'btn-group'>
                         % if request.has_permission("edit.business", layout.current_business_object):
                         <a

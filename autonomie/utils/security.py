@@ -1054,12 +1054,14 @@ def get_business_acl(self):
     admin_perms = ('view.business',)
 
     if not self.closed:
-        admin_perms += ('edit.business', 'add.invoice', 'close.business',)
+        admin_perms += ('edit.business', 'add.invoice',)
         perms += ('edit.business', 'add.invoice',)
 
         if not self.invoices and not self.cancelinvoices:
             perms += ('delete.business',)
             admin_perms += ('delete.business',)
+        if self.file_requirement_service.check(self):
+            admin_perms += ('close.business',)
 
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', perms))

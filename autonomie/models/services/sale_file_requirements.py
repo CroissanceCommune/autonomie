@@ -285,6 +285,19 @@ class SaleFileRequirementService(object):
             indicator.force()
             DBSESSION().merge(indicator)
 
+    @classmethod
+    def check(cls, node):
+        """
+        Check if all indicators are successfull
+        :param obj node: The node for which we check the indicators
+        """
+        query = DBSESSION().query(SaleFileRequirement.id)
+        query = query.filter_by(node_id=node.id)
+        query = query.filter(
+            SaleFileRequirement.status != SaleFileRequirement.SUCCESS_STATUS
+        )
+        return query.count() == 0
+
 
 class TaskFileRequirementService(SaleFileRequirementService):
 

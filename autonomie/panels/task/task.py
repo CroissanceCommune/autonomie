@@ -157,7 +157,7 @@ def includeme(config):
     """
     for document_type in ('estimation', 'invoice', 'cancelinvoice'):
         panel_name = "{0}_html".format(document_type)
-        template = "panels/{0}.mako".format(document_type)
+        template = "panels/task/{0}.mako".format(document_type)
         config.add_panel(task_panel, panel_name, renderer=template)
 
     config.add_panel(

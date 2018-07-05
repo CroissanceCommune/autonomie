@@ -68,10 +68,10 @@
 <%block name='content'>
 <div class='row'>
     <div class='col-md-6' id='tasklist_container'>
-        ${panel('company_tasks')}
+        ${panel('company_recent_tasks')}
     </div>
     <div class='col-md-6' id='event_container'>
-        ${panel('company_events')}
+        ${panel('company_coming_events')}
     </div>
 </div>
 </%block>

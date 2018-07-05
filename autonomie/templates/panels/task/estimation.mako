@@ -25,7 +25,7 @@
 <%doc>
     estimation panel template
 </%doc>
-<%inherit file="/panels/task.mako" />
+<%inherit file="/panels/task/base.mako" />
 <%namespace file="/base/utils.mako" import="format_text" />
 <%def name="table(title, datas, css='')">
     <div class="title ${css}">

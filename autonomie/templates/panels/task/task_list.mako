@@ -42,8 +42,8 @@
         <th>${sortable(u"TVA", "ht")}</th>
         <th>${sortable(u"TTC", "ttc")}</th>
         <th>${sortable(u"Paiement", "payment")}</th>
-        <th>PDF</th>
         <th>Fichiers attachés</th>
+        <th>Actions</th>
     </thead>
     <tbody>
         <tr>
@@ -144,26 +144,16 @@
                 % endif
             </td>
             <td>
-                <a class='btn btn-default'
-                    href="${request.route_path('/%ss/{id}.pdf' % type_, id=id_)}"
-                    title="Télécharger la version PDF">
-                    <i class='glyphicon glyphicon-file'></i>
-                </a>
-            </td>
-              <td>
-                  ${format_filelist(document)}
+                ${format_filelist(document)}
                 % if hasattr(document, 'estimation_id') and document.estimation_id is not None:
-                    ${format_filelist(document.estimation)}
+                ${format_filelist(document.estimation)}
                 % elif hasattr(document, 'invoice_id') and document.invoice_id is not None:
-                    ${format_filelist(document.invoice)}
+                ${format_filelist(document.invoice)}
                 % endif
-                <% url = request.route_path('/%ss/{id}/addfile' % type_, id=id_)  %>
-                  <button class='btn btn-default'
-                     onclick="window.openPopup('${url}')"
-                      title="Attacher un fichier">
-                      <i class='glyphicon glyphicon-plus'></i>
-                  </button>
-              </td>
+            </td>
+            <td class='text-right'>
+                ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(request, document))}
+            </td>
         </tr>
         % endfor
     % else:

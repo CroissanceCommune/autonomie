@@ -143,7 +143,7 @@
                 </table>
             </div>
         </div>
-        ${request.layout_manager.render_panel('invoicetable', records, is_admin_view=is_admin)}
+        ${request.layout_manager.render_panel('task_list', records, is_admin_view=is_admin, is_project_view=True)}
         ${pager(records)}
     </div>
 </div>

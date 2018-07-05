@@ -372,14 +372,23 @@ class Link(object):
     panel_name = "link"
 
     def __init__(self, url, label, title=None, js=None, icon="", css="",
-                 disabled=False, confirm=None):
+                 disabled=False, confirm=None, popup=False):
         self.label = label
-        self.url = url
+        if popup:
+            self.url = "#"
+            js = "openPopup('{url}')".format(url=url)
+        else:
+            self.url = url
+
         self.title = title or self.label
         if confirm:
             self.js = u"return confirm('{0}')".format(
                 confirm.replace("'", "\\'")
             )
+            if popup:
+                raise Exception(
+                    u"Link Error : confirm and popup can't be used together"
+                )
         else:
             self.js = js
         self.icon = self.format_icon(icon)

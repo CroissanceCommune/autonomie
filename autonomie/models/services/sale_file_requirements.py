@@ -207,7 +207,10 @@ class SaleFileRequirementService(object):
             businesses_id_query = businesses_id_query.filter(
                 Business.id != business_id
             )
-        return SaleFileRequirement.query().filter(
+        query = SaleFileRequirement.query().filter_by(
+            file_type_id=file_type_id
+        )
+        return query.filter(
             or_(
                 SaleFileRequirement.node_id.in_(businesses_id_query),
                 SaleFileRequirement.node_id.in_(tasks_id_query),

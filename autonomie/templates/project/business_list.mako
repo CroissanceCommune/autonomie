@@ -85,51 +85,57 @@
                     <th>${sortable(u"Nom", "name")}</th>
                     <th>Documents</th>
                     <th>CA</th>
+                    <th>Statut</th>
                     <th class="actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 % if records:
                     % for id, business in records:
-                    <tr class='tableelement'>
+                    <tr class='tableelement business-closed-${business.closed} business-check-${business.file_requirement_service.check(business)}'>
                         <tr class='tableelement'>
                             <td>
                                 ${api.format_date(business.created_at)}
                             </td>
                             <td>
-                                % if business.closed:
-                                    <span class='label label-warning'>Cette affaire est close</span>
-                                % endif
                                 ${business.name}
                             </td>
                             <td>
                                 <ul>
                                     % for estimation in business.estimations:
                                         <li>
-                                        <a href="${request.route_path('/estimations/{id}', id=estimation.id)}">
-                                        Devis : ${estimation.name}
-                                        </a>
+                                            Devis : ${estimation.name}
                                         </li>
                                     % endfor
                                     % for invoice in business.invoices:
                                         <li>
-                                            <a href="${request.route_path('/%ss/{id}' % invoice.type_, id=invoice.id)}">
-                                            ${api.format_task_type(invoice)} n°${invoice.official_number} : ${invoice.name}
-                                            </a>
+                                            ${api.format_task_type(invoice)}
+                                            % if invoice.official_number:
+                                            n°${invoice.official_number}
+                                            % endif
+                                            : ${invoice.name}
                                         </li>
                                     % endfor
                                 </ul>
                             </td>
                             <td>
+                            ${api.format_amount(sum([i.ttc for i in business.invoices]), precision=5)|n}&nbsp;€
+                            </td>
+                            <td>
+                            % if business.closed:
+                            <i class='fa fa-folder'></i>&nbsp;Clôturée
+                            % else:
+                            <i class="fa fa-folder-open"></i>&nbsp;En cours
+                            % endif
                             </td>
                             <td class='text-right'>
-                        	${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(business))}
+                                ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(business))}
                             </td>
                         </tr>
                     % endfor
                 % else:
                     <tr>
-                        <td colspan='6'>
+                        <td colspan='7'>
                             Aucune affaire n'a été initiée pour l'instant
                         </td>
                     </tr>

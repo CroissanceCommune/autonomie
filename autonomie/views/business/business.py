@@ -72,7 +72,7 @@ class BusinessOverviewView(BaseView, TreeMixin):
 
     @property
     def title(self):
-        return u"Affaire : %s" % self.context.name
+        return u"{0.business_type.label} : {0.name}".format(self.context)
 
     @property
     def url(self):

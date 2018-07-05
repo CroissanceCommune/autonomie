@@ -211,22 +211,22 @@ table.opa tfoot td {
   .status-table .signed-status-signed .status-td, .status-table .justified-True:not(.status-valid) .status-td, .status-table .job-planned .status-td {
     background-color: #238bff; }
 
-.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait:not(.justified-True), .status-table .job-failed, .status-table .activity-status-cancelled, .status-table .operation-associated-False {
+.status-table .signed-status-aborted, .status-table .tolate-True, .status-table .status-wait:not(.justified-True), .status-table .job-failed, .status-table .activity-status-cancelled, .status-table .operation-associated-False, .status-table .business-check-False {
   background-color: #f9aaaa !important; }
-  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait:not(.justified-True) a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn), .status-table .operation-associated-False a:not(.btn) {
+  .status-table .signed-status-aborted a:not(.btn), .status-table .tolate-True a:not(.btn), .status-table .status-wait:not(.justified-True) a:not(.btn), .status-table .job-failed a:not(.btn), .status-table .activity-status-cancelled a:not(.btn), .status-table .operation-associated-False a:not(.btn), .status-table .business-check-False a:not(.btn) {
     text-transform: uppercase;
     text-decoration: underline; }
-  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait:not(.justified-True) .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td, .status-table .operation-associated-False .status-td {
+  .status-table .signed-status-aborted .status-td, .status-table .tolate-True .status-td, .status-table .status-wait:not(.justified-True) .status-td, .status-table .job-failed .status-td, .status-table .activity-status-cancelled .status-td, .status-table .operation-associated-False .status-td, .status-table .business-check-False .status-td {
     background-color: #C43C35 !important; }
 
-.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed, .status-table .operation-associated-True {
+.status-table .geninv-True, .status-table .paid-status-resulted, .status-table .job-completed, .status-table .activity-status-closed, .status-table .operation-associated-True, .status-table .business-closed-True {
   background-color: #c4ffaa; }
-  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td, .status-table .operation-associated-True .status-td {
+  .status-table .geninv-True .status-td, .status-table .paid-status-resulted .status-td, .status-table .job-completed .status-td, .status-table .activity-status-closed .status-td, .status-table .operation-associated-True .status-td, .status-table .business-closed-True .status-td {
     background-color: #baff87; }
 
-.status-table .paid-status-paid {
+.status-table .paid-status-paid, .status-table .business-check-True.business-closed-False {
   background-color: #ffb266; }
-  .status-table .paid-status-paid .status-td {
+  .status-table .paid-status-paid .status-td, .status-table .business-check-True.business-closed-False .status-td {
     background-color: #ffb266; }
 
 .status-header.signed-status-signed, .status-header.justified-True:not(.status-valid), .status-header.job-planned {

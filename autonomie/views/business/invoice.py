@@ -107,7 +107,7 @@ def includeme(config):
     config.add_tree_view(
         BusinessInvoicesListView,
         parent=ProjectBusinessListView,
-        renderer="autonomie:templates/project/invoices.mako",
+        renderer="autonomie:templates/business/invoices.mako",
         permission='list.invoices',
         layout="business",
     )

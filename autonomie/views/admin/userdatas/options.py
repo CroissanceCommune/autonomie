@@ -10,18 +10,20 @@ from autonomie.models.user.userdatas import (
     ZoneQualificationOption,
     StudyLevelOption,
     SocialStatusOption,
-    EmployeeQualityOption,
     ActivityTypeOption,
     PcsOption,
     PrescripteurOption,
     NonAdmissionOption,
     ParcoursStatusOption,
-    MotifSortieOption,
     SocialDocTypeOption,
     CaeSituationOption,
-    TypeSortieOption,
     AntenneOption,
+)
+from autonomie.models.career_path import (
     TypeContratOption,
+    EmployeeQualityOption,
+    TypeSortieOption,
+    MotifSortieOption,
 )
 from autonomie.views.admin.tools import (
     get_model_admin_view,

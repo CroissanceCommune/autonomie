@@ -40,6 +40,10 @@ from sqlalchemy import (
 from sqlalchemy.event import listen
 from sqlalchemy.orm import relationship
 from autonomie.models.tools import get_excluded_colanderalchemy
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
@@ -68,6 +72,54 @@ CAREER_PATH_GRID = (
     (('type_sortie_id',6), ('motif_sortie_id',6)),
 )
 
+
+# CONFIGURABLE OPTIONS
+###############################################################################
+class TypeContratOption(ConfigurableOption):
+    """
+    Possible values for contract type
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Type de contrat",
+        'validation_msg': u"Les types de contrat ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+class EmployeeQualityOption(ConfigurableOption):
+    """
+    Different values for employee quality
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Qualité du salarié",
+        'validation_msg': u"Les qualité du salarié ont bien été configurées",
+        "help_msg": u"Configurer les options possibles pour définir la qualité\
+ d'un salarié (cadre, employé ...)",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+class TypeSortieOption(ConfigurableOption):
+    """
+    Possible values for exit type
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Type de sortie",
+        'validation_msg': u"Les types de sortie ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+class MotifSortieOption(ConfigurableOption):
+    """
+    Possible values for exit motivation
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Motif de sortie",
+        'validation_msg': u"Les motifs de sortie ont bien été configurés",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
+
+# CAREER PATH CLASS
+###############################################################################
 class CareerPath(DBBASE):
     """
     Different career path stages
@@ -250,7 +302,7 @@ def update_user_situation_cae(mapper, connection, target):
     if target.cae_situation_id is not None:
         from autonomie.models.user.userdatas import UserDatas
         user = UserDatas.query().filter(UserDatas.id==target.userdatas_id).first()
-        situation = user.get_cae_situation_from_career_path(target.start_date)
+        situation = user.get_cae_situation_from_career_path(None)
         if user.situation_situation_id != situation.id:
             logger.debug(u"Update CAE situation of the user %s to '%s'" % (target.userdatas_id, situation.label))
             connection.execute("UPDATE user_datas SET situation_situation_id=%s WHERE id=%s" % (situation.id, user.id))

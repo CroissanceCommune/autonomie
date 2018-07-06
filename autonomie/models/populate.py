@@ -56,26 +56,41 @@ de ses factures",
 )
 
 
-def populate_situation_options(session):
+def populate_cae_situations_and_career_stages(session):
     """
-    Populate the CAE situation options
+    Populate the database with default CAE situation options and career stages
     """
+    # Populate CAE situations
     from autonomie.models.user.userdatas import CaeSituationOption
     query = session.query(CaeSituationOption)
-    if query.filter(CaeSituationOption.is_integration == True).count() == 0:
-        session.add(CaeSituationOption(
-            label=u"Réunion d'information",
-            order=0,
-        ))
-        session.add(CaeSituationOption(
-            label=u"Intégré",
-            is_integration=True,
-            order=1,
-        ))
-        session.add(CaeSituationOption(
-            label=u"Sortie",
-            order=2,
-        ))
+    if query.count() == 0:
+        situation_cand = CaeSituationOption(label=u"Candidat", order=0)
+        situation_conv = CaeSituationOption(label=u"En convention", is_integration=True, order=1)
+        situation_es = CaeSituationOption(label=u"Entrepreneur salarié", is_integration=True, order=2)
+        situation_out = CaeSituationOption(label=u"Sortie", order=3)
+        session.add(situation_cand)
+        session.add(situation_conv)
+        session.add(situation_es)
+        session.add(situation_out)
+        session.flush()
+    # Populate Career Stages
+    from autonomie.models.career_stage import CareerStage
+    if CareerStage.query().count() == 0:
+        for active, name, cae_situation_id, stage_type in (
+            (True, "Diagnostic", None, None),
+            (True, "Contrat CAPE", situation_conv.id, "entry"),
+            (True, "Contrat CESA", situation_es.id, "contract"),
+            (True, "Avenant contrat", None, "amendment"),
+            (True, "Sortie", situation_out.id, "exit"),
+        ):
+            session.add(
+                CareerStage(
+                    active=active, 
+                    name=name, 
+                    cae_situation_id=cae_situation_id, 
+                    stage_type=stage_type, 
+                )
+            )
         session.flush()
 
 
@@ -126,7 +141,6 @@ def populate_accounting_income_statement_measure_types(session):
     from autonomie.models.accounting.income_statement_measures import (
         IncomeStatementMeasureTypeCategory,
     )
-
     if IncomeStatementMeasureTypeCategory.query().count() == 0:
         for order, category in enumerate((
             u"Produits",
@@ -137,7 +151,6 @@ def populate_accounting_income_statement_measure_types(session):
             session.add(
                 IncomeStatementMeasureTypeCategory(label=category, order=order)
             )
-
         session.flush()
 
 
@@ -168,7 +181,6 @@ def populate_project_types(session):
                 default_btype.other_project_types.append(ptype)
                 session.merge(default_btype)
                 session.flush()
-
         if BusinessType.query().filter_by(name=name).count() == 0:
             session.add(
                 BusinessType(
@@ -177,11 +189,23 @@ def populate_project_types(session):
                     editable=False,
                     private=private,
                     project_type_id=ptype.id,
-
                 )
             )
     session.flush()
 
+
+def populate_contract_types(session):
+    """
+    Populate the database with default contract types
+    """
+    from autonomie.models.career_path import TypeContratOption
+    if session.query(TypeContratOption).filter("label"=="CDD").count() == 0:
+        session.add(TypeContratOption(label=u"CDD", order=0))
+    if session.query(TypeContratOption).filter("label"=="CDI").count() == 0:
+        session.add(TypeContratOption(label=u"CDI", order=0))
+    if session.query(TypeContratOption).filter("label"=="CESA").count() == 0:
+        session.add(TypeContratOption(label=u"CESA", order=0))
+    session.flush()
 
 def populate_invoice_number_template(session):
     from autonomie.models.config import Config
@@ -197,17 +221,17 @@ def populate_database():
     logger.debug("Populating the database")
     session = DBSESSION()
     for func in (
-        populate_situation_options,
+        populate_cae_situations_and_career_stages,
         populate_groups,
         populate_accounting_treasury_measure_types,
         populate_accounting_income_statement_measure_types,
         populate_project_types,
+        populate_contract_types,
         populate_invoice_number_template,
     ):
         try:
             func(session)
         except sqlalchemy.exc.OperationalError as e:
-            print("The seem to be an error in the population process")
+            print("There is an error in the population process :")
             print(e)
-
     commit()

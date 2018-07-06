@@ -22,23 +22,22 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name="mainblock">
-% if request.has_permission('delete.userdatas', current_userdatas):
-<a
-    class='btn btn-danger primary-action btn-head'
-    href="${delete_url}"
-    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette fiche de gestion et tous les éléments associés (fichiers, historiques ...) ?')">
-    <i class='fa fa-trash'></i>&nbsp;Supprimer la fiche
-</a>
-% endif
-
-${request.layout_manager.render_panel('help_message_panel', parent_tmpl_dict=context.kwargs)}
+    ${request.layout_manager.render_panel('help_message_panel', parent_tmpl_dict=context.kwargs)}
     <button
         type="button"
-        class="btn btn-info primary-action btn-head"
+        class="btn btn-info btn-head"
         onclick="javascript:enableForm('#deform');$(this).hide();"
         >
-        Dégeler le formulaire
-   </button>
+        <i class='fa fa-unlock'></i>&nbsp;Dégeler le formulaire
+    </button>
+    % if request.has_permission('delete.userdatas', current_userdatas):
+        <a
+            class='btn text-danger btn-head'
+            href="${delete_url}"
+            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette fiche de gestion et tous les éléments associés (fichiers, historiques ...) ?')">
+            <i class='fa fa-trash'></i>&nbsp;Supprimer la fiche
+        </a>
+    % endif
     ${form|n}
 </%block>
 <%block name="footerjs">

@@ -31,6 +31,7 @@ import simplejson as json
 import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
+from speaklater import make_lazy_string
 
 from autonomie.models.config import Config
 from autonomie.models.competence import (
@@ -58,6 +59,23 @@ def invoice_number_template_validator(node, value):
         InvoiceNumberService.validate_template(value)
     except ValueError as e:
         raise colander.Invalid(node, str(e))
+
+
+@make_lazy_string
+def help_text_libelle_comptable():
+    """
+    Hack to allow dynamic content in a description field description.
+    """
+    base = u"Les variables disponibles \
+pour la génération des écritures sont décrites en haut de page."
+    maxlength = Config.get_value('accounting_label_maxlength', None)
+    if maxlength:
+        return u"{} NB : les libellés sont tronqués à ".format(base) + \
+            u"{} caractères au moment de l'export.".format(maxlength) + \
+            u"Il est possible de changer cette taille dans  " +\
+            u"Configuration → Logiciel de comptabilité."
+    else:
+        return base
 
 
 CONFIGURATION_KEYS = {
@@ -142,32 +160,6 @@ entrepreneurs à la CAE",
         "description": u"",
         "section": u"Configuration des comptes RRR"
     },
-    "compte_cg_assurance": {
-        "title": u"Compte de charge assurance",
-        "description": u"",
-        "section": u"Module Assurance",
-    },
-    "compte_cgscop": {
-        "title": u"Compte de charge CG Scop",
-        "description": u"",
-        "section": u"Module CGSCOP",
-    },
-    'compte_cg_debiteur': {
-        "title": u"Compte de contrepartie CGSCOP",
-        "description": u"",
-        "section": u"Module CGSCOP",
-    },
-    "compte_cg_organic": {
-        "title": u"Compte de charge Organic",
-        "description": u"Compte CG pour la contribution à l'Organic",
-        "section": u"Module Contribution à l'Organic",
-    },
-    "compte_cg_debiteur_organic": {
-        "title": u"Compte de contrepartie Organic",
-        "description": u"Compte CG de débiteur pour la contribution à \
-l'Organic",
-        "section": u"Module Contribution à l'Organic",
-    },
     'compte_rg_interne': {
         "title": u"Compte CG RG Interne",
         "description": u"",
@@ -184,24 +176,6 @@ l'Organic",
 0 et 100). Elle peut être individualisée sur les pages entreprises.",
         "section": u"Module Contribution",
     },
-    'taux_assurance': {
-        "title": u"Taux d'assurance",
-        "description": u"(nombre entre 0 et 100) Requis pour le module \
-d'écritures Assurance",
-        "section": u"Module Assurance",
-    },
-    'taux_cgscop': {
-        "title": u"Taux CGSCOP",
-        "description": u"(nombre entre 0 et 100) Requis pour le module \
-d'écritures CGSCOP",
-        "section": u"Module CGSCOP",
-    },
-    'taux_contribution_organic': {
-        "title": u"Taux de Contribution à l'Organic",
-        "description": "(nombre entre 0 et 100) Requis pour le module \
-d'écritures Contribution Organic",
-        "section": u"Module Contribution à l'Organic",
-    },
     'taux_rg_interne': {
         "title": u"Taux RG Interne",
         "description": u"(nombre entre 0 et 100) Requis pour les écritures \
@@ -214,23 +188,47 @@ RG Interne",
 d'écriture RG Client",
         "section": u"Module RG Client",
     },
+    'bookentry_facturation_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Module Facturation",
+    },
+    'bookentry_payment_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Encaissements",
+    },
+    'bookentry_rg_client_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Module RG Client",
+    },
+    'bookentry_rg_interne_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Module RG Interne",
+    },
+    'bookentry_contribution_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Module Contribution",
+    },
+    'bookentry_expense_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+    },
+    'bookentry_expense_payment_main_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Paiement des notes de dépenses",
+    },
+    'bookentry_expense_payment_waiver_label_template': {
+        'title': u"Gabarit pour les libellés d'écriture",
+        'description': help_text_libelle_comptable,
+        "section": u"Abandon de créance",
+    },
     'sage_contribution': {
         "title": u"Module contribution",
-        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
-        "section": u"Activation des modules d'export Sage",
-    },
-    'sage_assurance': {
-        "title": u"Module assurance",
-        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
-        "section": u"Activation des modules d'export Sage",
-    },
-    'sage_cgscop': {
-        "title": u"Module CGSCOP",
-        "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
-        "section": u"Activation des modules d'export Sage",
-    },
-    'sage_organic': {
-        "title": u"Module Contribution organic",
         "widget": deform.widget.CheckboxWidget(true_val='1', false_val='0'),
         "section": u"Activation des modules d'export Sage",
     },
@@ -266,16 +264,20 @@ entrepreneurs",
         "description": u"Code journal utilisé pour l'export des abandons \
 de créance, si ce champ n'est pas rempli, le code journal d'export des notes \
 de dépense est utilisé. Les autres exports de décaissement utilisent \
-le code journal de la banque concernée."
+    le code journal de la banque concernée.",
+        "section": u"Abandon de créance",
+
     },
     "compte_cg_waiver_ndf": {
         "title": u"Compte abandons de créance",
         "description": u"Compte de comptabilité générale spécifique aux \
 abandons de créance dans les notes de dépense",
+        "section": u"Abandon de créance",
     },
     "code_tva_ndf": {
         "title": u"Code TVA utilisé pour les décaissements",
-        "description": u"Le code TVA utilisé pour l'export des décaissements"
+        "description": u"Le code TVA utilisé pour l'export des décaissements",
+        "section": u"Paiement des notes de dépenses",
     },
     "treasury_measure_ui": {
         "title": u"Indicateur à mettre en évidence",
@@ -324,6 +326,11 @@ séparateurs… etc), ainsi que des variables et séquences. Ex: {YYYY}-{SEQYEAR
         "title": u"Date à laquelle on initialise la séquence annuelle",
         "section": u"Séquence annuelle (SEQMONTH)",
         "widget": deform.widget.DateInputWidget(),
+    },
+    "accounting_label_maxlength": {
+        "title": u"Taille maximum des libellés d'écriture (troncature)",
+        "description": u"Autonomie tronquera les libellés d'écriture comptable exportés à cette longueur. Dépend de votre logiciel de comptabilité. Ex :  30 pour quadra, 35 pour sage, 25 pour ciel. Mettre à zéro pour désactiver la troncature.",
+        "type": colander.Int(),
     },
 }
 
@@ -399,7 +406,7 @@ def build_config_appstruct(request, keys):
             ui_conf = CONFIGURATION_KEYS[key]
 
             if "section" in ui_conf:
-                appstruct.setdefault(ui_conf['section'], {})[key] = value
+                appstruct.setdefault(safe_unicode(ui_conf['section']), {})[key] = value
             else:
                 appstruct[key] = value
     return appstruct

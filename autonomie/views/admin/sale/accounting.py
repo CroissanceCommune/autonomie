@@ -33,7 +33,7 @@ BaseSaleAccountingCustomView = get_model_admin_view(
 
 
 class SaleAccountingIndex(BaseAdminIndexView):
-    title = u"Configuration comptables du module Vente"
+    title = u"Configuration comptable du module Vente"
     description = u"Configurer la génération des écritures de vente"
     route_name = ACCOUNTING_URL
 
@@ -63,31 +63,45 @@ modules prédéfinis"
         "taux_rg_interne",
         'compte_rg_externe',
         "taux_rg_client",
+        'bookentry_facturation_label_template',
+        'bookentry_contribution_label_template',
+        'bookentry_rg_interne_label_template',
+        'bookentry_rg_client_label_template',
         'sage_facturation_not_used',
         "sage_contribution",
         'sage_rginterne',
         'sage_rgclient',
     )
     schema = get_config_schema(keys)
-    info_message = u"""
-Configurez les exports comptables de votre CAE.
-Configurez les champs indispensables aux exports :\
+    info_message = u"""\
+<p>Configurez les exports comptables de votre CAE.</p>
+<h4>Champs indispensables aux exports</h4>\
     <ul>\
         <li>Code journal</li>\
         <li>Numéro analytique de la CAE</li>\
         <li>Compte banque de l'entrepreneur</li>\
-    </ul>\
-Configurez les champs relatifs aux frais et remises:\
+    </ul>
+<h4>Champs relatifs aux frais et remises</h4>\
     <ul>\
-<li>Compte de frais annexes</li>\
-<li>Compte RRR (Rabais, Remises et Ristournes)</li>\
-    </ul>\
-    Configurez et activez des modules de retenues optionnels :\
+      <li>Compte de frais annexes</li>\
+      <li>Compte RRR (Rabais, Remises et Ristournes)</li>\
+    </ul>
+<h4>Configurez et activez des modules de retenues optionnels</h4>\
         <ul>\
     <li>Module de contribution à la CAE</li>\
     <li>Module RG Externe (spécifique bâtiment)</li>\
     <li>Module RG Interne (spécifique bâtiment)</li>\
     </ul>
+<h4>Variables utilisables dans les gabarits de libellés</h4>\
+    <p>Il est possible de personaliser les libellés comptables à l'aide d'un gabarit. Plusieurs variables sont disponibles :</p>\
+    <ul>\
+      <li><code>{invoice.customer.label}</code> : nom du client facturé</li>\
+      <li><code>{invoice.customer.code}</code> : code du client facturé</li>\
+      <li><code>{company.code_compta}</code> : code analytique de l'enseigne établissant la facture</li>\
+      <li><code>{invoice.official_number}</code> : numéro de facture (pour tronquer à 9 caractères : <code>{invoice.official_number:.9}</code>)</li>\
+      <li><code>{company.name}</code> : nom de l'enseigne établissant la facture</li>\
+    </ul>\
+    <p>NB : Penser à séparer les variables, par exemple par des espaces, sous peine de libellés peu lisibles.</p>\
     """
 
 

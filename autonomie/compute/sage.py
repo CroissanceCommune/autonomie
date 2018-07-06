@@ -5,6 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 #       * Pettier Gabriel;
 #       * TJEBBES Gaston <g.t@majerti.fr>
+#       * Delalande Jocelyn
 #
 # This file is part of Autonomie : Progiciel de gestion de CAE.
 #
@@ -223,10 +224,20 @@ class BaseSageBookEntryFactory(object):
     # Tells us if we need to add analytic entries to our output (double_lines)
     static_columns = ()
     _part_key = None
+    _label_template_key = None
 
     def __init__(self, context, request):
         self.config = request.config
         self.company = None
+        if self._label_template_key:
+            self.label_template = self.config.get(
+                self._label_template_key,
+                None,
+            )
+            assert self.label_template is not None, \
+                '"{}" Config key should be set'.format(
+                    self._label_template_key
+                )
 
     def get_base_entry(self):
         """
@@ -318,9 +329,27 @@ class BaseInvoiceBookEntryFactory(BaseSageBookEntryFactory):
     def libelle(self):
         """
             Return the label for our book entry
-            Should be overriden by subclasses
         """
-        return ""
+        try:
+            return self.label_template.format(
+                company=self.company,
+                invoice=self.invoice,
+                # backward compatibility
+                client=self.invoice.customer,
+                # backward compatibility:
+                num_facture=self.invoice.official_number,
+                # backward compatibility:
+                numero_facture=self.invoice.official_number,
+                # backward compatibility:
+                entreprise=self.company,
+            )
+        except AttributeError:
+            raise NotImplementedError(
+                'The class {} should define a {} attribute.'.format(
+                    self.__class__,
+                    self.label_template,
+                )
+            )
 
 
 class SageFacturation(BaseInvoiceBookEntryFactory):
@@ -357,15 +386,8 @@ class SageFacturation(BaseInvoiceBookEntryFactory):
             * Libellés
             * Montant
     """
-    @property
-    def libelle(self):
-        """
-            Return the value of the libelle column
-        """
-        return u"{0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
+
+    _label_template_key = 'bookentry_facturation_label_template'
 
     @property
     def num_analytique(self):
@@ -458,13 +480,7 @@ class SageContribution(BaseInvoiceBookEntryFactory):
         The contribution module
     """
     _part_key = "contribution_cae"
-
-    @property
-    def libelle(self):
-        return u"{0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
+    _label_template_key = "bookentry_contribution_label_template"
 
     def get_amount(self, product):
         """
@@ -560,267 +576,12 @@ class SageContribution(BaseInvoiceBookEntryFactory):
             yield self.credit_cae(product)
 
 
-class SageAssurance(BaseInvoiceBookEntryFactory):
-    """
-        The assurance module
-    """
-    _part_key = 'taux_assurance'
-
-    @property
-    def libelle(self):
-        return u"{0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
-
-    def get_amount(self):
-        """
-            Return the amount for the current module
-            (the same for credit or debit)
-        """
-        return self._amount_method(self.invoice.total_ht(), self.get_part())
-
-    @double_lines
-    def debit_entreprise(self):
-        """
-            Debit entreprise book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_assurance'],
-            num_analytique=self.company.code_compta,
-            debit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def credit_entreprise(self):
-        """
-            Credit entreprise book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_banque'],
-            num_analytique=self.company.code_compta,
-            credit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def debit_cae(self):
-        """
-            Debit cae book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_banque'],
-            num_analytique=self.config['numero_analytique'],
-            debit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def credit_cae(self):
-        """
-            Credit CAE book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_assurance'],
-            num_analytique=self.config['numero_analytique'],
-            credit=self.get_amount(),
-        )
-        return entry
-
-    def yield_entries(self):
-        """
-            yield book entries
-        """
-        yield self.debit_entreprise()
-        yield self.credit_entreprise()
-        yield self.debit_cae()
-        yield self.credit_cae()
-
-
-class SageCGScop(BaseInvoiceBookEntryFactory):
-    """
-        The cgscop module
-    """
-    _part_key = "taux_cgscop"
-
-    @property
-    def libelle(self):
-        return u"{0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
-
-    def get_amount(self):
-        """
-            Return the amount for the current module
-            (the same for credit or debit)
-        """
-        return self._amount_method(self.invoice.total_ht(), self.get_part())
-
-    @double_lines
-    def debit_entreprise(self):
-        """
-            Debit entreprise book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cgscop'],
-            num_analytique=self.company.code_compta,
-            debit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def credit_entreprise(self):
-        """
-            Credit entreprise book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_banque'],
-            num_analytique=self.company.code_compta,
-            credit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def debit_cae(self):
-        """
-            Debit cae book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_banque'],
-            num_analytique=self.config['numero_analytique'],
-            debit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def credit_cae(self):
-        """
-            Credit CAE book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_debiteur'],
-            num_analytique=self.config['numero_analytique'],
-            credit=self.get_amount(),
-        )
-        return entry
-
-    def yield_entries(self):
-        """
-            yield book entries
-        """
-        yield self.debit_entreprise()
-        yield self.credit_entreprise()
-        yield self.debit_cae()
-        yield self.credit_cae()
-
-
-class SageContributionOrganic(BaseInvoiceBookEntryFactory):
-    """
-        The Organic contribution is due for CAE with a large CA
-    """
-    _part_key = "taux_contribution_organic"
-
-    @property
-    def libelle(self):
-        return u"Contribution Organic {0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
-
-    def get_contribution(self):
-        return self.get_part()
-
-    def get_amount(self):
-        """
-            Return the amount for the current module
-            (the same for credit or debit)
-        """
-        return self._amount_method(self.invoice.total_ht(), self.get_part())
-
-    @double_lines
-    def debit_entreprise(self):
-        """
-            Debit entreprise book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_organic'],
-            num_analytique=self.company.code_compta,
-            debit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def credit_entreprise(self):
-        """
-            Credit entreprise book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_banque'],
-            num_analytique=self.company.code_compta,
-            credit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def debit_cae(self):
-        """
-            Debit cae book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_banque'],
-            num_analytique=self.config['numero_analytique'],
-            debit=self.get_amount(),
-        )
-        return entry
-
-    @double_lines
-    def credit_cae(self):
-        """
-            Credit CAE book entry
-        """
-        entry = self.get_base_entry()
-        entry.update(
-            compte_cg=self.config['compte_cg_debiteur_organic'],
-            num_analytique=self.config['numero_analytique'],
-            credit=self.get_amount(),
-        )
-        return entry
-
-    def yield_entries(self):
-        """
-            yield book entries
-        """
-        yield self.debit_entreprise()
-        yield self.credit_entreprise()
-        yield self.debit_cae()
-        yield self.credit_cae()
-
-
 class SageRGInterne(BaseInvoiceBookEntryFactory):
     """
         The RGINterne module
     """
     _part_key = "taux_rg_interne"
-
-    @property
-    def libelle(self):
-        return u"RG COOP {0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
+    _label_template_key = "bookentry_rg_interne_label_template"
 
     def get_amount(self, product):
         """
@@ -898,13 +659,7 @@ class SageRGClient(BaseInvoiceBookEntryFactory):
         The Rg client module
     """
     _part_key = "taux_rg_client"
-
-    @property
-    def libelle(self):
-        return u"RG {0} {1}".format(
-            self.invoice.customer.label,
-            self.company.name,
-        )
+    _label_template_key = "bookentry_rg_client_label_template"
 
     def get_amount(self, product):
         """
@@ -979,15 +734,6 @@ class CustomBookEntryFactory(BaseInvoiceBookEntryFactory):
             (the same for credit or debit)
         """
         return self._amount_method(self.invoice.total_ht(), self.get_part())
-
-    @property
-    def libelle(self):
-        return self.label_template.format(
-            client=self.invoice.customer,
-            entreprise=self.company,
-            num_facture=self.invoice.official_number,
-            numero_facture=self.invoice.official_number,
-        )
 
     @double_lines
     def debit_entreprise(self):
@@ -1132,6 +878,8 @@ class SageExpenseBase(BaseSageBookEntryFactory):
         'credit',
     )
 
+    _label_template_key = "bookentry_expense_label_template"
+
     def set_expense(self, expense):
         self.expense = expense
         self.company = expense.company
@@ -1155,10 +903,11 @@ class SageExpenseBase(BaseSageBookEntryFactory):
 
     @property
     def libelle(self):
-        return u"{0}/frais {1} {2}".format(
-            format_account(self.expense.user, reverse=False),
-            self.expense.month,
-            self.expense.year
+        return self.label_template.format(
+            beneficiaire=format_account(self.expense.user, reverse=False),
+            beneficiaire_LASTNAME=self.expense.user.lastname.upper(),
+            expense=self.expense,
+            expense_date=datetime.date(self.expense.year, self.expense.month, 1)
         )
 
 
@@ -1362,6 +1111,8 @@ class SagePaymentBase(BaseSageBookEntryFactory):
         'credit',
     )
 
+    _label_template_key = "bookentry_payment_label_template"
+
     def set_payment(self, payment):
         self.invoice = payment.invoice
         self.payment = payment
@@ -1372,7 +1123,7 @@ class SagePaymentBase(BaseSageBookEntryFactory):
     def reference(self):
         return u"{0}/{1}".format(
             self.invoice.official_number,
-            self.payment.remittance_amount,
+            self.payment.bank_remittance_id,
         )
 
     @property
@@ -1389,9 +1140,10 @@ class SagePaymentBase(BaseSageBookEntryFactory):
 
     @property
     def libelle(self):
-        return u"{0} / Rgt {1}".format(
-            self.company.name,
-            self.invoice.customer.label,
+        return self.label_template.format(
+            company=self.company,
+            invoice=self.invoice,
+            payment=self.payment,
         )
 
     @property
@@ -1553,6 +1305,17 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
         'credit',
     )
 
+    _label_template_key = "bookentry_expense_payment_main_label_template"
+
+    @property
+    def libelle(self):
+        return self.label_template.format(
+            beneficiaire=format_account(self.expense.user, reverse=False),
+            beneficiaire_LASTNAME=self.expense.user.lastname.upper(),
+            expense=self.expense,
+            expense_date=datetime.date(self.expense.year, self.expense.month, 1)
+        )
+
     def set_payment(self, payment):
         self.expense = payment.expense
         self.payment = payment
@@ -1568,11 +1331,6 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
         self.code_journal = self.payment.bank.code_journal
         self.date = format_sage_date(self.payment.date)
         self.mode = self.payment.mode
-        self.libelle = u"{nom} / REMB FRAIS {mois}/{annee}".format(
-            nom=self.user.lastname.upper(),
-            mois=month_name(self.expense.month),
-            annee=self.expense.year,
-        )
         self.num_analytique = self.company.code_compta
         self.code_taxe = self.config['code_tva_ndf']
 
@@ -1604,6 +1362,9 @@ class SageExpensePaymentWaiver(SageExpensePaymentMain):
     """
     Module d'export pour les paiements par abandon de créance
     """
+
+    _label_template_key = 'bookentry_expense_payment_waiver_label_template'
+
     def set_static_cols(self):
         SageExpensePaymentMain.set_static_cols(self)
         self.code_journal = self.config.get('code_journal_waiver_ndf')
@@ -1611,11 +1372,6 @@ class SageExpensePaymentWaiver(SageExpensePaymentMain):
             self.code_journal = self.config['code_journal_ndf']
         self.mode = u"Abandon de créance"
         self.code_taxe = ""
-        self.libelle = u"Abandon de créance {name} {month}/{year}".format(
-            name=self.user.lastname.upper(),
-            month=month_name(self.expense.month),
-            year=self.expense.year,
-        )
 
     @double_lines
     def credit_bank(self, val):

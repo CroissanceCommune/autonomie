@@ -25,11 +25,16 @@
 """
 Sage exports tools
 """
+import logging
+
 from autonomie.utils.strings import format_amount
 from sqla_inspect.csv import CsvExporter
 
 
 SAGE_COMPATIBLE_ENCODING = 'cp1252'
+
+
+log = logging.getLogger(__name__)
 
 
 class SageCsvWriter(CsvExporter):
@@ -44,8 +49,23 @@ class SageCsvWriter(CsvExporter):
     headers = ()
     amount_precision = 2
 
-    def __init__(self, *args):
+    def __init__(self, context, request):
         CsvExporter.__init__(self, encoding=SAGE_COMPATIBLE_ENCODING)
+        if request:
+            self.libelle_length = request.config.get_value(
+                'accounting_label_maxlength',
+                default=None,
+                type_=int,
+            )
+        else:
+            self.libelle_length = None
+
+        if self.libelle_length is None:
+            log.warning(
+                u'No accounting label length defined, fallback : '
+                u'truncating disabled'
+            )
+            self.libelle_length = 0
 
     def format_debit(self, debit):
         """
@@ -66,6 +86,16 @@ class SageCsvWriter(CsvExporter):
             format the credit entry to get a clean float
         """
         return self.format_debit(credit)
+
+    def format_libelle(self, libelle):
+        """
+            truncate the libelle in order to suit the accounting software specs
+        """
+        if self.libelle_length > 0:
+            return libelle[:self.libelle_length]
+        else:
+            return libelle
+
 
 
 class SageInvoiceCsvWriter(SageCsvWriter):

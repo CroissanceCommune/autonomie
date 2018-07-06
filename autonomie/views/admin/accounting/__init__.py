@@ -18,13 +18,14 @@ ACCOUNTING_URL = os.path.join(BASE_URL, 'accounting')
 
 class AccountingIndexView(BaseAdminIndexView):
     route_name = ACCOUNTING_URL
-    title = u"Module Fichiers Comptables"
-    description = u"Configurer les tableaux de bord de Trésorerie et \
-Comptes de résultat"
+    title = u"Module Comptabilité"
+    description = u"Configurer les tableaux de bord (trésorerie, \
+comptes de résultat) et les paramètres liés au logiciel de comptabilité."
 
 
 def includeme(config):
     config.add_route(ACCOUNTING_URL, ACCOUNTING_URL)
     config.add_admin_view(AccountingIndexView, parent=AdminIndexView)
+    config.include('.accounting_software')
     config.include('.treasury_measures')
     config.include('.income_statement_measures')

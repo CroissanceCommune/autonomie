@@ -57,3 +57,26 @@ Exemple : migration depuis WinScop
 - Initialiser pour chaque activité sa séquence mensuelle (en base)
 - S'assurer que chaque activité a bien son code analytique renseigné (depuis
   l'annuaire des entreprises)
+
+
+Migration des libellés d'écriture comptables
+--------------------------------------------
+
+Avec une logique similaire à celle des numéros de facture, il est possible
+de paramétrer, pour chaque type d'écriture comptable, le libellé qui apparaitra
+dans les exports CSV opérés depuis autonomie, et ainsi de conserver le même
+format qu'avec l'ERP précédent. Ces paramètres se trouvent dans les différents
+modules de configuration :
+
+- *Module Notes de dépenses → Export comptable des notes de dépense*
+- *Module Notes de dépenses → Export comptable des décaissements*
+- *Module Ventes → Configuration comptable du module Vente → Configuration des informations générales et des modules prédéfinis*
+- *Module Ventes → Configuration comptable du module Vente → Modules de contribution personnalisés*
+
+ .. note:: Penser également à configurer la troncature des libellés en fonction
+           du logiciel de compta utilisé dans *Module Comptabilité → Logiciel
+           de comptabilité*
+
+ .. note:: Pour migrer depuis WinScop, penser à utiliser une troncature du
+           numéro de facture à 9 caractères (cf exemple sur les formulaire de
+           configuration), les n° de facture WinScop étant assez longs.

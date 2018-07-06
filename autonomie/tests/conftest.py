@@ -182,10 +182,6 @@ def config(request, pyramid_request, settings, registry):
     config.include('autonomie_celery')
     from autonomie.utils.renderer import customize_renderers
     customize_renderers(config)
-
-    # FIXME: there might be a better place to do that…
-    from autonomie.models.config import Config
-    Config.set('invoice_number_template', '{SEQYEAR}')
     return config
 
 
@@ -245,6 +241,8 @@ def content(connection, settings):
     adjust_for_engine(connection.engine)
     metadata.create_all(connection.engine)
 
+    from autonomie.models.config import Config
+    Config.set('invoice_number_template', '{SEQYEAR}')
     commit()
 
 

@@ -37,14 +37,14 @@ class NumberingConfigView(BaseConfigView):
     info_message = u"""
 <p>Il est possible de personaliser le gabarit du numéro de facture.</p>\
 <p>Plusieurs variables et séquences chronologiques sont à disposition.</p>\
-<h3>Variables :</h3>\
+<h4>Variables :</h4>\
 <ul>\
 <li><code>{YYYY}</code> : année, sur 4 digits</li>\
 <li><code>{YY}</code> : année, sur 2 digits</li>\
 <li><code>{MM}</code> : mois, sur 2 digits</li>\
-<li><code>{ANA}</code> : code analytique de l'activité</li>\
+<li><code>{ANA}</code> : code analytique de l'enseigne</li>\
 </ul>\
-<h3>Numéros de séquence :</h3>\
+<h4>Numéros de séquence :</h4>\
 <ul>\
 <li><code>{SEQGLOBAL}</code> : numéro de séquence global (aucun ràz)</li>\
 <li><code>{SEQYEAR}</code> : numéro de séquence annuel (ràz chaque année)</li>\

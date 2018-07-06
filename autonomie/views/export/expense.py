@@ -34,7 +34,7 @@ bien été fournis : <br />
     Configuration des notes de dépense
 </a><br/>
 <a onclick="openPopup('{1}');" href='#'>
-    Configuration comptables du module vente
+    Configuration comptable du module vente
 </a>"""
 
 

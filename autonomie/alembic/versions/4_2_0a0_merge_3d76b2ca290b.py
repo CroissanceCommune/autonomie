@@ -1,22 +1,21 @@
-# -*- coding: utf-8 -*-
-"""${message}
+"""empty message
 
-Revision ID: ${up_revision}
-Revises: ${down_revision}
-Create Date: ${create_date}
+Revision ID: 3d76b2ca290b
+Revises: ('14d7548ec2ce', '18b00b9e3b46')
+Create Date: 2018-06-25 15:42:40.769490
 
 """
 
 # revision identifiers, used by Alembic.
-revision = ${repr(up_revision)}
-down_revision = ${repr(down_revision)}
+revision = '3d76b2ca290b'
+down_revision = ('14d7548ec2ce', '18b00b9e3b46')
 
 from alembic import op
 import sqlalchemy as sa
-${imports if imports else ""}
+
 
 def update_database_structure():
-    ${upgrades if upgrades else "pass"}
+    pass
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
@@ -30,4 +29,4 @@ def upgrade():
 
 
 def downgrade():
-    ${downgrades if downgrades else "pass"}
+    pass

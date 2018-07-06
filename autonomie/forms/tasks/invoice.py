@@ -546,10 +546,11 @@ class MultiplePaymentSchema(colander.MappingSchema):
         colander schema for payment recording
     """
     come_from = forms.come_from_node()
-    remittance_amount = colander.SchemaNode(
+    bank_remittance_id = colander.SchemaNode(
         colander.String(),
         title=u"Identifiant de la remise en banque",
-        default=deferred_remittance_amount_default,
+        default=deferred_remittance_amount_default,  # FIXME: C'est quoi cette ligne ?
+
     )
     payment_amount = colander.SchemaNode(
         AmountType(5),
@@ -683,7 +684,7 @@ def _customize_payment_schema(schema):
         missing=colander.required
     )
     customize("amount", typ=AmountType(5), missing=colander.required)
-    customize("remittance_amount", missing=colander.required)
+    customize("bank_remittance_id", missing=colander.required)
     customize("date", missing=colander.required)
     customize("task_id", missing=colander.required)
     customize(

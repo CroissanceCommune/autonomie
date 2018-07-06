@@ -36,7 +36,6 @@ from autonomie.compute.sage import (
     SageInvoice,
     SageFacturation,
     SageContribution,
-    SageAssurance,
     SageRGInterne,
     SageRGClient,
     CustomBookEntryFactory,
@@ -71,6 +70,8 @@ class DummyInvoice(Dummy, InvoiceCompute):
 @pytest.fixture
 def app_config():
     return {
+        'sage_contribution':'1',
+        'sage_rginterne':'1',
         'code_journal': 'CODE_JOURNAL',
         'compte_cg_contribution': 'CG_CONTRIB',
         'compte_rrr': 'CG_RRR',
@@ -91,6 +92,22 @@ def app_config():
         "compte_cg_waiver_ndf": "COMPTE_CG_WAIVER",
         'receipts_active_tva_module': True,
         'receipts_code_journal': "JOURNAL_RECEIPTS",
+        'bookentry_facturation_label_template':
+            u'{invoice.customer.label} {company.name}',
+        'bookentry_contribution_label_template':
+            u"{invoice.customer.label} {company.name}",
+        'bookentry_rg_interne_label_template':
+            u"RG COOP {invoice.customer.label} {company.name}",
+        'bookentry_rg_client_label_template':
+            u"RG {invoice.customer.label} {company.name}",
+        'bookentry_expense_label_template':
+            u"{beneficiaire}/frais {expense_date:%-m %Y}",
+        'bookentry_payment_label_template':
+            u"{company.name} / Rgt {invoice.customer.label}",
+        'bookentry_expense_payment_main_label_template':
+            u"{beneficiaire_LASTNAME} / REMB FRAIS {expense_date:%B/%Y}",
+        'bookentry_expense_payment_waiver_label_template':
+            u"Abandon de créance {beneficiaire_LASTNAME} {expense_date:%B/%Y}",
     }
 
 
@@ -350,7 +367,7 @@ def bank():
 @pytest.fixture
 def payment(invoice, def_tva, bank):
     p = Dummy(
-        remittance_amount=10000,
+        bank_remittance_id=10000,
         amount=10000000,
         mode=u"chèque",
         date=datetime.date.today(),
@@ -1019,12 +1036,8 @@ class TestSageRGClient(BaseBookEntryTest):
 
 
 class TestSageExport():
-    def test_modules(self, config_request):
-        config = {
-            'sage_contribution':'1',
-            'sage_rginterne':'1',
-        }
-        config_request.config = config
+    def test_modules(self, config_request, app_config):
+        config_request.config = app_config
         exporter = InvoiceExport(None, config_request)
         assert len(exporter.modules) == 3
         sage_factories = [SageFacturation, SageContribution, SageRGInterne]

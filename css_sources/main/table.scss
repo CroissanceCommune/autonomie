@@ -47,6 +47,16 @@ table.opa tfoot td{
   background-color:#FCF8E3;
 }
 
+.list-legend{
+  font-size: 12px;
+  .btn.btn-circle{
+    width: 18px;
+    height: 18px;
+    border: 1px solid #dedede;
+    margin-bottom: 5px;
+  }
+}
+
 .status-table{
   td.status-td{
     width: 16px;

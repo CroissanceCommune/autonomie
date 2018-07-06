@@ -265,6 +265,10 @@ header .navbar .nav > li > a{
 .nav-tabs { min-width: 600px; }
 .nav-tabs-responsive { overflow: auto; }
 
+.shadow-sm {
+    box-shadow: .25rem rgba(0,0,0,.075)!important;
+}
+
 /* Task lists css */
 
 .overlay{

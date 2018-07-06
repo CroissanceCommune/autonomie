@@ -109,41 +109,7 @@
     ${records.item_count} Résultat(s)
     </div>
     <div class='panel-body'>
-        <div class='row'>
-            <div class='col-md-4 col-md-offset-8 col-xs-12'>
-                <table class='table table-bordered status-table'>
-                    <tr>
-                        <td class='paid-status-resulted'><br /></td>
-                        <td>Factures payées</td>
-                    </tr>
-                    <tr>
-                        <td class='paid-status-paid'><br /></td>
-                        <td>Factures payées partiellement</td>
-                    </tr>
-                    <tr>
-                        <td class=''><br /></td>
-                        <td>Factures non payées depuis moins de 45 jours</td>
-                    </tr>
-                    <tr>
-                        <td class='tolate-True'><br /></td>
-                        <td>Factures non payées depuis plus de 45 jours</td>
-                    </tr>
-                    <tr>
-                        <td class='status-draft'><br /></td>
-                        <td>Factures en brouillon</td>
-                    </tr>
-                    <tr>
-                        <td class='status-wait'><br /></td>
-                        <td>Factures en attente de validation</td>
-                    </tr>
-                    <tr>
-                        <td class='status-invalid'><br /></td>
-                        <td>Factures invalides</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        ${request.layout_manager.render_panel('task_list', records, is_admin_view=is_admin, is_project_view=True, is_business_view=True)}
+        ${request.layout_manager.render_panel('task_list', records, datatype="invoice" is_admin_view=is_admin, is_project_view=True, is_business_view=True)}
         ${pager(records)}
     </div>
 </div>

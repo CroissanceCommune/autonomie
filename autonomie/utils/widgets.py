@@ -403,3 +403,13 @@ class Link(object):
             if not icon.startswith('fa ') and not icon.startswith('glyphicon'):
                 icon = "fa fa-%s" % icon
         return icon
+
+
+class Column(object):
+    """
+    Wraps a column definition
+    """
+    def __init__(self, label, sort_key=None):
+        self.sortable = sort_key is not None
+        self.sort_key = sort_key
+        self.label = label

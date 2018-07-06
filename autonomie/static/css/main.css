@@ -194,6 +194,14 @@ table.opa thead th {
 table.opa tfoot td {
   background-color: #FCF8E3; }
 
+.list-legend {
+  font-size: 12px; }
+  .list-legend .btn.btn-circle {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #dedede;
+    margin-bottom: 5px; }
+
 .status-table td.status-td {
   width: 16px; }
 
@@ -649,6 +657,9 @@ header .navbar .nav > li > a {
 
 .nav-tabs-responsive {
   overflow: auto; }
+
+.shadow-sm {
+  box-shadow: 0.25rem rgba(0, 0, 0, 0.075) !important; }
 
 /* Task lists css */
 .overlay {

@@ -24,25 +24,56 @@
 <%namespace file="/base/utils.mako" import="format_text"/>
 <%namespace file="/base/utils.mako" import="format_customer"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
-
-
+<div class='row'>
+    <div class='col-md-4 col-md-offset-8 col-xs-12'>
+        <div class='status-table list-legend'>
+        % if is_invoice_list:
+            <div>
+                <span class='btn btn-circle paid-status-resulted'><br /></span>
+                <span>Factures payées</span>
+            </div>
+            <div>
+                <span class='btn btn-circle paid-status-paid'><br /></span>
+                <span>Factures payées partiellement</span>
+            </div>
+            <div>
+                <span class='btn btn-circle shadow-sm'><br /></span>
+                <span>Factures non payées depuis moins de 45 jours</span>
+            </div>
+            <div>
+                <span class='btn btn-circle tolate-True'><br /></span>
+                <span>Factures non payées depuis plus de 45 jours</span>
+            </div>
+            % if not is_admin_view:
+            <div>
+                <span class='btn btn-circle status-draft'><br /></span>
+                <span>Factures en brouillon</span>
+            </div>
+            <div>
+                <span class='btn btn-circle status-wait'><br /></span>
+                <span>Factures en attente de validation</span>
+            </div>
+            <div>
+                <span class='btn btn-circle status-invalid'><br /></span>
+                <span>Factures invalides</span>
+            </div>
+            % endif
+        % endif
+        </div>
+    </div>
+</div>
+<% num_columns = len(columns) + 1 %>
 <table class="table table-condensed table-bordered status-table">
     <thead>
-        <% num_columns = 11 %>
-        <th><span class="glyphicon glyphicon-comment"></span></th>
-        <th>${sortable(u"Identifiant", "official_number")}</th>
-    % if is_admin_view:
-        <% num_columns += 1 %>
-        <th>${sortable(u"Entrepreneur", 'company')}</th>
-    % endif
-        <th>${sortable(u"Émise le", 'date')}</th>
-        <th>${sortable(u"Nom de la facture", 'internal_number')}</th>
-        <th>${sortable(u"Client", 'customer')}</th>
-        <th>${sortable(u"Montant HT", "ht")}</th>
-        <th>${sortable(u"TVA", "ht")}</th>
-        <th>${sortable(u"TTC", "ttc")}</th>
-        <th>${sortable(u"Paiement", "payment")}</th>
-        <th>Fichiers attachés</th>
+    % for column in columns:
+        <th>
+            % if column.sortable:
+            ${sortable(column.label, column.sort_key)}
+            % else:
+            ${column.label | n}
+            % endif
+        </th>
+    % endfor
         <th>Actions</th>
     </thead>
     <tbody>
@@ -146,7 +177,7 @@
                 % endif
             </td>
             <td class='text-right'>
-                ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(request, document))}
+                ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(document))}
             </td>
         </tr>
         % endfor

@@ -32,7 +32,7 @@
             <div class='col-md-3 col-xs-12 bordered'>
                 <div class='row'>
                     <div class='col-md-3 text-center'>
-                        <i class='fa fa-folder-open fa-4x'></i>
+                        <i class='fa fa-folder-open fa-3x'></i>
                     </div>
                     <div class='col-md-9'>
                         <div>Projet : ${layout.current_project_object.name}</div>

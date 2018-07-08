@@ -33,9 +33,9 @@
                 <div class='row'>
                     <div class='col-md-3 text-center'>
                     % if layout.current_business_object.closed:
-                        <i class='fa fa-folder fa-4x'></i>
+                        <i class='fa fa-folder fa-3x'></i>
                     % else:
-                        <i class='fa fa-folder-open fa-4x'></i>
+                        <i class='fa fa-folder-open fa-3x'></i>
                     % endif
                     </div>
                     <div class='col-md-9'>

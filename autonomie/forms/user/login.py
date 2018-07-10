@@ -197,6 +197,7 @@ def _deferred_group_widget(node, kw):
     return deform.widget.Select2Widget(
         values=groups,
         multiple=True,
+        placeholder=u'Aucun droit spécifique',
     )
 
 

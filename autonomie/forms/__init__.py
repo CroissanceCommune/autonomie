@@ -873,3 +873,53 @@ def reorder_schema(schema, child_order):
     """
     schema.children = [schema[node_name] for node_name in child_order]
     return schema
+
+
+def mk_choice_node_factory(base_node_factory, resource_name, **parent_kw):
+    """
+    Specialize a node factory using Select2Widget
+    to an item chooser among a list of items.
+
+    Typical use:  field in add/edit form (think ForeignKey)
+
+    :param function base_node_factory: a base node factory
+    :param resource_name str: the name of the resource to be selected
+      (used in widget strings and as default title)
+    """
+    def choice_node(**kw):
+        # if a keyword is defined in both parent call and choice_node call,
+        # priorize choice_node call (more specific).
+        for k, v in parent_kw.items():
+            kw.setdefault(k, v)
+
+        return base_node_factory(
+            widget_options={
+                'title': kw.get('title', resource_name),
+                'placeholder': u"- Sélectionner {} -".format(resource_name),
+                'default_option': ('', ''),  # required by placeholder
+            },
+            **kw
+        )
+    return choice_node
+
+
+def mk_filter_node_factory(base_node_factory, empty_filter_msg, **parent_kw):
+    """
+    Specialize a a node factory using Select2Widget
+    to a list filtering node factory.
+
+    :param function base_node_factory: a base node factory
+    :param empty_filter_msg str: the name of the list item for "no filter"
+      (used in widget strings)
+    """
+    def filter_node(**kw):
+        for k, v in parent_kw.items():
+            kw.setdefault(k, v)
+        return base_node_factory(
+            missing=colander.drop,
+            widget_options={
+                'default_option': ('', empty_filter_msg),
+            },
+            **kw
+        )
+    return filter_node

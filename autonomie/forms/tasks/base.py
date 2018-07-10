@@ -72,7 +72,7 @@ from autonomie.models.task import (
 )
 from autonomie.models.customer import Customer
 from autonomie.forms import today_node
-from autonomie.forms.customer import get_customer_select_node
+from autonomie.forms.customer import customer_choice_node_factory
 
 
 logger = logging.getLogger(__name__)
@@ -407,8 +407,7 @@ class NewTaskSchema(colander.Schema):
         default=deferred_default_name,
         missing="",
     )
-    customer_id = get_customer_select_node(
-        title=u"Choix du client",
+    customer_id = customer_choice_node_factory(
         default=deferred_default_customer,
         query_func=_get_customers_options,
     )
@@ -543,8 +542,7 @@ class DuplicateSchema(NewTaskSchema):
     """
     schema used to duplicate a task
     """
-    customer_id = get_customer_select_node(
-        title=u"Choix du client",
+    customer_id = customer_choice_node_factory(
         query_func=_get_customers_options,
         default=deferred_default_customer,
     )

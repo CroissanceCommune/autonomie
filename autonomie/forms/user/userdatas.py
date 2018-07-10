@@ -38,7 +38,7 @@ from autonomie.models.company import CompanyActivity
 from autonomie.forms.widgets import CleanMappingWidget
 from autonomie.forms.lists import BaseListsSchema
 from autonomie.forms.user import (
-    user_node,
+    conseiller_filter_node_factory,
     get_deferred_user_choice,
 )
 from autonomie.forms import (
@@ -358,17 +358,7 @@ def get_list_schema():
     )
     )
 
-    schema.insert(
-        0,
-        user_node(
-            roles=['manager', 'admin'],
-            missing=-1,
-            name='situation_follower_id',
-            widget_options={
-                'default_option': (-1, ''),
-                'placeholder': u"Sélectionner un conseiller"},
-        )
-    )
+    schema.insert(0, conseiller_filter_node_factory())
     return schema
 
 

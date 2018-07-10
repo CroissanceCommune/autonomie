@@ -6,6 +6,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import load_only
 
 from autonomie_base.models.base import DBSESSION
+from autonomie import forms
 from autonomie.utils.strings import (
     format_account,
 )
@@ -92,3 +93,38 @@ def user_node(roles=None, **kw):
         widget=get_deferred_user_choice(roles, widget_options),
         **kw
     )
+
+
+contractor_filter_node_factory = forms.mk_filter_node_factory(
+    user_node,
+    empty_filter_msg=u'Tous les travailleurs',
+    title=u'Travailleur',
+)
+
+conseiller_choice_node = forms.mk_choice_node_factory(
+    user_node,
+    resource_name=u"un conseiller",
+    roles=['manager', 'admin'],
+)
+
+conseiller_filter_node_factory = forms.mk_filter_node_factory(
+    user_node,
+    empty_filter_msg='Tous les conseillers',
+    roles=['manager', 'admin'],
+)
+
+participant_choice_node = forms.mk_choice_node_factory(
+    user_node,
+    resource_name=u"un participant",
+)
+
+participant_filter_node_factory = forms.mk_filter_node_factory(
+    user_node,
+    empty_filter_msg='Tous les participants',
+)
+
+contractor_choice_node_factory = forms.mk_choice_node_factory(
+    user_node,
+    resource_name="un entrepreneur",
+    roles=['contractor'],
+)

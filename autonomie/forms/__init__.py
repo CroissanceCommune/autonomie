@@ -864,7 +864,7 @@ def customize_field(schema, field_name, widget=None, validator=None, **kw):
 
 def reorder_schema(schema, child_order):
     """
-    reorder a schema folowwing the child_order
+    reorder a schema folowing the child_order
 
     :param obj schema: The colander schema :class:`colander.Schema`
     :param tuple child_order: The children order

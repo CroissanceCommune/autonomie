@@ -747,7 +747,11 @@ def get_estimation_default_acl(self):
     # Common estimation access acl
     if self.status != 'valid':
         acl.append(
-            (Allow, "group:estimation_validation", ('valid.estimation',))
+            (
+                Allow,
+                "group:estimation_validation",
+                ('valid.estimation', 'edit.estimation')
+            )
         )
         acl.append((Deny, "group:estimation_validation", ('wait.estimation',)))
 
@@ -794,7 +798,13 @@ def get_invoice_default_acl(self):
         acl.append((Allow, "group:manager", admin_perms))
 
     if self.status != 'valid':
-        acl.append((Allow, "group:invoice_validation", ('valid.invoice',)))
+        acl.append(
+            (
+                Allow,
+                "group:invoice_validation",
+                ('valid.invoice', 'edit.invoice')
+            )
+        )
         acl.append((Deny, "group:invoice_validation", ('wait.invoice',)))
 
     if self.status == 'valid' and self.paid_status != 'resulted':

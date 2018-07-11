@@ -28,6 +28,17 @@ code : une partie des ``User`` (+ ``UserData``), groupe ``contractor``
 
 Entrepreneur, qu'il soit en CAPE, ou en CESA. Inclut également les CDD.
 
+Accompagnateur
+--------------
+
+code: une partie des ``User`` (+ ``UserData``) : groupe ``manager``
+
+Personne de l'équipe d'appui faisant le suivi d'un entrepreneur.
+
+.. note:: Parfois appelée, selon la CAE *« chargée d'accompagnement »*, *«
+          conseiller »* ou *« chargé d'accompagnement »*.
+
+
 Enseigne
 --------
 
@@ -38,12 +49,3 @@ Nom commercial regroupant un ou plusieurs entrepreneurs.
 .. warning:: À éviter (source de confusion) : *« entreprise »* ou *« activité »*.
 
 
-Accompagnateur
---------------
-
-code: une partie des ``User`` (+ ``UserData``) : groupe ``manager``
-
-Personne de l'équipe d'appui faisant le suivi d'un entrepreneur.
-
-.. note:: Parfois appelée, selon la CAE *« chargée d'accompagnement »*, *«
-          conseiller »* ou *« chargé d'accompagnement »*.

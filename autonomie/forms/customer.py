@@ -41,31 +41,22 @@ from autonomie.forms.lists import BaseListsSchema
 CIVILITE_OPTIONS = ORIG_CIVILITE_OPTIONS + (('mr&mme', u"Monsieur et Madame"),)
 
 
-def _build_customer_select_value(customer=None):
+def _build_customer_select_value(customer):
     """
         return the tuple for building customer select
     """
-    if customer:
-        label = customer.get_label()
-        if customer.code:
-            label += u" ({0})".format(customer.code)
-        return (customer.id, label)
-    else:
-        return ("", u"Sélectionnez")
+    label = customer.get_label()
+    if customer.code:
+        label += u" ({0})".format(customer.code)
+    return (customer.id, label)
 
 
-def build_customer_values(customers, default=True):
+def build_customer_values(customers):
     """
         Build human understandable customer labels
         allowing efficient discrimination
     """
-    options = []
-    if default:
-        options.append(_build_customer_select_value())
-    options.extend(
-        [_build_customer_select_value(customer) for customer in customers]
-    )
-    return options
+    return [_build_customer_select_value(customer) for customer in customers]
 
 
 def get_customers_from_request(request):
@@ -104,7 +95,7 @@ def get_current_customer_id_from_request(request):
 
 def get_deferred_customer_select(
     query_func=get_customers_from_request,
-    with_default=True,
+    default_option=None,
     **widget_options
 ):
     """
@@ -122,9 +113,12 @@ def get_deferred_customer_select(
         """
         request = kw['request']
         customers = query_func(request)
+        values = list(build_customer_values(customers))
+        if default_option is not None:
+            values.insert(0, default_option)
+
         return deform.widget.Select2Widget(
-            values=build_customer_values(customers, default=with_default),
-            placeholder=u'Sélectionner un client',
+            values=values,
             **widget_options
         )
     return deferred_customer_select
@@ -175,7 +169,7 @@ def get_deferred_customer_select_validator(
         return colander.Function(customer_oneof)
 
 
-def get_customer_select_node(**kw):
+def customer_node_factory(**kw):
     """
     Shortcut used to build a colander schema node
 
@@ -197,10 +191,6 @@ def get_customer_select_node(**kw):
 
             deform.widget.Select2Widget options as a dict
 
-        with_default
-
-            Should the select provide a default void value ?
-
         query_func
 
             A callable expecting the request parameter and returning the current
@@ -218,7 +208,6 @@ def get_customer_select_node(**kw):
 
     """
     title = kw.pop('title', u'')
-    with_default = kw.pop('with_default', True)
     default = kw.pop('default', deferred_default_customer)
     query_func = kw.pop('query_func', get_customers_from_request)
     widget_options = kw.pop('widget_options', {})
@@ -228,12 +217,18 @@ def get_customer_select_node(**kw):
         default=default,
         widget=get_deferred_customer_select(
             query_func=query_func,
-            with_default=with_default,
             **widget_options
         ),
         validator=get_deferred_customer_select_validator(query_func),
         **kw
     )
+
+
+customer_choice_node_factory = forms.mk_choice_node_factory(
+    customer_node_factory,
+    title=u"Choix du client",
+    resource_name="un client",
+)
 
 
 def get_list_schema():

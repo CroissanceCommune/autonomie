@@ -29,7 +29,7 @@ import colander
 import logging
 
 from deform import widget
-from autonomie.forms.user import user_node
+from autonomie.forms.user import contractor_filter_node_factory
 
 log = logging.getLogger(__name__)
 
@@ -59,11 +59,7 @@ class HolidaysSchema(colander.MappingSchema):
 class SearchHolidaysSchema(colander.MappingSchema):
     start_date = colander.SchemaNode(colander.Date(), title=u"Date de début")
     end_date = colander.SchemaNode(colander.Date(), title=u"Date de fin")
-    user_id = user_node(
-        title=u"Entrepreneur",
-        missing=colander.drop,
-        widget_options={'default_option': ('', u"Tous")}
-    )
+    user_id = contractor_filter_node_factory()
 
 
 searchSchema = SearchHolidaysSchema(

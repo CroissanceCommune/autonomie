@@ -43,7 +43,7 @@ from autonomie.models.project.types import (
 )
 from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
-from autonomie.forms.customer import get_customer_select_node
+from autonomie.forms.customer import customer_choice_node_factory
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +260,10 @@ def _add_customer_node_to_schema(schema):
     :param obj schema: a colander.SchemaNode instance
     """
     # Add a custom node to be able to associate existing customers
-    customer_id_node = get_customer_select_node(name="un client")
+    customer_id_node = customer_choice_node_factory(
+        name='customer_id',
+        title='un client',
+    )
     customer_id_node.objectify = customer_objectify
     customer_id_node.dictify = customer_dictify
 

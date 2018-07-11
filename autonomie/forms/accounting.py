@@ -75,7 +75,7 @@ def deferred_analytical_account_widget(node, kw):
     ).order_by(AccountingOperation.analytical_account).all()
     datas = zip(*datas)[0]
     values = zip(datas, datas)
-    values.insert(0, ('', u'Filtrer par code analytique'))
+    values.insert(0, ('', u'Tous les codes analytiques'))
     return deform.widget.Select2Widget(values=values)
 
 
@@ -89,7 +89,7 @@ def deferred_general_account_widget(node, kw):
     ).order_by(AccountingOperation.general_account).all()
     datas = zip(*datas)[0]
     values = zip(datas, datas)
-    values.insert(0, ('', u'Filtrer par compte général'))
+    values.insert(0, ('', u'Tous les comptes généraux'))
     return deform.widget.Select2Widget(values=values)
 
 
@@ -103,7 +103,7 @@ def deferred_company_id_widget(node, kw):
     ).all()
     datas = zip(*datas)[0]
     values = DBSESSION().query(Company.id, Company.name).all()
-    values.insert(0, ('', u"Filtrer par entreprise"))
+    values.insert(0, ('', u"Toutes les  entreprises"))
     return deform.widget.Select2Widget(values=values)
 
 

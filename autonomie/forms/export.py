@@ -30,7 +30,7 @@ import deform
 
 from autonomie.models.expense.sheet import get_expense_years
 from autonomie.models.task.invoice import get_invoice_years
-from autonomie.forms.user import user_node
+from autonomie.forms.user import contractor_filter_node_factory
 
 from autonomie import forms
 
@@ -149,10 +149,7 @@ class ExpenseSchema(colander.MappingSchema):
     """
     Schema for sage expense export
     """
-    user_id = user_node(
-        title=u"Nom de l'entrepreneur",
-        widget_options={'default_option': (u'0', u'Tous les entrepreneurs',)}
-    )
+    user_id = contractor_filter_node_factory()
     year = forms.year_select_node(title=u"Année", query_func=get_expense_years)
     month = forms.month_select_node(title=u"Mois")
     exported = ExportedField()

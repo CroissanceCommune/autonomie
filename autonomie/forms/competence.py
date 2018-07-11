@@ -21,7 +21,7 @@
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 import colander
 
-from autonomie.forms.user import user_node
+from autonomie.forms.user import contractor_choice_node_factory
 from autonomie.models.competence import CompetenceDeadline
 
 
@@ -42,7 +42,7 @@ def deferred_deadline_id_validator(node, kw):
 
 
 class _CompetenceGridQuerySchema(colander.Schema):
-    contractor_id = user_node(roles=['contractor'])
+    contractor_id = contractor_choice_node_factory()
     deadline = colander.SchemaNode(
         colander.Integer(),
         validator=deferred_deadline_id_validator,

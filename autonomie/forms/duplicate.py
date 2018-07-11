@@ -30,7 +30,7 @@ from autonomie.models.customer import Customer
 from autonomie import forms
 from autonomie.forms.customer import (
     get_customers_from_request,
-    get_customer_select_node,
+    customer_choice_node_factory,
 )
 
 
@@ -121,11 +121,7 @@ class DuplicateSchema(colander.MappingSchema):
     """
     colander schema for duplication recording
     """
-    customer = get_customer_select_node(
-        title=u"Client",
-        default=deferred_default_customer,
-        with_default=False,
-    )
+    customer = customer_choice_node_factory()
     project = colander.SchemaNode(
         colander.Integer(),
         title=u"Projet",

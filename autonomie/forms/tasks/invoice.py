@@ -55,8 +55,8 @@ from autonomie.models.task.invoice import (
 from autonomie.utils.strings import format_amount
 from autonomie import forms
 from autonomie.forms.company import (
-    customer_node,
-    company_node,
+    customer_filter_node_factory,
+    company_filter_node_factory,
 )
 from autonomie.forms.custom_types import (
     AmountType,
@@ -278,16 +278,15 @@ def get_list_schema(is_global=False, excludes=()):
     )
 
     if 'customer' not in excludes:
-        schema.insert(0, customer_node(is_global))
+        schema.insert(0, customer_filter_node_factory(
+            is_admin=is_global,
+            name='customer_id',
+        ))
 
     if 'company_id' not in excludes:
         schema.insert(
             0,
-            company_node(
-                name='company_id',
-                missing=colander.drop,
-                widget_options={'default': ('', u'Toutes les entreprises')},
-            )
+            company_filter_node_factory(name='company_id')
         )
 
     schema.insert(

@@ -46,7 +46,7 @@ from autonomie.models.expense.types import (
     ExpenseType,
     ExpenseKmType,
 )
-from autonomie.forms.user import user_node
+from autonomie.forms.user import contractor_filter_node_factory
 from .custom_types import AmountType
 from autonomie import forms
 from autonomie.forms.payments import (
@@ -326,16 +326,6 @@ def get_list_schema():
         widget_options={'default_val': (-1, '')},
     ))
 
-    schema.insert(
-        0,
-        user_node(
-            title=u"Utilisateur",
-            missing=colander.drop,
-            name=u'owner_id',
-            widget_options={
-                'default_option': ('', u'Tous les entrepreneurs'),
-                'placeholder': u"Sélectionner un entrepreneur"},
-        )
-    )
+    schema.insert(0, contractor_filter_node_factory(name=u'owner_id'))
 
     return schema

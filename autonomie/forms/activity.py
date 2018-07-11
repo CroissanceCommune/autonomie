@@ -37,8 +37,13 @@ from autonomie.models.activity import (
     ATTENDANCE_STATUS,
     ATTENDANCE_STATUS_SEARCH,
 )
-from autonomie.forms.user import user_node
-from autonomie.forms.company import company_node
+from autonomie.forms.user import (
+    conseiller_choice_node,
+    conseiller_filter_node_factory,
+    participant_choice_node,
+    participant_filter_node_factory,
+)
+from autonomie.forms.company import company_choice_node
 from autonomie.models.task.invoice import get_invoice_years
 
 from autonomie import forms
@@ -116,24 +121,21 @@ class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
     """
-    participant_id = user_node(title=u"un participant", )
+    participant_id = participant_choice_node()
 
 
 class ConseillerSequence(colander.SequenceSchema):
     """
     Schema for the list of conseiller
     """
-    conseiller_id = user_node(
-        title=u"un conseiller",
-        roles=['manager', 'admin'],
-    )
+    conseiller_id = conseiller_choice_node()
 
 
 class CompanySequence(colander.SequenceSchema):
     """
     schema for the list of attached companies
     """
-    company_id = company_node(title=u"une entreprise")
+    company_id = company_choice_node()
 
 
 class CreateActivitySchema(colander.MappingSchema):
@@ -317,24 +319,8 @@ def get_list_schema(is_admin=False):
         missing=colander.drop))
 
     if is_admin:
-        schema.insert(0, user_node(
-            missing=colander.drop,
-            name='participant_id',
-            widget_options={
-                'default_option': ("", u"- Sélectionner un participant -"),
-            }
-            )
-        )
-
-        schema.insert(0, user_node(
-            roles=['manager', 'admin'],
-            missing=colander.drop,
-            name='conseiller_id',
-            widget_options={
-                'default_option': ("", u"- Sélectionner un conseiller -"),
-            }
-            )
-        )
+        schema.insert(0, participant_filter_node_factory(name='participant_id'))
+        schema.insert(0, conseiller_filter_node_factory(name='conseiller_id'))
 
     year = forms.year_select_node(
         name='year',

@@ -219,7 +219,7 @@ def get_deferred_company_choices(widget_options):
     """
     Build a deferred for company selection widget
     """
-    default_entry = widget_options.pop('default', None)
+    default_option = widget_options.pop('default_option', None)
 
     @colander.deferred
     def deferred_company_choices(node, kw):
@@ -227,11 +227,10 @@ def get_deferred_company_choices(widget_options):
         return a deferred company selection widget
         """
         values = DBSESSION().query(Company.id, Company.name).all()
-        if default_entry is not None:
-            values.insert(0, default_entry)
+        if default_option:
+            values.insert(0, default_option)
         return deform.widget.Select2Widget(
             values=values,
-            placeholder=u"Sélectionner une entreprise",
             **widget_options
             )
     return deferred_company_choices
@@ -249,38 +248,18 @@ def company_node(**kw):
     )
 
 
+company_choice_node = forms.mk_choice_node_factory(
+    company_node,
+    resource_name=u'une entreprise'
+)
+
+company_filter_node_factory = forms.mk_filter_node_factory(
+    company_node,
+    empty_filter_msg=u'Toutes les entreprises',
+)
+
+
 # Customer node related tools
-@colander.deferred
-def deferred_fullcustomer_list_widget(node, kw):
-    values = [('', u"Tous les clients")]
-    for comp in Company.query().options(load_only("id", "name")):
-        customers = Customer.label_query().filter_by(company_id=comp.id)
-        values.append(
-            deform.widget.OptGroup(
-                comp.name,
-                *build_customer_values(customers, default=False)
-            )
-        )
-    return deform.widget.Select2Widget(
-        values=values,
-        placeholder=u"Sélectionner un client"
-    )
-
-
-@colander.deferred
-def deferred_customer_list_widget(node, kw):
-    values = [('', u'Tous les clients'), ]
-    company = kw['request'].context
-    for cust in company.customers:
-        values.append(
-            (cust.id, u"%s (%s)" % (cust.name, cust.code))
-        )
-    return deform.widget.Select2Widget(
-        values=values,
-        placeholder=u'Sélectionner un client',
-    )
-
-
 @colander.deferred
 def deferred_company_customer_validator(node, kw):
     """
@@ -291,7 +270,7 @@ def deferred_company_customer_validator(node, kw):
     return colander.OneOf(values)
 
 
-def customer_node(is_admin=False):
+def customer_node(is_admin=False, widget_options=None, **kwargs):
     """
     return a customer selection node
 
@@ -299,20 +278,58 @@ def customer_node(is_admin=False):
 
             is the associated view restricted to company's invoices
     """
+    widget_options = widget_options or {}
+    default_option = widget_options.pop("default_option", None)
+
+    if default_option:
+        values = [default_option]
+    else:
+        values = []
+
+    @colander.deferred
+    def deferred_customer_widget(node, kw):
+        if is_admin:
+            # All customers, grouped by Company
+            for comp in Company.query().options(load_only("id", "name")):
+                customers = Customer.label_query().filter_by(
+                    company_id=comp.id,
+                )
+                values.append(
+                    deform.widget.OptGroup(
+                        comp.name,
+                        *build_customer_values(customers)
+                    )
+                )
+        else:
+            # Company customers only
+            company = kw['request'].context
+            for cust in company.customers:
+                values.append(
+                    (cust.id, u"%s (%s)" % (cust.name, cust.code))
+                )
+
+        return deform.widget.Select2Widget(
+            values=values,
+            **(widget_options or {})
+        )
+
     if is_admin:
-        deferred_customer_widget = deferred_fullcustomer_list_widget
         deferred_customer_validator = None
     else:
-        deferred_customer_widget = deferred_customer_list_widget
         deferred_customer_validator = deferred_company_customer_validator
 
     return colander.SchemaNode(
         colander.Integer(),
-        name='customer_id',
         widget=deferred_customer_widget,
         validator=deferred_customer_validator,
-        missing=colander.drop,
+        **kwargs
     )
+
+
+customer_filter_node_factory = forms.mk_filter_node_factory(
+    customer_node,
+    empty_filter_msg=u'Tous les clients',
+)
 
 
 def get_list_schema(company=False):

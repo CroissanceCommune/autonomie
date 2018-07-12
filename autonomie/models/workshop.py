@@ -28,6 +28,7 @@ from sqlalchemy import (
     String,
     DateTime,
     Boolean,
+    Text,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -76,6 +77,7 @@ class Workshop(Event):
         primaryjoin="Workshop.info3_id==WorkshopAction.id",
     )
     leaders = Column(JsonEncodedList)
+    description = Column(Text, default='')
 
     @property
     def title(self):
@@ -88,6 +90,7 @@ class Workshop(Event):
     def duplicate(self):
         new_item = Workshop(
             name=self.name,
+            description=self.description,
             _acl=self._acl,
             datetime=self.datetime,
             status=self.status,

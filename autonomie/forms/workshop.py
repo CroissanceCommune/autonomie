@@ -145,6 +145,12 @@ class Workshop(colander.MappingSchema):
         title=u"Animateur(s)/Animatrice(s)",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
+    description = colander.SchemaNode(
+        colander.String(),
+        description=u"Facultatif",
+        widget=deform.widget.TextAreaWidget(),
+        missing=u"",
+    )
     info1_id = colander.SchemaNode(
         colander.Integer(),
         widget=deferred_info1,

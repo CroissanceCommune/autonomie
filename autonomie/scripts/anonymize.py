@@ -64,6 +64,7 @@ class Anonymizer(object):
             workshop.leaders = [
                 u"{} {}".format(self.faker.last_name(), self.faker.first_name())
             ]
+            workshop.description = self.faker.text()
             self.session.merge(workshop)
 
         type_labels = (

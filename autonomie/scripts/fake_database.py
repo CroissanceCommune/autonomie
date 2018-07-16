@@ -48,7 +48,6 @@ from autonomie.models.activity import (
 )
 
 from autonomie.scripts.utils import command
-from autonomie.scripts.anonymize import anonymize_database
 
 
 def add_user(login, password, group, firstname="", lastname="", email=""):
@@ -288,6 +287,8 @@ def autonomie_fake_cmd():
         elif arguments['populate_conf']:
             func = set_configuration
         elif arguments['anonymize']:
+            # Évite la dépendance à faker jusqu'à l'appel effectif
+            from autonomie.scripts.anonymize import anonymize_database
             func = anonymize_database
         else:
             print autonomie_fake_cmd.__doc__

@@ -29,6 +29,7 @@ from autonomie.forms.user import (
     participant_filter_node_factory,
     participant_choice_node,
     trainer_choice_node_factory,
+    trainer_filter_node_factory,
 )
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie import forms
@@ -179,7 +180,7 @@ class Workshop(colander.MappingSchema):
         missing=colander.null,
         default=colander.null,
     )
-    participants = activity.ParticipantsSequence(
+    participants = ParticipantsSequence(
         title=u"Participants",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
@@ -206,6 +207,11 @@ def get_list_schema(company=False):
             description=u"Date de l'atelier",
             widget_options={'css_class': 'input-medium search-query'},
             ))
+
+    schema.insert(
+        0,
+        trainer_filter_node_factory(name='trainer_id'),
+    )
 
     if not company:
         schema.insert(

@@ -138,6 +138,12 @@ trainer_choice_node_factory = forms.mk_choice_node_factory(
     roles=['trainer'],
 )
 
+trainer_filter_node_factory = forms.mk_filter_node_factory(
+    user_node,
+    empty_filter_msg=u"Tou(te)s les Animateur/Animatrice(s)",
+    roles=['trainer'],
+)
+
 
 @colander.deferred
 def deferred_user_groups_datas_select(node, kw):

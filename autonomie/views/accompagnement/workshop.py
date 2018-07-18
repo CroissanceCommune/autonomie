@@ -87,9 +87,10 @@ WORKSHOP_SUCCESS_MSG = u"L'atelier a bien été programmée : \
 SEARCH_FORM_GRID = (
     (('year', 3,), ('date', 3), ('participant_id', 3), ('info_1_id', 3)),
     (
-        ('notfilled', 3), ('search', 3), ('items_per_page', 3),
+        ('notfilled', 3), ('search', 3), ('trainer_id', 6),
         ('direction', 1), ('sort', 1), ('page', 1),
     ),
+    (('items_per_page', 3),)
 )
 USER_SEARCH_FORM_GRID = (
     (('year', 3,), ('date', 3), ('search', 3), ('items_per_page', 3),),
@@ -378,21 +379,21 @@ class WorkshopListTools(object):
             )
         return query
 
+    def filter_trainer(self, query, appstruct):
+        trainer_id = appstruct.get('trainer_id')
+        if trainer_id:
+            query = query.join(models.Workshop.trainers).filter(
+                user.User.id == trainer_id,
+            )
+        return query
+
     def filter_search(self, query, appstruct):
         search = appstruct['search']
         if search not in (None, colander.null, ''):
-            query_trainers = query.join(models.Workshop.trainers).filter(
-                or_(
-                    user.User.firstname.like(u'%{}%'.format(search)),
-                    user.User.lastname.like(u'%{}%'.format(search)),
-                )
-            )
-            query_workshops = query.filter(
+            query = query.filter(
                 models.Workshop.name.like(u'%{}%'.format(search))
             )
-            return query_workshops.union(query_trainers)
-        else:
-            return query
+        return query
 
     def filter_date(self, query, appstruct):
         date = appstruct.get('date')

@@ -381,11 +381,18 @@ class WorkshopListTools(object):
     def filter_search(self, query, appstruct):
         search = appstruct['search']
         if search not in (None, colander.null, ''):
-            query = query.filter(
-                or_(models.Workshop.name.like(u'%{0}%'.format(search)),
-                    models.Workshop.leaders.like(u'%{0}%'.format(search))
-                    ))
-        return query
+            query_trainers = query.join(models.Workshop.trainers).filter(
+                or_(
+                    user.User.firstname.like(u'%{}%'.format(search)),
+                    user.User.lastname.like(u'%{}%'.format(search)),
+                )
+            )
+            query_workshops = query.filter(
+                models.Workshop.name.like(u'%{}%'.format(search))
+            )
+            return query_workshops.union(query_trainers)
+        else:
+            return query
 
     def filter_date(self, query, appstruct):
         date = appstruct.get('date')
@@ -442,7 +449,7 @@ class WorkshopCsvWriter(CsvExporter):
         {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
         {'name': 'participant', 'label': "Participant"},
-        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'trainers', 'label': "Formateur(s)"},
         {'name': 'duration', 'label': "Durée"},
     )
 
@@ -452,7 +459,7 @@ class WorkshopXlsWriter(XlsExporter):
         {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
         {'name': 'participant', 'label': "Participant"},
-        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'trainers', 'label': "Formateur(s)"},
         {'name': 'duration', 'label': "Durée"},
     )
 
@@ -462,7 +469,7 @@ class WorkshopOdsWriter(OdsExporter):
         {'name': 'date', 'label': u'Date'},
         {'name': 'label', 'label': u"Intitulé"},
         {'name': 'participant', 'label': u"Participant"},
-        {'name': 'leaders', 'label': u"Formateur(s)"},
+        {'name': 'trainers', 'label': u"Formateur(s)"},
         {'name': 'duration', 'label': u"Durée"},
     )
 
@@ -493,7 +500,7 @@ def stream_workshop_entries_for_export(query):
                     "date": workshop.timeslots[0].start_time.date(),
                     "label": workshop.name,
                     "participant": format_account(participant),
-                    "leaders": '\n'.join(workshop.leaders),
+                    "trainers": '\n'.join(i.label for i in workshop.trainers),
                     "duration": duration,
                 }
 

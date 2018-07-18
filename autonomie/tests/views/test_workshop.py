@@ -44,10 +44,10 @@ def workshop_action(dbsession):
 
 
 @pytest.fixture
-def workshop_model(dbsession, workshop_action):
+def workshop_model(dbsession, workshop_action, user):
     appstruct = {
         'name': 'Workshop',
-        'leaders': ['user1', 'user2'],
+        'trainers': [user],
         'datetime': date.today(),
         'info1_id': workshop_action.id,
     }

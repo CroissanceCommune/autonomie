@@ -101,11 +101,9 @@ ${records.item_count} Résultat(s)
                     </td>
                     <td onclick="${onclick}" class="rowlink">
                         <ul>
-                            % if workshop.leaders:
-                                % for lead in workshop.leaders:
-                                    <li>${lead}</li>
-                                % endfor
-                            % endif
+                            % for trainer in workshop.trainers:
+                                <li>${trainer.label}</li>
+                            % endfor
                         </ul>
                     </td>
                     <td onclick="${onclick}" class="rowlink">

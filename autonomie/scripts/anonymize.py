@@ -61,9 +61,6 @@ class Anonymizer(object):
                 setattr(activity, fieldname, self.faker.text())
 
         for workshop in self.session.query(Workshop).options(load_only('id')):
-            workshop.leaders = [
-                u"{} {}".format(self.faker.last_name(), self.faker.first_name())
-            ]
             workshop.description = self.faker.text()
             self.session.merge(workshop)
 

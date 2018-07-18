@@ -39,7 +39,7 @@
             ${api.format_datetime(event.start_time)}
         </td>
         <td onclick="${onclick}" class="rowlink">
-            ${', '.join(workshop.leaders)}
+            ${', '.join(i.label for i in workshop.trainers)}
         </td>
         <td class="visible-lg rowlink" onclick="${onclick}">
             ${workshop.name} (${event.name})

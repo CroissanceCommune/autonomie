@@ -87,7 +87,6 @@ class Workshop(Event):
         "WorkshopAction",
         primaryjoin="Workshop.info3_id==WorkshopAction.id",
     )
-    leaders = Column(JsonEncodedList)
     trainers = relationship(
         "User",
         secondary=WORKSHOP_TRAINER,
@@ -107,7 +106,7 @@ class Workshop(Event):
         Return a title for this given workshop
         """
         return u"Atelier '{0}' animé par {1}".format(
-            self.name, ', '.join(self.leaders))
+            self.name, ', '.join(i.label for i in self.trainers))
 
     def duplicate(self):
         new_item = Workshop(
@@ -116,7 +115,6 @@ class Workshop(Event):
             _acl=self._acl,
             datetime=self.datetime,
             status=self.status,
-            leaders=self.leaders,
             info1=self.info1,
             info2=self.info2,
             info3=self.info3,

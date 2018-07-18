@@ -95,14 +95,6 @@ def deferred_info3(node, kw):
     return deform.widget.SelectWidget(values=options)
 
 
-class LeaderSequence(colander.SequenceSchema):
-    name = colander.SchemaNode(
-        colander.String(),
-        title=u"Animateur/Animatrice",
-        validator=colander.Length(max=100),
-        )
-
-
 def range_validator(form, values):
     """
     Ensure start_time is before end_time
@@ -147,10 +139,6 @@ class Workshop(colander.MappingSchema):
         colander.String(),
         validator=colander.Length(max=255),
         title=u"Titre de l'atelier",
-        )
-    leaders = LeaderSequence(
-        title=u"Animateur(s)/Animatrice(s)",
-        widget=deform_widget.SequenceWidget(min_len=1),
         )
     trainers = TrainerSequence(
         title=u"Animateur(s)/Animatrice(s)",

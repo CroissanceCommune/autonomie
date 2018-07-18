@@ -28,31 +28,42 @@
 <div class='page-header-block'>
         % if request.has_permission('admin_treasury'):
         <div class='pull-right btn-group'>
-        <%
-            ## We build the link with the current search arguments
-            args = request.GET
-            url = request.route_path('workshops.xls', _query=args)
-            %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste">
-                <i class='fa fa-file-excel-o'></i>&nbsp;Excel
-            </a>
-            <% url = request.route_path('workshops.ods', _query=args) %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste">
-                <i class='fa fa-file'></i>&nbsp;ODS
-            </a>
-            <% url = request.route_path('workshops.csv', _query=args) %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste">
-                <i class='fa fa-file'></i>&nbsp;CSV
-            </a>
+            <button type="button" class="btn btn-default dropdown-toggle"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                <i class='fa fa-file'></i>&nbsp;
+                Exporter émargements <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <%
+                ## We build the link with the current search arguments
+                args = request.GET
+                url = request.route_path('workshops.xls', _query=args)
+                %>
+                <li>
+                    <a
+                        href='${url}'
+                        title="Exporter les éléments de la liste">
+                        <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+                    </a>
+                </li>
+                <% url = request.route_path('workshops.ods', _query=args) %>
+                <li>
+                    <a
+                        href='${url}'
+                        title="Exporter les éléments de la liste">
+                        <i class='fa fa-file'></i>&nbsp;ODS
+                    </a>
+                </li>
+                <% url = request.route_path('workshops.csv', _query=args) %>
+                <li>
+                    <a
+                        href='${url}'
+                        title="Exporter les éléments de la liste">
+                        <i class='fa fa-file'></i>&nbsp;CSV
+                    </a>
+                </li>
+            </ul>
         </div>
         % endif
     % if request.has_permission('add_workshop'):

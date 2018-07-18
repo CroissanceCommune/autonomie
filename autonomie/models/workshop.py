@@ -28,6 +28,7 @@ from sqlalchemy import (
     String,
     DateTime,
     Boolean,
+    Table,
     Text,
 )
 from sqlalchemy.orm import (
@@ -44,6 +45,16 @@ from autonomie.models.activity import Event
 
 
 log = logging.getLogger(__name__)
+
+
+WORKSHOP_TRAINER = Table(
+    'workshop_trainer',
+    DBBASE.metadata,
+    Column("workshop_id", Integer, ForeignKey("workshop.id"), nullable=False),
+    Column("user_id", Integer, ForeignKey("accounts.id"), nullable=False),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
 class Workshop(Event):
@@ -77,6 +88,17 @@ class Workshop(Event):
         primaryjoin="Workshop.info3_id==WorkshopAction.id",
     )
     leaders = Column(JsonEncodedList)
+    trainers = relationship(
+        "User",
+        secondary=WORKSHOP_TRAINER,
+        info={
+            'colanderalchemy': {
+                'title': u"Animateur(s)/ice(s)",
+            },
+            'export': {'exclude': True},
+        }
+    )
+
     description = Column(Text, default='')
 
     @property

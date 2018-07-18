@@ -130,6 +130,13 @@ contractor_choice_node_factory = forms.mk_choice_node_factory(
     roles=['contractor'],
 )
 
+trainer_choice_node_factory = forms.mk_choice_node_factory(
+    user_node,
+    resource_name="un(e) animateur/Animatrice",
+    title="Animateur/Animatrice",
+    roles=['trainer'],
+)
+
 
 @colander.deferred
 def deferred_user_groups_datas_select(node, kw):

@@ -168,6 +168,10 @@ class WorkshopAddView(BaseFormView):
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
 
+        trainers_ids = set(appstruct.pop('trainers', []))
+        appstruct['trainers'] = [
+            user.User.get(id_) for id_ in trainers_ids
+        ]
         workshop_obj = models.Workshop(**appstruct)
 
         workshop_obj = merge_session_with_post(
@@ -225,6 +229,9 @@ class WorkshopEditView(BaseFormView):
         participants = self.context.participants
         appstruct['participants'] = [p.id for p in participants]
 
+        trainers = self.context.trainers
+        appstruct['trainers'] = [p.id for p in trainers]
+
         timeslots = self.context.timeslots
         appstruct['timeslots'] = [t.appstruct() for t in timeslots]
 
@@ -275,6 +282,11 @@ qui n'appartient pas au contexte courant !!!!")
 
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
+
+        trainers_ids = set(appstruct.pop('trainers', []))
+        appstruct['trainers'] = [
+            user.User.get(id_) for id_ in trainers_ids
+        ]
 
         merge_session_with_post(
             self.context, appstruct, remove_empty_values=False,

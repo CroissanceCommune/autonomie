@@ -25,7 +25,10 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
-from autonomie.forms.user import participant_filter_node_factory
+from autonomie.forms.user import (
+    participant_filter_node_factory,
+    trainer_choice_node_factory,
+)
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie import forms
 from autonomie.forms import lists, activity
@@ -131,6 +134,10 @@ class TimeslotsSequence(colander.SequenceSchema):
         )
 
 
+class TrainerSequence(colander.SequenceSchema):
+    trainer_id = trainer_choice_node_factory()
+
+
 class Workshop(colander.MappingSchema):
     """
     Schema for workshop creation/edition
@@ -145,6 +152,10 @@ class Workshop(colander.MappingSchema):
         title=u"Animateur(s)/Animatrice(s)",
         widget=deform_widget.SequenceWidget(min_len=1),
         )
+    trainers = TrainerSequence(
+        title=u"Animateur(s)/Animatrice(s)",
+        widget=deform_widget.SequenceWidget(min_len=1),
+    )
     description = colander.SchemaNode(
         colander.String(),
         description=u"Facultatif",

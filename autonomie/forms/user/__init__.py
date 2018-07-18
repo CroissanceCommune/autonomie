@@ -82,7 +82,7 @@ def get_deferred_user_choice(roles=None, widget_options=None):
     return user_select
 
 
-def user_node(roles=None, **kw):
+def user_node(roles=None, multiple=False, **kw):
     """
     Return a schema node for user selection
     roles: allow to restrict the selection to the given roles
@@ -90,7 +90,7 @@ def user_node(roles=None, **kw):
     """
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
-        colander.Integer(),
+        colander.Set() if multiple else colander.Integer(),
         widget=get_deferred_user_choice(roles, widget_options),
         **kw
     )

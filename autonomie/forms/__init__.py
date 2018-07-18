@@ -887,7 +887,12 @@ def reorder_schema(schema, child_order):
     return schema
 
 
-def mk_choice_node_factory(base_node_factory, resource_name, **parent_kw):
+def mk_choice_node_factory(
+        base_node_factory,
+        resource_name,
+        resource_name_plural=None,
+        **parent_kw
+):
     """
     Specialize a node factory using Select2Widget
     to an item chooser among a list of items.
@@ -897,17 +902,27 @@ def mk_choice_node_factory(base_node_factory, resource_name, **parent_kw):
     :param function base_node_factory: a base node factory
     :param resource_name str: the name of the resource to be selected
       (used in widget strings and as default title)
+    :param resource_name_plural str: the pluralized form of the resource name
     """
+    if resource_name_plural is None:
+        resource_name_plural = resource_name + 's'
+
     def choice_node(**kw):
         # if a keyword is defined in both parent call and choice_node call,
         # priorize choice_node call (more specific).
         for k, v in parent_kw.items():
             kw.setdefault(k, v)
 
+        if kw.get('multiple', False):
+            _resource_name = resource_name_plural
+        else:
+            _resource_name = resource_name
+
         widget_options = {
-            'title': kw.get('title', resource_name),
-            'placeholder': u"- Sélectionner {} -".format(resource_name),
+            'title': kw.get('title', _resource_name),
+            'placeholder': u"- Sélectionner {} -".format(_resource_name),
             'default_option': ('', ''),  # required by placeholder
+            'multiple': kw.get('multiple', False),
         }
         widget_options.update(kw.pop('widget_options', {}))
         return base_node_factory(

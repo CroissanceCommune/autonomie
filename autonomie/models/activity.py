@@ -167,6 +167,29 @@ class Event(Node):
     datetime = Column(DateTime, default=datetime.datetime.now)
     status = Column(String(15), default='planned')
 
+    owner_id = Column(
+        ForeignKey('accounts.id'),
+        info={
+            "export": {'exclude': True},
+        },
+    )
+
+    owner = relationship(
+        "User",
+        primaryjoin="Event.owner_id==User.id",
+        backref=backref(
+            "owned_events",
+            info={
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
+            },
+        ),
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
+        },
+    )
+
     participants = association_proxy('attendances', 'user')
 
     # Waiting for a way to declare order_by clause in an association_proxy

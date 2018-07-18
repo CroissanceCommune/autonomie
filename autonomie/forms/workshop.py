@@ -25,6 +25,8 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
+from autonomie.models.user.user import User
+from autonomie.models.workshop import Workshop
 from autonomie.forms.user import (
     participant_filter_node_factory,
     participant_choice_node,
@@ -108,6 +110,31 @@ def range_validator(form, values):
         raise exc
 
 
+@colander.deferred
+def deferred_owner_validator(node, kw):
+    request = kw['request']
+    msg = u"Gestionnaire illégal"
+
+    if not isinstance(request.context, Workshop):
+        context = request.context
+    else:
+        context = Workshop()  # creation form
+
+    def validate_self_owner(node, value):
+        if value != request.user.id:
+            raise colander.Invalid(node, msg)
+
+    def validate_trainer(node, value):
+        user = User.get(value)
+        if 'trainer' not in user.login.groups:
+            raise colander.invalid(node, msg)
+
+    if request.has_permission('edit.owner', context):
+        return validate_trainer
+    else:
+        return validate_self_owner
+
+
 class ParticipantsSequence(colander.SequenceSchema):
     """
     Schema for the list of participants
@@ -146,6 +173,10 @@ class Workshop(colander.MappingSchema):
         title=u"Titre de l'atelier",
         )
 
+    owner = trainer_choice_node_factory(
+        title="Gestionnaire de l'atelier",
+        validator=deferred_owner_validator,
+    )
     trainers = trainer_choice_node_factory(
         multiple=True,
         title=u"Animateur(s)/Animatrice(s)",

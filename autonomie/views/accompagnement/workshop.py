@@ -142,7 +142,13 @@ class WorkshopAddView(BaseFormView):
         auto_need(form)
         timepicker_fr.need()
         default_timeslots = get_default_timeslots()
-        form.set_appstruct({'timeslots': default_timeslots})
+        form.set_appstruct({
+            'timeslots': default_timeslots,
+            'owner': self.request.user.id,
+        })
+
+        if not self.request.has_permission('edit.owner'):
+            form['owner'].widget.readonly = True
 
     def submit_success(self, appstruct):
         """
@@ -173,6 +179,8 @@ class WorkshopAddView(BaseFormView):
         appstruct['trainers'] = [
             user.User.get(id_) for id_ in trainers_ids
         ]
+        appstruct['owner'] = user.User.get(appstruct['owner'])
+
         workshop_obj = models.Workshop(**appstruct)
 
         workshop_obj = merge_session_with_post(
@@ -236,7 +244,16 @@ class WorkshopEditView(BaseFormView):
         timeslots = self.context.timeslots
         appstruct['timeslots'] = [t.appstruct() for t in timeslots]
 
+        try:
+            appstruct['owner'] = appstruct['owner'].id
+        except KeyError:
+            pass
+
         form.set_appstruct(appstruct)
+
+        if not self.request.has_permission('edit.owner'):
+            form['owner'].widget.readonly = True
+
         return form
 
     def _retrieve_workshop_timeslot(self, id_):
@@ -288,6 +305,10 @@ qui n'appartient pas au contexte courant !!!!")
         appstruct['trainers'] = [
             user.User.get(id_) for id_ in trainers_ids
         ]
+        try:
+            appstruct['owner'] = user.User.get(appstruct['owner'])
+        except KeyError:  # case of read-only owner
+            pass
 
         merge_session_with_post(
             self.context, appstruct, remove_empty_values=False,

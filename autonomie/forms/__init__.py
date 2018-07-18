@@ -904,12 +904,14 @@ def mk_choice_node_factory(base_node_factory, resource_name, **parent_kw):
         for k, v in parent_kw.items():
             kw.setdefault(k, v)
 
+        widget_options = {
+            'title': kw.get('title', resource_name),
+            'placeholder': u"- Sélectionner {} -".format(resource_name),
+            'default_option': ('', ''),  # required by placeholder
+        }
+        widget_options.update(kw.pop('widget_options', {}))
         return base_node_factory(
-            widget_options={
-                'title': kw.get('title', resource_name),
-                'placeholder': u"- Sélectionner {} -".format(resource_name),
-                'default_option': ('', ''),  # required by placeholder
-            },
+            widget_options=widget_options,
             **kw
         )
     return choice_node
@@ -927,11 +929,12 @@ def mk_filter_node_factory(base_node_factory, empty_filter_msg, **parent_kw):
     def filter_node(**kw):
         for k, v in parent_kw.items():
             kw.setdefault(k, v)
+        widget_options = {'default_option': ('', empty_filter_msg)}
+        widget_options.update(kw.pop('widget_options', {}))
+
         return base_node_factory(
             missing=colander.drop,
-            widget_options={
-                'default_option': ('', empty_filter_msg),
-            },
+            widget_options=widget_options,
             **kw
         )
     return filter_node

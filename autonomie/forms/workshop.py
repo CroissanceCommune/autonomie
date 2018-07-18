@@ -27,6 +27,7 @@ from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
 from autonomie.forms.user import (
     participant_filter_node_factory,
+    participant_choice_node,
     trainer_choice_node_factory,
 )
 from autonomie.models.task.invoice import get_invoice_years
@@ -104,6 +105,13 @@ def range_validator(form, values):
         exc = colander.Invalid(form, message)
         exc['start_time'] = u"Doit précéder la fin"
         raise exc
+
+
+class ParticipantsSequence(colander.SequenceSchema):
+    """
+    Schema for the list of participants
+    """
+    participant_id = participant_choice_node()
 
 
 class TimeslotSchema(colander.MappingSchema):

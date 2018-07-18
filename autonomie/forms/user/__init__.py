@@ -117,6 +117,7 @@ conseiller_filter_node_factory = forms.mk_filter_node_factory(
 participant_choice_node = forms.mk_choice_node_factory(
     user_node,
     resource_name=u"un participant",
+    resource_name_plural=u"un ou plusieurs participant(s)",
 )
 
 participant_filter_node_factory = forms.mk_filter_node_factory(

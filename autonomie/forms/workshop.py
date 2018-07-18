@@ -126,10 +126,6 @@ class TimeslotsSequence(colander.SequenceSchema):
         )
 
 
-class TrainerSequence(colander.SequenceSchema):
-    trainer_id = trainer_choice_node_factory()
-
-
 class Workshop(colander.MappingSchema):
     """
     Schema for workshop creation/edition
@@ -140,9 +136,10 @@ class Workshop(colander.MappingSchema):
         validator=colander.Length(max=255),
         title=u"Titre de l'atelier",
         )
-    trainers = TrainerSequence(
+
+    trainers = trainer_choice_node_factory(
+        multiple=True,
         title=u"Animateur(s)/Animatrice(s)",
-        widget=deform_widget.SequenceWidget(min_len=1),
     )
     description = colander.SchemaNode(
         colander.String(),

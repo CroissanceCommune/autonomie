@@ -377,14 +377,17 @@ def get_event_acl(self):
     Return acl fr events participants can view
     """
     acl = DEFAULT_PERM[:]
-    for user in self.participants:
-        acl.append(
-            (
-                Allow,
-                user.login.login,
-                ("view_activity", "view_workshop", "view.file")
-            )
-        )
+
+    participants_perms = (
+        "view_activity",
+        "view_workshop",
+        "view.file",
+    )
+
+    acl.extend(
+        (Allow, user.login.login, participants_perms)
+        for user in self.participants
+    )
     return acl
 
 

@@ -5,12 +5,12 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import datetime
 import pytest
-
+from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
 
 def test_status_change_view_invalid_error(
     config, get_csrf_request_with_db, estimation, user
 ):
-    config.add_route('project', '/{id}')
+    config.add_route(PROJECT_ITEM_ROUTE, PROJECT_ITEM_ROUTE)
     from autonomie.utils.rest import RestError
     from autonomie.views.estimations.rest_api import EstimationStatusRestView
 
@@ -32,7 +32,7 @@ def test_status_change_view_invalid_error(
 def test_status_change_view_forbidden_error(
     config, get_csrf_request_with_db, full_estimation, user
 ):
-    config.add_route('project', '/{id}')
+    config.add_route(PROJECT_ITEM_ROUTE, PROJECT_ITEM_ROUTE)
     config.testing_securitypolicy(
         userid="test",
         groupids=('admin',),
@@ -59,7 +59,7 @@ def test_status_change_view_forbidden_error(
 def test_status_change_view(
     config, get_csrf_request_with_db, full_estimation, user
 ):
-    config.add_route('project', '/{id}')
+    config.add_route(PROJECT_ITEM_ROUTE, PROJECT_ITEM_ROUTE)
     config.testing_securitypolicy(
         userid="test",
         groupids=('admin',),
@@ -76,7 +76,9 @@ def test_status_change_view(
 
     view = EstimationStatusRestView(request)
     result = view.__call__()
-    assert result == {'redirect': '/%s' % full_estimation.project_id}
+    assert result == {
+        'redirect': PROJECT_ITEM_ROUTE.format(id=full_estimation.project_id)
+    }
     assert full_estimation.status == 'valid'
     assert full_estimation.statuses[-1].status_comment == u"Test comment"
     assert full_estimation.statuses[-1].status_code == 'valid'

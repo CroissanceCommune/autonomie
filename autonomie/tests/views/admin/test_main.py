@@ -62,8 +62,10 @@ def test_admin_contact_success(config, get_csrf_request_with_db, dbsession):
 def test_file_type_add(config, get_csrf_request_with_db, dbsession):
     from autonomie.views.admin.main.file_types import (
         FileTypeAddView,
+        FILE_TYPE_ROUTE,
     )
     from autonomie.models.files import FileType
+    config.add_route(FILE_TYPE_ROUTE, FILE_TYPE_ROUTE)
     appstruct = {
         'label': u"Label",
     }
@@ -78,10 +80,12 @@ def test_file_type_add(config, get_csrf_request_with_db, dbsession):
 def test_file_type_edit(config, get_csrf_request_with_db, dbsession, file_type):
     from autonomie.views.admin.main.file_types import (
         FileTypeEditView,
+        FILE_TYPE_ROUTE,
     )
     appstruct = {
         'label': u"New label",
     }
+    config.add_route(FILE_TYPE_ROUTE, FILE_TYPE_ROUTE)
     req = get_csrf_request_with_db()
     req.context = file_type
     view = FileTypeEditView(req)
@@ -93,7 +97,9 @@ def test_file_type_disable(config, get_csrf_request_with_db, dbsession,
                            file_type):
     from autonomie.views.admin.main.file_types import (
         FileTypeDisableView,
+        FILE_TYPE_ROUTE,
     )
+    config.add_route(FILE_TYPE_ROUTE, FILE_TYPE_ROUTE)
     req = get_csrf_request_with_db()
     req.context = file_type
     view = FileTypeDisableView(req)
@@ -105,8 +111,10 @@ def test_file_type_delete(config, get_csrf_request_with_db, dbsession,
                           file_type):
     from autonomie.views.admin.main.file_types import (
         FileTypeDeleteView,
+        FILE_TYPE_ROUTE,
     )
     from autonomie.models.files import FileType
+    config.add_route(FILE_TYPE_ROUTE, FILE_TYPE_ROUTE)
     fid = file_type.id
     req = get_csrf_request_with_db()
     req.context = file_type

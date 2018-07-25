@@ -299,6 +299,7 @@ def get_csrf_request(config, pyramid_request):
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
         pyramid_request.navigation = Navigation()
+        pyramid_request.is_popup = False
 
         if current_route_path:
             if not current_route_name:
@@ -349,6 +350,7 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
         pyramid_request.session.get_csrf_token = csrf_token
         pyramid_request.actionmenu = ActionMenu()
         pyramid_request.navigation = Navigation()
+        pyramid_request.is_popup = False
 
         if current_route_path:
             if not current_route_name:

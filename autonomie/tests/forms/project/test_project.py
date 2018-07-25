@@ -9,7 +9,8 @@ import datetime
 
 
 @pytest.fixture
-def other_project_type(dbsession, other_business_type):
+def other_project_type(dbsession, mk_business_type):
+    other_business_type = mk_business_type(name="other")
     from autonomie.models.project.types import ProjectType
     result = ProjectType(name="other", label="other")
     result.default_business_type = other_business_type
@@ -82,7 +83,7 @@ def test_is_compatible_project_type(
     company,
     other_project_type,
     default_business_type,
-    other_business_type,
+    mk_business_type,
 ):
     from autonomie.models.task.estimation import Estimation
     estimation = Estimation(
@@ -90,7 +91,7 @@ def test_is_compatible_project_type(
         project=project,
         customer=customer,
         user=user,
-        business_type=other_business_type,
+        business_type=other_project_type.default_business_type,
     )
     dbsession.add(estimation)
     dbsession.flush()

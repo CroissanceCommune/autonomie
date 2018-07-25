@@ -29,17 +29,13 @@ from autonomie.models.config import (
 pytest.mark.usefixtures("config")
 
 
-def test_main_config_success(config, get_csrf_request_with_db, dbsession):
-    from autonomie.views.admin.main import (
-        AdminMainView,
-        MAIN_URL,
+def test_site_config_success(config, get_csrf_request_with_db, dbsession):
+    from autonomie.views.admin.main.site import (
+        MAIN_SITE_ROUTE,
+        AdminSiteView,
     )
-    config.add_route(MAIN_URL, '/')
-    appstruct = {
-        "site": {'welcome': 'testvalue'},
-        "document": {'footertitle': 'testvalue2'}
-    }
-    view = AdminMainView(get_csrf_request_with_db())
+    config.add_route(MAIN_SITE_ROUTE, MAIN_SITE_ROUTE)
+    appstruct = {'welcome': 'testvalue'}
+    view = AdminSiteView(get_csrf_request_with_db())
     view.submit_success(appstruct)
     assert get_config()['welcome'] == u'testvalue'
-    assert get_config()['coop_pdffootertitle'] == u'testvalue2'

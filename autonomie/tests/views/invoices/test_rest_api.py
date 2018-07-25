@@ -3,12 +3,12 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-
+from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
 
 def test_invoice_valid_view(
     config, get_csrf_request_with_db, full_invoice, user
 ):
-    config.add_route('project', '/{id}')
+    config.add_route(PROJECT_ITEM_ROUTE, PROJECT_ITEM_ROUTE)
     config.testing_securitypolicy(
         userid="test",
         groupids=('admin',),
@@ -25,7 +25,8 @@ def test_invoice_valid_view(
 
     view = InvoiceStatusRestView(request)
     result = view.__call__()
-    assert result == {'redirect': '/%s' % full_invoice.project_id}
+    assert result == {
+        'redirect': PROJECT_ITEM_ROUTE.format(id=full_invoice.project_id)}
     assert full_invoice.status == 'valid'
     assert full_invoice.statuses[-1].status_comment == u"Test comment"
     assert full_invoice.statuses[-1].status_code == 'valid'
@@ -34,7 +35,7 @@ def test_invoice_valid_view(
 def test_cancelinvoice_valid_view(
     config, get_csrf_request_with_db, full_cancelinvoice, full_invoice, user
 ):
-    config.add_route('project', '/{id}')
+    config.add_route(PROJECT_ITEM_ROUTE, PROJECT_ITEM_ROUTE)
     config.testing_securitypolicy(
         userid="test",
         groupids=('admin',),
@@ -51,7 +52,9 @@ def test_cancelinvoice_valid_view(
 
     view = CancelInvoiceStatusRestView(request)
     result = view.__call__()
-    assert result == {'redirect': '/%s' % full_cancelinvoice.project_id}
+    assert result == {
+        'redirect': PROJECT_ITEM_ROUTE.format(id=full_cancelinvoice.project_id)
+    }
     assert full_cancelinvoice.status == 'valid'
     assert full_cancelinvoice.statuses[-1].status_comment == u"Test comment"
     assert full_cancelinvoice.statuses[-1].status_code == 'valid'

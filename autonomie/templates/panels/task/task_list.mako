@@ -22,7 +22,6 @@
 </%doc>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%namespace file="/base/utils.mako" import="format_text"/>
-<%namespace file="/base/utils.mako" import="format_customer"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <div class='row'>
     <div class='col-md-4 col-md-offset-8 col-xs-12'>
@@ -104,7 +103,7 @@
                     <% company_name = company.name %>
                 % endif
                 <% customer_id = document.customer.id %>
-                <% customer_name = document.customer.get_label() %>
+                <% customer_label = document.customer.label %>
 
                 <tr class='status tolate-${document.is_tolate()} paid-status-${paid_status} status-${document.status}'>
                         <td class='status-td'>
@@ -134,7 +133,7 @@
                 % endif
             </td>
             <td class='invoice_company_name'>
-                ${customer_name}
+                ${customer_label}
             </td>
             <td>
                 <strong>${api.format_amount(ht, precision=5)|n}&nbsp;€</strong>

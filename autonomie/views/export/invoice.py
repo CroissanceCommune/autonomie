@@ -225,7 +225,7 @@ class SageSingleInvoiceExportPage(BaseExportView):
 
                 message = CUSTOMER_ERROR_MSG.format(
                     official_number,
-                    invoice.customer.name,
+                    invoice.customer.label,
                     customer_url)
                 res['errors'].append(message)
                 continue

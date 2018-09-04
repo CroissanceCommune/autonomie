@@ -54,7 +54,7 @@
         <ul>
             % for customer in customers:
                 <li>
-                ${customer.code.upper()} (${customer.name})
+                ${customer.code.upper()} (${customer.label})
                 </li>
             % endfor
         </ul>

@@ -129,7 +129,7 @@
                 <td colspan='1'></td>
             </tr>
             % if records:
-                % for id_, name, internal_number, status, signed_status, geninv, date, description, ht, tva, ttc, customer_id, customer_name, company_id, company_name in records:
+                % for id_, name, internal_number, status, signed_status, geninv, date, description, ht, tva, ttc, customer_id, customer_label, company_id, company_name in records:
                     <tr class="status status-${status} signed-status-${signed_status} geninv-${geninv}">
                         <td class="status-td">
                         </td>
@@ -150,7 +150,7 @@
                 </td>
                 <td>
                     <a href="${request.route_path("customer", id=customer_id)}">
-                        ${customer_name}
+                        ${customer_label}
                     </a>
                 </td>
                  <td>

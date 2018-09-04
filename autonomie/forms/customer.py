@@ -45,7 +45,7 @@ def _build_customer_select_value(customer):
     """
         return the tuple for building customer select
     """
-    label = customer.get_label()
+    label = customer.label
     if customer.code:
         label += u" ({0})".format(customer.code)
     return (customer.id, label)
@@ -78,7 +78,7 @@ def get_customers_from_request(request):
     customers = customers.filter_by(company_id=company_id)
     customers = customers.filter_by(archived=False)
 
-    return customers.order_by(Customer.name).all()
+    return customers.order_by(Customer.label).all()
 
 
 def get_current_customer_id_from_request(request):

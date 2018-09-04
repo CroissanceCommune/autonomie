@@ -421,7 +421,6 @@ def product(tva, dbsession):
 @fixture
 def unity(dbsession):
     from autonomie.models.task.unity import WorkUnit
-    print([w.label for w in WorkUnit.query()])
     unity = WorkUnit(label=u"Mètre")
     dbsession.add(unity)
     dbsession.flush()
@@ -527,6 +526,7 @@ def customer(dbsession, company):
     from autonomie.models.customer import Customer
     customer = Customer(
         name=u"customer",
+        type_='company',
         code=u"CUST",
         lastname=u"Lastname",
         firstname=u"Firstname",

@@ -32,7 +32,7 @@ class GlobalEstimationList(BaseListView):
     schema = get_list_schema(is_global=True, excludes=('status',))
     sort_columns = dict(
         date=Estimation.date,
-        customer=Customer.name,
+        customer=Customer.label,
         company=Company.name,
     )
     default_sort = 'date'
@@ -53,7 +53,7 @@ class GlobalEstimationList(BaseListView):
             Estimation.tva,
             Estimation.ttc,
             Customer.id,
-            Customer.name,
+            Customer.label,
             Company.id,
             Company.name
         )

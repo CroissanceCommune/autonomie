@@ -106,7 +106,7 @@ class ProjectListView(BaseListView, TreeMixin):
                 or_(
                     Project.name.like("%" + search + "%"),
                     Project.customers.any(
-                        Customer.name.like("%" + search + "%")
+                        Customer.label.like("%" + search + "%")
                     )
                 )
             )

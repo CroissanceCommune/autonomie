@@ -113,7 +113,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                                 <dd>${api.format_date(request.context.date)}</dd>
                                 <dt>Client</dt>
                                 <dd>
-                                    ${request.context.customer.get_label()}
+                                    ${request.context.customer.label}
                                     % if request.context.customer:
                                         (${request.context.customer.code})
                                     % endif

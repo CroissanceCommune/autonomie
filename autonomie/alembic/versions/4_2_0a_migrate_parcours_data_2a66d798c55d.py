@@ -1,4 +1,4 @@
-#-*-coding:utf-8-*- 
+#-*-coding:utf-8-*-
 """4.2.0a : Migrate parcours data
 
 Revision ID: 2a66d798c55d
@@ -17,6 +17,7 @@ from autonomie_base.models.base import DBSESSION
 from autonomie.alembic.utils import (
     disable_constraints,
     enable_constraints,
+    column_exists,
 )
 
 
@@ -56,35 +57,35 @@ def populate_default_datas():
     session.flush()
     # Populate Career Stages
     if CareerStage.query().count() == 0:
-        stage_diag = CareerStage(active=True, 
-                    name="Diagnostic", 
-                    cae_situation_id=None, 
-                    stage_type=None, 
+        stage_diag = CareerStage(active=True,
+                    name="Diagnostic",
+                    cae_situation_id=None,
+                    stage_type=None,
                 )
-        stage_cape = CareerStage(active=True, 
-                    name="Contrat CAPE", 
-                    cae_situation_id=situation_conv.id, 
-                    stage_type="entry", 
+        stage_cape = CareerStage(active=True,
+                    name="Contrat CAPE",
+                    cae_situation_id=situation_conv.id,
+                    stage_type="entry",
                 )
-        stage_dpae = CareerStage(active=True, 
-                    name="Contrat DPAE", 
-                    cae_situation_id=None, 
-                    stage_type=None, 
+        stage_dpae = CareerStage(active=True,
+                    name="Contrat DPAE",
+                    cae_situation_id=None,
+                    stage_type=None,
                 )
-        stage_cesa = CareerStage(active=True, 
-                    name="Contrat CESA", 
-                    cae_situation_id=situation_es.id, 
-                    stage_type="contract", 
+        stage_cesa = CareerStage(active=True,
+                    name="Contrat CESA",
+                    cae_situation_id=situation_es.id,
+                    stage_type="contract",
                 )
-        stage_avct = CareerStage(active=True, 
-                    name="Avenant contrat", 
-                    cae_situation_id=None, 
-                    stage_type="amendment", 
+        stage_avct = CareerStage(active=True,
+                    name="Avenant contrat",
+                    cae_situation_id=None,
+                    stage_type="amendment",
                 )
-        stage_out = CareerStage(active=True, 
-                    name="Sortie", 
-                    cae_situation_id=situation_out.id, 
-                    stage_type="exit", 
+        stage_out = CareerStage(active=True,
+                    name="Sortie",
+                    cae_situation_id=situation_out.id,
+                    stage_type="exit",
                 )
         session.add(stage_diag)
         session.add(stage_cape)
@@ -94,16 +95,16 @@ def populate_default_datas():
         session.add(stage_out)
         session.flush()
     return (
-        situation_conv.id, 
-        situation_es.id, 
+        situation_conv.id,
+        situation_es.id,
         situation_out.id
     ), (
-        stage_diag.id, 
-        stage_cape.id, 
-        stage_dpae.id, 
-        stage_cesa.id, 
-        stage_avct.id, 
-        stage_out.id, 
+        stage_diag.id,
+        stage_cape.id,
+        stage_dpae.id,
+        stage_cesa.id,
+        stage_avct.id,
+        stage_out.id,
     )
 
 
@@ -139,11 +140,11 @@ def migrate_datas(situations_ids, stages_ids):
         capes = cnx.execute("SELECT date, end_date FROM date_convention_cape_datas WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
         for cape in capes:
             session.add(CareerPath(
-                userdatas_id=u.id, 
-                career_stage_id=stages_ids[1], 
-                start_date=cape.date, 
-                end_date=cape.end_date, 
-                cae_situation_id=situations_ids[0], 
+                userdatas_id=u.id,
+                career_stage_id=stages_ids[1],
+                start_date=cape.date,
+                end_date=cape.end_date,
+                cae_situation_id=situations_ids[0],
                 stage_type="entry"
             ))
         # DPAE
@@ -151,7 +152,7 @@ def migrate_datas(situations_ids, stages_ids):
         for dpae in dpaes:
             session.add(CareerPath(userdatas_id=u.id, career_stage_id=stages_ids[2], start_date=dpae.date))
         # Contrat
-        if u.parcours_start_date:
+        if u.parcours_start_date and u.parcours_contract_type is not None:
             from autonomie.models.career_path import TypeContratOption
             cdi_type = session.query(TypeContratOption).filter(
                 TypeContratOption.label==u.parcours_contract_type.upper()
@@ -161,11 +162,11 @@ def migrate_datas(situations_ids, stages_ids):
             else:
                 cdi_type_id = None
             session.add(CareerPath(
-                userdatas_id=u.id, 
-                career_stage_id=stages_ids[3], 
-                start_date=u.parcours_start_date, 
-                end_date=u.parcours_end_date, 
-                cae_situation_id=situations_ids[1], 
+                userdatas_id=u.id,
+                career_stage_id=stages_ids[3],
+                start_date=u.parcours_start_date,
+                end_date=u.parcours_end_date,
+                cae_situation_id=situations_ids[1],
                 stage_type="contrat",
                 type_contrat_id=cdi_type_id,
                 employee_quality_id=u.parcours_employee_quality_id,
@@ -177,9 +178,9 @@ def migrate_datas(situations_ids, stages_ids):
             avenants = cnx.execute("SELECT date, number FROM contract_history WHERE date>'2000-01-01' AND userdatas_id=%s" % u.id)
             for avenant in avenants:
                 model_avenant = CareerPath(
-                    userdatas_id=u.id, 
-                    career_stage_id=stages_ids[4], 
-                    start_date=avenant.date, 
+                    userdatas_id=u.id,
+                    career_stage_id=stages_ids[4],
+                    start_date=avenant.date,
                     stage_type="amendment",
                     amendment_number=avenant.number
                 )
@@ -190,10 +191,10 @@ def migrate_datas(situations_ids, stages_ids):
         # Sortie
         if u.sortie_date:
             session.add(CareerPath(
-                userdatas_id=u.id, 
-                career_stage_id=stages_ids[5], 
-                start_date=u.sortie_date, 
-                cae_situation_id=situations_ids[2], 
+                userdatas_id=u.id,
+                career_stage_id=stages_ids[5],
+                start_date=u.sortie_date,
+                cae_situation_id=situations_ids[2],
                 stage_type="exit",
                 type_sortie_id=u.sortie_type_id,
                 motif_sortie_id=u.sortie_motif_id
@@ -217,21 +218,36 @@ def clean_database():
     op.drop_table('date_diagnostic_datas')
     op.drop_table('date_dpae_datas')
     op.drop_constraint('fk_user_datas_parcours_employee_quality_id', 'user_datas', type_='foreignkey')
-    op.drop_constraint('fk_user_datas_sortie_motif_id', 'user_datas', type_='foreignkey')
-    op.drop_constraint('fk_user_datas_sortie_type_id', 'user_datas', type_='foreignkey')
-    op.drop_column('user_datas', 'parcours_contract_type',)
-    op.drop_column('user_datas', 'parcours_start_date',)
-    op.drop_column('user_datas', 'parcours_end_date',)
-    op.drop_column('user_datas', 'parcours_last_avenant',)
-    op.drop_column('user_datas', 'parcours_taux_horaire',)
-    op.drop_column('user_datas', 'parcours_taux_horaire_letters',)
-    op.drop_column('user_datas', 'parcours_num_hours',)
-    op.drop_column('user_datas', 'parcours_salary',)
-    op.drop_column('user_datas', 'parcours_salary_letters',)
-    op.drop_column('user_datas', 'parcours_employee_quality_id',)
-    op.drop_column('user_datas', 'sortie_date',)
-    op.drop_column('user_datas', 'sortie_motif_id',)
-    op.drop_column('user_datas', 'sortie_type_id',)
+    if column_exists('user_datas', 'sortie_motif_id'):
+        try:
+            op.drop_constraint('fk_user_datas_sortie_motif_id', 'user_datas', type_='foreignkey')
+        except:
+            pass
+        op.drop_column('user_datas', 'sortie_motif_id',)
+
+    if column_exists('user_datas', 'sortie_type_id'):
+        try:
+            op.drop_constraint('fk_user_datas_sortie_type_id', 'user_datas', type_='foreignkey')
+        except:
+            pass
+        op.drop_column('user_datas', 'sortie_type_id',)
+
+    for column in (
+        ('user_datas', 'parcours_contract_type',),
+        ('user_datas', 'parcours_start_date',),
+        ('user_datas', 'parcours_end_date',),
+        ('user_datas', 'parcours_last_avenant',),
+        ('user_datas', 'parcours_taux_horaire',),
+        ('user_datas', 'parcours_taux_horaire_letters',),
+        ('user_datas', 'parcours_num_hours',),
+        ('user_datas', 'parcours_salary',),
+        ('user_datas', 'parcours_salary_letters',),
+        ('user_datas', 'parcours_employee_quality_id',),
+        ('user_datas', 'sortie_date',),
+        ('user_datas', 'sortie_motif_id',),
+    ):
+        if column_exists('user_datas', column):
+            op.drop_column('user_datas', column)
     enable_constraints()
 
 

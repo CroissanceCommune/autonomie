@@ -16,7 +16,7 @@ def task_formatter(task):
         'company': task.project.company.name,
         'code': task.project.company.code_compta,
         'quantity': sum([line.quantity for line in task.all_lines]),
-        'customer': task.customer.name,
+        'customer': task.customer.label,
         'description': task.description,
         'payment': '',
     }
@@ -61,7 +61,7 @@ def write_xls(year, from_number, filepath, force=False):
          '__col__': {},
          },
         {'label': 'Entrepreneur', 'name': 'company', '__col__': {}, },
-        {'label': 'Client', 'name': 'customer', '__col__': {}},
+        {'label': 'Client', 'label': 'customer', '__col__': {}},
         {'label': 'HT', 'name': 'ht',
          '__col__': {},
          },

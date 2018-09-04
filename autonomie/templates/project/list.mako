@@ -102,7 +102,7 @@
                                 <ul>
                                     % for customer in project.customers:
                                         <li>
-                                        ${customer.get_label()}
+                                        ${customer.label}
                                         </li>
                                     % endfor
                                 </ul>

@@ -126,8 +126,8 @@ class ProjectLayout(DefaultLayout):
         )
 
     @property
-    def customer_names(self):
-        return (customer.get_label()
+    def customer_labels(self):
+        return (customer.label
                 for customer in self.current_project_object.customers)
 
     @property

@@ -166,7 +166,7 @@ class SagePaymentExportPage(BaseExportView):
                     _query={'action': 'edit'})
                 message = PAYMENT_CUSTOMER_ERROR_MSG.format(
                     invoice.official_number,
-                    invoice.customer.name,
+                    invoice.customer.label,
                     customer_url)
                 res['errors'].append(message)
                 continue

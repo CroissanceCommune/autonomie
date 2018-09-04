@@ -75,7 +75,7 @@ class TaskListPanel(object):
             )
         yield Link(
             self.request.route_path("customer", id=item.customer_id),
-            u"Voir le client %s" % item.customer.get_label(),
+            u"Voir le client %s" % item.customer.label,
             icon="building-o",
         )
 

@@ -36,9 +36,9 @@
         </div>
         <div class='panel-body'>
             % if customer.is_company():
-                <h2>Entreprise ${customer.name.upper()}</h2>
+                <h2>Entreprise ${customer.label.upper()}</h2>
             % else:
-                <h2>${customer.get_label()}</h2>
+                <h2>${customer.label}</h2>
             % endif
         <a class='btn btn-primary secondary-action'
             href='${request.route_path("customer", id=customer.id, _query=dict(action="edit"))}'>

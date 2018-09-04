@@ -124,7 +124,7 @@ ${records.item_count} Résultat(s)
         <tr>
             <th class="visible-lg">${sortable(u"Créé le", "created_at")}</th>
             <th class="visible-lg">${sortable(u"Code", "code")}</th>
-            <th>${sortable(u"Entreprise", "name")}</th>
+            <th>${sortable(u"Nom du client", "label")}</th>
             <th class="visible-lg">${sortable(u"Nom du contact principal", "lastname")}</th>
             <th class="actions">Actions</th>
         </tr>
@@ -141,18 +141,10 @@ ${records.item_count} Résultat(s)
                         % if customer.archived:
                             <span class='label label-warning'>Ce client a été archivé</span>
                         % endif
-                        % if customer.is_company():
-                            ${customer.name}
-                        % else:
-                            Client particulier
-                        % endif
+                        ${customer.label}
                     </td>
                     <td onclick="${onclick}" class="visible-lg rowlink" >
-                        % if customer.is_company():
-                            ${customer.lastname} ${customer.firstname}
-                        % else:
-                            ${customer.get_name()}
-                        % endif
+                        ${customer.get_name()}
                     </td>
                     <td class="actions">
 		                <div class='btn-group'>

@@ -93,6 +93,18 @@ class UserDatasListClass(object):
             )
         return query
 
+    def filter_situation_antenne_id(self, query, appstruct):
+        """
+        Filter the current query with antenne id
+        """
+        antenne_id = appstruct.get('situation_antenne_id')
+
+        if antenne_id not in (None, -1, colander.null):
+            query = query.filter(
+                UserDatas.situation_antenne_id == antenne_id
+            )
+        return query
+
 
 class UserDatasListView(UserDatasListClass, BaseListView):
     """

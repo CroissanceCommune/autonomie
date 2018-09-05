@@ -510,7 +510,9 @@ def get_deferred_model_select_validator(model, id_key='id', filters=[]):
 get_deferred_select_validator = get_deferred_model_select_validator
 
 
-def get_model_select_option_values(model, keys, filters=(), add_default=True):
+def get_model_select_option_values(
+    model, keys, filters=(), add_default=True, empty_filter_msg=''
+):
     """
     Build an option list that can be used by SelectWidget and CheckboxListWidget
 
@@ -524,8 +526,8 @@ def get_model_select_option_values(model, keys, filters=(), add_default=True):
     key1, key2 = keys
 
     values = []
-    if add_default:
-        values.append(('', ''))
+    if add_default or empty_filter_msg:
+        values.append(('', empty_filter_msg))
 
     query = model.query()
     for key, value in filters:
@@ -546,7 +548,8 @@ def get_model_select_option_values(model, keys, filters=(), add_default=True):
 
 
 def get_deferred_model_select(
-    model, multi=False, mandatory=False, keys=('id', 'label'), filters=[]
+    model, multi=False, mandatory=False, keys=('id', 'label'), filters=[],
+    empty_filter_msg="",
 ):
     """
     Return a deferred select widget based on the given model
@@ -582,7 +585,8 @@ def get_deferred_model_select(
             model,
             keys,
             filters,
-            add_default=not mandatory
+            add_default=not mandatory,
+            empty_filter_msg=empty_filter_msg,
         )
         return deform.widget.SelectWidget(values=values, multi=multi)
     return deferred_widget

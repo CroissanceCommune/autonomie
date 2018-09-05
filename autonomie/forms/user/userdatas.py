@@ -44,6 +44,7 @@ from autonomie.forms.user import (
 from autonomie.forms import (
     customize_field,
     get_deferred_select,
+    get_deferred_select_validator,
     get_select,
     get_select_validator,
     mail_validator,
@@ -53,8 +54,8 @@ from autonomie.forms import (
 USERDATAS_FORM_GRIDS = {
     u"Synthèse": (
         (
-            ('situation_follower_id',6), 
-            ('situation_antenne_id',6), 
+            ('situation_follower_id', 6),
+            ('situation_antenne_id', 6),
         ),
         (
             ('parcours_prescripteur_id', 6),
@@ -62,7 +63,7 @@ USERDATAS_FORM_GRIDS = {
         ),
         (
             ('parcours_date_info_coll', 3),
-            ('situation_societariat_entrance',3),
+            ('situation_societariat_entrance', 3),
             ('parcours_non_admission_id', 6),
         ),
     ),
@@ -156,22 +157,6 @@ USERDATAS_FORM_GRIDS = {
     ),
 
 }
-
-
-@colander.deferred
-def deferred_situation_select(node, kw):
-    values = [('', u"Sélectionner un statut")]
-    options = CaeSituationOption.query()
-    for option in options:
-        values.append((option.id, option.label))
-    return deform.widget.SelectWidget(values=values)
-
-
-@colander.deferred
-def deferred_situation_id_validator(node, kw):
-    return colander.OneOf(
-        [option.id for option in CaeSituationOption.query()]
-    )
 
 
 def customize_schema(schema):
@@ -352,13 +337,25 @@ def get_list_schema():
     schema.insert(0, colander.SchemaNode(
         colander.Integer(),
         name='situation_situation',
-        widget=deferred_situation_select,
-        validator=deferred_situation_id_validator,
+        widget=get_deferred_select(
+            CaeSituationOption, empty_filter_msg=u"Tous les status"
+        ),
+        validator=get_deferred_select_validator(CaeSituationOption),
         missing=colander.drop,
     )
     )
 
     schema.insert(0, conseiller_filter_node_factory())
+    antenne_filter_node = colander.SchemaNode(
+        colander.Integer(),
+        name="situation_antenne_id",
+        widget=get_deferred_select(
+            AntenneOption, empty_filter_msg=u"Toutes les antennes"
+        ),
+        validator=get_deferred_select_validator(AntenneOption),
+        missing=colander.drop
+    )
+    schema.insert(0, antenne_filter_node)
     return schema
 
 
@@ -366,7 +363,7 @@ def get_doctypes_schema(userdatas_model):
     """
     Build a form schema for doctypes registration
 
-    :param obj userdatas_model: An instance of userdatas we're building 
+    :param obj userdatas_model: An instance of userdatas we're building
     the form for
     """
     registered = userdatas_model.doctypes_registrations

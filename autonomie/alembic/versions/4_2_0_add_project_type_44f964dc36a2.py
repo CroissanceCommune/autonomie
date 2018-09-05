@@ -164,9 +164,15 @@ where {type_}.course=1 and task.project_id=project.id ) > 0;"
     _add_business_to_all_invoices(session)
 
 
+def clean_database():
+    op.drop_column('estimation', 'course')
+    op.drop_column('invoice', 'course')
+
+
 def upgrade():
     update_database_structure()
     migrate_datas()
+    clean_database()
 
 
 def downgrade():

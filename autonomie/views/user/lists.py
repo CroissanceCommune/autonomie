@@ -28,23 +28,20 @@ from autonomie.views import BaseListView
 logger = logging.getLogger(__name__)
 
 
-class GeneralAccountList(BaseListView):
+class BaseUserListView(BaseListView):
     """
-    List the User models with Login attached to them
+    Base list for the User model
+    Provide :
 
-    Allows to filter on :
+        The base User class query
+        The filtering on the search field
+        The filtering on the company activity_id
 
-        * Active/unactive Login
-        * Company name or User lastname/firstname
-        * Company acivity
-
-    Sort on:
-        * User.lastname
-        * User.email
+    add filters to specify more specific list views (e.g: trainers, users with
+    account ...)
     """
-    title = u"Annuaire des utilisateurs"
-    # The schema used to validate our search/filter form
-    schema = get_list_schema()
+    title = u"Tous les comptes"
+    schema = None
     # The columns that allow sorting
     sort_columns = dict(
         name=User.lastname,
@@ -95,16 +92,42 @@ class GeneralAccountList(BaseListView):
             logger.debug(query)
         return query
 
+
+class GeneralAccountList(BaseUserListView):
+    """
+    List the User models with Login attached to them
+
+    Allows to filter on :
+
+        * Active/unactive Login
+        * Company name or User lastname/firstname
+        * Company acivity
+
+    Sort on:
+        * User.lastname
+        * User.email
+    """
+    title = u"Annuaire des utilisateurs"
+    # The schema used to validate our search/filter form
+    schema = get_list_schema()
+    # The columns that allow sorting
+    sort_columns = dict(
+        name=User.lastname,
+        email=User.email,
+    )
+
     def filter_login_filter(self, query, appstruct):
+        """
+        Filter the list on accounts with login only
+        """
+        query = query.join(User.login)
         login_filter = appstruct.get('login_filter', 'active_login')
         logger.debug("Filtering login : %s" % login_filter)
-        if login_filter != 'no_login':
-            query = query.join(Login)
-            if login_filter == 'active_login':
-                logger.debug("Adding a filter on Login.active")
-                query = query.filter(Login.active == True)
-            elif login_filter == "unactive_login":
-                query = query.filter(Login.active == False)
+        if login_filter == 'active_login':
+            logger.debug("Adding a filter on Login.active")
+            query = query.filter(Login.active == True)
+        elif login_filter == "unactive_login":
+            query = query.filter(Login.active == False)
         return query
 
 

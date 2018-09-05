@@ -123,6 +123,7 @@
                             </td>
                             <td>${user.email}</td>
                             <td>
+                            % if user.companies:
                                 <ul class="list-unstyled">
                                     % for company in user.companies:
                                         <% company_url = request.route_path('company', id=company.id) %>
@@ -142,6 +143,9 @@
                                         </li>
                                     % endfor
                                 </ul>
+                            % else:
+                            Ce compte n'est associé à aucune entreprise
+                            % endif
                             </td>
                             % if request.has_permission('manage'):
                                 <td class='text-right'>

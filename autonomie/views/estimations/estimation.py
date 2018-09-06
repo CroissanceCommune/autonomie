@@ -172,7 +172,7 @@ class EstimationPdfView(TaskPdfView):
 class EstimationDuplicateView(TaskDuplicateView):
     label = u"le devis"
 
-    def _after_task_duplicate(task, appstruct):
+    def _after_task_duplicate(self, task, appstruct):
         task.initialize_business_datas()
         return task
 

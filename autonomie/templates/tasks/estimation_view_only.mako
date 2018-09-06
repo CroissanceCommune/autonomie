@@ -45,12 +45,7 @@
         href="${request.route_path('/estimations/{id}/genbusiness', id=estimation.id)}"
         title="Générer une affaire au sein de laquelle facturer"
         >
-        <i class='fa fa-files-o'></i>&nbsp;
-        % if len(estimation.businesses) >= 1:
-            Générer une nouvelle affaire (${estimation.business_type.label})
-        % else:
-            Générer une affaire (${estimation.business_type.label})
-        % endif
+        <i class='fa fa-files-o'></i>&nbsp;Générer une affaire (${estimation.business_type.label})
     </a>
 % endif
 % if api.has_permission('duplicate.estimation'):
@@ -74,8 +69,14 @@
 
 <%block name='before_actions'>
     <% estimation = request.context %>
-    <h2>${estimation.name}</h2>
-
+    <h2>
+    ${estimation.name}
+    </h2>
+</%block>
+<%block name='before_summary'>
+<br />
+<br />
+    <% estimation = request.context %>
 % if api.has_permission('set_signed_status.estimation'):
     <div
         class="btn-group signed_status_group"
@@ -101,14 +102,7 @@
             </label>
         % endfor
     </div>
-    <br />
-    <br />
-    <br />
 % endif
-
-</%block>
-<%block name='before_summary'>
-    <% estimation = request.context %>
 <h3>Rattachement</h3>
 <ul>
 % if estimation.invoices:

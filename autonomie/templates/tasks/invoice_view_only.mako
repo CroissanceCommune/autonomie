@@ -68,7 +68,7 @@
     <% invoice = request.context %>
     <h2>${invoice.name}</h2>
     <p class='lead'>
-    Cette facture porte le numéro <b>${invoice.official_number}</b>
+    ${invoice.official_number}
     </p>
 </%block>
 <%block name='moretabs'>

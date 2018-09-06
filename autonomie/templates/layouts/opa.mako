@@ -65,7 +65,8 @@ One page application layout template
             ${request.actionmenu.render(request)|n}
         % endif
         </%block>
-      </div>
+        </div>
+        ${request.layout_manager.render_panel('navigation')}
       <%block name='pop_message'>
       % for message in request.session.pop_flash(queue=""):
        % if message is not None:

@@ -1067,7 +1067,7 @@ def get_business_acl(self):
         admin_perms += ('edit.business', 'add.invoice',)
         perms += ('edit.business', 'add.invoice',)
 
-        if not self.invoices and not self.cancelinvoices:
+        if not self.invoices:
             perms += ('delete.business',)
             admin_perms += ('delete.business',)
         if self.file_requirement_service.check(self):

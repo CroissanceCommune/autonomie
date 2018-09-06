@@ -52,7 +52,7 @@ class ProjectFilesView(BaseView, TreeMixin):
         return u"Documents rattachés au projet {0}".format(self.context.name)
 
     @property
-    def url(self):
+    def tree_url(self):
         return self.request.route_path(self.route_name, id=self.context.id)
 
     def collect_parent_ids(self):

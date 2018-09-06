@@ -273,7 +273,7 @@ class MeasureTypeListView(AdminCrudListView):
         ) - 1
 
     @property
-    def url(self):
+    def tree_url(self):
         return self.request.route_path(
             TYPE_CATEGORY_URL,
             category_id=_get_category_id_from_request(self.request)

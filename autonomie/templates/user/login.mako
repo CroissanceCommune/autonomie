@@ -35,37 +35,18 @@ pour se connecter à Autonomie
 </a>
 % else:
     % if request.has_permission('edit.login'):
+        Nom d'utilisateur <strong>${login.login}</strong>
+        <hr />
         % if login.active:
         <h4 class='text-success'>
         <i class='fa fa-check'></i>&nbsp;Ces identifiants sont actifs
         </h4>
-        <a
-            href="${request.route_path('/users/{id}/login/edit', id=login.user_id)}"
-            class='btn btn-default btn-primary primary-action'
-            >
-            <i class='fa fa-pencil'></i>&nbsp;Modifier (identifiant / mot de passe / groupes)
-        </a>
-
-        <a
-            href="${request.route_path('/logins/{id}', id=login.id, _query={'action': 'activate'})}"
-            class='btn btn-default btn-danger'
-            title="Désactiver ce compte (cet utilisateur ne pourra plus se connecter)">
-            <i class='fa fa-book'></i>&nbsp;Désactiver ce compte
-        </a>
-
         % else:
         <h4 class='text-danger'>
             <i class='fa fa-remove'></i>&nbsp;Ces identifiants ne sont pas actifs
         </h4>
-        <a
-            href="${request.route_path('/logins/{id}', id=login.id, _query={'action': 'activate'})}"
-            class='btn btn-default'>
-            <i class='fa fa-check'></i>&nbsp;Activer
-        </a>
         % endif
         <div>
-        <hr />
-        Nom d'utilisateur <strong>${login.login}</strong>
         <hr />
         Fait partie des groupes
         <ul>
@@ -74,6 +55,27 @@ pour se connecter à Autonomie
         % endfor
         </ul>
         </div>
+        % if login.active:
+        <a
+            href="${request.route_path('/users/{id}/login/edit', id=login.user_id)}"
+            class='btn btn-default'
+            >
+            <i class='fa fa-pencil'></i>&nbsp;Modifier (identifiant / mot de passe / groupes)
+        </a>
+
+        <a
+            href="${request.route_path('/logins/{id}', id=login.id, _query={'action': 'activate'})}"
+            class='btn btn-danger'
+            title="Désactiver ce compte (cet utilisateur ne pourra plus se connecter)">
+            <i class='fa fa-book'></i>&nbsp;Désactiver ce compte
+        </a>
+        % else:
+        <a
+            href="${request.route_path('/logins/{id}', id=login.id, _query={'action': 'activate'})}"
+            class='btn btn-default'>
+            <i class='fa fa-check'></i>&nbsp;Activer
+        </a>
+        % endif
 
     % elif request.has_permission('set_password.login'):
         <a

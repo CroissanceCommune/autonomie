@@ -91,11 +91,17 @@ class LoginAddView(BaseFormView):
 class LoginEditView(BaseFormView):
     schema = get_add_edit_schema(edit=True)
 
+    def is_my_account_view(self):
+        return self.current().user_id == self.request.user.id
+
     @property
     def title(self):
-        return u"Modification des identifiants de {0}".format(
-            format_account(self.context.user)
-        )
+        if self.is_my_account_view():
+            return u"Modification de mes identifiants"
+        else:
+            return u"Modification des identifiants de {0}".format(
+                format_account(self.current().user)
+            )
 
     def before(self, form):
         form.set_appstruct(
@@ -135,8 +141,16 @@ class LoginPasswordView(LoginEditView):
     """
     Changer mon mot de passe
     """
-    title = u"Modification de mot de passe"
     schema = get_password_schema()
+
+    @property
+    def title(self):
+        if self.is_my_account_view():
+            return u"Modification de mon mot de passe"
+        else:
+            return u"Modification du mot de passe de {0}".format(
+                format_account(self.current().user)
+            )
 
 
 class UserLoginEditView(LoginEditView):
@@ -145,16 +159,18 @@ class UserLoginEditView(LoginEditView):
     def current(self):
         return self.context.login
 
-    @property
-    def title(self):
-        return u"Modification des identifiants de {0}".format(
-            format_account(self.context)
-        )
-
 
 class UserLoginPasswordView(UserLoginEditView):
-    title = u"Modification de mot de passe"
     schema = get_password_schema()
+
+    @property
+    def title(self):
+        if self.is_my_account_view():
+            return u"Modification de mon mot de passe"
+        else:
+            return u"Modification du mot de passe de {0}".format(
+                format_account(self.current().user)
+            )
 
 
 class LoginDisableView(DisableView):

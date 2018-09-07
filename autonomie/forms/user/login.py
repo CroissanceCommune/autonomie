@@ -245,6 +245,16 @@ def set_widgets(schema):
     return schema
 
 
+def remove_actual_password_my_account(schema, kw):
+    """
+    Remove the actual password field if it's not the current_user's account
+    """
+    context = kw['request'].context
+    if context not in (kw['request'].user, kw['request'].user.login):
+        del schema['password']
+
+
+
 def get_password_schema():
     """
     Return the schema for user password change
@@ -271,6 +281,7 @@ def get_password_schema():
     )
 
     schema['pwd_hash'].title = u"Nouveau mot de passe"
+    schema.after_bind = remove_actual_password_my_account
 
     return schema
 

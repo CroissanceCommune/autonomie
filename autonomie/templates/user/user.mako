@@ -23,68 +23,70 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="company_disabled_msg" />
 <%block name="mainblock">
-% if request.has_permission('edit.login'):
 <div class='row'>
+    <div class='col-md-2'>
     % if user.login:
         % if user.login.active:
-        <div class='col-md-2'>
             <i class='fa fa-lock fa-3x fa-border text-success' style='vertical-align:middle'></i>
-        </div>
-        <div class='col-md-10'>
-            <span class='text-success'>
-                Ce compte dispose d'identifiants
-                <strong>l'utilisateur peut se connecter à Autonomie</strong>
-            </span>
-        </div>
-        % else:
-        <div class='col-md-2'>
+        %else:
             <i class='fa fa-lock fa-3x fa-border text-danger' style='vertical-align:middle'></i>
-        </div>
-        <div class='col-md-10'>
-            <span class='text-danger'>
-                Les identifiants de ce compte sont désactivés
-                <strong>
-                l'utilisateur ne peut pas se connecter à Autonomie
-                </strong>
-            </span>
-        </div>
         % endif
-        <a class='btn btn-default'
-            href="${request.route_path('/users/{id}/login', id=user.id)}"
-            >
-            <i class='fa fa-search'></i>&nbsp;Voir
-        </a>
     % else:
-        <div class='col-md-2'>
-            <i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
-        </div>
-        <div class='col-md-10'>
-            <em>Ce compte ne dispose pas d'identifiants</em><&nbsp;
-            <a
-            class='btn btn-primary'
-            href="${request.route_path('/users/{id}/login', id=user.id, _query={'action': 'add'})}"
-            >
-                <i class='fa fa-plus-circle'></i>&nbsp;Créer des identifiants
+        <i class='fa fa-lock fa-3x fa-border' style='vertical-align:middle'></i>
+    % endif
+    </div>
+% if request.has_permission('edit.login'):
+    <div class='col-md-10'>
+    % if user.login:
+        % if user.login.active:
+        <span class='text-success'>
+            Ce compte dispose d'identifiants
+            <strong>l'utilisateur peut se connecter à Autonomie</strong>
+        </span>
+        <div>
+            <a class='btn btn-default'
+                href="${request.route_path('/users/{id}/login', id=user.id)}"
+                >
+                <i class='fa fa-search'></i>&nbsp;Voir
             </a>
         </div>
+        % else:
+        <span class='text-danger'>
+            Les identifiants de ce compte sont désactivés
+            <strong>
+            l'utilisateur ne peut pas se connecter à Autonomie
+            </strong>
+        </span>
+        % endif
+    % else:
+        <em>Ce compte ne dispose pas d'identifiants</em><&nbsp;
+        <a
+        class='btn btn-primary'
+        href="${request.route_path('/users/{id}/login', id=user.id, _query={'action': 'add'})}"
+        >
+            <i class='fa fa-plus-circle'></i>&nbsp;Créer des identifiants
+        </a>
     % endif
-</div>
+    </div>
 % elif request.has_permission('set_email.user'):
-    <a
-        class='btn btn-primary primary-action'
-        href="${request.route_path('/users/{id}/myaccount', id=request.context.id)}"
-        >
-        <i class='fa fa-pencil'></i>&nbsp;Modifier mes informations
-    </a>
+    <div class='col-md-10'>
+        <a
+            class='btn btn-default'
+            href="${request.route_path('/users/{id}/myaccount', id=request.context.id)}"
+            >
+            <i class='fa fa-pencil'></i>&nbsp;Modifier mes informations
+        </a>
+    % if request.has_permission('set_password.login') and user.login:
+        <a
+            class='btn btn-default'
+            href="${request.route_path('/users/{id}/login/set_password', id=request.context.id)}"
+            >
+            <i class='fa fa-lock'></i>&nbsp;Changer mon mot de passe
+        </a>
+    % endif
+    </div>
 % endif
-% if request.has_permission('set_password.login') and user.login:
-    <a
-        class='btn btn-primary primary-action'
-        href="${request.route_path('/users/{id}/login/set_password', id=request.context.id)}"
-        >
-        <i class='fa fa-lock'></i>&nbsp;Changer de mot de passe
-    </a>
-% endif
+</div>
 <hr />
 
 
@@ -179,12 +181,21 @@
             style='vertical-align:middle'></i>
     </div>
     <div class='col-md-10'>
+    % if user == request.user:
+    <a class='btn btn-default'
+        href="${request.route_path('/users/{id}/trainerdatas/edit', id=user.id)}"
+        >
+        <i class='fa fa-search'></i>&nbsp;Voir ma fiche formateur
+    </a>
+    % else:
     <div class='text-success'>Une fiche formateur est associée à ce compte</div>
     <a class='btn btn-default'
         href="${request.route_path('/users/{id}/trainerdatas/edit', id=user.id)}"
         >
         <i class='fa fa-search'></i>&nbsp;Voir
     </a>
+    % endif
+    </div>
     % elif request.has_permission('add.trainerdatas'):
     <div class='col-md-2'>
         <i

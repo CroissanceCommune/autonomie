@@ -52,7 +52,7 @@
     <% cancelinvoice = request.context %>
     <h2>${cancelinvoice.name}</h2>
     <p class='lead'>
-    Cet avoir porte le numéro <b>${cancelinvoice.official_number}</b>
+    ${cancelinvoice.official_number}
     </p>
 </%block>
 <%block name='moretabs'>

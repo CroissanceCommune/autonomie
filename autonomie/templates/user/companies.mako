@@ -24,6 +24,7 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/utils.mako" import="company_disabled_msg" />
 <%block name="mainblock">
+    % if companies:
     <table class="table table-striped table-condensed table-hover">
         <thead>
             <th>Nom</th>
@@ -102,6 +103,9 @@
             % endfor
         </tbody>
     </table>
+    % else:
+        <div class='alert alert-warning'><em>Ce compte n'est rattaché à aucune entreprise</em></div>
+    % endif
     <a href="${request.route_path('/users/{id}/companies/associate', id=user.id)}"
         class='btn btn-primary'>
         <i class="glyphicon glyphicon-plus"></i>

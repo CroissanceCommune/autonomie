@@ -1209,8 +1209,9 @@ class TreeMixin:
 
     @classmethod
     def get_url(cls, request):
-        if getattr(cls, 'url', None) is not None:
-            return cls(request).url
+        if getattr(cls, 'tree_url', None) is not None:
+            return cls(request).tree_url
+
         elif getattr(cls, 'route_name', None) is not None:
             if isinstance(cls.route_name, property):
                 return cls(request).route_name
@@ -1227,20 +1228,26 @@ class TreeMixin:
             return cls.title
 
     @classmethod
-    def get_breadcrumb(cls, request, local=False):
+    def get_breadcrumb(cls, request, is_leaf=False):
         """
         Collect breadcrumb entries
 
         :param obj request: The Pyramid request
-        :param bool local: Is the breadcrumb for local use
+        :param bool is_leaf: Do we ask the leaf node
         :returns: A generator of 2-uples (title, url)
         """
         if cls.parent_view is not None:
             for link in cls.parent_view.get_breadcrumb(request):
                 yield link
 
-        if not local:
-            yield Link(cls.get_url(request), cls.get_title(request))
+        if getattr(cls, "tree_is_visible", None) is not None:
+            visible = cls(request).tree_is_visible
+        else:
+            visible = True
+
+        if not is_leaf:
+            if visible:
+                yield Link(cls.get_url(request), cls.get_title(request))
         else:
             yield Link("", cls.get_title(request))
 
@@ -1282,7 +1289,7 @@ class TreeMixin:
 
     @property
     def breadcrumb(self):
-        return self.get_breadcrumb(self.request, local=True)
+        return self.get_breadcrumb(self.request, is_leaf=True)
 
     @property
     def back_link(self):

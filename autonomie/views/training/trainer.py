@@ -117,7 +117,7 @@ class TrainerDatasEditView(BaseEditView):
         form.widget = AccordionFormWidget(named_grids=FORM_GRID)
 
     def get_context_model(self):
-        return self.current_userdatas
+        return self.current_trainerdatas
 
     def redirect(self):
         return HTTPFound(self.request.current_route_path())

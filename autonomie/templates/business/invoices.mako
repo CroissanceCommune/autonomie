@@ -109,7 +109,7 @@
     ${records.item_count} Résultat(s)
     </div>
     <div class='panel-body'>
-        ${request.layout_manager.render_panel('task_list', records, datatype="invoice" is_admin_view=is_admin, is_project_view=True, is_business_view=True)}
+        ${request.layout_manager.render_panel('task_list', records, datatype="invoice", is_admin_view=is_admin, is_project_view=True, is_business_view=True)}
         ${pager(records)}
     </div>
 </div>

@@ -117,7 +117,9 @@ class EstimationAddView(TaskAddView):
 
 
 class EstimationEditView(TaskEditView):
+    route_name = '/estimations/{id}'
 
+    @property
     def title(self):
         customer = self.context.customer
         customer_label = customer.label
@@ -154,6 +156,7 @@ class EstimationAdminView(BaseEditView):
 
 class EstimationHtmlView(TaskHtmlView):
     label = u"Devis"
+    route_name = "/estimations/{id}.html"
 
     def actions(self):
         estimation_signed_status_js.need()
@@ -172,7 +175,7 @@ class EstimationPdfView(TaskPdfView):
 class EstimationDuplicateView(TaskDuplicateView):
     label = u"le devis"
 
-    def _after_task_duplicate(task, appstruct):
+    def _after_task_duplicate(self, task, appstruct):
         task.initialize_business_datas()
         return task
 
@@ -313,10 +316,10 @@ def includeme(config):
         request_param="action=add",
         layout="default"
     )
-
-    config.add_view(
+    from autonomie.views.business.business import BusinessOverviewView
+    config.add_tree_view(
         EstimationEditView,
-        route_name='/estimations/{id}',
+        parent=BusinessOverviewView,
         renderer='tasks/form.mako',
         permission='view.estimation',
         layout='opa',
@@ -341,9 +344,10 @@ def includeme(config):
         permission="duplicate.estimation",
         renderer='tasks/add.mako',
     )
-    config.add_view(
+    from autonomie.views.business.business import BusinessOverviewView
+    config.add_tree_view(
         EstimationHtmlView,
-        route_name="/estimations/{id}.html",
+        parent=BusinessOverviewView,
         renderer='tasks/estimation_view_only.mako',
         permission='view.estimation',
     )

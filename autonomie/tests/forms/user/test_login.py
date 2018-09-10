@@ -4,6 +4,7 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 import pytest
+from autonomie.tests.tools import Dummy
 
 
 def test_password_change_schema(login, pyramid_request):
@@ -12,6 +13,24 @@ def test_password_change_schema(login, pyramid_request):
 
     schema = get_password_schema()
     pyramid_request.context = login
+    pyramid_request.user = Dummy(login=None)
+
+    schema = schema.bind(request=pyramid_request)
+
+    result = schema.deserialize(
+        {'pwd_hash': u"New pass"}
+    )
+
+    assert result['pwd_hash'] == u'New pass'
+
+
+def test_mypassword_change_schema(login, pyramid_request):
+    import colander
+    from autonomie.forms.user.login import get_password_schema
+
+    schema = get_password_schema()
+    pyramid_request.context = login
+    pyramid_request.user = Dummy(login=login)
 
     schema = schema.bind(request=pyramid_request)
 
@@ -39,7 +58,7 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
             'pwd_hash': 'oo',
             'primary_group': 'contractor',
             'groups': ['trainer'],
-            'user_id': 3
+            'user_id': 1500
         }
     )
 
@@ -52,7 +71,7 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
                 'pwd_hash': '',
                 'primary_group': 'contractor',
                 'groups': ['trainer'],
-                'user_id': 3
+                'user_id': 1500
             }
         )
 
@@ -63,7 +82,7 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
                 'pwd_hash': 'ooo',
                 'primary_group': 'contractor',
                 'groups': ['trainer'],
-                'user_id': 3
+                'user_id': 1500
             }
         )
     with pytest.raises(colander.Invalid):
@@ -73,7 +92,7 @@ def test_add_schema(dbsession, pyramid_request, login, groups):
                 'pwd_hash': 'ooo',
                 'primary_group': '',
                 'groups': ['trainer'],
-                'user_id': 3
+                'user_id': 1500
             }
         )
 

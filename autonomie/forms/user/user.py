@@ -130,7 +130,7 @@ def get_list_schema():
     """
     schema = forms.lists.BaseListsSchema().clone()
 
-    schema['search'].description = u"Nom, entreprise, activité"
+    schema['search'].description = u"Nom, entreprise"
 
     schema.add(
         colander.SchemaNode(
@@ -150,8 +150,7 @@ def get_list_schema():
                 values=(
                     ('active_login', u"Seulement les comptes actifs"),
                     ('unactive_login', u"Seulement les comptes désactivés"),
-                    ('with_login', u"Tous les comptes avec identiants"),
-                    ('no_login', u"Inclure les comptes sans identifiants"),
+                    ('with_login', u"Tous les comptes avec identifiants"),
                 )
             ),
             default='active_login',

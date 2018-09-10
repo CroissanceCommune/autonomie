@@ -59,7 +59,7 @@ class ProjectBusinessListView(BaseListView, TreeMixin):
             return self.context.id
 
     @property
-    def url(self):
+    def tree_url(self):
         return self.request.route_path(self.route_name, id=self.current_id())
 
     @property

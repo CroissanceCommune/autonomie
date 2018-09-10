@@ -101,7 +101,10 @@ nav.sidebar-menu .subnav li {
   padding: 0;
   line-height: 36px;
   list-style: none;
-  background-color: #e6e9ed; }
+  background-color: #e6e9ed;
+  white-space: nowrap;
+  overflow: auto;
+  overflow-y: hidden; }
 
 .breadcrumb-arrow li:first-child a {
   border-radius: 4px 0 0 4px;

@@ -5,8 +5,9 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 
 import logging
-
+import colander
 import pkg_resources
+
 from autonomie.resources import (
     user_resources,
 )
@@ -18,6 +19,34 @@ from autonomie.utils.menu import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+@colander.deferred
+def deferred_enterprise_label(item, kw):
+    """
+    Collect a custom label for the "Entreprises" menu entry using binding
+    parameters
+    """
+    current_user = kw['current_user']
+    if current_user.companies:
+        label = u"Entreprises <span class='badge'>{}</span>".format(
+            len(current_user.companies)
+        )
+    else:
+        label = u"<em>Entreprises</em> <span class='badge badge-alert'>0</span>"
+    return label
+
+
+@colander.deferred
+def deferred_login_label(item, kw):
+    """
+    Custom deferred label for the login sidebar entry
+    """
+    current_user = kw['current_user']
+    if current_user.login:
+        return u"Identifiants"
+    else:
+        return u"<em>Identifiants</em>"
 
 
 UserMenu = Menu(name="usermenu")
@@ -34,7 +63,7 @@ UserMenu.add(
 UserMenu.add(
     AttrMenuItem(
         name="login",
-        label=u'Identifiants',
+        label=deferred_login_label,
         route_name=u'/users/{id}/login',
         icon=u'fa fa-lock',
         disable_attribute='login',
@@ -45,10 +74,10 @@ UserMenu.add(
 UserMenu.add(
     AttrMenuItem(
         name="companies",
-        label=u'Entreprises',
+        label=deferred_enterprise_label,
+        title=u"Entreprises associées à ce compte",
         route_name=u'/users/{id}/companies',
         icon=u'fa fa-building',
-        disable_attribute='companies',
         perm='list.company',
     ),
 )
@@ -77,6 +106,7 @@ class UserLayout(object):
     @property
     def usermenu(self):
         UserMenu.set_current(self.current_user_object)
+        UserMenu.bind(current_user=self.current_user_object)
         return UserMenu
 
 
@@ -85,4 +115,4 @@ def includeme(config):
         UserLayout,
         template='autonomie:templates/layouts/user.mako',
         name='user'
-)
+    )

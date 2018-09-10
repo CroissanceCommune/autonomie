@@ -71,11 +71,21 @@ class BusinessOverviewView(BaseView, TreeMixin):
         BaseView.__init__(self, *args, **kw)
 
     @property
+    def tree_is_visible(self):
+        """
+        Check if this node should be displayed in the breadcrumb tree
+        """
+        if hasattr(self.context, 'project'):
+            if self.context.project.project_type.default:
+                return False
+        return True
+
+    @property
     def title(self):
         return u"{0.business_type.label} : {0.name}".format(self.context)
 
     @property
-    def url(self):
+    def tree_url(self):
         if hasattr(self.context, 'business_id'):
             return self.request.route_path(
                 self.route_name, id=self.context.business_id

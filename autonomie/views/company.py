@@ -177,16 +177,16 @@ class CompanyList(BaseListView):
         if company.active:
             yield (
                 url,
-                u"Archiver",
-                u"Archiver l'entreprise",
+                u"Désactiver",
+                u"Désactiver l'entreprise",
                 'book',
                 {}
             )
         else:
             yield (
                 url,
-                u"Désarchiver",
-                u"Désarchiver l'entreprise",
+                u"Activer",
+                u"Activer l'entreprise",
                 'book',
                 {}
             )

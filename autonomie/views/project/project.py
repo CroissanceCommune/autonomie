@@ -169,7 +169,7 @@ class ProjectPhaseListView(BaseView, TreeMixin):
         BaseView.__init__(self, *args, **kw)
 
     @property
-    def url(self):
+    def tree_url(self):
         return self.request.route_path(self.route_name, id=self.context.id)
 
     @property
@@ -326,7 +326,7 @@ class ProjectGeneralView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_GENERAL_ROUTE
 
     @property
-    def url(self):
+    def tree_url(self):
         return self.request.route_path(self.route_name, id=self.context.id)
 
     @property

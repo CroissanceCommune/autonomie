@@ -164,7 +164,7 @@ class AttrMenuItem(MenuItem):
     def enabled(self, context, request):
         if self.disable_attribute is None:
             return True
-        return getattr(context, self.disable_attribute, None) is not None
+        return getattr(context, self.disable_attribute, None) not in (None, [])
 
     def visible(self, context, request):
         if self.hidden_attribute is None:

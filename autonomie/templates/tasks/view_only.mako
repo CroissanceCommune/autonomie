@@ -32,14 +32,10 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
 <%block name='content'>
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
-        ${request.context.name}
     </div>
     <div class='panel-body'>
         <div class='row'>
             <div class='col-xs-12 col-md-3'>
-                <span class='hidden-xs' style='float:left'>
-                <i class='fa fa-file fa-4x'></i>&nbsp;
-                </span>
                 % if hasattr(next, 'before_actions'):
                 ${next.before_actions()}
                 % endif
@@ -63,6 +59,9 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                 </div>
             </div>
             <div class='col-xs-12 col-md-9'>
+                % if hasattr(next, 'before_task_tabs'):
+                ${next.before_task_tabs()}
+                % endif
 
                 <div class="nav-tabs-responsive">
                     <ul class="nav nav-tabs" role="tablist">
@@ -113,7 +112,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                                 <dd>${api.format_date(request.context.date)}</dd>
                                 <dt>Client</dt>
                                 <dd>
-                                    ${request.context.customer.get_label()}
+                                    ${request.context.customer.label}
                                     % if request.context.customer:
                                         (${request.context.customer.code})
                                     % endif

@@ -118,7 +118,7 @@ class CustomersListTools(object):
     title = u"Liste des clients"
     schema = get_list_schema()
     sort_columns = {
-        'name': Customer.name,
+        'label': Customer.label,
         "code": Customer.code,
         "lastname": Customer.lastname,
         "created_at": Customer.created_at,
@@ -152,7 +152,7 @@ class CustomersListTools(object):
         search = appstruct.get('search')
         if search:
             records = records.filter(
-                or_(Customer.name.like("%" + search + "%"),
+                or_(Customer.label.like("%" + search + "%"),
                     Customer.lastname.like("%" + search + "%")))
         return records
 
@@ -288,7 +288,7 @@ def customer_delete(request):
     customer = request.context
     request.dbsession.delete(customer)
     request.session.flash(
-        u"Le client '{0}' a bien été supprimé".format(customer.name)
+        u"Le client '{0}' a bien été supprimé".format(customer.label)
     )
     return HTTPFound(request.referer)
 
@@ -298,7 +298,7 @@ def customer_view(context, request):
         Return the view of a customer
     """
     populate_actionmenu(request)
-    title = u"Client : {0}".format(context.get_label())
+    title = u"Client : {0}".format(context.label)
     if request.context.code:
         title += u" {0}".format(context.code)
 
@@ -384,6 +384,7 @@ class CustomerAdd(BaseFormView):
             model.type_ = "company"
         else:
             model.type_ = "individual"
+
         self.dbsession.add(model)
 
         self.dbsession.flush()

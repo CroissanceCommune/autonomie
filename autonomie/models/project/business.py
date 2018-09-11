@@ -96,3 +96,6 @@ class Business(Node):
         primaryjoin="and_(Task.business_id==Business.id, "
         "Task.type_.in_(('invoice', 'cancelinvoice')))"
     )
+
+    def get_company_id(self):
+        return self.project.company_id

@@ -1076,10 +1076,13 @@ class UserDatas(Node):
         ).filter(
             CareerPath.cae_situation_id != None
         ).first()
-        situation = CaeSituationOption.query().filter(
-            CaeSituationOption.id == last_situation_path.cae_situation_id
-        ).first()
-        return situation
+        if last_situation_path is None:
+            return None
+        else:
+            situation = CaeSituationOption.query().filter(
+                CaeSituationOption.id == last_situation_path.cae_situation_id
+            ).first()
+            return situation
 
 
 # multi-valued user-datas

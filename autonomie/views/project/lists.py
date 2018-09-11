@@ -67,7 +67,7 @@ class ProjectListView(BaseListView, TreeMixin):
     item_route_name = PROJECT_ITEM_ROUTE
 
     @property
-    def url(self):
+    def tree_url(self):
         if isinstance(self.context, Company):
             cid = self.context.id
         elif isinstance(self.context, Project):
@@ -106,7 +106,7 @@ class ProjectListView(BaseListView, TreeMixin):
                 or_(
                     Project.name.like("%" + search + "%"),
                     Project.customers.any(
-                        Customer.name.like("%" + search + "%")
+                        Customer.label.like("%" + search + "%")
                     )
                 )
             )

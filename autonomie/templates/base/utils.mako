@@ -27,7 +27,7 @@
 <%def name='address(datas, _type)'>
     %if _type == 'customer':
             <address>
-                <b>${datas.name}</b><br />
+                <b>${datas.label}</b><br />
                 ${datas.address}<br />
                 ${datas.zip_code} ${datas.city}
                 % if datas.country and datas.country!= 'France':
@@ -61,7 +61,7 @@
     %if customer is not UNDEFINED and customer is not None:
         % if link:
         <a href="${request.route_path('customer', id=customer.id)}"
-            title="Voir le client ${customer.name}">
+            title="Voir le client ${customer.label}">
         % endif
         ${customer.label}
         % if link:

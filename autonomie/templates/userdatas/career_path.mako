@@ -45,7 +45,11 @@
                     <tr>
                         <td>${api.format_date(stage.start_date)}</td>
                         <td>${api.format_date(stage.end_date)}</td>
-                        <td>${stage.career_stage.name}</td>                        
+                        <td>
+                            % if stage.career_stage is not None:
+                                ${stage.career_stage.name}
+                            % endif
+                        </td>
                         <td class="text-muted">
                             % if stage.cae_situation is not None:
                                 <small>${stage.cae_situation.label}</small>

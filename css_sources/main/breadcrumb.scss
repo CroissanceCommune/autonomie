@@ -10,6 +10,9 @@
     line-height: 36px;
     list-style: none;
     background-color: $breadcrumb-bkg-color;
+    white-space: nowrap;
+    overflow: auto;
+overflow-y: hidden;
 }
 .breadcrumb-arrow li:first-child a {
     border-radius: 4px 0 0 4px;

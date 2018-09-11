@@ -39,6 +39,7 @@ from autonomie.views import (
     BaseFormView,
     submit_btn,
     cancel_btn,
+    TreeMixin,
 )
 from autonomie.views.project.routes import (
     PROJECT_ITEM_PHASE_ROUTE,
@@ -122,7 +123,7 @@ class TaskAddView(BaseFormView):
         return HTTPFound(url)
 
 
-class TaskEditView(BaseView):
+class TaskEditView(BaseView, TreeMixin):
 
     def title(self):
         return u"Modification du document {task.name}".format(task=self.context)
@@ -151,11 +152,13 @@ class TaskEditView(BaseView):
         if hasattr(self, '_before'):
             self._before()
 
+        self.populate_navigation()
+
         task_resources.need()
-        populate_actionmenu(self.request)
+        # populate_actionmenu(self.request)
         return dict(
             context=self.context,
-            title=self.title(),
+            title=self.title,
             context_url=self.context_url(),
             form_config_url=self.form_config_url(),
             load_catalog_url=self.load_catalog_url(),
@@ -268,7 +271,7 @@ class TaskMoveToPhaseView(BaseView):
         )
 
 
-class TaskHtmlView(BaseView):
+class TaskHtmlView(BaseView, TreeMixin):
     """
     Base Task html view
     """
@@ -297,6 +300,7 @@ class TaskHtmlView(BaseView):
         return self.context.file_requirements
 
     def __call__(self):
+        self.populate_navigation()
         task_html_pdf_css.need()
         # If the task is editable, we go the edit page
         if self.request.has_permission('edit.%s' % self.context.type_):
@@ -307,12 +311,12 @@ class TaskHtmlView(BaseView):
                 )
             )
 
-        populate_actionmenu(self.request)
         return dict(
             title=self.title,
             task=self.context,
             actions=self.actions(),
             indicators=self._collect_file_indicators(),
+
         )
 
 

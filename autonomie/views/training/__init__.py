@@ -8,3 +8,4 @@
 def includeme(config):
     config.include(".routes")
     config.include('.trainer')
+    config.include('.lists')

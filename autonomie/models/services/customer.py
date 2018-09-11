@@ -116,12 +116,8 @@ class CustomerService(object):
         query = customer_class.query()
         query = query.options(load_only(
             "id",
-            "name",
-            "type_",
-            "firstname",
-            "lastname",
+            "label",
             "code",
-            "civilite",
             "company_id",
         ))
         return query

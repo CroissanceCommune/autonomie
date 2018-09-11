@@ -51,6 +51,7 @@ from sqlalchemy.orm import (
     deferred,
     relationship,
 )
+from sqlalchemy.event import listen
 from autonomie_base.models.types import (
     PersistentACLMixin,
 )
@@ -136,6 +137,15 @@ class Customer(DBBASE, PersistentACLMixin):
             'colanderalchemy': {'exclude': True},
         },
         nullable=False,
+    )
+
+    label = Column(
+        "label",
+        String(255),
+        info={
+            'colanderalchemy': {'exclude': True},
+        },
+        default='',
     )
 
     name = Column(
@@ -468,15 +478,8 @@ class Customer(DBBASE, PersistentACLMixin):
     def is_company(self):
         return self.type_ == 'company'
 
-    def get_label(self):
+    def _get_label(self):
         return self._autonomie_service.get_label(self)
-
-    @property
-    def label(self):
-        """
-        Property used for exports (as a related_key parameter)
-        """
-        return self.get_label()
 
     def get_name(self):
         return self._autonomie_service.format_name(self)
@@ -588,3 +591,14 @@ INDIVIDUAL_FORM_GRID = (
         ('compte_tiers', 4),
     )
 )
+
+
+def set_customer_label(mapper, connection, target):
+    """
+    Set the label of the given customer
+    """
+    target.label = target._get_label()
+
+
+listen(Customer, "before_insert", set_customer_label)
+listen(Customer, "before_update", set_customer_label)

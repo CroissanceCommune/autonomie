@@ -206,7 +206,7 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         return title
 
     @property
-    def url(self):
+    def tree_url(self):
         return self.request.route_path(
             EXPENSE_KM_URL,
             year=_get_year_from_request(self.request)

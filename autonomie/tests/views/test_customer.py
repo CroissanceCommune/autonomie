@@ -119,6 +119,7 @@ class TestCustomerAdd():
             assert getattr(customer, key) == value
         assert customer.type_ == 'individual'
         assert customer.company == company
+        assert customer.label == customer._get_label()
 
 
 class TestCustomerEdit():
@@ -139,6 +140,7 @@ class TestCustomerEdit():
         assert customer.lastname == u'Changed Lastname'
         assert customer.compte_cg == "1"
         assert customer.compte_tiers == "2"
+        assert customer.label == customer._get_label()
 
 
 def test_customer_delete(customer, get_csrf_request_with_db):

@@ -60,7 +60,7 @@
             </div>
             <div class='col-md-9 hidden-xs'>
             <%block name='projecttitle'>
-                <div>Clients : ${','.join(layout.customer_names)}</div>
+                <div>Clients : ${','.join(layout.customer_labels)}</div>
             </%block>
             </div>
         </div>

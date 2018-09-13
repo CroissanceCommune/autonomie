@@ -153,7 +153,7 @@ class BaseStatisticCriterion(DBBASE):
     """
     __table_args__ = default_table_args
     __mapper_args__ = {
-        'polymorphic_on': 'type_',
+        'polymorphic_on': 'type',
         'polymorphic_identity': 'base',
     }
 
@@ -266,6 +266,7 @@ class CommonStatisticCriterion(BaseStatisticCriterion):
         return CommonStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
             search1=self.search1,
             search2=self.search2,
         )
@@ -341,6 +342,7 @@ class DateStatisticCriterion(BaseStatisticCriterion):
         return DateStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
             search1=self.search1,
             search2=self.search2,
         )

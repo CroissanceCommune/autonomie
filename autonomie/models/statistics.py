@@ -234,6 +234,14 @@ class AndStatisticCriterion(BaseStatisticCriterion):
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
     label = Column(String(255), default='')
 
+    def duplicate(self):
+        return AndStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+            label=self.label,
+        )
+
 
 class BoolStatisticCriterion(BaseStatisticCriterion):
     __table_args__ = default_table_args
@@ -308,6 +316,7 @@ class OptListStatisticCriterion(BaseStatisticCriterion):
         return OptListStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
             searches=self.searches,
         )
 

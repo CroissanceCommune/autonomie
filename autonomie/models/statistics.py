@@ -259,6 +259,7 @@ class BoolStatisticCriterion(BaseStatisticCriterion):
         return BoolStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
         )
 
 

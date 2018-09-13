@@ -153,7 +153,7 @@ class BaseStatisticCriterion(DBBASE):
     """
     __table_args__ = default_table_args
     __mapper_args__ = {
-        'polymorphic_on': 'type',
+        'polymorphic_on': 'type_',
         'polymorphic_identity': 'base',
     }
 

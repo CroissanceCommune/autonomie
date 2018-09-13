@@ -224,6 +224,13 @@ class OrStatisticCriterion(BaseStatisticCriterion):
     __mapper_args__ = {'polymorphic_identity': 'or'}
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
 
+    def duplicate(self):
+        return AndStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+        )
+
 
 class AndStatisticCriterion(BaseStatisticCriterion):
     """

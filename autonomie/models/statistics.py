@@ -224,6 +224,13 @@ class OrStatisticCriterion(BaseStatisticCriterion):
     __mapper_args__ = {'polymorphic_identity': 'or'}
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
 
+    def duplicate(self):
+        return AndStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+        )
+
 
 class AndStatisticCriterion(BaseStatisticCriterion):
     """
@@ -233,6 +240,14 @@ class AndStatisticCriterion(BaseStatisticCriterion):
     __mapper_args__ = {'polymorphic_identity': 'and'}
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
     label = Column(String(255), default='')
+
+    def duplicate(self):
+        return AndStatisticCriterion(
+            key=self.key,
+            method=self.method,
+            type=self.type,
+            label=self.label,
+        )
 
 
 class BoolStatisticCriterion(BaseStatisticCriterion):
@@ -244,6 +259,7 @@ class BoolStatisticCriterion(BaseStatisticCriterion):
         return BoolStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
         )
 
 
@@ -266,6 +282,7 @@ class CommonStatisticCriterion(BaseStatisticCriterion):
         return CommonStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
             search1=self.search1,
             search2=self.search2,
         )
@@ -307,6 +324,7 @@ class OptListStatisticCriterion(BaseStatisticCriterion):
         return OptListStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
             searches=self.searches,
         )
 
@@ -341,6 +359,7 @@ class DateStatisticCriterion(BaseStatisticCriterion):
         return DateStatisticCriterion(
             key=self.key,
             method=self.method,
+            type=self.type,
             search1=self.search1,
             search2=self.search2,
         )

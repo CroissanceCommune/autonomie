@@ -5,8 +5,6 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 
 import logging
-import colander
-
 from autonomie.models.project.project import Project
 from autonomie.utils.menu import (
     MenuItem,
@@ -30,7 +28,12 @@ logger = logging.getLogger(__name__)
 ProjectMenu = Menu(name="projectmenu")
 
 
-@colander.deferred
+def deferred_business_list_show_perms(item, request, kw):
+    proj = kw['current_project']
+    return proj.project_type.name != 'default' and \
+        request.has_permission('list.businesses')
+
+
 def deferred_business_list_label(item, kw):
     """
     return the label to be used for the given item
@@ -44,13 +47,24 @@ def deferred_business_list_label(item, kw):
         return u"Liste des affaires"
 
 
+def deferred_phase_show_perms(item, request, kw):
+    """
+    Check if the phase menu should be shown
+    """
+    proj = kw['current_project']
+    if proj.project_type.name in ('training', 'construction'):
+        return False
+    else:
+        return True and request.has_permission('view.project')
+
+
 ProjectMenu.add(
     MenuItem(
         name="project_businesses",
         label=deferred_business_list_label,
         route_name=PROJECT_ITEM_BUSINESS_ROUTE,
         icon=u'fa fa-folder-open',
-        perm='list.businesses',
+        perm=deferred_business_list_show_perms,
     )
 )
 ProjectMenu.add(
@@ -59,7 +73,7 @@ ProjectMenu.add(
         label=u"Document rangés par dossiers",
         route_name=PROJECT_ITEM_PHASE_ROUTE,
         icon=u'fa fa-folder-open',
-        perm='view.project',
+        perm=deferred_phase_show_perms,
     )
 )
 ProjectMenu.add(
@@ -78,15 +92,6 @@ ProjectMenu.add(
         route_name=PROJECT_ITEM_INVOICE_ROUTE,
         icon=u'fa fa-files-o',
         perm='list.invoices',
-    )
-)
-ProjectMenu.add(
-    MenuItem(
-        name="project_general",
-        label=u'Informations générales',
-        route_name=PROJECT_ITEM_GENERAL_ROUTE,
-        icon=u'fa fa-cog',
-        perm='view.project',
     )
 )
 ProjectMenu.add(
@@ -123,6 +128,13 @@ class ProjectLayout(DefaultLayout):
             PROJECT_ITEM_ROUTE,
             id=self.current_project_object.id,
             _query={'action': 'edit'}
+        )
+
+    @property
+    def details_url(self):
+        return self.request.route_path(
+            PROJECT_ITEM_GENERAL_ROUTE,
+            id=self.current_project_object.id,
         )
 
     @property

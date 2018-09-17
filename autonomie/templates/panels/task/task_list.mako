@@ -25,8 +25,14 @@
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <div class='row'>
     <div class='col-md-4 col-md-offset-8 col-xs-12'>
-        <div class='status-table list-legend'>
         % if is_invoice_list:
+        <div
+            class='collapse-link text-right'
+            data-toggle="collapse"
+            data-target=".list-legend">
+            Légende&nbsp;<i class='fa fa-caret-down'></i>
+        </div>
+        <div class='status-table list-legend collapse'>
             <div>
                 <span class='btn btn-circle paid-status-resulted'><br /></span>
                 <span>Factures payées</span>
@@ -57,8 +63,8 @@
                 <span>Factures invalides</span>
             </div>
             % endif
-        % endif
         </div>
+        % endif
     </div>
 </div>
 <% num_columns = len(columns) + 1 %>
@@ -106,10 +112,13 @@
                 <% customer_label = document.customer.label %>
 
                 <tr class='status tolate-${document.is_tolate()} paid-status-${paid_status} status-${document.status}'>
-                        <td class='status-td'>
+                    <td
+                        class='status-td'
+                        title="${api.format_status(document)}"
+                        >
                         <br />
                         </td>
-            <td>
+            <td title="${api.format_status(document)}">
                 ${official_number}
             </td>
             % if is_admin_view:

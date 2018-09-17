@@ -47,7 +47,10 @@ class MenuItem(object):
 
     def has_permission(self, context, request):
         if self.perm is not None:
-            return request.has_permission(self.perm)
+            if isinstance(self.perm, colander.deferred):
+                return self.perm(context, request)
+            else:
+                return request.has_permission(self.perm)
         return True
 
     def get_label(self, **params):

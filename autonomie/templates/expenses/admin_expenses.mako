@@ -80,7 +80,7 @@ Admin expenses list view
             </div>
             <div id='list-legend' class='status-table list-legend collapse'>
                     <div>
-                        <span class='btn btn-circle status-wait'><br /></span>
+                        <span class='btn btn-circle status-wait justified-False'><br /></span>
                         <span>Notes de dépense en attente de validation</span>
                     </div>
                     <div>

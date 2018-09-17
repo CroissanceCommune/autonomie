@@ -3,11 +3,47 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-import colander
 
 
 class MenuItem(object):
     __type__ = 'item'
+    """
+    Une entrée de menu
+
+    name
+
+        Name of the entry used in the html code
+
+    route_name
+
+        Name of the route this entry is pointing on
+
+    icon
+
+        Name of the icon to display. For fontawesome icons, there is no need to
+        prefix icons with fa fa- infos
+
+    label
+
+        The label to display in the UI, if a callable is provided, it
+        will be called with the menu's bind parameters
+
+    title
+
+        The title shown to the end user when he hovers the menu item
+
+    perm
+
+        If a string is provided, the user should have the associated permission
+        on the current context to view this menu entry
+        If a callable is provided, it will be called with the request
+        as first argument then with the menu's bind parameters
+
+    other_route_name
+
+       Here you can specify other routes for which the menu entry can show
+       itself as selected
+    """
 
     def __init__(
         self, name, route_name, icon, label, title=None,
@@ -45,16 +81,16 @@ class MenuItem(object):
             return True
         return False
 
-    def has_permission(self, context, request):
+    def has_permission(self, context, request, **bind_params):
         if self.perm is not None:
-            if isinstance(self.perm, colander.deferred):
-                return self.perm(context, request)
+            if callable(self.perm):
+                return self.perm(self, request, bind_params)
             else:
                 return request.has_permission(self.perm)
         return True
 
     def get_label(self, **params):
-        if isinstance(self.label, colander.deferred):
+        if callable(self.label):
             return self.label(self, params)
         else:
             return self.label

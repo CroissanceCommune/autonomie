@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 ProjectMenu = Menu(name="projectmenu")
 
 
-def deferred_business_list_show_perms(item, request, kw):
+def deferred_business_list_show_perms(item, kw):
     proj = kw['current_project']
+    request = kw['request']
     return proj.project_type.name != 'default' and \
         request.has_permission('list.businesses')
 
@@ -47,11 +48,12 @@ def deferred_business_list_label(item, kw):
         return u"Liste des affaires"
 
 
-def deferred_phase_show_perms(item, request, kw):
+def deferred_phase_show_perms(item, kw):
     """
     Check if the phase menu should be shown
     """
     proj = kw['current_project']
+    request = kw['request']
     if proj.project_type.name in ('training', 'construction'):
         return False
     else:

@@ -84,7 +84,9 @@ class MenuItem(object):
     def has_permission(self, context, request, **bind_params):
         if self.perm is not None:
             if callable(self.perm):
-                return self.perm(self, request, bind_params)
+                if request not in bind_params:
+                    bind_params['request'] = request
+                return self.perm(self, bind_params)
             else:
                 return request.has_permission(self.perm)
         return True
@@ -159,13 +161,18 @@ class MenuDropdown(object):
                 break
         return res
 
-    def has_permission(self, context, request):
+    def has_permission(self, context, request, **bind_params):
         if self.perm is not None:
-            return request.has_permission(self.perm)
+            if callable(self.perm):
+                if request not in bind_params:
+                    bind_params['request'] = request
+                return self.perm(self, bind_params)
+            else:
+                return request.has_permission(self.perm)
         return True
 
     def get_label(self, **params):
-        if isinstance(self.label, colander.deferred):
+        if callable(self.label):
             return self.label(self, params)
         else:
             return self.label
@@ -210,13 +217,15 @@ class AttrMenuItem(MenuItem):
             return True
         return getattr(context, self.hidden_attribute, None) is not None
 
-    def has_permission(self, context, request):
+    def has_permission(self, context, request, **bind_params):
         related = context
         if self.perm_context_attribute is not None:
             related = getattr(context, self.perm_context_attribute, None)
 
         if self.perm is not None and related is not None:
-            return request.has_permission(self.perm, related)
+            return MenuItem.has_permission(
+                self, context, request, **bind_params
+            )
         return True
 
 

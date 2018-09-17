@@ -7,6 +7,10 @@ import datetime
 import logging
 import colander
 from sqlalchemy import (distinct, extract)
+from sqlalchemy.orm import (
+    contains_eager,
+    load_only,
+)
 
 from autonomie.forms.tasks.estimation import (
     get_list_schema,
@@ -42,23 +46,36 @@ class GlobalEstimationList(BaseListView):
     def query(self):
         query = self.request.dbsession.query(
             distinct(Estimation.id),
-            Estimation.name,
-            Estimation.internal_number,
-            Estimation.status,
-            Estimation.signed_status,
-            Estimation.geninv,
-            Estimation.date,
-            Estimation.description,
-            Estimation.ht,
-            Estimation.tva,
-            Estimation.ttc,
-            Customer.id,
-            Customer.label,
-            Company.id,
-            Company.name
+            Estimation,
         )
         query = query.outerjoin(Task.company)
         query = query.outerjoin(Task.customer)
+        query = query.options(
+            contains_eager(Task.customer).load_only(
+                Customer.id,
+                Customer.label,
+            )
+        )
+        query = query.options(
+            contains_eager(Task.company).load_only(
+                Company.id,
+                Company.name
+            )
+        )
+        query = query.options(
+            load_only(
+                "name",
+                "internal_number",
+                "status",
+                "signed_status",
+                "geninv",
+                "date",
+                "description",
+                "ht",
+                "tva",
+                "ttc",
+            )
+        )
         return query
 
     def filter_date(self, query, appstruct):
@@ -138,9 +155,10 @@ class GlobalEstimationList(BaseListView):
         """
         ret_dict = BaseListView.more_template_vars(self, response_dict)
         records = response_dict['records']
-        ret_dict['totalht'] = sum(r[8] for r in records)
-        ret_dict['totaltva'] = sum(r[9] for r in records)
-        ret_dict['totalttc'] = sum(r[10] for r in records)
+        # Les records sont des 2-uples (identifiant, instance)
+        ret_dict['totalht'] = sum(r[1].ht for r in records)
+        ret_dict['totaltva'] = sum(r[1].tva for r in records)
+        ret_dict['totalttc'] = sum(r[1].ttc for r in records)
         return ret_dict
 
 

@@ -72,8 +72,8 @@
     <div class='panel-body'>
 <% columns = 8 %>
     <div class='row'>
-        <div class='col-md-4 col-md-offset-8 col-xs-12'>
-            <div class='text-right'>
+        <div class='col-md-4 col-xs-12'>
+            <div>
                 <a
                     href="#list-legend"
                     data-toggle="collapse"
@@ -205,7 +205,7 @@
       % else:
           <tr>
               <td colspan='7'>
-                  Aucun devis n'a pu être retrouvé
+                  <em>Aucun devis ne correspond à votre requête</em>
               </td>
           </tr>
       % endif

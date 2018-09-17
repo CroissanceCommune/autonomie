@@ -68,29 +68,37 @@ Admin expenses list view
     ${records.item_count} Résultat(s)
     </div>
     <div class='panel-body'>
-        <div class='row'>
-            <div class='col-md-4 col-md-offset-8 col-xs-12'>
-                <table class='table table-bordered status-table'>
-                    <tr>
-                        <td class='status-wait'><br /></td>
-                        <td>Notes de dépense en attente de validation</td>
-                    </tr>
-                    <tr>
-                        <td class=''><br /></td>
-                        <td>Notes de dépense validées</td>
-                    </tr>
-                    <tr>
-                        <td class='status justified-True'><br /></td>
-                        <td>Justificatifs reçus</td>
-                    </tr>
-                    <tr>
-                        <td class='paid-status-paid'><br /></td>
-                        <td>Notes de dépense partiellement payées</td>
-                    </tr>
-                    <tr>
-                        <td class='paid-status-resulted'><br /></td>
-                        <td>Notes de dépense payées</td>
-                    </tr>
+    <div class='row'>
+        <div class='col-md-4 col-xs-12'>
+            <div>
+                <a
+                    href="#list-legend"
+                    data-toggle="collapse"
+                    data-target="#list-legend">
+                    Légende&nbsp;<i class='fa fa-caret-down'></i>
+                </a>
+            </div>
+            <div id='list-legend' class='status-table list-legend collapse'>
+                    <div>
+                        <span class='btn btn-circle status-wait'><br /></span>
+                        <span>Notes de dépense en attente de validation</span>
+                    </div>
+                    <div>
+                        <span class='btn btn-circle '><br /></span>
+                        <span>Notes de dépense validées</span>
+                    </div>
+                    <div>
+                        <span class='btn btn-circle status justified-True'><br /></span>
+                        <span>Justificatifs reçus</span>
+                    </div>
+                    <div>
+                        <span class='btn btn-circle paid-status-paid'><br /></span>
+                        <span>Notes de dépense partiellement payées</span>
+                    </div>
+                    <div>
+                        <span class='btn btn-circle paid-status-resulted'><br /></span>
+                        <span>Notes de dépense payées</span>
+                    </div>
                 </table>
             </div>
         </div>

@@ -58,6 +58,7 @@ from autonomie.views import (
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.project.routes import PROJECT_ITEM_INVOICE_ROUTE
+from autonomie.views.business.business import BusinessOverviewView
 
 from autonomie.views.task.views import (
     TaskAddView,
@@ -104,7 +105,9 @@ class InvoiceAddView(TaskAddView):
 
 
 class InvoiceEditView(TaskEditView):
+    route_name = '/invoices/{id}'
 
+    @property
     def title(self):
         customer = self.context.customer
         customer_label = customer.label
@@ -135,6 +138,7 @@ class InvoiceDeleteView(TaskDeleteView):
 
 class InvoiceHtmlView(TaskHtmlView):
     label = u"Facture"
+    route_name = '/invoices/{id}.html'
 
 
 class InvoiceDuplicateView(TaskDuplicateView):
@@ -144,6 +148,7 @@ class InvoiceDuplicateView(TaskDuplicateView):
         business = task.gen_business()
         task.initialize_business_datas(business)
         return task
+
 
 class InvoicePdfView(TaskPdfView):
     pass
@@ -459,9 +464,9 @@ def includeme(config):
         layout='default'
     )
 
-    config.add_view(
+    config.add_tree_view(
         InvoiceEditView,
-        route_name='/invoices/{id}',
+        parent=BusinessOverviewView,
         renderer='tasks/form.mako',
         permission='view.invoice',
         layout='opa',
@@ -487,9 +492,9 @@ def includeme(config):
         renderer='tasks/add.mako',
     )
 
-    config.add_view(
+    config.add_tree_view(
         InvoiceHtmlView,
-        route_name='/invoices/{id}.html',
+        parent=BusinessOverviewView,
         renderer='tasks/invoice_view_only.mako',
         permission='view.invoice',
     )

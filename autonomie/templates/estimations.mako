@@ -71,14 +71,16 @@
     <div class='panel-body'>
 <% columns = 8 %>
     <div class='row'>
-        <div class='col-md-4 col-md-offset-8 col-xs-12'>
-            <div
-                class='collapse-link text-right'
-                data-toggle="collapse"
-                data-target=".list-legend">
-                Légende&nbsp;<i class='fa fa-caret-down'></i>
+        <div class='col-md-4 col-xs-12'>
+            <div>
+                <a
+                    href="#list-legend"
+                    data-toggle="collapse"
+                    data-target="#list-legend">
+                    Légende&nbsp;<i class='fa fa-caret-down'></i>
+                </a>
             </div>
-            <div class='status-table list-legend collapse'>
+            <div id='list-legend' class='status-table list-legend collapse'>
                 <div>
                     <span class='btn btn-circle geninv-True'><br /></span>
                     <span>Devis concrétisés en facture</span>
@@ -204,7 +206,7 @@
       % else:
           <tr>
               <td colspan='7'>
-                  Aucun devis n'a pu être retrouvé
+                  <em>Aucun devis n'a pu être retrouvé</em>
               </td>
           </tr>
       % endif

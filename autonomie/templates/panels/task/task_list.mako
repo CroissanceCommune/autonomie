@@ -24,15 +24,17 @@
 <%namespace file="/base/utils.mako" import="format_text"/>
 <%namespace file="/base/utils.mako" import="format_filelist" />
 <div class='row'>
-    <div class='col-md-4 col-md-offset-8 col-xs-12'>
+    <div class='col-md-4 col-xs-12'>
         % if is_invoice_list:
-        <div
-            class='collapse-link text-right'
-            data-toggle="collapse"
-            data-target=".list-legend">
-            Légende&nbsp;<i class='fa fa-caret-down'></i>
-        </div>
-        <div class='status-table list-legend collapse'>
+            <div>
+                <a
+                    href="#list-legend"
+                    data-toggle="collapse"
+                    data-target="#list-legend">
+                    Légende&nbsp;<i class='fa fa-caret-down'></i>
+                </a>
+            </div>
+            <div id='list-legend' class='status-table list-legend collapse'>
             <div>
                 <span class='btn btn-circle paid-status-resulted'><br /></span>
                 <span>Factures payées</span>
@@ -192,7 +194,7 @@
     % else:
         <tr>
             <td colspan='${num_columns}'>
-                Aucune facture n'a pu être retrouvée
+                <em>Aucune facture n'a pu être retrouvée</em>
             </td>
         </tr>
     % endif

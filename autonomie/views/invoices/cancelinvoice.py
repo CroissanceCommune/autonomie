@@ -43,6 +43,7 @@ from autonomie.views import (
     BaseEditView,
     add_panel_page_view,
 )
+from autonomie.views.business.business import BusinessOverviewView
 from autonomie.views.files import FileUploadView
 from autonomie.views.task.views import (
     TaskEditView,
@@ -60,6 +61,9 @@ log = logging.getLogger(__name__)
 
 
 class CancelInvoiceEditView(TaskEditView):
+    route_name = '/cancelinvoices/{id}'
+
+    @property
     def title(self):
         customer = self.context.customer
         customer_label = customer.label
@@ -81,6 +85,7 @@ class CancelInvoiceDeleteView(TaskDeleteView):
 
 class CancelInvoiceHtmlView(TaskHtmlView):
     label = u"Avoir"
+    route_name = '/cancelinvoices/{id}.html'
 
 
 class CancelInvoicePdfView(TaskPdfView):
@@ -196,9 +201,9 @@ def includeme(config):
     add_routes(config)
 
     # Here it's only view.cancelinvoice to allow redirection to the html view
-    config.add_view(
+    config.add_tree_view(
         CancelInvoiceEditView,
-        route_name='/cancelinvoices/{id}',
+        parent=BusinessOverviewView,
         renderer="tasks/form.mako",
         permission='view.cancelinvoice',
     )
@@ -223,9 +228,9 @@ def includeme(config):
         permission='view.cancelinvoice',
     )
 
-    config.add_view(
+    config.add_tree_view(
         CancelInvoiceHtmlView,
-        route_name='/cancelinvoices/{id}.html',
+        parent=BusinessOverviewView,
         renderer='tasks/cancelinvoice_view_only.mako',
         permission='view.cancelinvoice',
     )

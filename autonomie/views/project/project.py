@@ -59,14 +59,13 @@ from autonomie.views import (
     submit_btn,
     TreeMixin,
 )
-from autonomie.views.files import (
-    FileUploadView,
-)
 from autonomie.views.project.routes import (
     COMPANY_PROJECTS_ROUTE,
     PROJECT_ITEM_ROUTE,
     PROJECT_ITEM_GENERAL_ROUTE,
     PROJECT_ITEM_PHASE_ROUTE,
+    PROJECT_ITEM_BUSINESS_ROUTE,
+    PROJECT_ITEM_ESTIMATION_ROUTE,
 )
 from autonomie.views.project.lists import (
     redirect_to_customerslist,
@@ -152,14 +151,45 @@ def retrieve_navigation_history(request, project_id):
     return handler.last()
 
 
-def project_entry_point_view(context, request):
-    """
-    Project entry point view only redirects to the most appropriate page
-    """
-    last = retrieve_navigation_history(request, context.id)
-    if last is None:
-        last = request.route_path(PROJECT_ITEM_PHASE_ROUTE, id=context.id)
-    return HTTPFound(last)
+class ProjectEntryPointView(BaseView, TreeMixin):
+    route_name = PROJECT_ITEM_ROUTE
+
+    @property
+    def title(self):
+        return u"Projet {}".format(self.current().name)
+
+    def current(self):
+        if hasattr(self.context, 'project_id'):
+            return self.context.project
+        else:
+            return self.context
+
+    @property
+    def tree_url(self):
+        return self.request.route_path(self.route_name, id=self.current().id)
+
+    def __call__(self):
+        """
+        Project entry point view only redirects to the most appropriate page
+        """
+        last = retrieve_navigation_history(self.request, self.context.id)
+        if last is None:
+            if self.context.project_type.name == "default":
+                last = self.request.route_path(
+                    PROJECT_ITEM_PHASE_ROUTE,
+                    id=self.context.id
+                )
+            elif self.context.businesses:
+                last = self.request.route_path(
+                    PROJECT_ITEM_BUSINESS_ROUTE,
+                    id=self.context.id
+                )
+            else:
+                last = self.request.route_path(
+                    PROJECT_ITEM_ESTIMATION_ROUTE,
+                    id=self.context.id
+                )
+        return HTTPFound(last)
 
 
 class ProjectPhaseListView(BaseView, TreeMixin):
@@ -168,9 +198,15 @@ class ProjectPhaseListView(BaseView, TreeMixin):
     def __init__(self, *args, **kw):
         BaseView.__init__(self, *args, **kw)
 
+    def current_id(self):
+        if hasattr(self.context, 'project_id'):
+            return self.context.project_id
+        else:
+            return self.context.id
+
     @property
     def tree_url(self):
-        return self.request.route_path(self.route_name, id=self.context.id)
+        return self.request.route_path(self.route_name, id=self.current_id())
 
     @property
     def title(self):
@@ -475,9 +511,9 @@ def project_delete(request):
 
 
 def includeme(config):
-    config.add_view(
-        project_entry_point_view,
-        route_name=PROJECT_ITEM_ROUTE,
+    config.add_tree_view(
+        ProjectEntryPointView,
+        parent=ProjectListView,
         permission='view.project',
     )
     config.add_tree_view(

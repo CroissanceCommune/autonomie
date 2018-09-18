@@ -1,0 +1,14 @@
+<div>
+    <span
+        class='link'
+        data-toggle="collapse"
+        data-target=".list-legend">
+        Légende&nbsp;<i class='fa fa-caret-down'></i>
+    </span>
+</div>
+<div class='status-table list-legend collapse'>
+  <div tal:repeat="legend legends">
+    <span class="btn btn-circle ${legend[0]}"><br /></span>
+    <span tal:content="structure legend[1]"></span>
+  </div>
+</div>

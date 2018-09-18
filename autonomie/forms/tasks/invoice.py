@@ -378,7 +378,7 @@ pdfexportSchema = InvoicesPdfExport(
 
 
 @colander.deferred
-def deferred_remittance_amount_default(node, kw):
+def deferred_bank_remittance_id_default(node, kw):
     """
         default value for the payment amount
     """
@@ -434,12 +434,12 @@ class PaymentSchema(colander.MappingSchema):
         colander schema for payment recording
     """
     come_from = forms.come_from_node()
-    remittance_amount = colander.SchemaNode(
+    bank_remittance_id = colander.SchemaNode(
         colander.String(),
         title=u"Identifiant de la remise en banque",
         description=u"Ce champ est un indicateur permettant de \
 retrouver la remise en banque à laquelle cet encaissement est associé",
-        default=deferred_remittance_amount_default,
+        default=deferred_bank_remittance_id_default,
     )
     amount = colander.SchemaNode(
         AmountType(5),
@@ -523,11 +523,11 @@ def deferred_payment_amount_validation(node, kw):
     """
     def validate_sum_of_tvapayments(values):
         """
-        Validate the sum of the tva payments is equal to the remittance_amount
+        Validate the sum of the tva payments is equal to the bank_remittance_id
         """
         tva_sum = sum([tvap['amount'] for tvap in values['tvas']])
-        remittance_amount = values['payment_amount']
-        diff = abs(tva_sum - remittance_amount)
+        bank_remittance_id = values['payment_amount']
+        diff = abs(tva_sum - bank_remittance_id)
         if diff >= PAYMENT_SUM_EPSILON:
             return u"Le montant du paiement doit correspondre à la somme \
 des encaissements correspondant"
@@ -548,8 +548,7 @@ class MultiplePaymentSchema(colander.MappingSchema):
     bank_remittance_id = colander.SchemaNode(
         colander.String(),
         title=u"Identifiant de la remise en banque",
-        default=deferred_remittance_amount_default,  # FIXME: C'est quoi cette ligne ?
-
+        default=deferred_bank_remittance_id_default,
     )
     payment_amount = colander.SchemaNode(
         AmountType(5),

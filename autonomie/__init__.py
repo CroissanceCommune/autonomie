@@ -171,6 +171,9 @@ def get_groups(login, request):
         for group in user.login.groups:
             res.append('group:{0}'.format(group))
 
+        for company_id in user.active_company_ids:
+            res.append('company:{}'.format(company_id))
+
     return res
 
 

@@ -139,7 +139,7 @@ DEFAULT_PERM = [
 ]
 DEFAULT_PERM_NEW = [
     (Allow, "group:admin", ('admin', 'manage', 'admin_treasury')),
-    (Allow, "group:manager", ('manage', 'admin_treasury')),
+    (Allow, "group:manager", ('manage', 'admin_treasury',)),
     (Allow, "group:trainer", ("add.training",)),
     (Allow, "group:constructor", ("add.construction",)),
 ]
@@ -354,14 +354,13 @@ def get_activity_acl(self):
     """
     acl = get_event_acl(self)
     for companies in self.companies:
-        for user in companies.employees:
-            acl.append(
-                (
-                    Allow,
-                    user.login.login,
-                    ("view_activity", "view.file")
-                )
+        acl.append(
+            (
+                Allow,
+                'company:{}'.format(company.id),
+                ("view_activity", "view.file")
             )
+        )
     return acl
 
 
@@ -370,10 +369,10 @@ def get_company_acl(self):
         Compute the company's acl
     """
     acl = DEFAULT_PERM[:]
-    acl.extend(
-        [(
+    acl.append(
+        (
             Allow,
-            user.login.login,
+            "company:{}".format(self.id),
             (
                 "view_company",
                 "edit_company",
@@ -404,7 +403,7 @@ def get_company_acl(self):
                 "view.treasury",
 
             )
-        )for user in self.employees]
+        )
     )
     return acl
 
@@ -663,26 +662,25 @@ def _get_user_status_acl(self):
     """
     acl = []
 
-    for user in self.company.employees:
-        perms = (
-            'view.%s' % self.type_,
-            'view.file',
-            'add.file',
-            'edit.file',
-            "delete.file",
+    perms = (
+        'view.%s' % self.type_,
+        'view.file',
+        'add.file',
+        'edit.file',
+        "delete.file",
+    )
+
+    if self.status in ('draft', 'invalid'):
+        perms += (
+            'edit.%s' % self.type_,
+            'wait.%s' % self.type_,
+            'delete.%s' % self.type_,
+            'draft.%s' % self.type_,
         )
+    if self.status in ('wait',):
+        perms += ('draft.%s' % self.type_,)
 
-        if self.status in ('draft', 'invalid'):
-            perms += (
-                'edit.%s' % self.type_,
-                'wait.%s' % self.type_,
-                'delete.%s' % self.type_,
-                'draft.%s' % self.type_,
-            )
-        if self.status in ('wait',):
-            perms += ('draft.%s' % self.type_,)
-
-        acl.append((Allow, user.login.login, perms))
+    acl.append((Allow, "company:{}".format(self.company_id), perms))
     return acl
 
 
@@ -759,19 +757,18 @@ def get_estimation_default_acl(self):
 
     acl.extend(_get_user_status_acl(self))
 
-    for user in self.company.employees:
-        perms = ('duplicate.estimation', )
+    perms = ('duplicate.estimation', )
 
-        if self.status == 'valid':
-            perms += ('set_signed_status.estimation', )
-            if not self.signed_status == 'aborted':
-                if self.project.project_type.default:
-                    perms += ('geninv.estimation',)
-                else:
-                    perms += ('genbusiness.estimation',)
+    if self.status == 'valid':
+        perms += ('set_signed_status.estimation', )
+        if not self.signed_status == 'aborted':
+            if self.project.project_type.default:
+                perms += ('geninv.estimation',)
+            else:
+                perms += ('genbusiness.estimation',)
 
-        if perms:
-            acl.append((Allow, user.login.login, perms))
+    if perms:
+        acl.append((Allow, "company:{}".format(self.company_id), perms))
     return acl
 
 
@@ -815,13 +812,12 @@ def get_invoice_default_acl(self):
     acl.append((Deny, "group:estimation_only", ("duplicate.invoice",)))
     acl.extend(_get_user_status_acl(self))
 
-    for user in self.company.employees:
-        perms = ('duplicate.invoice', )
-        if self.status == 'valid' and self.paid_status != 'resulted':
-            perms += ('gencinv.invoice',)
+    perms = ('duplicate.invoice', )
+    if self.status == 'valid' and self.paid_status != 'resulted':
+        perms += ('gencinv.invoice',)
 
-        if perms:
-            acl.append((Allow, user.login.login, perms))
+    if perms:
+        acl.append((Allow, "company:{}".format(self.company_id), perms))
 
     return acl
 
@@ -942,8 +938,13 @@ def get_payment_default_acl(self):
     acl.append((Allow, 'group:manager', admin_perms))
     acl.append((Allow, 'group:payment_admin', admin_perms))
 
-    for user in self.task.company.employees:
-        acl.append((Allow, user.login.login, ('view.payment',)))
+    acl.append(
+        (
+            Allow,
+            "company:{}".format(self.task.company_id),
+            ('view.payment',)
+        )
+    )
 
     return acl
 
@@ -963,8 +964,13 @@ def get_expense_payment_acl(self):
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', admin_perms))
 
-    for user in self.expense.company.employees:
-        acl.append((Allow, user.login.login, ('view.payment',)))
+    acl.append(
+        (
+            Allow,
+            "company:{}".format(self.expense.company_id),
+            ('view.payment',)
+        )
+    )
     return acl
 
 
@@ -980,8 +986,7 @@ def get_customer_acl(self):
     else:
         acl.insert(0, (Deny, Everyone, ('delete_customer',)))
 
-    for user in self.company.employees:
-        acl.append((Allow, user.login.login, perms))
+    acl.append((Allow, "company:{}".format(self.company_id), perms))
 
     return acl
 
@@ -998,8 +1003,10 @@ def get_phase_acl(self):
     else:
         acl.insert(0, (Deny, Everyone, ('delete.phase',)))
 
-    for user in self.project.company.employees:
-        acl.append((Allow, user.login.login, perms))
+    company_id = FindCompanyService.find_company_id_from_node(self)
+    acl.append(
+        (Allow, "company:{}".format(company_id), perms)
+    )
 
     return acl
 
@@ -1050,8 +1057,7 @@ def get_project_acl(self):
 
     acl.append((Deny, 'group:estimation_only', ('add_invoice', )))
 
-    for user in self.company.employees:
-        acl.append((Allow, user.login.login, perms))
+    acl.append((Allow, "company:{}".format(self.company_id), perms))
 
     return acl
 
@@ -1078,8 +1084,10 @@ def get_business_acl(self):
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', perms))
 
-    for user in self.project.company.employees:
-        acl.append((Allow, user.login.login, perms))
+    company_id = FindCompanyService.find_company_id_from_node(self)
+    acl.append(
+        (Allow, "company:{}".format(company_id), perms)
+    )
 
     return acl
 
@@ -1106,18 +1114,17 @@ def get_product_acl(self):
     Return the acl for a product : A product's acl is given by its category
     """
     acl = DEFAULT_PERM[:]
-    for user in self.company.employees:
-        acl.append(
+    acl.append(
+        (
+            Allow,
+            "company:{}".format(self.company_id),
             (
-                Allow,
-                user.login.login,
-                (
-                    'list_sale_products',
-                    'view_sale_product',
-                    'edit_sale_product',
-                )
+                'list_sale_products',
+                'view_sale_product',
+                'edit_sale_product',
             )
         )
+    )
     return acl
 
 
@@ -1194,12 +1201,11 @@ def get_sale_file_requirement_acl(self):
     else:
         acl = DEFAULT_PERM_NEW[:]
 
-    employee_logins = FindCompanyService.find_employees_login_from_node(
+    company_id = FindCompanyService.find_company_id_from_node(
         self.node
     )
-
-    for login in employee_logins:
-        acl.append((Allow, login, user_perms))
+    if company_id:
+        acl.append((Allow, "company:{}".format(company_id), user_perms))
 
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', admin_perms))

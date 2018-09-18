@@ -37,7 +37,7 @@ class ProjectInvoiceListView(CompanyInvoicesListView, TreeMixin):
         is_global=False,
         excludes=("company_id", 'year', 'customers',)
     )
-    add_template_vars = (u'title', 'is_admin', "with_draft", 'add_url', )
+    add_template_vars = CompanyInvoicesListView.add_template_vars + ('add_url',)
     is_admin = False
 
     @property

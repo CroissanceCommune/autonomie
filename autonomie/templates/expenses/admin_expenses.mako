@@ -70,38 +70,9 @@ Admin expenses list view
     <div class='panel-body'>
     <div class='row'>
         <div class='col-md-4 col-xs-12'>
-            <div>
-                <a
-                    href="#list-legend"
-                    data-toggle="collapse"
-                    data-target="#list-legend">
-                    Légende&nbsp;<i class='fa fa-caret-down'></i>
-                </a>
-            </div>
-            <div id='list-legend' class='status-table list-legend collapse'>
-                    <div>
-                        <span class='btn btn-circle status-wait justified-False'><br /></span>
-                        <span>Notes de dépense en attente de validation</span>
-                    </div>
-                    <div>
-                        <span class='btn btn-circle '><br /></span>
-                        <span>Notes de dépense validées</span>
-                    </div>
-                    <div>
-                        <span class='btn btn-circle status justified-True'><br /></span>
-                        <span>Justificatifs reçus</span>
-                    </div>
-                    <div>
-                        <span class='btn btn-circle paid-status-paid'><br /></span>
-                        <span>Notes de dépense partiellement payées</span>
-                    </div>
-                    <div>
-                        <span class='btn btn-circle paid-status-resulted'><br /></span>
-                        <span>Notes de dépense payées</span>
-                    </div>
-                </table>
-            </div>
+        ${request.layout_manager.render_panel('list_legend', legends=legends)}
         </div>
+    </div>
 <table class="table table-condensed table-bordered status-table">
     <thead>
         <tr>

@@ -73,44 +73,7 @@
 <% columns = 8 %>
     <div class='row'>
         <div class='col-md-4 col-xs-12'>
-            <div>
-                <a
-                    href="#list-legend"
-                    data-toggle="collapse"
-                    data-target="#list-legend">
-                    Légende&nbsp;<i class='fa fa-caret-down'></i>
-                </a>
-            </div>
-            <div id='list-legend' class='status-table list-legend collapse'>
-                <div>
-                    <span class='btn btn-circle geninv-True'><br /></span>
-                    <span>Devis concrétisés en facture</span>
-                </div>
-                <div>
-                    <span class='btn btn-circle signed-status-signed'><br /></span>
-                    <span>Devis signés</span>
-                </div>
-                <div>
-                    <span class='btn btn-circle '><br /></span>
-                    <span>Devis en cours</span>
-                </div>
-                <div>
-                    <span class='btn btn-circle signed-status-aborted'><br /></span>
-                    <span>Devis sans suite</span>
-                </div>
-                <div>
-                    <span class='btn btn-circle status-draft'><br /></span>
-                    <span>Devis en brouillon</span>
-                </div>
-                <div>
-                    <span class='btn btn-circle status-wait'><br /></span>
-                    <span>Devis en attente de validation</span>
-                </div>
-                <div>
-                    <span class='btn btn-circle status-invalid'><br /></span>
-                    <span>Devis invalides</span>
-                </div>
-            </div>
+        ${request.layout_manager.render_panel('list_legend', legends=legends)}
         </div>
     </div>
     <table class="table table-condensed table-bordered status-table">

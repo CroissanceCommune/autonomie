@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class GlobalEstimationList(BaseListView):
     title = u"Devis de la CAE"
-    add_template_vars = (u'title', 'is_admin',)
+    add_template_vars = (u'title', 'is_admin', 'legends')
     schema = get_list_schema(is_global=True, excludes=('status',))
     sort_columns = dict(
         date=Estimation.date,
@@ -42,6 +42,12 @@ class GlobalEstimationList(BaseListView):
     default_sort = 'date'
     default_direction = 'desc'
     is_admin = True
+    legends = (
+        ('geninv-True', u"Devis concrétisés en facture"),
+		('signed-status-signed', u"Devis signés"),
+        ("", u"Devis en cours"),
+        ("signed-status-aborted", u"Devis sans suite"),
+    )
 
     def query(self):
         query = self.request.dbsession.query(
@@ -165,7 +171,12 @@ class GlobalEstimationList(BaseListView):
 class CompanyEstimationList(GlobalEstimationList):
     is_admin = False
     schema = get_list_schema(is_global=False, excludes=("company_id",))
-    add_template_vars = (u'title', 'is_admin', "with_draft", )
+    add_template_vars = (u'title', 'is_admin', "with_draft", 'legends')
+    legends = GlobalEstimationList.legends + (
+		('status-draft', u"Devis en brouillon"),
+        ('status-wait', u"Devis en attente de validation"),
+        ('status-invalid', u"Devis invalides"),
+    )
 
     @property
     def with_draft(self):

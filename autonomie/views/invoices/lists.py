@@ -306,8 +306,14 @@ class GlobalInvoicesListView(InvoiceListTools, BaseListView):
     """
         Used as base for company invoices listing
     """
-    add_template_vars = (u'title', u'pdf_export_btn', 'is_admin',)
+    add_template_vars = (u'title', u'pdf_export_btn', 'is_admin', "legends")
     is_admin = True
+    legends = (
+        ('paid-status-resulted', u"Factures payées"),
+        ('paid-status-paid', u"Factures payées partiellement"),
+        ('shadow-sm', u"Factures non payées depuis moins de 45 jours"),
+        ("tolate-True", u"Factures non payées depuis plus de 45 jours"),
+    )
 
     @property
     def pdf_export_btn(self):
@@ -327,7 +333,12 @@ class CompanyInvoicesListView(GlobalInvoicesListView):
     """
     is_admin = False
     schema = get_list_schema(is_global=False, excludes=("company_id",))
-    add_template_vars = (u'title', 'is_admin', "with_draft", )
+    add_template_vars = (u'title', u"is_admin", u"legends")
+    legends = GlobalInvoicesListView.legends + (
+        ('status-draft', u"Factures en brouillon"),
+        ("status-wait", u"Factures en attente de validation"),
+        ("status-invalid", u"Factures invalides"),
+    )
 
     @property
     def with_draft(self):

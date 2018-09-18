@@ -71,39 +71,47 @@
     <div class='panel-body'>
 <% columns = 8 %>
     <div class='row'>
-        <div class='col-md-4 col-md-offset-8 col-xs-12'>
-            <table class='table table-condensed table-bordered status-table'>
-                <tr>
-                    <td class='geninv-True'><br /></td>
-                    <td>Devis concrétisés en facture</td>
-                </tr>
-                <tr>
-                    <td class='signed-status-signed'><br /></td>
-                    <td>Devis signés</td>
-                </tr>
-                <tr>
-                    <td class=''><br /></td>
-                    <td>Devis en cours</td>
-                </tr>
-                <tr>
-                    <td class='signed-status-aborted'><br /></td>
-                    <td>Devis annulés</td>
-                </tr>
+        <div class='col-md-4 col-xs-12'>
+            <div>
+                <a
+                    href="#list-legend"
+                    data-toggle="collapse"
+                    data-target="#list-legend">
+                    Légende&nbsp;<i class='fa fa-caret-down'></i>
+                </a>
+            </div>
+            <div id='list-legend' class='status-table list-legend collapse'>
+                <div>
+                    <span class='btn btn-circle geninv-True'><br /></span>
+                    <span>Devis concrétisés en facture</span>
+                </div>
+                <div>
+                    <span class='btn btn-circle signed-status-signed'><br /></span>
+                    <span>Devis signés</span>
+                </div>
+                <div>
+                    <span class='btn btn-circle '><br /></span>
+                    <span>Devis en cours</span>
+                </div>
+                <div>
+                    <span class='btn btn-circle signed-status-aborted'><br /></span>
+                    <span>Devis sans suite</span>
+                </div>
                 % if with_draft is not UNDEFINED:
-                <tr>
-                    <td class='status-draft'><br /></td>
-                    <td>Devis en brouillon</td>
-                </tr>
-                <tr>
-                    <td class='status-wait'><br /></td>
-                    <td>Devis en attente de validation</td>
-                </tr>
-                <tr>
-                    <td class='status-invalid'><br /></td>
-                    <td>Devis invalide</td>
-                </tr>
+                <div>
+                    <span class='btn btn-circle status-draft'><br /></span>
+                    <span>Devis en brouillon</span>
+                </div>
+                <div>
+                    <span class='btn btn-circle status-wait'><br /></span>
+                    <span>Devis en attente de validation</span>
+                </div>
+                <div>
+                    <span class='btn btn-circle status-invalid'><br /></span>
+                    <span>Devis invalides</span>
+                </div>
                 % endif
-            </table>
+            </div>
         </div>
     </div>
     <table class="table table-condensed table-bordered status-table">
@@ -130,9 +138,23 @@
                 <td colspan='1'></td>
             </tr>
             % if records:
-                % for id_, name, internal_number, status, signed_status, geninv, date, description, ht, tva, ttc, customer_id, customer_label, company_id, company_name in records:
+                % for id_, document in records:
+                    <% name = document.name %>
+                    <% internal_number = document.internal_number %>
+                    <% status = document.status %>
+                    <% signed_status = document.signed_status %>
+                    <% date = document.date %>
+                    <% geninv = document.geninv %>
+                    <% description = document.description %>
+                    <% ht = document.ht %>
+                    <% tva = document.tva %>
+                    <% ttc = document.ttc %>
+                    <% customer_id = document.customer_id %>
+                    <% customer_label = document.customer.name %>
+                    <% company_id = document.company_id %>
+                    <% company_name = document.company.name %>
                     <tr class="status status-${status} signed-status-${signed_status} geninv-${geninv}">
-                        <td class="status-td">
+                        <td class="status-td" title="${api.format_estimation_status(document)}">
                         </td>
                 % if is_admin:
                     <td class='invoice_company_name'>
@@ -141,7 +163,7 @@
                         </a>
                     </td>
                 % endif
-                <td>${api.format_date(date)}</td>
+                <td title="${api.format_status(document)}">${api.format_date(date)}</td>
                 <td>
                     <a href="${request.route_path('/estimations/{id}.html', id=id_)}"
                     title="Voir le document">
@@ -184,7 +206,7 @@
       % else:
           <tr>
               <td colspan='7'>
-                  Aucun devis n'a pu être retrouvé
+                  <em>Aucun devis n'a pu être retrouvé</em>
               </td>
           </tr>
       % endif

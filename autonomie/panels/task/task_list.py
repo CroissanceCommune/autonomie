@@ -148,6 +148,7 @@ class TaskListPanel(object):
             is_admin_view=is_admin_view,
             is_project_view=is_project_view,
             is_business_view=is_business_view,
+            is_invoice_list=not (is_business_view or is_project_view)
         )
         if datatype == "invoice":
             ret_dict['stream_actions'] = self._stream_invoice_actions

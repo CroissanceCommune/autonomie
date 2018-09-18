@@ -18,6 +18,7 @@ import PaymentLineCollection from '../models/PaymentLineCollection.js';
 import StatusHistoryCollection from '../models/StatusHistoryCollection.js';
 import TotalModel from '../models/TotalModel.js';
 import Radio from 'backbone.radio';
+import { round } from "../../math.js"
 
 const FacadeClass = Mn.Object.extend({
     channelName: 'facade',
@@ -181,12 +182,9 @@ const FacadeClass = Mn.Object.extend({
         return result;
     },
     TTC(){
-        var result = 0;
-        _.each(this.collections, function(collection){
-            result += collection.ttc();
-        });
-        _.each(this.models, function(model){
-            result += model.ttc();
+        var result = round(this.HT());
+        _.each(this.TVAParts(), function(value){
+            result += round(value);
         });
         return result;
     },

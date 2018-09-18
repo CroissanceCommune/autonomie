@@ -70,5 +70,5 @@
     % endfor
     </table>
 %else:
-    <div class="alert alert-warning" style='clear:both'>Aucun devis n'a été créé</div>
+    <em>Aucun devis n'a été créé</em>
 % endif

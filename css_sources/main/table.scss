@@ -70,7 +70,7 @@ table.opa tfoot td{
 			$grey_status_light2 20px
 		);
   }
-  .status-wait{
+  .status-wait:not(.justified-True):not(.justified-False){
     background: repeating-linear-gradient(
 			45deg,
 			$orange_status_light,

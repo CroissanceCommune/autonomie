@@ -16,6 +16,7 @@ from autonomie.models.user.user import User
 from autonomie.forms.user.user import (
     get_add_edit_schema,
     get_edit_account_schema,
+    get_edit_accounting_schema,
 )
 from autonomie.views import (
     BaseFormView,
@@ -25,6 +26,7 @@ from autonomie.views import (
 from autonomie.views.user.routes import (
     USER_URL,
     USER_ITEM_URL,
+    USER_ACCOUNTING_URL,
     USER_MYACCOUNT_URL,
     USER_ITEM_EDIT_URL,
     USER_LOGIN_URL,
@@ -158,6 +160,19 @@ déjà été créés : <ul>".format(query_count)
         return HTTPFound(redirect)
 
 
+class UserAccountingEditView(BaseEditView):
+    schema = get_edit_accounting_schema()
+    title = u"Configuration des informations comptables"
+
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                USER_ITEM_URL,
+                id=self.context.id,
+            )
+        )
+
+
 class UserAccountEditView(BaseEditView):
     """
     View allowing a end user to modify some of his account informations
@@ -195,6 +210,14 @@ def includeme(config):
         renderer='/user/user.mako',
         layout='user',
     )
+    config.add_view(
+        UserAccountingEditView,
+        route_name=USER_ACCOUNTING_URL,
+        permission="admin_treasury",
+        renderer="autonomie:templates/user/accounting.mako",
+        layout="user",
+    )
+
     config.add_view(
         UserAccountEditView,
         route_name=USER_MYACCOUNT_URL,

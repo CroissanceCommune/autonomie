@@ -76,5 +76,5 @@
     % endfor
     </table>
 %else:
-    <div class="alert alert-warning" style='clear:both'>Aucune facture n'a été créée</div>
+    <em>Aucune facture n'a été créée</em>
 % endif

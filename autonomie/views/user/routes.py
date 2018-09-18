@@ -8,6 +8,7 @@ import os
 
 USER_URL = "/users"
 USER_ITEM_URL = os.path.join(USER_URL, '{id}')
+USER_ACCOUNTING_URL = os.path.join(USER_ITEM_URL, 'accounting')
 USER_MYACCOUNT_URL = os.path.join(USER_ITEM_URL, 'myaccount')
 USER_ITEM_EDIT_URL = os.path.join(USER_ITEM_URL, 'edit')
 USER_LOGIN_URL = os.path.join(USER_ITEM_URL, "login")
@@ -24,8 +25,9 @@ def includeme(config):
     config.add_route(USER_URL, USER_URL)
     config.add_route(LOGIN_URL, LOGIN_URL)
     for route in (
-        USER_ITEM_URL, USER_MYACCOUNT_URL, USER_ITEM_EDIT_URL, USER_LOGIN_URL,
-        USER_LOGIN_EDIT_URL, USER_LOGIN_SET_PASSWORD_URL
+        USER_ITEM_URL, USER_ACCOUNTING_URL, USER_MYACCOUNT_URL,
+        USER_ITEM_EDIT_URL, USER_LOGIN_URL, USER_LOGIN_EDIT_URL,
+        USER_LOGIN_SET_PASSWORD_URL,
     ):
         config.add_route(route, route, traverse="/users/{id}")
 

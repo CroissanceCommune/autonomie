@@ -136,7 +136,7 @@ class User(DBBASE, PersistentACLMixin):
             info={
                 'colanderalchemy':
                 {
-                    'title': u'Compte tiers pour note de dépense',
+                    'title': u'Compte tiers utilisé pour les notes de dépenses',
                 }
             },
             default="",

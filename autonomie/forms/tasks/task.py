@@ -163,7 +163,7 @@ def _customize_task_fields(schema):
     )
     customize(
         "status_person_id",
-        widget=get_deferred_user_choice
+        widget=get_deferred_user_choice(),
     )
     customize(
         "description",

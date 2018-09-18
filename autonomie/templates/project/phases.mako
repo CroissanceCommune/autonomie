@@ -93,7 +93,7 @@
     %endfor
 </div>
 %if not project.phases:
-    <strong>Aucun dossier n'a été créé dans ce projet</strong>
+    <em>Aucun dossier n'a été créé dans ce projet</em>
 %endif
 % if tasks_without_phases is not None:
 <div class='panel panel-default'>

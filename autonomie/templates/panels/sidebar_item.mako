@@ -17,7 +17,7 @@
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
 <%def name="render_item(elem)">
-    % if elem.has_permission(_context, request) and elem.visible(_context, request):
+    % if elem.has_permission(_context, request, **bind_params) and elem.visible(_context, request):
         <li
         % if elem.selected(_context, request):
             class="active"
@@ -39,7 +39,7 @@
     % endif
 </%def>
 <%def name="render_dropdown(elem)">
-    % if elem.has_permission(_context, request) and elem.visible(_context, request):
+    % if elem.has_permission(_context, request, **bind_params) and elem.visible(_context, request):
         % if not elem.enabled(_context, request):
         ${render_item(elem)}
         % else:

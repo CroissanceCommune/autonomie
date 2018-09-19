@@ -79,7 +79,7 @@ STATUS_LABELS = {
         "cancelinvoice": u"Soldé",
         "expensesheet": u"Validée",
     },
-    "aborted": u"Annulé",
+    "aborted": u"Sans suite",
     'sent': u"Envoyé",
     "signed": u"Signé par le client",
     "geninv": u"Factures générées",

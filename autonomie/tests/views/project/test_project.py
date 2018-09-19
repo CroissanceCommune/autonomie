@@ -57,7 +57,7 @@ def getone():
 
 def test_entry_point_view(user, project, get_csrf_request_with_db, config):
     from autonomie.views.project.project import (
-        project_entry_point_view,
+        ProjectEntryPointView,
         ProjectPhaseListView,
     )
     from autonomie.views.project.estimation import (
@@ -81,7 +81,7 @@ def test_entry_point_view(user, project, get_csrf_request_with_db, config):
 
     req = get_csrf_request_with_db()
     req.user = user
-    res = project_entry_point_view(project, req)
+    res = ProjectEntryPointView(project, req)()
     assert res.location == PROJECT_ITEM_PHASE_ROUTE.format(id=project.id)
 
     for view, route in (
@@ -95,7 +95,7 @@ def test_entry_point_view(user, project, get_csrf_request_with_db, config):
         req.context = project
         req.user = user
         view(project, req).__call__()
-        res = project_entry_point_view(project, req)
+        res = ProjectEntryPointView(project, req)()
         assert res.location == url
 
 

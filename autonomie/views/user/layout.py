@@ -17,11 +17,15 @@ from autonomie.utils.menu import (
     AttrMenuItem,
     Menu,
 )
+from autonomie.views.user.routes import (
+    USER_ITEM_URL,
+    USER_LOGIN_URL,
+    USER_ACCOUNTING_URL,
+)
 
 logger = logging.getLogger(__name__)
 
 
-@colander.deferred
 def deferred_enterprise_label(item, kw):
     """
     Collect a custom label for the "Entreprises" menu entry using binding
@@ -37,7 +41,6 @@ def deferred_enterprise_label(item, kw):
     return label
 
 
-@colander.deferred
 def deferred_login_label(item, kw):
     """
     Custom deferred label for the login sidebar entry
@@ -49,13 +52,22 @@ def deferred_login_label(item, kw):
         return u"<em>Identifiants</em>"
 
 
+def deferred_accounting_show_perm(item, kw):
+    request = kw['request']
+    current_user = kw['current_user']
+    if current_user.login:
+        return request.has_permission('admin_treasury')
+    else:
+        return False
+
+
 UserMenu = Menu(name="usermenu")
 
 UserMenu.add(
     MenuItem(
         name="user",
         label=u'Compte utilisateur',
-        route_name=u'/users/{id}',
+        route_name=USER_ITEM_URL,
         icon=u'fa fa-user-o',
         perm='view.user',
     )
@@ -64,12 +76,21 @@ UserMenu.add(
     AttrMenuItem(
         name="login",
         label=deferred_login_label,
-        route_name=u'/users/{id}/login',
+        route_name=USER_LOGIN_URL,
         icon=u'fa fa-lock',
         disable_attribute='login',
         perm_context_attribute="login",
         perm='view.login',
     ),
+)
+UserMenu.add(
+    AttrMenuItem(
+        name="accounting",
+        label=u"Informations comptables",
+        route_name=USER_ACCOUNTING_URL,
+        icon=u'fa fa-money',
+        perm=deferred_accounting_show_perm
+    )
 )
 UserMenu.add(
     AttrMenuItem(

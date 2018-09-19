@@ -76,6 +76,7 @@ from autonomie.views import (
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.project.routes import PROJECT_ITEM_ESTIMATION_ROUTE
+from autonomie.views.business.business import BusinessOverviewView
 from autonomie.views.task.views import (
     TaskAddView,
     TaskEditView,
@@ -316,7 +317,6 @@ def includeme(config):
         request_param="action=add",
         layout="default"
     )
-    from autonomie.views.business.business import BusinessOverviewView
     config.add_tree_view(
         EstimationEditView,
         parent=BusinessOverviewView,
@@ -344,7 +344,6 @@ def includeme(config):
         permission="duplicate.estimation",
         renderer='tasks/add.mako',
     )
-    from autonomie.views.business.business import BusinessOverviewView
     config.add_tree_view(
         EstimationHtmlView,
         parent=BusinessOverviewView,

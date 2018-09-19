@@ -29,99 +29,18 @@
 
 from sqlalchemy import (
     Column,
-    Integer,
-    ForeignKey,
-    Text,
-    Table,
     String,
-    Float,
-)
-from sqlalchemy.orm import (
-    relationship,
-    backref,
-)
-from autonomie_base.models.base import (
-    DBBASE,
-    default_table_args,
-)
-from autonomie.compute.math_utils import integer_to_amount
-from autonomie import forms
-from autonomie.forms.custom_types import AmountType
-
-TRAINING_PRODUCT_TO_GROUP_REL_TABLE = Table(
-    "training_product_product_group_rel",
-    DBBASE.metadata,
-    Column(
-        "traiing_sale_product_id",
-        Integer,
-        ForeignKey('training_sale_product.id', ondelete='cascade')
-    ),
-    Column(
-        "training_sale_product_group_id",
-        Integer,
-        ForeignKey(
-            'training_sale_product_group.id',
-            ondelete='cascade',
-            name="fk_training_product_to_group_rel_group_id"
-        )
-    ),
-    mysql_charset=default_table_args['mysql_charset'],
-    mysql_engine=default_table_args['mysql_engine'],
 )
 
+from autonomie.models.sale_product import SaleProductGroup
 
-class TrainingSaleProductCategory(DBBASE):
+
+class TrainingSaleProductGroup(SaleProductGroup):
     """
-    A training product category allowing to group training
+    A product group model
     :param id: unique id
-    :param title: the title of the category
-    :param description: the training category description
-    :param company_id: company that owns the category
-    """
-    __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    title = Column(
-        String(255),
-        nullable=False,
-        info={
-            "colanderalchemy": {'title': u"Titre"}
-        }
-    )
-    description = Column(Text(), default="")
-    company_id = Column(
-        ForeignKey('company.id'),
-        info={
-            'export': {'exclude': True},
-        }
-    )
-    company = relationship(
-        "Company",
-        info={
-            'export': {'exclude': True},
-        }
-    )
-
-    def __json__(self, request):
-        """
-        Json repr of our model
-        """
-        return dict(
-            id=self.id,
-            title=self.title,
-            description=self.description,
-            company_id=self.company_id,
-            product_groups=[item.__json__(request)
-                            for item in self.product_groups],
-            products=[item.__json__(request)
-                      for item in self.products],
-        )
-
-
-class TrainingSaleProduct(DBBASE):
-    """
-    Training model
-    Stores company trainings
-    :param id: unique id
+    :param label training product group label
+    :param description: the training group description
     :param title: title of the training item
     :param goals: goals of title of the training item
     :param prerequisites: prerequisites to subscribe to the training session
@@ -141,21 +60,8 @@ class TrainingSaleProduct(DBBASE):
     :param free_2: free input
     :param free_3: free input
     :param company_id: company that owns the training
+    :param company_id: company that owns the group
     """
-    __table_args__ = default_table_args
-    __tablename__ = 'training_sale_product'
-    id = Column(Integer, primary_key=True)
-
-    title = Column(
-        String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Intitulé",
-            }
-        },
-        nullable=False,
-        default=u''
-    )
 
     goals = Column(
         String(10),
@@ -329,12 +235,7 @@ class TrainingSaleProduct(DBBASE):
         default=u''
     )
 
-    category_id = Column(ForeignKey('training_sale_product_category.id'))
-    category = relationship(
-        TrainingSaleProductCategory,
-        backref=backref('training_products'),
-        info={'colanderalchemy': forms.EXCLUDED},
-    )
+    ##
 
     def __json__(self, request):
         """
@@ -342,7 +243,12 @@ class TrainingSaleProduct(DBBASE):
         """
         return dict(
             id=self.id,
+            label=self.label,
+            ref=self.ref,
             title=self.title,
+            description=self.description,
+            products=[product.__json__(request) for product in self.products],
+            category_id=self.category_id,
             goals=self.goals,
             prerequisites=self.prerequisites,
             for_who=self.for_who,
@@ -360,61 +266,6 @@ class TrainingSaleProduct(DBBASE):
             free_1=self.free_1,
             free_2=self.free_2,
             free_3=self.free_3,
-            category_id=self.category_id,
-            category=self.category.title,
-        )
-
-    @property
-    def company(self):
-        return self.category.company
-
-class TrainingSaleProductGroup(DBBASE):
-    """
-    A product group model
-    :param id: unique id
-    :param label training product group label
-    :param description: the training group description
-    :param company_id: company that owns the group
-    """
-    __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True)
-    label = Column(String(255), nullable=False)
-    ref = Column(String(100), nullable=True)
-
-    title = Column(String(255), default="")
-    description = Column(Text(), default='')
-
-    products = relationship(
-        "TrainingSaleProduct",
-        secondary=TRAINING_PRODUCT_TO_GROUP_REL_TABLE,
-        info={
-            'colanderalchemy': {
-                # Permet de sélectionner des éléments existants au lieu
-                # d'insérer des nouveaux à chaque fois
-                'children': forms.get_sequence_child_item(TrainingSaleProduct),
-            }
-        }
-    )
-
-    category_id = Column(ForeignKey('training_sale_product_category.id'))
-    category = relationship(
-        TrainingSaleProductCategory,
-        backref=backref('training_product_groups'),
-        info={'colanderalchemy': forms.EXCLUDED},
-    )
-
-    def __json__(self, request):
-        """
-        Json repr of our model
-        """
-        return dict(
-            id=self.id,
-            label=self.label,
-            ref=self.ref,
-            title=self.title,
-            description=self.description,
-            products=[product.__json__(request) for product in self.products],
-            category_id=self.category_id,
         )
 
     @property

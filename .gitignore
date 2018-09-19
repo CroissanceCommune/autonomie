@@ -21,3 +21,6 @@ node_modules
 autonomie/tests/datas/filedepot
 package-lock.json
 autonomie/tests/datas/*-*-*-*-*/
+.DS_Store
+.idea/
+venv/

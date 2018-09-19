@@ -151,7 +151,7 @@ class MissingDatasError(Exception):
     """
     def __init__(self, message, *args, **kwargs):
         Exception.__init__(self, message, *args)
-        for key, value in kwargs:
+        for key, value in kwargs.items():
             setattr(self, key, value)
 
 

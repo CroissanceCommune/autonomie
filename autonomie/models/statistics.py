@@ -225,7 +225,7 @@ class OrStatisticCriterion(BaseStatisticCriterion):
     id = Column(ForeignKey('base_statistic_criterion.id'), primary_key=True)
 
     def duplicate(self):
-        return AndStatisticCriterion(
+        return OrStatisticCriterion(
             key=self.key,
             method=self.method,
             type=self.type,

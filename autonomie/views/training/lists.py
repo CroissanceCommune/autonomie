@@ -3,10 +3,11 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import logging
 import colander
 from sqlalchemy import distinct
 from sqlalchemy.orm import (
-    contains_eager,
+    selectinload,
 )
 
 from autonomie.models.user.user import User
@@ -28,6 +29,9 @@ from autonomie.views.training.routes import (
     TRAINER_LIST_URL,
     TRAINING_LIST_URL,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class TrainerListView(BaseUserListView):
@@ -72,15 +76,11 @@ class GlobalTrainingListView(BaseListView):
         ).filter_by(
             project_type_id=ptype_id
         )
-        query = query.join(Project.company)
-        query = query.join(Project.customers)
         query = query.options(
-            contains_eager(Project.customers).load_only(
+            selectinload(Project.customers).load_only(
                 Customer.id, Customer.label
-            )
-        )
-        query = query.options(
-            contains_eager(Project.company).load_only(
+            ),
+            selectinload(Project.company).load_only(
                 Company.id, Company.name
             )
         )
@@ -89,12 +89,15 @@ class GlobalTrainingListView(BaseListView):
     def filter_company_id(self, query, appstruct):
         company_id = appstruct.get('company_id', None)
         if company_id not in (None, '', colander.null):
+            logger.debug(u"  + Filtering on company_id")
             query = query.filter(Project.company_id == company_id)
         return query
 
     def filter_customer_id(self, query, appstruct):
         customer_id = appstruct.get('customer_id', None)
         if customer_id not in (None, '', colander.null):
+            logger.debug(u"  + Filtering on customer_id")
+            query = query.outerjoin(Project.customers)
             query = query.filter(
                 Project.customers.any(Customer.id == customer_id)
             )
@@ -104,6 +107,7 @@ class GlobalTrainingListView(BaseListView):
         search = appstruct.get('search', None)
 
         if search not in (None, colander.null, ''):
+            logger.debug(u"  + Filtering on search")
             query = query.outerjoin(Project.tasks)
             query = query.filter(
                 Project.tasks.any(
@@ -115,6 +119,7 @@ class GlobalTrainingListView(BaseListView):
     def filter_include_closed(self, query, appstruct):
         include_closed = appstruct.get('include_closed', False)
         if not include_closed:
+            logger.debug(u"  + Filtering on businesses")
             query = query.outerjoin(Project.businesses)
             query = query.filter(
                 Project.businesses.any(Business.closed == False)

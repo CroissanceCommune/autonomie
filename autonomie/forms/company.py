@@ -28,9 +28,13 @@
 import colander
 import logging
 import deform
-
 import deform_extensions
-from sqlalchemy.orm import load_only
+from collections import OrderedDict
+
+from sqlalchemy.orm import (
+    load_only,
+    contains_eager,
+)
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.company import (
@@ -41,7 +45,6 @@ from autonomie.models.company import (
 from autonomie.models.customer import Customer
 
 from autonomie import forms
-from autonomie.forms.customer import build_customer_values
 from autonomie.forms.custom_types import QuantityType
 from autonomie.forms import (
     files,
@@ -290,15 +293,25 @@ def customer_node(is_admin=False, widget_options=None, **kwargs):
     @colander.deferred
     def deferred_customer_widget(node, kw):
         if is_admin:
-            # All customers, grouped by Company
-            for comp in Company.query().options(load_only("id", "name")):
-                customers = Customer.label_query().filter_by(
-                    company_id=comp.id,
+            query = Customer.query().join(Customer.company)
+            query = query.options(
+                contains_eager(Customer.company).load_only('name')
+            )
+            query = query.options(load_only('id', 'label'))
+
+            datas = OrderedDict()
+
+            for item in query:
+                datas.setdefault(item.company.name, []).append(
+                    (item.id, item.label)
                 )
+
+            # All customers, grouped by Company
+            for company_name, customers in datas.items():
                 values.append(
                     deform.widget.OptGroup(
-                        comp.name,
-                        *build_customer_values(customers)
+                        company_name,
+                        *customers
                     )
                 )
         else:

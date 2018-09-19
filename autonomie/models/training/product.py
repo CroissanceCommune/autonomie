@@ -117,7 +117,7 @@ class TrainingSaleProductCategory(DBBASE):
         )
 
 
-class SaleProduct(DBBASE):
+class TrainingSaleProduct(DBBASE):
     """
     Training model
     Stores company trainings
@@ -332,7 +332,7 @@ class SaleProduct(DBBASE):
     category_id = Column(ForeignKey('training_sale_product_category.id'))
     category = relationship(
         TrainingSaleProductCategory,
-        backref=backref('products'),
+        backref=backref('training_products'),
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
@@ -367,3 +367,107 @@ class SaleProduct(DBBASE):
     @property
     def company(self):
         return self.category.company
+
+class TrainingSaleProductGroup(DBBASE):
+    """
+    A product group model
+    :param id: unique id
+    :param label training product group label
+    :param description: the training group description
+    :param company_id: company that owns the group
+    """
+    __table_args__ = default_table_args
+    id = Column(Integer, primary_key=True)
+    label = Column(String(255), nullable=False)
+    ref = Column(String(100), nullable=True)
+
+    title = Column(String(255), default="")
+    description = Column(Text(), default='')
+
+    products = relationship(
+        "TrainingSaleProduct",
+        secondary=TRAINING_PRODUCT_TO_GROUP_REL_TABLE,
+        info={
+            'colanderalchemy': {
+                # Permet de sélectionner des éléments existants au lieu
+                # d'insérer des nouveaux à chaque fois
+                'children': forms.get_sequence_child_item(TrainingSaleProduct),
+            }
+        }
+    )
+
+    category_id = Column(ForeignKey('training_sale_product_category.id'))
+    category = relationship(
+        TrainingSaleProductCategory,
+        backref=backref('training_product_groups'),
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+
+    def __json__(self, request):
+        """
+        Json repr of our model
+        """
+        return dict(
+            id=self.id,
+            label=self.label,
+            ref=self.ref,
+            title=self.title,
+            description=self.description,
+            products=[product.__json__(request) for product in self.products],
+            category_id=self.category_id,
+        )
+
+    @property
+    def company(self):
+        return self.category.company
+
+
+TRAINING_FORM_GRID = (
+    (
+        ('title', 12),
+    ),
+    (
+        ('goals', 12),
+    ),
+    (
+        ('prerequisites', 12),
+    ),
+    (
+        ('for_who', 12),
+    ),
+    (
+        ('duration', 12),
+    ),
+    (
+        ('content', 12),
+    ),
+    (
+        ('teaching_method', 12),
+    ),
+    (
+        ('logistics_means', 12),
+    ),
+    (
+        ('evaluation', 12),
+    ),
+    (
+        ('place', 12),
+    ),
+    (
+        ('modality', 12),
+    ),
+    (
+        ('date', 4),
+        ('type', 4),
+        ('price', 4),
+    ),
+    (
+        ('free_1', 12),
+    ),
+    (
+        ('free_2', 12),
+    ),
+    (
+        ('free_3', 12),
+    )
+)

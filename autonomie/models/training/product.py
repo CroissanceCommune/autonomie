@@ -30,9 +30,15 @@
 from sqlalchemy import (
     Column,
     String,
+    ForeignKey,
+)
+
+from autonomie_base.models.base import (
+    default_table_args,
 )
 
 from autonomie.models.sale_product import SaleProductGroup
+from autonomie import forms
 
 
 class TrainingSaleProductGroup(SaleProductGroup):
@@ -42,6 +48,7 @@ class TrainingSaleProductGroup(SaleProductGroup):
     :param label training product group label
     :param description: the training group description
     :param title: title of the training item
+    :param type_: the sale product group type
     :param goals: goals of title of the training item
     :param prerequisites: prerequisites to subscribe to the training session
     :param for_who: target of the training item
@@ -62,6 +69,17 @@ class TrainingSaleProductGroup(SaleProductGroup):
     :param company_id: company that owns the training
     :param company_id: company that owns the group
     """
+    __table_args__ = default_table_args
+    __mapper_args__ = {'polymorphic_identity': 'training'}
+    id = Column(ForeignKey('sale_product_group.id'), primary_key=True)
+
+    title = Column(
+        String(255),
+        nullable=False,
+        info={
+            "colanderalchemy": {'title': u"Titre"}
+        }
+    )
 
     goals = Column(
         String(10),
@@ -234,8 +252,6 @@ class TrainingSaleProductGroup(SaleProductGroup):
         },
         default=u''
     )
-
-    ##
 
     def __json__(self, request):
         """

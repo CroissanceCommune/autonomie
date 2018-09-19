@@ -166,6 +166,18 @@ class SaleProductGroup(DBBASE):
     A product group model
     """
     __table_args__ = default_table_args
+    __mapper_args__ = {
+        'polymorphic_on': 'type_',
+        'polymorphic_identity': 'base',
+    }
+
+    type_ = Column(
+        'type_',
+        String(30),
+        info={'colanderalchemy': forms.EXCLUDED},
+        nullable=False,
+    )
+
     id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False)
     ref = Column(String(100), nullable=True)
@@ -192,6 +204,11 @@ class SaleProductGroup(DBBASE):
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
+    parent_id = Column(
+        ForeignKey('sale_product_group.id'),
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+
     def __json__(self, request):
         """
         Json repr of our model
@@ -204,6 +221,7 @@ class SaleProductGroup(DBBASE):
             description=self.description,
             products=[product.__json__(request) for product in self.products],
             category_id=self.category_id,
+            parent_id=self.parent_id,
         )
 
     @property

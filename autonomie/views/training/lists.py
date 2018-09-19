@@ -5,6 +5,9 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 import colander
 from sqlalchemy import distinct
+from sqlalchemy.orm import (
+    contains_eager,
+)
 
 from autonomie.models.user.user import User
 from autonomie.models.project.types import (
@@ -14,6 +17,7 @@ from autonomie.models.project.business import Business
 from autonomie.models.task.task import Task
 from autonomie.models.project import Project
 from autonomie.models.customer import Customer
+from autonomie.models.company import Company
 
 from autonomie.forms.training.trainer import get_list_schema
 from autonomie.forms.training.training import get_training_list_schema
@@ -55,7 +59,7 @@ class GlobalTrainingListView(BaseListView):
         """
         Retrieve the training project type id from the database
         """
-        return self.dbession.query(
+        return self.dbsession.query(
             ProjectType.id
         ).filter_by(
             name="training"
@@ -63,12 +67,23 @@ class GlobalTrainingListView(BaseListView):
 
     def query(self):
         ptype_id = self._get_training_project_type()
-        query = self.dbsession.query(distinct(Project.id), Project).filter_by(
+        query = self.dbsession.query(
+            distinct(Project.id), Project
+        ).filter_by(
             project_type_id=ptype_id
         )
-        query = query.outerjoin(Project.businesses)
-        query = query.outerjoin(Project.company)
-        query = query.outerjoin(Project.customers)
+        query = query.join(Project.company)
+        query = query.join(Project.customers)
+        query = query.options(
+            contains_eager(Project.customers).load_only(
+                Customer.id, Customer.label
+            )
+        )
+        query = query.options(
+            contains_eager(Project.company).load_only(
+                Company.id, Company.name
+            )
+        )
         return query
 
     def filter_company_id(self, query, appstruct):
@@ -89,12 +104,18 @@ class GlobalTrainingListView(BaseListView):
         search = appstruct.get('search', None)
 
         if search not in (None, colander.null, ''):
-            query = query.filter(Task.official_number == search)
+            query = query.outerjoin(Project.tasks)
+            query = query.filter(
+                Project.tasks.any(
+                    Task.official_number == search
+                )
+            )
         return query
 
     def filter_include_closed(self, query, appstruct):
         include_closed = appstruct.get('include_closed', False)
         if not include_closed:
+            query = query.outerjoin(Project.businesses)
             query = query.filter(
                 Project.businesses.any(Business.closed == False)
             )

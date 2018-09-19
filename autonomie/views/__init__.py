@@ -117,7 +117,7 @@ class BaseListClass(BaseView):
 
     def __init__(self, *args, **kwargs):
         BaseView.__init__(self, *args, **kwargs)
-        self.dbsession = self.request.session
+        self.dbsession = self.request.dbsession
         self.error = None
 
     def _get_bind_params(self):

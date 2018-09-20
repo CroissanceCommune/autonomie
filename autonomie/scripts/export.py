@@ -286,6 +286,7 @@ def export_economic_stats2018(args, env):
         raise Exception(u"Le répertoire de destination n'existe pas")
 
     year = get_value(args, 'year')
+    cae = get_value(args, 'cae')
 
     from sqlalchemy.orm import load_only
     from sqlalchemy import or_
@@ -313,24 +314,28 @@ def export_economic_stats2018(args, env):
         company_dict['customers'][i.customer_id] += 1
         company_dict.setdefault('count', 0)
         company_dict['count'] += 1
+        company_dict['cae'] = cae
 
     for key, value in datas.items():
         value['customer_nums'] = len(value['customers'].keys())
 
-    companies = Company.query().filter(Company.id.in_(datas.keys()))
-    for company in companies:
-        datas[company.id]['activities'] = ""
-        for a in company.activities:
-            datas[company.id]['activities'] += u"{}, ".format(a.label)
-        datas[company.id]['salaries'] = 0
-        for user in company.employees:
-            if user.userdatas is not None:
-                if user.userdatas.parcours_salary is not None:
-                    datas[company.id]['salaries'] += user.userdatas.parcours_salary
+    company_ids = datas.keys()
+    if company_ids:
+        companies = Company.query().filter(Company.id.in_(company_ids))
+        for company in companies:
+            datas[company.id]['activities'] = ""
+            for a in company.activities:
+                datas[company.id]['activities'] += u"{}, ".format(a.label)
+            datas[company.id]['salaries'] = 0
+            for user in company.employees:
+                if user.userdatas is not None:
+                    if user.userdatas.parcours_salary is not None:
+                        datas[company.id]['salaries'] += user.userdatas.parcours_salary
 
     from sqla_inspect.csv import CsvWriter
     writer = CsvWriter()
     headers = [
+        {'name': "cae", "label": u"CAE"},
         {'name': "activities", 'label': u"Type d'activité"},
         {'name': "ca", "label": u"Chiffre d'affaire"},
         {'name': "salaries", "label": u"Salaires produits"},
@@ -341,7 +346,7 @@ def export_economic_stats2018(args, env):
     writer._datas = [writer.format_row(value) for value in datas.values()]
     dest_file = os.path.join(
         destdir,
-        "export_statistic2018_annee_{}.csv".format(year)
+        "export_statistic2018_{}_annee_{}.csv".format(cae.replace(' ', '_'), year)
     )
     with open(dest_file, 'w') as fbuf:
         writer.render(fbuf)
@@ -353,7 +358,7 @@ def export_cmd():
     Usage:
         autonomie-export <config_uri> userdatas [--fields=<fields>] [--where=<where>]
         autonomie-export <config_uri> invoices_pdf [--destdir=<destdir>] [--where=<where>]
-        autonomie-export <config_uri> economic_statistics2018 [--destdir=<destdir>] [--year=<year>]
+        autonomie-export <config_uri> economic_statistics2018 [--cae=<destdir] [--destdir=<destdir>] [--year=<year>]
 
     Options:
         -h --help             Show this screen

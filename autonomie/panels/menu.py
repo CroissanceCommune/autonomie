@@ -405,14 +405,19 @@ def get_admin_menus(request):
 
     menu.add(gestion_sociale)
 
+    formation = DropDown(label=u"Formations")
+    href = request.route_path('/trainings')
+    formation.add_item(u"Liste des formations", href=href, icon="fa fa-file")
+    href = request.route_path("/trainers")
+    formation.add_item(u"Formateurs", icon="fa fa-graduation-cap", href=href)
+    menu.add(formation)
+
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)
 
     annuaire = DropDown(label=u"Annuaires")
     href = request.route_path("/users")
     annuaire.add_item(u"Utilisateurs", icon="fa fa-users", href=href)
-    href = request.route_path("/trainers")
-    annuaire.add_item(u"Formateurs", icon="fa fa-graduation-cap", href=href)
     href = request.route_path("companies")
     annuaire.add_item(u"Entreprises", icon="fa fa-building", href=href)
     menu.add(annuaire)

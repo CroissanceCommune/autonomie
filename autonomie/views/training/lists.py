@@ -8,11 +8,12 @@ import colander
 from sqlalchemy import distinct
 from sqlalchemy.orm import (
     selectinload,
+    joinedload,
 )
 
 from autonomie.models.user.user import User
 from autonomie.models.project.types import (
-    ProjectType,
+    BusinessType,
 )
 from autonomie.models.project.business import Business
 from autonomie.models.task.task import Task
@@ -23,11 +24,15 @@ from autonomie.models.company import Company
 from autonomie.forms.training.trainer import get_list_schema
 from autonomie.forms.training.training import get_training_list_schema
 
+from autonomie.utils.widgets import Link
 from autonomie.views.user.lists import BaseUserListView
 from autonomie.views import BaseListView
 from autonomie.views.training.routes import (
     TRAINER_LIST_URL,
     TRAINING_LIST_URL,
+)
+from autonomie.views.business.routes import (
+    BUSINESS_ITEM_ROUTE,
 )
 
 
@@ -58,30 +63,33 @@ class GlobalTrainingListView(BaseListView):
     """
     title = u"Liste des formations dispensées dans la CAE"
     schema = get_training_list_schema(is_admin=True)
+    add_template_vars = ('stream_columns', 'stream_actions',)
 
-    def _get_training_project_type(self):
+    def _get_training_business_type(self):
         """
         Retrieve the training project type id from the database
         """
         return self.dbsession.query(
-            ProjectType.id
+            BusinessType.id
         ).filter_by(
             name="training"
         ).scalar() or -1
 
     def query(self):
-        ptype_id = self._get_training_project_type()
+        business_type_id = self._get_training_business_type()
         query = self.dbsession.query(
-            distinct(Project.id), Project
-        ).filter_by(
-            project_type_id=ptype_id
+            distinct(Business.id), Business
+        ).filter(
+            Business.business_type_id == business_type_id
         )
         query = query.options(
-            selectinload(Project.customers).load_only(
-                Customer.id, Customer.label
-            ),
+            joinedload(Business.project).load_only('id').\
             selectinload(Project.company).load_only(
                 Company.id, Company.name
+            ),
+            selectinload(Business.tasks).\
+            selectinload(Project.customers).load_only(
+                Customer.id, Customer.label
             )
         )
         return query
@@ -90,6 +98,7 @@ class GlobalTrainingListView(BaseListView):
         company_id = appstruct.get('company_id', None)
         if company_id not in (None, '', colander.null):
             logger.debug(u"  + Filtering on company_id")
+            query = query.join(Business.project)
             query = query.filter(Project.company_id == company_id)
         return query
 
@@ -97,9 +106,9 @@ class GlobalTrainingListView(BaseListView):
         customer_id = appstruct.get('customer_id', None)
         if customer_id not in (None, '', colander.null):
             logger.debug(u"  + Filtering on customer_id")
-            query = query.outerjoin(Project.customers)
+            query = query.outerjoin(Business.tasks)
             query = query.filter(
-                Project.customers.any(Customer.id == customer_id)
+                Business.tasks.any(Task.customer_id == customer_id)
             )
         return query
 
@@ -108,7 +117,7 @@ class GlobalTrainingListView(BaseListView):
 
         if search not in (None, colander.null, ''):
             logger.debug(u"  + Filtering on search")
-            query = query.outerjoin(Project.tasks)
+            query = query.outerjoin(Business.tasks)
             query = query.filter(
                 Project.tasks.any(
                     Task.official_number == search
@@ -120,11 +129,40 @@ class GlobalTrainingListView(BaseListView):
         include_closed = appstruct.get('include_closed', False)
         if not include_closed:
             logger.debug(u"  + Filtering on businesses")
-            query = query.outerjoin(Project.businesses)
-            query = query.filter(
-                Project.businesses.any(Business.closed == False)
-            )
+            query = query.filter(Business.closed == False)
         return query
+
+    def stream_columns(self, item):
+        yield "TODO"
+        yield item.name
+        yield item.project.company.name
+        yield item.tasks[0].customer.label
+
+    def stream_actions(self, item):
+        yield Link(
+            self.request.route_path(
+                BUSINESS_ITEM_ROUTE,
+                id=item.id,
+            ),
+            u"Voir la formation",
+            icon="pencil"
+        )
+        yield Link(
+            self.request.route_path(
+                "customer",
+                id=item.tasks[0].customer.id,
+            ),
+            u"Voir le client {}".format(item.tasks[0].customer.label),
+            icon="pencil"
+        )
+        yield Link(
+            self.request.route_path(
+                "company",
+                id=item.project.company.id,
+            ),
+            u"Voir l'enseigne {}".format(item.project.company.name),
+            icon="pencil"
+        )
 
 
 def includeme(config):

@@ -51,28 +51,20 @@ Template Displaying a list of trainings
     <table class="table table-condensed table-bordered">
         <thead>
             <th>Statut</th>
-            <th>Intitulé du projet</th>
+            <th>Intitulé de la formation</th>
             <th>Enseigne</th>
             <th>Client</th>
-            <th class='text-center'>Actions</th>
+            <th class='text-right'>Actions</th>
         </thead>
         <tbody>
         % if records:
             % for id_, record in records:
                 <tr>
-                    <td>
-                    TODO
-                    </td>
-                    <td>${record.name}</td>
-                    <td>${record.company.name}</td>
-                    <td>
-                        <ul>
-                            % for customer in record.customers:
-                            <li>${customer.label}</li>
-                            % endfor
-                        </ul>
-                    </td>
-                    <td class='text-center'>
+                    % for column in stream_columns(record):
+                    <td>${column | n}</td>
+                    % endfor
+                    <td class='text-right'>
+                    ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(record))}
                     </td>
                 </tr>
             % endfor

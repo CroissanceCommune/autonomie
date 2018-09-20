@@ -11,13 +11,13 @@ webpackJsonp([0],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _jquery = __webpack_require__(/*! jquery */ 2);
+	var _jquery = __webpack_require__(/*! jquery */ 3);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _tools = __webpack_require__(/*! ./tools.js */ 3);
+	var _tools = __webpack_require__(/*! ./tools.js */ 4);
 	
-	__webpack_require__(/*! bootstrap/js/dropdown.js */ 9);
+	__webpack_require__(/*! bootstrap/js/dropdown.js */ 10);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -49,7 +49,8 @@ webpackJsonp([0],[
 /***/ }),
 /* 1 */,
 /* 2 */,
-/* 3 */
+/* 3 */,
+/* 4 */
 /*!**********************!*\
   !*** ./src/tools.js ***!
   \**********************/
@@ -66,20 +67,20 @@ webpackJsonp([0],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _jquery = __webpack_require__(/*! jquery */ 2);
+	var _jquery = __webpack_require__(/*! jquery */ 3);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _date = __webpack_require__(/*! ./date.js */ 4);
+	var _date = __webpack_require__(/*! ./date.js */ 5);
 	
-	var _math = __webpack_require__(/*! ./math.js */ 5);
+	var _math = __webpack_require__(/*! ./math.js */ 6);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	__webpack_require__(/*! jquery */ 2);
+	__webpack_require__(/*! jquery */ 3);
 	
 	
-	var datepicker = __webpack_require__(/*! jquery-ui/ui/widgets/datepicker */ 6);
+	var datepicker = __webpack_require__(/*! jquery-ui/ui/widgets/datepicker */ 7);
 	
 	var setDatePicker = exports.setDatePicker = function setDatePicker(input_tag, altfield_selector, value, kwargs) {
 	    /*
@@ -318,7 +319,7 @@ webpackJsonp([0],[
 	};
 
 /***/ }),
-/* 4 */
+/* 5 */
 /*!*********************!*\
   !*** ./src/date.js ***!
   \*********************/
@@ -413,7 +414,7 @@ webpackJsonp([0],[
 	};
 
 /***/ }),
-/* 5 */
+/* 6 */
 /*!*********************!*\
   !*** ./src/math.js ***!
   \*********************/
@@ -612,7 +613,7 @@ webpackJsonp([0],[
 	};
 
 /***/ }),
-/* 6 */
+/* 7 */
 /*!**********************************************!*\
   !*** ./~/jquery-ui/ui/widgets/datepicker.js ***!
   \**********************************************/
@@ -643,9 +644,9 @@ webpackJsonp([0],[
 	
 			// AMD. Register as an anonymous module.
 			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-				__webpack_require__(/*! jquery */ 2),
-				__webpack_require__(/*! ../version */ 7),
-				__webpack_require__(/*! ../keycode */ 8)
+				__webpack_require__(/*! jquery */ 3),
+				__webpack_require__(/*! ../version */ 8),
+				__webpack_require__(/*! ../keycode */ 9)
 			], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
@@ -2741,7 +2742,7 @@ webpackJsonp([0],[
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /*!***********************************!*\
   !*** ./~/jquery-ui/ui/version.js ***!
   \***********************************/
@@ -2751,7 +2752,7 @@ webpackJsonp([0],[
 		if ( true ) {
 	
 			// AMD. Register as an anonymous module.
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 2) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 3) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
 			// Browser globals
@@ -2767,7 +2768,7 @@ webpackJsonp([0],[
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /*!***********************************!*\
   !*** ./~/jquery-ui/ui/keycode.js ***!
   \***********************************/
@@ -2791,7 +2792,7 @@ webpackJsonp([0],[
 		if ( true ) {
 	
 			// AMD. Register as an anonymous module.
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 2), __webpack_require__(/*! ./version */ 7) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 3), __webpack_require__(/*! ./version */ 8) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
 			// Browser globals

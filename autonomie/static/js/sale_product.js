@@ -142,7 +142,8 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     regions: {
       title: '#category-title',
       products: '#product-list',
-      groups: "#group-list"
+      groups: "#group-list",
+      trainingGroup: "#traiing-group-list"
     }
   });
 

@@ -38,7 +38,6 @@ from autonomie_base.models.base import (
 )
 
 from autonomie.models.sale_product import SaleProductGroup
-from autonomie import forms
 
 
 class TrainingSaleProductGroup(SaleProductGroup):
@@ -47,7 +46,6 @@ class TrainingSaleProductGroup(SaleProductGroup):
     :param id: unique id
     :param label training product group label
     :param description: the training group description
-    :param title: title of the training item
     :param type_: the sale product group type
     :param goals: goals of title of the training item
     :param prerequisites: prerequisites to subscribe to the training session
@@ -72,14 +70,6 @@ class TrainingSaleProductGroup(SaleProductGroup):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'training'}
     id = Column(ForeignKey('sale_product_group.id'), primary_key=True)
-
-    title = Column(
-        String(255),
-        nullable=False,
-        info={
-            "colanderalchemy": {'title': u"Titre"}
-        }
-    )
 
     goals = Column(
         String(10),
@@ -313,6 +303,9 @@ TRAINING_FORM_GRID = (
     ),
     (
         ('logistics_means', 12),
+    ),
+    (
+        ('more_stuff', 12),
     ),
     (
         ('evaluation', 12),

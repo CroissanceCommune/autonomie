@@ -324,11 +324,8 @@ def export_economic_stats2018(args, env):
             datas[company.id]['activities'] += u"{}, ".format(a.label)
         datas[company.id]['salaries'] = 0
         for user in company.employees:
-            print("User : {}".format(user.id))
             if user.userdatas is not None:
-                print("  + Userdatas : {}".format(user.userdatas.id))
                 if user.userdatas.parcours_salary is not None:
-                    print(u"    + Salary : {}".format(user.userdatas.parcours_salary))
                     datas[company.id]['salaries'] += user.userdatas.parcours_salary
 
     from sqla_inspect.csv import CsvWriter
@@ -348,6 +345,7 @@ def export_economic_stats2018(args, env):
     )
     with open(dest_file, 'w') as fbuf:
         writer.render(fbuf)
+    print(dest_file)
 
 
 def export_cmd():

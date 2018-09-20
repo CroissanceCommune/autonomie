@@ -215,6 +215,7 @@ def _write_invoice_on_disk(request, document, destdir, prefix, key):
     )
     from autonomie.utils.pdf import buffer_pdf
     from pyramid_layout.config import create_layout_manager
+
     class A:
         def __init__(self, req):
             self.request = req
@@ -275,11 +276,86 @@ def _invoices_pdf_command(args, env):
     logger.debug(u"Export has finished, check %s" % destdir)
 
 
+def export_economic_stats2018(args, env):
+    """
+    Exporte les données statistiques au format 2018
+    """
+    logger = logging.getLogger(__name__)
+    destdir = get_value(args, "destdir")
+    if not os.path.isdir(destdir):
+        raise Exception(u"Le répertoire de destination n'existe pas")
+
+    year = get_value(args, 'year')
+
+    from sqlalchemy.orm import load_only
+    from sqlalchemy import or_
+    from autonomie.models.company import Company
+    from autonomie.models.task import Task, Invoice, CancelInvoice
+    from autonomie.compute.math_utils import integer_to_amount
+    docs = Task.query().with_polymorphic(
+        [Invoice, CancelInvoice]
+    ).options(
+        load_only('customer_id', 'company_id', 'id', 'ht')
+    ).filter(
+        Task.type_.in_(('invoice', 'cancelinvoice'))
+    ).filter(
+        or_(
+            Invoice.financial_year == year,
+            CancelInvoice.financial_year == year,
+        )
+    )
+    datas = {}
+    for i in docs:
+        company_dict = datas.setdefault(i.company_id, {})
+        company_dict.setdefault('ca', 0)
+        company_dict['ca'] += integer_to_amount(i.ht, precision=5)
+        company_dict.setdefault('customers', {}).setdefault(i.customer_id, 0)
+        company_dict['customers'][i.customer_id] += 1
+        company_dict.setdefault('count', 0)
+        company_dict['count'] += 1
+
+    for key, value in datas.items():
+        value['customer_nums'] = len(value['customers'].keys())
+
+    companies = Company.query().filter(Company.id.in_(datas.keys()))
+    for company in companies:
+        datas[company.id]['activities'] = ""
+        for a in company.activities:
+            datas[company.id]['activities'] += u"{}, ".format(a.label)
+        datas[company.id]['salaries'] = 0
+        for user in company.employees:
+            print("User : {}".format(user.id))
+            if user.userdatas is not None:
+                print("  + Userdatas : {}".format(user.userdatas.id))
+                if user.userdatas.parcours_salary is not None:
+                    print(u"    + Salary : {}".format(user.userdatas.parcours_salary))
+                    datas[company.id]['salaries'] += user.userdatas.parcours_salary
+
+    from sqla_inspect.csv import CsvWriter
+    writer = CsvWriter()
+    headers = [
+        {'name': "activities", 'label': u"Type d'activité"},
+        {'name': "ca", "label": u"Chiffre d'affaire"},
+        {'name': "salaries", "label": u"Salaires produits"},
+        {'name': "count", "label": u"Nombre de facture"},
+        {'name': "customer_nums", "label": u"Nombre de clients"},
+    ]
+    writer.set_headers(headers)
+    writer._datas = [writer.format_row(value) for value in datas.values()]
+    dest_file = os.path.join(
+        destdir,
+        "export_statistic2018_annee_{}.csv".format(year)
+    )
+    with open(dest_file, 'w') as fbuf:
+        writer.render(fbuf)
+
+
 def export_cmd():
     """Export utilitiy tool, stream csv datas in stdout
     Usage:
         autonomie-export <config_uri> userdatas [--fields=<fields>] [--where=<where>]
         autonomie-export <config_uri> invoices_pdf [--destdir=<destdir>] [--where=<where>]
+        autonomie-export <config_uri> economic_statistics2018 [--destdir=<destdir>] [--year=<year>]
 
     Options:
         -h --help             Show this screen
@@ -290,6 +366,7 @@ def export_cmd():
 
     o userdatas     : Export userdatas as csv format
     o invoices_pdf  : Export Invoices and CancelInvoices in pdf format
+    o economic_statistics2018
 
     Streams the output in stdout
 
@@ -309,6 +386,8 @@ def export_cmd():
             func = _export_userdatas_command
         elif arguments['invoices_pdf']:
             func = _invoices_pdf_command
+        elif arguments['economic_statistics2018']:
+            func = export_economic_stats2018
         return func(arguments, env)
 
     try:

@@ -24,6 +24,16 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/utils.mako" import="company_disabled_msg" />
 <%block name="mainblock">
+    <a href="${request.route_path('/users/{id}/companies/associate', id=user.id)}"
+        class='btn btn-primary'>
+        <i class="glyphicon glyphicon-plus"></i>
+        Associer à une entreprise existante dans Autonomie
+    </a>
+    <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}"
+        class='btn btn-primary'>
+        <i class="glyphicon glyphicon-plus"></i>
+        Associer à une nouvelle entreprise
+    </a>
     % if companies:
     <table class="table table-striped table-condensed table-hover">
         <thead>
@@ -62,58 +72,13 @@
                         </ul>
                     </td>
                     <td class='actions'>
-                        ${table_btn(url, u"Voir", u"Modifier l'entreprise", icon='glyphicon glyphicon-search')}
-                        % if request.has_permission("edit.company", company):
-                            <% url = request.route_path('company', id=company.id, _query=dict(action='edit')) %>
-                            ${table_btn(url, u"Modifier", u"Modifier l'entreprise", icon='glyphicon glyphicon-pencil')}
-                        % endif
-                        % if request.has_permission('admin.company'):
-                            % if len(company.employees) > 1:
-                                <% url = request.route_path('company', id=company.id, _query=dict(action="remove", uid=user.id)) %>
-                                <% msg = u"{0} n\\'aura plus accès aux données de l\\'entreprise {1}. Êtes-vous sûr de vouloir continuer ?".format(api.format_account(user), company.name) %>
-
-                                ${table_btn(url, \
-                                u"Retirer",
-                                u"Retirer %s de cette entreprise" % user.label,
-                                onclick="return confirm('%s');" % msg,
-                                icon="link",
-                                css_class="btn-warning")}
-
-                            % endif
-
-                            <% url = request.route_path('company', id=company.id, _query=dict(action="disable")) %>
-                            % if company.active:
-                                <% msg = u"Cette entreprise n\\'apparaîtra plus dans les listings de factures. Êtes-vous sûr de vouloir continuer ?" %>
-                                ${table_btn(url, \
-                                u"Désactiver", \
-                                u"désactiver l'entreprise", \
-                                icon='glyphicon glyphicon-book', \
-                                onclick="return confirm('%s');" % msg,
-                                css_class="btn-danger")}
-                            % else:
-                                ${table_btn(url, \
-                                u"Activer", \
-                                u"Activer l'entreprise", \
-                                icon='glyphicon glyphicon-book', \
-                                css_class="btn-success")}
-                            % endif
-                        % endif
+                    ${request.layout_manager.render_panel('menu_dropdown', label="Actions", links=stream_actions(company))}
                     </td>
                 </tr>
             % endfor
         </tbody>
     </table>
     % else:
-        <div class='alert alert-warning'><em>Ce compte n'est rattaché à aucune entreprise</em></div>
+        <div><em>Ce compte n'est rattaché à aucune entreprise</em></div>
     % endif
-    <a href="${request.route_path('/users/{id}/companies/associate', id=user.id)}"
-        class='btn btn-primary'>
-        <i class="glyphicon glyphicon-plus"></i>
-        Associer à une entreprise existante dans Autonomie
-    </a>
-    <a href="${request.route_path('companies', _query=dict(action='add', user_id=user.id))}"
-        class='btn btn-primary'>
-        <i class="glyphicon glyphicon-plus"></i>
-        Associer à une nouvelle entreprise
-    </a>
 </%block>

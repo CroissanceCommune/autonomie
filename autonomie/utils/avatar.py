@@ -55,7 +55,11 @@ def get_avatar(request):
         query = request.dbsession.query(User)
         query = query.join(Login)
         query = query.options(load_only("firstname", "lastname"))
-        query = query.options(contains_eager(User.login).load_only('login').selectinload(Login._groups).load_only('name'))
+        query = query.options(
+            contains_eager(User.login).load_only('login').selectinload(
+                Login._groups).load_only('name'),
+            selectinload(User.companies).load_only('id', 'active'),
+        )
         query = query.filter(Login.login == login)
         result = query.first()
         if result is None:

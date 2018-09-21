@@ -322,13 +322,13 @@ def get_admin_menus(request):
     documents = DropDown(label=u"Documents")
 
     href = request.route_path("invoices")
-    documents.add_item(u"Factures", icon="fa fa-file", href=href)
+    documents.add_item(u"Factures", icon="fa fa-list", href=href)
 
     href = request.route_path('expenses')
-    documents.add_item(u'Notes de dépense', icon='fa fa-file-o', href=href)
+    documents.add_item(u'Notes de dépense', icon='fa fa-list', href=href)
 
     href = request.route_path("estimations")
-    documents.add_item(u"Devis", icon="fa fa-file-o", href=href)
+    documents.add_item(u"Devis", icon="fa fa-list", href=href)
 
     menu.add(documents)
 
@@ -405,12 +405,17 @@ def get_admin_menus(request):
 
     menu.add(gestion_sociale)
 
-    formation = DropDown(label=u"Formations")
-    href = request.route_path('/trainings')
-    formation.add_item(u"Liste des formations", href=href, icon="fa fa-file")
-    href = request.route_path("/trainers")
-    formation.add_item(u"Formateurs", icon="fa fa-graduation-cap", href=href)
-    menu.add(formation)
+    if request.has_permission('admin_trainings'):
+        formation = DropDown(label=u"Formations")
+        href = request.route_path('/trainings')
+        formation.add_item(u"Formations", href=href, icon="fa fa-list")
+        href = request.route_path("/trainers")
+        formation.add_item(
+            u"Annuaire des formateurs",
+            icon="fa fa-graduation-cap",
+            href=href
+        )
+        menu.add(formation)
 
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)

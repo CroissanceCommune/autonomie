@@ -16,6 +16,7 @@ USER_TRAINER_ADD_URL = os.path.join(USER_TRAINER_URL, "add")
 USER_TRAINER_EDIT_URL = os.path.join(USER_TRAINER_URL, "edit")
 USER_TRAINER_FILE_URL = os.path.join(USER_TRAINER_URL, "filelist")
 TRAINING_LIST_URL = "/trainings"
+TRAINING_DASHBOARD_URL = "/companies/{id}/trainings"
 
 
 def includeme(config):
@@ -31,3 +32,9 @@ def includeme(config):
         USER_TRAINER_FILE_URL
     ):
         config.add_route(route, route, traverse="/users/{id}")
+
+    config.add_route(
+        TRAINING_DASHBOARD_URL,
+        TRAINING_DASHBOARD_URL,
+        traverse="/companies/{id}"
+    )

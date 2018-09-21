@@ -40,7 +40,7 @@ from webhelpers.html import HTML
 from autonomie.models.company import Company
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Item(dict):
@@ -208,6 +208,12 @@ def _get_company_gestion_dropdown(request, cid):
         icon="fa fa-table",
         href=href
     )
+
+    if request.has_permission('training'):
+        from autonomie.views.training.routes import TRAINING_DASHBOARD_URL
+        href = request.route_path(TRAINING_DASHBOARD_URL, id=cid)
+        gestion.add_item(u"Formation", icon="fa fa-graduation-cap", href=href)
+
     return gestion
 
 
@@ -484,7 +490,7 @@ def menu_panel(context, request):
     """
         Top menu panel
     """
-    log.debug(u"Entering the menu panel")
+    logger.debug(u" + Building the menu")
     # If we've no user in the current request, we don't return anything
     if not getattr(request, 'user'):
         return {}
@@ -507,7 +513,7 @@ def menu_panel(context, request):
 
         href = request.route_path("/users")
         menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
-
+    logger.debug(u" -> Menu built")
     return {
         'menu': menu,
         'usermenu': usermenu,

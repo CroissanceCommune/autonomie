@@ -127,14 +127,12 @@ from autonomie.models.accounting.income_statement_measures import (
     IncomeStatementMeasureGrid,
 )
 
-logger = logging.getLogger(__name__)
-
 DEFAULT_PERM = [
     (Allow, "group:admin", ALL_PERMISSIONS, ),
     (Deny, "group:manager", ('admin',)),
     (Allow, "group:manager", ALL_PERMISSIONS, ),
     (Allow, "group:contractor", ('visit',), ),
-    (Allow, "group:trainer", ("add.training",)),
+    (Allow, "group:trainer", ("training", "add.training", "list.training")),
     (Allow, "group:constructor", ("add.construction",)),
 ]
 # Nouveau format de permission
@@ -149,7 +147,7 @@ DEFAULT_PERM_NEW = [
             'admin',
             'manage',
             'admin_treasury',
-            'admin_trainings',
+            'admin.trainings',
         )
     ),
     (
@@ -158,7 +156,7 @@ DEFAULT_PERM_NEW = [
         (
             'manage',
             'admin_treasury',
-            'admin_trainings',
+            'admin.trainings',
         )
     ),
     (
@@ -279,12 +277,15 @@ class RootFactory(dict):
     def __init__(self, request):
         self.request = request
 
+        logger = logging.getLogger(__name__)
+
         for traversal_name, object_name, factory in self.leaves:
             self[traversal_name] = TraversalDbAccess(
                 self,
                 traversal_name,
                 object_name,
                 factory,
+                logger,
             )
 
         for traversal_name, subtree in self.subtrees:
@@ -320,14 +321,21 @@ class TraversalDbAccess(object):
     dbsession = None
 
     def __init__(self, parent, traversal_name, object_name, factory,
-                 id_key='id'):
+                 logger, id_key='id'):
         self.__parent__ = parent
         self.factory = factory
         self.object_name = object_name
         self.__name__ = traversal_name
         self.id_key = id_key
+        self.logger = logger
 
     def __getitem__(self, key):
+        self.logger.debug(
+            u"Retrieving the context of type : {}".format(
+                self.__name__
+            )
+        )
+        self.logger.debug(u"With ID : {}".format(key))
         return self._get_item(self.factory, key, self.object_name)
 
     def _get_item(self, klass, key, object_name):
@@ -398,40 +406,50 @@ def get_company_acl(self):
         Compute the company's acl
     """
     acl = DEFAULT_PERM[:]
+    perms = (
+        "view_company",
+        "edit_company",
+        # for logo and header
+        "view.file",
+        "list_customers",
+        "add_customer",
+        "list_projects",
+        "add_project",
+        'list_estimations',
+        "list_invoices",
+        "edit_commercial_handling",
+        "list_expenses",
+        "add.expense",
+        "add.expensesheet",
+        "list_sale_products",
+        "add_sale_product",
+        "list_treasury_files",
+        # Accompagnement
+        "list_activities",
+        "list_workshops",
+        # New format
+        "view.accounting",
+        "list.estimation",
+        "list.invoice",
+        "list.activity",
+        "view.commercial",
+        "view.treasury",
+    )
     acl.append(
         (
             Allow,
             "company:{}".format(self.id),
+            perms
+        )
+    )
+    acl.append(
+        (
+            Allow,
+            "group:trainer",
             (
-                "view_company",
-                "edit_company",
-                # for logo and header
-                "view.file",
-                "list_customers",
-                "add_customer",
-                "list_projects",
-                "add_project",
-                'list_estimations',
-                "list_invoices",
-                "edit_commercial_handling",
-                "list_expenses",
-                "add.expense",
-                "add.expensesheet",
-                "list_sale_products",
-                "add_sale_product",
-                "list_treasury_files",
-                # Accompagnement
-                "list_activities",
-                "list_workshops",
-                # New format
-                "view.accounting",
-                "list.estimation",
-                "list.invoice",
-                "list.activity",
-                "view.commercial",
-                "view.treasury",
-
-            )
+                'list.trainings',
+                'add.training',
+            ),
         )
     )
     return acl

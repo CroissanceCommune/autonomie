@@ -52,9 +52,6 @@ templates['boolcriterion_form.mustache'] = template({"1":function(container,dept
   if (stack1 != null) { buffer += stack1; }
   return buffer + "        </select>\n    </div>\n    </div>\n    </fieldset>\n    <div class=\"form-actions\">\n        <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n        <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n    </div>\n</form>\n</div>\n";
 },"useData":true});
-templates['criterion_list.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<h4>Critères composant notre entrée statistique\n<a class='btn btn-primary add' style='font-size: 10px'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n<a class='btn btn-primary add-or' style='font-size: 10px'>Ajouter une clause 'OU' <i class='glyphicon glyphicon-plus'></i></a>\n<a class='btn btn-primary add-and' style='font-size: 10px'>Ajouter une clause 'ET' <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-9'>Intitulé</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n";
-},"useData":true});
 templates['criterion.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function";
 
@@ -63,6 +60,9 @@ templates['criterion.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":fun
     + "\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#"
     + container.escapeExpression(((helper = (helper = helpers.edit_url || (depth0 != null ? depth0.edit_url : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"edit_url","hash":{},"data":data}) : helper)))
     + "' title=\"Modifier cette entrée\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer cette entrée'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n</td>\n";
+},"useData":true});
+templates['criterion_list.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<h4>Critères composant notre entrée statistique\n<a class='btn btn-primary add' style='font-size: 10px'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n<a class='btn btn-primary add-or' style='font-size: 10px'>Ajouter une clause 'OU' <i class='glyphicon glyphicon-plus'></i></a>\n<a class='btn btn-primary add-and' style='font-size: 10px'>Ajouter une clause 'ET' <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<table class=\"table table-bordered table-condensed table-striped\">\n    <thead>\n        <th class='col-xs-9'>Intitulé</th>\n        <th class='col-xs-3 actions'>Actions</th>\n    </thead>\n    <tbody>\n    </tbody>\n</table>\n";
 },"useData":true});
 templates['criterion_type_select.mustache'] = template({"1":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -109,6 +109,15 @@ templates['datecriterion_form.mustache'] = template({"1":function(container,dept
   if (stack1 != null) { buffer += stack1; }
   return buffer + "        </select>\n    </div>\n    <div class=\"form-group col-sm-4\">\n        <label  for='altdate1'>Date 1</label>\n        <input class=\"form-control\" name=\"altdate1\" type=\"text\" autocomplete=\"off\">\n        <input class=\"form-control\" name=\"search1\" type=\"hidden\">\n    </div>\n    <div class=\"form-group col-sm-4\">\n        <label  for='altdate'>Date 2</label>\n        <input class=\"form-control\" name=\"altdate2\" type=\"text\" autocomplete=\"off\">\n        <input class=\"form-control\" name=\"search2\" type=\"hidden\">\n    </div>\n    </div>\n    </fieldset>\n    <div class=\"form-actions\">\n        <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n        <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n    </div>\n</form>\n</div>\n";
 },"useData":true});
+templates['entry.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
+
+  return "<td>\n"
+    + alias4(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data}) : helper)))
+    + "\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#entries/"
+    + alias4(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data}) : helper)))
+    + "/edit' title=\"Modifier cette entrée\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <button class='btn btn-default btn-sm csv_export' title='Exporter les éléments correspondant à cette entrée statistiques'>\n            <i class='glyphicon glyphicon-export'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Exporter\n            </span>\n        </button>\n        <a class='btn btn-default btn-danger btn-sm remove' title='Supprimer cette entrée'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n</td>\n";
+},"useData":true});
 templates['entry_form.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
@@ -120,15 +129,6 @@ templates['entry_form.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":fu
 },"useData":true});
 templates['entry_list.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     return "<h4>Entrées statistiques\n<a class='btn btn-primary' style='font-size: 10px' href='#entries/add'>Ajouter <i class='glyphicon glyphicon-plus'></i></a>\n</h4>\n<div class=\"panel panel-default\">\n    <table class=\"table table-bordered table-condensed table-striped\">\n        <thead>\n            <th class='col-xs-9'>Intitulé</th>\n            <th class='col-xs-3 actions'>Actions</th>\n        </thead>\n        <tbody>\n        </tbody>\n    </table>\n</div>\n";
-},"useData":true});
-templates['entry.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
-
-  return "<td>\n"
-    + alias4(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"title","hash":{},"data":data}) : helper)))
-    + "\n</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm' href='#entries/"
-    + alias4(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data}) : helper)))
-    + "/edit' title=\"Modifier cette entrée\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <button class='btn btn-default btn-sm csv_export' title='Exporter les éléments correspondant à cette entrée statistiques'>\n            <i class='glyphicon glyphicon-export'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Exporter\n            </span>\n        </button>\n        <a class='btn btn-default btn-danger btn-sm remove' title='Supprimer cette entrée'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n</td>\n";
 },"useData":true});
 templates['full_entry_form.mustache'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;

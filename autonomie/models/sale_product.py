@@ -164,6 +164,10 @@ class SaleProduct(DBBASE):
 class SaleProductGroup(DBBASE):
     """
     A product group model
+    :param id: unique id
+    :param label: product group label
+    :param ref: product group reference
+    :param type_: group type "base" for "ouvrages" and "training" form "formations"
     """
     __table_args__ = default_table_args
     __mapper_args__ = {

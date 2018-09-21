@@ -40,13 +40,10 @@ from autonomie_base.models.base import (
 from autonomie.models.sale_product import SaleProductGroup
 
 
-class TrainingSaleProductGroup(SaleProductGroup):
+class SaleTrainingGroup(SaleProductGroup):
     """
     A product group model
     :param id: unique id
-    :param label training product group label
-    :param description: the training group description
-    :param type_: the sale product group type
     :param goals: goals of title of the training item
     :param prerequisites: prerequisites to subscribe to the training session
     :param for_who: target of the training item

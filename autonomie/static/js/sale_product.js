@@ -57,6 +57,9 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     },
     groups_url: function(){
       return this.url() + "/groups";
+    },
+    training_groups_url: function(){
+        return this.url() + "/training_groups"
     }
   });
 
@@ -106,6 +109,19 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     }
   });
 
+  var TrainingGroupModel = Backbone.Model.extend({
+      validation: {
+          label: {
+            required: true,
+            msg: "est requis"
+          }
+      }
+  })
+
+  var TrainingGroupCollection = Backbone.Collection.extend({
+      model: TrainingGroupModel,
+  })
+
   var CategoryView = Marionette.ItemView.extend({
     template: "category",
     tagName: "li",
@@ -143,7 +159,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       title: '#category-title',
       products: '#product-list',
       groups: "#group-list",
-      trainingGroup: "#traiing-group-list"
+      trainingGroups: "#training-group-list"
     }
   });
 
@@ -280,6 +296,7 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
       tinyMCE.execCommand('mceAddEditor', false, 'tiny_description');
     }
   });
+
   /* PRODUCT GROUP VIEWS */
   var ProductGroupView = BaseTableLineView.extend({
     template: "product_group",
@@ -330,6 +347,79 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
     ui:{
       "form": "form",
       "select": "form[name=product_group] select[name=products]"
+    },
+    focus: function(){
+      this.ui.form.find('input').first().focus();
+    },
+    closeView: function(result){
+      this.destroy();
+    },
+    templateHelpers: function(){
+      var ids = _.pluck(this.model.get('products'), 'id');
+      var product_options = this.updateSelectOptions(
+        this.init_options.products, ids, 'id');
+      return {
+        product_options: product_options
+      };
+    },
+    onShow: function(){
+      this.ui.select.select2();
+    },
+    onRender: function(){
+      this.ui.select.select2();
+    }
+  });
+
+  /* TRAINING GROUP VIEWS */
+  var TrainingGroupView = BaseTableLineView.extend({
+    template: "training_group",
+    events: {
+      'click a.remove':'_remove',
+      'click a.edit': 'showEditionForm'
+    },
+    modelEvents: {
+      "change": "render"
+    },
+    _remove: function(id){
+      var this_ = this;
+      var confirmed = confirm("Êtes vous certain de vouloir supprimer cet élément ?");
+      if (confirmed){
+        var _model = this.model;
+        this.highlight({
+          callback: function(){
+            _model.destroy({
+                success: function(model, response) {
+                  this_.destroy();
+                  displayServerSuccess("L'élément a bien été supprimé");
+                }
+             });
+           }
+          });
+      }
+    },
+    showEditionForm: function(){
+      controller.training_group_edit(this.model);
+    }
+  });
+
+  var TrainingGroupListView = Marionette.CompositeView.extend({
+    childView: TrainingGroupView,
+    template: "training_group_list",
+    childViewContainer: "tbody",
+    emptyView: NoChildrenView,
+    events: {
+      "click a.add": "showAddForm"
+    },
+    showAddForm: function(){
+      controller.add_training_group();
+    }
+  });
+
+  var TrainingGroupFormView = BaseFormView.extend({
+    template: "training_group_form",
+    ui:{
+      "form": "form",
+      "select": "form[name=training_group] select[name=products]"
     },
     focus: function(){
       this.ui.form.find('input').first().focus();
@@ -426,6 +516,22 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
           }
         }
       );
+
+      this.training_group_collection = new TrainingGroupCollection(
+          { url: category.training_groups_url(), category_id: category.id}
+      );
+      this.training_group_collection.fetch(
+          {
+              success: function () {
+                  var training_group_list_view = new TrainingGroupListView({
+                      collection: this_.training_group_collection
+                  });
+                  this_.main_layout.getRegion('trainingGroups').show(
+                      training_group_list_view
+                  );
+              }
+          }
+      )
       return true;
     },
     add_product: function(){
@@ -467,6 +573,37 @@ AutonomieApp.module('Product', function(Product, App, Backbone, Marionette, $, _
           var add_form = new ProductGroupFormView({
             model: product_group,
             destCollection: this_.product_group_collection,
+            products: result.products
+          });
+          App.popup.show(add_form);
+        }
+      );
+    },
+    add_training_group: function(){
+      var this_ = this;
+      var training_group = new TrainingGroupModel({});
+      // We load all products, not only those from the current category
+      var load_all_products = initLoad(AppOptions['all_products_url']);
+      load_all_products.then(
+        function(result){
+          var add_form = new TrainingGroupFormView({
+            model: training_group,
+            destCollection: this_.training_group_collection,
+            products: result.products
+          });
+          App.popup.show(add_form);
+        }
+      );
+    },
+    training_group_edit: function(training_group){
+      var this_ = this;
+      // We load all products, not only those from the current category
+      var load_all_products = initLoad(AppOptions['all_products_url']);
+      load_all_products.then(
+        function(result){
+          var add_form = new TrainingGroupFormView({
+            model: training_group,
+            destCollection: this_.training_group_collection,
             products: result.products
           });
           App.popup.show(add_form);

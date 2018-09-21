@@ -165,16 +165,24 @@ def get_groups(login, request):
     user = request.user
     if user is None:
         logger.debug("User is None")
-        res = None
+        principals = None
+
+    elif getattr(request, 'principals', []):
+        principals = request.principals
+
     else:
-        res = []
+        logger.debug(u" + Building principals")
+        principals = []
         for group in user.login.groups:
-            res.append('group:{0}'.format(group))
+            principals.append('group:{0}'.format(group))
 
         for company_id in user.active_company_ids:
-            res.append('company:{}'.format(company_id))
+            principals.append('company:{}'.format(company_id))
 
-    return res
+        request.principals = principals
+        logger.debug(u" -> Principals Built : caching")
+
+    return principals
 
 
 def prepare_config(**settings):

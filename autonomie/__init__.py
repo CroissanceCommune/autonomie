@@ -102,6 +102,7 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.widgets",
     "autonomie.panels.navigation",
     "autonomie.panels.project",
+    "autonomie.panels.training",
 )
 
 AUTONOMIE_EVENT_MODULES = (
@@ -176,8 +177,9 @@ def get_groups(login, request):
         for group in user.login.groups:
             principals.append('group:{0}'.format(group))
 
-        for company_id in user.active_company_ids:
-            principals.append('company:{}'.format(company_id))
+        for company in user.companies:
+            if company.active:
+                principals.append('company:{}'.format(company.id))
 
         request.principals = principals
         logger.debug(u" -> Principals Built : caching")

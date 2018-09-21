@@ -137,11 +137,40 @@ DEFAULT_PERM = [
     (Allow, "group:trainer", ("add.training",)),
     (Allow, "group:constructor", ("add.construction",)),
 ]
+# Nouveau format de permission
+# Dans l'ancien format l'admin avait un wildcard
+# Mais il peut arriver que certaines actions soient également interdites aux
+# admins
 DEFAULT_PERM_NEW = [
-    (Allow, "group:admin", ('admin', 'manage', 'admin_treasury')),
-    (Allow, "group:manager", ('manage', 'admin_treasury',)),
-    (Allow, "group:trainer", ("add.training",)),
-    (Allow, "group:constructor", ("add.construction",)),
+    (
+        Allow,
+        "group:admin",
+        (
+            'admin',
+            'manage',
+            'admin_treasury',
+            'admin_trainings',
+        )
+    ),
+    (
+        Allow,
+        "group:manager",
+        (
+            'manage',
+            'admin_treasury',
+            'admin_trainings',
+        )
+    ),
+    (
+        Allow,
+        "group:trainer",
+        ("add.training",)
+    ),
+    (
+        Allow,
+        "group:constructor",
+        ("add.construction",)
+    ),
 ]
 
 
@@ -353,7 +382,7 @@ def get_activity_acl(self):
     Return acl for activities : companies can also view
     """
     acl = get_event_acl(self)
-    for companies in self.companies:
+    for company in self.companies:
         acl.append(
             (
                 Allow,

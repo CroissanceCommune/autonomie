@@ -32,6 +32,7 @@ from pyramid.security import forget
 from sqlalchemy.orm import (
     load_only,
     contains_eager,
+    selectinload,
 )
 
 from autonomie.models.user.user import User
@@ -45,7 +46,7 @@ def get_avatar(request):
     """
         Returns the current User object
     """
-    logger.info("Get avatar")
+    logger.info("# Retrieving avatar #")
     login = request.unauthenticated_userid
     logger.info(u"  + Login : %s" % login)
     result = None
@@ -53,9 +54,8 @@ def get_avatar(request):
         logger.info("  + Returning the user")
         query = request.dbsession.query(User)
         query = query.join(Login)
-        query = query.outerjoin(Login._groups)
         query = query.options(load_only("firstname", "lastname"))
-        query = query.options(contains_eager(User.login).load_only('login'))
+        query = query.options(contains_eager(User.login).load_only('login').selectinload(Login._groups).load_only('name'))
         query = query.filter(Login.login == login)
         result = query.first()
         if result is None:
@@ -63,6 +63,7 @@ def get_avatar(request):
             raise HTTPFound("/")
     else:
         logger.info("  + No user found")
+    logger.debug(u"-> End of the avatar collection")
     return result
 
 

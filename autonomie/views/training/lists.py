@@ -169,7 +169,7 @@ def includeme(config):
     config.add_view(
         TrainerListView,
         route_name=TRAINER_LIST_URL,
-        renderer="/training/lists.mako",
+        renderer="/training/list_trainers.mako",
         permission="visit"
     )
     config.add_view(

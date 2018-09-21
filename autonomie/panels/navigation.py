@@ -3,6 +3,9 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def navigation_panel(context, request):
@@ -13,6 +16,7 @@ def navigation_panel(context, request):
     Alternative links
     Back link
     """
+    logger.debug(u" -> Navigation panel")
     return dict(
         links=request.navigation.links,
         back_link=request.navigation.back_link,

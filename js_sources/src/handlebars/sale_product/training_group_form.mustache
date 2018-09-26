@@ -1,10 +1,10 @@
-<form name='product_group'>
+<form name='training_group'>
     <div class='row'>
         <div class='col-md-6'>
             <fieldset>
                 <legend>Informations relatives au catalogue</legend>
                 <div class="form-group">
-                    <label for='label'>Intitulé de la formation</label>
+                    <label for='label'>Intitulé de la formation*</label>
                     <input class="form-control" type='text' name='label' value='{{ label }}'/>
                 </div>
                 <div class="form-group">
@@ -54,26 +54,30 @@
                 </div>
                 <div class="form-group">
                      <label for='more_stuff'>Quels sont les plus de cette formation ?</label>
-                     <textarea name='logistics_means' class='form-control'>{{ more_stuff }}</textarea>
+                     <textarea name='more_stuff' class='form-control'>{{ more_stuff }}</textarea>
                 </div>
                 <div class="form-group">
                      <label for='evaluation'>Modalités d'évaluation de la formation</label>
                     <div class='alert alert-info'>
                         Par exemple : questionnaire d'évaluation, exercices-tests, questionnaire
-                        de satisfaction, évaluation formative,...
+                        de satisfaction, évaluation formative.
                     </div>
                      <textarea name='evaluation' class='form-control'>{{ evaluation }}</textarea>
                 </div>
                 <div class="form-group">
-                     <label for='place'>Lieu de la formation</label>
+                    <label for='place'>Lieu de la formation</label>
                     <div class='alert alert-info'>
                         Villes, zones géographiques où la formation peut être mise en place
                     </div>
                      <textarea name='place' class='form-control'>{{ place }}</textarea>
                 </div>
                 <div class="form-group">
-                     <label for='modality'>Modalité de formation</label>
-                     <textarea name='modality' class='form-control'>{{ modality }}</textarea>
+                    <label for='modality'>Modalité de formation</label>
+                    <select multiple name='modality' class='form-control'>
+                       {{#modality_options }}
+                        <option value='{{id}}' {{#selected}}selected{{/selected}}>{{ label }}</option>
+                        {{/modality_options }}
+                    </select>
                 </div>
                 <div class="form-group">
                      <label for='type'>Type de formation</label>

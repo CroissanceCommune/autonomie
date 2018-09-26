@@ -31,14 +31,18 @@ from sqlalchemy import (
     Column,
     String,
     ForeignKey,
+    Text,
 )
-
+from sqlalchemy.orm import (
+    relationship,
+    backref,
+)
+from autonomie import forms
 from autonomie_base.models.base import (
     default_table_args,
 )
-
 from autonomie.models.sale_product import SaleProductGroup
-
+from autonomie.models.sale_product import SaleProductCategory
 
 class SaleTrainingGroup(SaleProductGroup):
     """
@@ -69,175 +73,95 @@ class SaleTrainingGroup(SaleProductGroup):
     id = Column(ForeignKey('sale_product_group.id'), primary_key=True)
 
     goals = Column(
-        String(10),
-        info={
-            'colanderalchemy': {
-                'title': u"Objectifs à atteindre à l'issue de la formation",
-            }
-        },
-        default=u'Les objectifs doivent être obligatoirement décrit avec des verbes d\'actions',
+        String(255),
+        default='',
     )
 
     prerequisites = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Pré-requis obligatoire de la formation",
-            }
-        },
-        default=u''
+        default=''
     )
 
     for_who = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Pour qui?",
-            }
-        },
-        default=u'Public susceptible de participer à cette formation'
+        default=''
     )
 
     duration = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Durée en heures et en jour(s) pour la formation",
-            }
-        },
         nullable=False,
-        default=u'Public susceptible de participer à cette formation'
+        default=''
     )
 
     content = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Contenu détaillé de la formation",
-            }
-        },
-        default=u'trame par étapes'
+        default=''
     )
 
     teaching_method = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Les moyens pédagogiques utilisés",
-            }
-        },
-        default=u''
+        default=''
     )
 
     logistics_means = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Moyens logistiques",
-            }
-        },
-        default=u''
+        default=""
     )
 
     more_stuff = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Quels sont les plus de cette formation ?",
-            }
-        },
-        default=u''
+        default=''
     )
 
     evaluation = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Modalités d'évaluation de la formation",
-            }
-        },
-        default=u'Par exemple : questionnaire d\'évaluation, exercices-tests, questionnaire de satisfaction, '
-                u'évaluation formative,... '
+        default=''
     )
 
     place = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Lieu de la formation",
-            }
-        },
-        default=u'Villes, zones géographiques où la formation peut être mise en place'
+        default=''
     )
 
     modality = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Modalité de formation",
-            }
-        },
-        default=u''
+        default=''
     )
 
     type = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Modalité de formation",
-            }
-        },
-        default=u''
+        default=''
     )
 
     date = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Dates de la formation",
-            }
-        },
-        default=u''
+        default=''
     )
 
     price = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Tarif de la formation",
-            }
-        },
-        default=u''
+        default=''
     )
 
     free_1 = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Champ libre 1",
-            }
-        },
-        default=u''
+        default=''
     )
 
     free_2 = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Champ libre 2",
-            }
-        },
-        default=u''
+        default=''
     )
 
     free_3 = Column(
         String(255),
-        info={
-            'colanderalchemy': {
-                'title': u"Champ libre 3",
-            }
-        },
-        default=u''
+        default=''
+    )
+
+    category = relationship(
+        SaleProductCategory,
+        backref=backref('training_groups'),
+        info={'colanderalchemy': forms.EXCLUDED},
     )
 
     def __json__(self, request):
@@ -274,57 +198,3 @@ class SaleTrainingGroup(SaleProductGroup):
     @property
     def company(self):
         return self.category.company
-
-
-TRAINING_FORM_GRID = (
-    (
-        ('title', 12),
-    ),
-    (
-        ('goals', 12),
-    ),
-    (
-        ('prerequisites', 12),
-    ),
-    (
-        ('for_who', 12),
-    ),
-    (
-        ('duration', 12),
-    ),
-    (
-        ('content', 12),
-    ),
-    (
-        ('teaching_method', 12),
-    ),
-    (
-        ('logistics_means', 12),
-    ),
-    (
-        ('more_stuff', 12),
-    ),
-    (
-        ('evaluation', 12),
-    ),
-    (
-        ('place', 12),
-    ),
-    (
-        ('modality', 12),
-    ),
-    (
-        ('date', 4),
-        ('type', 4),
-        ('price', 4),
-    ),
-    (
-        ('free_1', 12),
-    ),
-    (
-        ('free_2', 12),
-    ),
-    (
-        ('free_3', 12),
-    )
-)

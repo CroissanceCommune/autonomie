@@ -1,0 +1,129 @@
+<form name='training_group'>
+    <div class='row'>
+        <div class='col-md-6'>
+            <fieldset>
+                <legend>Informations relatives au catalogue</legend>
+                <div class="form-group">
+                    <label for='label'>Intitulé de la formation*</label>
+                    <input class="form-control" type='text' name='label' value='{{ label }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='ref'>Référence</label>
+                    <input class="form-control" type='text' name='ref' value='{{ ref }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='goals'>Objectifs à atteindre à l'issue de la formation</label>
+                    <textarea name='goals' class='form-control'>{{ goals }}</textarea>
+                    <p><i>Les objectifs doivent être obligatoirement décrit avec des verbes d'actions.</i></p>
+                </div>
+                <div class="form-group">
+                    <label for='prerequisites'>Pré-requis obligatoire de la formation</label>
+                    <textarea name='prerequisites' class='form-control'>{{ prerequisites }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='for_who'>Pour qui?</label>
+                    <textarea name='for_who' class='form-control'>{{ for_who }}</textarea>
+                    <p><i>Public susceptible de participer à cette formation.</i></p>
+                </div>
+                <div class="form-group">
+                    <label for='duration'>Durée en heures et en jour(s) pour la formation</label>
+                    <input class="form-control" type='text' name='duration' value='{{ duration }}'/>
+                    <p><i>Durée obligatoire minimale 7 heures soit 1 jour.</i></p>
+                </div>
+                <div class="form-group">
+                    <label for='content'>Contenu détaillé de la formation</label>
+                    <textarea name='content' class='form-control'>{{ content }}</textarea>
+                    <p><i>Trame par étapes.</i></p>
+                </div>
+                <div class="form-group">
+                    <label for='teaching_method'>Les moyens pédagogiques utilisés</label>
+                    <textarea name='teaching_method' class='form-control'>{{ teaching_method }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='logistics_means'>Les moyens logistiques à disposition</label>
+                    <textarea name='logistics_means' class='form-control'>{{ logistics_means }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='more_stuff'>Quels sont les plus de cette formation ?</label>
+                    <textarea name='more_stuff' class='form-control'>{{ more_stuff }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='evaluation'>Modalités d'évaluation de la formation</label>
+                    <textarea name='evaluation' class='form-control'>{{ evaluation }}</textarea>
+                    <p><i>Par exemple : questionnaire d'évaluation, exercices-tests, questionnaire de satisfaction, évaluation formative.</i></p>
+                </div>
+                <div class="form-group">
+                    <label for='place'>Lieu de la formation</label>
+                    <textarea name='place' class='form-control'>{{ place }}</textarea>
+                    <p><i>Villes, zones géographiques où la formation peut être mise en place.</i></p>
+                </div>
+                <div class="form-group">
+                    <label>Modalité de formation</label>
+                    <div>
+                        <input type='checkbox' name='modalityOne'> Intra-entreprise<br>
+                        <input type='checkbox' name='modalityTwo'> Inter-entreprise
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for='type'>Type de formation</label>
+                    <textarea name='type' class='form-control'>{{ type }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='date'>Dates de la formation</label>
+                    <input class="form-control" type='text' name='date' value='{{ date }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='price'>Dates de la formation</label>
+                    <input class="form-control" type='text' name='price' value='{{ price }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='free_1'>Champ libre 1</label>
+                    <textarea name='free_1' class='form-control'>{{ free_1 }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='free_2'>Champ libre 2</label>
+                    <textarea name='free_2' class='form-control'>{{ free_2 }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='free_3'>Champ libre 3</label>
+                    <textarea name='free_3' class='form-control'>{{ free_3 }}</textarea>
+                </div>
+            </fieldset>
+        </div>
+        <div class='col-md-6'>
+            <fieldset>
+                <legend>Informations utilisées lors de l'insertion dans les devis/factures</legend>
+                <div class='alert alert-info'>
+                    Lors de l'insertion de l'ouvrage dans un devis ou une
+                    facture, les champs ci-dessous seront utilisés pour
+                    pré-remplir les données dans le document.
+                    Ces champs sont facultatifs
+                </div>
+                <div class="form-group">
+                    <label for='title'>Titre</label>
+                    <input class="form-control" type='text' name='title' value='{{ title }}'/>
+                </div>
+                <div class="form-group">
+                    <label for='description'>Description</label>
+                    <textarea name='description' class='form-control'>{{ description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for='searches'>Produits composant cet ouvrage</label>
+                    <select multiple name='products' class='form-control'>
+                        {{#product_options }}
+                            <option value='{{id}}' {{#selected}}selected{{/selected}}>{{ label }} {{ ref }}</option>
+                        {{/product_options }}
+                    </select>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class='row'>
+        <div class='col-md-6 col-md-offset-6'>
+            <div class="form-actions text-right">
+                <button type="submit" class="btn btn-success" name='submit'>Valider</button>
+                <button type="reset" class="btn btn-danger" name="cancel">Annuler</button>
+            </div>
+        </div>
+    </div>
+</form>

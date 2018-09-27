@@ -31,7 +31,7 @@ from sqlalchemy import (
     Column,
     String,
     ForeignKey,
-    Text,
+    Boolean,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -43,6 +43,23 @@ from autonomie_base.models.base import (
 )
 from autonomie.models.sale_product import SaleProductGroup
 from autonomie.models.sale_product import SaleProductCategory
+from autonomie.models.options import (
+    ConfigurableOption,
+    get_id_foreignkey_col,
+)
+from autonomie.models.tools import get_excluded_colanderalchemy
+
+
+class TrainingTypeOptions(ConfigurableOption):
+    """
+    Different type of training
+    """
+    __colanderalchemy_config__ = {
+        'title': u"Type de formatiob",
+        'validation_msg': u"Les types de formation ont bien été configurées",
+    }
+    id = get_id_foreignkey_col('configurable_option.id')
+
 
 class SaleTrainingGroup(SaleProductGroup):
     """
@@ -105,7 +122,7 @@ class SaleTrainingGroup(SaleProductGroup):
 
     logistics_means = Column(
         String(255),
-        default=""
+        default=''
     )
 
     more_stuff = Column(
@@ -123,14 +140,33 @@ class SaleTrainingGroup(SaleProductGroup):
         default=''
     )
 
-    modality = Column(
-        String(255),
-        default=''
+    modalityOne = Column(
+        Boolean(),
+        default=False
+    )
+
+    modalityTwo = Column(
+        Boolean(),
+        default=False
     )
 
     type = Column(
         String(255),
         default=''
+    )
+
+    type_id = Column(
+        ForeignKey('training_type_option.id'),
+    )
+
+    type = relationship(
+        'TrainingTypeOptions',
+        info={
+            'colanderalchemy': get_excluded_colanderalchemy(
+                u"Type de formation"
+            ),
+            'export': {'related_key': 'label'},
+        },
     )
 
     date = Column(
@@ -186,7 +222,8 @@ class SaleTrainingGroup(SaleProductGroup):
             more_stuff=self.more_stuff,
             evaluation=self.evaluation,
             place=self.place,
-            modality=self.modality,
+            modalityOne=self.modalityOne,
+            modalityTwo=self.modalityTwo,
             type=self.type,
             date=self.date,
             price=self.price,

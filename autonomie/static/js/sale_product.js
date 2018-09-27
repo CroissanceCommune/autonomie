@@ -436,13 +436,12 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             var ids = _.pluck(this.model.get('products'), 'id');
             var product_options = this.updateSelectOptions(
                 this.init_options.products, ids, 'id');
-            var modality_Ids = _.pluck(this.model.get('modalities'), 'id');
-            var modality_options = this.updateSelectOptions(
-                this.init_options.modalities, modality_Ids, 'id');
             return {
                 product_options: product_options,
-                modality_options: modality_options,
             };
+        },
+        onBeforeFormSubmit: function () {
+            console.log("before ",this);
         },
         onShow: function () {
             this.ui.select.select2();
@@ -599,10 +598,6 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                         model: training_group,
                         destCollection: this_.training_group_collection,
                         products: result.products,
-                        modalities: [
-                            {id: "intra", value: "Intra-entreprise"},
-                            {id: "inter", value: "Inter-entreprise"},
-                        ]
                     });
                     App.popup.show(add_form);
                 }
@@ -618,12 +613,7 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                         model: training_group,
                         destCollection: this_.training_group_collection,
                         products: result.products,
-                        modalities: [
-                            {id: "intra", label: "Intra-entreprise"},
-                            {id: "inter", label: "Inter-entreprise"},
-                        ]
                     });
-                    console.log(add_form);
                     App.popup.show(add_form);
                 }
             );

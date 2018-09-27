@@ -208,11 +208,6 @@ class SaleProductGroup(DBBASE):
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
-    parent_id = Column(
-        ForeignKey('sale_product_group.id'),
-        info={'colanderalchemy': forms.EXCLUDED},
-    )
-
     def __json__(self, request):
         """
         Json repr of our model
@@ -225,7 +220,6 @@ class SaleProductGroup(DBBASE):
             description=self.description,
             products=[product.__json__(request) for product in self.products],
             category_id=self.category_id,
-            parent_id=self.parent_id,
         )
 
     @property

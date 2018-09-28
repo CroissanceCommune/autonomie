@@ -440,9 +440,6 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                 product_options: product_options,
             };
         },
-        onBeforeFormSubmit: function () {
-            console.log("before ",this);
-        },
         onShow: function () {
             this.ui.select.select2();
         },

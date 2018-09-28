@@ -275,7 +275,6 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
               "sauvegarde de vos données");
         },
         wait: true,
-        patch: true
       }
     );
 

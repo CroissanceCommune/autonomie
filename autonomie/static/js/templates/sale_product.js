@@ -183,11 +183,13 @@ templates['training_group.mustache'] = template({"1":function(container,depth0,h
     + "</td>\n<td class='action'>\n    <div class=\"btn-group\">\n        <a class='btn btn-success btn-default btn-sm edit' title=\"Modifier cette formation\">\n            <i class='glyphicon glyphicon-pencil'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Modifier\n            </span>\n        </a>\n        <a class='btn btn-danger btn-default btn-sm remove' title='Supprimer cet formation'>\n            <i class='glyphicon glyphicon-trash'></i>\n            <span class='visible-lg-inline-block hidden-sm'>\n                Supprimer\n            </span>\n        </a>\n    </div>\n\n</td>";
 },"useData":true});
 templates['training_group_form.mustache'] = template({"1":function(container,depth0,helpers,partials,data) {
+    return " checked";
+},"3":function(container,depth0,helpers,partials,data) {
     var stack1, helper, options, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression, buffer = 
   "                            <option value='"
     + alias4(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data}) : helper)))
     + "' ";
-  stack1 = ((helper = (helper = helpers.selected || (depth0 != null ? depth0.selected : depth0)) != null ? helper : alias2),(options={"name":"selected","hash":{},"fn":container.program(2, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
+  stack1 = ((helper = (helper = helpers.selected || (depth0 != null ? depth0.selected : depth0)) != null ? helper : alias2),(options={"name":"selected","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
   if (!helpers.selected) { stack1 = helpers.blockHelperMissing.call(depth0,stack1,options)}
   if (stack1 != null) { buffer += stack1; }
   return buffer + ">"
@@ -195,10 +197,10 @@ templates['training_group_form.mustache'] = template({"1":function(container,dep
     + " "
     + alias4(((helper = (helper = helpers.ref || (depth0 != null ? depth0.ref : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"ref","hash":{},"data":data}) : helper)))
     + "</option>\n";
-},"2":function(container,depth0,helpers,partials,data) {
+},"4":function(container,depth0,helpers,partials,data) {
     return "selected";
 },"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, helper, options, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression, buffer = 
+    var stack1, helper, options, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression, alias5=helpers.blockHelperMissing, buffer = 
   "<form name='training_group'>\n    <div class='row'>\n        <div class='col-md-6'>\n            <fieldset>\n                <legend>Informations relatives au catalogue</legend>\n                <div class=\"form-group\">\n                    <label for='label'>Intitulé de la formation*</label>\n                    <input class=\"form-control\" type='text' name='label' value='"
     + alias4(((helper = (helper = helpers.label || (depth0 != null ? depth0.label : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"label","hash":{},"data":data}) : helper)))
     + "'/>\n                </div>\n                <div class=\"form-group\">\n                    <label for='ref'>Référence</label>\n                    <input class=\"form-control\" type='text' name='ref' value='"
@@ -223,7 +225,15 @@ templates['training_group_form.mustache'] = template({"1":function(container,dep
     + alias4(((helper = (helper = helpers.evaluation || (depth0 != null ? depth0.evaluation : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"evaluation","hash":{},"data":data}) : helper)))
     + "</textarea>\n                    <p><i>Par exemple : questionnaire d'évaluation, exercices-tests, questionnaire de satisfaction, évaluation formative.</i></p>\n                </div>\n                <div class=\"form-group\">\n                    <label for='place'>Lieu de la formation</label>\n                    <textarea name='place' class='form-control'>"
     + alias4(((helper = (helper = helpers.place || (depth0 != null ? depth0.place : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"place","hash":{},"data":data}) : helper)))
-    + "</textarea>\n                    <p><i>Villes, zones géographiques où la formation peut être mise en place.</i></p>\n                </div>\n                <div class=\"form-group\">\n                    <label>Modalité de formation</label>\n                    <div>\n                        <input type='checkbox' name='modalityOne'> Intra-entreprise<br>\n                        <input type='checkbox' name='modalityTwo'> Inter-entreprise\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for='type'>Type de formation</label>\n                    <textarea name='type' class='form-control'>"
+    + "</textarea>\n                    <p><i>Villes, zones géographiques où la formation peut être mise en place.</i></p>\n                </div>\n                <div class=\"form-group\">\n                    <label>Modalité de formation</label>\n                    <div>\n                        <input type='checkbox' name='modalityOne' ";
+  stack1 = ((helper = (helper = helpers.modalityOne || (depth0 != null ? depth0.modalityOne : depth0)) != null ? helper : alias2),(options={"name":"modalityOne","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
+  if (!helpers.modalityOne) { stack1 = alias5.call(depth0,stack1,options)}
+  if (stack1 != null) { buffer += stack1; }
+  buffer += "> Intra-entreprise<br>\n                        <input type='checkbox' name='modalityTwo' ";
+  stack1 = ((helper = (helper = helpers.modalityTwo || (depth0 != null ? depth0.modalityTwo : depth0)) != null ? helper : alias2),(options={"name":"modalityTwo","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
+  if (!helpers.modalityTwo) { stack1 = alias5.call(depth0,stack1,options)}
+  if (stack1 != null) { buffer += stack1; }
+  buffer += "> Inter-entreprise\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for='type'>Type de formation</label>\n                    <textarea name='type' class='form-control'>"
     + alias4(((helper = (helper = helpers.type || (depth0 != null ? depth0.type : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"type","hash":{},"data":data}) : helper)))
     + "</textarea>\n                </div>\n                <div class=\"form-group\">\n                    <label for='date'>Dates de la formation</label>\n                    <input class=\"form-control\" type='text' name='date' value='"
     + alias4(((helper = (helper = helpers.date || (depth0 != null ? depth0.date : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"date","hash":{},"data":data}) : helper)))
@@ -240,8 +250,8 @@ templates['training_group_form.mustache'] = template({"1":function(container,dep
     + "'/>\n                </div>\n                <div class=\"form-group\">\n                    <label for='description'>Description</label>\n                    <textarea name='description' class='form-control'>"
     + alias4(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"description","hash":{},"data":data}) : helper)))
     + "</textarea>\n                </div>\n                <div class=\"form-group\">\n                    <label for='searches'>Produits composant cet ouvrage</label>\n                    <select multiple name='products' class='form-control'>\n";
-  stack1 = ((helper = (helper = helpers.product_options || (depth0 != null ? depth0.product_options : depth0)) != null ? helper : alias2),(options={"name":"product_options","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
-  if (!helpers.product_options) { stack1 = helpers.blockHelperMissing.call(depth0,stack1,options)}
+  stack1 = ((helper = (helper = helpers.product_options || (depth0 != null ? depth0.product_options : depth0)) != null ? helper : alias2),(options={"name":"product_options","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
+  if (!helpers.product_options) { stack1 = alias5.call(depth0,stack1,options)}
   if (stack1 != null) { buffer += stack1; }
   return buffer + "                    </select>\n                </div>\n            </fieldset>\n        </div>\n    </div>\n    <div class='row'>\n        <div class='col-md-6 col-md-offset-6'>\n            <div class=\"form-actions text-right\">\n                <button type=\"submit\" class=\"btn btn-success\" name='submit'>Valider</button>\n                <button type=\"reset\" class=\"btn btn-danger\" name=\"cancel\">Annuler</button>\n            </div>\n        </div>\n    </div>\n</form>\n";
 },"useData":true});

@@ -519,7 +519,7 @@ def includeme(config):
         RestTrainingGroups,
         attr='put',
         route_name='sale_training_group',
-        request_method="PUT",
+        request_method="PATCH",
         permission="edit_sale_product",
     )
     add_json_view(

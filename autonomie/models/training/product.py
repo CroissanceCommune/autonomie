@@ -155,18 +155,23 @@ class SaleTrainingGroup(SaleProductGroup):
         default=''
     )
 
-    type_id = Column(
-        ForeignKey('training_type_option.id'),
-    )
+    # type_id = Column(
+    #     ForeignKey('training_type_option.id'),
+    # )
+    #
+    # type = relationship(
+    #     'TrainingTypeOptions',
+    #     info={
+    #         'colanderalchemy': get_excluded_colanderalchemy(
+    #             u"Type de formation"
+    #         ),
+    #         'export': {'related_key': 'label'},
+    #     },
+    # )
 
-    type = relationship(
-        'TrainingTypeOptions',
-        info={
-            'colanderalchemy': get_excluded_colanderalchemy(
-                u"Type de formation"
-            ),
-            'export': {'related_key': 'label'},
-        },
+    type = Column(
+        String(255),
+        default=''
     )
 
     date = Column(

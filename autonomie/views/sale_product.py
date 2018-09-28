@@ -219,7 +219,7 @@ class RestProducts(BaseRestView):
 
     @property
     def schema(self):
-        return SQLAlchemySchemaNode(
+        return SQLAlchemySchemaNode(-
             SaleProduct,
             excludes=('id',),
         ).bind(request=self.request)
@@ -519,7 +519,7 @@ def includeme(config):
         RestTrainingGroups,
         attr='put',
         route_name='sale_training_group',
-        request_method="PATCH",
+        request_method="PUT",
         permission="edit_sale_product",
     )
     add_json_view(

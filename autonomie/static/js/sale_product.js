@@ -425,6 +425,8 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         ui: {
             "form": "form",
             "select": "form[name=training_group] select[name=products]",
+            "trainingSelect": "form[name=training_group] select[name=types]",
+            "checkboxes": "form[name=training_group] input[type=checkbox]"
         },
         focus: function () {
             this.ui.form.find('input').first().focus();
@@ -433,8 +435,8 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             this.destroy();
         },
         templateHelpers: function () {
-            var training_type = this.model.get('type_id');
-            var training_type_options = this.updateSelectOptions(AppOptions['training_type'],training_type, 'id');
+            var training_types = _.pluck(this.model.get('types'), 'id');
+            var training_type_options = this.updateSelectOptions(AppOptions['training_type'],training_types, 'id');
             var ids = _.pluck(this.model.get('products'), 'id');
             var product_options = this.updateSelectOptions(
                 this.init_options.products, ids, 'id');
@@ -444,10 +446,30 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             };
         },
         onShow: function () {
+            var model = this.model;
             this.ui.select.select2();
+            this.ui.trainingSelect.select2();
+            this.ui.checkboxes.each(
+                function() {
+                    $(this).on('change',
+                        function (event) {
+                            model.set($(this).attr('name'), $(event.target).is(':checked') ? true : false)
+                        })
+                }
+            );
         },
         onRender: function () {
+            var model = this.model;
             this.ui.select.select2();
+            this.ui.trainingSelect.select2();
+            this.ui.checkboxes.each(
+                function() {
+                    $(this).on('change',
+                        function (event) {
+                            model.set($(this).attr('name'), $(event.target).is(':checked') ? true : false)
+                        })
+                }
+            );
         }
     });
 

@@ -65,8 +65,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for='type'>Type de formation</label>
-                    <select name='type_id' class='form-control'>
+                    <label for='types'>Type de formation</label>
+                    <select multiple name='types' class='form-control'>
                         {{#training_type_options }}
                             <option value='{{id}}' {{#selected}}selected{{/selected}}>{{ label }}</option>
                         {{/training_type_options }}

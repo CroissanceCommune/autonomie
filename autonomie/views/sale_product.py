@@ -280,6 +280,13 @@ class RestTrainingGroups(BaseRestView):
 
             appstruct['products'] = product_ids
 
+        if 'types' in appstruct:
+            types_ids = appstruct.get('types')
+            if not hasattr(types_ids, '__iter__'):
+                types_ids = [types_ids]
+
+            appstruct['types'] = types_ids
+
         if self.context.__name__ == 'sale_category':
             appstruct['category_id'] = self.context.id
         return appstruct

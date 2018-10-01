@@ -244,7 +244,7 @@ templates['training_group_form.mustache'] = template({"1":function(container,dep
   stack1 = ((helper = (helper = helpers.modalityTwo || (depth0 != null ? depth0.modalityTwo : depth0)) != null ? helper : alias2),(options={"name":"modalityTwo","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
   if (!helpers.modalityTwo) { stack1 = alias5.call(depth0,stack1,options)}
   if (stack1 != null) { buffer += stack1; }
-  buffer += "> Inter-entreprise\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for='type'>Type de formation</label>\n                    <select name='type_id' class='form-control'>\n";
+  buffer += "> Inter-entreprise\n                    </div>\n                </div>\n                <div class=\"form-group\">\n                    <label for='types'>Type de formation</label>\n                    <select multiple name='types' class='form-control'>\n";
   stack1 = ((helper = (helper = helpers.training_type_options || (depth0 != null ? depth0.training_type_options : depth0)) != null ? helper : alias2),(options={"name":"training_type_options","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
   if (!helpers.training_type_options) { stack1 = alias5.call(depth0,stack1,options)}
   if (stack1 != null) { buffer += stack1; }

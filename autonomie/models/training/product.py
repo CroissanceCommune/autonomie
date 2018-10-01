@@ -32,6 +32,8 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Boolean,
+    Integer,
+    Table,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -39,6 +41,7 @@ from sqlalchemy.orm import (
 )
 from autonomie import forms
 from autonomie_base.models.base import (
+    DBBASE,
     default_table_args,
 )
 from autonomie.models.sale_product import SaleProductGroup
@@ -48,6 +51,27 @@ from autonomie.models.options import (
     get_id_foreignkey_col,
 )
 from autonomie.models.tools import get_excluded_colanderalchemy
+
+TRAINING_TYPE_TO_TRAINING_GROUP_REL_TABLE = Table(
+    "training_type_sale_training_group_rel",
+    DBBASE.metadata,
+    Column(
+        "training_type_id",
+        Integer,
+        ForeignKey('training_type_options.id', ondelete='cascade')
+    ),
+    Column(
+        "sale_training_group_id",
+        Integer,
+        ForeignKey(
+            'sale_training_group.id',
+            ondelete='cascade',
+            name="fk_training_type_sale_training_group_rel_id"
+        )
+    ),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
 class TrainingTypeOptions(ConfigurableOption):
@@ -76,7 +100,7 @@ class SaleTrainingGroup(SaleProductGroup):
     :param evaluation: evaluation criteria
     :param place: place if the training session
     :param modality: modality of the training session
-    :param type: type of the training
+    :param types: types of the training
     :param date: date og the training session
     :param price: price of the training session
     :param free_1: free input
@@ -150,17 +174,15 @@ class SaleTrainingGroup(SaleProductGroup):
         default=False
     )
 
-    type_id = Column(
-        ForeignKey('training_type_options.id'),
-    )
-
-    type = relationship(
+    types = relationship(
         'TrainingTypeOptions',
+        secondary=TRAINING_TYPE_TO_TRAINING_GROUP_REL_TABLE,
         info={
             'colanderalchemy': get_excluded_colanderalchemy(
                 u"Type de formation"
             ),
             'export': {'related_key': 'label'},
+            'children': forms.get_sequence_child_item(TrainingTypeOptions),
         },
     )
 
@@ -219,8 +241,7 @@ class SaleTrainingGroup(SaleProductGroup):
             place=self.place,
             modalityOne=self.modalityOne,
             modalityTwo=self.modalityTwo,
-            type_id=self.type_id,
-            type=self.type,
+            types=[type.__json__(request) for type in self.types],
             date=self.date,
             price=self.price,
             free_1=self.free_1,

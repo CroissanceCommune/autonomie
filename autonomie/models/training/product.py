@@ -178,9 +178,6 @@ class SaleTrainingGroup(SaleProductGroup):
         'TrainingTypeOptions',
         secondary=TRAINING_TYPE_TO_TRAINING_GROUP_REL_TABLE,
         info={
-            'colanderalchemy': get_excluded_colanderalchemy(
-                u"Type de formation"
-            ),
             'export': {'related_key': 'label'},
             'children': forms.get_sequence_child_item(TrainingTypeOptions),
         },

@@ -11,9 +11,9 @@ CSSDIRECTORIES=$(shell cd $(CSS_SOURCES) && find *  -maxdepth 1 -type d)
 
 # Used to build templates used in inline javascript stuff (not webpacked)
 js:
-	/Users/sebastienbodrero/npm-packages/bin/handlebars $(JS_TEMPLATES_SOURCE)/*.mustache  -f $(JS_TEMPLATE_MAIN_FILE)
+	handlebars $(JS_TEMPLATES_SOURCE)/*.mustache  -f $(JS_TEMPLATE_MAIN_FILE)
 	for dir in $(DIRECTORIES);do \
-		/Users/sebastienbodrero/npm-packages/bin/handlebars $(JS_TEMPLATES_SOURCE)/$$dir/*.mustache -f $(JS_TEMPLATE_DEST)/$$dir.js; \
+		handlebars $(JS_TEMPLATES_SOURCE)/$$dir/*.mustache -f $(JS_TEMPLATE_DEST)/$$dir.js; \
 	done
 
 # build js with webpack

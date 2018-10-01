@@ -55,7 +55,7 @@ class TrainingTypeOptions(ConfigurableOption):
     Different type of training
     """
     __colanderalchemy_config__ = {
-        'title': u"Type de formatiob",
+        'title': u"Type de formation",
         'validation_msg': u"Les types de formation ont bien été configurées",
     }
     id = get_id_foreignkey_col('configurable_option.id')
@@ -150,28 +150,18 @@ class SaleTrainingGroup(SaleProductGroup):
         default=False
     )
 
-    type = Column(
-        String(255),
-        default=''
+    type_id = Column(
+        ForeignKey('training_type_options.id'),
     )
 
-    # type_id = Column(
-    #     ForeignKey('training_type_option.id'),
-    # )
-    #
-    # type = relationship(
-    #     'TrainingTypeOptions',
-    #     info={
-    #         'colanderalchemy': get_excluded_colanderalchemy(
-    #             u"Type de formation"
-    #         ),
-    #         'export': {'related_key': 'label'},
-    #     },
-    # )
-
-    type = Column(
-        String(255),
-        default=''
+    type = relationship(
+        'TrainingTypeOptions',
+        info={
+            'colanderalchemy': get_excluded_colanderalchemy(
+                u"Type de formation"
+            ),
+            'export': {'related_key': 'label'},
+        },
     )
 
     date = Column(
@@ -229,6 +219,7 @@ class SaleTrainingGroup(SaleProductGroup):
             place=self.place,
             modalityOne=self.modalityOne,
             modalityTwo=self.modalityTwo,
+            type_id=self.type_id,
             type=self.type,
             date=self.date,
             price=self.price,

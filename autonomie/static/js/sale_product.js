@@ -453,7 +453,7 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                 function() {
                     $(this).on('change',
                         function (event) {
-                            model.set($(this).attr('name'), $(event.target).is(':checked') ? true : false)
+                            model.set($(this).attr('name'), $(event.target).is(':checked'))
                         })
                 }
             );
@@ -466,7 +466,7 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                 function() {
                     $(this).on('change',
                         function (event) {
-                            model.set($(this).attr('name'), $(event.target).is(':checked') ? true : false)
+                            model.set($(this).attr('name'), $(event.target).is(':checked'))
                         })
                 }
             );

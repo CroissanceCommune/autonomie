@@ -433,11 +433,14 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             this.destroy();
         },
         templateHelpers: function () {
+            var training_type = this.model.get('type_id');
+            var training_type_options = this.updateSelectOptions(AppOptions['training_type'],training_type, 'id');
             var ids = _.pluck(this.model.get('products'), 'id');
             var product_options = this.updateSelectOptions(
                 this.init_options.products, ids, 'id');
             return {
                 product_options: product_options,
+                training_type_options: training_type_options
             };
         },
         onShow: function () {

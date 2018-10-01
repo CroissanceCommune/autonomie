@@ -63,6 +63,8 @@ from .project import phase
 from .project import project
 from .project import types
 from .training import trainer
+from .training import TrainingTypeOptions
+from .training import SaleTrainingGroup
 from .user import user
 from .user import login
 from .user import group

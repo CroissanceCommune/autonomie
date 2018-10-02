@@ -102,12 +102,13 @@ class CareerPathAddStage(BaseFormView):
         # Redirect to login or stage's edition if needed
         dest_route = self.request.current_route_path(_query='')
         msg = u"L'étape de parcours a bien été ajoutée"
-        if model.career_stage.cae_situation.is_integration:
-            login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
-            if login is None:
-                dest_route = self.request.route_path('/users/{id}/login', id=self.context.userdatas.id)
-                msg = u"L'étape de parcours a bien été ajoutée, vous devez maintenant créer les \
-                identifiants de l'utilisateur"
+        if model.career_stage.cae_situation is not None:
+            if model.career_stage.cae_situation.is_integration:
+                login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
+                if login is None:
+                    dest_route = self.request.route_path('/users/{id}/login', id=self.context.userdatas.user_id)
+                    msg = u"L'étape de parcours a bien été ajoutée, vous devez maintenant créer les \
+                    identifiants de l'utilisateur"
         if model.stage_type is not None:
             if model.stage_type in ("contract", "amendment", "exit") : 
                 dest_route = self.request.route_path('career_path', id=model.id, _query='')
@@ -176,7 +177,7 @@ class CareerPathEditStage(BaseFormView):
                     dest = u"login"
 
         return HTTPFound(
-            self.request.route_path('/users/{id}/%s' % dest, id=self.context.userdatas_id)
+            self.request.route_path('/users/{id}/%s' % dest, id=self.context.userdatas.user_id)
         )
 
 
@@ -194,7 +195,7 @@ class CareerPathDeleteStage(DeleteView):
     
     def redirect(self):
         return HTTPFound(
-            self.request.route_path('/users/{id}/userdatas/career_path', id=self.context.userdatas_id)
+            self.request.route_path('/users/{id}/userdatas/career_path', id=self.context.userdatas.user_id)
         )
 
 

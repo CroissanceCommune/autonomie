@@ -136,13 +136,13 @@ class UserDatasListView(UserDatasListClass, BaseListView):
                 _query={'action': 'delete'}
             ),
             u"Supprimer",
-            u"Supprimer ces données de gestion sociale",
+            u"Supprimer la fiche de gestion sociale",
             u"trash",
             {
                 'onclick': u"return confirm('En supprimant cette fiche de "
-                u"gestion sociale, vous supprimerez "
-                u"également es données associées (documents sociaux, "
-                u"historique de situation ...). Continuez ?');"
+                u"gestion sociale, vous supprimerez également \n"
+                u"les données associées (documents sociaux, " 
+                u"parcours, historiques...). \n\nContinuer ?');"
             }
         )
 

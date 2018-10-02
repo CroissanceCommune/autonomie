@@ -24,3 +24,4 @@ autonomie/tests/datas/*-*-*-*-*/
 .DS_Store
 .idea/
 venv/
+tmp

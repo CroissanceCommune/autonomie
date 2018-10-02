@@ -139,7 +139,7 @@ class CareerPath(DBBASE):
         info={'colanderalchemy': {'widget': deform.widget.HiddenWidget()}},
     )
     userdatas_id = Column(
-        ForeignKey('user_datas.id'),
+        ForeignKey('user_datas.id', ondelete="CASCADE"),
         info={
             'colanderalchemy': {'exclude': True},
             'export': {

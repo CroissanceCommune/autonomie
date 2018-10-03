@@ -34,7 +34,7 @@
         <a
             class='btn text-danger btn-head'
             href="${delete_url}"
-            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette fiche de gestion sociale et tous les éléments associés (fichiers, historiques ...) ?')">
+            onclick="return confirm('En supprimant cette fiche de gestion sociale, vous supprimerez également \nles données associées (documents sociaux, parcours, historiques...). \n\nContinuer ?')">
             <i class='fa fa-trash'></i>&nbsp;Supprimer la fiche
         </a>
     % endif

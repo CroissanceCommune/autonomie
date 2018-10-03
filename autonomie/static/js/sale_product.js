@@ -369,9 +369,22 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         },
         onShow: function () {
             this.ui.select.select2();
+            this.ui.select.on('change',
+                function(){
+                    if($(this).val() == null) {
+                        model.set('products', []);
+                    }
+                });
         },
         onRender: function () {
+            var model = this.model;
             this.ui.select.select2();
+            this.ui.select.on('change',
+                function(){
+                    if($(this).val() == null) {
+                        model.set('products', []);
+                    }
+                });
         }
     });
 
@@ -457,6 +470,18 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                         })
                 }
             );
+            this.ui.select.on('change',
+                function(){
+                    if($(this).val() == null) {
+                        model.set('products', []);
+                    }
+                });
+            this.ui.trainingSelect.on('change',
+                function(){
+                    if($(this).val() == null) {
+                        model.set('types', []);
+                    }
+                });
         },
         onRender: function () {
             var model = this.model;
@@ -470,6 +495,18 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                         })
                 }
             );
+            this.ui.select.on('change',
+                function(){
+                    if($(this).val() == null) {
+                        model.set('products', []);
+                    }
+                });
+            this.ui.trainingSelect.on('change',
+                function(){
+                    if($(this).val() == null) {
+                        model.set('types', []);
+                    }
+                });
         }
     });
 

@@ -179,7 +179,12 @@ class SaleTrainingGroup(SaleProductGroup):
         secondary=TRAINING_TYPE_TO_TRAINING_GROUP_REL_TABLE,
         info={
             'export': {'related_key': 'label'},
-            #'children': forms.get_sequence_child_item(TrainingTypeOptions),
+
+            'colanderalchemy': {
+                # Permet de sélectionner des éléments existants au lieu
+                # d'insérer des nouveaux à chaque fois
+                'children': forms.get_sequence_child_item(TrainingTypeOptions),
+            }
         },
     )
 

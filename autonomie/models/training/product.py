@@ -179,7 +179,7 @@ class SaleTrainingGroup(SaleProductGroup):
         secondary=TRAINING_TYPE_TO_TRAINING_GROUP_REL_TABLE,
         info={
             'export': {'related_key': 'label'},
-            #'children': forms.get_sequence_child_item(TrainingTypeOptions),
+            'children': forms.get_sequence_child_item(TrainingTypeOptions, child_attrs=('id', 'key')),
         },
     )
 

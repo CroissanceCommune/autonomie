@@ -233,7 +233,7 @@ class RestProductGroups(BaseRestView):
     """
     # Context is the category
     def collection_get(self):
-        return self.context.product_groups
+        return [item for item in self.context.product_groups if item.type_ == 'base']
 
     def pre_format(self, appstruct):
         """

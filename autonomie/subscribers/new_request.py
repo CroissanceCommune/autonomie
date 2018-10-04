@@ -59,7 +59,7 @@ def add_request_attributes(event):
     # Use this one instead
     request.navigation = Navigation()
     request.popups = {}
-    if 'popup' in request.params:
+    if request.params.get('popup', "") != "":
         logger.info("Relative window is a popup")
         request.is_popup = True
     else:

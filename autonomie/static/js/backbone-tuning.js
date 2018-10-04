@@ -317,6 +317,21 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
       }
     });
     return options;
+  },
+  filterVATProductFromVATValue: function(options, vat_val) {
+    /*
+     * Return the products list depending on tva value
+     *
+     * :param list options: list of js objects
+     * :param list val: list of values or single value
+     */
+    var products = null;
+    _.each(options, function(option){
+      if(vat_val == option.value) {
+        products = option.products;
+      }
+    })
+    return products;
   }
 });
 

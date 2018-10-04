@@ -271,7 +271,9 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
     var ProductFormView = BaseFormView.extend({
         template: "product_form",
         ui: {
-            "form": "form"
+            "form": "form",
+            "vatSelect": "form select[name=tva]",
+            "vatProductSelect": "form select[name=vat_product_id]",
         },
         focus: function () {
             this.ui.form.find('input').first().focus();
@@ -282,12 +284,18 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         templateHelpers: function () {
             var tva = this.model.get('tva');
             tva_options = this.updateSelectOptions(AppOptions['tvas'], tva);
+            var vat_product_id = this.model.get('vat_product_id');
+            vat_product_options = this.updateSelectOptions(
+                this.filterVATProductFromVATValue(AppOptions['tvas'], tva),
+                vat_product_id, 'id')
+            ;
             var unity = this.model.get('unity');
             unity_options = this.updateSelectOptions(
                 AppOptions['unities'], unity);
             return {
                 tva_options: tva_options,
-                unity_options: unity_options
+                unity_options: unity_options,
+                vat_product_options: vat_product_options,
             };
         },
         onBeforeFormSubmit: function () {
@@ -299,6 +307,20 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                 delete tinyMCE.editors.tiny_description;
             }
             tinyMCE.execCommand('mceAddEditor', false, 'tiny_description');
+            // Update vat products option list
+            var innerFilterVATProductFromVATValue = this.filterVATProductFromVATValue;
+            this.ui.vatProductSelect.select2()
+            this.ui.vatSelect.on('change', function(){
+                $('form select[name=vat_product_id]').find('option').not(':first').remove();
+                new_vat_product_options = innerFilterVATProductFromVATValue(
+                    AppOptions['tvas'],
+                    $(this).val()
+                );
+                for (i in new_vat_product_options) {
+                    newOption = new Option(new_vat_product_options[i].name, new_vat_product_options[i].id);
+                    $('form select[name=vat_product_id]').append(newOption).trigger('change');
+                }
+            });
         }
     });
 

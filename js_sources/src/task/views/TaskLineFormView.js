@@ -31,6 +31,7 @@ const TaskLineFormView = Mn.View.extend({
         'quantity': '.quantity',
         'unity': '.unity',
         'tva': '.tva',
+        'vat_product_id': '.vat_product_id',
         'product_id': '.product_id',
         'catalog_container': '#catalog-container'
     },
@@ -51,7 +52,7 @@ const TaskLineFormView = Mn.View.extend({
         'set:product': 'refreshForm',
         'change:tva': 'refreshProductSelect'
     },
-    initialize(){
+    initialize: function () {
         var channel = Radio.channel('config');
         this.workunit_options = channel.request(
             'get:options',
@@ -68,7 +69,11 @@ const TaskLineFormView = Mn.View.extend({
         this.section = channel.request(
             'get:form_section',
             'tasklines'
-        )
+        );
+        this.vat_product_options = this.filterVATProductFromVATValue(
+            this.tva_options
+        );
+
     },
     onCatalogEdit: function(product_datas){
         this.model.loadProduct(product_datas);
@@ -146,6 +151,18 @@ const TaskLineFormView = Mn.View.extend({
                 }
             )
         );
+        this.showChildView(
+            'vat_product_id',
+            new SelectWidget(
+                {
+                    options: this.vat_product_options,
+                    title: "Compte produit",
+                    value: this.model.get('vat_product_id'),
+                    field_name: 'vat_product_id',
+                    id_key: 'value'
+                }
+            )
+        );
         this.refreshProductSelect();
         if (this.isAddView()){
             this.getUI('main_tab').tab('show');
@@ -156,6 +173,23 @@ const TaskLineFormView = Mn.View.extend({
     },
     getDefaultTva(){
         return _.findWhere(this.tva_options, {selected: true});
+    },
+    // TODO DRY alert
+    filterVATProductFromVATValue: function() {
+        /*
+         * Return the products list depending on tva value
+         *
+         */
+        var product_options = null;
+        var tva = this.model.get('tva') !== undefined ? this.model.get('tva') : '20';
+        if(this.tva_options !== undefined) {
+            _.each(this.tva_options, function(option){
+              if(tva == option.value) {
+                product_options = option.products;
+              }
+            })
+        }
+        return product_options;
     },
     refreshProductSelect(){
         /*
@@ -200,6 +234,8 @@ const TaskLineFormView = Mn.View.extend({
     onRender: function(){
         this.refreshForm();
         if (this.isAddView()){
+            console.log('isAddView');
+            this.filterVATProductFromVATValue()
             this.showChildView(
                 'catalog_container',
                 new LoadingWidget()

@@ -6734,7 +6734,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var TaskLineModel = _BaseModel2.default.extend({
-	    props: ['id', 'order', 'description', 'cost', 'quantity', 'unity', 'tva', 'product_id', 'task_id'],
+	    props: ['id', 'order', 'description', 'cost', 'quantity', 'unity', 'tva', 'vat_product_id', 'product_id', 'task_id'],
 	    validation: {
 	        description: {
 	            required: true,
@@ -7452,6 +7452,7 @@ webpackJsonp([2],[
 	        'quantity': '.quantity',
 	        'unity': '.unity',
 	        'tva': '.tva',
+	        'vat_product_id': '.vat_product_id',
 	        'product_id': '.product_id',
 	        'catalog_container': '#catalog-container'
 	    },
@@ -7478,8 +7479,8 @@ webpackJsonp([2],[
 	        this.tva_options = channel.request('get:options', 'tvas');
 	        this.product_options = channel.request('get:options', 'products');
 	        this.section = channel.request('get:form_section', 'tasklines');
+	        this.vat_product_options = this.filterVATProductFromVATValue(this.tva_options);
 	    },
-	
 	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
 	    },
@@ -7530,6 +7531,13 @@ webpackJsonp([2],[
 	            field_name: 'tva',
 	            id_key: 'value'
 	        }));
+	        this.showChildView('vat_product_id', new _SelectWidget2.default({
+	            options: this.vat_product_options,
+	            title: "Compte produit",
+	            value: this.model.get('vat_product_id'),
+	            field_name: 'vat_product_id',
+	            id_key: 'value'
+	        }));
 	        this.refreshProductSelect();
 	        if (this.isAddView()) {
 	            this.getUI('main_tab').tab('show');
@@ -7540,6 +7548,24 @@ webpackJsonp([2],[
 	    },
 	    getDefaultTva: function getDefaultTva() {
 	        return _.findWhere(this.tva_options, { selected: true });
+	    },
+	
+	    // TODO DRY alert
+	    filterVATProductFromVATValue: function filterVATProductFromVATValue() {
+	        /*
+	         * Return the products list depending on tva value
+	         *
+	         */
+	        var product_options = null;
+	        var tva = this.model.get('tva') !== undefined ? this.model.get('tva') : '20';
+	        if (this.tva_options !== undefined) {
+	            _.each(this.tva_options, function (option) {
+	                if (tva == option.value) {
+	                    product_options = option.products;
+	                }
+	            });
+	        }
+	        return product_options;
 	    },
 	    refreshProductSelect: function refreshProductSelect() {
 	        /*
@@ -7574,6 +7600,8 @@ webpackJsonp([2],[
 	    onRender: function onRender() {
 	        this.refreshForm();
 	        if (this.isAddView()) {
+	            console.log('isAddView');
+	            this.filterVATProductFromVATValue();
 	            this.showChildView('catalog_container', new _LoadingWidget2.default());
 	            var req = (0, _tools.ajax_call)(AppOption['load_catalog_url'], { type: 'sale_product' });
 	            req.done(this.onCatalogLoaded.bind(this));
@@ -7792,7 +7820,7 @@ webpackJsonp([2],[
 	    + "</h4>\n        </div>\n        <div class=\"modal-body\">\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskline-form'>\n                        <div class='order'></div>\n                        <div class='description required'></div>\n                        <div class='cost required'></div>\n                        <div class='quantity required'></div>\n                        <div class='unity'></div>\n                        <div class='tva required'></div>\n                        <div class='product_id'></div>\n                        <button\n                            class='btn btn-success primary-action'\n                            type='submit'\n                            value='submit'>\n                            "
+	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskline-form'>\n                        <div class='order'></div>\n                        <div class='description required'></div>\n                        <div class='cost required'></div>\n                        <div class='quantity required'></div>\n                        <div class='unity'></div>\n                        <div class='tva required'></div>\n                        <div class='vat_product_id'></div>\n                        <div class='product_id'></div>\n                        <button\n                            class='btn btn-success primary-action'\n                            type='submit'\n                            value='submit'>\n                            "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "\n                        </button>\n                        <button\n                            class='btn btn-default secondary-action'\n                            type='reset'\n                            value='submit'>\n                            Annuler\n                        </button>\n                    </form>\n                </div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});

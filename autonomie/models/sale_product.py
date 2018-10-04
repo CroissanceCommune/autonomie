@@ -42,6 +42,7 @@ from autonomie_base.models.base import (
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie import forms
 from autonomie.forms.custom_types import AmountType
+from autonomie.models.tva import Product
 
 
 PRODUCT_TO_GROUP_REL_TABLE = Table(
@@ -133,10 +134,18 @@ class SaleProduct(DBBASE):
     value = Column(Float(), default=0)
     unity = Column(String(100), default='')
 
+    vat_product_id = Column(String(125), default='')
+
     category_id = Column(ForeignKey('sale_product_category.id'))
     category = relationship(
         SaleProductCategory,
         backref=backref('products'),
+        info={'colanderalchemy': forms.EXCLUDED},
+    )
+
+    vat_product_id = Column(ForeignKey('product.id'))
+    vat_products = relationship(
+        Product,
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
@@ -152,6 +161,7 @@ class SaleProduct(DBBASE):
             tva=integer_to_amount(self.tva, 2),
             value=self.value,
             unity=self.unity,
+            vat_product_id=self.vat_product_id,
             category_id=self.category_id,
             category=self.category.title,
         )

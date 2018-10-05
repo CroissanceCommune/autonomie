@@ -7537,7 +7537,7 @@ webpackJsonp([2],[
 	            title: "Compte produit",
 	            value: this.model.get('vat_product_id'),
 	            field_name: 'vat_product_id',
-	            id_key: 'value'
+	            id_key: 'id'
 	        }));
 	        this.refreshProductSelect();
 	        if (this.isAddView()) {
@@ -7566,10 +7566,6 @@ webpackJsonp([2],[
 	                product_options = currentVatProducts.products;
 	            }
 	        }
-	        if (product_options !== null && !_.isEmpty(product_options) && _.findWhere(product_options, { id: 'default' }) === undefined) {
-	            product_options.unshift({ name: '', id: 'default' });
-	        }
-	        console.log('product_options', product_options);
 	        return product_options;
 	    },
 	    refreshProductAndVatProductSelect: function refreshProductAndVatProductSelect(event) {
@@ -7588,9 +7584,9 @@ webpackJsonp([2],[
 	        this.showChildView('vat_product_id', new _SelectWidget2.default({
 	            options: this.vat_product_options,
 	            title: "Compte produit",
-	            //value: this.model.get('vat_product_id'),
+	            value: this.model.get('vat_product_id'),
 	            field_name: 'vat_product_id',
-	            id_key: 'value'
+	            id_key: 'id'
 	        }));
 	    },
 	    refreshProductSelect: function refreshProductSelect() {

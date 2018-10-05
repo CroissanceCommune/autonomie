@@ -166,7 +166,10 @@ DEFAULT_PERM_NEW = [
     (
         Allow,
         "group:trainer",
-        ("add.training",)
+        (
+            "add.training",
+            "add_workshop",
+        )
     ),
     (
         Allow,

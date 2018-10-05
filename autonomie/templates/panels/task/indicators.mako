@@ -36,14 +36,14 @@
         <a
             href="${request.route_path(force_route, id=indicator.id, _query={'action': 'validation_status', 'validation_status': 'valid'})}"
             class='btn btn-success btn-circle'
-            title="Valider le fichier fournit"
+            title="Valider le fichier fourni"
             >
                 <i class='fa fa-eye'></i>
         </a>
         <a
             href="${request.route_path(force_route, id=indicator.id, _query={'action': 'validation_status', 'validation_status': 'valid'})}"
             class='btn btn-danger btn-circle'
-            title="Invalider le fichier fournit"
+            title="Invalider le fichier fourni"
             >
                 <i class='fa fa-close'></i>
         </a>

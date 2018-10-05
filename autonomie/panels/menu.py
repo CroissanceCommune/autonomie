@@ -298,6 +298,25 @@ def _get_company_param_dropdown(request, cid):
     return params
 
 
+def _get_user_business_tools_dropdown(request, cid):
+    """
+    Build the business tools dropdown
+
+    :param obj request: The Pyramid request object
+    :param int cid: The current company id
+    :returns: A DropDown
+    :rtype: DropDown
+    """
+    dd = DropDown(label="Outils métier")
+    dd.add_item(
+        "Organisation d'ateliers",
+        icon="fa fa-slideshare",
+        href=request.route_path("managed_workshops", id=request.user.id),
+    )
+    return dd
+
+
+
 def get_company_menu(request, cid, css=None):
     """
     Build the Company related menu
@@ -312,6 +331,7 @@ def get_company_menu(request, cid, css=None):
     menu.add(_get_company_gestion_dropdown(request, cid))
     menu.add(_get_company_accounting_documents_dropdown(request, cid))
     menu.add(_get_company_accompagnement_dropdown(request, cid))
+    menu.add(_get_user_business_tools_dropdown(request, cid))
     menu.add(_get_company_param_dropdown(request, cid))
     return menu
 

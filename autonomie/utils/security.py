@@ -380,7 +380,6 @@ def get_event_acl(self):
 
     participants_perms = (
         "view_activity",
-        "view_workshop",
         "view.file",
     )
     owner_perms = (
@@ -411,6 +410,37 @@ def get_activity_acl(self):
                 ("view_activity", "view.file")
             )
         )
+    return acl
+
+
+def get_workshop_acl(self):
+    """
+    Return ACL for workshops
+    """
+    acl = get_event_acl(self)
+
+    trainers_perms = (
+        "edit_workshop",
+        "view_workshop",
+    )
+    owner_perms = trainers_perms
+
+    participants_perms = (
+        "view_workshop",
+    )
+
+    acl.extend(
+        (Allow, user.login.login, participants_perms)
+        for user in self.participants
+    )
+    acl.extend(
+        (Allow, user.login.login, trainers_perms)
+        for user in self.trainers
+    )
+
+    acl.append(
+        (Allow, self.owner.login.login, owner_perms)
+    )
     return acl
 
 
@@ -1364,7 +1394,7 @@ def set_models_acl():
     IncomeStatementMeasureTypeCategory.__acl__ = get_base_acl
     User.__default_acl__ = get_user_acl
     UserDatas.__default_acl__ = get_userdatas_acl
-    Workshop.__default_acl__ = get_event_acl
+    Workshop.__acl__ = get_workshop_acl
 
     Tva.__acl__ = get_base_acl
     BaseExpenseLine.__acl__ = get_expenseline_acl

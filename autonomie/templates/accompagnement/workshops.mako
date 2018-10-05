@@ -175,7 +175,7 @@ ${records.item_count} Résultat(s)
                         % else:
                             % for user in request.context.employees:
                                 <% is_participant = workshop.is_participant(user.id) %>
-                                % if is_participant and len(request.context.employees) > 1:
+                                % if is_participant:
                                     ${api.format_account(user)} :
                                     % for timeslot in workshop.timeslots:
                                         <div>

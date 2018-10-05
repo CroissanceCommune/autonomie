@@ -7471,15 +7471,16 @@ webpackJsonp([2],[
 	    },
 	    modelEvents: {
 	        'set:product': 'refreshForm',
-	        'change:tva': 'refreshProductSelect'
+	        'change:tva': 'refreshProductAndVatProductSelect'
 	    },
 	    initialize: function initialize() {
 	        var channel = _backbone4.default.channel('config');
+	        console.log('init');
 	        this.workunit_options = channel.request('get:options', 'workunits');
 	        this.tva_options = channel.request('get:options', 'tvas');
 	        this.product_options = channel.request('get:options', 'products');
 	        this.section = channel.request('get:form_section', 'tasklines');
-	        this.vat_product_options = this.filterVATProductFromVATValue(this.tva_options);
+	        this.vat_product_options = this.getVatProductOptionsFromVatValue(this.tva_options, this.model.get('tva'));
 	    },
 	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
@@ -7502,9 +7503,9 @@ webpackJsonp([2],[
 	        this.showChildView('description', new _TextAreaWidget2.default({
 	            value: this.model.get('description'),
 	            title: "Intitulé des postes",
-	            field_name: "description",
-	            tinymce: true,
-	            cid: this.model.cid
+	            field_name: "description"
+	            //tinymce: true,
+	            //cid: this.model.cid
 	        }));
 	        this.showChildView('cost', new _InputWidget2.default({
 	            value: this.model.get('cost'),
@@ -7550,22 +7551,47 @@ webpackJsonp([2],[
 	        return _.findWhere(this.tva_options, { selected: true });
 	    },
 	
-	    // TODO DRY alert
-	    filterVATProductFromVATValue: function filterVATProductFromVATValue() {
+	    getVatProductOptionsFromVatValue: function getVatProductOptionsFromVatValue(options) {
+	        var val = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '20';
+	
 	        /*
 	         * Return the products list depending on tva value
-	         *
+	         * :param string val
 	         */
+	        console.log('options', options);
 	        var product_options = null;
-	        var tva = this.model.get('tva') !== undefined ? this.model.get('tva') : '20';
-	        if (this.tva_options !== undefined) {
-	            _.each(this.tva_options, function (option) {
-	                if (tva == option.value) {
-	                    product_options = option.products;
-	                }
-	            });
+	        if (!_.isUndefined(options)) {
+	            var currentVatProducts = _.findWhere(options, { value: Number(val) });
+	            if (!_.isUndefined(currentVatProducts)) {
+	                product_options = currentVatProducts.products;
+	            }
 	        }
+	        if (product_options !== null && !_.isEmpty(product_options) && _.findWhere(product_options, { id: 'default' }) === undefined) {
+	            product_options.unshift({ name: '', id: 'default' });
+	        }
+	        console.log('product_options', product_options);
 	        return product_options;
+	    },
+	    refreshProductAndVatProductSelect: function refreshProductAndVatProductSelect(event) {
+	        console.log('refresh');
+	        this.refreshProductSelect();
+	        this.refreshVatProductSelect(event);
+	    },
+	    refreshVatProductSelect: function refreshVatProductSelect(event) {
+	        /**
+	         * Update and show the vat products option select
+	         * :param string val
+	         */
+	        console.log('vat');
+	        var val = !_.isUndefined(event.attributes.tva) ? event.attributes.tva : '20';
+	        this.vat_product_options = this.getVatProductOptionsFromVatValue(this.tva_options, val);
+	        this.showChildView('vat_product_id', new _SelectWidget2.default({
+	            options: this.vat_product_options,
+	            title: "Compte produit",
+	            //value: this.model.get('vat_product_id'),
+	            field_name: 'vat_product_id',
+	            id_key: 'value'
+	        }));
 	    },
 	    refreshProductSelect: function refreshProductSelect() {
 	        /*
@@ -7590,7 +7616,6 @@ webpackJsonp([2],[
 	            this.showChildView('product_id', new _SelectWidget2.default({
 	                options: product_options,
 	                title: "Code produit",
-	                value: this.model.get('product_id'),
 	                field_name: 'product_id',
 	                id_key: 'id'
 	            }));
@@ -7600,8 +7625,6 @@ webpackJsonp([2],[
 	    onRender: function onRender() {
 	        this.refreshForm();
 	        if (this.isAddView()) {
-	            console.log('isAddView');
-	            this.filterVATProductFromVATValue();
 	            this.showChildView('catalog_container', new _LoadingWidget2.default());
 	            var req = (0, _tools.ajax_call)(AppOption['load_catalog_url'], { type: 'sale_product' });
 	            req.done(this.onCatalogLoaded.bind(this));

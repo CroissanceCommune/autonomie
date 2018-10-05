@@ -581,6 +581,25 @@ class CompanyWorkshopListView(WorkshopListView):
         return query
 
 
+class ManagedWorkshopListView(WorkshopListView):
+    """
+    View for listing the workshops where current user is either:
+
+    - manager
+    - trainer
+    """
+    schema = get_list_schema(company=False)
+    grid = SEARCH_FORM_GRID
+
+    def filter_owner_or_trainer(self, query, appstruct):
+        return query.filter(or_(
+            models.Workshop.owner_id == self.request.user.id,
+            models.Workshop.trainers.any(
+                user.User.id == self.request.user.id
+            )
+        ))
+
+
 class UserWorkshopListView(CompanyWorkshopListView):
     def filter_participant(self, query, appstruct):
         user_id = self.context.id
@@ -766,6 +785,11 @@ def add_routes(config):
         traverse="/companies/{id}",
         )
 
+    config.add_route(
+        "managed_workshops",
+        "/users/{id}/managed_workshops",
+        traverse='/users/{id}',
+    )
 
 def add_views(config):
     config.add_view(
@@ -788,6 +812,13 @@ def add_views(config):
         route_name='company_workshops',
         permission='list_workshops',
         renderer="/accompagnement/workshops.mako",
+    )
+
+    config.add_view(
+        ManagedWorkshopListView,
+        route_name='managed_workshops',
+        permission='add_workshop',
+        renderer='/accompagnement/workshops.mako',
     )
 
     config.add_view(

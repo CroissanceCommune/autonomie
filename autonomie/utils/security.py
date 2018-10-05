@@ -383,11 +383,18 @@ def get_event_acl(self):
         "view_workshop",
         "view.file",
     )
+    owner_perms = (
+        "edit.owner",
+    )
 
     acl.extend(
         (Allow, user.login.login, participants_perms)
         for user in self.participants
     )
+    if self.owner and self.owner.login:
+        acl.append(
+            (Allow, self.owner.login.login, owner_perms)
+        )
     return acl
 
 

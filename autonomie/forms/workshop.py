@@ -162,7 +162,7 @@ class TimeslotsSequence(colander.SequenceSchema):
         )
 
 
-class Workshop(colander.MappingSchema):
+class WorkshopSchema(colander.MappingSchema):
     """
     Schema for workshop creation/edition
     """

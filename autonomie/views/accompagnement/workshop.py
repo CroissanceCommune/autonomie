@@ -56,7 +56,7 @@ from sqla_inspect.excel import XlsExporter
 from sqla_inspect.ods import OdsExporter
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.workshop import (
-    Workshop as WorkshopSchema,
+    WorkshopSchema,
     get_list_schema,
     ATTENDANCE_STATUS,
     Attendances as AttendanceSchema,

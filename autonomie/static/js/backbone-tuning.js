@@ -323,7 +323,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
      * Return the products list depending on tva value
      *
      * :param list options: list of js objects
-     * :param list val: list of values or single value
+     * :param string val: list of values or single value
      */
     var products = null;
     _.each(options, function(option){

@@ -161,7 +161,7 @@ const TaskLineFormView = Mn.View.extend({
                     title: "Compte produit",
                     value: this.model.get('vat_product_id'),
                     field_name: 'vat_product_id',
-                    id_key: 'value'
+                    id_key: 'id'
                 }
             )
         );
@@ -189,14 +189,6 @@ const TaskLineFormView = Mn.View.extend({
                 product_options = currentVatProducts.products;
             }
         }
-        if (
-            product_options !== null
-            && ! _.isEmpty(product_options)
-            && _.findWhere(product_options, {id: 'default'}) === undefined
-        ) {
-            product_options.unshift({ name: '', id: 'default'});
-        }
-        console.log('product_options',product_options);
         return product_options;
     },
     refreshProductAndVatProductSelect(event){
@@ -221,9 +213,9 @@ const TaskLineFormView = Mn.View.extend({
                 {
                     options: this.vat_product_options,
                     title: "Compte produit",
-                    //value: this.model.get('vat_product_id'),
+                    value: this.model.get('vat_product_id'),
                     field_name: 'vat_product_id',
-                    id_key: 'value'
+                    id_key: 'id'
                 }
             )
         );

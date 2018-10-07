@@ -86,7 +86,6 @@ from autonomie.models.tva import (
     Tva,
 )
 
-
 log = logging.getLogger(__name__)
 
 

@@ -53,14 +53,14 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for='vat_product_id'>Compte produit</label>
-                    <select name='vat_product_id' class='form-control'>
+                    <label for='product_id'>Compte produit</label>
+                    <select name='product_id' class='form-control'>
                     <option value=''></option>
-                    {{#vat_product_options }}
+                    {{#product_options }}
                         <option value='{{ id }}' {{#selected}}selected{{/selected}}>
                             {{ name }}
                         </option>
-                    {{/vat_product_options }}
+                    {{/product_options }}
                     </select>
                 </div>
             </fieldset>

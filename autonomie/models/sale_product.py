@@ -134,8 +134,6 @@ class SaleProduct(DBBASE):
     value = Column(Float(), default=0)
     unity = Column(String(100), default='')
 
-    vat_product_id = Column(String(125), default='')
-
     category_id = Column(ForeignKey('sale_product_category.id'))
     category = relationship(
         SaleProductCategory,
@@ -143,10 +141,14 @@ class SaleProduct(DBBASE):
         info={'colanderalchemy': forms.EXCLUDED},
     )
 
-    vat_product_id = Column(ForeignKey('product.id'))
-    vat_products = relationship(
-        Product,
-        info={'colanderalchemy': forms.EXCLUDED},
+    product_id = Column(Integer)
+
+    product = relationship(
+        "Product",
+        primaryjoin="Product.id==SaleProduct.product_id",
+        uselist=False,
+        foreign_keys=product_id,
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def __json__(self, request):
@@ -161,7 +163,7 @@ class SaleProduct(DBBASE):
             tva=integer_to_amount(self.tva, 2),
             value=self.value,
             unity=self.unity,
-            vat_product_id=self.vat_product_id,
+            product_id=self.product_id,
             category_id=self.category_id,
             category=self.category.title,
         )

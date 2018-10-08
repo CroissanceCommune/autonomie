@@ -39,7 +39,6 @@ from sqlalchemy import (
     Text,
     Boolean,
     Date,
-    Table,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -49,6 +48,7 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 from autonomie.compute.task import (
     EstimationCompute,
@@ -58,7 +58,7 @@ from autonomie.models.tva import Product
 from autonomie.interfaces import (
     IMoneyTask,
 )
-from autonomie.models.config import Config
+from autonomie.models.services.estimation import EstimationInvoicingService
 from .invoice import (
     Invoice,
 )
@@ -105,6 +105,8 @@ class Estimation(Task, EstimationCompute):
     __tablename__ = 'estimation'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'estimation', }
+    _invoicing_service = EstimationInvoicingService
+
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
@@ -231,6 +233,17 @@ class Estimation(Task, EstimationCompute):
 
     def check_signed_status_allowed(self, status, request, **kw):
         return self.signed_state_manager.check_allowed(status, self, request)
+
+    def gen_business(self):
+        """
+        Generate a business based on this Task
+
+        :returns: A new business instance
+        :rtype: :class:`autonomie.models.project.business.Business`
+        """
+        business = Task.gen_business(self)
+        business.populate_deadlines(self)
+        return business
 
     def duplicate(self, user, **kw):
         """
@@ -503,6 +516,32 @@ class Estimation(Task, EstimationCompute):
             )
         )
         return result
+
+    def gen_deposit_invoice(self, user):
+        """
+        Generate a deposit invoice based on the current estimation
+
+        :param obj user: User instance, the user generating the document
+        :rtype: `class:Invoice`
+        """
+        return self._invoicing_service.gen_deposit_invoice(self, user)
+
+    def gen_invoice(self, payment_line, user):
+        """
+        Generate an invoice based on a payment line
+
+        :param obj payment_line: The payment line we ask an Invoice for
+        :param obj user: User instance, the user generating the document
+        :rtype: `class:Invoice`
+        """
+        if payment_line == self.payment_lines[-1]:
+            self.geninv = True
+            DBSESSION().merge(self)
+            return self._invoicing_service.gen_sold_invoice(self, user)
+        else:
+            return self._invoicing_service.gen_intermediate_invoice(
+                self, payment_line, user
+            )
 
 
 class PaymentLine(DBBASE):

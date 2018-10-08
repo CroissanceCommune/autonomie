@@ -322,6 +322,10 @@ def format_amount(amount, trim=True, grouping=True, precision=2, dividor=None):
 
     if grouping:
         resp = resp.replace(' ', '&nbsp;')
+
+    if isinstance(resp, str):
+        resp = resp.decode('utf-8')
+
     return resp
 
 

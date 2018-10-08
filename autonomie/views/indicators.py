@@ -5,6 +5,8 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 from pyramid.httpexceptions import HTTPFound
 
+INDICATOR_ROUTE = "/indicators/{id}"
+
 
 def force_indicator_view(context, request):
     """
@@ -30,20 +32,16 @@ def validate_file_view(context, request):
 
 
 def includeme(config):
-    config.add_route(
-        "/sale_file_requirements/{id}",
-        "/sale_file_requirements/{id}",
-        traverse="sale_file_requirements/{id}"
-    )
+    config.add_route(INDICATOR_ROUTE, INDICATOR_ROUTE, traverse=INDICATOR_ROUTE)
     config.add_view(
         force_indicator_view,
-        route_name="/sale_file_requirements/{id}",
+        route_name=INDICATOR_ROUTE,
         permission="force.indicator",
         request_param="action=force",
     )
     config.add_view(
         validate_file_view,
-        route_name="/sale_file_requirements/{id}",
+        route_name=INDICATOR_ROUTE,
         permission="valid.indicator",
         request_param="action=validation_status",
     )

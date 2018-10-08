@@ -94,7 +94,11 @@ from autonomie.models.expense.sheet import (
 )
 from autonomie.models.expense.payment import ExpensePayment
 from autonomie.models.expense.types import ExpenseType
-from autonomie.models.indicators import SaleFileRequirement
+from autonomie.models.indicators import (
+    Indicator,
+    CustomBusinessIndicator,
+    SaleFileRequirement,
+)
 
 from autonomie.models.user.login import Login
 from autonomie.models.user.user import User
@@ -217,9 +221,9 @@ class RootFactory(dict):
             IncomeStatementMeasureTypeCategory,
         ),
         (
-            'sale_file_requirements',
-            'sale_file_requirement',
-            SaleFileRequirement,
+            'indicators',
+            'indicator',
+            Indicator,
         ),
         ('jobs', 'job', Job, ),
         ('logins', 'login', Login, ),
@@ -292,7 +296,8 @@ class RootFactory(dict):
             self[traversal_name] = subtree
 
         self['configfiles'] = TraversalDbAccess(
-            self, 'configfiles', 'config_file', ConfigFiles, 'key'
+            self, 'configfiles', 'config_file', ConfigFiles, logger,
+            id_key='key'
         )
 
     @classmethod
@@ -1213,13 +1218,40 @@ def get_indicator_acl(self):
     if self.status == self.DANGER_STATUS:
         admin_perms += ("force.indicator",)
 
-    elif self.validation:
-        if self.validation_status != 'valid':
-            admin_perms += (
-                "valid.indicator",
-            )
+    elif self.validation_status != 'valid':
+        admin_perms += (
+            "valid.indicator",
+        )
     acl.append((Allow, 'group:admin', admin_perms))
     acl.append((Allow, 'group:manager', admin_perms))
+    return acl
+
+
+def get_custom_business_indicator_acl(self):
+    """
+    Compute acl for CustomBusinessIndicator management
+    """
+    # Si le parent est validé et l'indicateur est ok, on ne peut plus modifier
+    user_perms = ['view.indicator']
+
+    locked = False
+    if self.status == self.SUCCESS_STATUS:
+        if self.business.closed:
+            locked = True
+
+    if not locked:
+        acl = get_indicator_acl(self)
+        user_perms.append('force.indicator')
+
+    else:
+        acl = DEFAULT_PERM_NEW[:]
+
+    company_id = FindCompanyService.find_company_id_from_node(
+        self.business
+    )
+    if company_id:
+        acl.append((Allow, "company:{}".format(company_id), user_perms))
+
     return acl
 
 
@@ -1284,6 +1316,10 @@ def set_models_acl():
     File.__default_acl__ = property(get_file_acl)
     FileType.__acl__ = property(get_base_acl)
     Invoice.__default_acl__ = property(get_invoice_default_acl)
+    Indicator.__acl__ = property(get_indicator_acl)
+    CustomBusinessIndicator.__acl__ = property(
+        get_custom_business_indicator_acl
+    )
     SaleFileRequirement.__acl__ = property(get_sale_file_requirement_acl)
     Job.__default_acl__ = DEFAULT_PERM[:]
     Login.__acl__ = property(get_login_acl)

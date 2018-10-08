@@ -28,6 +28,13 @@
             <div class='panel-body'>
                 % if layout.current_business_object.closed:
                 <div class='alert alert-success'>Cette affaire est clôturée</div>
+                % else:
+                <a
+                    href="${invoice_action_url}"
+                    class='btn btn-primary primary-action'
+                    >
+                    <i class='fa fa-plus-circle'></i>&nbsp;<i class='fa fa-copy'></i>&nbsp;Facturer
+                </a>
                 % endif
                 <h3>Devis de référence</h3>
                 % if not estimations:
@@ -44,11 +51,55 @@
                     </a>
                 </div>
                 % endfor
-                % if request.context.file_requirements:
+                % if file_requirements or custom_indicators:
                 <h3>Indicateurs</h3>
-                ${request.layout_manager.render_panel('task_indicators')}
+                % for indicator in custom_indicators:
+                ${request.layout_manager.render_panel('custom_indicator', indicator=indicator)}
+                % endfor
+                ${request.layout_manager.render_panel('sale_file_requirements', file_requirements=file_requirements)}
                 % endif
-
+                % if payment_deadlines:
+                <h3>Échéances de paiement</h3>
+                    % for deadline in payment_deadlines:
+                    <hr />
+                    <div class='row'>
+                        % if deadline.deposit:
+                        <div class='col-xs-6'>
+                            <b>Facture d'acompte ${deadline.estimation.deposit} %</b>
+                        </div>
+                        % else:
+                        <div class='col-xs-3'>
+                            <b>${deadline.payment_line.description}</b>
+                        </div>
+                        <div class='col-xs-3'>
+                            ${api.format_amount(deadline.payment_line.amount, precision=5) | n}&nbsp;€
+                        </div>
+                        % endif
+                        % if deadline.invoiced:
+                        <div class='col-xs-3'>
+                            Facturée
+                        </div>
+                        <div class='col-xs-3'>
+                            <a class='btn btn-default'>Re-Générer la facture</a>
+                        </div>
+                        % elif not deadline.deposit and deadline.payment_line.date:
+                        <div class='col-xs-3'>
+                            Facturation prévue le ${api.format_date(deadline.payment_line.date)}
+                        </div>
+                        <div class='col-xs-3'>
+                            <a class='btn btn-default'>Générer la facture</a>
+                        </div>
+                        % else:
+                        <div class='col-xs-3'>
+                            En attente de facturation
+                        </div>
+                        <div class='col-xs-3'>
+                            <a class='btn btn-default'>Générer la facture</a>
+                        </div>
+                        % endif
+                    </div>
+                    % endfor
+                % endif
             </div>
         </div>
     </div>

@@ -98,6 +98,7 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.task",
     "autonomie.panels.company_index",
     'autonomie.panels.files',
+    'autonomie.panels.indicators',
     'autonomie.panels.sidebar',
     "autonomie.panels.widgets",
     "autonomie.panels.navigation",

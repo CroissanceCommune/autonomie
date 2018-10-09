@@ -103,7 +103,6 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.widgets",
     "autonomie.panels.navigation",
     "autonomie.panels.project",
-    "autonomie.panels.training",
 )
 
 AUTONOMIE_EVENT_MODULES = (

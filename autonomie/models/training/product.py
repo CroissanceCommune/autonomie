@@ -164,12 +164,12 @@ class SaleTrainingGroup(SaleProductGroup):
         default=''
     )
 
-    modalityOne = Column(
+    modality_one = Column(
         Boolean(),
         default=False
     )
 
-    modalityTwo = Column(
+    modality_two = Column(
         Boolean(),
         default=False
     )
@@ -223,14 +223,9 @@ class SaleTrainingGroup(SaleProductGroup):
         """
         Json repr of our model
         """
+        SaleProductGroup.__json__(self, request)
         return dict(
             id=self.id,
-            label=self.label,
-            ref=self.ref,
-            title=self.title,
-            description=self.description,
-            products=[product.__json__(request) for product in self.products],
-            category_id=self.category_id,
             goals=self.goals,
             prerequisites=self.prerequisites,
             for_who=self.for_who,
@@ -241,8 +236,8 @@ class SaleTrainingGroup(SaleProductGroup):
             more_stuff=self.more_stuff,
             evaluation=self.evaluation,
             place=self.place,
-            modalityOne=self.modalityOne,
-            modalityTwo=self.modalityTwo,
+            modality_one=self.modality_one,
+            modality_two=self.modality_two,
             types=[type.__json__(request) for type in self.types],
             date=self.date,
             price=self.price,

@@ -7565,7 +7565,7 @@ webpackJsonp([2],[
 	                return product.tva_id === current_tva_infos.id;
 	            });
 	            if (!_.isEmpty(options)) {
-	                options.unshift({ value: '' });
+	                options.unshift({ value: '', id: null });
 	            }
 	        }
 	        return options;

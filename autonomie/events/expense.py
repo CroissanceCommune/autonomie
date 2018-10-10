@@ -27,12 +27,13 @@ Events used while handling expenses :
 """
 import datetime
 import logging
+from zope.interface import implements
 
 from autonomie_base.mail import format_link
 from autonomie_base.utils.date import (
     format_date,
 )
-from autonomie.events.mail import send_mail_from_event
+from autonomie.interfaces import IMailEventWrapper
 from autonomie.utils.strings import (
     format_account,
 )
@@ -69,25 +70,21 @@ EXPENSE_NOTIFY_STATUS = dict(
 )
 
 
-class StatusChanged(object):
-    """
-        Event fired when an expense changes its status
-    """
-    def __init__(self, request, expense, status, comment=None):
-        self.request = request
-        self.expense = expense
-        self.new_status = status
-        self.comment = comment
+class ExpenseMailStatusChangedWrapper(object):
+    implements(IMailEventWrapper)
+
+    def __init__(self, event):
+        self.event = event
+        self.request = event.request
         self.settings = self.request.registry.settings
-        log.debug("Expense StatusChanged event new status : %s" % status)
 
     @property
     def recipients(self):
         """
             return the recipients' emails
         """
-        if self.expense.user.email:
-            email = [self.expense.user.email]
+        if self.event.node.user.email:
+            email = [self.event.node.user.email]
         else:
             email = []
         return email
@@ -112,7 +109,7 @@ class StatusChanged(object):
         """
         Return a formatted string for expense status notification
         """
-        status_str = EXPENSE_NOTIFY_STATUS.get(self.new_status)
+        status_str = EXPENSE_NOTIFY_STATUS.get(self.event.status)
         account_label = format_account(self.request.user)
         date_label = format_date(datetime.date.today())
         return status_str.format(account_label, date_label)
@@ -123,7 +120,7 @@ class StatusChanged(object):
             return the subject of the email
         """
         subject = u"Notes de dépense de {0} : {1}".format(
-            format_account(self.expense.user),
+            format_account(self.event.node.user),
             self.format_expense_notification()
         )
         return subject
@@ -133,10 +130,10 @@ class StatusChanged(object):
         """
             return the body of the email
         """
-        owner = format_account(self.expense.user)
-        date = u"{0}/{1}".format(self.expense.month, self.expense.year)
-        status_verb = get_status_verb(self.new_status)
-        addr = self.request.route_url("/expenses/{id}", id=self.expense.id)
+        owner = format_account(self.event.node.user)
+        date = u"{0}/{1}".format(self.event.node.month, self.event.node.year)
+        status_verb = get_status_verb(self.event.status)
+        addr = self.request.route_url("/expenses/{id}", id=self.event.node.id)
         addr = format_link(self.settings, addr)
 
         return MAIL_TMPL.format(
@@ -144,7 +141,7 @@ class StatusChanged(object):
             addr=addr,
             date=date,
             status_verb=status_verb,
-            comment=self.comment,
+            comment=self.event.comment,
         )
 
     @staticmethod
@@ -158,7 +155,7 @@ class StatusChanged(object):
         """
             Return True if the new status requires a mail to be sent
         """
-        if self.new_status in EVENTS.keys():
+        if self.event.status in EVENTS.keys():
             return True
         else:
             return False
@@ -169,10 +166,3 @@ def get_status_verb(status):
         Return the verb associated to the current status
     """
     return EVENTS.get(status, u"")
-
-
-def includeme(config):
-    """
-    Pyramid's incusion mechanism
-    """
-    config.add_subscriber(send_mail_from_event, StatusChanged)

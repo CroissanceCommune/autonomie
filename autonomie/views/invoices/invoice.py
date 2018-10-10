@@ -38,7 +38,7 @@ from autonomie.models.task import (
 )
 from autonomie.compute.math_utils import floor_to_precision
 from autonomie.models.tva import Tva
-from autonomie.events.tasks import StatusChanged
+from autonomie.events.status_changed import StatusChanged
 from autonomie.utils.strings import format_amount
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.tasks.invoice import (

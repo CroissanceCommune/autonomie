@@ -26,7 +26,7 @@ from autonomie.exception import (
     Forbidden,
     BadRequest,
 )
-from autonomie.events.tasks import StatusChanged
+from autonomie.events.status_changed import StatusChanged
 from autonomie.utils.rest import RestError
 from autonomie.views import BaseView
 from autonomie.views.project.routes import PROJECT_ITEM_ROUTE

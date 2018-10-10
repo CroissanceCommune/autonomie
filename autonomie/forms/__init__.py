@@ -120,6 +120,7 @@ def come_from_node(**kw):
     )
 
 
+@colander.deferred
 def deferred_default_popup(node, kw):
     """
     Check if the popup key is present in get or post params and return its id

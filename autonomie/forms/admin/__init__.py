@@ -31,7 +31,6 @@ import simplejson as json
 import deform
 
 from colanderalchemy import SQLAlchemySchemaNode
-from speaklater import make_lazy_string
 
 from autonomie.models.config import Config
 from autonomie.models.competence import (
@@ -60,8 +59,8 @@ def invoice_number_template_validator(node, value):
         raise colander.Invalid(node, str(e))
 
 
-@make_lazy_string
-def help_text_libelle_comptable():
+@colander.deferred
+def help_text_libelle_comptable(*args):
     """
     Hack to allow dynamic content in a description field description.
     """

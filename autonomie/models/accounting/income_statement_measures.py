@@ -228,7 +228,7 @@ class IncomeStatementMeasureType(DBBASE):
             'colanderalchemy': {
                 'title': u"Rassemble tous les comptes commençant par",
                 "description": u"Toutes les écritures dont le compte commence "
-                u"par le préfixe fournit seront utilisées pour calculer cet "
+                u"par le préfixe fourni seront utilisées pour calculer cet "
                 u"indicateur. "
                 u"NB : Une liste de préfixe peut être fournie en les "
                 u"séparant par des virgules (ex : 42,43), un préfixe peut "

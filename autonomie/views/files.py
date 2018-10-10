@@ -217,7 +217,9 @@ class FileUploadView(BaseFormView):
         # Inserting in the database
         file_object = self.factory()
         file_object.name = appstruct['name']
-        file_object.parent_id = self._parent().id
+        parent = self._parent()
+        if hasattr(parent, "id"):
+            file_object.parent_id = parent.id
 
         forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)

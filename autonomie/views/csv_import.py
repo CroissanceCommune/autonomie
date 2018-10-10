@@ -251,7 +251,7 @@ class ConfigFieldAssociationView(BaseFormView):
     :param request: the pyramid request object
     """
     help_message = u"Vous vous apprêtez à importer des données depuis le \
-fichier fournit à l'étape précédente. <br /> \
+fichier fourni à l'étape précédente. <br /> \
 À cette étape, vous allez : \
             <ul>\
         <li>Choisir la méthode d'import de données (nouvelle entrées, \

@@ -106,8 +106,8 @@ AUTONOMIE_PANELS_MODULES = (
 )
 
 AUTONOMIE_EVENT_MODULES = (
-    "autonomie.events.tasks",
-    "autonomie.events.expense",
+    "autonomie.events.status_changed",
+    "autonomie.events.files",
 )
 AUTONOMIE_REQUEST_SUBSCRIBERS = (
     "autonomie.subscribers.new_request",

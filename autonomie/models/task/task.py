@@ -1060,7 +1060,7 @@ class TaskLine(DBBASE, LineCompute):
 
     def __repr__(self):
         return u"<TaskLine id:{s.id} task_id:{s.group.task_id} cost:{s.cost} \
- quantity:{s.quantity} tva:{s.tva}>".format(s=self)
+ quantity:{s.quantity} tva:{s.tva} product_id:{s.product_id}>".format(s=self)
 
     def __json__(self, request):
         result = dict(
@@ -1072,9 +1072,8 @@ class TaskLine(DBBASE, LineCompute):
             quantity=self.quantity,
             unity=self.unity,
             group_id=self.group_id,
+            product_id=self.product_id,
         )
-        if self.product_id is not None:
-            result['product_id'] = self.product_id
         return result
 
     @property

@@ -106,38 +106,23 @@ class BusinessService:
         return result
 
     @classmethod
-    def populate_indicators(cls, business):
+    def find_deadline_from_invoice(cls, business, invoice):
         """
-        Generate base indicators for a given business
+        Find the deadline having this invoice attached to it
 
-        :param obj business: The Business instance
-        :returns: The Business instance
-        :rtype: obj
+        :param obj business: The parent Business
+        :param obj invoice: The associated Invoice
         """
-        from autonomie.models.indicators import CustomBusinessIndicator
-        indicator = CustomBusinessIndicator(
-            name="invoiced",
-            label=u"Facturation",
-        )
-        business.indicators.append(indicator)
-        return DBSESSION().merge(business)
-
-    @classmethod
-    def get_status(cls, business):
-        """
-        Get the actual status of a business collecting datas from its indicators
-
-        :param obj business: The Business instance
-        :returns: The Business instance
-        :rtype: obj
-        """
-        result = 'success'
-        for requirement in business.file_requirements:
-            result = requirement.cmp_status(result)
+        from autonomie.models.project.business import BusinessPaymentDeadline
+        result = BusinessPaymentDeadline.query().filter_by(
+            invoice_id=invoice.id
+        ).filter_by(
+            business_id=business.id
+        ).first()
         return result
 
     @classmethod
-    def gen_invoices(cls, business, user, payment_deadlines):
+    def gen_invoices(cls, business, user, payment_deadlines=None):
         """
         Generate the invoices associated to the given payment deadlines
 
@@ -167,7 +152,7 @@ class BusinessService:
             invoice.initialize_business_datas(business)
             DBSESSION().add(invoice)
             DBSESSION().flush()
-            deadline.invoiced = True
+            deadline.invoice_id = invoice.id
             DBSESSION().merge(deadline)
             invoices.append(invoice)
         return invoices

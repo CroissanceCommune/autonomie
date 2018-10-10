@@ -22,6 +22,9 @@ from autonomie.models.services.sale_file_requirements import (
     BusinessFileRequirementService,
 )
 from autonomie.models.services.business import BusinessService
+from autonomie.models.services.business_status import (
+    BusinessStatusService,
+)
 
 
 class BusinessPaymentDeadline(DBBASE):
@@ -33,8 +36,10 @@ class BusinessPaymentDeadline(DBBASE):
     estimation_payment_id = Column(Integer, ForeignKey('estimation_payment.id'))
     estimation_id = Column(Integer, ForeignKey('estimation.id'))
     invoiced = Column(Boolean(), default=False)
+    invoice_id = Column(Integer, ForeignKey('invoice.id'))
     payment_line = relationship("PaymentLine")
     estimation = relationship("Estimation")
+    invoice = relationship('Invoice')
 
 
 class Business(Node):
@@ -61,6 +66,7 @@ class Business(Node):
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': "business"}
     file_requirement_service = BusinessFileRequirementService
+    status_service = BusinessStatusService
     _autonomie_service = BusinessService
 
     id = Column(
@@ -156,7 +162,7 @@ class Business(Node):
 
         :returns: The business we manage
         """
-        return self._autonomie_service.populate_indicators(self)
+        return self.status_service.populate_indicators(self)
 
     def populate_deadlines(self, estimation=None):
         """
@@ -192,4 +198,24 @@ class Business(Node):
         """
         return self._autonomie_service.gen_invoices(
             self, user, payment_deadlines
+        )
+
+    def update_invoicing_status(self, invoice):
+        """
+        Update the invoicing status of this business
+        """
+        return self._autonomie_service.update_invoicing_status(
+            self, invoice
+        )
+
+    def find_deadline_from_invoice(self, invoice):
+        """
+        Find the deadline associated to the current business and the given
+        invoice
+
+        :param obj invoice: The Invoice we're working on
+        :returns: A BusinessPaymentDeadline instance
+        """
+        return self._autonomie_service.find_deadline_from_invoice(
+            self, invoice
         )

@@ -3,9 +3,6 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-import datetime
-
-from mock import MagicMock
 import pytest
 
 
@@ -222,132 +219,14 @@ def full_invoice(
 
 
 @pytest.fixture
-def invoice_20170707(mk_invoice):
-    return mk_invoice(date=datetime.date(2017, 7, 7))
+def business(dbsession, full_estimation, default_business_type):
+    from autonomie.models.project.business import Business
 
-
-@pytest.fixture
-def invoice_20170808(dbsession, mk_invoice):
-    return mk_invoice(date=datetime.date(2017, 7, 7))
-
-
-@pytest.fixture
-def sale_product(dbsession):
-    from autonomie.models.sale_product import SaleProduct
-    s = SaleProduct(
-        value=1.5,
-        tva=2000,
-        label=u"Produit du catalogue",
-        description=u"Description du produit du catalogue",
-        unity="m",
-    )
-    dbsession.add(s)
+    business = Business(name="business", business_type=default_business_type)
+    business.estimations = [full_estimation]
+    dbsession.add(business)
     dbsession.flush()
-    return s
-
-
-@pytest.fixture
-def global_seq_1(dbsession, invoice):
-    from autonomie.models.task.sequence_number import SequenceNumber
-    s = SequenceNumber(
-        sequence=SequenceNumber.SEQUENCE_INVOICE_GLOBAL,
-        index=1,
-        task_id=invoice.id,
-    )
-    dbsession.add(s)
-    dbsession.flush()
-    return s
-
-
-@pytest.fixture
-def set_seq_index(dbsession, mk_invoice, company):
-    """ Initialize a year seq to a given index
-    """
-    from autonomie.models.task.sequence_number import SequenceNumber
-
-    def _set_seq_index(index, year, month, sequence, company=company):
-        s = SequenceNumber(
-            sequence=sequence,
-            index=index,
-            task_id=mk_invoice(
-                date=datetime.date(year, month, 1),
-                company=company,
-            ).id,
-        )
-        dbsession.add(s)
-        dbsession.flush()
-        return s
-
-    return _set_seq_index
-
-
-@pytest.fixture
-def set_global_seq_index(dbsession, set_seq_index):
-    """ Initialize the global seq to a given index
-    """
-    from autonomie.models.task.sequence_number import SequenceNumber
-
-    def _set_global_seq_index(index):
-        return set_seq_index(
-            index=index,
-            year=2017,
-            month=1,
-            sequence=SequenceNumber.SEQUENCE_INVOICE_GLOBAL,
-        )
-    return _set_global_seq_index
-
-
-@pytest.fixture
-def set_year_seq_index(dbsession, set_seq_index):
-    """ Initialize a year seq to a given index
-    """
-    from autonomie.models.task.sequence_number import SequenceNumber
-
-    def _set_year_seq_index(index, year):
-        return set_seq_index(
-            index=index,
-            year=year,
-            month=1,
-            sequence=SequenceNumber.SEQUENCE_INVOICE_YEAR,
-        )
-    return _set_year_seq_index
-
-
-@pytest.fixture
-def set_month_seq_index(dbsession, set_seq_index):
-    """ Initialize a month seq to a given index
-    """
-    from autonomie.models.task.sequence_number import SequenceNumber
-
-    def _set_month_seq_index(index, year, month):
-        return set_seq_index(
-            index=index,
-            month=month,
-            year=year,
-            sequence=SequenceNumber.SEQUENCE_INVOICE_MONTH,
-        )
-    return _set_month_seq_index
-
-
-@pytest.fixture
-def set_month_company_seq_index(dbsession, set_seq_index):
-    """ Initialize a month seq to a given index for a given company
-    """
-    from autonomie.models.task.sequence_number import SequenceNumber
-
-    def _set_month_company_seq_index(index, year, month, company):
-        return set_seq_index(
-            index=index,
-            month=month,
-            year=year,
-            sequence=SequenceNumber.SEQUENCE_INVOICE_MONTH_COMPANY,
-            company=company,
-        )
-    return _set_month_company_seq_index
-
-
-@pytest.fixture
-def DummySequence():
-    ds = MagicMock()
-    ds.get_next_index = MagicMock(return_value=12)
-    return ds
+    full_estimation.business_type_id = default_business_type.id
+    full_estimation.business_id = business.id
+    dbsession.merge(full_estimation)
+    return business

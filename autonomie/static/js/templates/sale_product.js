@@ -116,7 +116,7 @@ templates['product_form.mustache'] = template({"1":function(container,depth0,hel
   stack1 = ((helper = (helper = helpers.unity_options || (depth0 != null ? depth0.unity_options : depth0)) != null ? helper : alias2),(options={"name":"unity_options","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
   if (!helpers.unity_options) { stack1 = alias5.call(depth0,stack1,options)}
   if (stack1 != null) { buffer += stack1; }
-  buffer += "                    </select>\n                </div>\n                <div class=\"form-group\">\n                    <label for='tva'>Tva</label>\n                    <select name='tva' class='form-control'>\n                    <option value=''></option>\n";
+  buffer += "                    </select>\n                </div>\n                <div class=\"form-group\">\n                    <label for='tva'>Tva</label>\n                    <select name='tva' class='form-control'>\n";
   stack1 = ((helper = (helper = helpers.tva_options || (depth0 != null ? depth0.tva_options : depth0)) != null ? helper : alias2),(options={"name":"tva_options","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data}),(typeof helper === alias3 ? helper.call(alias1,options) : helper));
   if (!helpers.tva_options) { stack1 = alias5.call(depth0,stack1,options)}
   if (stack1 != null) { buffer += stack1; }

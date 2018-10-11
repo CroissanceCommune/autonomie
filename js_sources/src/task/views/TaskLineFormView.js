@@ -192,9 +192,6 @@ const TaskLineFormView = Mn.View.extend({
             options = _.filter(product_options, function(product) {
               return product.tva_id === current_tva_infos.id;
             });
-            if(! _.isEmpty(options)) {
-                options.unshift({ value: '', id: null})
-            }
         }
         return options;
     },

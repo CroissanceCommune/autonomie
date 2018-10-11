@@ -310,9 +310,8 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             tinyMCE.execCommand('mceAddEditor', false, 'tiny_description');
             // Update vat products option list
             var innerGetProductOptions = this.getProductOptions;
-            this.ui.vatProductSelect.select2()
             this.ui.vatSelect.on('change', function(){
-                $('form select[name=product_id]').find('option').not(':first').remove();
+                $('form select[name=product_id]').empty();
                 var new_product_options = innerGetProductOptions(AppOptions['tvas'], AppOptions['products'], $(this).val());
                 for (i in new_product_options) {
                     var newOption = new Option(new_product_options[i].name, new_product_options[i].id);

@@ -1093,6 +1093,7 @@ class TaskLine(DBBASE, LineCompute):
         result.tva = sale_product.tva
         result.unity = sale_product.unity
         result.quantity = 1
+        result.product_id = sale_product.product_id
         return result
 
 

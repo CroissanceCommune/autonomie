@@ -224,7 +224,8 @@ class SaleTrainingGroup(SaleProductGroup):
         Json repr of our model
         """
         SaleProductGroup.__json__(self, request)
-        return dict(
+        result = SaleProductGroup.__json__(self, request)
+        result.update(
             id=self.id,
             goals=self.goals,
             prerequisites=self.prerequisites,
@@ -245,6 +246,7 @@ class SaleTrainingGroup(SaleProductGroup):
             free_2=self.free_2,
             free_3=self.free_3,
         )
+        return result
 
     @property
     def company(self):

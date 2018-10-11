@@ -24,6 +24,8 @@ def migrate_datas():
     from alembic.context import get_bind
     connection = get_bind()
     op.execute("UPDATE sale_product_group SET type_='base'")
+    from zope.sqlalchemy import mark_changed
+    mark_changed(session)
 
 def upgrade():
     update_database_structure()

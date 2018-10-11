@@ -223,7 +223,6 @@ class SaleTrainingGroup(SaleProductGroup):
         """
         Json repr of our model
         """
-        SaleProductGroup.__json__(self, request)
         result = SaleProductGroup.__json__(self, request)
         result.update(
             id=self.id,

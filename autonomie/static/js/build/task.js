@@ -6778,6 +6778,7 @@ webpackJsonp([2],[
 	        this.set('cost', product_datas.value);
 	        this.set('quantity', 1);
 	        this.set('tva', product_datas.tva);
+	        this.set('product_id', product_datas.product_id);
 	        this.trigger('set:product');
 	    }
 	});
@@ -7564,9 +7565,6 @@ webpackJsonp([2],[
 	            options = _.filter(product_options, function (product) {
 	                return product.tva_id === current_tva_infos.id;
 	            });
-	            if (!_.isEmpty(options)) {
-	                options.unshift({ value: '', id: null });
-	            }
 	        }
 	        return options;
 	    },

@@ -7503,9 +7503,9 @@ webpackJsonp([2],[
 	        this.showChildView('description', new _TextAreaWidget2.default({
 	            value: this.model.get('description'),
 	            title: "Intitulé des postes",
-	            field_name: "description"
-	            //tinymce: true, TODO Fix tinymce error
-	            //cid: this.model.cid
+	            field_name: "description",
+	            tinymce: true,
+	            cid: this.model.cid
 	        }));
 	        this.showChildView('cost', new _InputWidget2.default({
 	            value: this.model.get('cost'),

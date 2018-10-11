@@ -7475,7 +7475,6 @@ webpackJsonp([2],[
 	    },
 	    initialize: function initialize() {
 	        var channel = _backbone4.default.channel('config');
-	        console.log('init');
 	        this.workunit_options = channel.request('get:options', 'workunits');
 	        this.tva_options = channel.request('get:options', 'tvas');
 	        this.product_options = channel.request('get:options', 'products');

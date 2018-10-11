@@ -110,6 +110,7 @@ from autonomie.models.sale_product import (
     SaleProductGroup,
     SaleProductCategory,
 )
+from autonomie.models.training.product import SaleTrainingGroup
 from autonomie.models.tva import Tva
 from autonomie.models.career_stage import CareerStage
 from autonomie.models.career_path import CareerPath
@@ -203,6 +204,7 @@ class RootFactory(dict):
         ('sale_categories', 'sale_category', SaleProductCategory, ),
         ('sale_products', 'sale_product', SaleProduct, ),
         ('sale_product_groups', 'sale_product_group', SaleProductGroup, ),
+        ('sale_training_groups', 'sale_training_group', SaleTrainingGroup,),
         ('statistics', 'statistic', StatisticSheet,),
         ('statistic_entries', 'statistic_entry', StatisticEntry,),
         ('statistic_criteria', 'statistic_criterion',

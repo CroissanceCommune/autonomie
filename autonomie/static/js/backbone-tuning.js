@@ -274,7 +274,7 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
           displayServerError("Une erreur a été rencontrée lors de la " +
               "sauvegarde de vos données");
         },
-        wait: true
+        wait: true,
       }
     );
 

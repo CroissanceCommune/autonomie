@@ -94,6 +94,24 @@ def populate_cae_situations_and_career_stages(session):
         session.flush()
 
 
+def populate_training_types(session):
+    """
+    Populate the database with default training type options
+    """
+    from autonomie.models.training.product import TrainingTypeOptions
+    if session.query(TrainingTypeOptions).filter("label"=="Individuelle").count() == 0:
+        session.add(TrainingTypeOptions(label=u"Individuelle", order=0))
+    if session.query(TrainingTypeOptions).filter("label"=="Groupe").count() == 0:
+        session.add(TrainingTypeOptions(label=u"Groupe", order=1))
+    if session.query(TrainingTypeOptions).filter("label" == "Petit groupe (moins de 5 personnes)").count() == 0:
+        session.add(TrainingTypeOptions(label=u"Petit groupe (moins de 5 personnes)", order=2))
+    if session.query(TrainingTypeOptions).filter("label" == "Sur mesure").count() == 0:
+        session.add(TrainingTypeOptions(label=u"Sur mesure", order=3))
+    if session.query(TrainingTypeOptions).filter("label" == "À distance").count() == 0:
+        session.add(TrainingTypeOptions(label=u"À distance", order=4))
+    session.flush()
+
+
 def populate_groups(session):
     """
     Populate the groups in the database
@@ -335,6 +353,7 @@ def populate_database():
         populate_contract_types,
         populate_file_types_and_requirements,
         populate_invoice_number_template,
+        populate_training_types,
     ):
         try:
             func(session)

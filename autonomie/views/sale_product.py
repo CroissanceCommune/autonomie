@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # * Copyright (C) 2012-2015 Croissance Commune
 # * Authors:
@@ -29,6 +30,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 
 from autonomie.models.tva import Tva
 from autonomie.models.task import WorkUnit
+from autonomie.models.training import TrainingTypeOptions
 from autonomie.models.sale_product import (
     SaleProductCategory,
     SaleProduct,
@@ -38,6 +40,7 @@ from autonomie.compute.math_utils import convert_to_float
 from autonomie.resources import sale_product_js
 from autonomie.views import BaseRestView
 
+from autonomie.models.training.product import SaleTrainingGroup
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +90,8 @@ def company_products_options_ajax_view(context, request):
     """
     return dict(
         tvas=Tva.query().all(),
-        unities=WorkUnit.query().all()
+        unities=WorkUnit.query().all(),
+        training_type=TrainingTypeOptions.query().all(),
     )
 
 
@@ -118,6 +122,9 @@ def company_products_jstree_ajax_view(context, request):
     if item_type == 'sale_product_group':
         category_child_attr = 'product_groups'
         label = u"ouvrage"
+    elif item_type == 'sale_training_group':
+        category_child_attr = 'training_groups'
+        label = u"formation"
     elif item_type == 'sale_product':
         category_child_attr = 'products'
         label = u"produit"
@@ -226,7 +233,7 @@ class RestProductGroups(BaseRestView):
     """
     # Context is the category
     def collection_get(self):
-        return self.context.product_groups
+        return [item for item in self.context.product_groups if item.type_ == 'base']
 
     def pre_format(self, appstruct):
         """
@@ -248,6 +255,46 @@ class RestProductGroups(BaseRestView):
     def schema(self):
         return SQLAlchemySchemaNode(
             SaleProductGroup,
+            # id passe par l'url
+            excludes=('id', ),
+        ).bind(request=self.request)
+
+
+class RestTrainingGroups(BaseRestView):
+    """
+    JSON rest api for training group configuration
+    """
+    # Context is the category
+    def collection_get(self):
+        return self.context.training_groups
+
+    def pre_format(self, appstruct):
+        """
+        """
+        # Since when serializing a multi select on the client side, we get a
+        # list OR a string, we need to handle both cases
+        if 'products' in appstruct:
+            product_ids = appstruct.get('products')
+            if not hasattr(product_ids, '__iter__'):
+                product_ids = [product_ids]
+
+            appstruct['products'] = product_ids
+
+        if 'types' in appstruct:
+            types_ids = appstruct.get('types')
+            if not hasattr(types_ids, '__iter__'):
+                types_ids = [types_ids]
+
+            appstruct['types'] = types_ids
+
+        if self.context.__name__ == 'sale_category':
+            appstruct['category_id'] = self.context.id
+        return appstruct
+
+    @property
+    def schema(self):
+        return SQLAlchemySchemaNode(
+            SaleTrainingGroup,
             # id passe par l'url
             excludes=('id', ),
         ).bind(request=self.request)
@@ -297,6 +344,20 @@ def add_routes(config):
         "sale_product_group",
         group_url,
         traverse="/sale_product_groups/{pid}",
+    )
+
+    training_group_url = url + "/training_groups"
+    config.add_route(
+        "sale_training_groups",
+        training_group_url,
+        traverse="/sale_categories/{cid}",
+    )
+
+    training_group_url += "/{pid:\d+}"
+    config.add_route(
+        "sale_training_group",
+        training_group_url,
+        traverse="/sale_training_groups/{pid}",
     )
 
 
@@ -438,6 +499,42 @@ def includeme(config):
         RestProductGroups,
         attr='delete',
         route_name='sale_product_group',
+        request_method="DELETE",
+        permission="edit_sale_product",
+    )
+
+    add_json_view(
+        RestTrainingGroups,
+        attr='collection_get',
+        route_name='sale_training_groups',
+        request_method="GET",
+        permission="view_sale_product",
+    )
+    add_json_view(
+        RestTrainingGroups,
+        attr='post',
+        route_name='sale_training_groups',
+        request_method="POST",
+        permission="edit_sale_product",
+    )
+    add_json_view(
+        RestTrainingGroups,
+        attr='get',
+        route_name='sale_training_group',
+        request_method="GET",
+        permission="view_sale_product",
+    )
+    add_json_view(
+        RestTrainingGroups,
+        attr='put',
+        route_name='sale_training_group',
+        request_method="PUT",
+        permission="edit_sale_product",
+    )
+    add_json_view(
+        RestTrainingGroups,
+        attr='delete',
+        route_name='sale_training_group',
         request_method="DELETE",
         permission="edit_sale_product",
     )

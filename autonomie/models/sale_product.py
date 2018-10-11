@@ -164,8 +164,24 @@ class SaleProduct(DBBASE):
 class SaleProductGroup(DBBASE):
     """
     A product group model
+    :param id: unique id
+    :param label: product group label
+    :param ref: product group reference
+    :param type_: group type "base" for "ouvrages" and "training" form "formations"
     """
     __table_args__ = default_table_args
+    __mapper_args__ = {
+        'polymorphic_on': 'type_',
+        'polymorphic_identity': 'base',
+    }
+
+    type_ = Column(
+        'type_',
+        String(30),
+        info={'colanderalchemy': forms.EXCLUDED},
+        nullable=False,
+    )
+
     id = Column(Integer, primary_key=True)
     label = Column(String(255), nullable=False)
     ref = Column(String(100), nullable=True)

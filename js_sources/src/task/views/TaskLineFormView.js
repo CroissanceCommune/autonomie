@@ -53,7 +53,6 @@ const TaskLineFormView = Mn.View.extend({
     },
     initialize: function () {
         var channel = Radio.channel('config');
-        console.log('init');
         this.workunit_options = channel.request(
             'get:options',
             'workunits'
@@ -103,8 +102,8 @@ const TaskLineFormView = Mn.View.extend({
                 value: this.model.get('description'),
                 title: "Intitulé des postes",
                 field_name: "description",
-                //tinymce: true, TODO Fix tinymce error
-                //cid: this.model.cid
+                tinymce: true,
+                cid: this.model.cid
             })
         );
         this.showChildView(

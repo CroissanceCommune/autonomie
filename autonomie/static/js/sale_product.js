@@ -238,14 +238,15 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         },
         templateHelpers: function () {
             var tva = this.model.get('tva');
-            var current_tva = _.find(
-                AppOptions['tvas'], function (item) {
-                    return item.value == tva;
-                }
-            );
+            console.log('tva',tva);
             var tva_label = "";
-            if (!_.isUndefined(current_tva)) {
-                tva_label = current_tva.name;
+            if(! _.isUndefined(tva)) {
+                var current_tva = _.find(AppOptions['tvas'], function (item) {
+                        return item.value == tva;
+                });
+                if (!_.isUndefined(current_tva)) {
+                    tva_label = current_tva.name;
+                }
             }
             return {tva_label: tva_label};
         },
@@ -282,17 +283,18 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             this.destroy();
         },
         templateHelpers: function () {
-            var tva = this.model.get('tva');
-            var tva_options = this.updateSelectOptions(AppOptions['tvas'], tva);
+            var tva = this.model.get('tva') || '20';
+            var tva_options = this.updateSelectOptions(AppOptions['tvas'], Number(tva));
             var product_id = this.model.get('product_id');
             var product_options = [];
             var filtered_product_options = this.getProductOptions(tva_options, AppOptions['products'], tva);
             if(! _.isEmpty(filtered_product_options)) {
                 product_options = this.updateSelectOptions(filtered_product_options,product_id, 'id');
             }
+
             var unity = this.model.get('unity');
-            var unity_options = this.updateSelectOptions(
-                AppOptions['unities'], unity);
+            var unity_options = this.updateSelectOptions(AppOptions['unities'], unity);
+
             return {
                 tva_options: tva_options,
                 unity_options: unity_options,

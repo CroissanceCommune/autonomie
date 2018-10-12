@@ -43,7 +43,7 @@
                 </div>
                 <div class="form-group">
                     <label for='tva'>Tva</label>
-                    <select name='tva' class='form-control'>
+                    <select name='tva' class='form-control' required>
                     {{#tva_options }}
                         <option value='{{ value }}' {{#selected}}selected{{/selected}}>
                             {{ name }}
@@ -54,7 +54,6 @@
                 <div class="form-group">
                     <label for='product_id'>Compte produit</label>
                     <select name='product_id' class='form-control'>
-                    <option value=''></option>
                     {{#product_options }}
                         <option value='{{ id }}' {{#selected}}selected{{/selected}}>
                             {{ name }}
@@ -64,7 +63,7 @@
                 </div>
             </fieldset>
         </div>
-    </div>
+</div>
     <div class='row'>
         <div class='col-md-6 col-md-offset-6'>
             <div class="form-actions text-right">

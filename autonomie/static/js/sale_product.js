@@ -238,7 +238,6 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         },
         templateHelpers: function () {
             var tva = this.model.get('tva');
-            console.log('tva',tva);
             var tva_label = "";
             if(! _.isUndefined(tva)) {
                 var current_tva = _.find(AppOptions['tvas'], function (item) {

@@ -42,7 +42,7 @@ from autonomie_base.models.base import (
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie import forms
 from autonomie.forms.custom_types import AmountType
-from autonomie.models.tva import Product
+import colander
 
 
 PRODUCT_TO_GROUP_REL_TABLE = Table(
@@ -129,7 +129,6 @@ class SaleProduct(DBBASE):
             },
             'export': forms.EXCLUDED,
         },
-        default=0
     )
     value = Column(Float(), default=0)
     unity = Column(String(100), default='')

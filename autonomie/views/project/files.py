@@ -20,12 +20,13 @@ from autonomie.views import (
 from autonomie.views.files import FileUploadView
 from autonomie.views.project.routes import (
     PROJECT_ITEM_FILE_ROUTE,
+    PROJECT_ITEM_ADD_FILE_ROUTE,
 )
 from autonomie.views.project.project import ProjectListView
 
 
 class ProjectFileAddView(FileUploadView, TreeMixin):
-    route_name = PROJECT_ITEM_FILE_ROUTE
+    route_name = PROJECT_ITEM_ADD_FILE_ROUTE
 
     def __init__(self, *args, **kw):
         FileUploadView.__init__(self, *args, **kw)
@@ -42,7 +43,7 @@ class ProjectFileAddView(FileUploadView, TreeMixin):
 
 class ProjectFilesView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_FILE_ROUTE
-    add_route = PROJECT_ITEM_FILE_ROUTE
+    add_route = PROJECT_ITEM_ADD_FILE_ROUTE
     help_message = u"""
     Liste des documents rattachés au projet courant ou à un des documents
     qui le composent."""
@@ -84,11 +85,7 @@ class ProjectFilesView(BaseView, TreeMixin):
         return dict(
             title=self.title,
             files=query,
-            add_url=self.request.route_path(
-                self.add_route,
-                id=self.context.id,
-                _query={'action': 'attach_file'},
-            ),
+            add_url=self.request.route_path(self.add_route, id=self.context.id),
             help_message=self.help_message,
         )
 

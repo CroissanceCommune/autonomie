@@ -26,7 +26,7 @@ class BusinessFileAddView(ProjectFileAddView):
 
 class BusinessFilesView(ProjectFilesView):
     route_name = BUSINESS_ITEM_FILE_ROUTE
-    add_route = BUSINESS_ITEM_FILE_ROUTE
+    add_route = BUSINESS_ITEM_ADD_FILE_ROUTE
     help_message = u"""
     Liste des documents rattachés à l'affaire courante ou à un des documents
     qui la composent."""

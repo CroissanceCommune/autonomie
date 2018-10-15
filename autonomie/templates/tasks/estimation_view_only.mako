@@ -40,18 +40,24 @@
         % endif
     </a>
 % elif api.has_permission('genbusiness.estimation'):
+    % if estimation.business_id:
+    <a
+        class='btn btn-default btn-block'
+        href="${request.route_path('/businesses/{id}', id=estimation.business_id)}"
+        title="Voir l'affaire"
+        >
+        <i class='fa fa-files-o'></i>&nbsp;Voir l'affaire ${estimation.business.name}
+        </a>
+    % else:
     <a
         class='btn btn-default btn-block'
         href="${request.route_path('/estimations/{id}/genbusiness', id=estimation.id)}"
         title="Générer une affaire au sein de laquelle facturer"
         >
         <i class='fa fa-files-o'></i>&nbsp;
-        % if estimation.business_id:
-        Re-Générer une affaire (${estimation.business_type.label})
-        % else:
         Générer une affaire (${estimation.business_type.label})
-        % endif
     </a>
+    % endif
 % endif
 % if api.has_permission('duplicate.estimation'):
 <a class='btn btn-default btn-block' href="${request.route_path('/estimations/{id}/duplicate', id=estimation.id)}">

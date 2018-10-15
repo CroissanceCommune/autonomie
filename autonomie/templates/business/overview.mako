@@ -22,18 +22,28 @@
 </%doc>
 <%inherit file="${context['main_template'].uri}" />
 <%block name='mainblock'>
+<% business = layout.current_business_object %>
 <div class='row'>
     <div class='col-xs-12'>
         <div class='panel panel-default page-block'>
             <div class='panel-body'>
-                % if layout.current_business_object.closed:
+                % if business.closed:
                 <div class='alert alert-success'>Cette affaire est clôturée</div>
                 % else:
                 <a
                     href="${invoice_all_url}"
+                    % if not business.invoiced:
                     class='btn btn-primary primary-action'
+                    % else:
+                    class='btn btn-primary'
+                    % endif
                     >
-                    <i class='fa fa-plus-circle'></i>&nbsp;<i class='fa fa-copy'></i>&nbsp;Générer toutes les factures
+                    <i class='fa fa-plus-circle'></i>&nbsp;
+                    % if business.invoiced:
+                    Re-Générer toutes les factures
+                    % else:
+                    Générer toutes les factures
+                    % endif
                 </a>
                 % endif
                 <h3>Devis de référence</h3>
@@ -61,7 +71,7 @@
                 % if payment_deadlines:
                 <h3>Échéances de paiement</h3>
                     % for deadline in payment_deadlines:
-                    <% url = request.route_path(invoice_deadline_route, id=layout.current_business_object.id, deadline_id=deadline.id) %>
+                    <% url = request.route_path(invoice_deadline_route, id=business.id, deadline_id=deadline.id) %>
                     <hr />
                     <div class='row'>
                         % if deadline.deposit:
@@ -76,11 +86,13 @@
                             ${api.format_amount(deadline.payment_line.amount, precision=5) | n}&nbsp;€
                         </div>
                         % endif
-                        % if deadline.invoiced:
+                        % if deadline.invoice_id:
                         <div class='col-xs-3'>
-                            Facturée
+                        <a href="${request.route_path('/invoices/{id}', id=deadline.invoice_id)}">
+                        ${deadline.invoice.name} (${api.format_status(deadline.invoice)})
+                        </a>
                         </div>
-                            % if not layout.current_business_object.closed:
+                            % if not business.closed:
                             <div class='col-xs-3'>
                                 <a
                                     class='btn btn-default'
@@ -91,11 +103,27 @@
                                 </a>
                             </div>
                             % endif
+                        % elif deadline.invoice_id:
+                        <div class='col-xs-3'>
+                        </div>
+                            % if not business.closed:
+                            <div class='col-xs-3'>
+                                <a
+                                    class='btn btn-default'
+                                    href="${url}"
+                                    >
+                                    <i class='fa fa-copy'></i>&nbsp;
+                                    Re-Générer la facture
+                                </a>
+                            </div>
+                            % endif
+
+
                         % elif not deadline.deposit and deadline.payment_line.date:
                         <div class='col-xs-3'>
                             Facturation prévue le ${api.format_date(deadline.payment_line.date)}
                         </div>
-                            % if not layout.current_business_object.closed:
+                            % if not business.closed:
                             <div class='col-xs-3'>
                                 <a class='btn btn-default'
                                     href="${url}">
@@ -107,7 +135,7 @@
                         <div class='col-xs-3'>
                             En attente de facturation
                         </div>
-                            % if not layout.current_business_object.closed:
+                            % if not business.closed:
                             <div class='col-xs-3'>
                                 <a class='btn btn-default'
                                     href="${url}">

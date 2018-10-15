@@ -255,7 +255,7 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
         year = _get_year_from_request(self.request)
 
         # if we've got datas and we're not in the last year
-        if items.count() > 0 and year != current_year + 1:
+        if len(items) > 0 and year != current_year + 1:
             yield Link(
                 self._get_duplicate_url(),
                 label=u"Dupliquer cette grille vers l'année suivante "

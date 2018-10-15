@@ -256,12 +256,22 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
 
         # if we've got datas and we're not in the last year
         if len(items) > 0 and year != current_year + 1:
+            if self.load_items(year + 1).count() > 0:
+                confirm = (
+                    u"Tous les types de frais présentés ici seront "
+                    u"copiés vers l'année {}. Des frais sont déjà configurés "
+                    u"sur cette année."
+                    u" Voulez-vous continuer ?".format(year + 1)
+                )
+            else:
+                confirm = None
             yield Link(
                 self._get_duplicate_url(),
                 label=u"Dupliquer cette grille vers l'année suivante "
                 u"(%s)" % (year + 1),
                 icon=u"fa fa-copy",
-                css=u"btn btn-default"
+                css=u"btn btn-default",
+                confirm=confirm,
             )
 
         # If previous year there were some datas configured
@@ -271,7 +281,9 @@ class ExpenseKmTypeListView(ExpenseTypeListView):
                 label=u"Recopier la grille de l'année précédente "
                 u"(%s)" % (year - 1),
                 icon=u"fa fa-copy",
-                css=u"btn btn-default"
+                css=u"btn btn-default",
+                confirm=u"Tous les types de frais de l'année précédente seront "
+                u"recopiés ici. Voulez-vous continuer ?"
             )
 
 

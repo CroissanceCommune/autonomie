@@ -145,6 +145,11 @@ class Business(Node):
                 for deadline in self.payment_deadlines
                 if deadline.payment_line is not None]
 
+    @property
+    def invoiced(self):
+        indicator = self.status_service.get_or_create_invoice_indicator(self)
+        return indicator.status == indicator.SUCCESS_STATUS
+
     def get_company_id(self):
         return self.project.company_id
 

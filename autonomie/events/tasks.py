@@ -38,7 +38,7 @@ from autonomie_base.mail import (
 )
 from autonomie.interfaces import IMailEventWrapper
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # Events for which a mail will be sended
 EVENTS = {
@@ -101,7 +101,7 @@ class TaskMailStatusChangedWrapper(object):
         if 'mail.default_sender' in self.settings:
             mail = self.settings['mail.default_sender']
         else:
-            log.info(
+            logger.info(
                 u"'{0}' has not set his email".format(
                     self.event.request.user.login
                 )
@@ -200,7 +200,9 @@ def get_status_verb(status):
 
 def on_status_changed_alert_related_business(event):
     """
-    Alert the related business on status change
+    Alert the related business on Invoice status change
+
+    :param event: A StatusChanged instance with an Invoice attached
     """
     if event.status == 'valid':
         business = event.node.business
@@ -209,5 +211,5 @@ def on_status_changed_alert_related_business(event):
                 business.id
             )
         )
-        business.update_invoicing_status(event.node)
+        business.status_service.update_invoicing_status(business, event.node)
         business.status_service.update_status(business)

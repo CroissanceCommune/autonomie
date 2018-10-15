@@ -142,7 +142,7 @@ def gen_all_invoices(context, request):
     Generate all invoices attached to a business
 
     :param obj request: The request object
-    :param obj context: The current business
+    :param obj context: The current Business
     """
     invoices = context.gen_invoices(request.user)
     if len(invoices) == 1:

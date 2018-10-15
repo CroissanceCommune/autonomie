@@ -21,6 +21,7 @@ from autonomie.views.project.routes import (
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
     BUSINESS_ITEM_OVERVIEW_ROUTE,
+    BUSINESS_ITEM_INVOICING_ROUTE,
     BUSINESS_ITEM_INVOICING_ALL_ROUTE,
 )
 from autonomie.views.project.project import ProjectEntryPointView
@@ -108,7 +109,7 @@ class BusinessOverviewView(BaseView, TreeMixin):
             )
 
     # Lié à la vue elle-même
-    def invoice_action_url(self):
+    def invoice_all_url(self):
         return self.request.route_path(
             BUSINESS_ITEM_INVOICING_ALL_ROUTE,
             id=self.context.id,
@@ -127,8 +128,9 @@ class BusinessOverviewView(BaseView, TreeMixin):
             estimations=self.context.estimations,
             custom_indicators=self.context.indicators,
             file_requirements=self.context.file_requirements,
-            invoice_action_url=self.invoice_action_url(),
+            invoice_all_url=self.invoice_all_url(),
             payment_deadlines=self.context.payment_deadlines,
+            invoice_deadline_route=BUSINESS_ITEM_INVOICING_ROUTE,
         )
 
 

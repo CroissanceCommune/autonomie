@@ -3,12 +3,16 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
+import logging
 from autonomie.events.expense import ExpenseMailStatusChangedWrapper
 from autonomie.events.tasks import (
     TaskMailStatusChangedWrapper,
     on_status_changed_alert_related_business,
 )
 from autonomie.events.mail import send_mail_from_event
+
+
+logger = logging.getLogger(__name__)
 
 
 class StatusChanged(object):

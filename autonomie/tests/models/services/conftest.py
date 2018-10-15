@@ -57,9 +57,9 @@ def mk_task_line(dbsession, unity, tva, product, task_line_group):
 
 
 @pytest.fixture
-def task_line(mk_task_line, tva):
+def task_line(mk_task_line, tva, product):
     # TTC = 120 €
-    return mk_task_line(cost=10000000, tva_value=tva.value)
+    return mk_task_line(cost=10000000, tva_value=tva.value, product=product)
 
 
 @pytest.fixture
@@ -180,14 +180,16 @@ def cancelinvoice(
 @pytest.fixture
 def full_estimation(
     dbsession, estimation, task_line_group, task_line, user, mention,
-    discount_line, payment_line, payment_line2, mk_task_line,
+    discount_line, payment_line, payment_line2, mk_task_line, mk_tva, mk_product
 ):
+    tva = mk_tva(name="7%", value=700, default=False)
+    product = mk_product(name='product7', tva=tva)
     # TTC  : 100 + 20/100 * 100 + 100 + 7%*100 - 12  + 12 €
     # accompte : 10/100
     # payments : 1er paiement de 150 + solde
     task_line_group.lines = [
         task_line,
-        mk_task_line(cost=10000000, tva_value=700)
+        mk_task_line(cost=10000000, tva_value=700, product=product)
     ]
     estimation.deposit = 10
     estimation.line_groups = [task_line_group]
@@ -227,6 +229,6 @@ def business(dbsession, full_estimation, default_business_type):
     dbsession.add(business)
     dbsession.flush()
     full_estimation.business_type_id = default_business_type.id
-    full_estimation.business_id = business.id
+    full_estimation.businesses = [business]
     dbsession.merge(full_estimation)
     return business

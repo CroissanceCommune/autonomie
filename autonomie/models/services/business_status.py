@@ -81,7 +81,7 @@ class BusinessStatusService:
         :rtype: obj
         """
         if invoice:
-            deadline = business.find_deadline_from_invoice(business, invoice)
+            deadline = business.find_deadline_from_invoice(invoice)
             deadline.invoiced = True
             DBSESSION().merge(deadline)
         cls.update_invoicing_indicator(business)
@@ -113,7 +113,7 @@ class BusinessStatusService:
         :returns: The Business instance
         :rtype: obj
         """
-        status = cls._get_status(business)
+        status = cls._compute_status(business)
         if status != business.status:
             business.status = status
             DBSESSION().merge(business)

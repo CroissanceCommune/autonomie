@@ -130,3 +130,17 @@ def test_all_invoices(full_estimation, payment_line, user):
     )
     assert deposit_invoice.total_ht() + intermediate_invoice.total_ht() + \
         sold_invoice.total_ht() == full_estimation.total_ht()
+
+
+def test_gen_invoice_ref450(full_estimation, user):
+    from autonomie.models.services.estimation import EstimationInvoicingService
+    sold_invoice = EstimationInvoicingService.gen_sold_invoice(
+        full_estimation, user
+    )
+
+    for line in full_estimation.all_lines:
+        print(line.product_id)
+        print(line)
+
+    for line in sold_invoice.all_lines:
+        assert line.product_id is not None

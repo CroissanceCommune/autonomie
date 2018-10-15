@@ -29,6 +29,18 @@ def test_update_invoicing_indicator(business, invoice):
     assert business.indicators[0].status == u"success"
 
 
+def test_update_invoicing_status(dbsession, business, invoice):
+    from autonomie.models.services.business import BusinessService
+    BusinessService.populate_deadlines(business)
+
+    deadline = business.payment_deadlines[0]
+    deadline.invoice = invoice
+    dbsession.merge(deadline)
+    dbsession.flush()
+    BusinessStatusService.update_invoicing_status(business, invoice)
+    assert deadline.invoiced is True
+
+
 def test_compute_status(business):
     BusinessStatusService.populate_indicators(business)
     assert BusinessStatusService._compute_status(business) == u"danger"
@@ -37,3 +49,13 @@ def test_compute_status(business):
         indicator.status = indicator.SUCCESS_STATUS
 
     assert BusinessStatusService._compute_status(business) == u"success"
+
+
+def test_update_status(business):
+    BusinessStatusService.populate_indicators(business)
+
+    for indicator in business.indicators:
+        indicator.status = indicator.SUCCESS_STATUS
+
+    BusinessStatusService.update_status(business) == u"success"
+    assert business.status == "success"

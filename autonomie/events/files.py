@@ -23,6 +23,7 @@ class FileAdded(object):
         self.file_object = file_object
         self.parent = self.file_object.parent
 
+
 class FileUpdated(FileAdded):
     """
     Event to be fired on file update
@@ -32,7 +33,15 @@ class FileUpdated(FileAdded):
     action = "update"
 
 
-def on_file_downloaded(event):
+class FileDeleted(FileAdded):
+    """
+    Event fired when a file was deleted
+    >>> request.registry.notify(FileDeleted(request, file_object))
+    """
+    action = "delete"
+
+
+def on_file_change(event):
     if hasattr(event.parent, "file_requirement_service"):
         logger.info(u"+ Calling the parent's file requirement service")
         event.parent.file_requirement_service.register(
@@ -45,5 +54,6 @@ def on_file_downloaded(event):
 
 
 def includeme(config):
-    config.add_subscriber(on_file_downloaded, FileAdded)
-    config.add_subscriber(on_file_downloaded, FileUpdated)
+    config.add_subscriber(on_file_change, FileAdded)
+    config.add_subscriber(on_file_change, FileUpdated)
+    config.add_subscriber(on_file_change, FileDeleted)

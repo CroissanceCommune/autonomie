@@ -48,6 +48,7 @@ from autonomie.forms.files import (
 from autonomie.events.files import (
     FileAdded,
     FileUpdated,
+    FileDeleted,
 )
 from autonomie.resources import fileupload_js
 from autonomie.views import (
@@ -175,12 +176,7 @@ class FileUploadView(BaseFormView):
     By getting the referrer url from the request object, we provide the
     redirection to the original page when the file is added
 
-
-    file_requirement_service
-
-        If the file's parent has a file_requirement_service respecting
-        :class:`autonomie.interfaces.IFileRequirementService`
-        its register method will be called
+    a `class:autonomie.events.files.FileAdded` is fired on file modification
     """
     factory = File
     schema = FileUploadSchema()
@@ -200,19 +196,6 @@ class FileUploadView(BaseFormView):
             'come_from': come_from,
         }
         form.set_appstruct(appstruct)
-
-    def _update_file_requirements(self, file_object, action='add'):
-        """
-        Update the file requirements for the given object
-
-        :param obj file_object: The new :class:`autonomie.models.files.File`
-        :param bool edit: Are we editing an existing file ?
-        """
-        parent = self._parent()
-        if hasattr(parent, "file_requirement_service"):
-            parent.file_requirement_service.register(
-                parent, file_object, action=action
-            )
 
     def persist_to_database(self, appstruct):
         """
@@ -260,9 +243,11 @@ class FileUploadView(BaseFormView):
 
 class FileEditView(FileUploadView):
     """
-        View for file object modification
+    View for file object modification
 
-        Current context is the file itself
+    Current context is the file itself
+
+    a `class:autonomie.events.files.FileUpdated` is fired on file modification
     """
     valid_msg = EDIT_OK_MSG
 
@@ -332,14 +317,13 @@ def get_add_file_link(
 
 
 class FileDeleteView(DeleteView, FileViewRedirectMixin):
+    """
+    a `class:autonomie.events.files.FileDeleted` is fired on file deletion
+    """
     delete_msg = None
 
     def on_before_delete(self):
-        parent = self.context.parent
-        if hasattr(parent, "file_requirement_service"):
-            parent.file_requirement_service.register(
-                parent, self.context, action='delete'
-            )
+        self.request.registry.notify(FileDeleted(self.request, self.context))
 
     def redirect(self):
         return HTTPFound(self.back_url())

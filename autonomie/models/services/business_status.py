@@ -24,11 +24,11 @@ class BusinessStatusService:
         :returns: The Business instance
         :rtype: obj
         """
-        cls._get_or_create_invoice_indicator(business)
+        cls.get_or_create_invoice_indicator(business)
         return business
 
     @classmethod
-    def _get_or_create_invoice_indicator(cls, business):
+    def get_or_create_invoice_indicator(cls, business):
         from autonomie.models.indicators import CustomBusinessIndicator
         indicator = CustomBusinessIndicator.query().filter_by(
             business_id=business.id
@@ -64,7 +64,7 @@ class BusinessStatusService:
 
         indicator = None
         if invoicing_status is True:
-            indicator = cls._get_or_create_invoice_indicator(business)
+            indicator = cls.get_or_create_invoice_indicator(business)
             indicator.status = indicator.SUCCESS_STATUS
             DBSESSION().merge(indicator)
 

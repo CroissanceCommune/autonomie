@@ -186,8 +186,6 @@ class Project(Node):
         info={
             "colanderalchemy": {
                 "title": u"Types de sous-projet proposés",
-                "description": u"Types d'affaires que l'on peut utiliser "
-                "dans ce projet",
             }
         }
     )

@@ -11,7 +11,6 @@ import logging
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import or_
 
-from autonomie.utils.strings import format_account
 from autonomie.models.user.user import User
 from autonomie.forms.user.user import (
     get_add_edit_schema,
@@ -84,20 +83,6 @@ class UserAddView(BaseFormView):
         :returns: template vars
         :rtype: dict
         """
-        if query_count == 1:
-            msg = u"Un compte similaire \
-a déjà été créé: <ul>"
-        else:
-            msg = u"{0} comptes similaires ont \
-déjà été créés : <ul>".format(query_count)
-
-        for entry in query:
-            msg += u"<li><a href='%s'>%s (%s)</a></li>" % (
-                self.request.route_path(USER_ITEM_URL, id=entry.id),
-                format_account(entry),
-                entry.email,
-            )
-        msg += u"</ul>"
         form = self._get_form()
         _query = self.request.GET.copy()
         _query['confirmation'] = '1'
@@ -105,9 +90,12 @@ déjà été créés : <ul>".format(query_count)
 
         form.set_appstruct(appstruct)
         datas = dict(
+            duplicate_accounts=query.all(),
+            appstruct=appstruct,
             form=form.render(),
-            confirmation_message=msg,
             confirm_form_id=form.formid,
+            user_view_route=USER_ITEM_URL,
+            back_url=self.request.route_path(USER_URL),
         )
         datas.update(self._more_template_vars())
         return datas

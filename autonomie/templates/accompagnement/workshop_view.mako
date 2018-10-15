@@ -23,36 +23,43 @@
 <%inherit file="${context['main_template'].uri}" />
 <%namespace file="/base/utils.mako" import="definition_list"/>
 <%block name="content">
-<div class='row'>
-    <table class="table table-striped table-condensed table-hover">
-        <thead>
-            <tr>
-                <th>
-                    Nom de la tranche horaire
-                </th>
-                <th>
-                    Dates et horaires
-                </th>
-                <th>
-                    Votre statut
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            % for label, time_str, status in timeslots_datas:
-                <tr>
-                    <td>
-                        ${label}
-                     </td>
-                     <td>
-                        ${time_str}
-                     </td>
-                     <td>
-                         ${status}
-                     </td>
-                </tr>
-            % endfor
-        </tbody>
-    </table>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
+    ${request.context.title}
+    </div>
+    <div class='panel-body'>
+        <div class='row'>
+            <table class="table table-striped table-condensed table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            Nom de la tranche horaire
+                        </th>
+                        <th>
+                            Dates et horaires
+                        </th>
+                        <th>
+                            Votre statut
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % for label, time_str, status in timeslots_datas:
+                        <tr>
+                            <td>
+                                ${label}
+                             </td>
+                             <td>
+                                ${time_str}
+                             </td>
+                             <td>
+                                 ${status}
+                             </td>
+                        </tr>
+                    % endfor
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </%block>

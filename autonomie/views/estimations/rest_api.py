@@ -23,7 +23,7 @@ from autonomie.compute.math_utils import (
 from autonomie.models.task import (
     Estimation,
 )
-from autonomie.events.tasks import StatusChanged
+from autonomie.events.status_changed import StatusChanged
 from autonomie.forms.tasks.estimation import (
     validate_estimation,
     get_add_edit_estimation_schema,

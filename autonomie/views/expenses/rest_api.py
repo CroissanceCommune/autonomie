@@ -37,7 +37,7 @@ from autonomie.forms.expense import (
     get_add_edit_line_schema,
 )
 
-from autonomie.events.expense import StatusChanged as ExpenseStatusChanged
+from autonomie.events.status_changed import StatusChanged
 from autonomie.views import BaseRestView
 from autonomie.views.expenses.bookmarks import (
     get_bookmarks,
@@ -561,7 +561,7 @@ class RestExpenseSheetStatusView(StatusView):
         Notify a status change
         """
         self.request.registry.notify(
-            ExpenseStatusChanged(self.request, self.context, status)
+            StatusChanged(self.request, self.context, status)
         )
 
     def redirect(self):
@@ -594,7 +594,7 @@ class RestExpenseSheetJustifiedStatusView(StatusView):
     def notify(self, status):
         if status is True:
             self.request.registry.notify(
-                ExpenseStatusChanged(self.request, self.context, 'justified')
+                StatusChanged(self.request, self.context, 'justified')
             )
 
     def redirect(self):

@@ -84,7 +84,8 @@ def test_format_float():
     from autonomie.utils.strings import format_float
 
     assert format_float(1.256, precision=2) == "1,26"
-    assert format_float(1265.254, precision=2, html=False) == "1 265,25"
+    res = format_float(1265.254, precision=2, html=False)
+    assert res == "1\xe2\x80\xaf265,25" or res == "1 265,25"
     assert format_float(1265.254, precision=2) == "1&nbsp;265,25"
     assert format_float(1265.254, precision=2, grouping=False) == "1265,25"
     assert format_float(1.256, precision=None) == "1.256"

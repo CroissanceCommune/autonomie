@@ -96,10 +96,6 @@ table.opa tfoot td{
   }
   .signed-status-aborted, .tolate-True, .status-wait:not(.justified-True), .job-failed, .activity-status-cancelled, .operation-associated-False, .business-check-False{
     background-color: $red_status_light!important;
-    a:not(.btn){
-      text-transform:uppercase;
-      text-decoration:underline;
-    }
     .status-td{
       background-color: $red_status_hard!important;
     }

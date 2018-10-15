@@ -45,6 +45,11 @@ from autonomie import forms
 from autonomie.forms.files import (
     FileUploadSchema,
 )
+from autonomie.events.files import (
+    FileAdded,
+    FileUpdated,
+    FileDeleted,
+)
 from autonomie.resources import fileupload_js
 from autonomie.views import (
     BaseFormView,
@@ -171,12 +176,7 @@ class FileUploadView(BaseFormView):
     By getting the referrer url from the request object, we provide the
     redirection to the original page when the file is added
 
-
-    file_requirement_service
-
-        If the file's parent has a file_requirement_service respecting
-        :class:`autonomie.interfaces.IFileRequirementService`
-        its register method will be called
+    a `class:autonomie.events.files.FileAdded` is fired on file modification
     """
     factory = File
     schema = FileUploadSchema()
@@ -197,19 +197,6 @@ class FileUploadView(BaseFormView):
         }
         form.set_appstruct(appstruct)
 
-    def _update_file_requirements(self, file_object, action='add'):
-        """
-        Update the file requirements for the given object
-
-        :param obj file_object: The new :class:`autonomie.models.files.File`
-        :param bool edit: Are we editing an existing file ?
-        """
-        parent = self._parent()
-        if hasattr(parent, "file_requirement_service"):
-            parent.file_requirement_service.register(
-                parent, file_object, action=action
-            )
-
     def persist_to_database(self, appstruct):
         """
         Execute actions on the database
@@ -224,7 +211,7 @@ class FileUploadView(BaseFormView):
         forms.merge_session_with_post(file_object, appstruct)
         self.request.dbsession.add(file_object)
         self.request.dbsession.flush()
-        self._update_file_requirements(file_object)
+        self.request.registry.notify(FileAdded(self.request, file_object))
 
     def redirect(self, come_from=None):
         """
@@ -256,9 +243,11 @@ class FileUploadView(BaseFormView):
 
 class FileEditView(FileUploadView):
     """
-        View for file object modification
+    View for file object modification
 
-        Current context is the file itself
+    Current context is the file itself
+
+    a `class:autonomie.events.files.FileUpdated` is fired on file modification
     """
     valid_msg = EDIT_OK_MSG
 
@@ -307,7 +296,7 @@ class FileEditView(FileUploadView):
     def persist_to_database(self, appstruct):
         forms.merge_session_with_post(self.context, appstruct)
         self.request.dbsession.merge(self.context)
-        self._update_file_requirements(self.context, action="update")
+        self.request.registry.notify(FileUpdated(self.request, self.context))
 
 
 def get_add_file_link(
@@ -328,14 +317,13 @@ def get_add_file_link(
 
 
 class FileDeleteView(DeleteView, FileViewRedirectMixin):
+    """
+    a `class:autonomie.events.files.FileDeleted` is fired on file deletion
+    """
     delete_msg = None
 
     def on_before_delete(self):
-        parent = self.context.parent
-        if hasattr(parent, "file_requirement_service"):
-            parent.file_requirement_service.register(
-                parent, self.context, action='delete'
-            )
+        self.request.registry.notify(FileDeleted(self.request, self.context))
 
     def redirect(self):
         return HTTPFound(self.back_url())

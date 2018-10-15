@@ -41,9 +41,15 @@ class TaskListPanel(object):
         query = {}
         if action:
             query['action'] = action
-        return self.request.route_path(
-            route, id=item.id, _query=query, _anchor=_anchor
+
+        key_params = dict(
+            id=item.id,
+            _query=query,
         )
+        if _anchor is not None:
+            key_params['_anchor'] = _anchor
+
+        return self.request.route_path(route, **key_params)
 
     def _stream_main_actions(self, item):
         """
@@ -133,6 +139,7 @@ class TaskListPanel(object):
         self,
         records,
         datatype="invoice",
+        legends=[],
         is_admin_view=False,
         is_project_view=False,
         is_business_view=False,
@@ -148,7 +155,8 @@ class TaskListPanel(object):
             is_admin_view=is_admin_view,
             is_project_view=is_project_view,
             is_business_view=is_business_view,
-            is_invoice_list=not (is_business_view or is_project_view)
+            is_invoice_list=not (is_business_view or is_project_view),
+            legends=legends,
         )
         if datatype == "invoice":
             ret_dict['stream_actions'] = self._stream_invoice_actions

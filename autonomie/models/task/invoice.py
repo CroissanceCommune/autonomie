@@ -39,9 +39,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     DateTime,
-    func,
     distinct,
-    extract,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -77,7 +75,7 @@ from .task import (
 )
 from .actions import DEFAULT_ACTION_MANAGER
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 INVOICE_STATES = (
@@ -261,7 +259,7 @@ class Invoice(Task, InvoiceCompute):
             payment = Payment()
             for key, value in kw.iteritems():
                 setattr(payment, key, value)
-            log.info(u"Amount : {0}".format(payment.amount))
+            logger.info(u"Amount : {0}".format(payment.amount))
             self.payments.append(payment)
 
         return self.check_resulted(
@@ -273,7 +271,7 @@ class Invoice(Task, InvoiceCompute):
         """
         Check if the invoice is resulted or not and set the appropriate status
         """
-        log.debug(u"-> There still to pay : %s" % self.topay())
+        logger.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() <= 0 or force_resulted:
             self.paid_status = 'resulted'
 

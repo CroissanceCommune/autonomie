@@ -98,6 +98,7 @@ AUTONOMIE_PANELS_MODULES = (
     "autonomie.panels.task",
     "autonomie.panels.company_index",
     'autonomie.panels.files',
+    'autonomie.panels.indicators',
     'autonomie.panels.sidebar',
     "autonomie.panels.widgets",
     "autonomie.panels.navigation",
@@ -105,8 +106,9 @@ AUTONOMIE_PANELS_MODULES = (
 )
 
 AUTONOMIE_EVENT_MODULES = (
-    "autonomie.events.tasks",
-    "autonomie.events.expense",
+    "autonomie.events.status_changed",
+    "autonomie.events.files",
+    "autonomie.events.indicators",
 )
 AUTONOMIE_REQUEST_SUBSCRIBERS = (
     "autonomie.subscribers.new_request",
@@ -165,13 +167,25 @@ def get_groups(login, request):
     user = request.user
     if user is None:
         logger.debug("User is None")
-        res = None
-    else:
-        res = []
-        for group in user.login.groups:
-            res.append('group:{0}'.format(group))
+        principals = None
 
-    return res
+    elif getattr(request, 'principals', []):
+        principals = request.principals
+
+    else:
+        logger.debug(u" + Building principals")
+        principals = []
+        for group in user.login.groups:
+            principals.append('group:{0}'.format(group))
+
+        for company in user.companies:
+            if company.active:
+                principals.append('company:{}'.format(company.id))
+
+        request.principals = principals
+        logger.debug(u" -> Principals Built : caching")
+
+    return principals
 
 
 def prepare_config(**settings):

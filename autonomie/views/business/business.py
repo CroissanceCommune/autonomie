@@ -7,6 +7,7 @@ from pyramid.httpexceptions import HTTPFound
 from autonomie.forms.project.business import get_business_edit_schema
 
 from autonomie.utils.navigation import NavigationHandler
+from autonomie.models.project.business import Business
 from autonomie.views import (
     TreeMixin,
     BaseView,
@@ -20,6 +21,8 @@ from autonomie.views.project.routes import (
 from autonomie.views.business.routes import (
     BUSINESS_ITEM_ROUTE,
     BUSINESS_ITEM_OVERVIEW_ROUTE,
+    BUSINESS_ITEM_INVOICING_ROUTE,
+    BUSINESS_ITEM_INVOICING_ALL_ROUTE,
 )
 from autonomie.views.project.project import ProjectEntryPointView
 
@@ -70,6 +73,7 @@ class BusinessOverviewView(BaseView, TreeMixin):
     def __init__(self, *args, **kw):
         BaseView.__init__(self, *args, **kw)
 
+    # Relatif au TreeMixin
     @property
     def tree_is_visible(self):
         """
@@ -78,11 +82,20 @@ class BusinessOverviewView(BaseView, TreeMixin):
         if hasattr(self.context, 'project'):
             if self.context.project.project_type.default:
                 return False
+            elif getattr(self.context, "business_id", None) is None:
+                return False
         return True
 
     @property
     def title(self):
-        return u"{0.business_type.label} : {0.name}".format(self.context)
+        """
+        Return the page title both for the view and for the breadcrumb
+        """
+        business = self.context
+        if not isinstance(self.context, Business):
+            business = self.context.business
+
+        return u"{0.business_type.label} : {0.name}".format(business)
 
     @property
     def tree_url(self):
@@ -95,6 +108,13 @@ class BusinessOverviewView(BaseView, TreeMixin):
                 self.route_name, id=self.context.id
             )
 
+    # Lié à la vue elle-même
+    def invoice_all_url(self):
+        return self.request.route_path(
+            BUSINESS_ITEM_INVOICING_ALL_ROUTE,
+            id=self.context.id,
+        )
+
     def __call__(self):
         self.populate_navigation()
         remember_navigation_history(self.request, self.context.id)
@@ -106,7 +126,11 @@ class BusinessOverviewView(BaseView, TreeMixin):
                 _query={'action': 'edit'}
             ),
             estimations=self.context.estimations,
-            indicators=[],  # self.context.indicators,
+            custom_indicators=self.context.indicators,
+            file_requirements=self.context.file_requirements,
+            invoice_all_url=self.invoice_all_url(),
+            payment_deadlines=self.context.payment_deadlines,
+            invoice_deadline_route=BUSINESS_ITEM_INVOICING_ROUTE,
         )
 
 

@@ -98,7 +98,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                         <div class='col-xs-12'>
                             <i class='glyphicon glyphicon-${api.status_icon(request.context)}'></i> ${api.format_status(request.context)}
                             % if indicators:
-                            ${request.layout_manager.render_panel('task_indicators')}
+                            ${request.layout_manager.render_panel('sale_file_requirements', file_requirements=indicators)}
                             % endif
                             % if hasattr(next, 'before_summary'):
                                 ${next.before_summary()}

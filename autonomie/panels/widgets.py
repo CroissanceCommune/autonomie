@@ -27,6 +27,18 @@ def menu_dropdown_panel(context, request, label, links):
     return dict(label=label, links=links)
 
 
+def legend_panel(context, request, legends):
+    """
+    a legend panel shows a legend link with a dropdown div containing the
+    legends
+
+    :param obj context: The request's context
+    :param obj request: The current Pyramid request
+    :param list legends: List of 2-uples (status-css class, label)
+    """
+    return dict(context=context, request=request, legends=legends)
+
+
 def includeme(config):
     config.add_panel(
         link_panel,
@@ -37,4 +49,9 @@ def includeme(config):
         menu_dropdown_panel,
         "menu_dropdown",
         renderer="autonomie:templates/panels/widgets/menu_dropdown.pt",
+    )
+    config.add_panel(
+        legend_panel,
+        name="list_legend",
+        renderer="autonomie:templates/panels/widgets/legend.pt",
     )

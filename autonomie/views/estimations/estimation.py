@@ -241,13 +241,10 @@ def estimation_geninv_view(context, request):
     :param obj context: The current context (estimation)
     """
     business = context.gen_business()
-
-    invoices = context.gen_invoices(request.user)
-    for invoice in invoices:
-        invoice.initialize_business_datas(business)
-        request.dbsession.add(invoice)
+    invoices = business.gen_invoices(request.user)
 
     context.geninv = True
+    request.dbsession.merge(context)
 
     if len(invoices) > 1:
         msg = u"{0} factures ont été générées".format(len(invoices))
@@ -266,9 +263,8 @@ def estimation_genbusiness_view(context, request):
 
     :param obj context: The current estimation
     """
+    logger.info("Generating a business for estimation {}".format(context.id))
     business = context.gen_business()
-    request.dbsession.add(business)
-    request.dbsession.flush()
     return HTTPFound(request.route_path("/businesses/{id}", id=business.id))
 
 

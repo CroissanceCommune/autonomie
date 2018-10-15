@@ -40,7 +40,7 @@ from webhelpers.html import HTML
 from autonomie.models.company import Company
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Item(dict):
@@ -208,6 +208,12 @@ def _get_company_gestion_dropdown(request, cid):
         icon="fa fa-table",
         href=href
     )
+
+    if request.has_permission('training'):
+        from autonomie.views.training.routes import TRAINING_DASHBOARD_URL
+        href = request.route_path(TRAINING_DASHBOARD_URL, id=cid)
+        gestion.add_item(u"Formation", icon="fa fa-graduation-cap", href=href)
+
     return gestion
 
 
@@ -322,13 +328,13 @@ def get_admin_menus(request):
     documents = DropDown(label=u"Documents")
 
     href = request.route_path("invoices")
-    documents.add_item(u"Factures", icon="fa fa-file", href=href)
+    documents.add_item(u"Factures", icon="fa fa-list", href=href)
 
     href = request.route_path('expenses')
-    documents.add_item(u'Notes de dépense', icon='fa fa-file-o', href=href)
+    documents.add_item(u'Notes de dépense', icon='fa fa-list', href=href)
 
     href = request.route_path("estimations")
-    documents.add_item(u"Devis", icon="fa fa-file-o", href=href)
+    documents.add_item(u"Devis", icon="fa fa-list", href=href)
 
     menu.add(documents)
 
@@ -405,14 +411,24 @@ def get_admin_menus(request):
 
     menu.add(gestion_sociale)
 
+    if request.has_permission('admin_trainings'):
+        formation = DropDown(label=u"Formations")
+        href = request.route_path('/trainings')
+        formation.add_item(u"Formations", href=href, icon="fa fa-list")
+        href = request.route_path("/trainers")
+        formation.add_item(
+            u"Annuaire des formateurs",
+            icon="fa fa-graduation-cap",
+            href=href
+        )
+        menu.add(formation)
+
     href = request.route_path("holidays")
     menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)
 
     annuaire = DropDown(label=u"Annuaires")
     href = request.route_path("/users")
     annuaire.add_item(u"Utilisateurs", icon="fa fa-users", href=href)
-    href = request.route_path("/trainers")
-    annuaire.add_item(u"Formateurs", icon="fa fa-graduation-cap", href=href)
     href = request.route_path("companies")
     annuaire.add_item(u"Entreprises", icon="fa fa-building", href=href)
     menu.add(annuaire)
@@ -474,7 +490,7 @@ def menu_panel(context, request):
     """
         Top menu panel
     """
-    log.debug(u"Entering the menu panel")
+    logger.debug(u" + Building the menu")
     # If we've no user in the current request, we don't return anything
     if not getattr(request, 'user'):
         return {}
@@ -497,7 +513,7 @@ def menu_panel(context, request):
 
         href = request.route_path("/users")
         menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
-
+    logger.debug(u" -> Menu built")
     return {
         'menu': menu,
         'usermenu': usermenu,

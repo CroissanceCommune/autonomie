@@ -33,7 +33,7 @@ def test_paymentform_schema(
     schema = PaymentSchema().bind(request=request_with_config)
 
     value = {
-        'remittance_amount': '79.4',
+        'bank_remittance_id': '79.4',
         'amount': '12.53',
         'date': '2015-08-07',
         'bank_id': str(bank.id),
@@ -43,7 +43,7 @@ def test_paymentform_schema(
     }
     expected_value = {
         'come_from': '',
-        'remittance_amount': '79.4',
+        'bank_remittance_id': '79.4',
         'amount': 1253000,
         'date': datetime.date(2015, 8, 7),
         'bank_id': bank.id,
@@ -70,7 +70,7 @@ def test_deferred_total_validator(
     schema = PaymentSchema().bind(request=request_with_config)
 
     value = {
-        'remittance_amount': '79.4',
+        'bank_remittance_id': '79.4',
         'amount': '20.0',
         'date': '2015-08-07',
         'bank_id': str(bank.id),
@@ -79,7 +79,7 @@ def test_deferred_total_validator(
         'tva_id': str(tva.id),
     }
     expected_value = {
-        'remittance_amount': '79.4',
+        'bank_remittance_id': '79.4',
         'amount': 15500000,
         'date': datetime.date(2015, 8, 7),
         'bank_id': str(bank.id),
@@ -90,7 +90,7 @@ def test_deferred_total_validator(
     schema.deserialize(value) == expected_value
 
     value = {
-        'remittance_amount': '79.4',
+        'bank_remittance_id': '79.4',
         'amount': '21',
         'date': '2015-08-07',
         'bank_id': str(bank.id),

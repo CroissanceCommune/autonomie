@@ -22,7 +22,7 @@ class ProjectEstimationListView(CompanyEstimationList, TreeMixin):
         is_global=False,
         excludes=("company_id", 'year', 'customer',)
     )
-    add_template_vars = (u'title', 'is_admin', "with_draft", "add_url", )
+    add_template_vars = CompanyEstimationList.add_template_vars + ("add_url",)
 
     @property
     def add_url(self):

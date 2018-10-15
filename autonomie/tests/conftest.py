@@ -401,21 +401,35 @@ def groups(dbsession):
 
 
 @fixture
-def tva(dbsession):
+def mk_tva(dbsession):
     from autonomie.models.tva import Tva
-    tva = Tva(value=2000, name='20%', default=True)
-    dbsession.add(tva)
-    dbsession.flush()
-    return tva
+    def factory(value, name, default=True):
+        tva = Tva(value=value, name=name, default=default)
+        dbsession.add(tva)
+        dbsession.flush()
+        return tva
+    return factory
 
 
 @fixture
-def product(tva, dbsession):
+def tva(mk_tva):
+    return mk_tva(value=2000, name='20%', default=True)
+
+
+@fixture
+def mk_product(dbsession):
     from autonomie.models.tva import Product
-    product = Product(name='product', compte_cg='122', tva_id=tva.id)
-    dbsession.add(product)
-    dbsession.flush()
-    return product
+    def factory(name, tva, compte_cg='122'):
+        product = Product(name=name, tva_id=tva.id, compte_cg=compte_cg)
+        dbsession.add(product)
+        dbsession.flush()
+        return product
+    return factory
+
+
+@fixture
+def product(tva, mk_product):
+    return mk_product("product", tva)
 
 
 @fixture

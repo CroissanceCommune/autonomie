@@ -29,47 +29,50 @@
 <div class='panel panel-default page-block'>
     <div class='panel-heading '>
         <div class='row'>
-            <div class='col-md-3 col-xs-12 bordered'>
-                <div class='row'>
-                    <div class='col-md-3 text-center'>
+            <div class='col-md-1 hidden-xs bordered text-center'>
                     % if layout.current_business_object.closed:
                         <i class='fa fa-folder fa-3x'></i>
                     % else:
                         <i class='fa fa-folder-open fa-3x'></i>
                     % endif
-                    </div>
-                    <div class='col-md-9'>
-                        <div>${layout.current_business_object.business_type.label}  : ${layout.current_business_object.name}</div>
-                        % if layout.current_business_object.closed:
-                        <div class='help-text'>
-                        Cette affaire est clôturée
-                        </div>
-                        % endif
-                        <div class'btn-group'>
-                        % if request.has_permission("edit.business", layout.current_business_object):
-                        <a
-                            class='btn btn-default btn-small'
-                            href="${layout.edit_url}"
-                            >
-                            <i class='fa fa-pencil'></i>
-                        </a>
-                        % endif
-
-                        </div>
-                    </div>
-                </div>
             </div>
-            <div class='col-md-9 hidden-xs'>
-            <%block name='businesstitle'>
-            </%block>
-                % if request.has_permission('close.business', layout.current_business_object):
-                <a
-                    class='btn btn-default'
-                    href="${layout.close_url}"
+            <div class='col-md-11 col-xs-12'>
+                <span
+                    class='btn btn-circle btn-${layout.current_business_object.status}'
+                    % if layout.current_business_object.status == 'success':
+                    title="Cette affaire est complète"
+                    % else:
+                    title="Des éléménts sont manquants dans cette affaire"
+                    % endif
                     >
-                    <i class='fa fa-window-close'></i>&nbsp;Clôturer cette affaire
+                    <i class="fa icon-${layout.current_business_object.status}"></i>
+                </span>
+                ${layout.current_business_object.business_type.label}  : ${layout.current_business_object.name}
+                % if layout.current_business_object.closed:
+                    <div class='help-text'>
+                    Cette affaire est clôturée
+                    </div>
+                % endif
+                <div class='pull-right'>
+                % if request.has_permission('close.business', layout.current_business_object):
+                    <a
+                        class='btn btn-default'
+                        href="${layout.close_url}"
+                        title="Clôturer cette affaire, elle ne sera plus modifiable"
+                        >
+                        <i class='fa fa-lock'></i>&nbsp;Clôturer cette affaire
+                    </a>
+                    % endif
+                % if request.has_permission("edit.business", layout.current_business_object):
+                <a
+                    class='btn btn-default btn-small'
+                    href="${layout.edit_url}"
+                    title="Modifier le nom de cette affaire"
+                    >
+                    <i class='fa fa-pencil'></i>
                 </a>
                 % endif
+                </div>
             </div>
         </div>
     </div>

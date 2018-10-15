@@ -45,7 +45,12 @@
         href="${request.route_path('/estimations/{id}/genbusiness', id=estimation.id)}"
         title="Générer une affaire au sein de laquelle facturer"
         >
-        <i class='fa fa-files-o'></i>&nbsp;Générer une affaire (${estimation.business_type.label})
+        <i class='fa fa-files-o'></i>&nbsp;
+        % if estimation.business_id:
+        Re-Générer une affaire (${estimation.business_type.label})
+        % else:
+        Générer une affaire (${estimation.business_type.label})
+        % endif
     </a>
 % endif
 % if api.has_permission('duplicate.estimation'):

@@ -30,10 +30,10 @@
                 <div class='alert alert-success'>Cette affaire est clôturée</div>
                 % else:
                 <a
-                    href="${invoice_action_url}"
+                    href="${invoice_all_url}"
                     class='btn btn-primary primary-action'
                     >
-                    <i class='fa fa-plus-circle'></i>&nbsp;<i class='fa fa-copy'></i>&nbsp;Facturer
+                    <i class='fa fa-plus-circle'></i>&nbsp;<i class='fa fa-copy'></i>&nbsp;Générer toutes les factures
                 </a>
                 % endif
                 <h3>Devis de référence</h3>
@@ -61,6 +61,7 @@
                 % if payment_deadlines:
                 <h3>Échéances de paiement</h3>
                     % for deadline in payment_deadlines:
+                    <% url = request.route_path(invoice_deadline_route, id=layout.current_business_object.id, deadline_id=deadline.id) %>
                     <hr />
                     <div class='row'>
                         % if deadline.deposit:
@@ -79,23 +80,41 @@
                         <div class='col-xs-3'>
                             Facturée
                         </div>
-                        <div class='col-xs-3'>
-                            <a class='btn btn-default'>Re-Générer la facture</a>
-                        </div>
+                            % if not layout.current_business_object.closed:
+                            <div class='col-xs-3'>
+                                <a
+                                    class='btn btn-default'
+                                    href="${url}"
+                                    >
+                                    <i class='fa fa-copy'></i>&nbsp;
+                                    Re-Générer la facture
+                                </a>
+                            </div>
+                            % endif
                         % elif not deadline.deposit and deadline.payment_line.date:
                         <div class='col-xs-3'>
                             Facturation prévue le ${api.format_date(deadline.payment_line.date)}
                         </div>
-                        <div class='col-xs-3'>
-                            <a class='btn btn-default'>Générer la facture</a>
-                        </div>
+                            % if not layout.current_business_object.closed:
+                            <div class='col-xs-3'>
+                                <a class='btn btn-default'
+                                    href="${url}">
+                                <i class='fa fa-copy'></i>&nbsp;
+                                Générer la facture</a>
+                            </div>
+                            % endif
                         % else:
                         <div class='col-xs-3'>
                             En attente de facturation
                         </div>
-                        <div class='col-xs-3'>
-                            <a class='btn btn-default'>Générer la facture</a>
-                        </div>
+                            % if not layout.current_business_object.closed:
+                            <div class='col-xs-3'>
+                                <a class='btn btn-default'
+                                    href="${url}">
+                                    <i class='fa fa-copy'></i>&nbsp;
+                                Générer la facture</a>
+                            </div>
+                            % endif
                         % endif
                     </div>
                     % endfor

@@ -200,14 +200,6 @@ class Business(Node):
             self, user, payment_deadlines
         )
 
-    def update_invoicing_status(self, invoice):
-        """
-        Update the invoicing status of this business
-        """
-        return self._autonomie_service.update_invoicing_status(
-            self, invoice
-        )
-
     def find_deadline_from_invoice(self, invoice):
         """
         Find the deadline associated to the current business and the given

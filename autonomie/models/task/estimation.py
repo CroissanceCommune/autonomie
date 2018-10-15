@@ -243,6 +243,7 @@ class Estimation(Task, EstimationCompute):
         """
         business = Task.gen_business(self)
         business.populate_deadlines(self)
+        business.populate_indicators()
         return business
 
     def duplicate(self, user, **kw):

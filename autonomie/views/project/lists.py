@@ -68,14 +68,19 @@ class ProjectListView(BaseListView, TreeMixin):
 
     @property
     def tree_url(self):
+        """
+        Compile the url to be used in the breadcrumb for this view
+        The context can be either :
+            A Project
+            A Business
+            A Task
+        """
         if isinstance(self.context, Company):
             cid = self.context.id
         elif isinstance(self.context, Project):
             cid = self.context.company_id
         elif hasattr(self.context, 'project'):
             cid = self.context.project.company_id
-        elif hasattr(self.context, 'business'):
-            cid = self.context.business.project.company_id
         else:
             raise Exception(
                 u"Can't retrieve company id for breadcrumb generation %s" % (

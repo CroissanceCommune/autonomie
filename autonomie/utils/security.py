@@ -1241,7 +1241,8 @@ def get_custom_business_indicator_acl(self):
 
     if not locked:
         acl = get_indicator_acl(self)
-        user_perms.append('force.indicator')
+        if not self.status == self.SUCCESS_STATUS:
+            user_perms.append('force.indicator')
 
     else:
         acl = DEFAULT_PERM_NEW[:]

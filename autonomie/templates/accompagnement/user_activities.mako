@@ -33,8 +33,9 @@
 <a
     href='${url}'
     class='btn btn-primary primary-action'>
-    <i class="glyphicon glyphicon-plus"></i>&nbsp;Prendre un rendez-vous
+    <i class="glyphicon glyphicon-plus-sign"></i>&nbsp;Prendre un rendez-vous
 </a>
+<br />
 % endif
 
 % if last_closed_event is not UNDEFINED and last_closed_event is not None:

@@ -477,7 +477,10 @@ def _get_admin_user_base_acl(self):
         "list.company",
         "admin.company",
 
+        "add.activity",
         "list.activity",
+        "add.workshop",
+        "list.workshop",
 
         'add.userdatas',
         "add.login",

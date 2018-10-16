@@ -189,3 +189,9 @@ Lancer les tests
 .. code-block:: console
 
    py.test autonomie/tests
+   
+Documentation utilisateur
+--------------------------
+
+Le guide d'utilisation se trouve à cette adresse :
+https://docerp.cooperer.coop

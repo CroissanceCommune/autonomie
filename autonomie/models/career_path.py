@@ -153,7 +153,8 @@ class CareerPath(DBBASE):
         info={
             'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
-        }
+        },
+        back_populates="career_paths",
     )
     start_date = Column(
         Date(),

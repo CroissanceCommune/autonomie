@@ -1013,9 +1013,10 @@ class UserDatas(Node):
 
     career_paths = relationship(
         "CareerPath",
+        order_by="desc(CareerPath.start_date)",
         info={
             'colanderalchemy': {'exclude': True},
-            'export': {'exclude': True},
+            'export': {'excldue': True},
         },
         back_populates='userdatas',
     )
@@ -1093,6 +1094,23 @@ class UserDatas(Node):
                 CaeSituationOption.id == last_situation_path.cae_situation_id
             ).first()
             return situation
+
+    def get_career_path_by_stages(self):
+        """
+        Collect CareerPath associated to this instance and stores them by stage
+        name
+
+        :returns: A dict {'stage': [List of ordered CareerPath]}
+        :rtype: dict
+        """
+        from autonomie.models.career_path import CareerPath
+        from autonomie.models.career_stage import CareerStage
+        result = {}
+        for stage in CareerStage.query():
+            result[stage.name] = CareerPath.query(self.id).filter_by(
+                career_stage_id=stage.id
+            ).all()
+        return result
 
 
 # multi-valued user-datas

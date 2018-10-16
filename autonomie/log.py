@@ -37,14 +37,19 @@ def get_user(request):
             return request._user.login
     return "Anonymous"
 
+
 def get_ip(request):
     """
         Return the client's ip or None
     """
     if request:
-        return request.remote_addr
+        if 'HTTP_X_REAL_IP' in request.environ:
+            return request.environ['HTTP_X_REAL_IP']
+        else:
+            return request.remote_addr
     else:
         return "None"
+
 
 class CustomFileHandler(logging.FileHandler, object):
     """
@@ -55,6 +60,7 @@ class CustomFileHandler(logging.FileHandler, object):
         record.ip = get_ip(request)
         record.user = get_user(request)
         super(CustomFileHandler, self).emit(record)
+
 
 class CustomStreamHandler(logging.StreamHandler, object):
     """

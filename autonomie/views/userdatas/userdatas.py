@@ -42,8 +42,10 @@ from autonomie.views import (
     BaseView,
     DeleteView,
 )
+from autonomie.export.utils import write_file_to_request
 from autonomie.views.userdatas.py3o import (
-    add_response_to_request,
+    store_compiled_file,
+    get_template_output,
     record_compilation,
     get_key_from_genshi_error,
 )
@@ -54,7 +56,6 @@ from autonomie.views.userdatas.routes import (
     USERDATAS_EDIT_URL,
     USERDATAS_DOCTYPES_URL,
     USERDATAS_PY3O_URL,
-    USERDATAS_MYDOCUMENTS_URL,
     USER_USERDATAS_URL,
     USER_USERDATAS_ADD_URL,
     USER_USERDATAS_EDIT_URL,
@@ -307,10 +308,17 @@ class UserDatasFileGeneration(BaseView):
                 " + Templating (%s, %s)" % (template.name, template.id)
             )
             try:
-                add_response_to_request(
-                    self.request,
-                    template,
+                compiled_output = get_template_output(
+                    self.request, template, model
+                )
+                write_file_to_request(
+                    self.request, template.name, compiled_output
+                )
+                store_compiled_file(
                     model,
+                    self.request,
+                    compiled_output,
+                    template,
                 )
                 record_compilation(model, self.request, template)
                 return self.request.response

@@ -11,7 +11,6 @@ from sqla_inspect import py3o
 
 from pyramid.httpexceptions import HTTPFound
 
-from autonomie.export.utils import write_file_to_request
 from autonomie.models import files
 
 
@@ -88,25 +87,63 @@ def get_key_from_genshi_error(err):
         return msg
 
 
-def add_response_to_request(request, template, context):
+def get_userdatas_py3o_stage_datas(userdatas):
     """
-    Build a templated file response, write it in the request
-    and record compilation
+    Generate additionnal datas that can be used for the py3o compiling context
+
+    :param obj userdatas: The UserDatas instance
+    """
+    compatibility_keys = {
+        u'Contrat CAPE': 'parcours_convention_cape',
+        u'Avenant contrat': "parcours_contract_history",
+        u"Contrat DPAE": "parcours_dpae",
+    }
+    res = {}
+    context = None
+    for stage, paths in userdatas.get_career_path_by_stages().items():
+        num_path = len(paths)
+        for index, path in enumerate(paths):
+            if context is None:
+                context = py3o.SqlaContext(path.__class__)
+            path_as_dict = context.compile_obj(path)
+
+            key = stage.replace(' ', '')
+            datas = res.setdefault(key, {})
+
+            datas[index] = path_as_dict
+
+            if index == 0:
+                datas['last'] = path_as_dict
+            if index == num_path - 1:
+                datas['first'] = path_as_dict
+
+            # On veut garder les clés que l'on avait dans le passé
+            if stage in compatibility_keys:
+                res[compatibility_keys[stage]] = datas.copy()
+
+    return res
+
+
+def get_template_output(request, template, context):
+    """
+    Compile the template/datas and generate the output file
+
+    Workflow :
+
+        - The context (model) is serialized to a dict
+        - py3o is used to compile the template using the given dict
 
     :param obj request: The current request object
     :param obj template: A Template object
-    :param obj context: The context to use for templating
+    :param obj context: The context to use for templating (must be an instance
+    inheriting from Node)
     :returns: The request object
+    :returns: StringIO.StringIO
     """
-    output = py3o.compile_template(
+    additionnal_context = get_userdatas_py3o_stage_datas(context)
+    additionnal_context.update(request.config)
+    return py3o.compile_template(
         context,
         template.data_obj,
-        request.config
+        additionnal_context=additionnal_context,
     )
-    write_file_to_request(
-        request,
-        template.name,
-        output,
-    )
-    store_compiled_file(context, request, output, template)
-    return request

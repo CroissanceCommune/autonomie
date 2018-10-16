@@ -114,13 +114,24 @@
                         ${definition_list(items)}
                     </div>
                     <div class='col-md-5'>
-                        <button class='btn btn-primary' data-toggle='collapse' data-target='#edition_form'>
-                            Editer
+                        <div class='btn-group'>
+                        <button
+                            class='btn btn-default'
+                            data-toggle='collapse'
+                            data-target='#edition_form'
+                            title="Modifier ce rendez-vous"
+                            >
+                            <i class='fa fa-pencil'></i>&nbsp;Modifier
                         </button>
-                        <br />
-                        <button class="btn btn-primary" data-toggle='collapse' data-target='#next_activity_form_container'>
-                            Programmer un nouveau rendez-vous
+                        <button
+                            class="btn btn-primary"
+                            data-toggle='collapse'
+                            data-target='#next_activity_form_container'
+                            title="Programmer un nouveau rendez-vous"
+                            >
+                            <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouveau rendez-vous
                         </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -562,6 +562,27 @@ class Payment(DBBASE, PersistentACLMixin):
     def get_amount(self):
         return self.amount
 
+    def __json__(self, request):
+        """
+        Build a Json representation of this object
+
+        :rtype: dict
+        """
+        return dict(
+            id=self.id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            mode=self.mode,
+            amount=math_utils.integer_to_amount(self.amount, 5),
+            bank_remittance_id=self.bank_remittance_id,
+            date=self.date,
+            exporter=self.exported,
+            task_id=self.task_id,
+            bank_id=self.bank_id,
+            tva_id=self.tva_id,
+            user_id=self.user_id,
+        )
+
     def __unicode__(self):
         return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\
  mode:{s.mode} date:{s.date}".format(s=self)

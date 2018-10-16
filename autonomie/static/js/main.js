@@ -376,6 +376,7 @@ window.openPopup = function(url){
     }
 
     var new_win = window.open(url, uniq_id, "width=" + width + ",height=" + height);
+    return false;
 }
 
 window.dismissPopup = function(win, options){

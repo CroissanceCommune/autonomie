@@ -41,7 +41,18 @@ def log_request(event):
     """
     logger.info(u"####################  NEW REQUEST COMING #################")
     logger.info(u"  + The request object")
-    logger.info(event.request)
+    result = event.request.as_bytes(skip_body=True).decode('utf-8')
+    result += u"\n\n# Paramètres GET de la requête #\n"
+    for key, value in event.request.GET.items():
+        if key == "password":
+            value = u"*************"
+        result += u"{} : {}\n".format(key, value)
+    result += u"# Paramètres POST de la requête #\n"
+    for key, value in event.request.POST.items():
+        if key == "password":
+            value = u"*************"
+        result += u"{} : {}\n".format(key, value)
+    logger.info(result)
     logger.info(u"  + The session object")
     logger.info(event.request.session)
     logger.info(u"################### END REQUEST METADATA LOG #############")

@@ -191,14 +191,14 @@ def deferred_business_type_widget(node, kw):
 
 
 @colander.deferred
-def deferred_business_type_description(node, kw):
+def deferred_business_type_title(node, kw):
     request = kw['request']
     business_types = _collect_business_types(request)
     count = len(business_types)
     if count == 0:
         description = ""
     else:
-        description = u"Le type d'affaire qui peut être mené dans ce projet "
+        description = u"Type(s) d'affaire qui peut être mené dans ce projet "
         default = request.context.project_type.default_business_type
 
         if default is not None:
@@ -206,16 +206,6 @@ def deferred_business_type_description(node, kw):
                 description, default.label
             )
     return description
-
-
-@colander.deferred
-def deferred_business_type_title(node, kw):
-    request = kw['request']
-    business_types = _collect_business_types(request)
-    if len(business_types) == 0:
-        return ""
-    else:
-        return u"Types d'affaire"
 
 
 def _customize_project_schema(schema):
@@ -247,7 +237,6 @@ def _customize_project_schema(schema):
             missing=colander.drop,
             children=[forms.get_sequence_child_item_id_node(BusinessType)],
             widget=deferred_business_type_widget,
-            description=deferred_business_type_description
         )
 
     return schema

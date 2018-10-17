@@ -29,7 +29,7 @@
             <a
                 class='btn btn-primary primary-action'
                 href="${request.route_path('/userdatas', _query=dict(action='add'))}">
-                Nouvelle entrée gestion sociale
+                <i class='fa fa-plus-circle'></i>&nbsp;Nouvelle entrée gestion sociale
             </a>
         % if api.has_permission('admin'):
             <a

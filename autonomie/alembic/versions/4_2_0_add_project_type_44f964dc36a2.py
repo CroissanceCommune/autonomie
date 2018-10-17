@@ -84,6 +84,10 @@ def _add_business_to_all_invoices(session):
         ).filter_by(estimation_id=e.id).all()
         if invoices:
             business = e.gen_business()
+            for deadline in business.payment_deadlines:
+                deadline.invoiced = True
+                session.merge(deadline)
+
             for invoice in invoices:
                 iindex += 1
                 op.execute(

@@ -39,9 +39,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     DateTime,
-    func,
     distinct,
-    extract,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -77,7 +75,7 @@ from .task import (
 )
 from .actions import DEFAULT_ACTION_MANAGER
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 INVOICE_STATES = (
@@ -261,7 +259,7 @@ class Invoice(Task, InvoiceCompute):
             payment = Payment()
             for key, value in kw.iteritems():
                 setattr(payment, key, value)
-            log.info(u"Amount : {0}".format(payment.amount))
+            logger.info(u"Amount : {0}".format(payment.amount))
             self.payments.append(payment)
 
         return self.check_resulted(
@@ -273,7 +271,7 @@ class Invoice(Task, InvoiceCompute):
         """
         Check if the invoice is resulted or not and set the appropriate status
         """
-        log.debug(u"-> There still to pay : %s" % self.topay())
+        logger.debug(u"-> There still to pay : %s" % self.topay())
         if self.topay() <= 0 or force_resulted:
             self.paid_status = 'resulted'
 
@@ -563,6 +561,27 @@ class Payment(DBBASE, PersistentACLMixin):
     # Simple function
     def get_amount(self):
         return self.amount
+
+    def __json__(self, request):
+        """
+        Build a Json representation of this object
+
+        :rtype: dict
+        """
+        return dict(
+            id=self.id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            mode=self.mode,
+            amount=math_utils.integer_to_amount(self.amount, 5),
+            bank_remittance_id=self.bank_remittance_id,
+            date=self.date,
+            exporter=self.exported,
+            task_id=self.task_id,
+            bank_id=self.bank_id,
+            tva_id=self.tva_id,
+            user_id=self.user_id,
+        )
 
     def __unicode__(self):
         return u"<Payment id:{s.id} task_id:{s.task_id} amount:{s.amount}\

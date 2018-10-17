@@ -26,7 +26,6 @@
 import logging
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import (
-    load_only,
     Load,
     joinedload,
 )
@@ -37,7 +36,6 @@ from autonomie.views import (
 )
 from autonomie.utils.strings import format_account
 from autonomie.models.career_path import CareerPath
-from autonomie.models.career_stage import CareerStage 
 from autonomie.models.user.login import Login
 from autonomie.forms.user.career_path import (
     get_add_stage_schema,
@@ -69,6 +67,7 @@ class CareerPathList(BaseView):
                 format_account(self.current_userdatas.user, False)
             )
         )
+
 
 class UserCareerPathList(CareerPathList):
     @property
@@ -104,14 +103,22 @@ class CareerPathAddStage(BaseFormView):
         msg = u"L'étape de parcours a bien été ajoutée"
         if model.career_stage.cae_situation is not None:
             if model.career_stage.cae_situation.is_integration:
-                login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
+                login = Login.query().filter(
+                    Login.user_id == self.context.userdatas.user_id
+                ).first()
                 if login is None:
-                    dest_route = self.request.route_path('/users/{id}/login', id=self.context.userdatas.user_id)
-                    msg = u"L'étape de parcours a bien été ajoutée, vous devez maintenant créer les \
-                    identifiants de l'utilisateur"
+                    dest_route = self.request.route_path(
+                        '/users/{id}/login',
+                        id=self.context.userdatas.user_id
+                    )
+                    msg = u"L'étape de parcours a bien été ajoutée, \
+vous devez maintenant créer les identifiants de l'utilisateur"
+
         if model.stage_type is not None:
-            if model.stage_type in ("contract", "amendment", "exit") : 
-                dest_route = self.request.route_path('career_path', id=model.id, _query='')
+            if model.stage_type in ("contract", "amendment", "exit"):
+                dest_route = self.request.route_path(
+                    'career_path', id=model.id, _query=''
+                )
 
         self.session.flash(msg)
         return HTTPFound(dest_route)
@@ -134,7 +141,7 @@ class CareerPathEditStage(BaseFormView):
     def current_userdatas(self):
         return self.context.userdatas
 
-    # Schema is here a property since we need to build it dynamically 
+    # Schema is here a property since we need to build it dynamically
     # regarding the current request
     @property
     def schema(self):
@@ -143,16 +150,25 @@ class CareerPathEditStage(BaseFormView):
         """
         if self._schema is None:
             self._schema = get_edit_stage_schema(self.context.stage_type)
-        self._schema.title = self.context.career_stage.name
-        if self.context.cae_situation is not None:
-            self._schema.title += ' ( => ' + self.context.cae_situation.label + ' )'
+
+            if self.context.career_stage:
+                self._schema.title = self.context.career_stage.name
+                if self.context.cae_situation is not None:
+                    self._schema.title += u' ( => {})'.format(
+                        self.context.cae_situation.label
+                    )
+            else:
+                if self.context.cae_situation is not None:
+                    self._schema.title = u"Changement de situation : {}".format(
+                        self.context.cae_situation.label
+                    )
         return self._schema
 
     @schema.setter
     def schema(self, value):
         """
         A setter for the schema property
-        The BaseClass in pyramid_deform gets and sets the schema attribute 
+        The BaseClass in pyramid_deform gets and sets the schema attribute
         that is here transformed as a property
         """
         self._schema = value
@@ -169,15 +185,21 @@ class CareerPathEditStage(BaseFormView):
         self.session.flash(u"L'étape de parcours a bien été enregistrée")
         dest = u"userdatas/career_path"
 
-        # Redirect to login management if new CAE situation is integration and no active login
+        # Redirect to login management if new CAE situation is integration and
+        # no active login
         if self.context.cae_situation is not None:
             if self.context.cae_situation.is_integration:
-                login = Login.query().filter(Login.user_id==self.context.userdatas.user_id).first()
+                login = Login.query().filter(
+                    Login.user_id == self.context.userdatas.user_id
+                ).first()
                 if login is None:
                     dest = u"login"
 
         return HTTPFound(
-            self.request.route_path('/users/{id}/%s' % dest, id=self.context.userdatas.user_id)
+            self.request.route_path(
+                '/users/{id}/%s' % dest,
+                id=self.context.userdatas.user_id
+            )
         )
 
 
@@ -192,10 +214,13 @@ class CareerPathDeleteStage(DeleteView):
     Career path delete stage view
     """
     delete_msg = u"L'étape a bien été supprimée"
-    
+
     def redirect(self):
         return HTTPFound(
-            self.request.route_path('/users/{id}/userdatas/career_path', id=self.context.userdatas.user_id)
+            self.request.route_path(
+                '/users/{id}/userdatas/career_path',
+                id=self.context.userdatas.user_id
+            )
         )
 
 

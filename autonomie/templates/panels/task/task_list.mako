@@ -26,46 +26,7 @@
 <div class='row'>
     <div class='col-md-4 col-xs-12'>
         % if is_invoice_list:
-            <div>
-                <a
-                    href="#list-legend"
-                    data-toggle="collapse"
-                    data-target="#list-legend">
-                    Légende&nbsp;<i class='fa fa-caret-down'></i>
-                </a>
-            </div>
-            <div id='list-legend' class='status-table list-legend collapse'>
-            <div>
-                <span class='btn btn-circle paid-status-resulted'><br /></span>
-                <span>Factures payées</span>
-            </div>
-            <div>
-                <span class='btn btn-circle paid-status-paid'><br /></span>
-                <span>Factures payées partiellement</span>
-            </div>
-            <div>
-                <span class='btn btn-circle shadow-sm'><br /></span>
-                <span>Factures non payées depuis moins de 45 jours</span>
-            </div>
-            <div>
-                <span class='btn btn-circle tolate-True'><br /></span>
-                <span>Factures non payées depuis plus de 45 jours</span>
-            </div>
-            % if not is_admin_view:
-            <div>
-                <span class='btn btn-circle status-draft'><br /></span>
-                <span>Factures en brouillon</span>
-            </div>
-            <div>
-                <span class='btn btn-circle status-wait'><br /></span>
-                <span>Factures en attente de validation</span>
-            </div>
-            <div>
-                <span class='btn btn-circle status-invalid'><br /></span>
-                <span>Factures invalides</span>
-            </div>
-            % endif
-        </div>
+        ${request.layout_manager.render_panel('list_legend', legends=legends)}
         % endif
     </div>
 </div>

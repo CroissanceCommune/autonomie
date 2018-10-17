@@ -49,9 +49,9 @@
         </a>
         % endif
     % elif indicator.forced:
-        Cet indicateur a été forcé manuellement
+        <em>Cet indicateur a été forcé manuellement</em>
     % else:
-        <b>Aucun fichier fourni</b>
+        <em>Aucun fichier fourni</em>
     % endif
     % if request.has_permission('add.file', indicator):
     <button

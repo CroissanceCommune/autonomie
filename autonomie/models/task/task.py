@@ -86,8 +86,7 @@ from autonomie.models.tva import (
     Tva,
 )
 
-log = logging.getLogger(__name__)
-
+logger = log = logging.getLogger(__name__)
 
 ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
 # , 'geninv', 'aboest', 'gencinv', 'resulted', 'paid', )
@@ -708,9 +707,9 @@ _{s.date:%m%y}"
         """
         fired on status change, stores a new taskstatus for each status change
         """
-        log.debug(u"# Task status change #")
+        logger.debug(u"# Task status change #")
         actual_status = self.status
-        log.debug(u" + was {0}, becomes {1}".format(actual_status, status))
+        logger.debug(u" + was {0}, becomes {1}".format(actual_status, status))
         return status
 
     def get_company(self):
@@ -776,6 +775,8 @@ _{s.date:%m%y}"
         )
         DBSESSION().add(business)
         DBSESSION().flush()
+        business.populate_indicators()
+        logger.debug(u"Business has id {}".format(business.id))
         business.file_requirement_service.populate(business)
         self.business_id = business.id
         DBSESSION().merge(self)
@@ -1102,7 +1103,7 @@ def cache_amounts(mapper, connection, target):
     Set amounts in the cached amount vars to be able to provide advanced search
     ... options in the invoice list page
     """
-    log.info("Caching the task amounts")
+    logger.info("Caching the task amounts")
     if hasattr(target, 'total_ht'):
         target.ht = target.total_ht()
     if hasattr(target, 'total'):
@@ -1116,7 +1117,7 @@ def cache_parent_amounts(mapper, connection, target):
     Set amounts in the cached amount vars to be able to provide advanced search
     ... options in the invoice list page
     """
-    log.info("Caching the parent task amounts")
+    logger.info("Caching the parent task amounts")
     if hasattr(target, 'task'):
         task = target.task
         if hasattr(task, 'total_ht'):

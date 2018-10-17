@@ -135,6 +135,13 @@ class TrainerDatasDeleteView(DeleteView):
     """
     delete_msg = u"La fiche formateur a bien été supprimée"
 
+    def on_delete(self):
+        login = self.context.user.login
+        if login is not None:
+            if 'trainer' in login.groups:
+                login.groups.remove('trainer')
+                self.request.dbsession.merge(login)
+
     def redirect(self):
         return HTTPFound(
             self.request.route_path('/users/{id}', id=self.context.user_id)

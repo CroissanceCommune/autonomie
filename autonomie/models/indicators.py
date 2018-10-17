@@ -87,6 +87,26 @@ class Indicator(DBBASE):
         nullable=False,
     )
 
+    def cmp_status(self, other_status):
+        """
+        Compare the current's instance status and the given one
+
+        Return the the lowest status
+
+        danger and danger = danger
+        warning and danger = danger
+        warning and success = warning
+        danger and success = success
+
+        :param str other_status: The status to compare to
+        :returns: One of the availabe statuses
+        :rtype: str
+        """
+        if self.STATUSES.index(self.status) < self.STATUSES.index(other_status):
+            return self.status
+        else:
+            return other_status
+
     def force(self):
         self.forced = True
         self.status = "success"
@@ -123,6 +143,23 @@ class Indicator(DBBASE):
             validation_status=self.validation_status,
             forced=self.forced,
         )
+
+
+class CustomBusinessIndicator(Indicator):
+    """
+    Custom Indicator related to businesses with a label and a custom name
+    """
+    __tablename__ = 'custom_indicator'
+
+    __mapper_args__ = {'polymorphic_identity': 'custom_indicator'}
+    id = Column(ForeignKey("indicator.id"), primary_key=True)
+    name = Column(String(255), nullable=False)
+    label = Column(String(255), default=u"Indicateur")
+    business_id = Column(ForeignKey('business.id'))
+    business = relationship(
+        "Business",
+        back_populates="indicators",
+    )
 
 
 class SaleFileRequirement(Indicator):

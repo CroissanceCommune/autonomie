@@ -96,7 +96,7 @@ USERDATAS_MENU.add_item(
     label=u'Documents sociaux',
     route_name=USER_USERDATAS_DOCTYPES_URL,
     icon=u'fa fa-check-square-o',
-    perm='doctype.userdatas',
+    perm='doctypes.userdatas',
 )
 USERDATAS_MENU.add_item(
     name="userdatas_py3o",

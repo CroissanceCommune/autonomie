@@ -44,7 +44,7 @@ from autonomie.models.expense.sheet import (
 from autonomie.models.expense.types import (
     ExpenseTelType,
 )
-from autonomie.events.expense import StatusChanged as ExpenseStatusChanged
+from autonomie.events.status_changed import StatusChanged
 from autonomie.utils.widgets import (
     ViewLink,
 )
@@ -114,7 +114,7 @@ def notify_status_changed(request, status):
     :param str status: The new status
     """
     request.registry.notify(
-        ExpenseStatusChanged(request, request.context, status)
+        StatusChanged(request, request.context, status)
     )
 
 

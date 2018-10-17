@@ -14,7 +14,7 @@ def test_estimation_set_numbers(full_estimation):
     assert full_estimation.project_index == 18
 
 
-def test_duplicate_estimation(dbsession, full_estimation):
+def test_duplicate_estimation(full_estimation):
     newestimation = full_estimation.duplicate(
         full_estimation.owner,
         project=full_estimation.project,
@@ -38,39 +38,6 @@ def test_duplicate_estimation(dbsession, full_estimation):
         newestimation.payment_lines
     )
     assert len(full_estimation.discounts) == len(newestimation.discounts)
-
-
-def test_light_gen_invoice(dbsession, full_estimation):
-    from autonomie.models.task import Invoice
-    invoices = full_estimation.gen_invoices(full_estimation.owner)
-    for inv in invoices:
-        dbsession.add(inv)
-        dbsession.flush()
-
-    invoices = Invoice.query().filter(
-        Invoice.estimation_id == full_estimation.id
-    ).all()
-    assert len(invoices) == 3
-
-    deposit = invoices[0]
-    assert deposit.date == datetime.date.today()
-    assert deposit.address == full_estimation.address
-    assert deposit.workplace == full_estimation.workplace
-    assert deposit.financial_year == datetime.date.today().year
-    assert deposit.total() == full_estimation.deposit_amount_ttc()
-    assert deposit.mentions == full_estimation.mentions
-
-    total = sum([i.total() for i in invoices])
-    assert total == full_estimation.total()
-
-def test_gen_invoice_ref450(dbsession, full_estimation):
-    # for line in full_estimation.all_lines:
-        # line.product_id = None
-
-    invoices = full_estimation.gen_invoices(full_estimation.owner)
-    for invoice in invoices:
-        for line in invoice.all_lines:
-            assert line.product_id is not None
 
 
 def test_duplicate_payment_line(payment_line):

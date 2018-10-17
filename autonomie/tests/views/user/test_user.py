@@ -62,7 +62,8 @@ def test_add_user_submit_success_confirm(
     req.matched_route = Dummy(name="/users")
     view = UserAddView(req)
     result = view.submit_success(appstruct)
-    assert 'confirmation_message' in result
+    assert 'duplicate_accounts' in result
+    assert len(result['duplicate_accounts']) == 1
     assert 'form' in result
 
 

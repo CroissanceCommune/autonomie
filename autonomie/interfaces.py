@@ -175,3 +175,24 @@ class IInvoice(Interface):
         """
             Return the customer this document is related to
         """
+
+
+class IMailEventWrapper(Interface):
+    """
+    describe the datas expected by the send_mail_from_event tool
+    """
+    request = Attribute("""The Pyramid request""")
+    sendermail = Attribute("""The sender's email address""")
+    recipients = Attribute("""List of mail recipients""")
+    subject = Attribute("""Subject of the e-mail""")
+    body = Attribute("""Body of the e-mail""")
+
+    def is_key_event():
+        """
+        Check if the associated event should fire a mail emission
+        """
+
+    def get_attachment():
+        """
+        Return a mail attachment or None
+        """

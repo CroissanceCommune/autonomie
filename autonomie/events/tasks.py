@@ -26,6 +26,7 @@
 Handle task (invoice/estimation) related events
 """
 import logging
+from zope.interface import implements
 
 from autonomie.utils.strings import (
     format_status,
@@ -35,9 +36,9 @@ from autonomie.utils.strings import (
 from autonomie_base.mail import (
     format_link,
 )
-from autonomie.events.mail import send_mail_from_event
+from autonomie.interfaces import IMailEventWrapper
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # Events for which a mail will be sended
 EVENTS = {
@@ -62,23 +63,21 @@ Commentaires associés au document :
     {comment}"""
 
 
-class StatusChanged(object):
-    """
-        Event raised when a document status changes
-    """
-    def __init__(self, request, document, status):
-        self.request = request
-        self.document = document
-        self.new_status = status
+class TaskMailStatusChangedWrapper(object):
+    implements(IMailEventWrapper)
+
+    def __init__(self, event):
+        self.event = event
+        self.request = event.request
+        self.status = event.status
         # Silly hack :
         # When a payment is registered, the new status is "paid",
         # if the resulted box has been checked, it's set to resulted later on.
         # So here, we got the paid status, but in reality, the status has
         # already been set to resulted. This hack avoid to send emails with the
         # wrong message
-        if status == 'paid' and self.document.paid_status == 'resulted':
-            self.new_status = 'resulted'
-
+        if self.status == 'paid' and self.event.node.paid_status == 'resulted':
+            self.status = 'resulted'
         self.settings = self.request.registry.settings
 
     @property
@@ -86,10 +85,10 @@ class StatusChanged(object):
         """
             return the recipients' emails
         """
-        if self.document.company.email:
-            email = [self.document.company.email]
-        elif self.document.owner and self.document.owner.email:
-            email = [self.document.owner.email]
+        if self.event.node.company.email:
+            email = [self.event.node.company.email]
+        elif self.event.node.owner and self.event.node.owner.email:
+            email = [self.event.node.owner.email]
         else:
             email = []
         return email
@@ -102,8 +101,11 @@ class StatusChanged(object):
         if 'mail.default_sender' in self.settings:
             mail = self.settings['mail.default_sender']
         else:
-            log.info(u"'{0}' has not set his email".format(
-                                                    self.request.user.login))
+            logger.info(
+                u"'{0}' has not set his email".format(
+                    self.event.request.user.login
+                )
+            )
             mail = "Unknown"
         return mail
 
@@ -113,40 +115,40 @@ class StatusChanged(object):
             return the subject of the email
         """
         return SUBJECT_TMPL.format(
-                docname=self.document.name,
-                customer=self.document.customer.label,
-                statusstr=format_status(self.document),
-                )
+            docname=self.event.node.name,
+            customer=self.event.node.customer.label,
+            statusstr=format_status(self.event.node),
+        )
 
     @property
     def body(self):
         """
             return the body of the email
         """
-        status_verb = get_status_verb(self.new_status)
+        status_verb = get_status_verb(self.status)
 
         # If the document is validated, we directly send the link to the pdf
         # file
-        if self.new_status == 'valid':
+        if self.status == 'valid':
             query_args = dict(view="pdf")
         else:
             query_args = {}
 
         addr = self.request.route_url(
-                    "/%ss/{id}.html" % self.document.type_,
-                    id=self.document.id,
+                    "/%ss/{id}.html" % self.event.node.type_,
+                    id=self.event.node.id,
                     _query=query_args,
                     )
         addr = format_link(self.settings, addr)
 
-        docnumber = self.document.internal_number.lower()
-        customer = self.document.customer.label
-        project = self.document.project.name.capitalize()
-        if self.document.type_ == 'invoice':
+        docnumber = self.event.node.internal_number.lower()
+        customer = self.event.node.customer.label
+        project = self.event.node.project.name.capitalize()
+        if self.event.node.type_ == 'invoice':
             docname = u"La facture"
             gender = u"e"
             determinant = u"la"
-        elif self.document.type_ == 'cancelinvoice':
+        elif self.event.node.type_ == 'cancelinvoice':
             docname = u"L'avoir"
             gender = u""
             determinant = u"le"
@@ -154,12 +156,12 @@ class StatusChanged(object):
             docname = u"Le devis"
             gender = u""
             determinant = u"le"
-        if self.document.status_comment:
-            comment = self.document.status_comment
+        if self.event.node.status_comment:
+            comment = self.event.node.status_comment
         else:
             comment = u"Aucun"
 
-        username = format_account(self.document.owner, reverse=False)
+        username = format_account(self.event.node.owner, reverse=False)
         return MAIL_TMPL.format(
                 determinant=determinant,
                 username=username,
@@ -182,8 +184,8 @@ class StatusChanged(object):
         """
             Return True if the new status requires a mail to be sent
         """
-        if self.new_status in EVENTS.keys() \
-                and not self.document.type_ == 'cancelinvoice':
+        if self.status in EVENTS.keys() \
+                and not self.event.node.type_ == 'cancelinvoice':
             return True
         else:
             return False
@@ -196,8 +198,18 @@ def get_status_verb(status):
     return EVENTS.get(status, u"")
 
 
-def includeme(config):
+def on_status_changed_alert_related_business(event):
     """
-    Pyramid's incusion mechanism
+    Alert the related business on Invoice status change
+
+    :param event: A StatusChanged instance with an Invoice attached
     """
-    config.add_subscriber(send_mail_from_event, StatusChanged)
+    if event.status == 'valid':
+        business = event.node.business
+        logger.info(
+            u"+ Status Changed : updating business {} invoicing status".format(
+                business.id
+            )
+        )
+        business.status_service.update_invoicing_status(business, event.node)
+        business.status_service.update_status(business)

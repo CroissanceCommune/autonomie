@@ -52,7 +52,17 @@ class ExpenseList(BaseListView):
     )
     default_sort = 'month'
     default_direction = 'desc'
-    add_template_vars = ('title', 'payment_formname',)
+    add_template_vars = ('title', 'payment_formname', 'legends')
+    legends = (
+        (
+            'status-wait justified-False',
+            u"Notes de dépense en attente de validation"
+        ),
+        ('', u"Notes de dépense validées"),
+        ("status justified-True", u"Justificatifs reçus"),
+        ("paid-status-paid", u"Notes de dépense partiellement payées"),
+        ("paid-status-resulted", u"Notes de dépense payées"),
+    )
 
     @property
     def payment_formname(self):

@@ -11,25 +11,17 @@ from autonomie.tests.tools import (
 
 
 @pytest.fixture
-def dummy_company():
-    login = Dummy(login="user1")
-    user1 = Dummy(login=login)
-    company = Dummy(employees=[user1])
-    return company
-
-
-@pytest.fixture
 def dummy_project():
     project_type = Dummy(default=True)
-    project = Dummy(project_type=project_type)
+    project = Dummy(project_type=project_type, company_id=1)
     return project
 
 
 @pytest.fixture
-def estimation(dummy_company, dummy_project):
+def estimation(dummy_project):
     return Dummy(
         status='draft',
-        company=dummy_company,
+        company_id=1,
         signed_status='waiting',
         geninv=False,
         type_='estimation',
@@ -38,10 +30,10 @@ def estimation(dummy_company, dummy_project):
 
 
 @pytest.fixture
-def invoice(dummy_company):
+def invoice():
     return Dummy(
         status='draft',
-        company=dummy_company,
+        company_id=1,
         paid_status='waiting',
         exported=False,
         type_='invoice',
@@ -49,20 +41,20 @@ def invoice(dummy_company):
 
 
 @pytest.fixture
-def cancelinvoice(dummy_company):
+def cancelinvoice():
     return Dummy(
         status='draft',
-        company=dummy_company,
+        company_id=1,
         exported=False,
         type_='cancelinvoice',
     )
 
 
 @pytest.fixture
-def expense_sheet(dummy_company):
+def expense_sheet():
     return Dummy(
         status='draft',
-        company=dummy_company,
+        company_id=1,
         paid_status='waiting',
         expense_exported=False,
         purchase_exported=False,
@@ -70,7 +62,7 @@ def expense_sheet(dummy_company):
     )
 
 
-def test_estimation_default_acls(estimation, dummy_company):
+def test_estimation_default_acls(estimation):
     from autonomie.utils.security import get_estimation_default_acl
 
     # Draft acls
@@ -78,11 +70,11 @@ def test_estimation_default_acls(estimation, dummy_company):
     # User
     for ace in ('wait.estimation', 'edit.estimation', 'delete.estimation',
                 'draft.estimation', 'add.file', 'view.file'):
-        assert check_acl(acl, ace, 'user1')
-    assert not check_acl(acl, 'valid.estimation', 'user1')
+        assert check_acl(acl, ace, 'company:1')
+    assert not check_acl(acl, 'valid.estimation', 'company:1')
 
-    assert not check_acl(acl, 'geninv.estimation', 'user1')
-    assert not check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert not check_acl(acl, 'geninv.estimation', 'company:1')
+    assert not check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -102,11 +94,11 @@ def test_estimation_default_acls(estimation, dummy_company):
     # User
     for ace in ('wait.estimation', 'edit.estimation', 'delete.estimation',
                 'draft.estimation', 'add.file', 'view.file'):
-        assert check_acl(acl, ace, 'user1')
-    assert not check_acl(acl, 'valid.estimation', 'user1')
+        assert check_acl(acl, ace, 'company:1')
+    assert not check_acl(acl, 'valid.estimation', 'company:1')
 
-    assert not check_acl(acl, 'geninv.estimation', 'user1')
-    assert not check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert not check_acl(acl, 'geninv.estimation', 'company:1')
+    assert not check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -125,14 +117,14 @@ def test_estimation_default_acls(estimation, dummy_company):
     estimation.status = 'wait'
     acl = get_estimation_default_acl(estimation)
     # #  User
-    assert check_acl(acl, 'draft.estimation', 'user1')
-    assert not check_acl(acl, 'wait.estimation', 'user1')
-    assert not check_acl(acl, 'edit.estimation', 'user1')
-    assert not check_acl(acl, 'valid.estimation', 'user1')
+    assert check_acl(acl, 'draft.estimation', 'company:1')
+    assert not check_acl(acl, 'wait.estimation', 'company:1')
+    assert not check_acl(acl, 'edit.estimation', 'company:1')
+    assert not check_acl(acl, 'valid.estimation', 'company:1')
 
-    assert not check_acl(acl, 'set_date.estimation', 'user1')
-    assert not check_acl(acl, 'geninv.estimation', 'user1')
-    assert not check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert not check_acl(acl, 'set_date.estimation', 'company:1')
+    assert not check_acl(acl, 'geninv.estimation', 'company:1')
+    assert not check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -140,7 +132,7 @@ def test_estimation_default_acls(estimation, dummy_company):
         assert check_acl(acl, 'invalid.estimation', group)
         assert check_acl(acl, 'edit.estimation', group)
         assert check_acl(acl, 'delete.estimation', group)
-        assert check_acl(acl, 'draft.estimation', 'user1')
+        assert check_acl(acl, 'draft.estimation', 'company:1')
         assert not check_acl(acl, 'geninv.estimation', group)
         assert not check_acl(acl, 'set_signed_status.estimation', group)
 
@@ -148,12 +140,12 @@ def test_estimation_default_acls(estimation, dummy_company):
     estimation.status = 'valid'
     acl = get_estimation_default_acl(estimation)
     # # User
-    assert not check_acl(acl, 'edit.estimation', 'user1')
-    assert not check_acl(acl, 'delete.estimation', 'user1')
+    assert not check_acl(acl, 'edit.estimation', 'company:1')
+    assert not check_acl(acl, 'delete.estimation', 'company:1')
 
-    assert not check_acl(acl, 'set_date.estimation', 'user1')
-    assert check_acl(acl, 'geninv.estimation', 'user1')
-    assert check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert not check_acl(acl, 'set_date.estimation', 'company:1')
+    assert check_acl(acl, 'geninv.estimation', 'company:1')
+    assert check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -169,8 +161,8 @@ def test_estimation_default_acls(estimation, dummy_company):
 
     acl = get_estimation_default_acl(estimation)
     # # User
-    assert not check_acl(acl, 'geninv.estimation', 'user1')
-    assert check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert not check_acl(acl, 'geninv.estimation', 'company:1')
+    assert check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -181,8 +173,8 @@ def test_estimation_default_acls(estimation, dummy_company):
     estimation.signed_status = 'signed'
     acl = get_estimation_default_acl(estimation)
     # # User
-    assert check_acl(acl, 'geninv.estimation', 'user1')
-    assert check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert check_acl(acl, 'geninv.estimation', 'company:1')
+    assert check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -195,8 +187,8 @@ def test_estimation_default_acls(estimation, dummy_company):
     estimation.geninv = True
     acl = get_estimation_default_acl(estimation)
     # # User
-    assert check_acl(acl, 'geninv.estimation', 'user1')
-    assert check_acl(acl, 'set_signed_status.estimation', 'user1')
+    assert check_acl(acl, 'geninv.estimation', 'company:1')
+    assert check_acl(acl, 'set_signed_status.estimation', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -205,7 +197,7 @@ def test_estimation_default_acls(estimation, dummy_company):
         assert not check_acl(acl, 'set_date.estimation', group)
 
 
-def test_invoice_default_acls(invoice, dummy_company):
+def test_invoice_default_acls(invoice):
     from autonomie.utils.security import get_invoice_default_acl
 
     # Draft acls
@@ -216,11 +208,11 @@ def test_invoice_default_acls(invoice, dummy_company):
         'wait.invoice', 'edit.invoice', 'delete.invoice',
         'view.file', 'add.file'
     ):
-        assert check_acl(acl, ace, 'user1')
-    assert not check_acl(acl, 'valid.invoice', 'user1')
+        assert check_acl(acl, ace, 'company:1')
+    assert not check_acl(acl, 'valid.invoice', 'company:1')
     # specific acl
-    assert not check_acl(acl, 'gencinv.invoice', 'user1')
-    assert not check_acl(acl, 'add_payment.invoice', 'user1')
+    assert not check_acl(acl, 'gencinv.invoice', 'company:1')
+    assert not check_acl(acl, 'add_payment.invoice', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -240,13 +232,13 @@ def test_invoice_default_acls(invoice, dummy_company):
     invoice.status = 'wait'
     acl = get_invoice_default_acl(invoice)
     # #  User
-    assert check_acl(acl, 'view.invoice', 'user1')
-    assert not check_acl(acl, 'edit.invoice', 'user1')
-    assert not check_acl(acl, 'set_date.invoice', 'user1')
+    assert check_acl(acl, 'view.invoice', 'company:1')
+    assert not check_acl(acl, 'edit.invoice', 'company:1')
+    assert not check_acl(acl, 'set_date.invoice', 'company:1')
     assert not check_acl(acl, 'gencinv.invoice')
-    assert not check_acl(acl, 'valid.invoice', 'user1')
-    assert not check_acl(acl, 'add_payment.invoice', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert not check_acl(acl, 'valid.invoice', 'company:1')
+    assert not check_acl(acl, 'add_payment.invoice', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -261,13 +253,13 @@ def test_invoice_default_acls(invoice, dummy_company):
     invoice.status = 'valid'
     acl = get_invoice_default_acl(invoice)
     # # User
-    assert not check_acl(acl, 'edit.invoice', 'user1')
-    assert not check_acl(acl, 'set_date.invoice', 'user1')
-    assert not check_acl(acl, 'delete.invoice', 'user1')
-    assert check_acl(acl, 'gencinv.invoice', 'user1')
-    assert check_acl(acl, 'view.invoice', 'user1')
-    assert not check_acl(acl, 'add_payment.invoice', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert not check_acl(acl, 'edit.invoice', 'company:1')
+    assert not check_acl(acl, 'set_date.invoice', 'company:1')
+    assert not check_acl(acl, 'delete.invoice', 'company:1')
+    assert check_acl(acl, 'gencinv.invoice', 'company:1')
+    assert check_acl(acl, 'view.invoice', 'company:1')
+    assert not check_acl(acl, 'add_payment.invoice', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -283,8 +275,8 @@ def test_invoice_default_acls(invoice, dummy_company):
 
     acl = get_invoice_default_acl(invoice)
     # # User
-    assert check_acl(acl, 'gencinv.invoice', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'gencinv.invoice', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -297,7 +289,7 @@ def test_invoice_default_acls(invoice, dummy_company):
     invoice.paid_status = 'resulted'
     acl = get_invoice_default_acl(invoice)
     # # User
-    assert not check_acl(acl, 'gencinv.invoice', 'user1')
+    assert not check_acl(acl, 'gencinv.invoice', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -311,8 +303,8 @@ def test_invoice_default_acls(invoice, dummy_company):
     invoice.exported = True
     acl = get_invoice_default_acl(invoice)
     # # User
-    assert check_acl(acl, 'gencinv.invoice', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'gencinv.invoice', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -323,7 +315,7 @@ def test_invoice_default_acls(invoice, dummy_company):
         assert check_acl(acl, 'add.file', group)
 
 
-def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
+def test_cancelinvoice_default_acls(cancelinvoice):
     from autonomie.utils.security import get_cancelinvoice_default_acl
 
     # Draft acls
@@ -334,8 +326,8 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
         'wait.cancelinvoice', 'edit.cancelinvoice', 'delete.cancelinvoice',
         'view.file', 'add.file'
     ):
-        assert check_acl(acl, ace, 'user1')
-    assert not check_acl(acl, 'valid.cancelinvoice', 'user1')
+        assert check_acl(acl, ace, 'company:1')
+    assert not check_acl(acl, 'valid.cancelinvoice', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -353,11 +345,11 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
     cancelinvoice.status = 'wait'
     acl = get_cancelinvoice_default_acl(cancelinvoice)
     # #  User
-    assert check_acl(acl, 'view.cancelinvoice', 'user1')
-    assert not check_acl(acl, 'edit.cancelinvoice', 'user1')
-    assert not check_acl(acl, 'set_date.cancelinvoice', 'user1')
-    assert not check_acl(acl, 'valid.cancelinvoice', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'view.cancelinvoice', 'company:1')
+    assert not check_acl(acl, 'edit.cancelinvoice', 'company:1')
+    assert not check_acl(acl, 'set_date.cancelinvoice', 'company:1')
+    assert not check_acl(acl, 'valid.cancelinvoice', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -370,11 +362,11 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
     cancelinvoice.status = 'valid'
     acl = get_cancelinvoice_default_acl(cancelinvoice)
     # # User
-    assert not check_acl(acl, 'edit.cancelinvoice', 'user1')
-    assert not check_acl(acl, 'set_date.cancelinvoice', 'user1')
-    assert not check_acl(acl, 'delete.cancelinvoice', 'user1')
-    assert check_acl(acl, 'view.cancelinvoice', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert not check_acl(acl, 'edit.cancelinvoice', 'company:1')
+    assert not check_acl(acl, 'set_date.cancelinvoice', 'company:1')
+    assert not check_acl(acl, 'delete.cancelinvoice', 'company:1')
+    assert check_acl(acl, 'view.cancelinvoice', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -389,7 +381,7 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
     acl = get_cancelinvoice_default_acl(cancelinvoice)
     # # User
 
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -398,7 +390,7 @@ def test_cancelinvoice_default_acls(cancelinvoice, dummy_company):
         assert check_acl(acl, 'add.file', group)
 
 
-def test_expense_sheet_default_acls(expense_sheet, dummy_company):
+def test_expense_sheet_default_acls(expense_sheet):
     from autonomie.utils.security import get_expense_sheet_default_acl
 
     acl = get_expense_sheet_default_acl(expense_sheet)
@@ -409,10 +401,10 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
         'wait.expensesheet', 'edit.expensesheet', 'delete.expensesheet',
         'view.file', 'add.file'
     ):
-        assert check_acl(acl, ace, 'user1')
-    assert not check_acl(acl, 'valid.expensesheet', 'user1')
+        assert check_acl(acl, ace, 'company:1')
+    assert not check_acl(acl, 'valid.expensesheet', 'company:1')
     # specific acl
-    assert not check_acl(acl, 'add_payment.expensesheet', 'user1')
+    assert not check_acl(acl, 'add_payment.expensesheet', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -430,11 +422,11 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
     expense_sheet.status = 'wait'
     acl = get_expense_sheet_default_acl(expense_sheet)
     # #  User
-    assert check_acl(acl, 'view.expensesheet', 'user1')
-    assert not check_acl(acl, 'edit.expensesheet', 'user1')
-    assert not check_acl(acl, 'valid.expensesheet', 'user1')
-    assert not check_acl(acl, 'add_payment.expensesheet', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'view.expensesheet', 'company:1')
+    assert not check_acl(acl, 'edit.expensesheet', 'company:1')
+    assert not check_acl(acl, 'valid.expensesheet', 'company:1')
+    assert not check_acl(acl, 'add_payment.expensesheet', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -449,11 +441,11 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
     expense_sheet.status = 'valid'
     acl = get_expense_sheet_default_acl(expense_sheet)
     # # User
-    assert not check_acl(acl, 'edit.expensesheet', 'user1')
-    assert not check_acl(acl, 'delete.expensesheet', 'user1')
-    assert check_acl(acl, 'view.expensesheet', 'user1')
-    assert not check_acl(acl, 'add_payment.expensesheet', 'user1')
-    assert check_acl(acl, 'add.file', 'user1')
+    assert not check_acl(acl, 'edit.expensesheet', 'company:1')
+    assert not check_acl(acl, 'delete.expensesheet', 'company:1')
+    assert check_acl(acl, 'view.expensesheet', 'company:1')
+    assert not check_acl(acl, 'add_payment.expensesheet', 'company:1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -467,7 +459,7 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
 
     acl = get_expense_sheet_default_acl(expense_sheet)
     # # User
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):
@@ -490,7 +482,7 @@ def test_expense_sheet_default_acls(expense_sheet, dummy_company):
     expense_sheet.purchase_exported = True
     acl = get_expense_sheet_default_acl(expense_sheet)
     # # User
-    assert check_acl(acl, 'add.file', 'user1')
+    assert check_acl(acl, 'add.file', 'company:1')
 
     # # Admins
     for group in ('group:admin', 'group:manager'):

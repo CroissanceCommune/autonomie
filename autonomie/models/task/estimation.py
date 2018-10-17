@@ -39,7 +39,6 @@ from sqlalchemy import (
     Text,
     Boolean,
     Date,
-    Table,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -49,6 +48,7 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
+    DBSESSION,
 )
 from autonomie.compute.task import (
     EstimationCompute,
@@ -58,7 +58,7 @@ from autonomie.models.tva import Product
 from autonomie.interfaces import (
     IMoneyTask,
 )
-from autonomie.models.config import Config
+from autonomie.models.services.estimation import EstimationInvoicingService
 from .invoice import (
     Invoice,
 )
@@ -73,7 +73,7 @@ from .actions import (
     SIGNED_ACTION_MANAGER,
 )
 
-logger = log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 PAYMENTDISPLAYCHOICES = (
@@ -105,6 +105,8 @@ class Estimation(Task, EstimationCompute):
     __tablename__ = 'estimation'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'estimation', }
+    _invoicing_service = EstimationInvoicingService
+
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
@@ -232,6 +234,18 @@ class Estimation(Task, EstimationCompute):
     def check_signed_status_allowed(self, status, request, **kw):
         return self.signed_state_manager.check_allowed(status, self, request)
 
+    def gen_business(self):
+        """
+        Generate a business based on this Task
+
+        :returns: A new business instance
+        :rtype: :class:`autonomie.models.project.business.Business`
+        """
+        business = Task.gen_business(self)
+        business.populate_deadlines(self)
+        business.populate_indicators()
+        return business
+
     def duplicate(self, user, **kw):
         """
         DUplicate the current Estimation object
@@ -276,208 +290,6 @@ class Estimation(Task, EstimationCompute):
         estimation.mentions = self.mentions
         return estimation
 
-    def _account_invoiceline(self, amount, description, tva=1960):
-        """
-            Return an account invoiceline
-        """
-        line = TaskLine(cost=amount, description=description, tva=tva)
-        line.product_id = Product.first_by_tva_value(tva)
-        return line
-
-    def _make_deposit(self, invoice):
-        """
-            Return a deposit invoice
-        """
-        invoice.financial_year = invoice.date.year
-        invoice.display_units = 0
-
-        for tva, amount in self.deposit_amounts().items():
-            description = u"Facture d'acompte"
-            line = self._account_invoiceline(amount, description, tva)
-            invoice.default_line_group.lines.append(line)
-        return invoice, [l.duplicate()
-                         for l in invoice.default_line_group.lines]
-
-    def _make_intermediary(self, invoice, paymentline, amounts):
-        """
-            return an intermediary invoice described by "paymentline"
-        """
-        invoice.date = paymentline.date
-        invoice.financial_year = paymentline.date.year
-        invoice.display_units = 0
-        for tva, amount in amounts.items():
-            description = paymentline.description
-            line = self._account_invoiceline(amount, description, tva)
-            invoice.default_line_group.lines.append(line)
-        return invoice, [l.duplicate()
-                         for l in invoice.default_line_group.lines]
-
-    def _sold_invoice_lines(self, account_lines):
-        """
-            return the lines that will appear in the sold invoice
-        """
-        sold_groups = []
-        for group in self.line_groups:
-            sold_groups.append(group.duplicate())
-
-        if len(self.line_groups) > 1:
-            current_group = TaskLineGroup()
-            sold_groups.append(current_group)
-        else:
-            current_group = sold_groups[0]
-
-        account_lines.reverse()
-
-        order = len(current_group.lines)
-        for line in account_lines:
-            order = order + 1
-            line.cost = -1 * line.cost
-            line.order = order
-            # On ajoute les lignes au groupe créé par défaut
-            current_group.lines.append(line)
-
-        return sold_groups
-
-    def _make_sold(self, invoice, paymentline, paid_lines):
-        """
-            Return the sold invoice
-        """
-        invoice.date = paymentline.date
-        invoice.financial_year = paymentline.date.year
-
-        invoice.display_units = self.display_units
-        invoice.expenses_ht = self.expenses_ht
-        # On supprimer le default_task_line group car insère ceux du devis
-        invoice.line_groups = []
-        for group in self._sold_invoice_lines(paid_lines):
-            invoice.line_groups.append(group)
-        for line in self.discounts:
-            invoice.discounts.append(line.duplicate())
-        return invoice
-
-    def _get_common_invoice(self, user):
-        """
-            Return an invoice object with common args for
-            all the generated invoices
-        """
-        inv = Invoice(
-            user=user,
-            company=self.company,
-            customer=self.customer,
-            project=self.project,
-            phase_id=self.phase_id,
-            estimation=self,
-            payment_conditions=self.payment_conditions,
-            description=self.description,
-            address=self.address,
-            workplace=self.workplace,
-            mentions=self.mentions,
-            business_type_id=self.business_type_id,
-            business_id=self.business_id,  # if set we pass it to the invoice
-        )
-        return inv
-
-    def gen_invoices(self, user):
-        """
-        Generate invoices based on the current estimation and its payments
-        configuration
-
-        :returns: The list of Invoice instances
-        :rtype: list
-        """
-        invoices = []
-        # Used to store the amount of the intermediary invoices
-        paid_lines = []
-
-        current_project_index = None
-        current_company_index = None
-
-        # Sequence number that will be incremented by hand
-        if self.deposit > 0:
-            invoice = self._get_common_invoice(user)
-            deposit, lines = self._make_deposit(invoice)
-            invoices.append(deposit)
-            # We remember the lines to display them in the last invoice
-            paid_lines.extend(lines)
-
-            current_project_index = invoice.project_index
-            current_company_index = invoice.company_index
-
-            # We need to update the invoice name
-            invoice.set_deposit_label()
-
-        if self.manualDeliverables == 1:
-            payments = self.manual_payment_line_amounts()
-
-            # all payment lines specified (less the last one)
-            for index, amounts in enumerate(payments[:-1]):
-                invoice = self._get_common_invoice(user)
-                line = self.payment_lines[index]
-                invoice, lines = self._make_intermediary(
-                    invoice,
-                    line,
-                    amounts,
-                )
-                if current_project_index is None:
-                    # Label and numbers remains unchanged, no need to update
-                    # numbers
-                    current_project_index = invoice.project_index
-                    current_company_index = invoice.company_index
-                else:
-                    current_project_index += 1
-                    current_company_index += 1
-                    invoice.set_numbers(
-                        current_company_index,
-                        current_project_index,
-                    )
-
-                paid_lines.extend(lines)
-                invoices.append(invoice)
-        else:
-            amounts = self.paymentline_amounts()
-
-            # All amounts are equal
-            for line in self.payment_lines[:-1]:
-                invoice = self._get_common_invoice(user)
-
-                invoice, lines = self._make_intermediary(
-                    invoice,
-                    line,
-                    amounts,
-                )
-                if current_project_index is None:
-                    # Label and numbers remains unchanged, no need to update
-                    # numbers
-                    current_project_index = invoice.project_index
-                    current_company_index = invoice.company_index
-                else:
-                    current_project_index += 1
-                    current_company_index += 1
-                    invoice.set_numbers(
-                        current_company_index,
-                        current_project_index,
-                    )
-                paid_lines.extend(lines)
-                invoices.append(invoice)
-
-        invoice = self._get_common_invoice(user)
-        pline = self.payment_lines[-1]
-        invoice = self._make_sold(
-            invoice,
-            pline,
-            paid_lines,
-        )
-
-        if current_project_index is not None:
-            # here we already have some invoices set
-            current_project_index += 1
-            current_company_index += 1
-            invoice.set_numbers(current_company_index, current_project_index)
-            invoice.set_sold_label()
-
-        invoices.append(invoice)
-        return invoices
-
     def __repr__(self):
         return u"<Estimation id:{s.id} ({s.status}>".format(s=self)
 
@@ -503,6 +315,32 @@ class Estimation(Task, EstimationCompute):
             )
         )
         return result
+
+    def gen_deposit_invoice(self, user):
+        """
+        Generate a deposit invoice based on the current estimation
+
+        :param obj user: User instance, the user generating the document
+        :rtype: `class:Invoice`
+        """
+        return self._invoicing_service.gen_deposit_invoice(self, user)
+
+    def gen_invoice(self, payment_line, user):
+        """
+        Generate an invoice based on a payment line
+
+        :param obj payment_line: The payment line we ask an Invoice for
+        :param obj user: User instance, the user generating the document
+        :rtype: `class:Invoice`
+        """
+        if payment_line == self.payment_lines[-1]:
+            self.geninv = True
+            DBSESSION().merge(self)
+            return self._invoicing_service.gen_sold_invoice(self, user)
+        else:
+            return self._invoicing_service.gen_intermediate_invoice(
+                self, payment_line, user
+            )
 
 
 class PaymentLine(DBBASE):

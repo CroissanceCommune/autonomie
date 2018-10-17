@@ -373,9 +373,16 @@ class EstimationCompute(TaskCompute):
 
     def paymentline_amounts(self):
         """
-            Compute payment lines amounts in case of equal payment repartition
-            (when manualDeliverables is 0)
-            (when the user has selected 3 time-payment)
+        Compute payment lines amounts in case of equal payment repartition:
+
+            when manualDeliverables is 0
+
+        e.g :
+
+            when the user has selected 3 time-payment
+
+        :returns: A dict describing the payments {'tva1': amount1, 'tva2':
+            amount2}
         """
         ret_dict = {}
         totals = self.tva_ht_parts()

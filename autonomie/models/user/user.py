@@ -279,6 +279,17 @@ class User(DBBASE, PersistentACLMixin):
         """
         return [company for company in self.companies if company.active]
 
+    @property
+    def active_company_ids(self):
+        """
+        Return only enabled companies ids
+        """
+        from autonomie.models.company import Company
+        query = DBSESSION().query(COMPANY_EMPLOYEE.c.company_id)
+        query = query.filter(COMPANY_EMPLOYEE.c.account_id == self.id)
+        query = query.join(Company).filter(Company.active == True)
+        return [c[0] for c in query]
+
 
 # Registering event handlers to keep datas synchronized
 def sync_user_to_userdatas(source_key, userdatas_key):

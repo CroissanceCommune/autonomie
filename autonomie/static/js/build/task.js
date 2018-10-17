@@ -6734,7 +6734,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var TaskLineModel = _BaseModel2.default.extend({
-	    props: ['id', 'order', 'description', 'cost', 'quantity', 'unity', 'tva', 'vat_product_id', 'product_id', 'task_id'],
+	    props: ['id', 'order', 'description', 'cost', 'quantity', 'unity', 'tva', 'product_id', 'task_id'],
 	    validation: {
 	        description: {
 	            required: true,
@@ -7452,7 +7452,6 @@ webpackJsonp([2],[
 	        'quantity': '.quantity',
 	        'unity': '.unity',
 	        'tva': '.tva',
-	        'vat_product_id': '.vat_product_id',
 	        'product_id': '.product_id',
 	        'catalog_container': '#catalog-container'
 	    },
@@ -7480,7 +7479,7 @@ webpackJsonp([2],[
 	        this.tva_options = channel.request('get:options', 'tvas');
 	        this.product_options = channel.request('get:options', 'products');
 	        this.section = channel.request('get:form_section', 'tasklines');
-	        this.vat_product_options = this.getVatProductOptionsFromVatValue(this.tva_options, this.model.get('tva'));
+	        this.product_options = channel.request('get:options', 'products');
 	    },
 	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
@@ -7504,7 +7503,7 @@ webpackJsonp([2],[
 	            value: this.model.get('description'),
 	            title: "Intitulé des postes",
 	            field_name: "description"
-	            //tinymce: true,
+	            //tinymce: true, TODO Fix tinymce error
 	            //cid: this.model.cid
 	        }));
 	        this.showChildView('cost', new _InputWidget2.default({
@@ -7532,11 +7531,11 @@ webpackJsonp([2],[
 	            field_name: 'tva',
 	            id_key: 'value'
 	        }));
-	        this.showChildView('vat_product_id', new _SelectWidget2.default({
-	            options: this.vat_product_options,
+	        this.showChildView('product_id', new _SelectWidget2.default({
+	            options: this.product_options,
 	            title: "Compte produit",
-	            value: this.model.get('vat_product_id'),
-	            field_name: 'vat_product_id',
+	            value: this.model.get('product_id'),
+	            field_name: 'product_id',
 	            id_key: 'id'
 	        }));
 	        this.refreshProductSelect();
@@ -7580,12 +7579,12 @@ webpackJsonp([2],[
 	         */
 	        console.log('vat');
 	        var val = !_.isUndefined(event.attributes.tva) ? event.attributes.tva : '20';
-	        this.vat_product_options = this.getVatProductOptionsFromVatValue(this.tva_options, val);
-	        this.showChildView('vat_product_id', new _SelectWidget2.default({
-	            options: this.vat_product_options,
+	        this.product_options = this.getVatProductOptionsFromVatValue(this.tva_options, val);
+	        this.showChildView('product_id', new _SelectWidget2.default({
+	            options: this.product_options,
 	            title: "Compte produit",
-	            value: this.model.get('vat_product_id'),
-	            field_name: 'vat_product_id',
+	            value: this.model.get('product_id'),
+	            field_name: 'product_id',
 	            id_key: 'id'
 	        }));
 	    },
@@ -7839,7 +7838,7 @@ webpackJsonp([2],[
 	    + "</h4>\n        </div>\n        <div class=\"modal-body\">\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskline-form'>\n                        <div class='order'></div>\n                        <div class='description required'></div>\n                        <div class='cost required'></div>\n                        <div class='quantity required'></div>\n                        <div class='unity'></div>\n                        <div class='tva required'></div>\n                        <div class='vat_product_id'></div>\n                        <div class='product_id'></div>\n                        <button\n                            class='btn btn-success primary-action'\n                            type='submit'\n                            value='submit'>\n                            "
+	  buffer += "            <div class='tab-content'>\n                <div\n                    role=\"tabpanel\"\n                    class=\"tab-pane fade in active\"\n                    id=\"form-container\">\n                    <form class='form taskline-form'>\n                        <div class='order'></div>\n                        <div class='description required'></div>\n                        <div class='cost required'></div>\n                        <div class='quantity required'></div>\n                        <div class='unity'></div>\n                        <div class='tva required'></div>\n                        <div class='product_id'></div>\n                        <button\n                            class='btn btn-success primary-action'\n                            type='submit'\n                            value='submit'>\n                            "
 	    + escapeExpression(((helper = (helper = helpers.title || (depth0 != null ? depth0.title : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
 	    + "\n                        </button>\n                        <button\n                            class='btn btn-default secondary-action'\n                            type='reset'\n                            value='submit'>\n                            Annuler\n                        </button>\n                    </form>\n                </div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.add : depth0), {"name":"if","hash":{},"fn":this.program(3, data),"inverse":this.noop,"data":data});

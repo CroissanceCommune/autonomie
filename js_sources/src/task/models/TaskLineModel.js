@@ -22,7 +22,6 @@ const TaskLineModel = BaseModel.extend({
         'quantity',
         'unity',
         'tva',
-        'vat_product_id',
         'product_id',
         'task_id', ],
     validation: {

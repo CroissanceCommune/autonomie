@@ -273,7 +273,7 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         ui: {
             "form": "form",
             "vatSelect": "form select[name=tva]",
-            "vatProductSelect": "form select[name=vat_product_id]",
+            "vatProductSelect": "form select[name=product_id]",
         },
         focus: function () {
             this.ui.form.find('input').first().focus();
@@ -283,19 +283,20 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         },
         templateHelpers: function () {
             var tva = this.model.get('tva');
-            tva_options = this.updateSelectOptions(AppOptions['tvas'], tva);
-            var vat_product_id = this.model.get('vat_product_id');
-            vat_product_options = this.updateSelectOptions(
-                this.filterVATProductFromVATValue(AppOptions['tvas'], tva),
-                vat_product_id, 'id')
-            ;
+            var tva_options = this.updateSelectOptions(AppOptions['tvas'], tva);
+            var product_id = this.model.get('product_id');
+            var product_options = [];
+            var filtered_product_options = this.getProductOptions(tva_options, AppOptions['products'], tva);
+            if(! _.isEmpty(filtered_product_options)) {
+                product_options = this.updateSelectOptions(filtered_product_options,product_id, 'id');
+            }
             var unity = this.model.get('unity');
-            unity_options = this.updateSelectOptions(
+            var unity_options = this.updateSelectOptions(
                 AppOptions['unities'], unity);
             return {
                 tva_options: tva_options,
                 unity_options: unity_options,
-                vat_product_options: vat_product_options,
+                product_options: product_options,
             };
         },
         onBeforeFormSubmit: function () {
@@ -308,17 +309,15 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             }
             tinyMCE.execCommand('mceAddEditor', false, 'tiny_description');
             // Update vat products option list
-            var innerFilterVATProductFromVATValue = this.filterVATProductFromVATValue;
+            var innerGetProductOptions = this.getProductOptions;
+            var innerUpdateSelectOptions = this.updateSelectOptions;
             this.ui.vatProductSelect.select2()
             this.ui.vatSelect.on('change', function(){
-                $('form select[name=vat_product_id]').find('option').not(':first').remove();
-                new_vat_product_options = innerFilterVATProductFromVATValue(
-                    AppOptions['tvas'],
-                    $(this).val()
-                );
-                for (i in new_vat_product_options) {
-                    newOption = new Option(new_vat_product_options[i].name, new_vat_product_options[i].id);
-                    $('form select[name=vat_product_id]').append(newOption).trigger('change');
+                $('form select[name=product_id]').find('option').not(':first').remove();
+                var new_product_options = innerGetProductOptions(AppOptions['tvas'], AppOptions['products'], $(this).val());
+                for (i in new_product_options) {
+                    var newOption = new Option(new_product_options[i].name, new_product_options[i].id);
+                    $('form select[name=product_id]').append(newOption).trigger('change');
                 }
             });
         }

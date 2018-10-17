@@ -86,9 +86,7 @@ from autonomie.models.tva import (
     Tva,
 )
 
-
 logger = log = logging.getLogger(__name__)
-
 
 ALL_STATES = ('draft', 'wait', 'valid', 'invalid')
 # , 'geninv', 'aboest', 'gencinv', 'resulted', 'paid', )

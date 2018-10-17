@@ -31,7 +31,6 @@ const TaskLineFormView = Mn.View.extend({
         'quantity': '.quantity',
         'unity': '.unity',
         'tva': '.tva',
-        'vat_product_id': '.vat_product_id',
         'product_id': '.product_id',
         'catalog_container': '#catalog-container'
     },
@@ -71,9 +70,9 @@ const TaskLineFormView = Mn.View.extend({
             'get:form_section',
             'tasklines'
         );
-        this.vat_product_options = this.getVatProductOptionsFromVatValue(
-            this.tva_options,
-            this.model.get('tva')
+        this.product_options = channel.request(
+            'get:options',
+            'products'
         );
 
     },
@@ -104,7 +103,7 @@ const TaskLineFormView = Mn.View.extend({
                 value: this.model.get('description'),
                 title: "Intitulé des postes",
                 field_name: "description",
-                //tinymce: true,
+                //tinymce: true, TODO Fix tinymce error
                 //cid: this.model.cid
             })
         );
@@ -154,13 +153,13 @@ const TaskLineFormView = Mn.View.extend({
             )
         );
         this.showChildView(
-            'vat_product_id',
+            'product_id',
             new SelectWidget(
                 {
-                    options: this.vat_product_options,
+                    options: this.product_options,
                     title: "Compte produit",
-                    value: this.model.get('vat_product_id'),
-                    field_name: 'vat_product_id',
+                    value: this.model.get('product_id'),
+                    field_name: 'product_id',
                     id_key: 'id'
                 }
             )
@@ -203,18 +202,18 @@ const TaskLineFormView = Mn.View.extend({
          */
         console.log('vat');
         const val = ! _.isUndefined(event.attributes.tva) ? event.attributes.tva : '20';
-        this.vat_product_options = this.getVatProductOptionsFromVatValue(
+        this.product_options = this.getVatProductOptionsFromVatValue(
             this.tva_options,
             val
         );
         this.showChildView(
-            'vat_product_id',
+            'product_id',
             new SelectWidget(
                 {
-                    options: this.vat_product_options,
+                    options: this.product_options,
                     title: "Compte produit",
-                    value: this.model.get('vat_product_id'),
-                    field_name: 'vat_product_id',
+                    value: this.model.get('product_id'),
+                    field_name: 'product_id',
                     id_key: 'id'
                 }
             )

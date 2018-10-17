@@ -49,7 +49,7 @@ const TaskLineFormView = Mn.View.extend({
     },
     modelEvents: {
         'set:product': 'refreshForm',
-        'change:tva': 'refreshProductAndVatProductSelect',
+        'change:tva': 'refreshTvaProductSelect',
     },
     initialize: function () {
         var channel = Radio.channel('config');
@@ -70,7 +70,7 @@ const TaskLineFormView = Mn.View.extend({
             'get:form_section',
             'tasklines'
         );
-        this.product_options = channel.request(
+        this.all_product_options = channel.request(
             'get:options',
             'products'
         );
@@ -152,6 +152,11 @@ const TaskLineFormView = Mn.View.extend({
                 }
             )
         );
+        this.product_options = this.getProductOptions(
+            this.tva_options,
+            this.all_product_options,
+            this.model.get('tva')
+        );
         this.showChildView(
             'product_id',
             new SelectWidget(
@@ -175,35 +180,32 @@ const TaskLineFormView = Mn.View.extend({
     getDefaultTva(){
         return _.findWhere(this.tva_options, {selected: true});
     },
-    getVatProductOptionsFromVatValue: function(options, val='20') {
-        /*
-         * Return the products list depending on tva value
-         * :param string val
-         */
-        console.log('options', options);
-        let product_options = null;
-        if (! _.isUndefined(options)) {
-            const currentVatProducts = _.findWhere(options, {value: Number(val)})
-            if(! _.isUndefined(currentVatProducts)) {
-                product_options = currentVatProducts.products;
-            }
+    getProductOptions(tva_options, product_options, tva='20'){
+       /*
+        *  Return an array on filtered products option depending on selected tva
+        *  :params list tva_options:
+        *  :params list product_options:
+        *  :param string tva
+        */
+        var options = null;
+        var current_tva_infos = _.findWhere(tva_options, { value: Number(tva)});
+        if(! _.isEmpty(current_tva_infos)) {
+            options = _.filter(product_options, function(product) {
+              return product.tva_id === current_tva_infos.id;
+            });
+
         }
-        return product_options;
+        return options;
     },
-    refreshProductAndVatProductSelect(event){
-        console.log('refresh');
-        this.refreshProductSelect();
-        this.refreshVatProductSelect(event);
-    },
-    refreshVatProductSelect(event){
+    refreshTvaProductSelect(event){
         /**
-         * Update and show the vat products option select
-         * :param string val
+         * Update and show the Tva products option select
+         * :param obj event
          */
-        console.log('vat');
-        const val = ! _.isUndefined(event.attributes.tva) ? event.attributes.tva : '20';
-        this.product_options = this.getVatProductOptionsFromVatValue(
+        const val = ! _.isUndefined(event.changed.tva) ? event.changed.tva : '20';
+        this.product_options = this.getProductOptions(
             this.tva_options,
+            this.all_product_options,
             val
         );
         this.showChildView(

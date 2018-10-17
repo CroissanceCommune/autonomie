@@ -169,7 +169,6 @@ const TaskLineFormView = Mn.View.extend({
                 }
             )
         );
-        this.refreshProductSelect();
         if (this.isAddView()){
             this.getUI('main_tab').tab('show');
         }
@@ -187,13 +186,15 @@ const TaskLineFormView = Mn.View.extend({
         *  :params list product_options:
         *  :param string tva
         */
-        var options = null;
-        var current_tva_infos = _.findWhere(tva_options, { value: Number(tva)});
+        let options = null;
+        const current_tva_infos = _.findWhere(tva_options, { value: Number(tva)});
         if(! _.isEmpty(current_tva_infos)) {
             options = _.filter(product_options, function(product) {
               return product.tva_id === current_tva_infos.id;
             });
-
+            if(! _.isEmpty(options)) {
+                options.unshift({ value: ''})
+            }
         }
         return options;
     },
@@ -220,45 +221,6 @@ const TaskLineFormView = Mn.View.extend({
                 }
             )
         );
-    },
-    refreshProductSelect(){
-        /*
-         * Show the product select tag
-         */
-        if (_.has(this.section, 'product')){
-            var product_options = this.product_options;
-
-            var tva_value = this.model.get('tva');
-            var tva;
-            if (! _.isUndefined(tva_value)){
-                tva = this.getTvaIdFromValue(tva_value);
-            }
-            if (!_.isUndefined(tva)){
-                product_options = _.where(
-                    this.product_options,
-                    {tva_id: tva.id}
-                );
-            } else{
-                var default_tva = this.getDefaultTva();
-                if (!_.isUndefined(default_tva)){
-                    product_options = _.where(
-                        this.product_options,
-                        {tva_id: default_tva.id}
-                    );
-                }
-            }
-            this.showChildView(
-                'product_id',
-                new SelectWidget(
-                    {
-                        options: product_options,
-                        title: "Code produit",
-                        field_name: 'product_id',
-                        id_key: 'id'
-                    }
-                )
-            );
-        }
     },
     onRender: function(){
         this.refreshForm();

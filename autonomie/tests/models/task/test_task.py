@@ -7,13 +7,13 @@
 
 def test_duplicate_task_line(task_line):
     newline = task_line.duplicate()
-    for i in ('order', 'cost', 'tva', "description", "quantity", "unity"):
+    for i in ('order', 'cost', 'tva', "description", "quantity", "unity", "product_id"):
         assert getattr(newline, i) == getattr(task_line, i)
 
 
 def test_gen_cancelinvoiceline(task_line):
     newline = task_line.gen_cancelinvoice_line()
-    for i in ('order', 'tva', "description", "quantity", "unity"):
+    for i in ('order', 'tva', "description", "quantity", "unity", "product_id"):
         assert getattr(newline, i) == getattr(task_line, i)
     assert newline.cost == -1 * task_line.cost
 
@@ -36,3 +36,4 @@ def test_task_line_from_sale_product(sale_product):
     assert t.cost == 100000 * sale_product.value
     assert t.description == sale_product.description
     assert t.unity == sale_product.unity
+    assert t.product_id == sale_product.product_id

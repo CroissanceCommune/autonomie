@@ -7539,7 +7539,6 @@ webpackJsonp([2],[
 	            field_name: 'product_id',
 	            id_key: 'id'
 	        }));
-	        this.refreshProductSelect();
 	        if (this.isAddView()) {
 	            this.getUI('main_tab').tab('show');
 	        }
@@ -7565,6 +7564,9 @@ webpackJsonp([2],[
 	            options = _.filter(product_options, function (product) {
 	                return product.tva_id === current_tva_infos.id;
 	            });
+	            if (!_.isEmpty(options)) {
+	                options.unshift({ value: '' });
+	            }
 	        }
 	        return options;
 	    },
@@ -7582,34 +7584,6 @@ webpackJsonp([2],[
 	            field_name: 'product_id',
 	            id_key: 'id'
 	        }));
-	    },
-	    refreshProductSelect: function refreshProductSelect() {
-	        /*
-	         * Show the product select tag
-	         */
-	        if (_.has(this.section, 'product')) {
-	            var product_options = this.product_options;
-	
-	            var tva_value = this.model.get('tva');
-	            var tva;
-	            if (!_.isUndefined(tva_value)) {
-	                tva = this.getTvaIdFromValue(tva_value);
-	            }
-	            if (!_.isUndefined(tva)) {
-	                product_options = _.where(this.product_options, { tva_id: tva.id });
-	            } else {
-	                var default_tva = this.getDefaultTva();
-	                if (!_.isUndefined(default_tva)) {
-	                    product_options = _.where(this.product_options, { tva_id: default_tva.id });
-	                }
-	            }
-	            this.showChildView('product_id', new _SelectWidget2.default({
-	                options: product_options,
-	                title: "Code produit",
-	                field_name: 'product_id',
-	                id_key: 'id'
-	            }));
-	        }
 	    },
 	
 	    onRender: function onRender() {

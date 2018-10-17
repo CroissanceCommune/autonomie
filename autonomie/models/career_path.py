@@ -23,7 +23,6 @@
     Model for career path
 """
 import logging
-import colander
 import deform
 import deform_extensions
 from sqlalchemy import (
@@ -32,10 +31,7 @@ from sqlalchemy import (
     Float,
     String,
     ForeignKey,
-    Boolean,
     Date,
-    Text,
-    not_,
 )
 from sqlalchemy.event import listen
 from sqlalchemy.orm import relationship
@@ -61,15 +57,15 @@ PERIOD_OPTIONS = (
 )
 
 CAREER_PATH_GRID = (
-    (('career_stage_id',12),),
-    (('start_date',6), ('end_date',6)),
-    (('cae_situation_id',12),),
-    (('stage_type',6),),
-    (('type_contrat_id',6), ('employee_quality_id',6)),
-    (('taux_horaire',6), ('num_hours',6)),
-    (('goals_amount',6), ('goals_period',6)),
-    (('amendment_number',6),),
-    (('type_sortie_id',6), ('motif_sortie_id',6)),
+    (('career_stage_id', 12), ),
+    (('start_date', 6), ('end_date', 6)),
+    (('cae_situation_id', 12), ),
+    (('stage_type', 6), ),
+    (('type_contrat_id', 6), ('employee_quality_id', 6)),
+    (('taux_horaire', 6), ('num_hours', 6)),
+    (('goals_amount', 6), ('goals_period', 6)),
+    (('amendment_number', 6), ),
+    (('type_sortie_id', 6), ('motif_sortie_id', 6)),
 )
 
 
@@ -85,6 +81,7 @@ class TypeContratOption(ConfigurableOption):
     }
     id = get_id_foreignkey_col('configurable_option.id')
 
+
 class EmployeeQualityOption(ConfigurableOption):
     """
     Different values for employee quality
@@ -97,6 +94,7 @@ class EmployeeQualityOption(ConfigurableOption):
     }
     id = get_id_foreignkey_col('configurable_option.id')
 
+
 class TypeSortieOption(ConfigurableOption):
     """
     Possible values for exit type
@@ -106,6 +104,7 @@ class TypeSortieOption(ConfigurableOption):
         'validation_msg': u"Les types de sortie ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
+
 
 class MotifSortieOption(ConfigurableOption):
     """
@@ -212,7 +211,7 @@ porteur cette nouvelle situation sera proposée par défaut"
     )
     type_contrat_id = Column(
         ForeignKey('type_contrat_option.id'),
-        info={'colanderalchemy': { 'title': u"Type de contrat" }}
+        info={'colanderalchemy': {'title': u"Type de contrat"}}
     )
     type_contrat = relationship(
         'TypeContratOption',
@@ -302,14 +301,20 @@ def update_user_situation_cae(mapper, connection, target):
     """
     if target.cae_situation_id is not None:
         from autonomie.models.user.userdatas import UserDatas
-        user = UserDatas.query().filter(UserDatas.id==target.userdatas_id).first()
+        user = UserDatas.query().filter(
+            UserDatas.id == target.userdatas_id
+        ).first()
         situation = user.get_cae_situation_from_career_path(None)
         if situation:
-	        if user.situation_situation_id != situation.id:
-	            logger.debug(u"Update CAE situation for user %s to '%s'" \
-	                         % (target.userdatas_id, situation.label))
-	            connection.execute("UPDATE user_datas SET situation_situation_id=%s \
-	                               WHERE id=%s" % (situation.id, user.id))
+            if user.situation_situation_id != situation.id:
+                logger.debug(
+                    u"Update CAE situation for user %s to '%s'" % (
+                        target.userdatas_id, situation.label
+                    )
+                )
+                connection.execute(
+                    "UPDATE user_datas SET situation_situation_id=%s \
+                    WHERE id=%s" % (situation.id, user.id))
 
 
 listen(CareerPath, "after_insert", update_user_situation_cae)

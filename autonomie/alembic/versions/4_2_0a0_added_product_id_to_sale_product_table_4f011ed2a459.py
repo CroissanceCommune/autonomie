@@ -1,14 +1,14 @@
 """Added product_id to sale_product table
 
 Revision ID: 4f011ed2a459
-Revises: 51278ee43fe0
+Revises: 18b6a30326e2
 Create Date: 2018-10-11 14:50:10.510325
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '4f011ed2a459'
-down_revision = '51278ee43fe0'
+down_revision = '18b6a30326e2'
 
 from alembic import op
 import sqlalchemy as sa

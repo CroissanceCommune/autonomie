@@ -21,6 +21,7 @@ from autonomie.models.company import (
 from autonomie.models.user.user import User
 from autonomie.models.user.login import Login
 from autonomie.forms.user.user import get_list_schema
+from autonomie.models.user.group import Group
 
 from autonomie.views import BaseListView
 
@@ -90,6 +91,18 @@ class BaseUserListView(BaseListView):
                 )
             )
             logger.debug(query)
+        return query
+
+    def filter_user_group(self, query, appstruct):
+        group_id = appstruct.get('group_id');
+        if group_id:
+            query = query.filter(
+                User.login.has(
+                    Login.groups.any(
+                        Group.id == group_id
+                    )
+                )
+            )
         return query
 
 
@@ -197,6 +210,18 @@ class GeneralUserList(BaseListView):
             query = query.filter(Login.active == True)
         elif active == "N":
             query = query.filter(Login.active == False)
+        return query
+
+    def filter_user_group(self, query, appstruct):
+        group_id = appstruct.get('group_id');
+        if group_id:
+            query = query.filter(
+                User.login.any(
+                    Login.groups.any(
+                        Group.id == group_id
+                    )
+                )
+            )
         return query
 
 

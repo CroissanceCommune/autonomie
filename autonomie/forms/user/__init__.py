@@ -13,6 +13,7 @@ from autonomie.utils.strings import (
 
 from autonomie.models.user.user import User
 from autonomie.models.user.login import Login
+from autonomie.models.user.group import Group
 
 
 def _filter_by_group(query, groups):
@@ -128,3 +129,18 @@ contractor_choice_node_factory = forms.mk_choice_node_factory(
     resource_name="un entrepreneur",
     roles=['contractor'],
 )
+
+
+@colander.deferred
+def deferred_user_groups_datas_select(node, kw):
+    values = Group.query('id', 'label').all()
+    values.insert(0, ('', "- Sélectionner un rôle"))
+    return deform.widget.SelectWidget(
+        values=values
+    )
+
+
+@colander.deferred
+def deferred_user_groups_datas_validator(node, kw):
+    ids = [entry[0] for entry in Group.query('id')]
+    return colander.OneOf(ids)

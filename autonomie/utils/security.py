@@ -136,7 +136,16 @@ DEFAULT_PERM = [
     (Deny, "group:manager", ('admin',)),
     (Allow, "group:manager", ALL_PERMISSIONS, ),
     (Allow, "group:contractor", ('visit',), ),
-    (Allow, "group:trainer", ("training", "add.training", "list.training")),
+    (
+        Allow,
+        "group:trainer",
+        (
+            "training",
+            "add.training",
+            "list.training",
+            "add_workshop",
+        )
+    ),
     (Allow, "group:constructor", ("add.construction",)),
 ]
 # Nouveau format de permission

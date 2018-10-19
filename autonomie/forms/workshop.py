@@ -176,6 +176,7 @@ class WorkshopSchema(colander.MappingSchema):
     owner = trainer_choice_node_factory(
         title="Gestionnaire de l'atelier",
         validator=deferred_owner_validator,
+        missing=colander.drop,
     )
     trainers = trainer_choice_node_factory(
         multiple=True,

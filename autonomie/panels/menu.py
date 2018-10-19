@@ -308,11 +308,12 @@ def _get_user_business_tools_dropdown(request, cid):
     :rtype: DropDown
     """
     dd = DropDown(label="Outils métier")
-    dd.add_item(
-        "Organisation d'ateliers",
-        icon="fa fa-slideshare",
-        href=request.route_path("managed_workshops", id=request.user.id),
-    )
+    if request.has_permission("add_workshop"):
+        dd.add_item(
+            "Organisation d'ateliers",
+            icon="fa fa-slideshare",
+            href=request.route_path("managed_workshops", id=request.user.id),
+        )
     return dd
 
 
@@ -331,7 +332,9 @@ def get_company_menu(request, cid, css=None):
     menu.add(_get_company_gestion_dropdown(request, cid))
     menu.add(_get_company_accounting_documents_dropdown(request, cid))
     menu.add(_get_company_accompagnement_dropdown(request, cid))
-    menu.add(_get_user_business_tools_dropdown(request, cid))
+    business_user_tools = _get_user_business_tools_dropdown(request, cid)
+    if len(business_user_tools.items) > 0:
+        menu.add(business_user_tools)
     menu.add(_get_company_param_dropdown(request, cid))
     return menu
 

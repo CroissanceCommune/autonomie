@@ -129,7 +129,7 @@ class TaskListPanel(object):
         result.append(Column(u"Nom de la facture", 'internal_number'))
         result.append(Column(u"Client", 'customer'))
         result.append(Column(u"Montant HT", "ht"))
-        result.append(Column(u"TVA", "ht"))
+        result.append(Column(u"TVA", "tva"))
         result.append(Column(u"TTC", "ttc"))
         result.append(Column(u"Paiement", "payment"))
         result.append(Column(u"Fichiers attachés"))

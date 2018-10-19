@@ -144,6 +144,7 @@ class InvoiceListTools(object):
         official_number=Task.official_number,
         ht=Task.ht,
         ttc=Task.ttc,
+        tva=Task.tva,
         payment=Payment.date,
     )
 

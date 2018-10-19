@@ -47,13 +47,25 @@ def get_info_field(title):
 
 def get_info1():
     query = WorkshopAction.query()
-    #query = query.filter(WorkshopAction.active == True)
+    query = query.filter(WorkshopAction.active == True)
     return query.filter(WorkshopAction.parent_id == None)
 
 
 @colander.deferred
 def deferred_info1(node, kw):
     options = [(unicode(a.id), a.label) for a in get_info1()]
+    return deform.widget.SelectWidget(values=options)
+
+
+def get_filter_info1():
+    query = WorkshopAction.query()
+    return query.filter(WorkshopAction.parent_id == None)
+
+
+@colander.deferred
+def deferred_filter_info1(node, kw):
+    options = [(unicode(a.id), a.label) for a in get_filter_info1()]
+    options.insert(0, ("", u"Intitulés de l\'action financée"))
     return deform.widget.SelectWidget(values=options)
 
 
@@ -208,7 +220,7 @@ def get_list_schema(company=False):
             colander.Integer(),
             name='info_1_id',
             missing=colander.drop,
-            widget=deferred_info1,
+            widget=deferred_filter_info1,
         )
     schema.insert(0, info_id_1)
 

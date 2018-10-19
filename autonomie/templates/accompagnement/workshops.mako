@@ -167,7 +167,7 @@ ${records.item_count} Résultat(s)
                                             icon='glyphicon glyphicon-file'>
                                             Du ${api.format_datetime(timeslot.start_time)} au \
         ${api.format_datetime(timeslot.end_time)} \
-        (${timeslot.duration[0]}h${timeslot.duration[1]})
+        (${api.format_duration(timeslot.duration)})
                                         </a>
                                     </li>
                                 % endfor

@@ -25,7 +25,6 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
-from autonomie.models import workshop as models
 from autonomie.forms.user import participant_filter_node_factory
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie import forms

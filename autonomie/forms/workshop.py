@@ -56,6 +56,18 @@ def deferred_info1(node, kw):
     return deform.widget.SelectWidget(values=options)
 
 
+def get_filter_info1():
+    query = WorkshopAction.query()
+    return query.filter(WorkshopAction.parent_id == None)
+
+
+@colander.deferred
+def deferred_filter_info1(node, kw):
+    options = [(unicode(a.id), a.label) for a in get_filter_info1()]
+    options.insert(0, ("", u"Intitulés de l\'action financée"))
+    return deform.widget.SelectWidget(values=options)
+
+
 @colander.deferred
 def deferred_info2(node, kw):
     options = [("", u"- Sélectionner un sous-titre -")]
@@ -202,6 +214,14 @@ def get_list_schema(company=False):
         description=u"Année"
     )
     schema.insert(0, year)
+
+    info_id_1 = colander.SchemaNode (
+            colander.Integer(),
+            name='info_1_id',
+            missing=colander.drop,
+            widget=deferred_filter_info1,
+        )
+    schema.insert(0, info_id_1)
 
     schema['search'].description = u"Intitulé de l'atelier"
     return schema

@@ -44,6 +44,7 @@ from js.jquery_timepicker_addon import timepicker_fr
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.models import workshop as models
+from autonomie.models.workshop import WorkshopAction
 from autonomie.models.activity import Attendance
 from autonomie.models import user
 from autonomie.utils.pdf import (
@@ -84,7 +85,7 @@ WORKSHOP_SUCCESS_MSG = u"L'atelier a bien été programmée : \
 
 
 SEARCH_FORM_GRID = (
-    (('year', 3,), ('date', 3), ('participant_id', 6),),
+    (('year', 3,), ('date', 3), ('participant_id', 3), ('info_1_id', 3)),
     (
         ('notfilled', 3), ('search', 3), ('items_per_page', 3),
         ('direction', 1), ('sort', 1), ('page', 1),
@@ -345,6 +346,16 @@ class WorkshopListTools(object):
             query = query.filter(
                 models.Workshop.attendances.any(
                     Attendance.account_id == participant_id
+                )
+            )
+        return query
+
+    def filter_info_1_id(self, query, appstruct):
+        info_1_id = appstruct.get('info_1_id')
+        if info_1_id not in (None, colander.null):
+            query = query.filter(
+                models.Workshop.info1.has(
+                    WorkshopAction.id == info_1_id
                 )
             )
         return query

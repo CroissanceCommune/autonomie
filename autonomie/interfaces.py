@@ -196,3 +196,40 @@ class IMailEventWrapper(Interface):
         """
         Return a mail attachment or None
         """
+
+
+class IExporter(Interface):
+    def add_title(self, title, width, options=None):
+        """
+        Add a title to the spreadsheet
+
+        :param str title: The title to display
+        :param int width: On how many cells should the title be merged
+        :param dict options: Options used to format the cells
+        """
+        pass
+
+    def add_headers(self, headers):
+        """
+        Add a header line to the file
+
+        :param list headers: List of header dicts
+        """
+        pass
+
+    def add_row(self, row_datas, options=None):
+        """
+        Add a row to the spreadsheet
+
+        :param list row_datas: The datas to display
+        :param dict options: Key value options used to format the line
+        """
+        pass
+
+    def render(self, f_buf=None):
+        """
+        Render the current spreadsheet to the given file buffer
+
+        :param obj f_buf: File buffer (E.G file('....') or StringIO.StringIO
+        """
+        pass

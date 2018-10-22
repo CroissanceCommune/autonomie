@@ -1,6 +1,6 @@
 alembic==0.8.2
 autonomie_base==4.2.0a1
-autonomie_celery==4.2.0a1
+autonomie_celery==4.2.0a3
 Beaker==1.6.4
 bleach==1.4.1
 Chameleon
@@ -8,7 +8,7 @@ colander==1.4
 ColanderAlchemy
 Cython==0.18
 deform==2.0.4
-deform_extensions==0.3.3a
+deform_extensions==0.3.3
 docopt==0.5.0
 fanstatic==1.0a5
 filedepot==0.1.2

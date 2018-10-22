@@ -44,11 +44,12 @@ def test_income_statement_measure_compiler(
     grid = grids[0]
 
     assert grid.company_id == company.id
-    assert len(grid.measures) == 4
+    assert len(grid.measures) == 5
     assert grid.get_measure_by_type(income_measure_types[0].id).value == 1000
     assert grid.get_measure_by_type(income_measure_types[1].id).value == 2000
     assert grid.get_measure_by_type(income_measure_types[2].id).value == -1000
     assert grid.get_measure_by_type(income_measure_types[3].id).value == -1000
+    assert grid.get_measure_by_type(income_measure_types[6].id).value == 5625
 
 
 def test_treasury_measure_compiler(

@@ -30,11 +30,6 @@ import itertools
 import logging
 from openpyxl.styles import (
     Color,
-    fills,
-    Style,
-    NumberFormat,
-    PatternFill,
-    Font,
 )
 
 from string import ascii_uppercase
@@ -49,50 +44,18 @@ from autonomie.models.expense.types import (
     ExpenseKmType,
     ExpenseTelType,
 )
-from autonomie.export.utils import write_file_to_request
+from autonomie.export.excel import (
+    TITLE_STYLE,
+    NUMBER_CELL,
+    HEADER_STYLE,
+    BOLD_CELL,
+    FOOTER_CELL,
+    LARGE_FOOTER_CELL,
+
+)
 
 
 log = logging.getLogger(__name__)
-
-Color.LightCyan = "FFE0FFFF"
-Color.LightCoral = "FFF08080"
-Color.LightGreen = "FF90EE90"
-Color.Crimson = "FFDC143C"
-Color.header = "FFD9EDF7"
-Color.footer = "FFFCF8E3"
-
-EXCEL_NUMBER_FORMAT = '0.00'
-
-TITLE_STYLE = Style(font=Font(size=24, bold=True))
-HEADER_STYLE = Style(
-    font=Font(bold=True),
-    fill=PatternFill(
-        fill_type=fills.FILL_SOLID,
-        start_color=Color(rgb=Color.header)
-    )
-)
-BOLD_CELL = Style(
-    font=Font(bold=True)
-)
-NUMBER_CELL = Style(
-    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
-)
-FOOTER_CELL = Style(
-    font=Font(bold=True),
-    fill=PatternFill(
-        fill_type=fills.FILL_SOLID,
-        start_color=Color(rgb=Color.footer)
-    ),
-    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
-)
-LARGE_FOOTER_CELL = Style(
-    font=Font(bold=True, size=16),
-    fill=PatternFill(
-        fill_type=fills.FILL_SOLID,
-        start_color=Color(rgb=Color.footer)
-    ),
-    number_format=NumberFormat(format_code=EXCEL_NUMBER_FORMAT)
-)
 
 
 # A, B, C, ..., AA, AB, AC, ..., ZZ
@@ -789,23 +752,3 @@ de vos clients)"
                 col_dim.width = 13
 
         return self.save_book()
-
-
-def make_excel_view(filename_builder, factory):
-    """
-        Build an excel view of a model
-        :param filename_builder: a callable that take the request as arg and
-            return a filename
-        :param factory: the Xls factory that should be used to wrap the
-            request context the factory should provide a render method
-            returning a file like object
-    """
-    def _view(request):
-        """
-            the dynamically built view object
-        """
-        filename = filename_builder(request)
-        result = factory(request.context).render()
-        request = write_file_to_request(request, filename, result)
-        return request.response
-    return _view

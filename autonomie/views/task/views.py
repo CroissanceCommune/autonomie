@@ -24,8 +24,11 @@ from autonomie.forms.tasks.base import (
 from autonomie.forms.tasks.invoice import (
     SetProductsSchema,
 )
+from autonomie.export.utils import (
+    write_file_to_request,
+)
 from autonomie.utils.pdf import (
-    write_pdf,
+    buffer_pdf,
     render_html,
 )
 from autonomie.resources import (
@@ -343,13 +346,29 @@ class TaskPdfView(BaseView):
     Return A pdf representation of the current context
 
     """
+    def _cache_pdf(self, filename, pdf_datas):
+        if self.context.status == 'valid':
+            self.context.persist_pdf(filename, pdf_datas)
+
     def __call__(self):
-        pdf_css.need()
         number = self.request.context.internal_number
         label = force_filename(number)
         filename = u"{0}.pdf".format(label)
-        html_string = html(self.request)
-        write_pdf(self.request, filename, html_string)
+
+        if self.context.status == 'valid' and self.context.pdf_file is not None:
+            pdf_datas = self.context.pdf_file
+        else:
+            pdf_css.need()
+            html_string = html(self.request)
+            pdf_datas = buffer_pdf(html_string)
+            self._cache_pdf(filename, pdf_datas)
+
+        write_file_to_request(
+            self.request,
+            filename,
+            pdf_datas,
+            'application/pdf'
+        )
         return self.request.response
 
 

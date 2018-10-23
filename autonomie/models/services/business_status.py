@@ -82,8 +82,9 @@ class BusinessStatusService:
         """
         if invoice:
             deadline = business.find_deadline_from_invoice(invoice)
-            deadline.invoiced = True
-            DBSESSION().merge(deadline)
+            if deadline is not None:
+                deadline.invoiced = True
+                DBSESSION().merge(deadline)
         cls.update_invoicing_indicator(business)
 
     @classmethod

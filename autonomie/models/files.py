@@ -113,7 +113,7 @@ class File(Node):
     @classmethod
     def _set_data(cls, target, value, oldvalue, initiator):
         # Ref #384 : enforce this method
-        if isinstance(value, (cStringIO.InputType, file)):
+        if hasattr(value, "seek"):
             value.seek(0)
             value = value.read()
 

@@ -340,7 +340,9 @@ class Company(DBBASE, PersistentACLMixin):
             from autonomie.models.files import File
             self.header_file = File()
 
-        self.header_file.name = appstruct.get('name', 'header.png')
+        appstruct['filename'] = appstruct['name'] = 'header.png'
+        appstruct['mimetype'] = 'image/png'
+
         for key, value in appstruct.items():
             setattr(self.header_file, key, value)
 

@@ -50,11 +50,15 @@ from autonomie.forms import (
     files,
     lists,
 )
-from autonomie.utils.image import ImageResizer
+from autonomie.utils.image import (
+    ImageResizer,
+    ImageRatio,
+)
 
 log = logging.getLogger(__name__)
 
-HEADER_RESIZER = ImageResizer(4, 1)
+HEADER_RATIO = ImageRatio(4, 1)
+HEADER_RESIZER = ImageResizer(2000, 500)
 
 
 @colander.deferred
@@ -74,7 +78,10 @@ def deferred_upload_header_widget(node, kw):
     request = kw['request']
     tmpstore = files.SessionDBFileUploadTempStore(
         request,
-        filters=HEADER_RESIZER.complete
+        filters=[
+            HEADER_RATIO.complete,
+            HEADER_RESIZER.complete,
+        ]
     )
     return files.CustomFileUploadWidget(tmpstore)
 

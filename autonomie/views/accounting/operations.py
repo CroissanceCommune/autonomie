@@ -24,7 +24,10 @@ from autonomie.forms.accounting import (
     get_upload_list_schema,
     get_operation_list_schema,
 )
-from autonomie.utils.widgets import ViewLink
+from autonomie.utils.widgets import (
+    ViewLink,
+    Link,
+)
 
 from autonomie.views import (
     BaseListView,
@@ -64,48 +67,42 @@ class UploadListView(BaseListView):
         """
 
         if self._has_operations(item):
-            yield (
+            yield Link(
                 self.request.route_path(
                     '/accounting/operation_uploads/{id}',
                     id=item.id,
                 ),
                 u"Voir le détail",
-                u"Voir le détail des écritures importées",
-                u"pencil",
-                {}
+                title=u"Voir le détail des écritures importées",
+                icon=u"pencil",
             )
-            yield (
+            yield Link(
                 self.request.route_path(
                     '/accounting/operation_uploads/{id}',
                     id=item.id,
                     _query={'action': u"compile"}
                 ),
                 u"Recalculer les indicateurs",
-                u"Recalculer les indicateurs générés depuis ce fichier "
+                title=u"Recalculer les indicateurs générés depuis ce fichier "
                 u"(ex : vous avez changé la configuration des indicateurs)",
-                u"fa fa-calculator",
-                {}
+                icon=u"fa fa-calculator",
             )
 
-        yield (
+        yield Link(
             self.request.route_path(
                 '/accounting/operation_uploads/{id}',
                 id=item.id,
                 _query={'action': 'delete'}
             ),
             u"Supprimer",
-            u"Supprimer les écritures téléversées ainsi que les indicateurs "
-            u"rattachés",
-            "trash",
-            {
-                "onclick": (
-                    u"return window.confirm('Supprimer ce téléversement "
-                    u"entraînera la suppression : \n- Des indicateurs générés"
-                    u" depuis ce fichier\n"
-                    u"- Des écritures enregistrées provenant de ce fichier\n"
-                    u"Continuez ?');"
-                    )
-            }
+            title=u"Supprimer les écritures téléversées ainsi que les "
+            u"indicateurs rattachés",
+            icon="trash",
+            confirm=u"Supprimer ce téléversement "
+            u"entraînera la suppression : \n- Des indicateurs générés"
+            u" depuis ce fichier\n"
+            u"- Des écritures enregistrées provenant de ce fichier\n"
+            u"Continuez ?"
         )
 
     def query(self):

@@ -143,21 +143,7 @@
                     ${api.format_account(userdata.situation_follower)}
                 </td>
                 <td class="actions">
-                    <div class='btn-group'>
-                        <button
-                            type="button"
-                            class="btn btn-default dropdown-toggle"
-                            data-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false">
-                            Actions <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                            % for url, label, title, icon, options in stream_actions(userdata):
-                                ${dropdown_item(url, label, title, icon=icon, **options)}
-                            % endfor
-                        </ul>
-                    </div>
+                    ${request.layout_manager.render_panel('action_dropdown', links=stream_actions(userdata))}
                 </td>
             </tr>
         % endfor

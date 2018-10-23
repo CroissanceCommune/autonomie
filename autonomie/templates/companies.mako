@@ -117,7 +117,7 @@
                             </ul>
                         </td>
                         <td class="actions">
-                            ${request.layout_manager.render_panel('action_dropdown', links=stream_actions(company)}
+                            ${request.layout_manager.render_panel('action_dropdown', links=stream_actions(company))}
                         </td>
                     </tr>
                 % endfor

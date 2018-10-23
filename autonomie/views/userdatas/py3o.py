@@ -7,11 +7,27 @@ import logging
 import os
 import datetime
 
-from sqla_inspect import py3o
-
 from pyramid.httpexceptions import HTTPFound
+from genshi.template.eval import UndefinedError
+from sqla_inspect import py3o
+from sqlalchemy.orm import (
+    Load,
+    joinedload,
+)
 
+from autonomie.export.utils import write_file_to_request
 from autonomie.models import files
+from autonomie.utils.widgets import Link
+from autonomie.views import (
+    BaseView,
+    DeleteView,
+)
+from autonomie.views.userdatas.routes import (
+    USERDATAS_PY3O_URL,
+    USER_USERDATAS_PY3O_URL,
+    TEMPLATING_ITEM_URL,
+)
+from autonomie.views.admin.userdatas.templates import TEMPLATE_URL
 
 
 logger = logging.getLogger(__name__)
@@ -146,4 +162,161 @@ def get_template_output(request, template, context):
         context,
         template.data_obj,
         additionnal_context=additionnal_context,
+    )
+
+
+class UserDatasFileGeneration(BaseView):
+    """
+    Base view for file generation
+    """
+    title = u"Génération de documents sociaux"
+
+    @property
+    def current_userdatas(self):
+        return self.context
+
+    @property
+    def admin_url(self):
+        return self.request.route_path(TEMPLATE_URL)
+
+    def stream_actions(self, item):
+        """
+        Stream actions on TemplatingHistory instances
+
+        :param obj item: A TemplatingHistory instance
+        :returns: A generator producing Link instances
+        """
+        yield Link(
+            self.request.route_path(
+                "/templatinghistory/{id}",
+                id=item.id,
+                _query={'action': 'delete'}
+            ),
+            u"Supprimer",
+            icon="fa fa-trash",
+        )
+
+    def py3o_action_view(self, doctemplate_id):
+        """
+        Answer to simple GET requests
+        """
+        model = self.current_userdatas
+        template = files.Template.get(doctemplate_id)
+        if template:
+            logger.debug(
+                " + Templating (%s, %s)" % (template.name, template.id)
+            )
+            try:
+                compiled_output = get_template_output(
+                    self.request, template, model
+                )
+                write_file_to_request(
+                    self.request, template.name, compiled_output
+                )
+                store_compiled_file(
+                    model,
+                    self.request,
+                    compiled_output,
+                    template,
+                )
+                record_compilation(model, self.request, template)
+                return self.request.response
+            except UndefinedError, err:
+                key = get_key_from_genshi_error(err)
+                msg = u"""Erreur à la compilation du modèle la clé {0}
+n'est pas définie""".format(key)
+                logger.exception(msg)
+
+                self.session.flash(msg, "error")
+            except IOError:
+                logger.exception(u"Le template n'existe pas sur le disque")
+                self.session.flash(
+                    u"Erreur à la compilation du modèle, le modèle de fichier "
+                    u"est manquant sur disque. Merci de contacter votre "
+                    u"administrateur.",
+                    "error",
+                )
+            except Exception:
+                logger.exception(
+                    u"Une erreur est survenue à la compilation du template \
+%s avec un contexte de type %s et d'id %s" % (
+                        template.id,
+                        model.__class__,
+                        model.id,
+                    )
+                )
+                self.session.flash(
+                    u"Erreur à la compilation du modèle, merci de contacter \
+votre administrateur",
+                    "error"
+                )
+        else:
+            self.session.flash(
+                u"Erreur : ce modèle est manquant",
+                "error"
+            )
+
+        return HTTPFound(self.request.current_route_path(_query={}))
+
+    def __call__(self):
+        doctemplate_id = self.request.GET.get('template_id')
+        if doctemplate_id:
+            return self.py3o_action_view(doctemplate_id)
+        else:
+            available_templates = files.Template.query()
+            available_templates = available_templates.filter_by(active=True)
+            template_query = files.TemplatingHistory.query()
+            template_query = template_query.options(
+                Load(files.TemplatingHistory).load_only('id', 'created_at'),
+                joinedload("user").load_only('firstname', 'lastname'),
+                joinedload('template').load_only('name'),
+            )
+            template_query = template_query.filter_by(
+                userdatas_id=self.current_userdatas.id
+            )
+            return dict(
+                templates=available_templates.all(),
+                template_history=template_query.all(),
+                title=self.title,
+                current_userdatas=self.current_userdatas,
+                admin_url=self.admin_url,
+                stream_actions=self.stream_actions,
+            )
+
+
+class UserUserDatasFileGeneration(UserDatasFileGeneration):
+    @property
+    def current_userdatas(self):
+        return self.context.userdatas
+
+
+class TemplatingHistoryDeleteView(DeleteView):
+    def redirect(self):
+        return HTTPFound(
+            self.request.route_path(
+                USER_USERDATAS_PY3O_URL,
+                id=self.context.user.id
+            )
+        )
+
+
+def includeme(config):
+    config.add_view(
+        UserDatasFileGeneration,
+        route_name=USERDATAS_PY3O_URL,
+        permission="py3o.userdatas",
+        renderer="/userdatas/py3o.mako",
+    )
+    config.add_view(
+        UserUserDatasFileGeneration,
+        route_name=USER_USERDATAS_PY3O_URL,
+        permission="py3o.userdatas",
+        renderer="/userdatas/py3o.mako",
+        layout='user',
+    )
+    config.add_view(
+        TemplatingHistoryDeleteView,
+        route_name=TEMPLATING_ITEM_URL,
+        request_param="action=delete",
+        permission="delete"
     )

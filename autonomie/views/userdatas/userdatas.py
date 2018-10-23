@@ -11,18 +11,12 @@ from pyramid.httpexceptions import HTTPFound
 
 from deform_extensions import AccordionFormWidget
 from js.deform import auto_need
-from genshi.template.eval import UndefinedError
-from sqlalchemy.orm import (
-    Load,
-    joinedload,
-)
 from autonomie.models.user.userdatas import (
     UserDatas,
     SocialDocTypeOption,
     UserDatasSocialDocTypes,
     get_default_cae_situation,
 )
-from autonomie.models import files
 from autonomie.forms.user.userdatas import (
     get_add_edit_schema,
     USERDATAS_FORM_GRIDS,
@@ -39,15 +33,7 @@ from autonomie.views import (
     BaseEditView,
     submit_btn,
     cancel_btn,
-    BaseView,
     DeleteView,
-)
-from autonomie.export.utils import write_file_to_request
-from autonomie.views.userdatas.py3o import (
-    store_compiled_file,
-    get_template_output,
-    record_compilation,
-    get_key_from_genshi_error,
 )
 from autonomie.views.user.routes import USER_ITEM_URL
 from autonomie.views.userdatas.routes import (
@@ -55,14 +41,12 @@ from autonomie.views.userdatas.routes import (
     USERDATAS_ITEM_URL,
     USERDATAS_EDIT_URL,
     USERDATAS_DOCTYPES_URL,
-    USERDATAS_PY3O_URL,
     USER_USERDATAS_URL,
     USER_USERDATAS_ADD_URL,
     USER_USERDATAS_EDIT_URL,
     USER_USERDATAS_DOCTYPES_URL,
     USER_USERDATAS_PY3O_URL,
 )
-from autonomie.views.admin.userdatas.templates import TEMPLATE_URL
 from autonomie.views.user.tools import UserFormConfigState
 
 
@@ -283,113 +267,6 @@ class UserUserDatasDocTypeView(UserDatasDocTypeView):
         return self.context.userdatas
 
 
-class UserDatasFileGeneration(BaseView):
-    """
-    Base view for file generation
-    """
-    title = u"Génération de documents sociaux"
-
-    @property
-    def current_userdatas(self):
-        return self.context
-
-    @property
-    def admin_url(self):
-        return self.request.route_path(TEMPLATE_URL)
-
-    def py3o_action_view(self, doctemplate_id):
-        """
-        Answer to simple GET requests
-        """
-        model = self.current_userdatas
-        template = files.Template.get(doctemplate_id)
-        if template:
-            logger.debug(
-                " + Templating (%s, %s)" % (template.name, template.id)
-            )
-            try:
-                compiled_output = get_template_output(
-                    self.request, template, model
-                )
-                write_file_to_request(
-                    self.request, template.name, compiled_output
-                )
-                store_compiled_file(
-                    model,
-                    self.request,
-                    compiled_output,
-                    template,
-                )
-                record_compilation(model, self.request, template)
-                return self.request.response
-            except UndefinedError, err:
-                key = get_key_from_genshi_error(err)
-                msg = u"""Erreur à la compilation du modèle la clé {0}
-n'est pas définie""".format(key)
-                logger.exception(msg)
-
-                self.session.flash(msg, "error")
-            except IOError:
-                logger.exception(u"Le template n'existe pas sur le disque")
-                self.session.flash(
-                    u"Erreur à la compilation du modèle, le modèle de fichier "
-                    u"est manquant sur disque. Merci de contacter votre "
-                    u"administrateur.",
-                    "error",
-                )
-            except Exception:
-                logger.exception(
-                    u"Une erreur est survenue à la compilation du template \
-%s avec un contexte de type %s et d'id %s" % (
-                        template.id,
-                        model.__class__,
-                        model.id,
-                    )
-                )
-                self.session.flash(
-                    u"Erreur à la compilation du modèle, merci de contacter \
-votre administrateur",
-                    "error"
-                )
-        else:
-            self.session.flash(
-                u"Erreur : ce modèle est manquant",
-                "error"
-            )
-
-        return HTTPFound(self.request.current_route_path(_query={}))
-
-    def __call__(self):
-        doctemplate_id = self.request.GET.get('template_id')
-        if doctemplate_id:
-            return self.py3o_action_view(doctemplate_id)
-        else:
-            available_templates = files.Template.query()
-            available_templates = available_templates.filter_by(active=True)
-            template_query = files.TemplatingHistory.query()
-            template_query = template_query.options(
-                Load(files.TemplatingHistory).load_only('id', 'created_at'),
-                joinedload("user").load_only('firstname', 'lastname'),
-                joinedload('template').load_only('name'),
-            )
-            template_query = template_query.filter_by(
-                userdatas_id=self.current_userdatas.id
-            )
-            return dict(
-                templates=available_templates.all(),
-                template_history=template_query.all(),
-                title=self.title,
-                current_userdatas=self.current_userdatas,
-                admin_url=self.admin_url,
-            )
-
-
-class UserUserDatasFileGeneration(UserDatasFileGeneration):
-    @property
-    def current_userdatas(self):
-        return self.context.userdatas
-
-
 def add_views(config):
     """
     Add module related views
@@ -442,19 +319,6 @@ def add_views(config):
         route_name=USER_USERDATAS_DOCTYPES_URL,
         permission="doctypes.userdatas",
         renderer="/userdatas/doctypes.mako",
-        layout='user',
-    )
-    config.add_view(
-        UserDatasFileGeneration,
-        route_name=USERDATAS_PY3O_URL,
-        permission="py3o.userdatas",
-        renderer="/userdatas/py3o.mako",
-    )
-    config.add_view(
-        UserUserDatasFileGeneration,
-        route_name=USER_USERDATAS_PY3O_URL,
-        permission="py3o.userdatas",
-        renderer="/userdatas/py3o.mako",
         layout='user',
     )
 

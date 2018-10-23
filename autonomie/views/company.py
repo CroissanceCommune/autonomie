@@ -49,6 +49,7 @@ from autonomie.models.company import (
 from autonomie.models.user.user import User
 from autonomie.utils.widgets import (
     ViewLink,
+    Link,
 )
 from autonomie.forms import (
     merge_session_with_post,
@@ -162,12 +163,11 @@ class CompanyList(BaseListView):
         return query
 
     def stream_actions(self, company):
-        yield (
+        yield Link(
             self.request.route_path('company', id=company.id),
             u"Voir/Modifier",
-            u"Voir/Modifier l'entreprise",
-            'pencil',
-            {}
+            title=u"Voir/Modifier l'enseigne",
+            icon='fa fa-pencil',
         )
         url = self.request.route_path(
             'company',
@@ -175,20 +175,18 @@ class CompanyList(BaseListView):
             _query=dict(action="disable")
         )
         if company.active:
-            yield (
+            yield Link(
                 url,
                 u"Désactiver",
-                u"Désactiver l'entreprise",
-                'book',
-                {}
+                title=u"Désactiver l'entreprise",
+                icon='fa fa-book',
             )
         else:
-            yield (
+            yield Link(
                 url,
                 u"Activer",
-                u"Activer l'entreprise",
-                'book',
-                {}
+                title=u"Activer l'entreprise",
+                icon='fa fa-book',
             )
 
 

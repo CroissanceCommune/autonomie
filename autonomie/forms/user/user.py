@@ -144,6 +144,16 @@ def get_list_schema():
 
     schema.add(
         colander.SchemaNode(
+            colander.Integer(),
+            name='group_id',
+            missing=colander.drop,
+            widget=forms.user.deferred_user_groups_datas_select,
+            validator=forms.user.deferred_user_groups_datas_validator,
+        )
+    )
+
+    schema.add(
+        colander.SchemaNode(
             colander.String(),
             name='login_filter',
             widget=deform.widget.SelectWidget(

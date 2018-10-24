@@ -24,8 +24,8 @@ def migrate_datas():
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()
-    op.execute("UPDATE sale_product SET tva=20 WHERE tva=NULL"
-    )
+    op.execute("UPDATE sale_product SET tva=20000 WHERE tva=NULL")
+    op.execute("UPDATE sale_product SET product_id=7 WHERE tva=20000")
     from zope.sqlalchemy import mark_changed
     mark_changed(session)
 

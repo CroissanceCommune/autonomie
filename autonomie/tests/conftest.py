@@ -177,8 +177,9 @@ def config(request, pyramid_request, settings, registry):
     request.addfinalizer(testing.tearDown)
     configure_filedepot(settings)
 
-    from autonomie import setup_services
+    from autonomie import setup_services, add_static_views
     setup_services(config, settings)
+    add_static_views(config, settings)
     config.include('autonomie_celery')
     from autonomie.utils.renderer import customize_renderers
     customize_renderers(config)
@@ -276,7 +277,8 @@ def get_csrf_request(config, pyramid_request):
     """
     def func(
         params=None, cookies=None, post=None,
-        current_route_name=None, current_route_path=None
+        current_route_name=None, current_route_path=None,
+        context=None,
     ):
         post = post or {}
         if params is not None:
@@ -292,7 +294,7 @@ def get_csrf_request(config, pyramid_request):
         pyramid_request.json_body = post
         pyramid_request.cookies = cookies
         pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
-        pyramid_request.config = config
+        pyramid_request.config = {}
         pyramid_request.registry = config.registry
         csrf_token = Mock()
         csrf_token.return_value = def_csrf
@@ -313,12 +315,20 @@ def get_csrf_request(config, pyramid_request):
             pyramid_request.matched_route = route
             pyramid_request.registry.registerUtility(mapper, IRoutesMapper)
 
+        if context:
+            from pyramid_layout.layout import LayoutManager
+            pyramid_request.context = context
+            pyramid_request.layout_manager = LayoutManager(
+                context,
+                pyramid_request
+            )
+
         return pyramid_request
     return func
 
 
 @fixture
-def get_csrf_request_with_db(pyramid_request, dbsession):
+def get_csrf_request_with_db(get_csrf_request, pyramid_request, dbsession):
     """
     Build a testing request builder with a csrf token and a db session object
 
@@ -327,42 +337,15 @@ def get_csrf_request_with_db(pyramid_request, dbsession):
     """
     def func(
         params=None, cookies=None, post=None,
-        current_route_name=None, current_route_path=None
+        current_route_name=None, current_route_path=None,
+        context=None,
     ):
-        post = post or {}
-        if params is not None:
-            params.update(post)
-        else:
-            params = post
-        cookies = cookies or {}
-        def_csrf = 'default_csrf'
-        if u'csrf_token' not in post.keys():
-            post.update({'csrf_token': def_csrf})
-        pyramid_request.params = params
-        pyramid_request.POST = post
-        pyramid_request.json_body = post
-        pyramid_request.cookies = cookies
-        pyramid_request.session = BeakerSessionFactoryConfig()(pyramid_request)
+        pyramid_request = get_csrf_request(
+            params=params, cookies=cookies, post=post,
+            current_route_name=current_route_name, current_route_path=current_route_path,
+            context=context,
+        )
         pyramid_request.dbsession = dbsession
-        pyramid_request.config = {}
-        csrf_token = Mock()
-        csrf_token.return_value = def_csrf
-        pyramid_request.session.get_csrf_token = csrf_token
-        pyramid_request.actionmenu = ActionMenu()
-        pyramid_request.navigation = Navigation()
-        pyramid_request.is_popup = False
-
-        if current_route_path:
-            if not current_route_name:
-                current_route_name = current_route_path
-
-            route = DummyRoute(
-                name=current_route_name, result=current_route_path
-            )
-            mapper = DummyRouteContext(route=route)
-            pyramid_request.matched_dict = {}
-            pyramid_request.matched_route = route
-            pyramid_request.registry.registerUtility(mapper, IRoutesMapper)
         return pyramid_request
     return func
 
@@ -403,6 +386,7 @@ def groups(dbsession):
 @fixture
 def mk_tva(dbsession):
     from autonomie.models.tva import Tva
+
     def factory(value, name, default=True):
         tva = Tva(value=value, name=name, default=default)
         dbsession.add(tva)
@@ -419,6 +403,7 @@ def tva(mk_tva):
 @fixture
 def mk_product(dbsession):
     from autonomie.models.tva import Product
+
     def factory(name, tva, compte_cg='122'):
         product = Product(name=name, tva_id=tva.id, compte_cg=compte_cg)
         dbsession.add(product)

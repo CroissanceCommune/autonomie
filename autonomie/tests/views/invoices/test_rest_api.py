@@ -5,6 +5,7 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
 
+
 def test_invoice_valid_view(
     config, get_csrf_request_with_db, full_invoice, user
 ):
@@ -17,9 +18,9 @@ def test_invoice_valid_view(
     from autonomie.views.invoices.rest_api import InvoiceStatusRestView
 
     request = get_csrf_request_with_db(
-        post={'submit': 'valid', 'comment': u"Test comment"}
+        post={'submit': 'valid', 'comment': u"Test comment"},
+        context=full_invoice,
     )
-    request.context = full_invoice
     request.user = user
     request.is_xhr = True
 
@@ -44,9 +45,9 @@ def test_cancelinvoice_valid_view(
     from autonomie.views.invoices.rest_api import CancelInvoiceStatusRestView
 
     request = get_csrf_request_with_db(
-        post={'submit': 'valid', 'comment': u"Test comment"}
+        post={'submit': 'valid', 'comment': u"Test comment"},
+        context=full_cancelinvoice,
     )
-    request.context = full_cancelinvoice
     request.user = user
     request.is_xhr = True
 

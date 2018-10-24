@@ -48,9 +48,11 @@ from autonomie.events.status_changed import StatusChanged
 from autonomie.utils.widgets import (
     ViewLink,
 )
+from autonomie.export.expense_excel import (
+    XlsExpense,
+)
 from autonomie.export.excel import (
     make_excel_view,
-    XlsExpense,
 )
 from autonomie.resources import (
     expense_resources,

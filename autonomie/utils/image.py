@@ -34,14 +34,28 @@ from PIL import (
 from StringIO import StringIO
 
 
-class ImageResizer(object):
+class ImageRatio(object):
     """
-        Allows to resize images regarding given proportions
-        r = ImageResize(height_proportion, width_proportion, default_color)
-        resized_image_buffer = r.complete(image_buffer)
+    Ensure images respect the given proportions by adding white spaces
 
-        resized_image_buffer will respect the given proportions and
-        will be filed with the default color
+    r = ImageRatio(height_proportion, width_proportion, default_color)
+    resized_image_buffer = r.complete(image_buffer)
+
+    resized_image_buffer will respect the given proportions and
+    will be filed with the given color
+
+
+    height
+
+        The destination height used to compile the dest ratio
+
+    width
+
+        The destination width used to compile the dest ratio
+
+    color
+
+        The RGB tuple describing the filling color to use
     """
     def __init__(self, width, height, color=(255, 255, 255,)):
         self.proportions = float(width)/float(height)
@@ -65,7 +79,10 @@ class ImageResizer(object):
         img_proportions = float(width)/float(height)
 
         if img_proportions >= self.proportions:
-            return img_buf
+            mybuffer = StringIO()
+            img_obj.save(mybuffer, format="PNG")
+            mybuffer.seek(0)
+            return mybuffer
         else:
             new_width = int(height * self.proportions)
             new_height = height
@@ -76,6 +93,30 @@ class ImageResizer(object):
             layer.save(mybuffer, format="PNG")
             mybuffer.seek(0)
             return mybuffer
+
+
+class ImageResizer(object):
+    """
+    Ensure image fit inside the given box
+
+    if the image's width or height are larger than the provided one, the image
+    is resized accordingly
+    """
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def complete(self, img_buf):
+        result = img_buf
+        result.seek(0)
+        img_obj = Image.open(result)
+        width, height = img_obj.size
+
+        img_obj.thumbnail((self.width, self.height), Image.ANTIALIAS)
+        result = StringIO()
+        img_obj.save(result, format='PNG')
+        result.seek(0)
+        return result
 
 
 def build_header(text, size=(1000, 250)):

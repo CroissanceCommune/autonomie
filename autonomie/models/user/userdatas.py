@@ -23,7 +23,6 @@ from sqlalchemy.orm import (
     backref,
 )
 from sqlalchemy.event import listen
-from sqlalchemy.orm.base import NO_VALUE
 
 from autonomie_base.consts import (
     SEX_OPTIONS,
@@ -33,7 +32,6 @@ from autonomie_base.models.base import (
     DBBASE,
     default_table_args,
 )
-from autonomie_base.utils.date import str_to_date
 from autonomie.models.tools import get_excluded_colanderalchemy
 from autonomie.models.node import Node
 from autonomie.models.options import (
@@ -111,7 +109,6 @@ class SocialStatusOption(ConfigurableOption):
     id = get_id_foreignkey_col('configurable_option.id')
 
 
-
 class ActivityTypeOption(ConfigurableOption):
     """
     Different possible values for activity type
@@ -178,7 +175,8 @@ class CaeSituationOption(ConfigurableOption):
         'validation_msg': u"Les types de situations ont bien été configurés",
         'help_msg': u"Ce sont les différents statuts que peuvent prendre les \
         porteurs de projet peuvent avoir pendant leur parcours au sein de la \
-        coopérative.<br /><br /><b>La première situation (dans l'ordre ci-dessous) \
+        coopérative.<br /><br /><b>La première situation (dans l'ordre \
+        ci-dessous) \
         sera affectée par défaut aux nouveaux porteurs de projet.</b>"
     }
     id = get_id_foreignkey_col('configurable_option.id')
@@ -196,13 +194,16 @@ un compte Autonomie lui sera automatiquement associé"
         },
     )
 
+
 def get_default_cae_situation():
-    situation = CaeSituationOption.query().order_by(CaeSituationOption.order).first()
+    situation = CaeSituationOption.query().order_by(
+        CaeSituationOption.order
+    ).first()
     if situation is not None:
         return situation.id
     else:
         return None
-    
+
 
 class SocialDocTypeOption(ConfigurableOption):
     """
@@ -748,7 +749,7 @@ class UserDatas(Node):
         "SocialStatusDatas",
         cascade="all, delete-orphan",
         primaryjoin="and_(UserDatas.id==SocialStatusDatas.userdatas_id, "
-                        "SocialStatusDatas.step=='entry')",
+        "SocialStatusDatas.step=='entry')",
         order_by="SocialStatusDatas.id",
         info={
             'colanderalchemy':
@@ -763,7 +764,7 @@ class UserDatas(Node):
         "SocialStatusDatas",
         cascade="all, delete-orphan",
         primaryjoin="and_(UserDatas.id==SocialStatusDatas.userdatas_id, "
-                        "SocialStatusDatas.step=='today')",
+        "SocialStatusDatas.step=='today')",
         order_by="SocialStatusDatas.id",
         info={
             'colanderalchemy':
@@ -1010,6 +1011,16 @@ class UserDatas(Node):
         }
     )
 
+    career_paths = relationship(
+        "CareerPath",
+        order_by="desc(CareerPath.start_date)",
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'excldue': True},
+        },
+        back_populates='userdatas',
+    )
+
     @property
     def export_label(self):
         return u"{0} {1}".format(
@@ -1070,7 +1081,7 @@ class UserDatas(Node):
         from autonomie.models.career_path import CareerPath
         from autonomie.models.user.userdatas import CaeSituationOption
         if date is None:
-            date=datetime.date.today()
+            date = datetime.date.today()
         last_situation_path = CareerPath.query(self.id).filter(
             CareerPath.start_date <= date
         ).filter(
@@ -1083,6 +1094,23 @@ class UserDatas(Node):
                 CaeSituationOption.id == last_situation_path.cae_situation_id
             ).first()
             return situation
+
+    def get_career_path_by_stages(self):
+        """
+        Collect CareerPath associated to this instance and stores them by stage
+        name
+
+        :returns: A dict {'stage': [List of ordered CareerPath]}
+        :rtype: dict
+        """
+        from autonomie.models.career_path import CareerPath
+        from autonomie.models.career_stage import CareerStage
+        result = {}
+        for stage in CareerStage.query():
+            result[stage.name] = CareerPath.query(self.id).filter_by(
+                career_stage_id=stage.id
+            ).all()
+        return result
 
 
 # multi-valued user-datas
@@ -1292,7 +1320,7 @@ class SocialStatusDatas(DBBASE):
             'export': {'related_key': 'label'}
         }
     )
-    
+
 
 def sync_userdatas_to_user(source_key, user_key):
     def handler(target, value, oldvalue, initiator):

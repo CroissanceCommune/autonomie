@@ -12,15 +12,12 @@ from autonomie.models import files
 
 from autonomie.views import (
     BaseView,
-    DeleteView,
 )
 from autonomie.views.files import FileUploadView
 from autonomie.views.userdatas.userdatas import USERDATAS_MENU
 from autonomie.views.userdatas.routes import (
-    TEMPLATING_ITEM_URL,
     USERDATAS_FILELIST_URL,
     USERDATAS_ITEM_URL,
-    USER_USERDATAS_URL,
     USER_USERDATAS_FILELIST_URL,
     USER_USERDATAS_MYDOCUMENTS_URL,
 )
@@ -81,13 +78,6 @@ class UserUserDatasFileList(UserDatasFileList):
         return self.context.userdatas
 
 
-class TemplatingHistoryDeleteView(DeleteView):
-    def redirect(self):
-        return HTTPFound(
-            self.request.route_path(USER_USERDATAS_URL, id=self.context.user.id)
-        )
-
-
 def mydocuments_view(context, request):
     """
     View callable collecting datas for showing the social docs associated to the
@@ -135,10 +125,4 @@ def includeme(config):
         permission="filelist.userdatas",
         renderer="/userdatas/mydocuments.mako",
         layout='user',
-    )
-    config.add_view(
-        TemplatingHistoryDeleteView,
-        route_name=TEMPLATING_ITEM_URL,
-        request_param="action=delete",
-        permission="delete"
     )

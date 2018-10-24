@@ -23,7 +23,6 @@ from autonomie.compute.math_utils import (
 from autonomie.models.task import (
     Estimation,
 )
-from autonomie.events.status_changed import StatusChanged
 from autonomie.forms.tasks.estimation import (
     validate_estimation,
     get_add_edit_estimation_schema,
@@ -38,10 +37,8 @@ from autonomie.views.task.rest_api import (
     TaskFileRequirementRestView,
 )
 from autonomie.views.task.utils import json_payment_conditions
-from autonomie.views.status import (
-    TaskStatusView,
-    StatusView,
-)
+from autonomie.views.task.views import TaskStatusView
+from autonomie.views.status import StatusView
 
 logger = logging.getLogger(__name__)
 
@@ -287,15 +284,6 @@ class EstimationStatusRestView(TaskStatusView):
 class EstimationSignedStatusRestView(StatusView):
     def check_allowed(self, status, params):
         self.request.context.check_signed_status_allowed(status, self.request)
-
-    def notify(self, status):
-        self.request.registry.notify(
-            StatusChanged(
-                self.request,
-                self.context,
-                status,
-            )
-        )
 
     def status_process(self, status, params):
         return self.context.set_signed_status(

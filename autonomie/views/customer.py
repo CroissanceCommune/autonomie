@@ -45,6 +45,7 @@ from autonomie.models.customer import (
     INDIVIDUAL_FORM_GRID,
 )
 from autonomie.utils.widgets import (
+    Link,
     ViewLink,
 )
 from autonomie.utils.rest import add_rest_views
@@ -195,24 +196,22 @@ class CustomersListView(CustomersListTools, BaseListView):
         """
             Return action buttons with permission handling
         """
-        yield (
+        yield Link(
             self.request.route_path("customer", id=customer.id),
             u"Voir",
-            u"Voir/Modifier ce client",
-            u"pencil",
-            {}
+            title=u"Voir/Modifier ce client",
+            icon=u"fa fa-pencil",
         )
 
-        yield (
+        yield Link(
             self.request.route_path(
                 COMPANY_PROJECTS_ROUTE,
                 id=customer.company.id,
                 _query=dict(action="add", customer=customer.id)
             ),
             u"Ajouter un projet",
-            u"Ajouter un projet pour ce client",
-            u"plus-sign",
-            {}
+            title=u"Ajouter un projet pour ce client",
+            icon=u"fa fa-plus-circle",
         )
 
         if customer.archived:
@@ -220,35 +219,27 @@ class CustomersListView(CustomersListTools, BaseListView):
         else:
             label = u"Archiver"
 
-        yield (
+        yield Link(
             self.request.route_path(
                 "customer",
                 id=customer.id,
                 _query=dict(action="archive"),
             ),
             label,
-            label,
-            "book",
-            {}
+            icon="book",
         )
 
         if self.request.has_permission('delete_customer', customer):
-            yield (
+            yield Link(
                 self.request.route_path(
                     "customer",
                     id=customer.id,
                     _query=dict(action="archive"),
                 ),
                 u"Supprimer",
-                u"Supprimer définitivement ce client",
-                "trash",
-                {
-                    "onclick": (
-                        u"return confirm('Êtes-vous sûr de "
-                        "vouloir supprimer ce client ?')"
-                    )
-                }
-
+                title=u"Supprimer définitivement ce client",
+                icon="fa fa-trash",
+                confirm=u"Êtes-vous sûr de vouloir supprimer ce client ?"
             )
 
 

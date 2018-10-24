@@ -135,7 +135,7 @@ class ViewLink(Widget, PermWidget):
         self.path = path
         if confirm:
             self.js = u"return confirm('{0}')".format(
-                confirm.replace("'", "\\'")
+                confirm.replace("'", "\\'").replace('\n', '')
             )
         else:
             self.js = js
@@ -383,7 +383,7 @@ class Link(object):
         self.title = title or self.label
         if confirm:
             self.js = u"return confirm('{0}')".format(
-                confirm.replace("'", "\\'")
+                confirm.replace("'", "\\'").replace('\n', '\\n')
             )
             if popup:
                 raise Exception(

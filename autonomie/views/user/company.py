@@ -63,7 +63,6 @@ class UserCompaniesView(BaseView):
                     u"Retirer",
                     title=u"Retirer l'entrepreneur de cette enseigne",
                     icon="link",
-                    css="text-warning",
                     confirm=u"{} n'aura plus accès aux données de cette "
                     u"l'enseigne {}. Êtes-vous sûr de vouloir continuer "
                     u"?".format(
@@ -82,7 +81,6 @@ class UserCompaniesView(BaseView):
                     u"Désactiver",
                     title=u"Désactiver cette enseigne",
                     icon="book",
-                    css="text-danger",
                     confirm=u"L'enseigne {} ne sera plus accessible et "
                     u"n'apparaîtra plus dans les listes (factures, notes de "
                     u"dépenses ...) Êtes-vous sûr de vouloir continuer "
@@ -98,7 +96,6 @@ class UserCompaniesView(BaseView):
                     u"Activer",
                     title=u"Ré-activer cette enseigne",
                     icon="book",
-                    css="text-success"
                 )
 
     def __call__(self):

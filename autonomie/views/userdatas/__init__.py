@@ -4,3 +4,4 @@ def includeme(config):
     config.include(".userdatas")
     config.include(".filelist")
     config.include(".career_path")
+    config.include('.py3o')

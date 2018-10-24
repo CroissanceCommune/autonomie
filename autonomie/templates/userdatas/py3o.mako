@@ -70,12 +70,7 @@
                         <td>${api.format_account(history.user)}</td>
                         <td>${api.format_datetime(history.created_at)}</td>
                         <td class='text-right'>
-                            <% url = request.route_path('/templatinghistory/{id}', id=history.id, _query=dict(action='delete')) %>
-                            ${table_btn(url, \
-                            u"Supprimer cette entrée",\
-                            u"Supprimer cette entrée de l'historique", \
-                            icon='trash', \
-                            css_class="btn-danger")}
+                        ${request.layout_manager.render_panel('action_dropdown', links=stream_actions(history))}
                         </td>
                     </tr>
                 % endif

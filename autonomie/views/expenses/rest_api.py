@@ -556,14 +556,6 @@ class RestBookMarkView(BaseView):
 
 
 class RestExpenseSheetStatusView(StatusView):
-    def notify(self, status):
-        """
-        Notify a status change
-        """
-        self.request.registry.notify(
-            StatusChanged(self.request, self.context, status)
-        )
-
     def redirect(self):
         loc = self.request.route_path("/expenses/{id}", id=self.context.id)
         return dict(redirect=loc)

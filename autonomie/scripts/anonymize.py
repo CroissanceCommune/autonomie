@@ -48,6 +48,8 @@ class Anonymizer(object):
 
     def _an_activity(self):
         from autonomie.models.activity import Activity, ActivityType
+        from autonomie.models.workshop import Workshop
+
         for activity in self.session.query(Activity):
             for fieldname in (
                 'point',
@@ -57,6 +59,12 @@ class Anonymizer(object):
                 'notes'
             ):
                 setattr(activity, fieldname, self.faker.text())
+
+        for workshop in self.session.query(Workshop).options(load_only('id')):
+            workshop.leaders = [
+                u"{} {}".format(self.faker.last_name(), self.faker.first_name())
+            ]
+            self.session.merge(workshop)
 
         type_labels = (
             u"RV conseil",

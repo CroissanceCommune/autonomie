@@ -23,6 +23,9 @@
 <%inherit file="${context['main_template'].uri}" />
 <%block name='afteractionmenu'>
 <div class='page-header-block'>
+    <div class="pull-right btn-group" role='group'>
+    ${request.layout_manager.render_panel('menu_dropdown', label="Exporter cette grille", links=export_btns)}
+    </div>
     <div class='text-center'>
         <h4>
         Vos comptes de résultat pour l'année <b>${selected_year}</b>

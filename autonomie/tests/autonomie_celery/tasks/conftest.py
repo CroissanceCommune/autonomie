@@ -33,10 +33,11 @@ def income_measure_types(dbsession, income_measure_type_categories):
         ('Label 1', 0, u"701", False, ""),
         ('Label 2', 0, u"701,702", False, ""),
         ('Label 3', 1, u"601", False, ""),
-        ('Total partiel autres achats', 1, u"6,-601", True, "account_prefix"),
+        ('Total partiel autres achats', 1, u"60,-601", True, "account_prefix"),
         ('Total produits et achats', 1, u"Produits,Achats", True, "categories"),
         ('Ratio produits et achats', 1, u"{Achats} * 100 / {Produits}", True,
          "categories"),
+        ('Salaires et appointements', 1, u"641,-641150", False, ""),
     ):
         typ = IncomeStatementMeasureType(
             label=label,
@@ -139,10 +140,13 @@ def general_operations(dbsession, general_upload, company):
         (1, "70200", u"", 1000, 0),
         (1, "602", u"avoir", 0, 1000),
         (1, "601", u"achats", 0, 1000),
+        (1, "641150", u"Test", 0, 17370),
+        (1, "641", u"Test", 5625, 0),
         (2, "70100", u"", 2000, 0),
         (2, "70200", u"", 2000, 0),
         (2, "602", u"avoir", 0, 2000),
         (2, "601", u"achats", 0, 2000),
+        (2, "641", u"Test", 38521.11, 0),
     ):
         op = AccountingOperation(
             date=datetime.date(2017, month, 1),

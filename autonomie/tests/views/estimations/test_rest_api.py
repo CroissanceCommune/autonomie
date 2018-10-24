@@ -68,9 +68,10 @@ def test_status_change_view(
     from autonomie.views.estimations.rest_api import EstimationStatusRestView
 
     request = get_csrf_request_with_db(
-        post={'submit': 'valid', 'comment': u"Test comment"}
+        post={'submit': 'valid', 'comment': u"Test comment"},
+        context=full_estimation
     )
-    request.context = full_estimation
+    from pyramid_layout.layout import LayoutManager
     request.user = user
     request.is_xhr = True
 

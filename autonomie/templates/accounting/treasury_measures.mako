@@ -150,22 +150,8 @@
                             <td onclick="${onclick}" class="visible-lg rowlink" >
                                 ${api.format_amount(record.get_first_measure().value, precision=0)|n}&nbsp;€
                             </td>
-                            <td class="actions">
-                                <div class='btn-group'>
-                                    <button
-                                        type="button"
-                                        class="btn btn-default dropdown-toggle"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false">
-                                        Actions <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-right">
-                                        % for url, label, title, icon, options in stream_actions(record):
-                                            ${dropdown_item(url, label, title, icon=icon, **options)}
-                                        % endfor
-                                    </ul>
-                                </div>
+                            <td class='actions'>
+                            ${request.layout_manager.render_panel('action_dropdown', links=stream_actions(record))}
                             </td>
                         </tr>
                     % endfor

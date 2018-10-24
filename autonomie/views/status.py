@@ -14,22 +14,18 @@ Common to :
 """
 import logging
 import colander
-import datetime
 
 from pyramid.httpexceptions import (
     HTTPNotFound,
-    HTTPFound,
 )
+from autonomie.events.status_changed import StatusChanged
 
-from autonomie.models.task import TaskStatus
 from autonomie.exception import (
     Forbidden,
     BadRequest,
 )
-from autonomie.events.status_changed import StatusChanged
 from autonomie.utils.rest import RestError
 from autonomie.views import BaseView
-from autonomie.views.project.routes import PROJECT_ITEM_ROUTE
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +119,13 @@ class StatusView(BaseView):
 
         :param str status: The new status that was affected
         """
-        raise NotImplemented()
+        self.request.registry.notify(
+            StatusChanged(
+                self.request,
+                self.context,
+                status,
+            )
+        )
 
     def __call__(self):
         """
@@ -180,85 +182,3 @@ class StatusView(BaseView):
                 "error"
             )
             return self.redirect()
-
-
-class TaskStatusView(StatusView):
-    """
-    View handling base status for tasks (estimation/invoice/cancelinvoice)
-
-    Status related views should implement the validate function to ensure data
-    integrity
-    """
-
-    def validate(self):
-        raise NotImplemented()
-
-    def check_allowed(self, status, params):
-        self.request.context.check_status_allowed(status, self.request)
-
-    def redirect(self):
-        project_id = self.request.context.project.id
-        loc = self.request.route_path(PROJECT_ITEM_ROUTE, id=project_id)
-        if self.request.is_xhr:
-            return dict(redirect=loc)
-        else:
-            return HTTPFound(loc)
-
-    def pre_status_process(self, status, params):
-        if 'comment' in params:
-            self.context.status_comment = params.get('comment')
-            logger.debug(self.context.status_comment)
-
-        if 'change_date' in params and params['change_date'] in ('1', 1):
-            logger.debug("Forcing the document's date !!!")
-            self.context.date = datetime.date.today()
-
-        return StatusView.pre_status_process(self, status, params)
-
-    def pre_wait_process(self, status, params):
-        """
-        Launched before the wait status is set
-        """
-        self.validate()
-        return {}
-
-    def pre_valid_process(self, status, params):
-        """
-        Launched before the wait status is set
-        """
-        self.validate()
-        return {}
-
-    def post_status_process(self, status, params):
-        """
-        Launch post status process functions
-
-        :param str status: The new status that should be affected
-        :param dict params: The params that were transmitted by the associated
-        State's callback
-        """
-        logger.debug("post_status_process")
-        logger.debug(self.context.status_comment)
-        # Record a task status change
-        self.context.status_date = datetime.date.today()
-        status_record = TaskStatus(
-            task_id=self.context.id,
-            status_code=status,
-            status_person_id=self.request.user.id,
-            status_comment=self.context.status_comment
-        )
-        self.context.statuses.append(status_record)
-        self.request.dbsession.merge(self.context)
-        StatusView.post_status_process(self, status, params)
-
-    def notify(self, status):
-        """
-        Notify the change to the registry
-        """
-        self.request.registry.notify(
-            StatusChanged(
-                self.request,
-                self.context,
-                status,
-            )
-        )

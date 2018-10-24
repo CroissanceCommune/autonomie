@@ -30,11 +30,9 @@ from autonomie.views.task.rest_api import (
     DiscountLineRestView,
     TaskFileRequirementRestView,
 )
+from autonomie.views.task.views import TaskStatusView
 from autonomie.views.task.utils import json_payment_conditions
 
-from autonomie.views.status import (
-    TaskStatusView,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +167,7 @@ class CancelInvoiceStatusRestView(TaskStatusView):
         return {}
 
     def post_valid_process(self, status, params):
+        TaskStatusView.post_valid_process(self, status, params)
         self.context.invoice.check_resulted(
             user_id=self.request.user.id,
         )

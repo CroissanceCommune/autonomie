@@ -10,7 +10,11 @@ from sqlalchemy.orm import (
     joinedload,
 )
 
+from autonomie.export.utils import write_file_to_request
+from autonomie.export.excel import XlsExporter
+from autonomie.export.ods import OdsExporter
 from autonomie.compute import math_utils
+from autonomie.utils.widgets import Link
 from autonomie.utils.strings import (
     month_name,
     format_float,
@@ -24,6 +28,12 @@ from autonomie.forms.accounting import get_income_statement_measures_list_schema
 from autonomie.views import BaseListView
 
 logger = logging.getLogger(__name__)
+
+
+INCOME_STATEMENT_GRIDS_ROUTE = \
+        "/companies/{id}/accounting/income_statement_measure_grids"
+INCOME_STATEMENT_GRIDS_ROUTE_EXPORT = \
+        "/companies/{id}/accounting/income_statement_measure_grids.{extension}"
 
 
 class YearGlobalGrid(object):
@@ -271,6 +281,7 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         Add template datas in the response dictionnary
         """
         month_grids = response_dict['records']
+        logger.debug("MONTH : {}".format(month_grids.count()))
         types = self.get_types()
         year_turnover = self.context.get_turnover(self.year)
 
@@ -279,13 +290,97 @@ class CompanyIncomeStatementMeasuresListView(BaseListView):
         response_dict['grid'] = grid
         response_dict['current_year'] = datetime.date.today().year
         response_dict['selected_year'] = int(self.year)
+        response_dict['export_btns'] = [
+            Link(
+                self.request.route_path(
+                    INCOME_STATEMENT_GRIDS_ROUTE_EXPORT,
+                    id=self.context.id,
+                    extension="ods",
+                    _query=self.request.GET,
+                ),
+                u"ODS",
+                title=u"Exporter ces données au format Open Document",
+                icon="fa fa-file-text-o",
+            ),
+            Link(
+                self.request.route_path(
+                    INCOME_STATEMENT_GRIDS_ROUTE_EXPORT,
+                    id=self.context.id,
+                    extension="xls",
+                    _query=self.request.GET,
+                ),
+                u"Excel",
+                title=u"Exporter ces données au format Xls",
+                icon="fa fa-file-excel-o",
+            )
+        ]
         return response_dict
+
+
+class IncomeStatementMeasureGridXlsView(CompanyIncomeStatementMeasuresListView):
+    """
+    Xls output
+    """
+    _factory = XlsExporter
+
+    @property
+    def filename(self):
+        return u"compte_de_resultat_{}.{}".format(
+            self.year,
+            self.request.matchdict['extension'],
+        )
+
+    def _stream_rows(self, query):
+        types = self.get_types()
+        year_turnover = self.context.get_turnover(self.year)
+        grid = YearGlobalGrid(query, types, year_turnover)
+        for item in grid.rows:
+            yield item
+
+    def _init_writer(self):
+        writer = self._factory()
+        writer.add_title(
+            u"Compte de résultat de {} pour l'année {}".format(
+                self.context.name,
+                self.year,
+            ),
+            width=15
+        )
+        writer.add_breakline()
+        headers = [month_name(i).capitalize() for i in range(1, 13)]
+        headers.insert(0, u"")
+        headers.append(u"Total")
+        headers.append(u"% Chiffre d'Affaire")
+        writer.add_headers(headers)
+        return writer
+
+    def _build_return_value(self, schema, appstruct, query):
+        writer = self._init_writer()
+        writer._datas = []
+        for type_, row in self._stream_rows(query):
+            row_datas = [type_.label]
+            row_datas.extend(row)
+            if type_.is_total:
+                writer.add_highlighted_row(row_datas)
+            else:
+                writer.add_row(row_datas)
+        write_file_to_request(self.request, self.filename, writer.render())
+        return self.request.response
+
+
+class IncomeStatementMeasureGridOdsView(IncomeStatementMeasureGridXlsView):
+    _factory = OdsExporter
 
 
 def add_routes(config):
     config.add_route(
-        "/companies/{id}/accounting/income_statement_measure_grids",
-        "/companies/{id}/accounting/income_statement_measure_grids",
+        INCOME_STATEMENT_GRIDS_ROUTE,
+        INCOME_STATEMENT_GRIDS_ROUTE,
+        traverse="/companies/{id}",
+    )
+    config.add_route(
+        INCOME_STATEMENT_GRIDS_ROUTE_EXPORT,
+        INCOME_STATEMENT_GRIDS_ROUTE_EXPORT,
         traverse="/companies/{id}",
     )
 
@@ -293,9 +388,21 @@ def add_routes(config):
 def add_views(config):
     config.add_view(
         CompanyIncomeStatementMeasuresListView,
-        route_name="/companies/{id}/accounting/income_statement_measure_grids",
+        route_name=INCOME_STATEMENT_GRIDS_ROUTE,
         permission="view.accounting",
         renderer="/accounting/income_statement_measures.mako",
+    )
+    config.add_view(
+        IncomeStatementMeasureGridXlsView,
+        route_name=INCOME_STATEMENT_GRIDS_ROUTE_EXPORT,
+        permission="view.accounting",
+        match_param="extension=xls",
+    )
+    config.add_view(
+        IncomeStatementMeasureGridOdsView,
+        route_name=INCOME_STATEMENT_GRIDS_ROUTE_EXPORT,
+        permission="view.accounting",
+        match_param="extension=ods",
     )
 
 

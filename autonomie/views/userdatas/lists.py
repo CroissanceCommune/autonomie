@@ -20,6 +20,7 @@ from autonomie.models.user.userdatas import (
     CompanyDatas,
 )
 from autonomie.forms.user.userdatas import get_list_schema
+from autonomie.utils.widgets import Link
 from autonomie.utils.renderer import set_close_popup_response
 from autonomie.views import BaseListView
 from autonomie.views.userdatas.routes import (
@@ -118,32 +119,29 @@ class UserDatasListView(UserDatasListClass, BaseListView):
         """
         Stream actions available for the given item
         """
-        yield (
+        yield Link(
             self.request.route_path(
                 USER_USERDATAS_EDIT_URL,
                 id=item.user_id
             ),
             u"Voir",
-            u"Voir / modifier les données de gestion sociales",
-            u"pencil",
-            {}
+            title=u"Voir / modifier les données de gestion sociales",
+            icon=u"fa fa-pencil",
         )
 
-        yield (
+        yield Link(
             self.request.route_path(
                 USERDATAS_ITEM_URL,
                 id=item.id,
                 _query={'action': 'delete'}
             ),
             u"Supprimer",
-            u"Supprimer la fiche de gestion sociale",
-            u"trash",
-            {
-                'onclick': u"return confirm('En supprimant cette fiche de "
-                u"gestion sociale, vous supprimerez également \n"
-                u"les données associées (documents sociaux, " 
-                u"parcours, historiques...). \n\nContinuer ?');"
-            }
+            title=u"Supprimer la fiche de gestion sociale",
+            icon=u"fa fa-trash",
+            confirm=u"En supprimant cette fiche de "
+            u"gestion sociale, vous supprimerez également \n"
+            u"les données associées (documents sociaux, "
+            u"parcours, historiques...). \n\nContinuer ?"
         )
 
 

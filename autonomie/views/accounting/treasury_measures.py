@@ -7,6 +7,7 @@ import logging
 import colander
 from sqlalchemy import extract
 
+from autonomie.utils.widgets import Link
 from autonomie.models.accounting.treasury_measures import (
     TreasuryMeasureGrid,
 )
@@ -97,12 +98,11 @@ class CompanyTreasuryMeasuresListView(BaseListView):
             id=item.id
         )
         return (
-            (
+            Link(
                 url,
                 u"Voir cet état",
-                u"Voir le détail de cet état de trésorerie",
-                u"fa fa-money",
-                {}
+                title=u"Voir le détail de cet état de trésorerie",
+                icon=u"money",
             ),
         )
 

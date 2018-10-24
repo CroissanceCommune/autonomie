@@ -380,6 +380,10 @@ class Task(Node):
     )
     business_type_id = Column(ForeignKey("business_type.id"))
     business_id = Column(ForeignKey("business.id"))
+    pdf_file_id = Column(
+        ForeignKey("file.id"),
+        info={'colanderalchemy': {'exclude': True}}
+    )
 
     # Organisationnal Relationships
     status_person = relationship(
@@ -541,6 +545,11 @@ class Task(Node):
             'colanderalchemy': {'exclude': True},
             'export': {'exclude': True},
         }
+    )
+    pdf_file = relationship(
+        "File",
+        primaryjoin="Task.pdf_file_id==File.id",
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     # Not used in latest invoices
@@ -785,7 +794,23 @@ _{s.date:%m%y}"
         return business
 
     def is_training(self):
-        return self.business_type.name == 'training'
+        return self.business_type and self.business_type.name == 'training'
+
+    def persist_pdf(self, filename, pdf_buffer):
+        """
+        Persist the pdf output of this task to the database
+
+        :param obj pdf_buffer: A buffer (file, StringIO)
+        :param str filename: The name of the pdf file
+        """
+        from autonomie.models.files import File
+        pdf_buffer.seek(0)
+        self.pdf_file = File(
+            name=filename,
+            mimetype="application/pdf",
+        )
+        self.pdf_file.data = pdf_buffer.read()
+        DBSESSION().merge(self)
 
 
 class DiscountLine(DBBASE, DiscountLineCompute):

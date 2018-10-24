@@ -108,15 +108,6 @@ class TemplateAddView(FileUploadView, AdminTreeMixin):
     valid_msg = UPLOAD_OK_MSG
     add_template_vars = ('title', 'breadcrumb', 'back_link')
 
-    def before(self, form):
-        come_from = self.request.referrer
-        log.debug(u"Coming from : %s" % come_from)
-
-        appstruct = {
-            'come_from': come_from
-        }
-        form.set_appstruct(appstruct)
-
 
 class TemplateEditView(FileEditView, AdminTreeMixin):
     route_name = TEMPLATE_ITEM_URL
@@ -125,9 +116,6 @@ class TemplateEditView(FileEditView, AdminTreeMixin):
     schema = get_template_upload_schema()
     valid_msg = EDIT_OK_MSG
     add_template_vars = ('title', 'breadcrumb', 'back_link')
-
-    def before(self, form):
-        FileEditView.before(self, form)
 
 
 class TemplateDisableView(BaseAdminDisableView):

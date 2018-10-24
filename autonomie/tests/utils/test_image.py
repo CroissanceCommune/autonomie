@@ -31,26 +31,50 @@ from autonomie.tests.conftest import DATASDIR
 
 from PIL import Image
 
-from autonomie.utils.image import ImageResizer
+from autonomie.utils.image import (
+    ImageResizer,
+    ImageRatio,
+)
+
+@pytest.fixture
+def ratio():
+    return ImageRatio(5, 1)
+
 
 @pytest.fixture
 def resizer():
-    return ImageResizer(5, 1)
+    return ImageResizer(800, 200)
 
-def test_resize_not_affect_equal(resizer):
+
+def test_ratio_not_affect_equal(ratio):
     image = file(os.path.join(DATASDIR, 'entete5_1.png'), 'r')
-    image2 = resizer.complete(image)
-    assert image2 == image
+    image2 = ratio.complete(image)
+    assert Image.open(image2).size == Image.open(image).size
 
-def test_resize_not_affect_less(resizer):
+
+def test_ratio_not_affect_less(ratio):
     image = file(os.path.join(DATASDIR, 'entete10_1.png'), 'r')
-    image2 = resizer.complete(image)
-    assert image2 == image
+    image2 = ratio.complete(image)
+    assert Image.open(image2).size == Image.open(image).size
 
-def test_resize(resizer):
+
+def test_ratio(ratio):
     image = file(os.path.join(DATASDIR, 'entete2_1.png'), 'r')
-    image2 = resizer.complete(image)
-    assert image != image2
+    image2 = ratio.complete(image)
     img_obj2 = Image.open(image2)
     width, height = img_obj2.size
     assert width/height == 5
+
+
+def test_resize_width(resizer):
+    image = file(os.path.join(DATASDIR, 'entete2_1.png'), 'r')
+    image2 = resizer.complete(image)
+    assert Image.open(image2).size[0] == 400
+    assert Image.open(image2).size[1] == 200
+
+
+def test_resize_height(resizer):
+    image = file(os.path.join(DATASDIR, 'entete5_1.png'), 'r')
+    image2 = resizer.complete(image)
+    assert Image.open(image2).size[0] == 800
+    assert Image.open(image2).size[1] == 160

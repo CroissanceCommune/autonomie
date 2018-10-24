@@ -794,7 +794,7 @@ _{s.date:%m%y}"
         return business
 
     def is_training(self):
-        return self.business_type.name == 'training'
+        return self.business_type and self.business_type.name == 'training'
 
     def persist_pdf(self, filename, pdf_buffer):
         """

@@ -21,9 +21,7 @@ def update_database_structure():
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
-    from pprint import pprint
     session = DBSESSION()
-    from alembic.context import get_bind
     cnx = op.get_bind()
     sale_product = cnx.execute("SELECT id, tva FROM sale_product")
     for item in sale_product:

@@ -21,11 +21,22 @@ def update_database_structure():
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
+    from pprint import pprint
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()
-    op.execute("UPDATE sale_product SET tva=20000 WHERE tva=NULL")
-    op.execute("UPDATE sale_product SET product_id=7 WHERE tva=20000")
+    cnx = op.get_bind()
+    cnx.execute("UPDATE sale_product SET product_id=10")
+    sale_product = cnx.execute("SELECT id, tva FROM sale_product")
+    pprint(sale_product)
+    for item in sale_product:
+        tvaId = cnx.execute("SELECT id FROM tva  WHERE value=%s" % item.tva)
+        if tvaId is not None:
+            for id in tvaId:
+                products = cnx.execute("SELECT id, tva_id from product WHERE tva_id=%s" % id.id)
+                if products is not None and products.rowcount < 2:
+                    for product in products:
+                        cnx.execute("UPDATE sale_product SET product_id=%s WHERE id=%s" % (product.id, item.id))
     from zope.sqlalchemy import mark_changed
     mark_changed(session)
 

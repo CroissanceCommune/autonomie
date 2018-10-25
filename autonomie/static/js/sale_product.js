@@ -238,14 +238,14 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
         },
         templateHelpers: function () {
             var tva = this.model.get('tva');
-            var current_tva = _.find(
-                AppOptions['tvas'], function (item) {
-                    return item.value == tva;
-                }
-            );
             var tva_label = "";
-            if (!_.isUndefined(current_tva)) {
-                tva_label = current_tva.name;
+            if(! _.isUndefined(tva)) {
+                var current_tva = _.find(AppOptions['tvas'], function (item) {
+                        return item.value == tva;
+                });
+                if (!_.isUndefined(current_tva)) {
+                    tva_label = current_tva.name;
+                }
             }
             return {tva_label: tva_label};
         },
@@ -271,7 +271,9 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
     var ProductFormView = BaseFormView.extend({
         template: "product_form",
         ui: {
-            "form": "form"
+            "form": "form",
+            "vatSelect": "form select[name=tva]",
+            "vatProductSelect": "form select[name=product_id]",
         },
         focus: function () {
             this.ui.form.find('input').first().focus();
@@ -280,14 +282,22 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
             this.destroy();
         },
         templateHelpers: function () {
-            var tva = this.model.get('tva');
-            tva_options = this.updateSelectOptions(AppOptions['tvas'], tva);
+            var tva = this.model.get('tva') || '20';
+            var tva_options = this.updateSelectOptions(AppOptions['tvas'], Number(tva));
+            var product_id = this.model.get('product_id');
+            var product_options = [];
+            var filtered_product_options = this.getProductOptions(tva_options, AppOptions['products'], tva);
+            if(! _.isEmpty(filtered_product_options)) {
+                product_options = this.updateSelectOptions(filtered_product_options,product_id, 'id');
+            }
+
             var unity = this.model.get('unity');
-            unity_options = this.updateSelectOptions(
-                AppOptions['unities'], unity);
+            var unity_options = this.updateSelectOptions(AppOptions['unities'], unity);
+
             return {
                 tva_options: tva_options,
-                unity_options: unity_options
+                unity_options: unity_options,
+                product_options: product_options,
             };
         },
         onBeforeFormSubmit: function () {
@@ -299,6 +309,16 @@ AutonomieApp.module('Product', function (Product, App, Backbone, Marionette, $, 
                 delete tinyMCE.editors.tiny_description;
             }
             tinyMCE.execCommand('mceAddEditor', false, 'tiny_description');
+            // Update vat products option list
+            var innerGetProductOptions = this.getProductOptions;
+            this.ui.vatSelect.on('change', function(){
+                $('form select[name=product_id]').empty();
+                var new_product_options = innerGetProductOptions(AppOptions['tvas'], AppOptions['products'], $(this).val());
+                for (i in new_product_options) {
+                    var newOption = new Option(new_product_options[i].name, new_product_options[i].id);
+                    $('form select[name=product_id]').append(newOption).trigger('change');
+                }
+            });
         }
     });
 

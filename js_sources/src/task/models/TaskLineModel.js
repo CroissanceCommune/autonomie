@@ -67,6 +67,7 @@ const TaskLineModel = BaseModel.extend({
         this.set('cost', product_datas.value);
         this.set('quantity', 1);
         this.set('tva', product_datas.tva);
+        this.set('product_id', product_datas.product_id);
         this.trigger('set:product');
     }
 });

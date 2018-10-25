@@ -42,6 +42,7 @@ from autonomie_base.models.base import (
 from autonomie.compute.math_utils import integer_to_amount
 from autonomie import forms
 from autonomie.forms.custom_types import AmountType
+import colander
 
 
 PRODUCT_TO_GROUP_REL_TABLE = Table(
@@ -128,7 +129,6 @@ class SaleProduct(DBBASE):
             },
             'export': forms.EXCLUDED,
         },
-        default=0
     )
     value = Column(Float(), default=0)
     unity = Column(String(100), default='')
@@ -138,6 +138,16 @@ class SaleProduct(DBBASE):
         SaleProductCategory,
         backref=backref('products'),
         info={'colanderalchemy': forms.EXCLUDED},
+    )
+
+    product_id = Column(Integer)
+
+    product = relationship(
+        "Product",
+        primaryjoin="Product.id==SaleProduct.product_id",
+        uselist=False,
+        foreign_keys=product_id,
+        info={'colanderalchemy': {'exclude': True}}
     )
 
     def __json__(self, request):
@@ -152,6 +162,7 @@ class SaleProduct(DBBASE):
             tva=integer_to_amount(self.tva, 2),
             value=self.value,
             unity=self.unity,
+            product_id=self.product_id,
             category_id=self.category_id,
             category=self.category.title,
         )

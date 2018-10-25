@@ -6778,6 +6778,7 @@ webpackJsonp([2],[
 	        this.set('cost', product_datas.value);
 	        this.set('quantity', 1);
 	        this.set('tva', product_datas.tva);
+	        this.set('product_id', product_datas.product_id);
 	        this.trigger('set:product');
 	    }
 	});
@@ -7470,7 +7471,7 @@ webpackJsonp([2],[
 	    },
 	    modelEvents: {
 	        'set:product': 'refreshForm',
-	        'change:tva': 'refreshProductSelect'
+	        'change:tva': 'refreshTvaProductSelect'
 	    },
 	    initialize: function initialize() {
 	        var channel = _backbone4.default.channel('config');
@@ -7478,8 +7479,8 @@ webpackJsonp([2],[
 	        this.tva_options = channel.request('get:options', 'tvas');
 	        this.product_options = channel.request('get:options', 'products');
 	        this.section = channel.request('get:form_section', 'tasklines');
+	        this.all_product_options = channel.request('get:options', 'products');
 	    },
-	
 	    onCatalogEdit: function onCatalogEdit(product_datas) {
 	        this.model.loadProduct(product_datas);
 	    },
@@ -7530,7 +7531,14 @@ webpackJsonp([2],[
 	            field_name: 'tva',
 	            id_key: 'value'
 	        }));
-	        this.refreshProductSelect();
+	        this.product_options = this.getProductOptions(this.tva_options, this.all_product_options, this.model.get('tva'));
+	        this.showChildView('product_id', new _SelectWidget2.default({
+	            options: this.product_options,
+	            title: "Compte produit",
+	            value: this.model.get('product_id'),
+	            field_name: 'product_id',
+	            id_key: 'id'
+	        }));
 	        if (this.isAddView()) {
 	            this.getUI('main_tab').tab('show');
 	        }
@@ -7541,34 +7549,38 @@ webpackJsonp([2],[
 	    getDefaultTva: function getDefaultTva() {
 	        return _.findWhere(this.tva_options, { selected: true });
 	    },
-	    refreshProductSelect: function refreshProductSelect() {
-	        /*
-	         * Show the product select tag
-	         */
-	        if (_.has(this.section, 'product')) {
-	            var product_options = this.product_options;
+	    getProductOptions: function getProductOptions(tva_options, product_options) {
+	        var tva = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '20';
 	
-	            var tva_value = this.model.get('tva');
-	            var tva;
-	            if (!_.isUndefined(tva_value)) {
-	                tva = this.getTvaIdFromValue(tva_value);
-	            }
-	            if (!_.isUndefined(tva)) {
-	                product_options = _.where(this.product_options, { tva_id: tva.id });
-	            } else {
-	                var default_tva = this.getDefaultTva();
-	                if (!_.isUndefined(default_tva)) {
-	                    product_options = _.where(this.product_options, { tva_id: default_tva.id });
-	                }
-	            }
-	            this.showChildView('product_id', new _SelectWidget2.default({
-	                options: product_options,
-	                title: "Code produit",
-	                value: this.model.get('product_id'),
-	                field_name: 'product_id',
-	                id_key: 'id'
-	            }));
+	        /*
+	         *  Return an array on filtered products option depending on selected tva
+	         *  :params list tva_options:
+	         *  :params list product_options:
+	         *  :param string tva
+	         */
+	        var options = null;
+	        var current_tva_infos = _.findWhere(tva_options, { value: Number(tva) });
+	        if (!_.isEmpty(current_tva_infos)) {
+	            options = _.filter(product_options, function (product) {
+	                return product.tva_id === current_tva_infos.id;
+	            });
 	        }
+	        return options;
+	    },
+	    refreshTvaProductSelect: function refreshTvaProductSelect(event) {
+	        /**
+	         * Update and show the Tva products option select
+	         * :param obj event
+	         */
+	        var val = !_.isUndefined(event.changed.tva) ? event.changed.tva : '20';
+	        this.product_options = this.getProductOptions(this.tva_options, this.all_product_options, val);
+	        this.showChildView('product_id', new _SelectWidget2.default({
+	            options: this.product_options,
+	            title: "Compte produit",
+	            value: this.model.get('product_id'),
+	            field_name: 'product_id',
+	            id_key: 'id'
+	        }));
 	    },
 	
 	    onRender: function onRender() {

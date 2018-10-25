@@ -24,6 +24,7 @@
 
 
 // Override backbone marionette's render method to fit hogan templating
+
 Backbone.Marionette.Renderer.render = function(template_name, data){
   var template_obj = Handlebars.templates[template_name + '.mustache'];
   return template_obj(data);
@@ -316,6 +317,26 @@ var BaseFormView = Backbone.Marionette.CompositeView.extend({
         option['selected'] = 'true';
       }
     });
+    return options;
+  },
+  getProductOptions: function(tva_options, product_options, tva) {
+   /*
+    *  Return an array on filtered products option depending on selected tva
+    *  :params list tva_options:
+    *  :params list product_options:
+    *  :param string tva
+    */
+    if (_.isUndefined(tva)){
+      tva = '20';
+    }
+    var options = null;
+    var current_tva_infos = _.findWhere(tva_options, { value: Number(tva)});
+    if(! _.isEmpty(current_tva_infos)) {
+        options = _.filter(product_options, function(product) {
+          return product.tva_id === current_tva_infos.id;
+        });
+
+    }
     return options;
   }
 });

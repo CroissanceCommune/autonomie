@@ -28,7 +28,7 @@ import functools
 
 from colanderalchemy import SQLAlchemySchemaNode
 
-from autonomie.models.tva import Tva
+from autonomie.models.tva import Tva, Product
 from autonomie.models.task import WorkUnit
 from autonomie.models.training import TrainingTypeOptions
 from autonomie.models.sale_product import (
@@ -91,6 +91,7 @@ def company_products_options_ajax_view(context, request):
     return dict(
         tvas=Tva.query().all(),
         unities=WorkUnit.query().all(),
+        products=Product.query().all(),
         training_type=TrainingTypeOptions.query().all(),
     )
 

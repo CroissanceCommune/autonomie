@@ -26,7 +26,6 @@ def migrate_datas():
     from alembic.context import get_bind
     cnx = op.get_bind()
     sale_product = cnx.execute("SELECT id, tva FROM sale_product")
-    pprint(sale_product)
     for item in sale_product:
         tvaId = cnx.execute("SELECT id FROM tva  WHERE value=%s" % item.tva)
         if tvaId is not None:

@@ -25,7 +25,6 @@ def migrate_datas():
     session = DBSESSION()
     from alembic.context import get_bind
     cnx = op.get_bind()
-    cnx.execute("UPDATE sale_product SET product_id=10")
     sale_product = cnx.execute("SELECT id, tva FROM sale_product")
     pprint(sale_product)
     for item in sale_product:

@@ -660,10 +660,14 @@ class ActivityConfigSchema(colander.Schema):
 
 
 class WorkshopConfigSchema(colander.Schema):
-    header_img = ImageNode(title=u'En-tête des sortie PDF')
+    header_img = ImageNode(
+        title=u'En-tête des sortie PDF',
+        missing=colander.drop,
+    )
     footer_img = ImageNode(
         title=u'Image du pied de page des sorties PDF',
         description=u"Vient se placer au-dessus du texte du pied de page",
+        missing=colander.drop,
     )
     footer = forms.textarea_node(
         title=u"Texte du pied de page des sorties PDF",

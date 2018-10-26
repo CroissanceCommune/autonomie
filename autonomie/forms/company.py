@@ -187,6 +187,27 @@ class CompanySchema(colander.MappingSchema):
 comptabilité",
             missing="")
 
+    general_customer_account = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte client général",
+        description="",
+        missing="",
+    )
+
+    third_party_customer_account = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte client tiers",
+        description="",
+        missing="",
+    )
+
+    bank_account = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte de banque",
+        description="",
+        missing="",
+    )
+
     contribution = colander.SchemaNode(
             QuantityType(),
             widget=deform.widget.TextInputWidget(

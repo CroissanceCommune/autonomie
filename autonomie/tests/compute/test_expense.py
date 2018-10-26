@@ -79,3 +79,40 @@ def test_expense_line(simple_type):
     compute = ExpenseLineCompute()
     compute.type_object = simple_type
     assert compute._compute_value(99.53) == 100
+
+
+def test_real_world_error(mk_expense_type):
+    from autonomie.models.expense.sheet import (
+        ExpenseKmLine,
+        ExpenseLine,
+    )
+    # test based on a real world problem that raised the error
+    kmtype = mk_expense_type(amount=0.38)
+    kmlines = []
+    for km in [3000, 2800, 280, 200, 540, 2800, 3600, 3000, 3000, 4400, 2000, 3000, 4600]:
+        compute = ExpenseKmLineCompute()
+        compute.km = km
+        compute.type_object = kmtype
+        kmlines.append(compute)
+
+    teltype = mk_expense_type(percentage=50)
+    telline = ExpenseLineCompute()
+    telline.ht = 2666
+    telline.tva = 533
+    telline.type_object = teltype
+
+    km_lines_total = sum(l.total for l in kmlines)
+    km_lines_rounded_total = int(sum(l.total_ht for l in kmlines))
+    km_lines_linerounded_total = sum(int(l.total_ht) for l in kmlines)
+
+    telline_total = telline.total
+    telline_rounded_total = int(telline.total_tva) + int(telline.total_ht)
+
+    last_rounded_total = int(km_lines_total + telline_total)
+    byproduct_rounded_total = km_lines_rounded_total + telline_rounded_total
+    byline_rounded_total = km_lines_linerounded_total + telline_rounded_total
+
+    # Option 1
+    assert last_rounded_total == byline_rounded_total
+    # Option 2
+    assert last_rounded_total == byproduct_rounded_total

@@ -432,7 +432,10 @@ class ExpenseSheet(Node, ExpenseCompute):
         sheet.company_id = self.company_id
 
         sheet.lines = [line.duplicate(sheet) for line in self.lines]
-        sheet.kmlines = [line.duplicate(sheet) for line in self.kmlines]
+        for line in self.kmlines:
+            newline = line.duplicate(sheet)
+            if newline:
+                sheet.kmlines.append(newline)
 
         return sheet
 
@@ -629,14 +632,19 @@ class ExpenseKmLine(BaseExpenseLine, ExpenseKmLineCompute):
         return self.type_object.label
 
     def duplicate(self, sheet):
-        line = ExpenseKmLine()
-        line.description = self.description
-        line.category = self.category
-        line.type_object = self.type_object.get_by_year(sheet.year)
+        type_object = self.type_object.get_by_year(sheet.year)
+        line = None
 
-        line.start = self.start
-        line.end = self.end
-        line.km = self.km
+        # Ref #774
+        if type_object is not None:
+            line = ExpenseKmLine()
+            line.description = self.description
+            line.category = self.category
+            line.type_object = self.type_object.get_by_year(sheet.year)
+
+            line.start = self.start
+            line.end = self.end
+            line.km = self.km
         return line
 
 

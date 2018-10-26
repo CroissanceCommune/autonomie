@@ -25,7 +25,6 @@
 """
     tests autonomie.views.expense
 """
-import pytest
 
 
 def test_add_expense(
@@ -75,12 +74,16 @@ def test_duplicate(
     company,
     user,
     full_expense_sheet,
+    mk_expense_type,
 ):
     from autonomie.views.expenses.expense import ExpenseSheetDuplicateView
     config.add_route('/expenses/{id}', "/{id}")
     request = get_csrf_request_with_db(
         post={'month': '10', 'year': '2017', 'submit': 'submit'}
     )
+    # https://github.com/CroissanceCommune/autonomie/issues/774
+    mk_expense_type(label='KM', code='KM', amount=0.184, year=2017)
+
     request.context = full_expense_sheet
     view = ExpenseSheetDuplicateView(request)
     result = view.__call__()

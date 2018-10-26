@@ -63,6 +63,10 @@ def update_database_structure():
             op.drop_column(tbl, column)
 
     op.execute("alter table task MODIFY `phase_id` int(11) DEFAULT NULL;")
+    op.add_column('task', sa.Column('pdf_file_id', sa.Integer(), nullable=True))
+    op.create_foreign_key(
+        op.f('fk_task_pdf_file_id'), 'task', 'file', ['pdf_file_id'], ['id']
+    )
 
 
 def _add_business_to_all_invoices(session):

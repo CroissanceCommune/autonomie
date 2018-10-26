@@ -225,6 +225,9 @@ header .navbar .nav > li > a{
 /* Jstree */
 .jstree{
   display: inline-block;
+  &.jstree-checkbox-selection {
+    margin-bottom: 5%;
+  }
 }
 /* Custom close button class */
 .large-close{

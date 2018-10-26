@@ -58,7 +58,8 @@ def migrate_datas():
             tva = get_tva()
             if tva is not None:
                 product = get_product_id(tva)
-                cnx.execute("UPDATE sale_product SET product_id=%s WHERE id=%s" % (product, item.id))
+                if product is not None:
+                    cnx.execute("UPDATE sale_product SET product_id=%s WHERE id=%s" % (product, item.id))
 
     from zope.sqlalchemy import mark_changed
     mark_changed(session)

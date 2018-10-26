@@ -8,60 +8,18 @@ from pytest import fixture
 
 
 @fixture
-def expense_teltype(dbsession):
-    from autonomie.models.expense.types import ExpenseTelType
-    item = ExpenseTelType(
-        label="Tel expense",
-        code="TEL",
-        code_tva="TEL_TVA",
-        compte_tva="TEL_COMPTE_TVA",
-        contribution=False,
-        percentage=50
-    )
-    dbsession.add(item)
-    dbsession.flush()
-    return item
-
-
-@fixture
-def expense_kmtype(dbsession):
-    from autonomie.models.expense.types import ExpenseKmType
-    item = ExpenseKmType(
-        label="KM expense",
+def expense_kmline(dbsession, mk_expense_type):
+    typ = mk_expense_type(
+        label="KM",
         code="KM",
-        code_tva="KM_TVA",
-        compte_tva="KM_COMPTE_TVA",
-        contribution=False,
         amount=1.254,
-        year=datetime.date.today().year
+        year=2018
     )
-    dbsession.add(item)
-    dbsession.flush()
-    return item
-
-
-@fixture
-def expense_type(dbsession):
-    from autonomie.models.expense.types import ExpenseType
-    item = ExpenseType(
-        label="KM expense",
-        code="KM",
-        code_tva="KM_TVA",
-        compte_tva="KM_COMPTE_TVA",
-        contribution=False,
-    )
-    dbsession.add(item)
-    dbsession.flush()
-    return item
-
-
-@fixture
-def expense_kmline(dbsession, expense_kmtype):
     from autonomie.models.expense.sheet import ExpenseKmLine
     item = ExpenseKmLine(
         description=u"Aller retour",
         category="1",
-        type_id=expense_kmtype.id,
+        type_id=typ.id,
         km=10000,
         start="Dijon",
         end="Lyon",
@@ -72,12 +30,13 @@ def expense_kmline(dbsession, expense_kmtype):
 
 
 @fixture
-def expense_telline(dbsession, expense_teltype):
+def expense_telline(dbsession, mk_expense_type):
+    typ = mk_expense_type(percentage=50)
     from autonomie.models.expense.sheet import ExpenseLine
     item = ExpenseLine(
         description=u"Test expense",
         category="1",
-        type_id=expense_teltype.id,
+        type_id=typ.id,
         ht=3000,
         tva=600,
     )
@@ -87,12 +46,13 @@ def expense_telline(dbsession, expense_teltype):
 
 
 @fixture
-def expense_line(dbsession, expense_type):
+def expense_line(dbsession, mk_expense_type):
+    typ = mk_expense_type(label="Base type")
     from autonomie.models.expense.sheet import ExpenseLine
     item = ExpenseLine(
         description=u"Test expense",
         category="2",
-        type_id=expense_type.id,
+        type_id=typ.id,
         ht=10000,
         tva=2000,
     )

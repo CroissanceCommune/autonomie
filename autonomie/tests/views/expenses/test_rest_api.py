@@ -82,15 +82,16 @@ def test_add_line(
     dbsession,
     get_csrf_request_with_db,
     full_expense_sheet,
-    expense_type,
+    mk_expense_type,
 ):
+    typ = mk_expense_type(label="test")
     from autonomie.views.expenses.rest_api import RestExpenseLineView
     request = get_csrf_request_with_db(post={
         'description': u"Test",
         "category": "1",
         "ht": "50",
         "tva": "10",
-        "type_id": expense_type.id,
+        "type_id": typ.id,
     })
     request.context = full_expense_sheet
     view = RestExpenseLineView(request)
@@ -100,6 +101,7 @@ def test_add_line(
     assert line.tva == 1000
     assert line.category == "1"
     assert line.description == u"Test"
+    assert line.type_object == typ
 
 
 def test_edit_line(
@@ -128,8 +130,9 @@ def test_add_kmline(
     dbsession,
     get_csrf_request_with_db,
     full_expense_sheet,
-    expense_kmtype,
+    mk_expense_type,
 ):
+    typ = mk_expense_type(amount=0.184)
     from autonomie.views.expenses.rest_api import RestExpenseKmLineView
     request = get_csrf_request_with_db(post={
         'description': u"Test",
@@ -137,7 +140,7 @@ def test_add_kmline(
         "start": "Start point",
         "end": "End point",
         "km": "50",
-        "type_id": expense_kmtype.id,
+        "type_id": typ.id,
     })
     request.context = full_expense_sheet
     view = RestExpenseKmLineView(request)
@@ -148,6 +151,7 @@ def test_add_kmline(
     assert line.description == u"Test"
     assert line.start == u"Start point"
     assert line.end == u"End point"
+    assert line.type_object == typ
 
 
 def test_edit_kmline(
@@ -175,7 +179,6 @@ def test_line_type_required(
     dbsession,
     get_csrf_request_with_db,
     full_expense_sheet,
-    expense_kmtype,
 ):
     from autonomie.views.expenses.rest_api import RestExpenseKmLineView
     from autonomie.utils.rest import RestError
@@ -197,13 +200,14 @@ def test_line_type_required(
 def test_bookmark_view(
     dbsession,
     get_csrf_request_with_db,
-    expense_type,
+    mk_expense_type,
     user
 ):
+    typ = mk_expense_type(label="base")
     from autonomie.views.expenses.rest_api import RestBookMarkView
     request = get_csrf_request_with_db(
         post={
-            'type_id': expense_type.id,
+            'type_id': typ.id,
             "tva": "20",
             "ht": "100",
             "description": u"Bookmark"
@@ -217,7 +221,7 @@ def test_bookmark_view(
     assert bookmark['ht'] == 100
     assert bookmark['tva'] == 20
     assert bookmark['description'] == "Bookmark"
-    assert bookmark['type_id'] == expense_type.id
+    assert bookmark['type_id'] == typ.id
     assert bookmark['id'] == 1
 
 

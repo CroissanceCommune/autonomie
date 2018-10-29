@@ -410,6 +410,15 @@ ul.form-tabs li.error a {
     .loginbox #authentication input[type=password] {
       margin-bottom: 4px; }
 
+/*
+ * Custom icon definition reusing fontawesome icons
+ */
+.icon-success:before {
+  content: "\f058"; }
+
+.icon-danger:before, .icon-warning:before {
+  content: "\f071"; }
+
 html {
   font-size: 16px; }
 

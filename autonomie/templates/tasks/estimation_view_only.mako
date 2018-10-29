@@ -74,8 +74,13 @@
     >
     <i class='glyphicon glyphicon-pencil'></i> Modifier
 </a>
-
-
+% if not estimation.invoices:
+    <a
+        href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
+        class='btn btn-primary btn-xs'>
+        <i class='glyphicon glyphicon-link'></i> Rattacher ce devis à des factures
+    </a>
+% endif
 </%block>
 
 <%block name='before_actions'>
@@ -114,9 +119,15 @@
         % endfor
     </div>
 % endif
-<h3>Rattachement</h3>
-<ul>
 % if estimation.invoices:
+<div>
+<h3 class='inline-element'>Factures</h3>
+    <a
+        href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
+        >
+        <i class='fa fa-pencil'></i>
+    </a>
+<ul>
     % for invoice in estimation.invoices:
             <li>
                 <p>
@@ -130,20 +141,7 @@
                 </p>
             </li>
     % endfor
-    <a
-        href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
-        class='btn btn-primary btn-xs'>
-        <i class='glyphicon glyphicon-link'></i> Modifier
-    </a>
-% else:
-<li>
-    Aucune facture n'a été générée depuis ce devis
-    <a
-        href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
-        class='btn btn-primary btn-xs'>
-        <i class='glyphicon glyphicon-link'></i> Rattacher ce devis à des factures
-    </a>
-    </li>
+    </ul>
+</div>
 % endif
-        </ul>
 </%block>

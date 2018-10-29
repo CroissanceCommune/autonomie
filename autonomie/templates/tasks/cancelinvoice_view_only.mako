@@ -48,12 +48,13 @@
 % endif
 </%block>
 
-<%block name='before_actions'>
+<%block name='panel_heading'>
     <% cancelinvoice = request.context %>
-    <h2>${cancelinvoice.name}</h2>
-    <p class='lead'>
-    ${cancelinvoice.official_number}
-    </p>
+    % if cancelinvoice.official_number:
+    Avoir n°${cancelinvoice.official_number} (${cancelinvoice.name})
+    % else:
+    <em>${cancelinvoice.name}</em>
+    % endif
 </%block>
 <%block name='moretabs'>
     <% cancelinvoice = request.context %>
@@ -63,16 +64,15 @@
 </%block>
 <%block name='before_summary'>
     <% cancelinvoice = request.context %>
-<h3>Rattachement</h3>
-<ul>
-<li>
 % if cancelinvoice.invoice:
-    Cet avoir est rattaché à la facture \
+<h4>
+Facture de référence :
     <a
     href="${request.route_path('/invoices/{id}.html', id=cancelinvoice.invoice.id)}"
     >
     ${cancelinvoice.invoice.internal_number}
     </a>
+</h4>
 % else:
 <div class='alert alert-danger'>
     <i class='glyphicon glyphicon-warning-sign'></i>

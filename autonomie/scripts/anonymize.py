@@ -256,6 +256,8 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             task.workplace = self.faker.address()
             task.payment_conditions = u"Par chèque ou virement à réception de "
             u"facture"
+            if task.notes:
+                task.notes = self.faker.text()
         for line in self.session.query(DiscountLine):
             line.description = self.faker.text()
 
@@ -270,10 +272,6 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
 
         for status in self.session.query(TaskStatus):
             status.status_comment = self.faker.sentence(nb_words=6)
-
-        for estimation in self.session.query(Estimation):
-            if estimation.exclusions:
-                estimation.exclusions = self.faker.text()
 
     def _an_task_config(self):
         from autonomie.models.task import (

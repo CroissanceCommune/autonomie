@@ -362,6 +362,17 @@ class Task(Node):
         ),
         group='edit',
     )
+    notes = deferred(
+        Column(
+            Text,
+            default="",
+            info={
+                'colanderalchemy': {'title': u'Notes complémentaires'},
+                'export': {'exclude': True},
+            },
+        ),
+        group='edit',
+    )
     round_floor = deferred(
         Column(
             Boolean(),

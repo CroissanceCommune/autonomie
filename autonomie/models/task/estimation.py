@@ -137,14 +137,6 @@ class Estimation(Task, EstimationCompute):
         default=0
     )
 
-    # Specific to estimations
-    exclusions = deferred(
-        Column(
-            Text,
-            info={'colanderalchemy': {'title': u"Notes"}}
-        ),
-        group='edit'
-    )
     manualDeliverables = deferred(
         Column(
             Integer,
@@ -275,7 +267,7 @@ class Estimation(Task, EstimationCompute):
 
         estimation.deposit = self.deposit
         estimation.payment_conditions = self.payment_conditions
-        estimation.exclusions = self.exclusions
+        estimation.notes = self.notes
         estimation.manualDeliverables = self.manualDeliverables
         estimation.display_units = self.display_units
         estimation.expenses_ht = self.expenses_ht
@@ -303,7 +295,7 @@ class Estimation(Task, EstimationCompute):
         result.update(
             dict(
                 deposit=self.deposit,
-                exclusions=self.exclusions,
+                notes=self.notes,
                 manual_deliverables=self.manualDeliverables,
                 manualDeliverables=self.manualDeliverables,
                 paymentDisplay=self.paymentDisplay,

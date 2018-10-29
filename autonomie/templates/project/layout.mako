@@ -43,6 +43,8 @@
                             % if layout.current_project_object.project_type.name != 'default':
                             ${layout.current_project_object.project_type.label}
                             % endif
+                        </div>
+                <div class='pull-right'>
                         % if request.has_permission("edit.project", layout.current_project_object):
                         <a
                             class='btn btn-default btn-small pull-right'
@@ -57,7 +59,6 @@
                             >
                             <i class='fa fa-info-circle'></i>
                         </a>
-                        </div>
                         <div>
                         </div>
                     </div>

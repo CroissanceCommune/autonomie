@@ -1,0 +1,9 @@
+/*
+ * Custom icon definition reusing fontawesome icons
+ */
+.icon-success:before {
+  content: "\f058";
+}
+.icon-danger:before, .icon-warning:before {
+  content: "\f071";
+}

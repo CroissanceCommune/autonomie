@@ -16,10 +16,11 @@ def get_training_list_schema(is_admin):
     """
     schema = BaseListsSchema().clone()
     schema['search'].description = u"Numéro de facture"
-    schema.add_before(
-        "items_per_page",
-        company_filter_node_factory(name='company_id')
-    )
+    if is_admin:
+        schema.add_before(
+            "items_per_page",
+            company_filter_node_factory(name='company_id')
+        )
     schema.add_before(
         "items_per_page",
         customer_filter_node_factory(name='customer_id', is_admin=is_admin)

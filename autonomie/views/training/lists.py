@@ -61,6 +61,7 @@ class GlobalTrainingListView(BaseListView):
     CA
     Actions
     """
+    is_admin = True
     title = u"Liste des formations dispensées dans la CAE"
     schema = get_training_list_schema(is_admin=True)
     add_template_vars = ('stream_columns', 'stream_actions',)
@@ -83,11 +84,11 @@ class GlobalTrainingListView(BaseListView):
             Business.business_type_id == business_type_id
         )
         query = query.options(
-            joinedload(Business.project).load_only('id').\
+            joinedload(Business.project).load_only('id').
             selectinload(Project.company).load_only(
                 Company.id, Company.name
             ),
-            selectinload(Business.tasks).\
+            selectinload(Business.tasks).
             selectinload(Project.customers).load_only(
                 Customer.id, Customer.label
             )
@@ -133,7 +134,11 @@ class GlobalTrainingListView(BaseListView):
         return query
 
     def stream_columns(self, item):
-        yield "TODO"
+        yield (
+            "<span class='btn btn-{0} btn-circle'>"
+            "<i class='fa icon-{0}'></i>"
+            "</span>".format(item.status)
+        )
         yield item.name
         yield item.project.company.name
         yield item.tasks[0].customer.label
@@ -155,14 +160,15 @@ class GlobalTrainingListView(BaseListView):
             u"Voir le client {}".format(item.tasks[0].customer.label),
             icon="pencil"
         )
-        yield Link(
-            self.request.route_path(
-                "company",
-                id=item.project.company.id,
-            ),
-            u"Voir l'enseigne {}".format(item.project.company.name),
-            icon="pencil"
-        )
+        if self.is_admin:
+            yield Link(
+                self.request.route_path(
+                    "company",
+                    id=item.project.company.id,
+                ),
+                u"Voir l'enseigne {}".format(item.project.company.name),
+                icon="pencil"
+            )
 
 
 def includeme(config):

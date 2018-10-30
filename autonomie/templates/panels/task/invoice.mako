@@ -53,6 +53,9 @@
 % endif
 </%block>
 <%block name="notes_and_conditions">
+%if task.notes:
+    ${table(u"Notes", task.notes)}
+%endif
 %if task.payment_conditions:
     ${table(u"Conditions de paiement", task.payment_conditions)}
 % endif

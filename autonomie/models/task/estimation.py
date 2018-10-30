@@ -295,7 +295,6 @@ class Estimation(Task, EstimationCompute):
         result.update(
             dict(
                 deposit=self.deposit,
-                notes=self.notes,
                 manual_deliverables=self.manualDeliverables,
                 manualDeliverables=self.manualDeliverables,
                 paymentDisplay=self.paymentDisplay,

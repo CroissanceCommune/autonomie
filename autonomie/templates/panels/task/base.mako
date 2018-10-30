@@ -26,6 +26,14 @@
     Only renders the content of the page
 </%doc>
 <%namespace file="/base/utils.mako" import="format_text" />
+<%def name="table(title, datas, css='')">
+    <div class="title ${css}">
+        ${title}
+    </div>
+    <div class='content'>
+        ${format_text(datas)}
+    </div>
+</%def>
 <div id='content'>
     <div class='header'>
         <img src='${api.img_url(company.header_file)}' alt='${company.name}'/>

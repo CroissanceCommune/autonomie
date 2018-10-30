@@ -20,7 +20,7 @@ const NotesBlockView = Mn.View.extend({
     className: 'form-section',
     template: template,
     regions: {
-        exclusions: '.exclusions',
+        notes: '.notes',
     },
     behaviors: [
         {
@@ -33,7 +33,7 @@ const NotesBlockView = Mn.View.extend({
         'finish': 'data:persist'
     },
     isMoreSet: function(){
-        if (this.model.get('exclusions')){
+        if (this.model.get('notes')){
             return true;
         }
         return false;
@@ -47,12 +47,12 @@ const NotesBlockView = Mn.View.extend({
         const view = new TextAreaWidget(
             {
                 title: 'Notes',
-                description: 'Notes complémentaires concernant les prestations décrites',
-                field_name: 'exclusions',
-                value: this.model.get('exclusions'),
+                description: 'Notes complémentaires',
+                field_name: 'notes',
+                value: this.model.get('notes'),
             }
         );
-        this.showChildView('exclusions', view);
+        this.showChildView('notes', view);
     }
 });
 export default NotesBlockView;

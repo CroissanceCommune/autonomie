@@ -1,24 +1,24 @@
 <h3>
     <a
-        data-target='#exclusions-more'
+        data-target='#notes-more'
         data-toggle='collapse'
         aria-expanded="false"
-        aria-controls="exclusions-more"
+        aria-controls="notes-more"
         >
         <i class='glyphicon glyphicon-plus-sign'></i>
             {{#if is_more_set}}<i>
-        Note complémentaire
+        Notes complémentaires
         </i>
         {{else}}
-        Note complémentaire
+        Notes complémentaires
         {{/if}}
     </a>
 </h3>
 <div class='content'>
     <div
         class='collapse row {{#if is_more_set}}in{{/if}}'
-        id="exclusions-more">
+        id="notes-more">
         <hr />
-        <div class='exclusions'></div>
+        <div class='notes'></div>
     </div>
 </div>

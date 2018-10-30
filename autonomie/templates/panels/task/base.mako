@@ -264,6 +264,9 @@
             </tbody>
         </table>
     </div>
+    %if task.notes:
+        ${table(u"Notes", task.notes)}
+    %endif
     <%block name="notes_and_conditions">
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>

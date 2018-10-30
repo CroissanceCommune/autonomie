@@ -686,6 +686,7 @@ _{s.date:%m%y}"
             address=self.address,
             workplace=self.workplace,
             payment_conditions=self.payment_conditions,
+            notes=self.notes,
             status_history=[
                 status.__json__(request) for status in self.statuses
             ],

@@ -25,7 +25,7 @@ const CommonModel = BaseModel.extend({
         'mentions',
         'workplace',
         'expenses_ht',
-        'exclusions',
+        'notes',
         'payment_conditions',
         'deposit',
         'payment_times',

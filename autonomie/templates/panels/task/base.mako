@@ -26,6 +26,14 @@
     Only renders the content of the page
 </%doc>
 <%namespace file="/base/utils.mako" import="format_text" />
+<%def name="table(title, datas, css='')">
+    <div class="title ${css}">
+        ${title}
+    </div>
+    <div class='content'>
+        ${format_text(datas)}
+    </div>
+</%def>
 <div id='content'>
     <div class='header'>
         <img src='${api.img_url(company.header_file)}' alt='${company.name}'/>
@@ -264,6 +272,9 @@
             </tbody>
         </table>
     </div>
+    %if task.notes:
+        ${table(u"Notes", task.notes)}
+    %endif
     <%block name="notes_and_conditions">
     ## All infos beetween document lines and footer text (notes, payment conditions ...)
     </%block>

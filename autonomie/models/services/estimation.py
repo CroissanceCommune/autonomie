@@ -33,6 +33,7 @@ class EstimationInvoicingService:
             workplace=estimation.workplace,
             mentions=estimation.mentions,
             business_type_id=estimation.business_type_id,
+            notes=estimation.notes,
         )
         return invoice
 

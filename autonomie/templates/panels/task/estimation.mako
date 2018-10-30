@@ -49,9 +49,6 @@
 % endif
 </%block>
 <%block name="notes_and_conditions">
-%if task.notes:
-    ${table(u"Notes", task.notes)}
-%endif
 % if task.paymentDisplay != u"NONE":
     % if task.paymentDisplay == u"ALL":
         <% colspan = 3 %>

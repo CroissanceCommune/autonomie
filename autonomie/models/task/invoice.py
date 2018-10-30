@@ -199,7 +199,6 @@ class Invoice(Task, InvoiceCompute):
             address=self.address,
             workplace=self.workplace,
             description=self.description,
-            notes=self.notes,
             invoice=self,
             expenses_ht=-1 * self.expenses_ht,
             financial_year=self.financial_year,

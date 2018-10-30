@@ -9376,7 +9376,7 @@ webpackJsonp([2],[
 	    className: 'form-section',
 	    template: template,
 	    regions: {
-	        exclusions: '.exclusions'
+	        notes: '.notes'
 	    },
 	    behaviors: [{
 	        behaviorClass: _FormBehavior2.default,
@@ -9387,7 +9387,7 @@ webpackJsonp([2],[
 	        'finish': 'data:persist'
 	    },
 	    isMoreSet: function isMoreSet() {
-	        if (this.model.get('exclusions')) {
+	        if (this.model.get('notes')) {
 	            return true;
 	        }
 	        return false;
@@ -9400,11 +9400,11 @@ webpackJsonp([2],[
 	    onRender: function onRender() {
 	        var view = new _TextAreaWidget2.default({
 	            title: 'Notes',
-	            description: 'Notes complémentaires concernant les prestations décrites',
-	            field_name: 'exclusions',
-	            value: this.model.get('exclusions')
+	            description: 'Notes complémentaires',
+	            field_name: 'notes',
+	            value: this.model.get('notes')
 	        });
-	        this.showChildView('exclusions', view);
+	        this.showChildView('notes', view);
 	    }
 	});
 	exports.default = NotesBlockView;
@@ -9419,19 +9419,19 @@ webpackJsonp([2],[
 	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "<i>\n        Note complémentaire\n        </i>\n";
+	  return "<i>\n        Notes complémentaires\n        </i>\n";
 	  },"3":function(depth0,helpers,partials,data) {
-	  return "        Note complémentaire\n";
+	  return "        Notes complémentaires\n";
 	  },"5":function(depth0,helpers,partials,data) {
 	  return "in";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<h3>\n    <a\n        data-target='#exclusions-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"exclusions-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i>\n            ";
+	  var stack1, buffer = "<h3>\n    <a\n        data-target='#notes-more'\n        data-toggle='collapse'\n        aria-expanded=\"false\"\n        aria-controls=\"notes-more\"\n        >\n        <i class='glyphicon glyphicon-plus-sign'></i>\n            ";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_more_set : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  buffer += "    </a>\n</h3>\n<div class='content'>\n    <div\n        class='collapse row ";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.is_more_set : depth0), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "'\n        id=\"exclusions-more\">\n        <hr />\n        <div class='exclusions'></div>\n    </div>\n</div>\n";
+	  return buffer + "'\n        id=\"notes-more\">\n        <hr />\n        <div class='notes'></div>\n    </div>\n</div>\n";
 	},"useData":true});
 
 /***/ }),
@@ -11532,7 +11532,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var CommonModel = _BaseModel2.default.extend({
-	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'exclusions', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'display_units'],
+	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'notes', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'display_units'],
 	    validation: {
 	        date: {
 	            required: true,

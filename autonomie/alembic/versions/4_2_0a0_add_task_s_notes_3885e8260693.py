@@ -16,7 +16,8 @@ from autonomie.alembic.utils import column_exists
 
 
 def update_database_structure():
-    op.add_column('task', sa.Column('notes', sa.Text(), nullable=True))
+    if not column_exists('task', 'notes'):
+        op.add_column('task', sa.Column('notes', sa.Text(), nullable=True))
 
 
 def migrate_datas():

@@ -177,7 +177,7 @@ class Company(DBBASE, PersistentACLMixin):
 
     general_customer_account = deferred(
         Column(
-            String(30),
+            String(255),
             default=""
         ),
         group="edit",
@@ -185,7 +185,7 @@ class Company(DBBASE, PersistentACLMixin):
 
     third_party_customer_account = deferred(
         Column(
-            String(30),
+            String(255),
             default=""
         ),
         group="edit",
@@ -193,7 +193,7 @@ class Company(DBBASE, PersistentACLMixin):
 
     bank_account = deferred(
         Column(
-            String(30),
+            String(255),
             default=""
         ),
         group="edit",

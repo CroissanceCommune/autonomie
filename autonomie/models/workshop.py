@@ -97,7 +97,6 @@ class Workshop(Event):
             'export': {'exclude': True},
         }
     )
-
     description = Column(Text, default='')
 
     @property
@@ -118,6 +117,7 @@ class Workshop(Event):
             info1=self.info1,
             info2=self.info2,
             info3=self.info3,
+            signup_mode=self.signup_mode,
         )
 
         for timeslot in self.timeslots:

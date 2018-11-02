@@ -27,6 +27,7 @@ from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
 from autonomie.models.user.user import User
 from autonomie.models.workshop import Workshop
+from autonomie.models.activity import EVENT_SIGNUP_MODE
 from autonomie.forms.user import (
     participant_filter_node_factory,
     participant_choice_node,
@@ -182,6 +183,17 @@ class WorkshopSchema(colander.MappingSchema):
         multiple=True,
         title=u"Animateur(s)/Animatrice(s)",
     )
+
+    signup_mode = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode d'inscription",
+        widget=deform.widget.SelectWidget(
+            values=EVENT_SIGNUP_MODE,
+            default='closed',
+        ),
+        validator=colander.OneOf([key for key, _ in EVENT_SIGNUP_MODE]),
+    )
+
     description = colander.SchemaNode(
         colander.String(),
         description=u"Facultatif",

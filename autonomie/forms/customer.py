@@ -38,7 +38,6 @@ from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
 
 # For customers we also want 'Mr et Mme'
-# For customers we also want 'Mr et Mme'
 CIVILITE_OPTIONS = ORIG_CIVILITE_OPTIONS + (
     ('M. et Mme', u"Monsieur et Madame"),
     ('M. ou Mme', u"Monsieur ou Madame"),

@@ -45,7 +45,7 @@ def test_individual_customer_schema():
     schema = get_individual_customer_schema()
 
     args = {
-        "civilite": "mr&mme",
+        "civilite": "M. et Mme",
         "address": u"1 rue Victor Hugo",
         "lastname": "Lastname",
         "zip_code": "21000",

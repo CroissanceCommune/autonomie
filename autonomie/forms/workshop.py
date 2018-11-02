@@ -214,8 +214,11 @@ class WorkshopSchema(colander.MappingSchema):
     )
     participants = ParticipantsSequence(
         title=u"Participants",
-        widget=deform_widget.SequenceWidget(min_len=1),
-        )
+        widget=deform_widget.SequenceWidget(
+            min_len=0,
+            add_subitem_text_template=u"Ajouter un participant",
+        ),
+    )
     timeslots = TimeslotsSequence(
         title=u"Tranches horaires",
         description=u"Les différentes tranches horaires de l'atelier \

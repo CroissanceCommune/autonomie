@@ -450,9 +450,11 @@ def get_workshop_acl(self):
         for user in self.trainers
     )
 
-    acl.append(
-        (Allow, self.owner.login.login, owner_perms)
-    )
+    if self.owner and self.owner.login:
+        acl.append(
+             (Allow, self.owner.login.login, owner_perms)
+        )
+
     return acl
 
 

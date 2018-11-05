@@ -27,6 +27,7 @@
 """
 import logging
 import datetime
+import colander
 
 from hashlib import md5
 
@@ -46,15 +47,22 @@ from sqlalchemy.orm import (
     backref,
 )
 from sqlalchemy.util import classproperty
-import colander
 
 from autonomie.views import render_api
-from autonomie.views.forms import widgets as custom_widget
 
-from deform import widget as deform_widget
 from deform_bootstrap import widget as bootstrap_widget
 from autonomie.models.base import DBBASE
 from autonomie.models.base import default_table_args
+from autonomie.models.widgets import (
+    get_hidden_field_conf,
+    get_id_foreignkey_col,
+    EXCLUDED,
+    get_select,
+    get_select_validator,
+    get_date,
+    get_deferred_select,
+    mail_validator,
+)
 from autonomie.models.types import JsonEncodedDict
 from autonomie.utils.ascii import camel_case_to_name
 
@@ -114,57 +122,7 @@ CONTRACT_OPTIONS = (
 )
 
 
-EXCLUDED = {'colanderalchemy': {'exclude': True}}
-
-
 log = logging.getLogger(__name__)
-
-
-def get_hidden_field_conf():
-    return {
-            'colanderalchemy': {
-                'widget': deform_widget.HiddenWidget(),
-                'missing': None
-            }
-    }
-
-
-def get_id_foreignkey_col(foreignkey_str):
-    """
-    Return an id column as a foreignkey with correct colander configuration
-
-        foreignkey_str
-
-            The foreignkey our id is pointing to
-    """
-    column = Column(
-        "id",
-        Integer,
-        ForeignKey(foreignkey_str),
-        primary_key=True,
-        info=get_hidden_field_conf(),
-    )
-    return column
-
-
-def get_deferred_select(model):
-    @colander.deferred
-    def deferred_widget(kw, request):
-        values = [(m.id, m.label) for m in model.query()]
-        return deform_widget.SelectWidget(values=values)
-    return deferred_widget
-
-
-def get_select(options):
-    return deform_widget.SelectWidget(values=options)
-
-
-def get_select_validator(options):
-    return colander.OneOf([o[0] for o in options])
-
-
-def get_date():
-    return custom_widget.CustomDateInputWidget(css_class='span2')
 
 
 class User(DBBASE):
@@ -338,7 +296,7 @@ class ConfigurableOption(DBBASE):
     id = Column(
         Integer,
         primary_key=True,
-        info=get_hidden_field_conf()
+        info={'colanderalchemy': get_hidden_field_conf()}
     )
     label = Column(
         String(100),
@@ -347,13 +305,13 @@ class ConfigurableOption(DBBASE):
     active = Column(
         Boolean(),
         default=True,
-        info=EXCLUDED
+        info={'colanderalchemy': EXCLUDED}
     )
     type_ = Column(
         'type_',
         String(30),
         nullable=False,
-        info=EXCLUDED
+        info={'colanderalchemy': EXCLUDED}
         )
 
     @classproperty
@@ -508,13 +466,13 @@ class UserDatasSocialDocTypes(DBBASE):
     userdatas_id = Column(
         ForeignKey('user_datas.id'),
         primary_key=True,
-        info=get_hidden_field_conf(),
+        info={'colanderalchemy': get_hidden_field_conf() },
     )
 
     doctype_id = Column(
         ForeignKey('social_doc_type_option.id'),
         primary_key=True,
-        info=get_hidden_field_conf(),
+        info={'colanderalchemy': get_hidden_field_conf()},
     )
 
     status = Column(Boolean(), default=False)
@@ -523,9 +481,9 @@ class UserDatasSocialDocTypes(DBBASE):
         backref=backref(
             'doctypes_registrations',
             cascade='all, delete-orphan',
-            info=EXCLUDED,
+            info={'colanderalchemy': EXCLUDED},
         ),
-        info=EXCLUDED,
+        info={'colanderalchemy': EXCLUDED},
     )
 
     doctype = relationship(
@@ -533,9 +491,9 @@ class UserDatasSocialDocTypes(DBBASE):
         backref=backref(
             'registration',
             cascade='all, delete-orphan',
-            info=EXCLUDED,
+            info={'colanderalchemy': EXCLUDED},
         ),
-        info=EXCLUDED,
+        info={'colanderalchemy': EXCLUDED},
     )
 
 
@@ -544,13 +502,13 @@ class UserDatas(DBBASE):
     id = Column(
         Integer,
         primary_key=True,
-        info=get_hidden_field_conf()
+        info={'colanderalchemy': get_hidden_field_conf(),}
     )
 
     # User account associated with this dataset
     user_id = Column(
         ForeignKey('accounts.id'),
-        info=EXCLUDED
+        info={'colanderalchemy': EXCLUDED}
     )
     user = relationship(
         "User",
@@ -560,7 +518,7 @@ class UserDatas(DBBASE):
             uselist=False,
             cascade='all, delete-orphan',
         ),
-        info=EXCLUDED
+        info={'colanderalchemy': EXCLUDED}
     )
 
     # INFORMATIONS GÉNÉRALES : CF CAHIER DES CHARGES #
@@ -608,7 +566,7 @@ class UserDatas(DBBASE):
         backref=backref(
             "followed_contractors",
         ),
-        info=EXCLUDED
+        info={'colanderalchemy': EXCLUDED}
     )
 
     # COORDONNÉES : CF CAHIER DES CHARGES #
@@ -701,7 +659,7 @@ class UserDatas(DBBASE):
 
     coordonnees_zone = relationship(
         'ZoneOption',
-        info=EXCLUDED,
+        info={'colanderalchemy': EXCLUDED},
     )
 
     coordonnees_zone_qual_id = Column(
@@ -719,7 +677,7 @@ class UserDatas(DBBASE):
 
     coordonnees_zone_qual = relationship(
         'ZoneQualificationOption',
-        info=EXCLUDED,
+        info={'colanderalchemy': EXCLUDED},
     )
 
     coordonnees_tel = Column(
@@ -748,6 +706,7 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u"Mail 1",
                 'section': u'Coordonnées',
+                'validator': mail_validator(),
             }
         },
         nullable=False,
@@ -759,6 +718,7 @@ class UserDatas(DBBASE):
             'colanderalchemy': {
                 'title': u"Mail 2",
                 'section': u'Coordonnées',
+                'validator': mail_validator(),
             }
         }
     )
@@ -872,7 +832,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    coordonnees_study_level = relationship('StudyLevelOption', info=EXCLUDED)
+    coordonnees_study_level = relationship(
+        'StudyLevelOption',
+        info={'colanderalchemy': EXCLUDED},
+    )
     coordonnees_emergency_name = Column(
         String(50),
         info={
@@ -919,7 +882,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    statut_social_status = relationship('SocialStatusOption', info=EXCLUDED)
+    statut_social_status = relationship(
+        'SocialStatusOption',
+        info={'colanderalchemy': EXCLUDED},
+    )
     statut_handicap_allocation_expiration = Column(
         Date(),
         default=None,
@@ -970,7 +936,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    activity_typologie = relationship('ActivityTypeOption', info=EXCLUDED)
+    activity_typologie = relationship(
+        'ActivityTypeOption',
+        info={'colanderalchemy': EXCLUDED},
+    )
     activity_pcs_id = Column(
         ForeignKey('pcs_option.id'),
         info={
@@ -983,7 +952,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    activity_pcs = relationship('PcsOption', info=EXCLUDED)
+    activity_pcs = relationship(
+        'PcsOption',
+        info={'colanderalchemy': EXCLUDED},
+    )
     activity_companydatas = relationship(
         "CompanyDatas",
         cascade="all, delete-orphan",
@@ -1009,7 +981,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    parcours_prescripteur = relationship("PrescripteurOption", info=EXCLUDED)
+    parcours_prescripteur = relationship(
+        "PrescripteurOption",
+        info={'colanderalchemy': EXCLUDED},
+    )
     parcours_prescripteur_name = Column(
         String(50),
         info={
@@ -1057,7 +1032,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    parcours_non_admission = relationship("NonAdmissionOption", info=EXCLUDED)
+    parcours_non_admission = relationship(
+        "NonAdmissionOption",
+        info={'colanderalchemy': EXCLUDED},
+    )
 
     parcours_convention_cape = relationship(
         "DateConventionCAPEDatas",
@@ -1210,7 +1188,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    parcours_status = relationship("ParcoursStatusOption", info=EXCLUDED)
+    parcours_status = relationship(
+        "ParcoursStatusOption",
+        info={'colanderalchemy': EXCLUDED},
+    )
     parcours_medical_visit = Column(
         Date(),
         info={
@@ -1260,7 +1241,10 @@ class UserDatas(DBBASE):
         }
     )
 
-    sortie_motif = relationship('MotifSortieOption', info=EXCLUDED)
+    sortie_motif = relationship(
+        'MotifSortieOption',
+        info={'colanderalchemy': EXCLUDED},
+    )
 
 
     @property
@@ -1278,7 +1262,6 @@ class UserDatas(DBBASE):
         """
         Generate a user account for the given model
         """
-        # TODO : gen_companies
         from autonomie.utils.ascii import gen_random_string
         if self.situation_situation == 'integre' and self.user_id is None:
             login = self.coordonnees_email1,
@@ -1315,9 +1298,15 @@ class UserDatas(DBBASE):
 
 # multi-valued user-datas
 class ExternalActivityDatas(DBBASE):
+    """
+    Datas related to external activities
+    """
     __tablename__ = 'external_activity_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info=get_hidden_field_conf())
+    id = Column(Integer, primary_key=True, info={
+        'colanderalchemy': get_hidden_field_conf()
+        }
+    )
     type = Column(String(50),
         info={'colanderalchemy':
               {
@@ -1351,13 +1340,19 @@ class ExternalActivityDatas(DBBASE):
               }
              }
     )
-    userdatas_id = Column(ForeignKey('user_datas.id'), info=EXCLUDED)
+    userdatas_id = Column(
+        ForeignKey('user_datas.id'),
+        info={'colanderalchemy': EXCLUDED},
+    )
 
 
 class CompanyDatas(DBBASE):
     __tablename__ = 'company_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info=get_hidden_field_conf())
+    id = Column(Integer, primary_key=True, info={
+        'colanderalchemy': get_hidden_field_conf()
+    }
+    )
     title = Column(
         String(250),
         info={
@@ -1387,13 +1382,16 @@ class CompanyDatas(DBBASE):
             }
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info=EXCLUDED)
+    userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
 
 
 class DateDiagnosticDatas(DBBASE):
     __tablename__ = 'date_diagnostic_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info=get_hidden_field_conf())
+    id = Column(Integer, primary_key=True, info={
+        'colanderalchemy': get_hidden_field_conf()
+    }
+    )
     date = Column(
         Date(),
         info={
@@ -1401,13 +1399,16 @@ class DateDiagnosticDatas(DBBASE):
             "widget": get_date(),
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info=EXCLUDED)
+    userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
 
 
 class DateConventionCAPEDatas(DBBASE):
     __tablename__ = 'date_convention_cape_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info=get_hidden_field_conf())
+    id = Column(Integer, primary_key=True, info={
+        'colanderalchemy': get_hidden_field_conf(),
+    }
+    )
     date = Column(
         Date(),
         info={
@@ -1415,13 +1416,16 @@ class DateConventionCAPEDatas(DBBASE):
             "widget": get_date(),
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info=EXCLUDED)
+    userdatas_id = Column(ForeignKey("user_datas.id"), info={'colanderalchemy': EXCLUDED})
 
 
 class DateDPAEDatas(DBBASE):
     __tablename__ = 'date_dpae_datas'
     __table_args__ = default_table_args
-    id = Column(Integer, primary_key=True, info=get_hidden_field_conf())
+    id = Column(Integer, primary_key=True, info={
+        'colanderalchemy': get_hidden_field_conf(),
+    }
+    )
     date = Column(
         Date(),
         info={
@@ -1429,4 +1433,7 @@ class DateDPAEDatas(DBBASE):
             "widget": get_date(),
         }
     )
-    userdatas_id = Column(ForeignKey("user_datas.id"), info=EXCLUDED)
+    userdatas_id = Column(
+        ForeignKey("user_datas.id"),
+        info={'colanderalchemy': EXCLUDED}
+    )

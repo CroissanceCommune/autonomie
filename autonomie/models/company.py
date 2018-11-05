@@ -28,20 +28,30 @@
 import os
 import logging
 
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import deferred
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import (
+    relationship,
+    deferred,
+    backref,
+)
 
+from autonomie.models import widgets
 from autonomie.models.utils import get_current_timestamp
-from autonomie.models.types import CustomDateType
-from autonomie.models.types import CustomFileType
+from autonomie.models.types import (
+    CustomDateType,
+    CustomFileType,
+)
 
-from autonomie.models.base import DBBASE
-from autonomie.models.base import DBSESSION
-from autonomie.models.base import default_table_args
+from autonomie.models.base import (
+    DBBASE,
+    DBSESSION,
+    default_table_args,
+)
 
 log = logging.getLogger(__name__)
 
@@ -155,12 +165,15 @@ class Company(DBBASE):
     customers = relationship(
         "Customer",
         order_by="Customer.code",
-        backref='company'
+        backref=backref(
+            'company',
+            info={'colanderalchemy': widgets.EXCLUDED},
+        )
     )
     projects = relationship(
         "Project",
         order_by="Project.id",
-        backref="company"
+        backref=backref("company", info={'colanderalchemy': widgets.EXCLUDED}),
     )
     code_compta = deferred(
         Column(

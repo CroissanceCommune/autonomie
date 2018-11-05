@@ -25,15 +25,21 @@
 """
     Project model
 """
-from sqlalchemy import Table
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import ForeignKey
-from sqlalchemy import Text
-from sqlalchemy.orm import deferred
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    Table,
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Text,
+)
+from sqlalchemy.orm import (
+    deferred,
+    relationship,
+    backref,
+)
 
+from autonomie.models import widgets
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.types import CustomDateType
 from autonomie.models.base import (
@@ -70,9 +76,14 @@ class Project(Node):
     type = deferred(Column('type', String(150)), group='edit')
     archived = Column("archived", String(255), default=0)
 
-    customers = relationship("Customer",
-                            secondary=ProjectCustomer,
-                            backref='projects')
+    customers = relationship(
+        "Customer",
+        secondary=ProjectCustomer,
+        backref=backref(
+            'projects',
+            info={'colanderalchemy': widgets.EXCLUDED},
+        )
+    )
 
     def get_estimation(self, taskid):
         """

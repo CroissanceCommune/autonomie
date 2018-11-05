@@ -52,6 +52,7 @@ from sqlalchemy.orm import (
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
+from autonomie.models import widgets
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.exception import Forbidden
@@ -137,11 +138,22 @@ class Invoice(Task, InvoiceCompute):
     customer = relationship(
         "Customer",
         primaryjoin="Customer.id==Invoice.customer_id",
-        backref=backref('invoices', order_by='Invoice.taskDate'))
+        backref=backref(
+            'invoices',
+            order_by='Invoice.taskDate',
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        ),
+    )
 
     project = relationship(
         "Project",
-        backref=backref('invoices', order_by='Invoice.taskDate'))
+        backref=backref(
+            'invoices',
+            order_by='Invoice.taskDate',
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        ),
+    )
+
     estimation = relationship(
         "Estimation",
         backref="invoices",
@@ -493,15 +505,27 @@ class CancelInvoice(Task, TaskCompute):
 
     project = relationship(
         "Project",
-        backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
+        backref=backref(
+            'cancelinvoices',
+            order_by='CancelInvoice.taskDate',
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        )
+    )
+
     invoice = relationship(
         "Invoice",
         backref=backref("cancelinvoice", uselist=False),
         primaryjoin="CancelInvoice.invoice_id==Invoice.id")
+
     customer = relationship(
         "Customer",
         primaryjoin="Customer.id==CancelInvoice.customer_id",
-        backref=backref('cancelinvoices', order_by='CancelInvoice.taskDate'))
+        backref=backref(
+            'cancelinvoices',
+            order_by='CancelInvoice.taskDate',
+            info={'colanderalchemy': widgets.EXCLUDED,},
+        )
+    )
 
     state_machine = DEFAULT_STATE_MACHINES['cancelinvoice']
     valid_states = ('valid', )

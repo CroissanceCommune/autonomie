@@ -46,6 +46,7 @@ from sqlalchemy.orm import (
 # migration des données, on dépend entièrement de mysql
 from sqlalchemy.dialects.mysql import DOUBLE
 
+from autonomie.models import widgets
 from autonomie.models.types import (
         CustomDateType,
         CustomDateType2)
@@ -116,12 +117,21 @@ class Estimation(Task, EstimationCompute):
     address = Column("address", Text, default="")
     project = relationship(
         "Project",
-        backref=backref('estimations', order_by='Estimation.taskDate')
+        backref=backref(
+            'estimations',
+            order_by='Estimation.taskDate',
+            info={'colanderalchemy': widgets.EXCLUDED, },
+        )
     )
     customer = relationship(
-            "Customer",
-            primaryjoin="Customer.id==Estimation.customer_id",
-            backref=backref('estimations', order_by='Estimation.taskDate'))
+        "Customer",
+        primaryjoin="Customer.id==Estimation.customer_id",
+        backref=backref(
+            'estimations',
+            order_by='Estimation.taskDate',
+            info={'colanderalchemy': widgets.EXCLUDED, },
+        )
+    )
 
     __mapper_args__ = {'polymorphic_identity': 'estimation', }
 

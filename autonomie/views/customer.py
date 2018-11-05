@@ -166,15 +166,15 @@ class CustomerAdd(BaseFormView):
         form.widget = GridFormWidget(grid=FORM_GRID)
 
     def submit_success(self, appstruct):
-        model = self.schema.objectify(appstruct)
 
         if self.context.__name__ == 'company':
             # It's an add form
+            model = self.schema.objectify(appstruct)
             model.company = self.context
             self.dbsession.add(model)
         else:
             # It's an edition one
-            model.id = self.context.id
+            model = self.schema.objectify(appstruct, self.context)
             model = self.dbsession.merge(model)
 
         self.dbsession.flush()

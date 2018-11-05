@@ -21,22 +21,33 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
-
 from autonomie.models.customer import Customer
+from autonomie.models.company import Company
 from autonomie.views.customer import CustomerAdd, CustomerEdit, customer_view
-from autonomie.tests.base import BaseFunctionnalTest
+from autonomie.tests.base import BaseFunctionnalTest, Dummy
 
 APPSTRUCT = {'name':'Company', 'contactLastName':u'Lastname',
              'contactFirstName':u'FirstName',
              'address':'Address should be multiline',
+             'zipCode': "21000",
+             "city": "Dijon",
              'compte_cg':"Compte CG1515",
-             'compte_tiers':"Compte Tiers"}
+             'compte_tiers':"Compte Tiers", 'code': 'CODE'}
+
+
+def get_user(contractor=True):
+    return Dummy(is_contractor=lambda :contractor)
 
 
 class Base(BaseFunctionnalTest):
-    def addOne(self):
+    def addOne(self, contractor=True):
         self.config.add_route('customer', '/')
-        view = CustomerAdd(self.get_csrf_request())
+        request = self.get_csrf_request()
+        comp = Company.query().first()
+        comp.__name__ = 'company'
+        request.context = comp
+        request.user = get_user(contractor)
+        view = CustomerAdd(request)
         view.submit_success(APPSTRUCT)
 
     def getOne(self):
@@ -57,8 +68,10 @@ class TestCustomerEdit(Base):
     def test_customer_edit(self):
         self.addOne()
         customer = self.getOne()
+        customer.__name__ = 'customer'
         req = self.get_csrf_request()
         req.context = customer
+        req.user = get_user(contractor=False)
         appstruct = APPSTRUCT.copy()
         appstruct['contactLastName'] = u"Changed Lastname"
         appstruct['compte_cg'] = "1"

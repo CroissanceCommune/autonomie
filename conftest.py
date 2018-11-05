@@ -93,7 +93,7 @@ def dump_sample():
         dump sample datas in our test database
     """
     from autonomie.scripts import fake_database
-    fake_database.fake_database_fill({})
+    fake_database.fake_database_fill()
     from transaction import commit
     commit()
     launch_cmd("mysqldump -uroot testautonomie > /tmp/test.sql")

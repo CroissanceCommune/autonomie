@@ -107,18 +107,16 @@ def add_company(user, company_name, goal=""):
 
     return company
 
-def add_customer(company, customer_name, customer_code, customer_lastname):
-    customer = Customer()
-    customer.name = customer_name #u"Institut médical Dupont & Dupond"
-    customer.contactLastName = customer_lastname # "Dupont"
-    customer.code = customer_code #"IMDD"
-    customer.company = company
+def add_customer(**kw): #company, customer_name, customer_code, customer_lastname):
+    customer = Customer(**kw)
 
     session = DBSESSION()
     session.add(customer)
     session.flush()
 
-    print u"Added customer to %s: %s" % (company.name, customer_name)
+    print u"Added customer to %s: %s" % (
+        customer.company.name,
+        customer.name)
     return customer
 
 def add_project(customer, company, project_name, project_code):
@@ -249,10 +247,13 @@ def fake_database_fill():
         u"Nettoyage de vitre",
     )
     customer = add_customer(
-        company,
-        u"Institut médical Dupont & Dupond",
-        "IMDD",
-        "Dupont",
+        company=company,
+        name=u"Institut médical Dupont & Dupond",
+        code="IMDD",
+        contactLastName="Dupont",
+        address=u"Avenue Victor Hugo",
+        zipCode=u"21000",
+        city=u"Dijon"
     )
     project = add_project(customer, company, u"Vitrine rue Neuve", "VRND")
     phase = add_phase(project, u"Default")

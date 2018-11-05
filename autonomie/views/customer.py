@@ -196,19 +196,16 @@ class CustomerAdd(BaseFormView):
 
     def submit_success(self, appstruct):
         model = self.schema.objectify(appstruct)
-        log.info(appstruct)
-        log.info(model)
-
-        log.info(model.appstruct())
 
         if self.context.__name__ == 'company':
             # It's an add form
             model.company = self.context
-
-        if model.id is not None:
-            model = self.dbsession.merge(model)
-        else:
             self.dbsession.add(model)
+        else:
+            # It's an edition one
+            model.id = self.context.id
+            model = self.dbsession.merge(model)
+
         self.dbsession.flush()
 
         self.session.flash(self.validation_msg)
@@ -250,12 +247,15 @@ def populate_actionmenu(request, context):
         if has_permission('edit', request.context, request):
             request.actionmenu.add(get_edit_btn(context.id))
 
+
 def get_list_view_btn(id_):
     return ViewLink(u"Liste des clients", "edit", path="company_customers",
                                                                     id=id_)
 
+
 def get_view_btn(customer_id):
     return ViewLink(u"Voir", "view", path="customer", id=customer_id)
+
 
 def get_edit_btn(customer_id):
     return ViewLink(u"Modifier", "edit", path="customer", id=customer_id,

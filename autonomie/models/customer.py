@@ -126,7 +126,7 @@ class Customer(DBBASE):
         primary_key=True,
         info={
             'options':{'csv_exclude':True},
-            'colanderalchemy': widgets.get_hidden_field_conf(),
+            'colanderalchemy': widgets.EXCLUDED,
         },
     )
 

@@ -94,6 +94,8 @@ def dump_sample():
     """
     from autonomie.scripts import fake_database
     fake_database.fake_database_fill()
+    fake_database.set_configuration()
+
     from transaction import commit
     commit()
     launch_cmd("mysqldump -uroot testautonomie > /tmp/test.sql")

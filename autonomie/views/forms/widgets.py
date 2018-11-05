@@ -510,7 +510,8 @@ match the number of children of our mapping widget")
                 child_row.append(child)
             if child_row != []:
                 result.append(child_row)
-        result.append(hidden_fields)
+        if hidden_fields != []:
+            result.append(hidden_fields)
         return result
 
 

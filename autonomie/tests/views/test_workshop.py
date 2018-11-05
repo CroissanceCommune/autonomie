@@ -108,6 +108,8 @@ class TestWorkshopEditView(BaseTest):
                 {
                     'name': u'Matinéee',
                     'id': timeslot_id,
+                    'start_time': req.context.timeslots[0].start_time,
+                    'end_time': req.context.timeslots[0].end_time,
                 },
                 {
                     'id': None,

@@ -124,7 +124,7 @@ class WorkshopAddView(BaseFormView):
 
         timeslots_datas = appstruct.pop('timeslots')
         for i in timeslots_datas:
-            i.pop('id')
+            i.pop('id', None)
 
         timeslots_datas.sort(key=lambda val: val['start_time'])
 

@@ -31,15 +31,10 @@ import logging
 import json
 import colander
 import warnings
-from string import lowercase
-import random
-from datetime import date
 from itertools import izip_longest
 
 import deform
 
-from beaker.cache import cache_region
-from sqlalchemy import distinct
 from deform.compat import url_quote
 from deform.compat import string_types
 from deform.i18n import _
@@ -51,7 +46,6 @@ from pyramid.renderers import render
 
 from autonomie.utils.ascii import gen_random_string
 from autonomie.utils.fileupload import FileTempStore
-from autonomie.models.task import Invoice
 
 
 log = logging.getLogger(__name__)
@@ -349,43 +343,6 @@ def deferred_autocomplete_widget(node, kw):
     return wid
 
 
-def get_years(dbsession):
-    """
-        Return a cached query for the available years
-    """
-    @cache_region("long_term", "taskdates")
-    def taskyears():
-        """
-            return the distinct financial years available in the database
-        """
-        years = dbsession.query(distinct(Invoice.financial_year))\
-                .order_by(Invoice.financial_year).all()
-        years = [year[0] for year in years]
-        now = date.today().year
-        if now not in years:
-            years.append(now)
-        return years
-    return taskyears()
-
-
-@colander.deferred
-def deferred_year_select_widget(node, kw):
-    """
-        Return a deferred year select widget
-    """
-    years = get_years(kw['request'].dbsession)
-    return widget.SelectWidget(values=zip(years, years),
-                css_class='input-small')
-
-
-@colander.deferred
-def deferred_today(node, kw):
-    """
-        return a deferred value for "today"
-    """
-    return date.today()
-
-
 def grouper(iterable, items, fillvalue=None):
     """
     Collect data into fixed-length chunks or blocks
@@ -517,6 +474,8 @@ class GridMappingWidget(TableMappingWidget):
 
         result = []
         index = 0
+        hidden_fields = []
+
         for row in grid:
             child_row = []
             width_sum = 0
@@ -535,6 +494,15 @@ lessc.".format(self.num_cols))
                         warnings.warn(u"The grid items number doesn't \
 match the number of children of our mapping widget")
                         break
+                    if type(child.widget) == deform.widget.HiddenWidget:
+                        hidden_fields.append(child)
+                        index += 1
+                        try:
+                            child = field.children[index]
+                        except IndexError:
+                            warnings.warn(u"The grid items number doesn't \
+match the number of children of our mapping widget")
+                            break
                     child.width = width
                     index += 1
                 else:
@@ -542,6 +510,7 @@ match the number of children of our mapping widget")
                 child_row.append(child)
             if child_row != []:
                 result.append(child_row)
+        result.append(hidden_fields)
         return result
 
 

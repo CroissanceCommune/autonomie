@@ -31,7 +31,6 @@ from sqlalchemy import or_
 from sqlalchemy.orm import undefer_group
 
 from deform import Form
-from colanderalchemy import SQLAlchemySchemaNode
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
@@ -42,51 +41,24 @@ from autonomie.models.customer import (
     FORM_GRID,
 )
 from autonomie.utils.widgets import (
-        ViewLink,
-        PopUp,
-        )
+    ViewLink,
+    PopUp,
+)
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.customer import (
-        get_list_schema,
-        )
+    get_list_schema,
+    get_customer_schema,
+)
 from autonomie.views.forms.widgets import GridFormWidget
 from autonomie.views.forms import (
-        BaseFormView,
-        )
+    BaseFormView,
+)
 from autonomie.views import (
-        BaseListView,
-        BaseCsvView,
-        )
+    BaseListView,
+    BaseCsvView,
+)
 
 log = logging.getLogger(__name__)
-
-
-def get_contractor_customer_schema():
-    """
-    Rerturn the contractor customer form
-    """
-    return SQLAlchemySchemaNode(
-        Customer,
-        excludes=('compte_tiers', 'compte_cg'),
-    )
-
-
-def get_manager_customer_schema():
-    """
-    Return the manager customer form
-    """
-    return SQLAlchemySchemaNode(Customer)
-
-
-def get_customer_schema(request):
-    """
-    return the schema for user add/edit regarding the current user's role
-    """
-    if request.user.is_contractor():
-        schema = get_contractor_customer_schema()
-    else:
-        schema = get_manager_customer_schema()
-    return schema
 
 def get_customer_form(request):
     """
@@ -237,7 +209,7 @@ class CustomerEdit(CustomerAdd):
 
 def populate_actionmenu(request, context):
     """
-        populate the actionmenu
+        populate the actionmenu for the different views (list/add/edit ...)
     """
     company_id = request.context.get_company_id()
     request.actionmenu.add(get_list_view_btn(company_id))

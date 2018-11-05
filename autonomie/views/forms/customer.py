@@ -25,10 +25,39 @@
 """
     Customer handling forms schemas
 """
+from colanderalchemy import SQLAlchemySchemaNode
 from autonomie.views.forms.lists import BaseListsSchema
 
 def get_list_schema():
     schema = BaseListsSchema().clone()
     schema['search'].description = u"Entreprise ou contact principal"
 
+    return schema
+
+
+def get_contractor_customer_schema():
+    """
+    Rerturn the contractor customer form
+    """
+    return SQLAlchemySchemaNode(
+        Customer,
+        excludes=('compte_tiers', 'compte_cg'),
+    )
+
+
+def get_manager_customer_schema():
+    """
+    Return the manager customer form
+    """
+    return SQLAlchemySchemaNode(Customer)
+
+
+def get_customer_schema(request):
+    """
+    return the schema for user add/edit regarding the current user's role
+    """
+    if request.user.is_contractor():
+        schema = get_contractor_customer_schema()
+    else:
+        schema = get_manager_customer_schema()
     return schema

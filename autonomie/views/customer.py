@@ -31,25 +31,27 @@ from sqlalchemy import or_
 from sqlalchemy.orm import undefer_group
 
 from deform import Form
+from colanderalchemy import SQLAlchemySchemaNode
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import has_permission
 
-from autonomie.models.customer import Customer
+from autonomie.models.customer import (
+    Customer,
+    FORM_GRID,
+)
 from autonomie.utils.widgets import (
         ViewLink,
         PopUp,
         )
 from autonomie.utils.views import submit_btn
 from autonomie.views.forms.customer import (
-        CUSTOMERSCHEMA,
         get_list_schema,
         )
 from autonomie.views.forms.widgets import GridFormWidget
 from autonomie.views.forms import (
         BaseFormView,
-        merge_session_with_post,
         )
 from autonomie.views import (
         BaseListView,
@@ -58,38 +60,66 @@ from autonomie.views import (
 
 log = logging.getLogger(__name__)
 
-FORM_GRID = (
-    ((4, True,), (2, True), ),
-    ((4, True,), (4, True),  (4, True), ),
-    ((4, True,), (4, True),  (4, True), ),
-    ((4, True,), (2, True), (3, True), (3, True), ),
-    ((3, True,), ),
-    ((3, True,), (3, True),  (3, True), ),
+
+def get_contractor_customer_schema():
+    """
+    Rerturn the contractor customer form
+    """
+    return SQLAlchemySchemaNode(
+        Customer,
+        excludes=('compte_tiers', 'compte_cg'),
     )
 
+
+def get_manager_customer_schema():
+    """
+    Return the manager customer form
+    """
+    return SQLAlchemySchemaNode(Customer)
+
+
+def get_customer_schema(request):
+    """
+    return the schema for user add/edit regarding the current user's role
+    """
+    if request.user.is_contractor():
+        schema = get_contractor_customer_schema()
+    else:
+        schema = get_manager_customer_schema()
+    return schema
 
 def get_customer_form(request):
     """
         Returns the customer add/edit form
     """
-    schema = CUSTOMERSCHEMA.bind(request=request)
+    schema = get_customer_schema(request)
+    schema = schema.bind(request=request)
     form = Form(schema, buttons=(submit_btn,))
     form.widget = GridFormWidget(grid=FORM_GRID)
     return form
 
 
 class CustomersList(BaseListView):
+    """
+    Customer list view
+    """
     title = u"Liste des clients"
     schema = get_list_schema()
-    sort_columns = {'name':Customer.name,
-                    "code":Customer.code,
-                    "contactLastName":Customer.contactLastName}
+    sort_columns = {
+        'name':Customer.name,
+        "code":Customer.code,
+        "contactLastName":Customer.contactLastName,
+    }
 
     def query(self):
         company = self.request.context
         return Customer.query().filter(Customer.company_id == company.id)
 
-    def filter_name_or_contact(self, records, appstruct):
+    @staticmethod
+    def filter_name_or_contact(records, appstruct):
+        """
+        Filter the records by customer name or contact lastname
+        """
         search = appstruct['search']
         if search:
             records = records.filter(
@@ -98,7 +128,10 @@ class CustomersList(BaseListView):
         return records
 
     def populate_actionmenu(self, appstruct):
-        populate_actionmenu(self.request)
+        """
+        Populate the actionmenu regarding the user's rights
+        """
+        populate_actionmenu(self.request, self.context)
         if has_permission('add', self.request.context, self.request):
             form = get_customer_form(self.request)
             popup = PopUp("addform", u'Ajouter un client', form.render())
@@ -132,70 +165,90 @@ def customer_view(request):
 
 
 class CustomerAdd(BaseFormView):
+    """
+    Customer add form
+    """
     title = u"Ajouter un client"
-    schema = CUSTOMERSCHEMA
+    _schema = None
     buttons = (submit_btn,)
+    validation_msg = u"Le client a bien été ajouté"
+
+    @property
+    def schema(self):
+        """
+        Dynamically create the schema regarding the current request
+        """
+        if self._schema == None:
+            self._schema = get_customer_schema(self.request)
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        """
+        A setter for the schema attribute (needed because of the baseclass in
+        pyramid_deform)
+        """
+        self._schema = value
 
     def before(self, form):
-        populate_actionmenu(self.request)
+        populate_actionmenu(self.request, self.context)
         form.widget = GridFormWidget(grid=FORM_GRID)
 
     def submit_success(self, appstruct):
-        customer = Customer()
-        customer.company = self.request.context
-        customer = merge_session_with_post(customer, appstruct)
-        self.dbsession.add(customer)
+        model = self.schema.objectify(appstruct)
+        log.info(appstruct)
+        log.info(model)
+
+        log.info(model.appstruct())
+
+        if self.context.__name__ == 'company':
+            # It's an add form
+            model.company = self.context
+
+        if model.id is not None:
+            model = self.dbsession.merge(model)
+        else:
+            self.dbsession.add(model)
         self.dbsession.flush()
-        message = u"Le client <b>{0}</b> a été ajouté avec succès".format(
-                                                                customer.name)
-        self.session.flash(message)
-        return HTTPFound(self.request.route_path('customer', id=customer.id))
+
+        self.session.flash(self.validation_msg)
+        return HTTPFound(
+            self.request.route_path(
+                'customer',
+                id=model.id
+            )
+        )
 
 
-class CustomerEdit(BaseFormView):
-    schema = CUSTOMERSCHEMA
-    buttons = (submit_btn,)
+class CustomerEdit(CustomerAdd):
+    """
+    Customer edition form
+    """
+    validation_msg = u"Le client a été édité avec succès"
 
     @reify
     def title(self):
-        return u"Modifier le client '{0}'".format(self.request.context.name)
-
-    def before(self, form):
-        """
-            prepopulate the form and the actionmenu
-        """
-        populate_actionmenu(self.request, self.request.context)
-        form.widget = GridFormWidget(grid=FORM_GRID)
-
-    def submit_success(self, appstruct):
-        """
-            Edit the database entry
-        """
-        customer = merge_session_with_post(self.request.context, appstruct)
-        customer = self.dbsession.merge(customer)
-        self.dbsession.flush()
-        message = u"Le client <b>{0}</b> a été édité avec succès".format(
-                                                                customer.name)
-        self.session.flash(message)
-        return HTTPFound(self.request.route_path('customer', id=customer.id))
+        return u"Modifier le client '{0}'".format(
+            self.request.context.name
+        )
 
     def appstruct(self):
         """
-            Populate the form with the current edited context (customer)
+        Populate the form with the current edited context (customer)
         """
-        return self.request.context.appstruct()
+        return self.schema.dictify(self.request.context)
 
 
-def populate_actionmenu(request, customer=None):
+def populate_actionmenu(request, context):
     """
         populate the actionmenu
     """
     company_id = request.context.get_company_id()
     request.actionmenu.add(get_list_view_btn(company_id))
-    if customer:
-        request.actionmenu.add(get_view_btn(customer.id))
+    if context.__name__ == 'customer':
+        request.actionmenu.add(get_view_btn(context.id))
         if has_permission('edit', request.context, request):
-            request.actionmenu.add(get_edit_btn(customer.id))
+            request.actionmenu.add(get_edit_btn(context.id))
 
 def get_list_view_btn(id_):
     return ViewLink(u"Liste des clients", "edit", path="company_customers",

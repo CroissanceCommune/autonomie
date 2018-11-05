@@ -36,6 +36,8 @@
 
 """
 import logging
+import colander
+from deform import widget as deform_widget
 from sqlalchemy import (
         Column,
         Integer,
@@ -44,10 +46,10 @@ from sqlalchemy import (
         ForeignKey,
     )
 from sqlalchemy.orm import (
-        relationship,
         deferred,
         )
 
+from autonomie.models import widgets
 from autonomie.models.types import CustomDateType
 from autonomie.models.utils import get_current_timestamp
 from autonomie.models.base import (
@@ -56,6 +58,50 @@ from autonomie.models.base import (
         )
 
 log = logging.getLogger(__name__)
+
+
+def get_customer_from_request(request):
+    if request.context.__name__ == 'customer':
+        return request.context
+    else:
+        return None
+
+
+def get_company_id_from_request(request):
+    if request.context.__name__ == 'company':
+        return request.context.id
+    elif request.context.__name__ == 'customer':
+        return request.context.company.id
+    else:
+        return -1
+
+
+@colander.deferred
+def deferred_ccode_valid(node, kw):
+    request = kw['request']
+    company_id = get_company_id_from_request(request)
+    customer = get_customer_from_request(request)
+
+    def unique_ccode(node, value):
+        """
+            Test customer code unicity
+        """
+        if len(value) != 4:
+            message = u"Le code client doit contenir 4 caractères."
+            raise colander.Invalid(node, message)
+        #Test unicity
+        query = Customer.query().filter(Customer.company_id == company_id)\
+                .filter(Customer.code == value)
+        if customer:
+            # In edit mode, it will always fail
+            query = query.filter(Customer.id != customer.id)
+        result = query.all()
+
+        if len(result):
+            message = u"Vous avez déjà utilisé ce code '{0}' pour un autre \
+client".format(value)
+            raise colander.Invalid(node, message)
+    return unique_ccode
 
 
 class Customer(DBBASE):
@@ -75,141 +121,285 @@ class Customer(DBBASE):
     __tablename__ = 'customer'
     __table_args__ = default_table_args
     id = Column(
-            'id',
-            Integer,
-            primary_key=True,
-            info={'options':{'csv_exclude':True}}
-            )
-    code = Column('code', String(4))
-    comments = deferred(
-            Column(
-                "comments",
-                Text,
-                info={'label':u"Commentaires"},
-                ),
-            group='edit',
-            )
-    creationDate = Column(
+        'id',
+        Integer,
+        primary_key=True,
+        info={
+            'options':{'csv_exclude':True},
+            'colanderalchemy': widgets.get_hidden_field_conf(),
+        },
+    )
+
+    creationDate = deferred(
+        Column(
             "creationDate",
             CustomDateType,
             default=get_current_timestamp,
-            info={'options':{'csv_exclude':True}},
-            )
-    updateDate = Column(
+            info={
+                'options':{'csv_exclude':True},
+                'colanderalchemy': widgets.EXCLUDED,
+            },
+        ),
+        group='all',
+    )
+
+    updateDate = deferred(
+        Column(
             "updateDate",
             CustomDateType,
             default=get_current_timestamp,
             onupdate=get_current_timestamp,
-            info={'options':{'csv_exclude':True}},
-            )
+            info={
+                'options':{'csv_exclude':True},
+                'colanderalchemy': widgets.EXCLUDED,
+            },
+        ),
+        group='all',
+    )
+
     company_id = Column(
-            "company_id",
-            Integer,
-            ForeignKey('company.id'),
-            info={'options':{'csv_exclude':True}}
-            )
-    intraTVA = deferred(
-            Column(
-                "intraTVA",
-                String(50),
-                info={'label':u"TVA intracommunautaire"},
-                ),
-            group='edit',
-            )
-    address = deferred(
-            Column(
-                "address",
-                String(255),
-                info={'label':u"Adresse"},
-                ),
-            group='edit')
-    zipCode = deferred(
-            Column(
-                "zipCode",
-                String(20),
-                info={'label':u"Code postal"},
-                ),
-            group='edit')
-    city = deferred(
-            Column(
-                "city",
-                String(255),
-                info={'label':u"Ville"},
-                ),
-            group='edit')
-    country = deferred(
-            Column(
-                "country",
-                String(150),
-                default=u'France',
-                info={'label':u"Pays"}
-                ),
-            group='edit')
-    phone = deferred(
-            Column(
-                "phone",
-                String(50),
-                info={'label':u"Téléphone"}
-                ),
-            group='edit')
-    fax = deferred(
-            Column(
-                "fax",
-                String(50),
-                info={'label':u"Fax"}
-                ),
-            group="edit")
-    function = deferred(
-            Column(
-                "function",
-                String(255),
-                info={'label':u"Fonction du contact principal"}
-                ),
-            group="edit")
-    email = deferred(
-            Column(
-                "email",
-                String(255),
-                info={'label':u"E-mail"}
-                ),
-            group='edit')
-    contactLastName = deferred(
-            Column(
-                "contactLastName",
-                String(255),
-                default=None,
-                info={'label':u"Prénom du contact principal"}
-                ),
-            group='edit')
+        "company_id",
+        Integer,
+        ForeignKey('company.id'),
+        info={
+            'options':{'csv_exclude':True},
+            'colanderalchemy': widgets.EXCLUDED,
+        }
+    )
+
     name = Column(
-            "name",
+        "name",
+        String(255),
+        info={
+            'label': u"Nom",
+            "colanderalchemy": {
+                'title': u'Nom',
+            },
+        },
+        nullable=False,
+    )
+
+    code = Column(
+        'code',
+        String(4),
+        info={
+            'colanderalchemy':{
+                'title': u"Code",
+                'widget': deform_widget.TextInputWidget(mask='****')
+            }
+        },
+        nullable=False,
+    )
+
+    contactLastName = deferred(
+        Column(
+            "contactLastName",
             String(255),
-            default=None,
-            info={'label':u"Nom"}
-            )
+            info={
+                'label':u"Nom du contact principal",
+                "colanderalchemy": {
+                    'title':u"Nom du contact principal",
+                }
+            },
+            nullable=False,
+        ),
+        group='edit',
+    )
+
     contactFirstName = deferred(
-            Column(
-                "contactFirstName",
-                String(255),
-                default=None,
-                info={'label':u"Nom du contact principal"}
-                ),
-            group='edit')
+        Column(
+            "contactFirstName",
+            String(255),
+            info={
+                'label': u"Prénom du contact principal",
+                'colanderalchemy': {
+                    'title': u"Prénom du contact principal",
+                }
+            },
+            default="",
+        ),
+        group='edit',
+    )
+
+    function = deferred(
+        Column(
+            "function",
+            String(255),
+            info={
+                'label': u"Fonction du contact principal",
+                'colanderalchemy': {
+                    'title': u"Fonction du contact principal",
+                }
+            },
+            default='',
+        ),
+        group="edit",
+    )
+
+    address = deferred(
+        Column(
+            "address",
+            String(255),
+            info={
+                'label':u"Adresse",
+                'colanderalchemy': {
+                    'title': u'Adresse',
+                    'widget': deform_widget.TextAreaWidget(
+                        cols=25,
+                        row=1,
+                    )
+                }
+            },
+            nullable=False,
+        ),
+        group='edit'
+    )
+
+    zipCode = deferred(
+        Column(
+            "zipCode",
+            String(20),
+            info={
+                'label':u"Code postal",
+                'colanderalchemy':{
+                    'title': u'Code postal',
+                }
+            },
+            nullable=False,
+        ),
+        group='edit',
+    )
+
+    city = deferred(
+        Column(
+            "city",
+            String(255),
+            info={
+                'label':u"Ville",
+                'colanderalchemy': {
+                    'title': u'Ville',
+                }
+            },
+            nullable=False,
+        ),
+        group='edit',
+    )
+
+    country = deferred(
+        Column(
+            "country",
+            String(150),
+            info={
+                'label':u"Pays",
+                'colanderalchemy': {'title': u'Pays'},
+            },
+            default=u'France',
+        ),
+        group='edit',
+    )
+
+    email = deferred(
+        Column(
+            "email",
+            String(255),
+            info={
+                'label':u"E-mail",
+                'colanderalchemy':{
+                    'title': u"E-mail",
+                    'validator': widgets.mail_validator(),
+                },
+            },
+            default='',
+        ),
+        group='edit',
+    )
+
+    phone = deferred(
+        Column(
+            "phone",
+            String(50),
+            info={
+                'label':u"Téléphone",
+                'colanderalchemy': {
+                    'title': u'Téléphone',
+                },
+            },
+            default='',
+        ),
+        group='edit',
+    )
+
+    fax = deferred(
+        Column(
+            "fax",
+            String(50),
+            info={
+                'label':u"Fax",
+                'colanderalchemy': {
+                    'title': u'Fax',
+                }
+            },
+            default='',
+        ),
+        group="edit"
+    )
+
+    intraTVA = deferred(
+        Column(
+            "intraTVA",
+            String(50),
+            info={
+                'label':u"TVA intracommunautaire",
+                'colanderalchemy': {'title': u"TVA intracommunautaire"},
+            },
+        ),
+        group='edit',
+    )
+
+    comments = deferred(
+        Column(
+            "comments",
+            Text,
+            info={
+                'label':u"Commentaires",
+                  'colanderalchemy':{
+                      'title': u"Commentaires",
+                      'widget': deform_widget.TextAreaWidget(
+                          css_class="span10"
+                      ),
+                  }
+            },
+        ),
+        group='edit',
+    )
 
     compte_cg = deferred(
-            Column(
-                String(125),
-                default="",
-                info={'options':{'csv_exclude':True}}
-                ),
-            group="edit")
+        Column(
+            String(125),
+            info={
+                'options':{'csv_exclude':True},
+                'colanderalchemy': {
+                    'title': u"Compte CG",
+                },
+            },
+            default="",
+        ),
+        group="edit",
+    )
+
     compte_tiers = deferred(
-            Column(
-                String(125),
-                default="",
-                info={'options':{'csv_exclude':True}}
-                ),
-            group="edit")
+        Column(
+            String(125),
+            info={
+                'options':{'csv_exclude':True},
+                'colanderalchemy': {
+                    'title': u"Compte tiers",
+                }
+            },
+            default="",
+        ),
+        group="edit",
+    )
 
     def get_company_id(self):
         """
@@ -249,3 +439,16 @@ class Customer(DBBASE):
         if self.country not in ("France", "france"):
             address += u"\n{0}".format(self.country)
         return address
+
+
+FORM_GRID = (
+    ((4, True,), (2, True), ),
+    ((4, True,), (4, True),  (4, True), ),
+    ((4, True,), (2, True), (3, True), (3, True), ),
+    ((4, True,), (4, True),  (4, True), ),
+    ((3, True,), ),
+    ((10, True,), ),
+    ((3, True,), (3, True), ),
+    )
+
+

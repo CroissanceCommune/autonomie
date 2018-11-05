@@ -115,8 +115,7 @@ class CustomersList(BaseListView):
         company = self.request.context
         return Customer.query().filter(Customer.company_id == company.id)
 
-    @staticmethod
-    def filter_name_or_contact(records, appstruct):
+    def filter_name_or_contact(self, records, appstruct):
         """
         Filter the records by customer name or contact lastname
         """

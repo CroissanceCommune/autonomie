@@ -220,6 +220,20 @@ class Customer(DBBASE, PersistentACLMixin):
         group="edit",
     )
 
+    registration = deferred(
+        Column(
+            "registration",
+            String(255),
+            info={
+                'colanderalchemy': {
+                    'title': u"Immatriculation (Siret, Siren, RNA)",
+                }
+            },
+            default='',
+        ),
+        group="edit",
+    )
+
     address = deferred(
         Column(
             "address",

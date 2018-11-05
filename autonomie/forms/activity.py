@@ -158,6 +158,7 @@ class CreateActivitySchema(colander.MappingSchema):
         colander.Integer(),
         widget=deferred_select_action,
         title=u"Intitulé de l'action (financée)",
+        missing=colander.drop,
     )
     subaction_id = colander.SchemaNode(
         colander.Integer(),

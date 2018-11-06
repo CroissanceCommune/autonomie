@@ -226,7 +226,7 @@ class Customer(DBBASE, PersistentACLMixin):
             String(255),
             info={
                 'colanderalchemy': {
-                    'title': u"Immatriculation (Siret, Siren, RNA)",
+                    'title': u"Numéro d'immatriculation (SIRET, SIREN, RCS, RNA...)",
                 }
             },
             default='',
@@ -458,6 +458,7 @@ class Customer(DBBASE, PersistentACLMixin):
             code=self.code,
             comments=self.comments,
             tva_intracomm=self.tva_intracomm,
+            registration=self.registration,
             address=self.address,
             zip_code=self.zip_code,
             city=self.city,
@@ -541,7 +542,7 @@ COMPANY_FORM_GRID = (
         ('country', 4),
     ),
     (
-        ('tva_intracomm', 4),
+        ('tva_intracomm', 4), ('registration', 4),
     ),
     (
         ('email', 4),

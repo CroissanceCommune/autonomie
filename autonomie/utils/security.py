@@ -143,7 +143,8 @@ DEFAULT_PERM = [
             "training",
             "add.training",
             "list.training",
-            "add_workshop",
+            "list.workshop",
+            "add.workshop",
         )
     ),
     (Allow, "group:constructor", ("add.construction",)),
@@ -161,6 +162,18 @@ DEFAULT_PERM_NEW = [
             'manage',
             'admin_treasury',
             'admin.trainings',
+            # activity
+            'add.activity',
+            'admin.activity',
+            'edit.activity',
+            'list.activity',
+            'view.activity',
+            # workshop
+            'add.workshop',
+            'admin.workshop',
+            'edit.workshop',
+            'list.workshop',
+            'view.workshop',
         )
     ),
     (
@@ -170,6 +183,18 @@ DEFAULT_PERM_NEW = [
             'manage',
             'admin_treasury',
             'admin.trainings',
+            # activity
+            'admin.activity',
+            'add.activity',
+            'edit.activity',
+            'list.activity',
+            'view.activity',
+            # workshop
+            'add.workshop',
+            'admin.workshop',
+            'edit.workshop',
+            'list.workshop',
+            'view.workshop',
         )
     ),
     (
@@ -177,7 +202,8 @@ DEFAULT_PERM_NEW = [
         "group:trainer",
         (
             "add.training",
-            "add_workshop",
+            "add.workshop",
+            "list.workshop",
         )
     ),
     (
@@ -392,14 +418,14 @@ def get_event_acl(self):
     # Prior to default ACL because we want to forbid self-signin on closed
     # workshops even for admins.
     if self.signup_mode == 'open':
-        acl.append((Allow, Authenticated, 'signup'))
+        acl.append((Allow, Authenticated, ('event.signup', 'event.signout')))
     else:
-        acl.append((Deny, Everyone, 'signup'))
+        acl.append((Deny, Everyone, ('event.signup', 'event.signout')))
 
-    acl += DEFAULT_PERM[:]
+    acl += DEFAULT_PERM_NEW[:]
 
     participants_perms = (
-        "view_activity",
+        "view.activity",
         "view.file",
     )
     owner_perms = (
@@ -427,7 +453,7 @@ def get_activity_acl(self):
             (
                 Allow,
                 'company:{}'.format(company.id),
-                ("view_activity", "view.file")
+                ("view.activity", "view.file")
             )
         )
     return acl
@@ -440,13 +466,13 @@ def get_workshop_acl(self):
     acl = get_event_acl(self)
 
     trainers_perms = (
-        "edit_workshop",
-        "view_workshop",
+        "edit.workshop",
+        "view.workshop",
     )
     owner_perms = trainers_perms
 
     participants_perms = (
-        "view_workshop",
+        "view.workshop",
     )
 
     acl.extend(
@@ -490,13 +516,12 @@ def get_company_acl(self):
         "add_sale_product",
         "list_treasury_files",
         # Accompagnement
-        "list_activities",
-        "list_workshops",
+        "list.activity",
+        "list.workshop",
         # New format
         "view.accounting",
         "list.estimation",
         "list.invoice",
-        "list.activity",
         "view.commercial",
         "view.treasury",
     )

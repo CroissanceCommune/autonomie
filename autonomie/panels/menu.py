@@ -308,7 +308,7 @@ def _get_user_business_tools_dropdown(request, cid):
     :rtype: DropDown
     """
     dd = DropDown(label="Outils métier")
-    if request.has_permission("add_workshop"):
+    if request.has_permission("add.workshop"):
         dd.add_item(
             "Organisation d'ateliers",
             icon="fa fa-slideshare",

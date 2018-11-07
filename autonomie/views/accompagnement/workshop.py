@@ -845,7 +845,7 @@ def add_views(config):
     config.add_view(
         WorkshopAddView,
         route_name='workshops',
-        permission='add_workshop',
+        permission='add.workshop',
         request_param='action=new',
         renderer="/base/formpage.mako",
     )
@@ -853,21 +853,21 @@ def add_views(config):
     config.add_view(
         WorkshopListView,
         route_name='workshops',
-        permission='admin_workshop',
+        permission='admin.workshop',
         renderer="/accompagnement/workshops.mako",
     )
 
     config.add_view(
         CompanyWorkshopListView,
         route_name='company_workshops',
-        permission='list_workshops',
+        permission='list.workshop',
         renderer="/accompagnement/workshops.mako",
     )
 
     config.add_view(
         ManagedWorkshopListView,
         route_name='managed_workshops',
-        permission='add_workshop',
+        permission='add.workshop',
         renderer='/accompagnement/workshops.mako',
     )
 
@@ -882,7 +882,7 @@ def add_views(config):
     config.add_view(
         WorkshopEditView,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=edit',
         renderer="/accompagnement/workshop_edit.mako",
     )
@@ -890,20 +890,20 @@ def add_views(config):
     config.add_view(
         record_attendances_view,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=record',
     )
 
     config.add_view(
         workshop_signup_view,
         route_name='workshop',
-        permission='signup_workshop',
+        permission='event.signup',
         request_param='action=signup',
     )
     config.add_view(
         workshop_signout_view,
         route_name='workshop',
-        permission='signout_workshop',
+        permission='event.signout',
         request_param='action=signout',
     )
 
@@ -911,52 +911,52 @@ def add_views(config):
     config.add_view(
         workshop_delete_view,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=delete',
     )
 
     config.add_view(
         WorkShopDuplicateView,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=duplicate',
     )
 
     config.add_view(
         workshop_view,
         route_name='workshop',
-        permission='view_workshop',
+        permission='view.workshop',
         renderer='/accompagnement/workshop_view.mako',
     )
 
     config.add_view(
         WorkshopCsvView,
         route_name='workshops.csv',
-        permission='list_workshops',
+        permission='list.workshop',
     )
 
     config.add_view(
         WorkshopXlsView,
         route_name='workshops.xls',
-        permission='list_workshops',
+        permission='list.workshop',
     )
 
     config.add_view(
         WorkshopOdsView,
         route_name='workshops.ods',
-        permission='list_workshops',
+        permission='list.workshop',
     )
 
     config.add_view(
         timeslot_pdf_view,
         route_name='timeslot.pdf',
-        permission="view_workshop",
+        permission="view.workshop",
     )
 
     config.add_view(
         workshop_pdf_view,
         route_name='workshop.pdf',
-        permission="view_workshop",
+        permission="view.workshop",
     )
 
 

@@ -66,7 +66,7 @@
             </ul>
         </div>
         % endif
-    % if request.has_permission('add_workshop'):
+    % if request.has_permission('add.workshop'):
         <a class='btn btn-primary primary-action'
         href="${request.route_path('workshops', _query=dict(action='new'))}">
             <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouvel Atelier
@@ -127,14 +127,14 @@ ${records.item_count} Résultat(s)
         </thead>
         <tbody>
             % for workshop in records:
-                % if request.has_permission('edit_workshop', workshop):
+                % if request.has_permission('edit.workshop', workshop):
                     <% _query=dict(action='edit') %>
                 % else:
                     ## Route is company_workshops, the context is the company
                     <% _query=dict(company_id=request.context.id) %>
                 % endif
                 <% url = request.route_path('workshop', id=workshop.id, _query=_query) %>
-                % if request.has_permission('view_workshop', workshop):
+                % if request.has_permission('view.workshop', workshop):
                     <% onclick = "document.location='{url}'".format(url=url) %>
                 % else :
                     <% onclick = u"alert(\"Vous n'avez pas accès aux données de cet atelier\");" %>
@@ -192,7 +192,7 @@ ${records.item_count} Résultat(s)
                         <% signup_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signup")) %>
                         <% signout_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signout")) %>
 
-                        % if request.has_permission('signup', workshop):
+                        % if request.has_permission('event.signup', workshop):
                             % if workshop.is_participant(request.user.id):
                                 ${table_btn(signout_url, \
                                 u"Me désinscrire", \
@@ -209,7 +209,7 @@ ${records.item_count} Résultat(s)
                                 )}
                             % endif
                         % endif
-                        % if request.has_permission('edit_workshop', workshop):
+                        % if request.has_permission('edit.workshop', workshop):
                             <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
                             ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='pencil')}
 
@@ -220,7 +220,7 @@ ${records.item_count} Résultat(s)
                             icon='trash', \
                             onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')", \
                             css_class="btn-danger")}
-                        % elif request.has_permission("view_workshop", workshop):
+                        % elif request.has_permission("view.workshop", workshop):
                             ${table_btn(url, u"Voir", u"Voir l'atelier", icon='search')}
                         % endif
                     </td>

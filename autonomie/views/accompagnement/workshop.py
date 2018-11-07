@@ -727,6 +727,49 @@ def workshop_delete_view(workshop, request):
     return HTTPFound(url)
 
 
+def workshop_signup_view(workshop, request):
+    """
+    Self-service user signup to a workshop.
+    """
+    url = request.referer
+
+    if request.user not in workshop.participants:
+        workshop.participants.append(request.user)
+
+        for timeslot in workshop.timeslots:
+            timeslot.participants.append(request.user)
+
+        request.dbsession.merge(workshop)
+    request.session.flash(
+        u"Vous êtes inscrit à « {} ».".format(workshop.title)
+    )
+    if not url:
+        url = request.route_path('workshops')
+    return HTTPFound(url)
+
+
+def workshop_signout_view(workshop, request):
+    """
+    Self-service user signout from a workshop.
+    """
+    url = request.referer
+
+    if request.user in workshop.participants:
+        workshop.participants.remove(request.user)
+
+        for timeslot in workshop.timeslots:
+            timeslot.participants.remove(request.user)
+
+        request.dbsession.merge(workshop)
+    request.session.flash(
+        u"Vous êtes désinscrit de « {} ».".format(workshop.title)
+    )
+    if not url:
+        url = request.route_path('workshops')
+    return HTTPFound(url)
+
+
+
 class WorkShopDuplicateView(DuplicateView):
     """
     Workshop duplication view
@@ -850,6 +893,20 @@ def add_views(config):
         permission='edit_workshop',
         request_param='action=record',
     )
+
+    config.add_view(
+        workshop_signup_view,
+        route_name='workshop',
+        permission='signup_workshop',
+        request_param='action=signup',
+    )
+    config.add_view(
+        workshop_signout_view,
+        route_name='workshop',
+        permission='signout_workshop',
+        request_param='action=signout',
+    )
+
 
     config.add_view(
         workshop_delete_view,

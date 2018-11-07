@@ -388,7 +388,15 @@ def get_event_acl(self):
     """
     Return acl fr events participants can view
     """
-    acl = DEFAULT_PERM[:]
+    acl = []
+    # Prior to default ACL because we want to forbid self-signin on closed
+    # workshops even for admins.
+    if self.signup_mode == 'open':
+        acl.append((Allow, Authenticated, 'signup'))
+    else:
+        acl.append((Deny, Everyone, 'signup'))
+
+    acl += DEFAULT_PERM[:]
 
     participants_perms = (
         "view_activity",

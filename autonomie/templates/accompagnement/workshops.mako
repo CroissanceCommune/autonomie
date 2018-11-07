@@ -189,6 +189,26 @@ ${records.item_count} Résultat(s)
                         % endif
                     </td>
                     <td class="actions">
+                        <% signup_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signup")) %>
+                        <% signout_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signout")) %>
+
+                        % if request.has_permission('signup', workshop):
+                            % if workshop.is_participant(request.user.id):
+                                ${table_btn(signout_url, \
+                                u"Me désinscrire", \
+                                u"Me désinscrire de cet atelier", \
+                                icon='log-out', \
+                                css_class="btn-primary",\
+                                )}
+                            % else:
+                                ${table_btn(signup_url, \
+                                u"M'inscrire", \
+                                u"M'inscrire à cet atelier", \
+                                icon='log-in', \
+                                css_class="btn-primary",\
+                                )}
+                            % endif
+                        % endif
                         % if request.has_permission('edit_workshop', workshop):
                             <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
                             ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='pencil')}

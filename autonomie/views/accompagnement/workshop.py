@@ -578,8 +578,11 @@ class CompanyWorkshopListView(WorkshopListView):
         company = self.context
         employees_id = [u.id for u in company.employees]
         query = query.filter(
-            models.Workshop.participants.any(
-                user.User.id.in_(employees_id)
+            or_(
+                models.Workshop.participants.any(
+                    user.User.id.in_(employees_id)
+                ),
+                models.Event.signup_mode == 'open',
             )
         )
         return query

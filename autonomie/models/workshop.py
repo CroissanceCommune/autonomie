@@ -50,8 +50,8 @@ log = logging.getLogger(__name__)
 WORKSHOP_TRAINER = Table(
     'workshop_trainer',
     DBBASE.metadata,
-    Column("workshop_id", Integer, ForeignKey("workshop.id"), nullable=False),
-    Column("user_id", Integer, ForeignKey("accounts.id"), nullable=False),
+    Column("workshop_id", Integer, ForeignKey("workshop.id", ondelete="cascade"), nullable=False),
+    Column("user_id", Integer, ForeignKey("accounts.id", ondelete="cascade"), nullable=False),
     mysql_charset=default_table_args['mysql_charset'],
     mysql_engine=default_table_args['mysql_engine'],
 )
@@ -117,7 +117,9 @@ class Workshop(Event):
             info1=self.info1,
             info2=self.info2,
             info3=self.info3,
+            trainers=self.trainers,
             signup_mode=self.signup_mode,
+            owner=self.owner,
         )
 
         for timeslot in self.timeslots:

@@ -641,7 +641,7 @@ def timeslots_pdf_output(timeslots, workshop, request):
     date = workshop.datetime.strftime("%e_%m_%Y")
     filename = u"atelier_{0}_{1}.pdf".format(date, workshop.id)
 
-    template = u"autonomie:templates/accompagnement/workshop_pdf.mako"
+    template = u"autonomie:templates/workshops/workshop_pdf.mako"
     rendering_datas = dict(
         timeslots=timeslots,
         workshop=workshop,
@@ -854,28 +854,28 @@ def add_views(config):
         WorkshopListView,
         route_name='workshops',
         permission='admin.workshop',
-        renderer="/accompagnement/workshops.mako",
+        renderer="/workshops/workshops.mako",
     )
 
     config.add_view(
         CompanyWorkshopListView,
         route_name='company_workshops',
         permission='list.workshop',
-        renderer="/accompagnement/workshops.mako",
+        renderer="/workshops/workshops.mako",
     )
 
     config.add_view(
         ManagedWorkshopListView,
         route_name='managed_workshops',
         permission='add.workshop',
-        renderer='/accompagnement/workshops.mako',
+        renderer='/workshops/workshops.mako',
     )
 
     config.add_view(
         UserWorkshopListView,
         route_name='/users/{id}/workshops',
         permission='list.workshop',
-        renderer="/accompagnement/user_workshops.mako",
+        renderer="/workshops/user_workshops.mako",
         layout="user",
     )
 
@@ -884,7 +884,7 @@ def add_views(config):
         route_name='workshop',
         permission='edit.workshop',
         request_param='action=edit',
-        renderer="/accompagnement/workshop_edit.mako",
+        renderer="/workshops/workshop_edit.mako",
     )
 
     config.add_view(
@@ -926,7 +926,7 @@ def add_views(config):
         workshop_view,
         route_name='workshop',
         permission='view.workshop',
-        renderer='/accompagnement/workshop_view.mako',
+        renderer='/workshops/workshop_view.mako',
     )
 
     config.add_view(

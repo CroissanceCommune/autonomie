@@ -133,8 +133,8 @@ contractor_choice_node_factory = forms.mk_choice_node_factory(
 
 trainer_choice_node_factory = forms.mk_choice_node_factory(
     user_node,
-    resource_name="un(e) Animateur/Animatrice",
-    resource_name_plural="un(e) ou plusieurs Animateur/Animatrice(s)",
+    resource_name=u"une personne avec les droits « Formateur »",
+    resource_name_plural=u"une ou plusieurs personnes avec les droits « Formateur »",
     roles=['trainer'],
 )
 

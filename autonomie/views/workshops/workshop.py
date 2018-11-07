@@ -469,6 +469,17 @@ class WorkshopListView(WorkshopListTools, BaseListView):
     """
     grid = SEARCH_FORM_GRID
 
+    def filter_owner_or_trainer(self, query, appstruct):
+        if self.request.has_permission('admin.workshop'):
+            return query
+        else:
+            return query.filter(or_(
+                models.Workshop.owner_id == self.request.user.id,
+                models.Workshop.trainers.any(
+                    user.User.id == self.request.user.id
+                )
+            ))
+
 
 class WorkshopCsvWriter(CsvExporter):
     headers = (
@@ -567,7 +578,7 @@ class WorkshopOdsView(WorkshopCsvView):
         return "ateliers.ods"
 
 
-class CompanyWorkshopListView(WorkshopListView):
+class CompanyWorkshopListView(WorkshopListTools, BaseListView):
     """
     View for listing company's workshops
     """
@@ -586,25 +597,6 @@ class CompanyWorkshopListView(WorkshopListView):
             )
         )
         return query
-
-
-class ManagedWorkshopListView(WorkshopListView):
-    """
-    View for listing the workshops where current user is either:
-
-    - manager
-    - trainer
-    """
-    schema = get_list_schema(company=False)
-    grid = SEARCH_FORM_GRID
-
-    def filter_owner_or_trainer(self, query, appstruct):
-        return query.filter(or_(
-            models.Workshop.owner_id == self.request.user.id,
-            models.Workshop.trainers.any(
-                user.User.id == self.request.user.id
-            )
-        ))
 
 
 class UserWorkshopListView(CompanyWorkshopListView):
@@ -835,11 +827,6 @@ def add_routes(config):
         traverse="/companies/{id}",
         )
 
-    config.add_route(
-        "managed_workshops",
-        "/users/{id}/managed_workshops",
-        traverse='/users/{id}',
-    )
 
 def add_views(config):
     config.add_view(
@@ -853,7 +840,7 @@ def add_views(config):
     config.add_view(
         WorkshopListView,
         route_name='workshops',
-        permission='admin.workshop',
+        permission='list.workshop',
         renderer="/workshops/workshops.mako",
     )
 
@@ -862,13 +849,6 @@ def add_views(config):
         route_name='company_workshops',
         permission='list.workshop',
         renderer="/workshops/workshops.mako",
-    )
-
-    config.add_view(
-        ManagedWorkshopListView,
-        route_name='managed_workshops',
-        permission='add.workshop',
-        renderer='/workshops/workshops.mako',
     )
 
     config.add_view(

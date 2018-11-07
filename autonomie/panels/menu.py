@@ -312,7 +312,7 @@ def _get_user_business_tools_dropdown(request, cid):
         dd.add_item(
             "Organisation d'ateliers",
             icon="fa fa-slideshare",
-            href=request.route_path("managed_workshops", id=request.user.id),
+            href=request.route_path("workshops", id=request.user.id),
         )
     return dd
 

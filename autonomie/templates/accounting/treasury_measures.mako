@@ -148,7 +148,12 @@
                                 ${api.format_date(record.date)}
                             </td>
                             <td onclick="${onclick}" class="visible-lg rowlink" >
+                                <% first_measure = api.format_amount(record.get_first_measure() %>
+                                % if first_measure is not None:
                                 ${api.format_amount(record.get_first_measure().value, precision=0)|n}&nbsp;€
+                                % else:
+                                -
+                                % endif
                             </td>
                             <td class='actions'>
                             ${request.layout_manager.render_panel('action_dropdown', links=stream_actions(record))}

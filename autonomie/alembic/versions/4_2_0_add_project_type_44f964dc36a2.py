@@ -16,6 +16,7 @@ from autonomie.alembic.utils import column_exists
 
 logger = logging.getLogger('alembic.add_project_type')
 
+
 def update_database_structure():
     op.add_column(
         "project",
@@ -168,6 +169,16 @@ business_type_id={btype_id} where {type_}.course={course}"
 (select count(task.id) from task join {type_} on {type_}.id=task.id \
 where {type_}.course=1 and task.project_id=project.id ) > 0;"
         op.execute(query2.format(type_=typ_, ptype_id=course_ptype_id,))
+
+    query = "update task join cancelinvoice on cancelinvoice.id=task.id set \
+business_type_id={btype_id}".format(btype_id=default_btype_id)
+    op.execute(query)
+    query = "update task join cancelinvoice on cancelinvoice.id=task.id join \
+task as task2 on cancelinvoice.invoice_id=task2.id set \
+task.business_type_id={btype_id} where task2.business_type_id=4".format(
+        btype_id=course_btype_id
+    )
+    op.execute(query)
 
     _add_business_to_all_invoices(session)
 

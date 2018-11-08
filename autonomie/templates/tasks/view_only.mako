@@ -30,35 +30,15 @@
 ${request.layout_manager.render_panel('task_title_panel', title=title)}
 </%block>
 <%block name='content'>
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    </div>
-    <div class='panel-body'>
-        <div class='row'>
-            <div class='col-xs-12 col-md-3'>
-                % if hasattr(next, 'before_actions'):
-                ${next.before_actions()}
-                % endif
-                % if task.business_type.name != 'default':
-                <p class='lead'>
-                Affaire de type : ${task.business_type.label}
-                </p>
-                % endif
-                <hr />
-                <a class='btn btn-primary primary-action btn-block'
-                    href="${request.route_path('/%ss/{id}.pdf' % request.context.type_, id=request.context.id)}"
-                    >
-                    <i class='glyphicon glyphicon-book'></i>&nbsp;Voir le PDF
-                </a>
-                <hr />
-                <div class='actions'>
-
-                % if hasattr(next, 'moreactions'):
-                ${next.moreactions()}
-                % endif
-                </div>
+<div class='row'>
+    <div class='col-xs-12 col-md-9'>
+        <div class='panel panel-default page-block'>
+            <div class='panel-heading'>
+            % if hasattr(next, 'panel_heading'):
+            ${next.panel_heading()}
+            % endif
             </div>
-            <div class='col-xs-12 col-md-9'>
+            <div class='panel-body'>
                 % if hasattr(next, 'before_task_tabs'):
                 ${next.before_task_tabs()}
                 % endif
@@ -96,16 +76,30 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                 <div class='tab-content'>
                     <div role='tabpanel' class="tab-pane active row" id="summary">
                         <div class='col-xs-12'>
-                            <i class='glyphicon glyphicon-${api.status_icon(request.context)}'></i> ${api.format_status(request.context)}
-                            % if indicators:
-                            ${request.layout_manager.render_panel('sale_file_requirements', file_requirements=indicators)}
-                            % endif
                             % if hasattr(next, 'before_summary'):
                                 ${next.before_summary()}
+                            % endif
+                            <hr />
+                            % if indicators:
+                            <h3>Indicateurs</h3>
+                            ${request.layout_manager.render_panel('sale_file_requirements', file_requirements=indicators)}
                             % endif
 
                             <h3>Informations générales</h3>
                             <dl class='dl-horizontal'>
+                                <dt>Statut</dt>
+                                <dd>
+                                <i class='glyphicon glyphicon-${api.status_icon(request.context)}'></i> ${api.format_status(request.context)}
+                                </dd>
+                                % if task.business_type and task.business_type.name != 'default':
+                                % if task.business_id is not None:
+                                    <dt>Affaire</dt>
+                                    <dd><a href="${request.route_path('/businesses/{id}/overview', id=task.business_id)}">${task.business_type.label} : ${task.business.name}</a></dd>
+                                % else:
+                                    <dt>Affaire de type</dt>
+                                    <dd>${task.business_type.label}</dd>
+                                % endif
+                                % endif
                                 <dt>Nom du document</dt>
                                 <dd>${request.context.name}</dd>
                                 <dt>Date</dt>
@@ -113,7 +107,7 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                                 <dt>Client</dt>
                                 <dd>
                                     ${request.context.customer.label}
-                                    % if request.context.customer:
+                                    % if request.context.customer.code:
                                         (${request.context.customer.code})
                                     % endif
                                     <a href="${request.route_path('customer', id=request.context.customer.id)}">
@@ -162,6 +156,27 @@ ${request.layout_manager.render_panel('task_title_panel', title=title)}
                        ${request.layout_manager.render_panel('task_file_tab', title=title)}
                     % endif
 
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class='col-xs-12 col-md-3'>
+        <div class='panel panel-default page-block'>
+            <div class='panel-body'>
+                % if hasattr(next, 'before_actions'):
+                ${next.before_actions()}
+                % endif
+                <a class='btn btn-primary primary-action btn-block'
+                    href="${request.route_path('/%ss/{id}.pdf' % request.context.type_, id=request.context.id)}"
+                    >
+                    <i class='glyphicon glyphicon-book'></i>&nbsp;Voir le PDF
+                </a>
+                <hr />
+                <div class='actions'>
+
+                % if hasattr(next, 'moreactions'):
+                ${next.moreactions()}
+                % endif
                 </div>
             </div>
         </div>

@@ -61,15 +61,23 @@
         <i class='fa fa-cog'></i> Configurer les codes produits
     </a>
 % endif
+% if not invoice.estimation:
+    <a
+        href="${request.route_path('/invoices/{id}/attach_estimation', id=invoice.id)}"
+        class='btn btn-default btn-block'>
+        <i class='glyphicon glyphicon-link'></i> Rattacher cette facture à un devis
+    </a>
+% endif
 
 </%block>
 
-<%block name='before_actions'>
+<%block name='panel_heading'>
     <% invoice = request.context %>
-    <h2>${invoice.name}</h2>
-    <p class='lead'>
-    ${invoice.official_number}
-    </p>
+    % if invoice.official_number:
+    Facture n°${invoice.official_number} (${invoice.name})
+    % else:
+    <em>${invoice.name}</em>
+    % endif
 </%block>
 <%block name='moretabs'>
     <% invoice = request.context %>
@@ -83,33 +91,25 @@
 </%block>
 <%block name='before_summary'>
     <% invoice = request.context %>
-<h3>Rattachement</h3>
-<ul>
-<li>
 % if invoice.estimation:
-    Cette facture est rattachée au devis \
+    <h4 class='inline-element'>
+    Devis de référence :
     <a
     href="${request.route_path('/estimations/{id}.html', id=invoice.estimation.id)}"
     >
     ${invoice.estimation.internal_number}
     </a>
+    </h4>
     <a
         href="${request.route_path('/invoices/{id}/attach_estimation', id=invoice.id)}"
-        class='btn btn-primary btn-xs'>
-        <i class='glyphicon glyphicon-link'></i> Modifier
+        >
+        <i class='fa fa-pencil'></i>
     </a>
 % else:
-<div>Aucun devis n'est rattaché à cette facture
-    <a
-        href="${request.route_path('/invoices/{id}/attach_estimation', id=invoice.id)}"
-        class='btn btn-primary btn-xs'>
-        <i class='glyphicon glyphicon-link'></i> Rattacher cette facture à un devis
-    </a>
-</div>
 % endif
-    </li>
 <br />
 % if invoice.cancelinvoices:
+<ul>
     % for  cancelinvoice in invoice.cancelinvoices:
             <li>
                 <p>
@@ -123,12 +123,8 @@
                 </p>
             </li>
     % endfor
-% else:
-<li>
-    Aucun avoir n'a été généré
-    </li>
+</ul>
 % endif
-        </ul>
 </%block>
 
 <%block name='moretabs_datas'>

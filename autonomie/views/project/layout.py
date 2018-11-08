@@ -50,7 +50,7 @@ def deferred_phase_show_perms(item, kw):
 ProjectMenu.add(
     MenuItem(
         name="project_businesses",
-        label=u"Liste des affaies",
+        label=u"Liste des affaires",
         route_name=PROJECT_ITEM_BUSINESS_ROUTE,
         icon=u'fa fa-folder-open',
         perm=deferred_business_list_show_perms,

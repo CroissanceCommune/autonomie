@@ -6,20 +6,32 @@
 from autonomie.utils.widgets import Link
 from autonomie.utils.strings import format_account
 
-from autonomie.views import BaseView
+from autonomie.models.project.business import Business
+from autonomie.models.project.project import Project
+from autonomie.forms.training.training import get_training_list_schema
+
+from .lists import GlobalTrainingListView
 from .routes import (
     TRAINING_DASHBOARD_URL,
     USER_TRAINER_EDIT_URL,
 )
 
 
-class TrainingDashboardView(BaseView):
+class TrainingDashboardView(GlobalTrainingListView):
     """
     Dashboard view allowing an employee to have an overview of its training
     activity
 
     Context : Company instance
     """
+    is_admin = False
+    schema = get_training_list_schema(is_admin=False)
+    title = u"Mon activité de formation"
+
+    def filter_company_id(self, query, appstruct):
+        query = query.join(Business.project)
+        query = query.filter(Project.company_id == self.context.id)
+        return query
 
     def _trainer_datas_links(self):
         result = []
@@ -48,10 +60,10 @@ class TrainingDashboardView(BaseView):
             )
         return result
 
-    def __call__(self):
-        return dict(
-            trainer_datas_links=self._trainer_datas_links(),
-        )
+    def more_template_vars(self, result):
+        result = GlobalTrainingListView.more_template_vars(self, result)
+        result["trainer_datas_links"] = self._trainer_datas_links()
+        return result
 
 
 def includeme(config):

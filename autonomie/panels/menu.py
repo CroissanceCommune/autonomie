@@ -209,7 +209,7 @@ def _get_company_gestion_dropdown(request, cid):
         href=href
     )
 
-    if request.has_permission('training'):
+    if request.has_permission('add.training'):
         from autonomie.views.training.routes import TRAINING_DASHBOARD_URL
         href = request.route_path(TRAINING_DASHBOARD_URL, id=cid)
         gestion.add_item(u"Formation", icon="fa fa-graduation-cap", href=href)

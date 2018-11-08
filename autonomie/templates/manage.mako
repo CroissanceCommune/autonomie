@@ -64,7 +64,7 @@
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
-                    <th>Nom de document</th>
+                    <th>Nom</th>
                     <th>Entreprise</th>
                     <th>Demandé le</th>
                 </tr>

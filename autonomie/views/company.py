@@ -431,8 +431,8 @@ def includeme(config):
     )
     # same panel as html view
     for panel, request_param in (
-            ('company_tasks', 'action=tasks_html',),
-            ('company_events', 'action=events_html',),
+            ('company_recent_tasks', 'action=tasks_html',),
+            ('company_coming_events', 'action=events_html',),
             ):
         add_panel_view(
             config,

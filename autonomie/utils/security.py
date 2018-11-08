@@ -269,7 +269,6 @@ class RootFactory(dict):
     )
     subtrees = ()
 
-    @property
     def __acl__(self):
         """
             Default permissions
@@ -309,7 +308,6 @@ class TraversalNode(dict):
     """
     Class representing a simple traversal node
     """
-    @property
     def __acl__(self):
         """
             Default permissions
@@ -1302,60 +1300,58 @@ def set_models_acl():
     Here acl are set globally, but we'd like to set things more dynamically
     when different roles will be implemented
     """
-    Activity.__default_acl__ = property(get_activity_acl)
-    AccountingOperationUpload.__acl__ = property(get_base_acl)
-    Business.__default_acl__ = property(get_business_acl)
-    BusinessType.__acl__ = property(get_base_acl)
-    CancelInvoice.__default_acl__ = property(get_cancelinvoice_default_acl)
-    Company.__default_acl__ = property(get_company_acl)
-    CompetenceGrid.__acl__ = property(get_competence_acl)
-    CompetenceGridItem.__acl__ = property(get_competence_acl)
-    CompetenceGridSubItem.__acl__ = property(get_competence_acl)
+    Activity.__default_acl__ = get_activity_acl
+    AccountingOperationUpload.__acl__ = get_base_acl
+    Business.__default_acl__ = get_business_acl
+    BusinessType.__acl__ = get_base_acl
+    CancelInvoice.__default_acl__ = get_cancelinvoice_default_acl
+    Company.__default_acl__ = get_company_acl
+    CompetenceGrid.__acl__ = get_competence_acl
+    CompetenceGridItem.__acl__ = get_competence_acl
+    CompetenceGridSubItem.__acl__ = get_competence_acl
     ConfigFiles.__default_acl__ = [(Allow, Everyone, 'view'), ]
-    Customer.__default_acl__ = property(get_customer_acl)
-    DiscountLine.__acl__ = property(get_discount_line_acl)
-    Estimation.__default_acl__ = property(get_estimation_default_acl)
-    ExpenseSheet.__default_acl__ = property(get_expense_sheet_default_acl)
-    ExpensePayment.__acl__ = property(get_expense_payment_acl)
-    File.__default_acl__ = property(get_file_acl)
-    FileType.__acl__ = property(get_base_acl)
-    Invoice.__default_acl__ = property(get_invoice_default_acl)
-    Indicator.__acl__ = property(get_indicator_acl)
-    CustomBusinessIndicator.__acl__ = property(
-        get_custom_business_indicator_acl
-    )
-    SaleFileRequirement.__acl__ = property(get_sale_file_requirement_acl)
+    Customer.__default_acl__ = get_customer_acl
+    DiscountLine.__acl__ = get_discount_line_acl
+    Estimation.__default_acl__ = get_estimation_default_acl
+    ExpenseSheet.__default_acl__ = get_expense_sheet_default_acl
+    ExpensePayment.__acl__ = get_expense_payment_acl
+    File.__default_acl__ = get_file_acl
+    FileType.__acl__ = get_base_acl
+    Invoice.__default_acl__ = get_invoice_default_acl
+    Indicator.__acl__ = get_indicator_acl
+    CustomBusinessIndicator.__acl__ = get_custom_business_indicator_acl
+    SaleFileRequirement.__acl__ = get_sale_file_requirement_acl
     Job.__default_acl__ = DEFAULT_PERM[:]
-    Login.__acl__ = property(get_login_acl)
-    Payment.__default_acl__ = property(get_payment_default_acl)
-    PaymentLine.__acl__ = property(get_payment_line_acl)
-    Phase.__acl__ = property(get_phase_acl)
-    Project.__default_acl__ = property(get_project_acl)
-    ProjectType.__acl__ = property(get_base_acl)
-    SaleProductCategory.__acl__ = property(get_product_acl)
-    SaleProduct.__acl__ = property(get_product_acl)
-    SaleProductGroup.__acl__ = property(get_product_acl)
-    StatisticSheet.__acl__ = property(get_base_acl)
-    StatisticEntry.__acl__ = property(get_base_acl)
-    BaseStatisticCriterion.__acl__ = property(get_base_acl)
-    TaskLine.__acl__ = property(get_task_line_acl)
-    TaskLineGroup.__acl__ = property(get_task_line_group_acl)
-    TaskMention.__acl__ = property(get_base_acl)
-    Template.__default_acl__ = property(get_base_acl)
-    TemplatingHistory.__default_acl__ = property(get_base_acl)
-    Timeslot.__default_acl__ = property(get_base_acl)
-    TrainerDatas.__default_acl__ = property(get_trainerdatas_acl)
-    TreasuryMeasureGrid.__acl__ = property(get_accounting_measure_acl)
-    TreasuryMeasureType.__acl__ = property(get_base_acl)
-    IncomeStatementMeasureGrid.__acl__ = property(get_accounting_measure_acl)
-    IncomeStatementMeasureType.__acl__ = property(get_base_acl)
-    IncomeStatementMeasureTypeCategory.__acl__ = property(get_base_acl)
-    User.__default_acl__ = property(get_user_acl)
-    UserDatas.__default_acl__ = property(get_userdatas_acl)
-    Workshop.__default_acl__ = property(get_event_acl)
+    Login.__acl__ = get_login_acl
+    Payment.__default_acl__ = get_payment_default_acl
+    PaymentLine.__acl__ = get_payment_line_acl
+    Phase.__acl__ = get_phase_acl
+    Project.__default_acl__ = get_project_acl
+    ProjectType.__acl__ = get_base_acl
+    SaleProductCategory.__acl__ = get_product_acl
+    SaleProduct.__acl__ = get_product_acl
+    SaleProductGroup.__acl__ = get_product_acl
+    StatisticSheet.__acl__ = get_base_acl
+    StatisticEntry.__acl__ = get_base_acl
+    BaseStatisticCriterion.__acl__ = get_base_acl
+    TaskLine.__acl__ = get_task_line_acl
+    TaskLineGroup.__acl__ = get_task_line_group_acl
+    TaskMention.__acl__ = get_base_acl
+    Template.__default_acl__ = get_base_acl
+    TemplatingHistory.__default_acl__ = get_base_acl
+    Timeslot.__default_acl__ = get_base_acl
+    TrainerDatas.__default_acl__ = get_trainerdatas_acl
+    TreasuryMeasureGrid.__acl__ = get_accounting_measure_acl
+    TreasuryMeasureType.__acl__ = get_base_acl
+    IncomeStatementMeasureGrid.__acl__ = get_accounting_measure_acl
+    IncomeStatementMeasureType.__acl__ = get_base_acl
+    IncomeStatementMeasureTypeCategory.__acl__ = get_base_acl
+    User.__default_acl__ = get_user_acl
+    UserDatas.__default_acl__ = get_userdatas_acl
+    Workshop.__default_acl__ = get_event_acl
 
-    Tva.__acl__ = property(get_base_acl)
-    BaseExpenseLine.__acl__ = property(get_expenseline_acl)
-    ExpenseType.__acl__ = property(get_base_acl)
-    CareerStage.__acl__ = property(get_base_acl)
-    CareerPath.__acl__ = property(get_career_path_acl)
+    Tva.__acl__ = get_base_acl
+    BaseExpenseLine.__acl__ = get_expenseline_acl
+    ExpenseType.__acl__ = get_base_acl
+    CareerStage.__acl__ = get_base_acl
+    CareerPath.__acl__ = get_career_path_acl

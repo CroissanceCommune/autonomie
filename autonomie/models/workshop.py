@@ -130,6 +130,19 @@ class Workshop(Event):
 
         return new_item
 
+    def relates_single_day(self):
+        """
+        Does the TimeSlots are all occuring the same day as Workshop.
+        """
+        for slot in self.timeslots:
+            if (
+                    slot.start_time.date() != self.datetime.date()
+                    or
+                    slot.end_time.date() != self.datetime.date()
+            ):
+                return False
+        return True
+
     def __str__(self):
         return "<Workshop : %s>" % (self.id,)
 

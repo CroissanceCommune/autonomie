@@ -163,11 +163,17 @@ ${records.item_count} Résultat(s)
                                     <li>
                                         <% pdf_url = request.route_path("timeslot.pdf", id=timeslot.id) %>
                                         <a href="${pdf_url}"
-                                            title="Télécharger la sortie PDF pour impression"
-                                            icon='glyphicon glyphicon-file'>
-                                            Du ${api.format_datetime(timeslot.start_time)} au \
-        ${api.format_datetime(timeslot.end_time)} \
-        (${api.format_duration(timeslot.duration)})
+                                           title="Télécharger la sortie PDF pour impression"
+                                           icon='glyphicon glyphicon-file'>
+                                            % if workshop.relates_single_day():
+                                                ${api.format_datetime(timeslot.start_time, timeonly=True)} → \
+                                                ${api.format_datetime(timeslot.end_time, timeonly=True)} \
+                                                (${api.format_duration(timeslot.duration)})
+                                            % else:
+                                                Du ${api.format_datetime(timeslot.start_time)} au \
+                                                ${api.format_datetime(timeslot.end_time)} \
+                                                (${api.format_duration(timeslot.duration)})
+                                            % endif
                                         </a>
                                     </li>
                                 % endfor
@@ -179,8 +185,13 @@ ${records.item_count} Résultat(s)
                                     ${api.format_account(user)} :
                                     % for timeslot in workshop.timeslots:
                                         <div>
-                                            Du ${api.format_datetime(timeslot.start_time)} \
-                                            au ${api.format_datetime(timeslot.end_time)} : \
+                                            % if workshop.relates_single_day():
+                                                ${api.format_datetime(timeslot.start_time, timeonly=True)} → \
+                                                 ${api.format_datetime(timeslot.end_time, timeonly=True)} : \
+                                            % else:
+                                                Du ${api.format_datetime(timeslot.start_time)} \
+                                                au ${api.format_datetime(timeslot.end_time)} : \
+                                            % endif
                                             ${timeslot.user_status(user.id)}
                                         </div>
                                     % endfor

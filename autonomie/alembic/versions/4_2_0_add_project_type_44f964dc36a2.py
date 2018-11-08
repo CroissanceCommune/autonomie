@@ -68,6 +68,7 @@ def update_database_structure():
     op.create_foreign_key(
         op.f('fk_task_pdf_file_id'), 'task', 'file', ['pdf_file_id'], ['id']
     )
+    op.add_column('task', sa.Column('notes', sa.Text(), nullable=True))
 
 
 def _add_business_to_all_invoices(session):

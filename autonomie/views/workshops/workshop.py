@@ -468,6 +468,7 @@ class WorkshopListView(WorkshopListTools, BaseListView):
     Workshop listing view
     """
     grid = SEARCH_FORM_GRID
+    title=u"Organisation d'ateliers"
 
     def filter_owner_or_trainer(self, query, appstruct):
         if self.request.has_permission('admin.workshop'):
@@ -600,6 +601,13 @@ class CompanyWorkshopListView(WorkshopListTools, BaseListView):
 
 
 class UserWorkshopListView(CompanyWorkshopListView):
+    @property
+    def title(self):
+        user = self.context
+        return u'Ateliers auxquels {} assiste'.format(
+            'il' if user.userdatas.coordonnees_sex == 'M' else 'elle'
+        )
+
     def filter_participant(self, query, appstruct):
         user_id = self.context.id
         query = query.filter(

@@ -97,14 +97,15 @@ nav.sidebar-menu .subnav li {
   margin-top: 3px;
   margin-left: 3px;
   margin-bottom: 5px;
-  height: 36px;
+  max-height: 36px;
   padding: 0;
-  line-height: 36px;
+  line-height: 26px;
   list-style: none;
   background-color: #e6e9ed;
   white-space: nowrap;
   overflow: auto;
-  overflow-y: hidden; }
+  overflow-y: hidden;
+  font-size: 12px; }
 
 .breadcrumb-arrow li:first-child a {
   border-radius: 4px 0 0 4px;
@@ -125,9 +126,9 @@ nav.sidebar-menu .subnav li {
   padding: 0 10px; }
 
 .breadcrumb-arrow li a, .breadcrumb-arrow li:not(:first-child) span {
-  height: 36px;
+  height: 26px;
   padding: 0 10px 0 25px;
-  line-height: 36px; }
+  line-height: 26px; }
 
 .breadcrumb-arrow li:first-child a {
   padding: 0 10px; }
@@ -148,8 +149,8 @@ nav.sidebar-menu .subnav li {
   width: 0;
   height: 0;
   content: '';
-  border-top: 18px solid transparent;
-  border-bottom: 18px solid transparent; }
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent; }
 
 .breadcrumb-arrow li a:before {
   right: -10px;
@@ -165,7 +166,7 @@ nav.sidebar-menu .subnav li {
 
 .breadcrumb-arrow li a:focus, .breadcrumb-arrow li a:hover {
   background-color: #4fc1e9;
-  border: 1px solid #4fc1e9; }
+  border: 1px solid #breadcrumb-bkg-current-color; }
 
 .breadcrumb-arrow li a:focus:before, .breadcrumb-arrow li a:hover:before {
   border-left-color: #4fc1e9; }

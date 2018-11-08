@@ -217,7 +217,7 @@ class InvoiceListTools(object):
             prefix = self.request.config.get('invoiceprefix', '')
             if prefix and number.startswith(prefix):
                 number = number[len(prefix):]
-            query = query.filter(Task.official_number == number)
+            query = query.filter(Task.official_number.like("%" + number + "%"))
         return query
 
     def filter_ttc(self, query, appstruct):

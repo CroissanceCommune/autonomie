@@ -85,7 +85,11 @@ class ProjectFilesView(BaseView, TreeMixin):
         return dict(
             title=self.title,
             files=query,
-            add_url=self.request.route_path(self.add_route, id=self.context.id),
+            add_url=self.request.route_path(
+                self.add_route, 
+                id=self.context.id,
+                _query=dict(action='attach_file')
+            ),
             help_message=self.help_message,
         )
 

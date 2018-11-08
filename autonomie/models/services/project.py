@@ -135,6 +135,7 @@ class ProjectService(object):
                 Customer.id == customer_id
             )
         )
+        query = query.filter(project_class.archived == False)
         return query.all()
 
     @classmethod

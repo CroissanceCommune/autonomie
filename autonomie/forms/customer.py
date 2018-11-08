@@ -318,7 +318,7 @@ def get_individual_customer_schema():
     """
     return the schema for user add/edit regarding the current user's role
     """
-    excludes = ('name', 'tva_intracomm', 'function',)
+    excludes = ('name', 'tva_intracomm', 'function', 'registration')
     schema = SQLAlchemySchemaNode(Customer, excludes=excludes)
     schema = _customize_schema(schema)
     schema['firstname'].title = u"Prénom"

@@ -342,7 +342,8 @@ def get_csrf_request_with_db(get_csrf_request, pyramid_request, dbsession):
     ):
         pyramid_request = get_csrf_request(
             params=params, cookies=cookies, post=post,
-            current_route_name=current_route_name, current_route_path=current_route_path,
+            current_route_name=current_route_name,
+            current_route_path=current_route_path,
             context=context,
         )
         pyramid_request.dbsession = dbsession
@@ -650,27 +651,79 @@ def mk_business_type_file_types(dbsession):
 
 
 @fixture
-def project_type(dbsession, default_business_type, mk_business_type):
+def mk_project_type(dbsession, default_business_type):
     from autonomie.models.project.types import ProjectType
-    proj = ProjectType(name="default", label=u"Par défaut")
-    other_business_type = mk_business_type(name="other", label=u"Cycle long")
-    proj.other_business_types.append(other_business_type)
-    proj.default_business_type = default_business_type
-    dbsession.add(proj)
-    dbsession.flush()
-    default_business_type.project_type = proj
-    return proj
+
+    def func(name, label=None, default_btype=default_business_type,
+             other_business_types=[]):
+        if label is None:
+            label = name
+        if not hasattr(other_business_types, '__iter__'):
+            other_business_types = [other_business_types]
+        ptype = ProjectType(name=name, label=label)
+        ptype.default_business_type = default_btype
+        ptype.other_business_types = other_business_types
+        dbsession.add(ptype)
+        dbsession.flush()
+        default_btype.project_type = ptype
+        return ptype
+    return func
 
 
 @fixture
-def project(dbsession, company, customer, project_type):
+def project_type(dbsession, mk_business_type, mk_project_type):
+    ptype = mk_project_type(
+        name="default",
+        label=u"Par défaut",
+        other_business_types=mk_business_type(
+            name="other", label=u"Cycle long"
+        )
+    )
+    return ptype
+
+
+@fixture
+def mk_project(dbsession, company, customer, project_type):
+    """
+    Return a project builder tool
+
+    name
+
+        Name of the project
+
+    company
+
+        Company owning the project
+
+    customers
+
+        Project is associated to the given customers
+
+    project_type
+
+        Which project type is this project associated to ?
+    """
     from autonomie.models.project import Project
-    project = Project(name=u"Project", project_type=project_type)
-    project.company = company
-    project.customers = [customer]
-    dbsession.add(project)
-    dbsession.flush()
-    return project
+
+    def func(
+        name=u'Project', company=company, customers=[customer],
+        project_type=project_type
+    ):
+        if not hasattr(customers, '__iter__'):
+            customers = [customers]
+
+        project = Project(name=u"Project", project_type=project_type)
+        project.company = company
+        project.customers = customers
+        dbsession.add(project)
+        dbsession.flush()
+        return project
+    return func
+
+
+@fixture
+def project(mk_project):
+    return mk_project()
 
 
 @fixture

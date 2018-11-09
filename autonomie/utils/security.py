@@ -904,28 +904,28 @@ def get_task_line_group_acl(self):
     """
     Return the task line acl
     """
-    return self.task.__acl__
+    return self.task.__acl__()
 
 
 def get_task_line_acl(self):
     """
     Return the task line acl
     """
-    return self.group.__acl__
+    return self.group.__acl__()
 
 
 def get_discount_line_acl(self):
     """
     Return the acls for accessing the discount line
     """
-    return self.task.__acl__
+    return self.task.__acl__()
 
 
 def get_payment_line_acl(self):
     """
     Return the acls for accessing a payment line
     """
-    return self.task.__acl__
+    return self.task.__acl__()
 
 
 def get_expense_sheet_default_acl(self):
@@ -1150,16 +1150,19 @@ def get_file_acl(self):
     Compute the acl for a file object
     a file object's acl are simply the parent's
     """
+    acl = []
     if self.parent is not None:
-        return self.parent.__acl__
+        acl = self.parent.__acl__
     # Exceptions: headers and logos are not attached throught the Node's parent
     # rel
     elif self.company_header_backref is not None:
-        return self.company_header_backref.__acl__
+        acl = self.company_header_backref.__acl__
     elif self.company_logo_backref is not None:
-        return self.company_logo_backref.__acl__
-    else:
-        return []
+        acl = self.company_logo_backref.__acl__
+
+    if acl and callable(acl):
+        acl = acl()
+    return acl
 
 
 def get_product_acl(self):
@@ -1205,9 +1208,12 @@ def get_accounting_measure_acl(self):
     Compile the default acl for TreasuryMeasureGrid and
     IncomeStatementMeasureGrid objects
     """
+    acl = []
     if self.company is not None:
-        return self.company.__acl__
-    return []
+        acl = self.company.__acl__
+        if callable(acl):
+            acl = acl()
+    return acl
 
 
 def get_indicator_acl(self):

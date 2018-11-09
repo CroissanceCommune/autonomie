@@ -83,11 +83,9 @@
 % endif
 </%block>
 
-<%block name='before_actions'>
+<%block name='panel_heading'>
     <% estimation = request.context %>
-    <h2>
     ${estimation.name}
-    </h2>
 </%block>
 <%block name='before_summary'>
 <br />

@@ -27,6 +27,7 @@
 </%block>
 <%block name='content'>
 <div class='panel panel-default page-block'>
+
     <div class='panel-heading'>
         <div class='row'>
             <div class='col-md-3 col-xs-12 bordered'>
@@ -36,6 +37,7 @@
                     </div>
                     <div class='col-md-9'>
                         <div>Projet : ${layout.current_project_object.name}</div>
+
                         <div class='help-text'>
                         % if layout.current_project_object.description:
                             ${layout.current_project_object.description}
@@ -44,7 +46,15 @@
                             ${layout.current_project_object.project_type.label}
                             % endif
                         </div>
-                <div class='pull-right'>
+
+                    </div>
+                </div>
+            </div>
+            <div class='col-md-9 hidden-xs'>
+                <%block name='projecttitle'>
+                    <div>Clients : ${','.join(layout.customer_labels)}</div>
+                </%block>
+                        <div class='pull-right'>
                         % if request.has_permission("edit.project", layout.current_project_object):
                         <a
                             class='btn btn-default btn-small pull-right'
@@ -59,15 +69,7 @@
                             >
                             <i class='fa fa-info-circle'></i>
                         </a>
-                        <div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class='col-md-9 hidden-xs'>
-            <%block name='projecttitle'>
-                <div>Clients : ${','.join(layout.customer_labels)}</div>
-            </%block>
             </div>
         </div>
     </div>

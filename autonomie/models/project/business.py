@@ -216,3 +216,12 @@ class Business(Node):
         return self._autonomie_service.find_deadline_from_invoice(
             self, invoice
         )
+
+    def is_visible(self):
+        """
+        Check if this business should be shown to the end user (if it's parent
+        project is not of default type)
+
+        :rtype: bool
+        """
+        return not self._autonomie_service.is_default_project_type(self)

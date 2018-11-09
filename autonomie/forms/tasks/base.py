@@ -533,7 +533,7 @@ def get_task_metadatas_edit_schema():
     schema['project_id'].widget = deferred_customer_project_widget
     schema['project_id'].title = u"Projet vers lequel déplacer ce document"
     schema['phase_id'].title = u"Dossier dans lequel déplacer ce document"
-    schema['business_type_id'].widget = deform.widget.HiddenWidget()
+    del schema['business_type_id']
     schema.after_bind = add_date_field_after_bind
     return schema
 

@@ -47,6 +47,13 @@
                             % endif
                         </div>
 
+                    </div>
+                </div>
+            </div>
+            <div class='col-md-9 hidden-xs'>
+                <%block name='projecttitle'>
+                    <div>Clients : ${','.join(layout.customer_labels)}</div>
+                </%block>
                         <div class='pull-right'>
                         % if request.has_permission("edit.project", layout.current_project_object):
                         <a
@@ -63,13 +70,6 @@
                             <i class='fa fa-info-circle'></i>
                         </a>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class='col-md-9 hidden-xs'>
-                <%block name='projecttitle'>
-                    <div>Clients : ${','.join(layout.customer_labels)}</div>
-                </%block>
             </div>
         </div>
     </div>

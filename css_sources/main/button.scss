@@ -1,6 +1,7 @@
 .btn{
   font-size: 0.95rem;
   border-radius: 0px;
+  overflow-x: hidden;
   // Button placed at the top of a page
   &.btn-head{
     margin-bottom: 15px !important;

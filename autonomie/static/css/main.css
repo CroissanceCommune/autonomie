@@ -322,7 +322,8 @@ ul.form-tabs li.error a {
 
 .btn {
   font-size: 0.95rem;
-  border-radius: 0px; }
+  border-radius: 0px;
+  overflow-x: hidden; }
   .btn.btn-head {
     margin-bottom: 15px !important; }
   .btn.primary-action {

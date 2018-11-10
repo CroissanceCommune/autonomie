@@ -53,6 +53,7 @@ def get_info1():
 @colander.deferred
 def deferred_info1(node, kw):
     options = [(unicode(a.id), a.label) for a in get_info1()]
+    options.insert(0, ("", u"- Sélectionner un intitulé -"))
     return deform.widget.SelectWidget(values=options)
 
 

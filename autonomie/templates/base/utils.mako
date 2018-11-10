@@ -178,6 +178,8 @@
                 <dd>${company.third_party_customer_account or u"Non renseigné"}</dd>
                 <dt>Compte de banque</dt>
                 <dd>${company.bank_account or u"Non renseigné"}</dd>
+                <dt>Taux d'assurance professionnelle</dt>
+                <dd>${company.custom_insurance_rate or u"Non renseigné"}</dd>
                 <dt>Contribution à la CAE (en %)</dt>
                 <dd>
                     % if company.contribution:

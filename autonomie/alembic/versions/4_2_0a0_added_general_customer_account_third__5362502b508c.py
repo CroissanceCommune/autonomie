@@ -19,6 +19,7 @@ def update_database_structure():
     op.add_column('company', sa.Column('bank_account', sa.String(length=255), nullable=True))
     op.add_column('company', sa.Column('general_customer_account', sa.String(length=255), nullable=True))
     op.add_column('company', sa.Column('third_party_customer_account', sa.String(length=255), nullable=True))
+    op.add_column('company', sa.Column('custom_insurance_rate', sa.Float(), nullable=True))
     ### end Alembic commands ###
 
 def migrate_datas():
@@ -37,4 +38,5 @@ def downgrade():
     op.drop_column('company', 'third_party_customer_account')
     op.drop_column('company', 'general_customer_account')
     op.drop_column('company', 'bank_account')
+    op.drop_column('company', sa.Column('custom_insurance_rate', sa.Float(), nullable=True))
     ### end Alembic commands ###

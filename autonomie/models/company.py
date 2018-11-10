@@ -199,6 +199,11 @@ class Company(DBBASE, PersistentACLMixin):
         group="edit",
     )
 
+    custom_insurance_rate = deferred(
+        Column(Float),
+        group='edit'
+    )
+
     contribution = deferred(
         Column(Float),
         group='edit'

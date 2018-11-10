@@ -434,7 +434,7 @@ def flatten_appstruct(appstruct):
     return res
 
 
-def merge_session_with_post(model, app_struct):
+def merge_session_with_post(model, app_struct, remove_empty_values=True):
     """
         Merge Deform validated datas with SQLAlchemy's objects
         Allow to spare some lines of assigning datas to the object
@@ -447,9 +447,16 @@ def merge_session_with_post(model, app_struct):
         app_struct
 
             The datas retrieved for example from a form
+
+        remove_empty_values
+
+            should we remove the colander.null / None values or set them
+            on model.
     """
     for key, value in app_struct.items():
-        if value not in (None, colander.null,):
+        if value == colander.null:
+            value = None
+        if not (remove_empty_values and value is None):
             setattr(model, key, value)
     return model
 

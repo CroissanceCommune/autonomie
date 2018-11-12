@@ -108,16 +108,35 @@ class InvoiceNumberService(object):
         invoice_number = formatter.format(template)
 
         involved_sequences = cls.get_involved_sequences(invoice, template)
-        # Create SequenceNumber objects (the index useages have not been
-        # booked until now).
-        for sequence, next_index in involved_sequences:
-            sn = SequenceNumber(
-                sequence=sequence.db_key,
-                index=next_index,
-                task_id=invoice.id,
-            )
-            db.add(sn)
-        db.flush()
-        invoice.official_number = invoice_number
-        db.merge(invoice)
+
+        with db.begin_nested():
+            # Create SequenceNumber objects (the index useages have not been
+            # booked until now).
+            for sequence, next_index in involved_sequences:
+                sn = SequenceNumber(
+                    sequence=sequence.db_key,
+                    index=next_index,
+                    task_id=invoice.id,
+                )
+                db.add(sn)
+            invoice.official_number = invoice_number
+            db.merge(invoice)
+
+            # Imported here to avoid circular dependencies
+            from autonomie.models.task import Task, Invoice, CancelInvoice
+
+            query = Task.query().with_polymorphic([Invoice, CancelInvoice])
+            query = query.filter(
+                Task.official_number == invoice_number,
+                Task.id != invoice.id,
+            ).scalar()
+
+            if query is not None:
+                # This case is exceptionnal, we can afford a crash here
+                # Context manager will take care of rolling back
+                # subtransaction.
+                raise ValueError(
+                    'Invoice number collision, rolling back to avoid it'
+                )
+
         return invoice_number

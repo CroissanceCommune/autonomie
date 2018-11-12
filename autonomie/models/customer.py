@@ -452,7 +452,10 @@ class Customer(DBBASE, PersistentACLMixin):
         """
             :returns: a dict version of the customer object
         """
-        projects = [project.__json__(request) for project in self.projects]
+        projects = [
+            project.__json__(request)
+            for project in self.projects if not project.archived
+        ]
         return dict(
             id=self.id,
             code=self.code,

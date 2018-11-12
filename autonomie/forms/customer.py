@@ -298,7 +298,8 @@ def _customize_schema(schema):
     )
     schema['email'].validator = forms.mail_validator()
     schema['comments'].widget = deform.widget.TextAreaWidget(
-        css_class="col-md-10"
+        css_class="col-md-10",
+        rows=5,
     )
     return schema
 

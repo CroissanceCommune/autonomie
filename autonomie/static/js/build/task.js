@@ -6774,9 +6774,10 @@ webpackJsonp([2],[
 	        return this.ht() + this.tva();
 	    },
 	    loadProduct: function loadProduct(product_datas) {
-	        this.set('description', product_datas.label);
+	        this.set('description', product_datas.description);
 	        this.set('cost', product_datas.value);
 	        this.set('quantity', 1);
+	        this.set('unity', product_datas.unity);
 	        this.set('tva', product_datas.tva);
 	        this.set('product_id', product_datas.product_id);
 	        this.trigger('set:product');

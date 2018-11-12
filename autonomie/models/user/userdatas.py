@@ -977,7 +977,7 @@ class UserDatas(Node):
         info={
             'colanderalchemy':
             {
-                'title': u"Aptitude",
+                'title': u"Résultat de la visite médicale",
                 'section': u'Activité',
             }
         }
@@ -985,7 +985,7 @@ class UserDatas(Node):
     parcours_status = relationship(
         "ParcoursStatusOption",
         info={
-            'colanderalchemy': get_excluded_colanderalchemy(u"Aptitude"),
+            'colanderalchemy': get_excluded_colanderalchemy(u"Résultat de la visite médicale"),
             'export': {'related_key': 'label'},
         },
     )

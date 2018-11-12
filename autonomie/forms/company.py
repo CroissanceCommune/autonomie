@@ -219,7 +219,7 @@ comptabilité",
                 max=100,
                 min_err=u"Veuillez fournir un nombre supérieur à 0",
                 max_err=u"Veuillez fournir un nombre inférieur à 100"),
-            title=u"Taux d'assurance professionnelle",
+            title=u"Taux de Responsabilité Civile Professionnel",
             missing=colander.drop,
             description=u"Pourcentage du taux d'assurance professionnelle de cette entreprise dans la CAE",
     )

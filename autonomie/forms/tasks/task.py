@@ -7,6 +7,10 @@ import functools
 import deform
 import colander
 from colanderalchemy import SQLAlchemySchemaNode
+
+from autonomie.utils.html import (
+    clean_html,
+)
 from autonomie.models.tva import (
     Tva,
     Product,
@@ -63,7 +67,8 @@ def _customize_discountline_fields(schema):
     customize(
         "description",
         widget=deform.widget.TextAreaWidget(),
-        validator=forms.textarea_node_validator
+        validator=forms.textarea_node_validator,
+        preparer=clean_html
     )
     customize(
         "amount",
@@ -94,6 +99,7 @@ def _customize_taskline_fields(schema):
         "description",
         widget=deform.widget.TextAreaWidget(),
         validator=forms.textarea_node_validator,
+        preparer=clean_html
     )
     customize("cost", typ=AmountType(5), missing=colander.required)
     customize("quantity", typ=QuantityType(), missing=colander.required)
@@ -127,7 +133,11 @@ def _customize_tasklinegroup_fields(schema):
     customize = functools.partial(forms.customize_field, schema)
     customize("id", widget=deform.widget.HiddenWidget())
     customize("task_id", missing=colander.required)
-    customize("description", widget=deform.widget.TextAreaWidget())
+    customize(
+        "description",
+        widget=deform.widget.TextAreaWidget(),
+        preparer=clean_html,
+    )
     customize(
         "lines",
         validator=colander.Length(

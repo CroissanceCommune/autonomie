@@ -19,7 +19,7 @@ def test_task_line_description():
     schema = get_add_edit_taskline_schema(includes=('description',))
     schema = schema.bind()
     value = {'description': "test\n"}
-    assert schema.deserialize(value) == value
+    assert schema.deserialize(value) == {'description': 'test'}
     value = {'description': "\n"}
     with pytest.raises(colander.Invalid):
         schema.deserialize(value)

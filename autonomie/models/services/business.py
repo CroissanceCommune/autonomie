@@ -156,3 +156,27 @@ class BusinessService:
             DBSESSION().merge(deadline)
             invoices.append(invoice)
         return invoices
+
+    @classmethod
+    def is_default_project_type(cls, business):
+        """
+        Check if the parent's project type is of type default
+
+        :param obj business: The current business instance this service is
+        attached to
+        :rtype: bool
+        """
+        from autonomie.models.project.project import Project
+        from autonomie.models.project.types import ProjectType
+        project_type_id = DBSESSION().query(
+            Project.project_type_id
+        ).filter_by(
+            id=business.project_id
+        ).scalar()
+
+        ptype_name = DBSESSION().query(
+            ProjectType.name
+        ).filter_by(
+            id=project_type_id
+        ).scalar()
+        return ptype_name == u"default"

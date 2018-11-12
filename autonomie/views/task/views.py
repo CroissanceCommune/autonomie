@@ -430,15 +430,87 @@ class TaskSetMetadatasView(BaseFormView):
         )
         return HTTPFound(url)
 
-    def submit_success(self, appstruct):
-        logger.debug(
-            u"TaskSetMetadatasView.submit_success : %s" % appstruct
-        )
+    def _get_related_elements(self):
+        """
+        List elements related to the current estimation
+        Produce a list of visible elements that will be moved
+        and a list of all elements that will be moved
+
+        :returns: a 2-uple (visible elements, list of elements to be moved)
+        :rtype: tuple
+        """
+        all_items = []
+        visible_items = []
+        business = self.context.business
+        if business:
+            if business.is_visible():
+                visible_items.append(business)
+            all_items.append(business)
+
+            all_items.extend(business.invoices)
+            visible_items.extend(business.invoices)
+            for estimation in business.estimations:
+                if estimation != self.context:
+                    visible_items.append(estimation)
+                    all_items.append(estimation)
+        return visible_items, all_items
+
+    def _handle_move_to_project(self, appstruct):
+        """
+        Handle the specific case where a document is moved to another project
+
+        :param dict appstruct: The appstruct returned after form validation
+        """
+        visible_items, all_items = self._get_related_elements()
+        if visible_items:
+            logger.debug(
+                u"We want the user to confirm the Move to project action"
+            )
+
+        self._apply_modifications(appstruct)
+        # We move all elements to the other project
+        for element in all_items:
+            element.project_id = appstruct['project_id']
+            if hasattr(element, 'phase_id') and 'phase_id' in appstruct:
+                element.phase_id = appstruct['phase_id']
+            self.dbsession.merge(element)
+
+        result = self.redirect()
+
+        return result
+
+    def _apply_modifications(self, appstruct):
+        """
+        Apply the modification described by appstruct to the current context
+
+        :param dict appstruct: The appstruct returned after form validation
+        """
+        # On a besoin du customer_id pour que la partie js qui gère le
+        # formulaire fonctionne (cf static/js/task_add.js)
         appstruct.pop('customer_id')
         for key, value in appstruct.items():
             setattr(self.context, key, value)
-        self.request.dbsession.merge(self.context)
-        return self.redirect()
+        return self.request.dbsession.merge(self.context)
+
+    def submit_success(self, appstruct):
+        """
+        Handle successfull modification
+
+        :param dict appstruct: The appstruct returned after form validation
+        :rtype: HTTPFound
+        """
+        logger.debug(
+            u"TaskSetMetadatasView.submit_success : %s" % appstruct
+        )
+        project_id = appstruct.get('project_id')
+
+        if project_id not in (None, self.context.project_id):
+            result = self._handle_move_to_project(appstruct)
+        else:
+            self._apply_modifications(appstruct)
+            result = self.redirect()
+
+        return result
 
     def cancel_success(self, appstruct):
         return self.redirect()

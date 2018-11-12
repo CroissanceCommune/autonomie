@@ -57,3 +57,12 @@ def test_gen_invoices_all(business, full_estimation, user):
     assert len(invoices) == 3
     for i in range(2):
         assert business.payment_deadlines[i].invoice == invoices[i]
+
+
+def test_is_visible(dbsession, business, project, mk_project_type):
+    business.project = project
+    dbsession.merge(business)
+    assert BusinessService.is_default_project_type(business) == True
+    project.project_type = mk_project_type(name="newone")
+    dbsession.merge(project)
+    assert BusinessService.is_default_project_type(business) == False

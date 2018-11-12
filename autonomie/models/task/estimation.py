@@ -110,6 +110,9 @@ class Estimation(Task, EstimationCompute):
     id = Column(
         ForeignKey('task.id'),
         primary_key=True,
+        info={
+            'colanderalchemy': {'exclude': True},
+        }
     )
     signed_status = Column(
         String(10),

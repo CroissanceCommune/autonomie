@@ -110,7 +110,13 @@ class Invoice(Task, InvoiceCompute):
     __tablename__ = 'invoice'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'invoice', }
-    id = Column(ForeignKey('task.id'), primary_key=True)
+    id = Column(
+        ForeignKey('task.id'),
+        primary_key=True,
+        info={
+            'colanderalchemy': {'exclude': True},
+        }
+    )
 
     # Common with CancelInvoice
     financial_year = Column(
@@ -373,7 +379,14 @@ class CancelInvoice(Task, TaskCompute):
     __tablename__ = 'cancelinvoice'
     __table_args__ = default_table_args
     __mapper_args__ = {'polymorphic_identity': 'cancelinvoice'}
-    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    id = Column(
+        Integer,
+        ForeignKey('task.id'),
+        primary_key=True,
+        info={
+            'colanderalchemy': {'exclude': True},
+        }
+    )
     # Common with Invoice
     financial_year = Column(
         Integer,

@@ -42,7 +42,7 @@ CIVILITE_OPTIONS = ORIG_CIVILITE_OPTIONS + (
     ('M. et Mme', u"Monsieur et Madame"),
     ('M. ou Mme', u"Monsieur ou Madame"),
     ('M. et M.', u"Monsieur et Monsieur"),
-    ('Mr ou Mr', u"Monsieur ou Monsieur"),
+    ('M. ou M.', u"Monsieur ou Monsieur"),
     ('Mme et Mme', u"Madame et Madame"),
     ('Mme ou Mme', u"Madame ou Madame"),
 )

@@ -63,6 +63,11 @@ class Node(DBBASE, PersistentACLMixin):
     id = Column(
         Integer,
         primary_key=True,
+        info={
+            'colanderalchemy': {
+                'exclude': True,
+            }
+        },
     )
     name = Column(
         String(255),

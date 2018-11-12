@@ -64,7 +64,7 @@
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr>
-                    <th>Type de document</th>
+                    <th>Nom</th>
                     <th>Entreprise</th>
                     <th>Demandé le</th>
                 </tr>
@@ -73,7 +73,7 @@
             % for task in dataset:
                 <tr class="clickable-row" data-href="${task.url}">
                     <td>
-                        ${api.format_task_type(task)}
+                        ${task.name}
                     </td>
                     <td>
                         ${task.get_company().name}

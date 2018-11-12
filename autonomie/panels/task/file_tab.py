@@ -4,6 +4,8 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 
+from autonomie.panels.files import stream_actions
+
 
 def task_file_tab_panel(context, request, title, add_url=None):
     """

@@ -38,7 +38,14 @@ from autonomie import forms
 from autonomie.forms.lists import BaseListsSchema
 
 # For customers we also want 'Mr et Mme'
-CIVILITE_OPTIONS = ORIG_CIVILITE_OPTIONS + (('mr&mme', u"Monsieur et Madame"),)
+CIVILITE_OPTIONS = ORIG_CIVILITE_OPTIONS + (
+    ('M. et Mme', u"Monsieur et Madame"),
+    ('M. ou Mme', u"Monsieur ou Madame"),
+    ('M. et M.', u"Monsieur et Monsieur"),
+    ('Mr ou Mr', u"Monsieur ou Monsieur"),
+    ('Mme et Mme', u"Madame et Madame"),
+    ('Mme ou Mme', u"Madame ou Madame"),
+)
 
 
 def _build_customer_select_value(customer):
@@ -285,9 +292,8 @@ def _customize_schema(schema):
 
     :param obj schema: The Customer form schema
     """
-    schema['civilite'].widget = forms.get_radio(
+    schema['civilite'].widget = forms.get_select(
         CIVILITE_OPTIONS[1:],
-        inline=True,
     )
     schema['civilite'].validator = colander.OneOf(
         [a[0] for a in CIVILITE_OPTIONS]

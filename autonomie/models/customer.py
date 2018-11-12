@@ -527,7 +527,7 @@ COMPANY_FORM_GRID = (
         ('name', 4,), ('code', 4),
     ),
     (
-        ('civilite', 12),
+        ('civilite', 8),
     ),
     (
         ('lastname', 4),
@@ -574,7 +574,7 @@ INDIVIDUAL_FORM_GRID = (
         ('code', 6),
     ),
     (
-        ('civilite', 12),
+        ('civilite', 8),
     ),
     (
         ('lastname', 4),

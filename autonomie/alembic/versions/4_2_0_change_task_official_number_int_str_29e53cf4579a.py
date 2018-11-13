@@ -1,4 +1,4 @@
-"""change task.official_number int->str
+"""4.2.0 change task.official_number int->str
 
 Revision ID: 29e53cf4579a
 Revises: 41261dd0a613

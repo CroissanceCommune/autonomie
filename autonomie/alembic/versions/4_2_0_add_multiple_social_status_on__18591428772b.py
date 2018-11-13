@@ -1,4 +1,4 @@
-"""4.2.0a : add multiple social status on userdatas
+"""4.2.0 add multiple social status on userdatas
 
 Revision ID: 18591428772b
 Revises: 1ad4b3e78299
@@ -32,15 +32,15 @@ def migrate_datas():
     for userdata in connection.execute(userdatas_helper.select()):
         if userdata.statut_social_status_id:
             social_status_entry = SocialStatusDatas(
-                step='entry', 
-                userdatas_id=userdata.id, 
+                step='entry',
+                userdatas_id=userdata.id,
                 social_status_id=userdata.statut_social_status_id
             )
             session.add(social_status_entry)
         if userdata.statut_social_status_today_id:
             social_status_today = SocialStatusDatas(
-                step='today', 
-                userdatas_id=userdata.id, 
+                step='today',
+                userdatas_id=userdata.id,
                 social_status_id=userdata.statut_social_status_today_id
             )
             session.add(social_status_today)

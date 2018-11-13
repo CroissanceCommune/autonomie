@@ -1,4 +1,4 @@
-"""4.2.0 : add project type
+"""4.2.0  add project type
 
 Revision ID: 44f964dc36a2
 Revises: 1ad4b3e78299

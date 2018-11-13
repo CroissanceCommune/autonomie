@@ -1,4 +1,4 @@
-"""4.2.0 : add_filetype_table
+"""4.2.0 add_filetype_table
 
 Revision ID: 11a62732db65
 Revises: 44f964dc36a2

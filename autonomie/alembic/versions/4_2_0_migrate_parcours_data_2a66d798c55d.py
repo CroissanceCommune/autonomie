@@ -1,5 +1,5 @@
 #-*-coding:utf-8-*-
-"""4.2.0a : Migrate parcours data
+"""4.2.0 Migrate parcours data
 
 Revision ID: 2a66d798c55d
 Revises: 44f964dc36a2

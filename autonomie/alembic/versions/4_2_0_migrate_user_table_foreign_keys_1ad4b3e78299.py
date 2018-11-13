@@ -1,4 +1,4 @@
-"""4.2 : Migrate user table foreign keys
+"""4.2.0 Migrate user table foreign keys
 
 Revision ID: 1ad4b3e78299
 Revises: 4299e583631c

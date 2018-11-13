@@ -1,4 +1,4 @@
-""" Revision merge
+"""4.2.0 Revision merge
 
 Revision ID: 2793f8d2e33e
 Revises: ('50caf9dd4cd6', '2a66d798c55d')

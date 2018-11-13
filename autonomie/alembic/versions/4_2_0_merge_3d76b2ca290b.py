@@ -1,14 +1,14 @@
-"""Initialise la Config de la taille de troncature des libelles comptables
+"""4.2.0 Revision merge
 
-Revision ID: 4f8d19c47c76
-Revises: 3d76b2ca290b
-Create Date: 2018-06-27 16:52:39.342455
+Revision ID: 3d76b2ca290b
+Revises: ('14d7548ec2ce', '18b00b9e3b46')
+Create Date: 2018-06-25 15:42:40.769490
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '4f8d19c47c76'
-down_revision = '3d76b2ca290b'
+revision = '3d76b2ca290b'
+down_revision = ('14d7548ec2ce', '18b00b9e3b46')
 
 from alembic import op
 import sqlalchemy as sa
@@ -22,10 +22,6 @@ def migrate_datas():
     session = DBSESSION()
     from alembic.context import get_bind
     conn = get_bind()
-    from autonomie.models.config import Config
-    Config.set('accounting_label_maxlength', 35)
-    session.flush()
-
 
 def upgrade():
     update_database_structure()

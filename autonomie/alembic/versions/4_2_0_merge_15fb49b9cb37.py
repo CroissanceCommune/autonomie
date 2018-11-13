@@ -1,14 +1,14 @@
-"""empty message
+"""4.2.0 merge
 
-Revision ID: 3d76b2ca290b
-Revises: ('14d7548ec2ce', '18b00b9e3b46')
-Create Date: 2018-06-25 15:42:40.769490
+Revision ID: 15fb49b9cb37
+Revises: ('4ab29f6cdd50', '2e4c3172fc54')
+Create Date: 2018-06-13 12:13:49.353601
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '3d76b2ca290b'
-down_revision = ('14d7548ec2ce', '18b00b9e3b46')
+revision = '15fb49b9cb37'
+down_revision = ('4ab29f6cdd50', '2e4c3172fc54')
 
 from alembic import op
 import sqlalchemy as sa

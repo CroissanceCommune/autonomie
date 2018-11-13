@@ -1,4 +1,4 @@
-"""Fill task.official_number with prefixed number
+"""4.2.0 Fill task.official_number with prefixed number
 
 Revision ID: 67403ce32f8
 Revises: 29e53cf4579a

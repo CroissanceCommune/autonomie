@@ -1,4 +1,4 @@
-"""Add sequence initialization properties to Company
+"""4.2.0 Add sequence initialization properties to Company
 
 Revision ID: 14d7548ec2ce
 Revises: 15fb49b9cb37

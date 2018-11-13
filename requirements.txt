@@ -1,5 +1,5 @@
 alembic==0.8.2
-autonomie_base==4.2.0a1
+autonomie_base==4.2.0
 autonomie_celery==4.2.0a5
 Beaker==1.6.4
 bleach==3.0.2

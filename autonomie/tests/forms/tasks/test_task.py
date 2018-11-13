@@ -428,3 +428,11 @@ def test_task(tva, unity):
     result = schema.deserialize(value)
     for key, value in expected_value.items():
         assert result[key] == value
+
+
+def test_not_task_id_ref_bug_822():
+    from autonomie.models.task import Estimation
+    schema = get_add_edit_task_schema(Estimation)
+    assert "id" not in schema
+    schema = get_add_edit_task_schema(Estimation, includes=('id',))
+    assert "id" not in schema

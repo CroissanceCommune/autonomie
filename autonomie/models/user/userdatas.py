@@ -160,8 +160,8 @@ class ParcoursStatusOption(ConfigurableOption):
     Possible values for status
     """
     __colanderalchemy_config__ = {
-        'title': u"Statut du parcours",
-        'validation_msg': u"Les statuts de parcours ont bien été configurés",
+        'title': u"Résultat de la visite médicale",
+        'validation_msg': u"Les résultats de la visite médicale ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
 
@@ -977,7 +977,7 @@ class UserDatas(Node):
         info={
             'colanderalchemy':
             {
-                'title': u"Aptitude",
+                'title': u"Résultat de la visite médicale",
                 'section': u'Activité',
             }
         }
@@ -985,7 +985,7 @@ class UserDatas(Node):
     parcours_status = relationship(
         "ParcoursStatusOption",
         info={
-            'colanderalchemy': get_excluded_colanderalchemy(u"Aptitude"),
+            'colanderalchemy': get_excluded_colanderalchemy(u"Résultat de la visite médicale"),
             'export': {'related_key': 'label'},
         },
     )

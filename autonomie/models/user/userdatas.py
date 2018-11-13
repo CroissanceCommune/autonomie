@@ -161,7 +161,7 @@ class ParcoursStatusOption(ConfigurableOption):
     """
     __colanderalchemy_config__ = {
         'title': u"Résultat de la visite médicale",
-        'validation_msg': u"Le résultat de la visite médicale du parcours a bien été configuré",
+        'validation_msg': u"Les résultats de la visite médicale ont bien été configurés",
     }
     id = get_id_foreignkey_col('configurable_option.id')
 

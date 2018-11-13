@@ -272,7 +272,9 @@ qui n'appartient pas au contexte courant !!!!")
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
 
-        merge_session_with_post(self.context, appstruct)
+        merge_session_with_post(
+            self.context, appstruct, remove_empty_values=False,
+        )
         self.dbsession.merge(self.context)
 
         workshop_url = self.request.route_path(

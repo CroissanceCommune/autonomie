@@ -160,8 +160,8 @@ class ParcoursStatusOption(ConfigurableOption):
     Possible values for status
     """
     __colanderalchemy_config__ = {
-        'title': u"Statut du parcours",
-        'validation_msg': u"Les statuts de parcours ont bien été configurés",
+        'title': u"Résultat de la visite médicale",
+        'validation_msg': u"Le résultat de la visite médicale du parcours a bien été configuré",
     }
     id = get_id_foreignkey_col('configurable_option.id')
 

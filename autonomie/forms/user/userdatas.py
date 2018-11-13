@@ -148,11 +148,9 @@ USERDATAS_FORM_GRIDS = {
             ('parcours_goals', 12),
         ),
         (
-            ('parcours_status_id', 12),
-        ),
-        (
             ('parcours_medical_visit', 3),
             ('parcours_medical_visit_limit', 3),
+            ('parcours_status_id', 6),
         ),
     ),
 

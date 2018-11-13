@@ -1,4 +1,4 @@
-"""Rename Payment.remittance_amount -> Payment.bank_remittance_id
+"""4.2.0 Rename Payment.remittance_amount -> Payment.bank_remittance_id
 
 Revision ID: 50caf9dd4cd6
 Revises: 4f8d19c47c76

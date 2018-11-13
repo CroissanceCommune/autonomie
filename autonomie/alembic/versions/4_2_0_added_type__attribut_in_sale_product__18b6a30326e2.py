@@ -1,4 +1,4 @@
-"""Added type_ attribut in Sale_product_group
+"""4.2.0 Added type_ attribut in Sale_product_group
 
 Revision ID: 18b6a30326e2
 Revises: 182bf34f7989

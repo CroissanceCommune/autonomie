@@ -1,4 +1,4 @@
-"""Added registration attribute to customer model
+"""4.2.0 Added registration attribute to customer model
 
 Revision ID: 118382521263
 Revises: 3885e8260693

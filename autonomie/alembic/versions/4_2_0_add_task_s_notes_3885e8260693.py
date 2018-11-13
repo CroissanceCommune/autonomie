@@ -1,4 +1,4 @@
-"""add task's notes
+"""4.2.0 add task's notes
 
 Revision ID: 3885e8260693
 Revises: 4f011ed2a459

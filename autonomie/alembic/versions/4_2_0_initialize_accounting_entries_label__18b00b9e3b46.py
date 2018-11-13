@@ -1,6 +1,6 @@
 #! -*- coding: utf-8 -*-
 
-"""initialize accounting entries label templates in Config
+"""4.2.0 initialize accounting entries label templates in Config
 
 Revision ID: 18b00b9e3b46
 Revises: 3519f2dab802

@@ -1,4 +1,4 @@
-"""Add customer label column
+"""4.2.0 Add customer label column
 
 Revision ID: 182bf34f7989
 Revises: 2793f8d2e33e

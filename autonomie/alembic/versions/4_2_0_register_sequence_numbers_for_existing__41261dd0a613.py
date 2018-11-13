@@ -1,4 +1,4 @@
-"""register sequence numbers for existing invoices
+"""4.2.0 register sequence numbers for existing invoices
 
 Revision ID: 41261dd0a613
 Revises: 1e1a970ad004

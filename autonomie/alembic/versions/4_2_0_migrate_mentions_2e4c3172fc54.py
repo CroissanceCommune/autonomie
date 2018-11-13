@@ -1,4 +1,4 @@
-"""4.2.0 : migrate mentions
+"""4.2.0 migrate mentions
 
 Revision ID: 2e4c3172fc54
 Revises: 11a62732db65

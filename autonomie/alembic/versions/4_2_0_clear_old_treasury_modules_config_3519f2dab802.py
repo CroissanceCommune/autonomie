@@ -1,4 +1,4 @@
-"""clear old treasury modules Config
+"""4.2.0 clear old treasury modules Config
 
 Revision ID: 3519f2dab802
 Revises: 2e4c3172fc54

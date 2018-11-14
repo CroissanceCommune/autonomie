@@ -203,9 +203,13 @@
           % endif
               % if child.type_ == 'file':
                   <li>
+                  <% dl_url = request.route_path('file', id=child.id, _query=dict(action='download')) %>
                   % if api.has_permission('edit.file', child):
-                      <a href="${request.route_path('file', id=child.id)}">${child.label}</a>
-                      <a  href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                  <% edit_url = request.route_path('file', id=child.id) %>
+                      <a href="#!" onclick="window.openPopup('${edit_url}');">
+                        ${child.label}
+                      </a>
+                      <a  href="#!" onclick="window.openPopup('${dl_url}')">
                           <i class='glyphicon glyphicon-download'></i>
                       </a>
                         % if delete:
@@ -217,7 +221,7 @@
                       % endif
 
                   % elif api.has_permission('view.file', child):
-                      <a href="${request.route_path('file', id=child.id, _query=dict(action='download'))}">
+                      <a href="#!" onclick="window.openPopup('${dl_url}');">
                           ${child.label} <i class='glyphicon glyphicon-download'></i>
                       </a>
                   % endif

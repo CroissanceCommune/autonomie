@@ -120,7 +120,7 @@
                 % if len(document.payments) == 1 and paid_status == 'resulted':
                     <% payment = document.payments[0] %>
                     <% url = request.route_path('payment', id=payment.id) %>
-                    <a href="#dummy" onclick="openPopup('${url}')">
+                    <a href="#!" onclick="window.openPopup('${url}')">
                     Le ${api.format_date(payment.date)}
                     (${api.format_paymentmode(payment.mode)})
                     </a>
@@ -129,7 +129,7 @@
                         % for payment in document.payments:
                     <% url = request.route_path('payment', id=payment.id) %>
                             <li>
-                                <a href="#dummy" onclick="openPopup('${url}')">
+                                <a href="#!" onclick="window.openPopup('${url}')">
                                     ${api.format_amount(payment.amount, precision=5)|n}&nbsp;€
                                     le ${api.format_date(payment.date)}
                                     (${api.format_paymentmode(payment.mode)})

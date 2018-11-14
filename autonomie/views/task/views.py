@@ -369,7 +369,7 @@ class TaskPdfView(BaseView):
         label = force_filename(number)
         return u"{0}.pdf".format(label)
 
-    def _get_pdf_buffer(self):
+    def get_pdf_buffer(self, filename):
         """
         Collect the pdf representation of the current context
         """
@@ -378,13 +378,12 @@ class TaskPdfView(BaseView):
         else:
             html_string = self._get_html_output()
             result = buffer_pdf(html_string)
+            self._cache_pdf(filename, result)
         return result
 
     def __call__(self):
         filename = self._get_filename()
-        pdf_datas = self._get_pdf_buffer()
-        if self.context.status == 'valid' and self.context.pdf_file is not None:
-            self._cache_pdf(filename, pdf_datas)
+        pdf_datas = self.get_pdf_buffer(filename)
 
         write_file_to_request(
             self.request,
@@ -646,8 +645,7 @@ class TaskStatusView(StatusView):
         # Generate a cached version of the pdf output
         view = TaskPdfView(self.context, self.request)
         filename = view._get_filename()
-        pdf_buffer = view._get_pdf_buffer()
-        self.context.persist_pdf(filename, pdf_buffer)
+        view.get_pdf_buffer(filename)
 
     def post_status_process(self, status, params):
         """

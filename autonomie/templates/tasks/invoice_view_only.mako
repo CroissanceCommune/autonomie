@@ -31,7 +31,7 @@
 <%block name='moreactions'>
 <% invoice = request.context %>
 % if api.has_permission('add_payment.invoice'):
-    <a class='btn btn-default primary-action btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}">
+    <a class='btn btn-default btn-block' href="${request.route_path('/invoices/{id}/addpayment', id=invoice.id)}">
         <i class='fa fa-bank'></i> Enregistrer un encaissement
     </a>
 % endif

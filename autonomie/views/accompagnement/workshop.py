@@ -169,6 +169,10 @@ class WorkshopAddView(BaseFormView):
             timeslot.participants = appstruct['participants']
 
         workshop_obj = models.Workshop(**appstruct)
+
+        workshop_obj = merge_session_with_post(
+            workshop_obj, appstruct, remove_empty_values=False,
+        )
         self.dbsession.add(workshop_obj)
         self.dbsession.flush()
 

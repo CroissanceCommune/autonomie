@@ -196,7 +196,7 @@ def record_changes(request, appstruct, message, gotolist=False,
     :param dict query_options: In case of single activity page redirect, add
     those options to the url
     """
-    activity = merge_session_with_post(request.context, appstruct)
+    activity = merge_session_with_post(request.context, appstruct, remove_empty_values=False)
     request.dbsession.merge(activity)
     if message:
         request.session.flash(message)

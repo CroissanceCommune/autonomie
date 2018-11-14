@@ -29,7 +29,7 @@
 % if request.has_permission(add_perm):
 <button
     class='btn btn-primary primary-action'
-    onclick='openPopup("${add_url}");'
+    onclick='window.openPopup("${add_url}");'
     title="Déposer un document dans autonomie"
     >
     <i class="glyphicon glyphicon-plus"></i>

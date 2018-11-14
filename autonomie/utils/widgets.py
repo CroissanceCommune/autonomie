@@ -376,7 +376,7 @@ class Link(object):
         self.label = label
         if popup:
             self.url = "#dummy"
-            js = "openPopup('{url}')".format(url=url)
+            js = "window.openPopup('{url}')".format(url=url)
         else:
             self.url = url
 

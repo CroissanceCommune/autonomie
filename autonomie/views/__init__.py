@@ -193,18 +193,24 @@ class BaseListClass(BaseView):
         """
         sort_column_key = self._get_sort_key(appstruct)
         self.logger.debug("  + Sorting the query : %s" % sort_column_key)
-        sort_column = self.sort_columns.get(sort_column_key)
 
-        if sort_column:
-            sort_direction = self._get_sort_direction(appstruct)
-            self.logger.debug("  + Direction : %s" % sort_direction)
+        custom_sort_method = getattr(self, "sort_by_%s" % sort_column_key, None)
+        if custom_sort_method is not None:
+            query = custom_sort_method(query, appstruct)
 
-            if sort_direction == 'asc':
-                func = asc
-                query = query.order_by(func(sort_column))
-            elif sort_direction == 'desc':
-                func = desc
-                query = query.order_by(func(sort_column))
+        else:
+            sort_column = self.sort_columns.get(sort_column_key)
+
+            if sort_column:
+                sort_direction = self._get_sort_direction(appstruct)
+                self.logger.debug("  + Direction : %s" % sort_direction)
+
+                if sort_direction == 'asc':
+                    func = asc
+                    query = query.order_by(func(sort_column))
+                elif sort_direction == 'desc':
+                    func = desc
+                    query = query.order_by(func(sort_column))
         return query
 
     def set_form_widget(self, form):

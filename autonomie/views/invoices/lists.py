@@ -37,6 +37,8 @@ from deform import (
 from sqlalchemy import (
     or_,
     distinct,
+    asc,
+    desc,
 )
 from sqlalchemy.orm import (
     contains_eager,
@@ -194,6 +196,25 @@ class InvoiceListTools(object):
             )
         )
         return query
+
+    def sort_by_official_number(self, query, appstruct):
+        """
+        Sort the query by official number
+
+        :param obj query: The query to sort
+        :param dict appstruct: filtered datas provided by the search form
+        :returns: The sorted query
+        """
+        sort_direction = self._get_sort_direction(appstruct)
+        if sort_direction == 'asc':
+            func = asc
+        else:
+            func = desc
+
+        return query.order_by(
+            func(Task.status_date),
+            func(Task.official_number),
+        )
 
     def _get_company_id(self, appstruct):
         """

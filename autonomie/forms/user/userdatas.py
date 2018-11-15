@@ -340,10 +340,12 @@ def get_list_schema():
         ),
         validator=get_deferred_select_validator(CaeSituationOption),
         missing=colander.drop,
-    )
-    )
+    ))
 
-    schema.insert(0, conseiller_filter_node_factory())
+    schema.insert(0, conseiller_filter_node_factory(
+        name='situation_follower_id'
+    ))
+
     antenne_filter_node = colander.SchemaNode(
         colander.Integer(),
         name="situation_antenne_id",
@@ -354,6 +356,7 @@ def get_list_schema():
         missing=colander.drop
     )
     schema.insert(0, antenne_filter_node)
+
     return schema
 
 

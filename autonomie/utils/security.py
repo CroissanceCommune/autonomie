@@ -172,6 +172,7 @@ DEFAULT_PERM_NEW = [
             'add.workshop',
             'admin.workshop',
             'edit.workshop',
+            'edit_owner.event',
             'list.workshop',
             'view.workshop',
         )
@@ -436,7 +437,7 @@ def get_event_acl(self):
         "view.file",
     )
     owner_perms = (
-        "edit.owner",
+        "edit_owner.event",
     )
 
     acl.extend(

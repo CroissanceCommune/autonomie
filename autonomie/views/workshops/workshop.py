@@ -150,7 +150,7 @@ class WorkshopAddView(BaseFormView):
             'owner': self.request.user.id,
         })
 
-        if not self.request.has_permission('edit.owner'):
+        if not self.request.has_permission('edit_owner.event'):
             form['owner'].widget.readonly = True
 
         # Default to current user
@@ -262,7 +262,7 @@ class WorkshopEditView(BaseFormView):
 
         form.set_appstruct(appstruct)
 
-        if not self.request.has_permission('edit.owner'):
+        if not self.request.has_permission('edit_owner.event'):
             form['owner'].widget.readonly = True
 
         return form

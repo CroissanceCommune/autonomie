@@ -130,7 +130,7 @@ def deferred_owner_validator(node, kw):
         if 'trainer' not in user.login.groups:
             raise colander.invalid(node, msg)
 
-    if request.has_permission('edit.owner', context):
+    if request.has_permission('edit_owner.event', context):
         return validate_trainer
     else:
         return validate_self_owner

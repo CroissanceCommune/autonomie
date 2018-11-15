@@ -51,6 +51,9 @@ from autonomie.utils.pdf import (
     render_html,
     write_pdf,
 )
+from autonomie.resources import (
+    workshop_css,
+)
 from sqla_inspect.csv import CsvExporter
 from sqla_inspect.excel import XlsExporter
 from sqla_inspect.ods import OdsExporter
@@ -463,7 +466,13 @@ class WorkshopListTools(object):
         return query
 
 
-class WorkshopListView(WorkshopListTools, BaseListView):
+class BaseWorkshopListView(WorkshopListTools, BaseListView):
+    def __init__(self, *args, **kwargs):
+        super(BaseWorkshopListView, self).__init__(*args, **kwargs)
+        workshop_css.need()
+
+
+class WorkshopListView(BaseWorkshopListView):
     """
     Workshop listing view
     """
@@ -579,7 +588,7 @@ class WorkshopOdsView(WorkshopCsvView):
         return "ateliers.ods"
 
 
-class CompanyWorkshopListView(WorkshopListTools, BaseListView):
+class CompanyWorkshopListView(BaseWorkshopListView):
     """
     View for listing company's workshops
     """

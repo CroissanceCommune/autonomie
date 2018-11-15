@@ -322,3 +322,5 @@ user_resources = Group([user_css, main_group])
 
 admin_css = get_resource("css/admin.css", depends=(main_css, ))
 admin_resources = Group([admin_css, main_group, tinymce])
+
+workshop_css = get_resource("css/workshop.css", depends=(main_css, ))

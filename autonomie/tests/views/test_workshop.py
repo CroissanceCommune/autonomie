@@ -25,7 +25,7 @@ from autonomie.models import (
     workshop,
 )
 
-from autonomie.views.accompagnement.workshop import (
+from autonomie.views.workshops.workshop import (
     WorkshopAddView,
     WorkshopEditView,
     workshop_view,
@@ -44,10 +44,11 @@ def workshop_action(dbsession):
 
 
 @pytest.fixture
-def workshop_model(dbsession, workshop_action):
+def workshop_model(dbsession, workshop_action, user):
     appstruct = {
         'name': 'Workshop',
-        'leaders': ['user1', 'user2'],
+        'description': 'test desc',
+        'owner': user,
         'datetime': date.today(),
         'info1_id': workshop_action.id,
     }
@@ -70,7 +71,7 @@ def get_one():
     return workshop.Workshop.query().first()
 
 
-def test_add_view(config, get_csrf_request_with_db, workshop_action):
+def test_add_view(config, get_csrf_request_with_db_and_user, workshop_action):
     config.add_route('toto', '/toto')
     config.add_route('workshop', '/workshop/{id}')
 
@@ -87,7 +88,7 @@ def test_add_view(config, get_csrf_request_with_db, workshop_action):
             'end_time': stop,
         }]
     }
-    view = WorkshopAddView(get_csrf_request_with_db())
+    view = WorkshopAddView(get_csrf_request_with_db_and_user())
     view.submit_success(appstruct)
     a = get_one()
 

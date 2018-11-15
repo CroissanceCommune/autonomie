@@ -82,7 +82,7 @@ def get_deferred_user_choice(roles=None, widget_options=None):
     return user_select
 
 
-def user_node(roles=None, **kw):
+def user_node(roles=None, multiple=False, **kw):
     """
     Return a schema node for user selection
     roles: allow to restrict the selection to the given roles
@@ -90,7 +90,7 @@ def user_node(roles=None, **kw):
     """
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
-        colander.Integer(),
+        colander.Set() if multiple else colander.Integer(),
         widget=get_deferred_user_choice(roles, widget_options),
         **kw
     )
@@ -117,6 +117,7 @@ conseiller_filter_node_factory = forms.mk_filter_node_factory(
 participant_choice_node = forms.mk_choice_node_factory(
     user_node,
     resource_name=u"un participant",
+    resource_name_plural=u"un ou plusieurs participant(s)",
 )
 
 participant_filter_node_factory = forms.mk_filter_node_factory(
@@ -128,6 +129,19 @@ contractor_choice_node_factory = forms.mk_choice_node_factory(
     user_node,
     resource_name="un entrepreneur",
     roles=['contractor'],
+)
+
+trainer_choice_node_factory = forms.mk_choice_node_factory(
+    user_node,
+    resource_name=u"une personne avec les droits « Formateur »",
+    resource_name_plural=u"une ou plusieurs personnes avec les droits « Formateur »",
+    roles=['trainer'],
+)
+
+trainer_filter_node_factory = forms.mk_filter_node_factory(
+    user_node,
+    empty_filter_msg=u"Tou(te)s les Animateur/Animatrice(s)",
+    roles=['trainer'],
 )
 
 

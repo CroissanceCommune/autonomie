@@ -21,6 +21,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import unicode_literals
 
 """
     Panels for the top main menus
@@ -172,20 +173,20 @@ def _get_company_gestion_dropdown(request, cid):
     :returns: A DropDown
     :rtype: obj
     """
-    gestion = DropDown(label=u"Gestion")
+    gestion = DropDown(label="Gestion")
 
     href = request.route_path("company_estimations", id=cid)
-    gestion.add_item(u"Devis", icon="fa fa-file-o", href=href)
+    gestion.add_item("Devis", icon="fa fa-file-o", href=href)
 
     href = request.route_path("company_invoices", id=cid)
-    gestion.add_item(u"Factures", icon="fa fa-file", href=href)
+    gestion.add_item("Factures", icon="fa fa-file", href=href)
 
     href = request.route_path("company_expenses", id=cid)
-    gestion.add_item(u"Notes de dépense", icon="fa fa-credit-card", href=href)
+    gestion.add_item("Notes de dépense", icon="fa fa-credit-card", href=href)
 
     href = request.route_path("commercial_handling", id=cid)
     gestion.add_item(
-        u"Gestion commerciale",
+        "Gestion commerciale",
         icon="fa fa-line-chart",
         href=href
     )
@@ -194,7 +195,7 @@ def _get_company_gestion_dropdown(request, cid):
         id=cid
     )
     gestion.add_item(
-        u"État de trésorerie",
+        "État de trésorerie",
         icon="fa fa-money",
         href=href
     )
@@ -204,7 +205,7 @@ def _get_company_gestion_dropdown(request, cid):
         id=cid
     )
     gestion.add_item(
-        u"Compte de résultat",
+        "Compte de résultat",
         icon="fa fa-table",
         href=href
     )
@@ -212,7 +213,7 @@ def _get_company_gestion_dropdown(request, cid):
     if request.has_permission('add.training'):
         from autonomie.views.training.routes import TRAINING_DASHBOARD_URL
         href = request.route_path(TRAINING_DASHBOARD_URL, id=cid)
-        gestion.add_item(u"Formation", icon="fa fa-graduation-cap", href=href)
+        gestion.add_item("Formation", icon="fa fa-graduation-cap", href=href)
 
     return gestion
 
@@ -226,21 +227,21 @@ def _get_company_accounting_documents_dropdown(request, cid):
     :returns: A DropDown
     :rtype: obj
     """
-    docs = DropDown(label=u"Documents")
+    docs = DropDown(label="Documents")
 
     href = request.route_path("treasury", id=cid)
-    docs.add_item(u"Trésorerie", icon="fa fa-bank", href=href)
+    docs.add_item("Trésorerie", icon="fa fa-bank", href=href)
 
     href = request.route_path("incomestatement", id=cid)
     docs.add_item(
-        u"Compte de résultat",
+        "Compte de résultat",
         icon="fa fa-eur",
         href=href
     )
 
     href = request.route_path("salarysheet", id=cid)
     docs.add_item(
-        u"Bulletin de salaire",
+        "Bulletin de salaire",
         icon="fa fa-file-text-o",
         href=href
     )
@@ -251,7 +252,7 @@ def _get_company_accounting_documents_dropdown(request, cid):
             '/users/{id}/userdatas/mydocuments',
             id=request.user.id
         )
-        docs.add_item(u"Mes documents", icon='fa fa-folder-open', href=href)
+        docs.add_item("Mes documents", icon='fa fa-folder-open', href=href)
 
     return docs
 
@@ -265,16 +266,16 @@ def _get_company_accompagnement_dropdown(request, cid):
     :returns: A DropDown
     :rtype: obj
     """
-    accompagnement = DropDown(label=u"Accompagnement")
+    accompagnement = DropDown(label="Accompagnement")
 
     href = request.route_path("company_activities", id=cid)
-    accompagnement.add_item(u"Rendez-vous", icon="fa fa-calendar", href=href)
+    accompagnement.add_item("Rendez-vous", icon="fa fa-calendar", href=href)
 
     href = request.route_path("company_workshops", id=cid)
-    accompagnement.add_item(u"Ateliers", icon="fa fa-slideshare", href=href)
+    accompagnement.add_item("Ateliers", icon="fa fa-slideshare", href=href)
 
     href = request.route_path('user_competences', id=request.user.id)
-    accompagnement.add_item(u"Compétences", href=href, icon="fa fa-star")
+    accompagnement.add_item("Compétences", href=href, icon="fa fa-star")
     return accompagnement
 
 
@@ -287,14 +288,34 @@ def _get_company_param_dropdown(request, cid):
     :returns: A DropDown
     :rtype: obj
     """
-    params = DropDown(label=u"Paramètres")
+    params = DropDown(label="Paramètres")
 
     href = request.route_path("company", id=cid)
-    params.add_item(u"Paramètres", icon="fa fa-cogs", href=href)
+    params.add_item("Paramètres", icon="fa fa-cogs", href=href)
 
     href = request.route_path("sale_categories", id=cid)
-    params.add_item(u"Catalogue produits", icon="fa fa-book", href=href)
+    params.add_item("Catalogue produits", icon="fa fa-book", href=href)
     return params
+
+
+def _get_user_business_tools_dropdown(request, cid):
+    """
+    Build the business tools dropdown
+
+    :param obj request: The Pyramid request object
+    :param int cid: The current company id
+    :returns: A DropDown
+    :rtype: DropDown
+    """
+    dd = DropDown(label="Outils métier")
+    if request.has_permission("add.workshop"):
+        dd.add_item(
+            "Organisation d'ateliers",
+            icon="fa fa-slideshare",
+            href=request.route_path("workshops", id=request.user.id),
+        )
+    return dd
+
 
 
 def get_company_menu(request, cid, css=None):
@@ -303,14 +324,17 @@ def get_company_menu(request, cid, css=None):
     """
     menu = Menu(css=css)
     href = request.route_path("company_customers", id=cid)
-    menu.add_item(u"Clients", icon="fa fa-users", href=href)
+    menu.add_item("Clients", icon="fa fa-users", href=href)
 
     from autonomie.views.project.routes import COMPANY_PROJECTS_ROUTE
     href = request.route_path(COMPANY_PROJECTS_ROUTE, id=cid)
-    menu.add_item(u"Projets", icon="fa fa-folder-open-o", href=href)
+    menu.add_item("Projets", icon="fa fa-folder-open-o", href=href)
     menu.add(_get_company_gestion_dropdown(request, cid))
     menu.add(_get_company_accounting_documents_dropdown(request, cid))
     menu.add(_get_company_accompagnement_dropdown(request, cid))
+    business_user_tools = _get_user_business_tools_dropdown(request, cid)
+    if len(business_user_tools.items) > 0:
+        menu.add(business_user_tools)
     menu.add(_get_company_param_dropdown(request, cid))
     return menu
 
@@ -323,88 +347,88 @@ def get_admin_menus(request):
 
     if request.has_permission("admin"):
         href = request.route_path("/admin")
-        menu.add_item(u"Configuration", icon="fa fa-cogs", href=href)
+        menu.add_item("Configuration", icon="fa fa-cogs", href=href)
 
-    documents = DropDown(label=u"Documents")
+    documents = DropDown(label="Documents")
 
     href = request.route_path("invoices")
-    documents.add_item(u"Factures", icon="fa fa-list", href=href)
+    documents.add_item("Factures", icon="fa fa-list", href=href)
 
     href = request.route_path('expenses')
-    documents.add_item(u'Notes de dépense', icon='fa fa-list', href=href)
+    documents.add_item('Notes de dépense', icon='fa fa-list', href=href)
 
     href = request.route_path("estimations")
-    documents.add_item(u"Devis", icon="fa fa-list", href=href)
+    documents.add_item("Devis", icon="fa fa-list", href=href)
 
     menu.add(documents)
 
     if request.has_permission("admin_treasury"):
-        treasury = DropDown(label=u"Comptabilité")
+        treasury = DropDown(label="Comptabilité")
 
         href = request.route_path("/export/treasury/invoices")
         treasury.add_item(
-            u"Export des factures",
+            "Export des factures",
             icon="fa fa-edit",
             href=href
         )
 
         href = request.route_path("/export/treasury/expenses")
         treasury.add_item(
-            u"Export des notes de dépense",
+            "Export des notes de dépense",
             icon="fa fa-credit-card",
             href=href
         )
 
         href = request.route_path("/export/treasury/payments")
         treasury.add_item(
-            u"Export des encaissements",
+            "Export des encaissements",
             icon="fa fa-bank",
             href=href
         )
 
         href = request.route_path("/export/treasury/expense_payments")
         treasury.add_item(
-            u"Export des paiements de notes de dépense",
+            "Export des paiements de notes de dépense",
             icon="fa fa-bank",
             href=href
         )
 
         href = request.route_path("admin_treasury_all")
         treasury.add_item(
-            u"Bulletins de salaire",
+            "Bulletins de salaire",
             icon="fa fa-send-o",
             href=href
         )
 
         href = request.route_path("/accounting/operation_uploads")
         treasury.add_item(
-            u"Fichiers comptables déposés",
+            "Fichiers comptables déposés",
             icon="fa fa-money",
             href=href
         )
 
         menu.add(treasury)
 
-    accompagnement = DropDown(label=u"Accompagnement")
+    accompagnement = DropDown(label="Accompagnement")
 
     href = request.route_path('activities')
-    accompagnement.add_item(u"Rendez-vous", href=href, icon="fa fa-calendar")
+    accompagnement.add_item("Rendez-vous", href=href, icon="fa fa-calendar")
 
     href = request.route_path('workshops')
-    accompagnement.add_item(u"Ateliers", href=href, icon="fa fa-slideshare")
+    accompagnement.add_item("Ateliers", href=href, icon="fa fa-slideshare")
 
     href = request.route_path('competences')
-    accompagnement.add_item(u"Compétences", href=href, icon="fa fa-star")
+    accompagnement.add_item("Compétences", href=href, icon="fa fa-star")
 
     menu.add(accompagnement)
 
-    gestion_sociale = DropDown(label=u"Gestion sociale")
+    gestion_sociale = DropDown(label="Gestion sociale")
     href = request.route_path('/userdatas')
-    gestion_sociale.add_item(u"Consulter", href=href, icon="fa fa-users")
+    gestion_sociale.add_item("Consulter", href=href, icon="fa fa-users")
 
     href = request.route_path('statistics')
     gestion_sociale.add_item(
-        u"Statistiques",
+        "Statistiques",
         href=href,
         icon="fa fa-line-chart",
     )
@@ -412,25 +436,25 @@ def get_admin_menus(request):
     menu.add(gestion_sociale)
 
     if request.has_permission('admin_trainings'):
-        formation = DropDown(label=u"Formations")
+        formation = DropDown(label="Formations")
         href = request.route_path('/trainings')
-        formation.add_item(u"Formations", href=href, icon="fa fa-list")
+        formation.add_item("Formations", href=href, icon="fa fa-list")
         href = request.route_path("/trainers")
         formation.add_item(
-            u"Annuaire des formateurs",
+            "Annuaire des formateurs",
             icon="fa fa-graduation-cap",
             href=href
         )
         menu.add(formation)
 
     href = request.route_path("holidays")
-    menu.add_item(u"Congés", icon="fa fa-space-shuttle", href=href)
+    menu.add_item("Congés", icon="fa fa-space-shuttle", href=href)
 
-    annuaire = DropDown(label=u"Annuaires")
+    annuaire = DropDown(label="Annuaires")
     href = request.route_path("/users")
-    annuaire.add_item(u"Utilisateurs", icon="fa fa-users", href=href)
+    annuaire.add_item("Utilisateurs", icon="fa fa-users", href=href)
     href = request.route_path("companies")
-    annuaire.add_item(u"Entreprises", icon="fa fa-building", href=href)
+    annuaire.add_item("Entreprises", icon="fa fa-building", href=href)
     menu.add(annuaire)
     return menu
 
@@ -448,7 +472,7 @@ def company_choice(request, companies, cid):
 
         name = company.name
         if not company.active:
-            name += u" (désactivée)"
+            name += " (désactivée)"
 
         options.append((url, name))
 
@@ -476,13 +500,13 @@ def get_usermenu(request):
         '/users/{id}',
         id=request.user.id,
     )
-    menu.add_item(u"Mon compte", icon='fa fa-cog', href=href)
+    menu.add_item("Mon compte", icon='fa fa-cog', href=href)
 
     href = request.route_path('user_holidays', id=request.user.id)
-    menu.add_item(u"Mes congés", icon="fa fa-space-shuttle", href=href)
+    menu.add_item("Mes congés", icon="fa fa-space-shuttle", href=href)
 
     href = request.route_path("logout")
-    menu.add_item(u"Déconnexion", icon="fa fa-close", href=href)
+    menu.add_item("Déconnexion", icon="fa fa-close", href=href)
     return menu
 
 
@@ -490,7 +514,7 @@ def menu_panel(context, request):
     """
         Top menu panel
     """
-    logger.debug(u" + Building the menu")
+    logger.debug(" + Building the menu")
     # If we've no user in the current request, we don't return anything
     if not getattr(request, 'user'):
         return {}
@@ -512,8 +536,8 @@ def menu_panel(context, request):
             menu.insert(company_choice(request, companies, cid))
 
         href = request.route_path("/users")
-        menu.add_item(u"Annuaire", icon="fa fa-book", href=href)
-    logger.debug(u" -> Menu built")
+        menu.add_item("Annuaire", icon="fa fa-book", href=href)
+    logger.debug(" -> Menu built")
     return {
         'menu': menu,
         'usermenu': usermenu,

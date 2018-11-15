@@ -56,7 +56,7 @@ from sqla_inspect.excel import XlsExporter
 from sqla_inspect.ods import OdsExporter
 from autonomie.utils.widgets import ViewLink
 from autonomie.forms.workshop import (
-    Workshop as WorkshopSchema,
+    WorkshopSchema,
     get_list_schema,
     ATTENDANCE_STATUS,
     Attendances as AttendanceSchema,
@@ -87,9 +87,10 @@ WORKSHOP_SUCCESS_MSG = u"L'atelier a bien été programmée : \
 SEARCH_FORM_GRID = (
     (('year', 3,), ('date', 3), ('participant_id', 3), ('info_1_id', 3)),
     (
-        ('notfilled', 3), ('search', 3), ('items_per_page', 3),
+        ('notfilled', 3), ('search', 3), ('trainer_id', 6),
         ('direction', 1), ('sort', 1), ('page', 1),
     ),
+    (('items_per_page', 3),)
 )
 USER_SEARCH_FORM_GRID = (
     (('year', 3,), ('date', 3), ('search', 3), ('items_per_page', 3),),
@@ -141,7 +142,13 @@ class WorkshopAddView(BaseFormView):
         auto_need(form)
         timepicker_fr.need()
         default_timeslots = get_default_timeslots()
-        form.set_appstruct({'timeslots': default_timeslots})
+        form.set_appstruct({
+            'timeslots': default_timeslots,
+            'owner': self.request.user.id,
+        })
+
+        if not self.request.has_permission('edit.owner'):
+            form['owner'].widget.readonly = True
 
     def submit_success(self, appstruct):
         """
@@ -167,6 +174,16 @@ class WorkshopAddView(BaseFormView):
 
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
+
+        trainers_ids = set(appstruct.pop('trainers', []))
+        appstruct['trainers'] = [
+            user.User.get(id_) for id_ in trainers_ids
+        ]
+
+        # If we have no owner form input, we must use current user id.
+        appstruct['owner'] = user.User.get(
+            appstruct.get('owner', self.request.user.id)
+        )
 
         workshop_obj = models.Workshop(**appstruct)
 
@@ -225,10 +242,22 @@ class WorkshopEditView(BaseFormView):
         participants = self.context.participants
         appstruct['participants'] = [p.id for p in participants]
 
+        trainers = self.context.trainers
+        appstruct['trainers'] = [p.id for p in trainers]
+
         timeslots = self.context.timeslots
         appstruct['timeslots'] = [t.appstruct() for t in timeslots]
 
+        try:
+            appstruct['owner'] = appstruct['owner'].id
+        except KeyError:
+            pass
+
         form.set_appstruct(appstruct)
+
+        if not self.request.has_permission('edit.owner'):
+            form['owner'].widget.readonly = True
+
         return form
 
     def _retrieve_workshop_timeslot(self, id_):
@@ -275,6 +304,15 @@ qui n'appartient pas au contexte courant !!!!")
 
         for timeslot in appstruct['timeslots']:
             timeslot.participants = appstruct['participants']
+
+        trainers_ids = set(appstruct.pop('trainers', []))
+        appstruct['trainers'] = [
+            user.User.get(id_) for id_ in trainers_ids
+        ]
+        try:
+            appstruct['owner'] = user.User.get(appstruct['owner'])
+        except KeyError:  # case of read-only owner
+            pass
 
         merge_session_with_post(
             self.context, appstruct, remove_empty_values=False,
@@ -366,13 +404,20 @@ class WorkshopListTools(object):
             )
         return query
 
+    def filter_trainer(self, query, appstruct):
+        trainer_id = appstruct.get('trainer_id')
+        if trainer_id:
+            query = query.join(models.Workshop.trainers).filter(
+                user.User.id == trainer_id,
+            )
+        return query
+
     def filter_search(self, query, appstruct):
         search = appstruct['search']
         if search not in (None, colander.null, ''):
             query = query.filter(
-                or_(models.Workshop.name.like(u'%{0}%'.format(search)),
-                    models.Workshop.leaders.like(u'%{0}%'.format(search))
-                    ))
+                models.Workshop.name.like(u'%{}%'.format(search))
+            )
         return query
 
     def filter_date(self, query, appstruct):
@@ -423,6 +468,18 @@ class WorkshopListView(WorkshopListTools, BaseListView):
     Workshop listing view
     """
     grid = SEARCH_FORM_GRID
+    title=u"Organisation d'ateliers"
+
+    def filter_owner_or_trainer(self, query, appstruct):
+        if self.request.has_permission('admin.workshop'):
+            return query
+        else:
+            return query.filter(or_(
+                models.Workshop.owner_id == self.request.user.id,
+                models.Workshop.trainers.any(
+                    user.User.id == self.request.user.id
+                )
+            ))
 
 
 class WorkshopCsvWriter(CsvExporter):
@@ -430,7 +487,7 @@ class WorkshopCsvWriter(CsvExporter):
         {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
         {'name': 'participant', 'label': "Participant"},
-        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'trainers', 'label': "Formateur(s)"},
         {'name': 'duration', 'label': "Durée"},
     )
 
@@ -440,7 +497,7 @@ class WorkshopXlsWriter(XlsExporter):
         {'name': 'date', 'label': 'Date'},
         {'name': 'label', 'label': "Intitulé"},
         {'name': 'participant', 'label': "Participant"},
-        {'name': 'leaders', 'label': "Formateur(s)"},
+        {'name': 'trainers', 'label': "Formateur(s)"},
         {'name': 'duration', 'label': "Durée"},
     )
 
@@ -450,7 +507,7 @@ class WorkshopOdsWriter(OdsExporter):
         {'name': 'date', 'label': u'Date'},
         {'name': 'label', 'label': u"Intitulé"},
         {'name': 'participant', 'label': u"Participant"},
-        {'name': 'leaders', 'label': u"Formateur(s)"},
+        {'name': 'trainers', 'label': u"Formateur(s)"},
         {'name': 'duration', 'label': u"Durée"},
     )
 
@@ -481,7 +538,7 @@ def stream_workshop_entries_for_export(query):
                     "date": workshop.timeslots[0].start_time.date(),
                     "label": workshop.name,
                     "participant": format_account(participant),
-                    "leaders": '\n'.join(workshop.leaders),
+                    "trainers": '\n'.join(i.label for i in workshop.trainers),
                     "duration": duration,
                 }
 
@@ -522,7 +579,7 @@ class WorkshopOdsView(WorkshopCsvView):
         return "ateliers.ods"
 
 
-class CompanyWorkshopListView(WorkshopListView):
+class CompanyWorkshopListView(WorkshopListTools, BaseListView):
     """
     View for listing company's workshops
     """
@@ -533,14 +590,24 @@ class CompanyWorkshopListView(WorkshopListView):
         company = self.context
         employees_id = [u.id for u in company.employees]
         query = query.filter(
-            models.Workshop.participants.any(
-                user.User.id.in_(employees_id)
+            or_(
+                models.Workshop.participants.any(
+                    user.User.id.in_(employees_id)
+                ),
+                models.Event.signup_mode == 'open',
             )
         )
         return query
 
 
 class UserWorkshopListView(CompanyWorkshopListView):
+    @property
+    def title(self):
+        user = self.context
+        return u'Ateliers auxquels {} assiste'.format(
+            'il' if user.userdatas.coordonnees_sex == 'M' else 'elle'
+        )
+
     def filter_participant(self, query, appstruct):
         user_id = self.context.id
         query = query.filter(
@@ -574,7 +641,7 @@ def timeslots_pdf_output(timeslots, workshop, request):
     date = workshop.datetime.strftime("%e_%m_%Y")
     filename = u"atelier_{0}_{1}.pdf".format(date, workshop.id)
 
-    template = u"autonomie:templates/accompagnement/workshop_pdf.mako"
+    template = u"autonomie:templates/workshops/workshop_pdf.mako"
     rendering_datas = dict(
         timeslots=timeslots,
         workshop=workshop,
@@ -660,6 +727,49 @@ def workshop_delete_view(workshop, request):
     return HTTPFound(url)
 
 
+def workshop_signup_view(workshop, request):
+    """
+    Self-service user signup to a workshop.
+    """
+    url = request.referer
+
+    if request.user not in workshop.participants:
+        workshop.participants.append(request.user)
+
+        for timeslot in workshop.timeslots:
+            timeslot.participants.append(request.user)
+
+        request.dbsession.merge(workshop)
+    request.session.flash(
+        u"Vous êtes inscrit à « {} ».".format(workshop.title)
+    )
+    if not url:
+        url = request.route_path('workshops')
+    return HTTPFound(url)
+
+
+def workshop_signout_view(workshop, request):
+    """
+    Self-service user signout from a workshop.
+    """
+    url = request.referer
+
+    if request.user in workshop.participants:
+        workshop.participants.remove(request.user)
+
+        for timeslot in workshop.timeslots:
+            timeslot.participants.remove(request.user)
+
+        request.dbsession.merge(workshop)
+    request.session.flash(
+        u"Vous êtes désinscrit de « {} ».".format(workshop.title)
+    )
+    if not url:
+        url = request.route_path('workshops')
+    return HTTPFound(url)
+
+
+
 class WorkShopDuplicateView(DuplicateView):
     """
     Workshop duplication view
@@ -730,7 +840,7 @@ def add_views(config):
     config.add_view(
         WorkshopAddView,
         route_name='workshops',
-        permission='add_workshop',
+        permission='add.workshop',
         request_param='action=new',
         renderer="/base/formpage.mako",
     )
@@ -738,89 +848,103 @@ def add_views(config):
     config.add_view(
         WorkshopListView,
         route_name='workshops',
-        permission='admin_workshop',
-        renderer="/accompagnement/workshops.mako",
+        permission='list.workshop',
+        renderer="/workshops/workshops.mako",
     )
 
     config.add_view(
         CompanyWorkshopListView,
         route_name='company_workshops',
-        permission='list_workshops',
-        renderer="/accompagnement/workshops.mako",
+        permission='list.workshop',
+        renderer="/workshops/workshops.mako",
     )
 
     config.add_view(
         UserWorkshopListView,
         route_name='/users/{id}/workshops',
         permission='list.workshop',
-        renderer="/accompagnement/user_workshops.mako",
+        renderer="/workshops/user_workshops.mako",
         layout="user",
     )
 
     config.add_view(
         WorkshopEditView,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=edit',
-        renderer="/accompagnement/workshop_edit.mako",
+        renderer="/workshops/workshop_edit.mako",
     )
 
     config.add_view(
         record_attendances_view,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=record',
     )
 
     config.add_view(
+        workshop_signup_view,
+        route_name='workshop',
+        permission='event.signup',
+        request_param='action=signup',
+    )
+    config.add_view(
+        workshop_signout_view,
+        route_name='workshop',
+        permission='event.signout',
+        request_param='action=signout',
+    )
+
+
+    config.add_view(
         workshop_delete_view,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=delete',
     )
 
     config.add_view(
         WorkShopDuplicateView,
         route_name='workshop',
-        permission='edit_workshop',
+        permission='edit.workshop',
         request_param='action=duplicate',
     )
 
     config.add_view(
         workshop_view,
         route_name='workshop',
-        permission='view_workshop',
-        renderer='/accompagnement/workshop_view.mako',
+        permission='view.workshop',
+        renderer='/workshops/workshop_view.mako',
     )
 
     config.add_view(
         WorkshopCsvView,
         route_name='workshops.csv',
-        permission='list_workshops',
+        permission='list.workshop',
     )
 
     config.add_view(
         WorkshopXlsView,
         route_name='workshops.xls',
-        permission='list_workshops',
+        permission='list.workshop',
     )
 
     config.add_view(
         WorkshopOdsView,
         route_name='workshops.ods',
-        permission='list_workshops',
+        permission='list.workshop',
     )
 
     config.add_view(
         timeslot_pdf_view,
         route_name='timeslot.pdf',
-        permission="view_workshop",
+        permission="view.workshop",
     )
 
     config.add_view(
         workshop_pdf_view,
         route_name='workshop.pdf',
-        permission="view_workshop",
+        permission="view.workshop",
     )
 
 

@@ -71,6 +71,11 @@ ATTENDANCE_STATUS_SEARCH = (
     ('attended', u'Les participants étaient présents',),
     )
 
+EVENT_SIGNUP_MODE = (
+    ('closed', 'Fermé (le gestionnaire gère les inscriptions)'),
+    ('open', u"Ouvert (les travailleurs de la CAE peuvent s'inscrire librement"),
+)
+
 # Statut d'une activité
 STATUS = (
     ('planned', u'Planifié', ),
@@ -166,6 +171,30 @@ class Event(Node):
     id = Column(Integer, ForeignKey('node.id'), primary_key=True)
     datetime = Column(DateTime, default=datetime.datetime.now)
     status = Column(String(15), default='planned')
+    signup_mode = Column(String(100), default='closed', nullable=False)
+
+    owner_id = Column(
+        ForeignKey('accounts.id'),
+        info={
+            "export": {'exclude': True},
+        },
+    )
+
+    owner = relationship(
+        "User",
+        primaryjoin="Event.owner_id==User.id",
+        backref=backref(
+            "owned_events",
+            info={
+                'colanderalchemy': {'exclude': True},
+                'export': {'exclude': True},
+            },
+        ),
+        info={
+            'colanderalchemy': {'exclude': True},
+            'export': {'exclude': True},
+        },
+    )
 
     participants = association_proxy('attendances', 'user')
 

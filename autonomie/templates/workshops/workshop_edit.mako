@@ -60,6 +60,17 @@
 </div>
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
+    Détails
+    </div>
+    <div class='panel-body'>
+        % if request.context.description != '':
+        <h4>Description</h4>
+        <p>${request.context.description}</p>
+        % endif
+    </div>
+</div>
+<div class='panel panel-default page-block'>
+    <div class='panel-heading'>
     Émargement
     </div>
     <div class='panel-body'>

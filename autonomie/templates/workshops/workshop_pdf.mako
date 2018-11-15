@@ -84,7 +84,7 @@ if request.config.has_key('workshop_footer'):
             </h3>
         % endif
         <div>
-            <b>Nom du (des) formateur(s)</b> : ${' '.join(workshop.leaders)}&nbsp;&nbsp;&nbsp; <b>Signature(s)</b> :
+            <b>Nom du (des) formateur(s)</b> : ${' '.join(i.label for i in workshop.trainers)}&nbsp;&nbsp;&nbsp; <b>Signature(s)</b> :
         </div>
         <br />
         <div>

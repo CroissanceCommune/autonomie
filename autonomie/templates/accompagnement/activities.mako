@@ -25,7 +25,7 @@
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
 <%block name="afteractionmenu">
-% if request.has_permission('admin_activities'):
+% if request.has_permission('admin.activity'):
 <div class='page-header-block'>
 <a
     class='btn btn-primary primary-action'
@@ -138,7 +138,7 @@ ${records.item_count} Résultat(s)
         <tbody>
             % for activity in records:
                 <% url = request.route_path('activity', id=activity.id) %>
-                % if request.has_permission('view_activity', activity):
+                % if request.has_permission('view.activity', activity):
                     <% onclick = "document.location='{url}'".format(url=url) %>
                 % else :
                     <% onclick = u"alert(\"Vous n'avez pas accès aux données de ce rendez-vous\");" %>
@@ -170,7 +170,7 @@ ${records.item_count} Résultat(s)
                         ${activity.mode}
                     </td>
                     <td class="actions">
-                        % if api.has_permission('edit_activity', activity):
+                        % if api.has_permission('edit.activity', activity):
                             <% edit_url = request.route_path('activity', id=activity.id, _query=dict(action="edit")) %>
                             ${table_btn(edit_url, \
                             u"Voir/éditer", \

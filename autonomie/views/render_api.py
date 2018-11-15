@@ -30,6 +30,7 @@ from pyramid.security import has_permission as base_has_permission
 
 from autonomie_base.utils.date import (
     format_date,
+    format_duration,
     format_short_date,
     format_long_date,
     format_datetime,
@@ -162,6 +163,7 @@ class Api(object):
     format_long_date = staticmethod(format_long_date)
     format_quantity = staticmethod(format_quantity)
     format_datetime = staticmethod(format_datetime)
+    format_duration = staticmethod(format_duration)
     format_task_type = staticmethod(format_task_type)
     compile_template_str = staticmethod(compile_template_str)
 

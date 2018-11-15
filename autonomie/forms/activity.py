@@ -117,36 +117,15 @@ def deferred_mode_validator(node, kw):
     return colander.OneOf(values)
 
 
-class ParticipantsSequence(colander.SequenceSchema):
-    """
-    Schema for the list of participants
-    """
-    participant_id = participant_choice_node()
-
-
-class ConseillerSequence(colander.SequenceSchema):
-    """
-    Schema for the list of conseiller
-    """
-    conseiller_id = conseiller_choice_node()
-
-
-class CompanySequence(colander.SequenceSchema):
-    """
-    schema for the list of attached companies
-    """
-    company_id = company_choice_node()
-
-
 class CreateActivitySchema(colander.MappingSchema):
     """
         Activity creation schema
     """
     come_from = forms.come_from_node()
 
-    conseillers = ConseillerSequence(
+    conseillers = conseiller_choice_node(
         title=u"Conseillers menant le rendez-vous",
-        widget=deform.widget.SequenceWidget(min_len=1)
+        multiple=True,
     )
     datetime = forms.now_node(title=u"Date de rendez-vous")
     type_id = colander.SchemaNode(
@@ -173,12 +152,12 @@ class CreateActivitySchema(colander.MappingSchema):
         widget=deferred_select_mode,
         title=u"Mode d'entretien",
     )
-    participants = ParticipantsSequence(
-        title=u"Participants",
+    participants = participant_choice_node(
+        multiple=True,
         description=u"Participants attendus au rendez-vous",
-        widget=deform.widget.SequenceWidget(min_len=1)
     )
-    companies = CompanySequence(
+    companies = company_choice_node(
+        multiple=True,
         title=u"Entreprises concernées (donner le droit de consultation)",
         description=u"Les membres de ces entreprises qui ne participent \
 pas au rendez-vous peuvent quand même le consulter.",

@@ -28,34 +28,45 @@
 <div class='page-header-block'>
         % if request.has_permission('admin_treasury'):
         <div class='pull-right btn-group'>
-        <%
-            ## We build the link with the current search arguments
-            args = request.GET
-            url = request.route_path('workshops.xls', _query=args)
-            %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste">
-                <i class='fa fa-file-excel-o'></i>&nbsp;Excel
-            </a>
-            <% url = request.route_path('workshops.ods', _query=args) %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste">
-                <i class='fa fa-file'></i>&nbsp;ODS
-            </a>
-            <% url = request.route_path('workshops.csv', _query=args) %>
-            <a
-                class='btn btn-default'
-                href='${url}'
-                title="Exporter les éléments de la liste">
-                <i class='fa fa-file'></i>&nbsp;CSV
-            </a>
+            <button type="button" class="btn btn-default dropdown-toggle"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                <i class='fa fa-file'></i>&nbsp;
+                Exporter émargements <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <%
+                ## We build the link with the current search arguments
+                args = request.GET
+                url = request.route_path('workshops.xls', _query=args)
+                %>
+                <li>
+                    <a
+                        href='${url}'
+                        title="Exporter les éléments de la liste">
+                        <i class='fa fa-file-excel-o'></i>&nbsp;Excel
+                    </a>
+                </li>
+                <% url = request.route_path('workshops.ods', _query=args) %>
+                <li>
+                    <a
+                        href='${url}'
+                        title="Exporter les éléments de la liste">
+                        <i class='fa fa-file'></i>&nbsp;ODS
+                    </a>
+                </li>
+                <% url = request.route_path('workshops.csv', _query=args) %>
+                <li>
+                    <a
+                        href='${url}'
+                        title="Exporter les éléments de la liste">
+                        <i class='fa fa-file'></i>&nbsp;CSV
+                    </a>
+                </li>
+            </ul>
         </div>
         % endif
-    % if request.has_permission('add_workshop'):
+    % if request.has_permission('add.workshop'):
         <a class='btn btn-primary primary-action'
         href="${request.route_path('workshops', _query=dict(action='new'))}">
             <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouvel Atelier
@@ -116,14 +127,14 @@ ${records.item_count} Résultat(s)
         </thead>
         <tbody>
             % for workshop in records:
-                % if request.has_permission('edit_workshop', workshop):
+                % if request.has_permission('edit.workshop', workshop):
                     <% _query=dict(action='edit') %>
                 % else:
                     ## Route is company_workshops, the context is the company
                     <% _query=dict(company_id=request.context.id) %>
                 % endif
                 <% url = request.route_path('workshop', id=workshop.id, _query=_query) %>
-                % if request.has_permission('view_workshop', workshop):
+                % if request.has_permission('view.workshop', workshop):
                     <% onclick = "document.location='{url}'".format(url=url) %>
                 % else :
                     <% onclick = u"alert(\"Vous n'avez pas accès aux données de cet atelier\");" %>
@@ -137,11 +148,9 @@ ${records.item_count} Résultat(s)
                     </td>
                     <td onclick="${onclick}" class="rowlink">
                         <ul>
-                            % if workshop.leaders:
-                                % for lead in workshop.leaders:
-                                    <li>${lead}</li>
-                                % endfor
-                            % endif
+                            % for trainer in workshop.trainers:
+                                <li>${trainer.label}</li>
+                            % endfor
                         </ul>
                     </td>
                     <td onclick="${onclick}" class="rowlink">
@@ -154,11 +163,17 @@ ${records.item_count} Résultat(s)
                                     <li>
                                         <% pdf_url = request.route_path("timeslot.pdf", id=timeslot.id) %>
                                         <a href="${pdf_url}"
-                                            title="Télécharger la sortie PDF pour impression"
-                                            icon='glyphicon glyphicon-file'>
-                                            Du ${api.format_datetime(timeslot.start_time)} au \
-        ${api.format_datetime(timeslot.end_time)} \
-        (${timeslot.duration[0]}h${timeslot.duration[1]})
+                                           title="Télécharger la sortie PDF pour impression"
+                                           icon='glyphicon glyphicon-file'>
+                                            % if workshop.relates_single_day():
+                                                ${api.format_datetime(timeslot.start_time, timeonly=True)} → \
+                                                ${api.format_datetime(timeslot.end_time, timeonly=True)} \
+                                                (${api.format_duration(timeslot.duration)})
+                                            % else:
+                                                Du ${api.format_datetime(timeslot.start_time)} au \
+                                                ${api.format_datetime(timeslot.end_time)} \
+                                                (${api.format_duration(timeslot.duration)})
+                                            % endif
                                         </a>
                                     </li>
                                 % endfor
@@ -166,12 +181,17 @@ ${records.item_count} Résultat(s)
                         % else:
                             % for user in request.context.employees:
                                 <% is_participant = workshop.is_participant(user.id) %>
-                                % if is_participant and len(request.context.employees) > 1:
+                                % if is_participant:
                                     ${api.format_account(user)} :
                                     % for timeslot in workshop.timeslots:
                                         <div>
-                                            Du ${api.format_datetime(timeslot.start_time)} \
-                                            au ${api.format_datetime(timeslot.end_time)} : \
+                                            % if workshop.relates_single_day():
+                                                ${api.format_datetime(timeslot.start_time, timeonly=True)} → \
+                                                 ${api.format_datetime(timeslot.end_time, timeonly=True)} : \
+                                            % else:
+                                                Du ${api.format_datetime(timeslot.start_time)} \
+                                                au ${api.format_datetime(timeslot.end_time)} : \
+                                            % endif
                                             ${timeslot.user_status(user.id)}
                                         </div>
                                     % endfor
@@ -180,7 +200,27 @@ ${records.item_count} Résultat(s)
                         % endif
                     </td>
                     <td class="actions">
-                        % if request.has_permission('edit_workshop', workshop):
+                        <% signup_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signup")) %>
+                        <% signout_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signout")) %>
+
+                        % if request.has_permission('event.signup', workshop):
+                            % if workshop.is_participant(request.user.id):
+                                ${table_btn(signout_url, \
+                                u"Me désinscrire", \
+                                u"Me désinscrire de cet atelier", \
+                                icon='log-out', \
+                                css_class="btn-primary",\
+                                )}
+                            % else:
+                                ${table_btn(signup_url, \
+                                u"M'inscrire", \
+                                u"M'inscrire à cet atelier", \
+                                icon='log-in', \
+                                css_class="btn-primary",\
+                                )}
+                            % endif
+                        % endif
+                        % if request.has_permission('edit.workshop', workshop):
                             <% edit_url = request.route_path('workshop', id=workshop.id, _query=dict(action="edit")) %>
                             ${table_btn(edit_url, u"Voir/éditer", u"Voir / Éditer l'atelier", icon='pencil')}
 
@@ -191,7 +231,7 @@ ${records.item_count} Résultat(s)
                             icon='trash', \
                             onclick=u"return confirm('Êtes vous sûr de vouloir supprimer cet atelier ?')", \
                             css_class="btn-danger")}
-                        % elif request.has_permission("view_workshop", workshop):
+                        % elif request.has_permission("view.workshop", workshop):
                             ${table_btn(url, u"Voir", u"Voir l'atelier", icon='search')}
                         % endif
                     </td>

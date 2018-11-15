@@ -247,13 +247,13 @@ def get_deferred_company_choices(widget_options):
     return deferred_company_choices
 
 
-def company_node(**kw):
+def company_node(multiple=False, **kw):
     """
     Return a schema node for company selection
     """
     widget_options = kw.pop('widget_options', {})
     return colander.SchemaNode(
-        colander.Integer(),
+        colander.Set() if multiple else colander.Integer(),
         widget=get_deferred_company_choices(widget_options),
         **kw
     )
@@ -261,7 +261,8 @@ def company_node(**kw):
 
 company_choice_node = forms.mk_choice_node_factory(
     company_node,
-    resource_name=u'une entreprise'
+    resource_name=u'une entreprise',
+    resource_name_plural=u'de zéro à plusieurs entreprises',
 )
 
 company_filter_node_factory = forms.mk_filter_node_factory(

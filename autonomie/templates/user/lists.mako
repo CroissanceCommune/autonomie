@@ -163,7 +163,7 @@
                                         <% url = request.route_path('/users/{id}', id=user.id) %>
                                         <li><a href='${url}'>Voir le compte</a></li>
                                         <li role="separator" class="divider"></li>
-                                        % if request.has_permission('add_activity'):
+                                        % if request.has_permission('add.activity'):
                                             <% activity_url = request.route_path('activities', _query={'action': 'new', 'user_id': user.id}) %>
                                             <li><a href='${activity_url}'>Nouveau rendez-vous</a></li>
                                         % endif

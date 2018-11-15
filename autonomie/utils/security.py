@@ -136,7 +136,17 @@ DEFAULT_PERM = [
     (Deny, "group:manager", ('admin',)),
     (Allow, "group:manager", ALL_PERMISSIONS, ),
     (Allow, "group:contractor", ('visit',), ),
-    (Allow, "group:trainer", ("training", "add.training", "list.training")),
+    (
+        Allow,
+        "group:trainer",
+        (
+            "training",
+            "add.training",
+            "list.training",
+            "list.workshop",
+            "add.workshop",
+        )
+    ),
     (Allow, "group:constructor", ("add.construction",)),
 ]
 # Nouveau format de permission
@@ -152,6 +162,18 @@ DEFAULT_PERM_NEW = [
             'manage',
             'admin_treasury',
             'admin.trainings',
+            # activity
+            'add.activity',
+            'admin.activity',
+            'edit.activity',
+            'list.activity',
+            'view.activity',
+            # workshop
+            'add.workshop',
+            'admin.workshop',
+            'edit.workshop',
+            'list.workshop',
+            'view.workshop',
         )
     ),
     (
@@ -161,12 +183,28 @@ DEFAULT_PERM_NEW = [
             'manage',
             'admin_treasury',
             'admin.trainings',
+            # activity
+            'admin.activity',
+            'add.activity',
+            'edit.activity',
+            'list.activity',
+            'view.activity',
+            # workshop
+            'add.workshop',
+            'admin.workshop',
+            'edit.workshop',
+            'list.workshop',
+            'view.workshop',
         )
     ),
     (
         Allow,
         "group:trainer",
-        ("add.training",)
+        (
+            "add.training",
+            "add.workshop",
+            "list.workshop",
+        )
     ),
     (
         Allow,
@@ -376,14 +414,31 @@ def get_event_acl(self):
     """
     Return acl fr events participants can view
     """
-    acl = DEFAULT_PERM[:]
-    for user in self.participants:
+    acl = []
+    # Prior to default ACL because we want to forbid self-signin on closed
+    # workshops even for admins.
+    if self.signup_mode == 'open':
+        acl.append((Allow, Authenticated, ('event.signup', 'event.signout')))
+    else:
+        acl.append((Deny, Everyone, ('event.signup', 'event.signout')))
+
+    acl += DEFAULT_PERM_NEW[:]
+
+    participants_perms = (
+        "view.activity",
+        "view.file",
+    )
+    owner_perms = (
+        "edit.owner",
+    )
+
+    acl.extend(
+        (Allow, user.login.login, participants_perms)
+        for user in self.participants
+    )
+    if self.owner and self.owner.login:
         acl.append(
-            (
-                Allow,
-                user.login.login,
-                ("view_activity", "view_workshop", "view.file")
-            )
+            (Allow, self.owner.login.login, owner_perms)
         )
     return acl
 
@@ -398,9 +453,42 @@ def get_activity_acl(self):
             (
                 Allow,
                 'company:{}'.format(company.id),
-                ("view_activity", "view.file")
+                ("view.activity", "view.file")
             )
         )
+    return acl
+
+
+def get_workshop_acl(self):
+    """
+    Return ACL for workshops
+    """
+    acl = get_event_acl(self)
+
+    trainers_perms = (
+        "edit.workshop",
+        "view.workshop",
+    )
+    owner_perms = trainers_perms
+
+    participants_perms = (
+        "view.workshop",
+    )
+
+    acl.extend(
+        (Allow, user.login.login, participants_perms)
+        for user in self.participants
+    )
+    acl.extend(
+        (Allow, user.login.login, trainers_perms)
+        for user in self.trainers
+    )
+
+    if self.owner and self.owner.login:
+        acl.append(
+             (Allow, self.owner.login.login, owner_perms)
+        )
+
     return acl
 
 
@@ -428,13 +516,12 @@ def get_company_acl(self):
         "add_sale_product",
         "list_treasury_files",
         # Accompagnement
-        "list_activities",
-        "list_workshops",
+        "list.activity",
+        "list.workshop",
         # New format
         "view.accounting",
         "list.estimation",
         "list.invoice",
-        "list.activity",
         "view.commercial",
         "view.treasury",
     )
@@ -1354,7 +1441,7 @@ def set_models_acl():
     IncomeStatementMeasureTypeCategory.__acl__ = get_base_acl
     User.__default_acl__ = get_user_acl
     UserDatas.__default_acl__ = get_userdatas_acl
-    Workshop.__default_acl__ = get_event_acl
+    Workshop.__acl__ = get_workshop_acl
 
     Tva.__acl__ = get_base_acl
     BaseExpenseLine.__acl__ = get_expenseline_acl

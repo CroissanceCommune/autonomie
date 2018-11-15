@@ -352,6 +352,15 @@ def get_csrf_request_with_db(get_csrf_request, pyramid_request, dbsession):
 
 
 @fixture
+def get_csrf_request_with_db_and_user(get_csrf_request_with_db, user):
+    def f(*args, **kwargs):
+        req = get_csrf_request_with_db()
+        req.user = user
+        return req
+    return f
+
+
+@fixture
 def wsgi_app(settings, dbsession):
     from autonomie import base_configure, prepare_config
     config = prepare_config(**settings)

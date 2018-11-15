@@ -25,7 +25,15 @@ from deform import widget as deform_widget
 
 from autonomie.models.activity import ATTENDANCE_STATUS
 from autonomie.models.workshop import WorkshopAction
-from autonomie.forms.user import participant_filter_node_factory
+from autonomie.models.user.user import User
+from autonomie.models.workshop import Workshop
+from autonomie.models.activity import EVENT_SIGNUP_MODE
+from autonomie.forms.user import (
+    participant_filter_node_factory,
+    participant_choice_node,
+    trainer_choice_node_factory,
+    trainer_filter_node_factory,
+)
 from autonomie.models.task.invoice import get_invoice_years
 from autonomie import forms
 from autonomie.forms import lists, activity
@@ -92,14 +100,6 @@ def deferred_info3(node, kw):
     return deform.widget.SelectWidget(values=options)
 
 
-class LeaderSequence(colander.SequenceSchema):
-    name = colander.SchemaNode(
-        colander.String(),
-        title=u"Animateur/Animatrice",
-        validator=colander.Length(max=100),
-        )
-
-
 def range_validator(form, values):
     """
     Ensure start_time is before end_time
@@ -109,6 +109,38 @@ def range_validator(form, values):
         exc = colander.Invalid(form, message)
         exc['start_time'] = u"Doit précéder la fin"
         raise exc
+
+
+@colander.deferred
+def deferred_owner_validator(node, kw):
+    request = kw['request']
+    msg = u"Gestionnaire illégal"
+
+    if not isinstance(request.context, Workshop):
+        context = request.context
+    else:
+        context = Workshop()  # creation form
+
+    def validate_self_owner(node, value):
+        if value != request.user.id:
+            raise colander.Invalid(node, msg)
+
+    def validate_trainer(node, value):
+        user = User.get(value)
+        if 'trainer' not in user.login.groups:
+            raise colander.invalid(node, msg)
+
+    if request.has_permission('edit.owner', context):
+        return validate_trainer
+    else:
+        return validate_self_owner
+
+
+class ParticipantsSequence(colander.SequenceSchema):
+    """
+    Schema for the list of participants
+    """
+    participant_id = participant_choice_node()
 
 
 class TimeslotSchema(colander.MappingSchema):
@@ -131,7 +163,7 @@ class TimeslotsSequence(colander.SequenceSchema):
         )
 
 
-class Workshop(colander.MappingSchema):
+class WorkshopSchema(colander.MappingSchema):
     """
     Schema for workshop creation/edition
     """
@@ -141,10 +173,33 @@ class Workshop(colander.MappingSchema):
         validator=colander.Length(max=255),
         title=u"Titre de l'atelier",
         )
-    leaders = LeaderSequence(
+
+    owner = trainer_choice_node_factory(
+        title="Gestionnaire de l'atelier",
+        validator=deferred_owner_validator,
+        missing=colander.drop,
+    )
+    trainers = trainer_choice_node_factory(
+        multiple=True,
         title=u"Animateur(s)/Animatrice(s)",
-        widget=deform_widget.SequenceWidget(min_len=1),
-        )
+    )
+
+    signup_mode = colander.SchemaNode(
+        colander.String(),
+        title=u"Mode d'inscription",
+        widget=deform.widget.SelectWidget(
+            values=EVENT_SIGNUP_MODE,
+            default='closed',
+        ),
+        validator=colander.OneOf([key for key, _ in EVENT_SIGNUP_MODE]),
+    )
+
+    description = colander.SchemaNode(
+        colander.String(),
+        description=u"Facultatif",
+        widget=deform.widget.TextAreaWidget(),
+        missing=u"",
+    )
     info1_id = colander.SchemaNode(
         colander.Integer(),
         widget=deferred_info1,
@@ -169,10 +224,13 @@ class Workshop(colander.MappingSchema):
         missing=colander.null,
         default=colander.null,
     )
-    participants = activity.ParticipantsSequence(
+    participants = ParticipantsSequence(
         title=u"Participants",
-        widget=deform_widget.SequenceWidget(min_len=1),
-        )
+        widget=deform_widget.SequenceWidget(
+            min_len=0,
+            add_subitem_text_template=u"Ajouter un participant",
+        ),
+    )
     timeslots = TimeslotsSequence(
         title=u"Tranches horaires",
         description=u"Les différentes tranches horaires de l'atelier \
@@ -196,6 +254,11 @@ def get_list_schema(company=False):
             description=u"Date de l'atelier",
             widget_options={'css_class': 'input-medium search-query'},
             ))
+
+    schema.insert(
+        0,
+        trainer_filter_node_factory(name='trainer_id'),
+    )
 
     if not company:
         schema.insert(

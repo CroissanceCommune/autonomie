@@ -28,6 +28,8 @@ from sqlalchemy import (
     String,
     DateTime,
     Boolean,
+    Table,
+    Text,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -43,6 +45,16 @@ from autonomie.models.activity import Event
 
 
 log = logging.getLogger(__name__)
+
+
+WORKSHOP_TRAINER = Table(
+    'workshop_trainer',
+    DBBASE.metadata,
+    Column("workshop_id", Integer, ForeignKey("workshop.id", ondelete="cascade"), nullable=False),
+    Column("user_id", Integer, ForeignKey("accounts.id", ondelete="cascade"), nullable=False),
+    mysql_charset=default_table_args['mysql_charset'],
+    mysql_engine=default_table_args['mysql_engine'],
+)
 
 
 class Workshop(Event):
@@ -75,7 +87,17 @@ class Workshop(Event):
         "WorkshopAction",
         primaryjoin="Workshop.info3_id==WorkshopAction.id",
     )
-    leaders = Column(JsonEncodedList)
+    trainers = relationship(
+        "User",
+        secondary=WORKSHOP_TRAINER,
+        info={
+            'colanderalchemy': {
+                'title': u"Animateur(s)/ice(s)",
+            },
+            'export': {'exclude': True},
+        }
+    )
+    description = Column(Text, default='')
 
     @property
     def title(self):
@@ -83,18 +105,21 @@ class Workshop(Event):
         Return a title for this given workshop
         """
         return u"Atelier '{0}' animé par {1}".format(
-            self.name, ', '.join(self.leaders))
+            self.name, ', '.join(i.label for i in self.trainers))
 
     def duplicate(self):
         new_item = Workshop(
             name=self.name,
+            description=self.description,
             _acl=self._acl,
             datetime=self.datetime,
             status=self.status,
-            leaders=self.leaders,
             info1=self.info1,
             info2=self.info2,
             info3=self.info3,
+            trainers=self.trainers,
+            signup_mode=self.signup_mode,
+            owner=self.owner,
         )
 
         for timeslot in self.timeslots:
@@ -104,6 +129,19 @@ class Workshop(Event):
             new_item.participants.append(participant)
 
         return new_item
+
+    def relates_single_day(self):
+        """
+        Does the TimeSlots are all occuring the same day as Workshop.
+        """
+        for slot in self.timeslots:
+            if (
+                    slot.start_time.date() != self.datetime.date()
+                    or
+                    slot.end_time.date() != self.datetime.date()
+            ):
+                return False
+        return True
 
     def __str__(self):
         return "<Workshop : %s>" % (self.id,)

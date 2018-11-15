@@ -116,7 +116,7 @@ def deferred_owner_validator(node, kw):
     request = kw['request']
     msg = u"Gestionnaire illégal"
 
-    if not isinstance(request.context, Workshop):
+    if isinstance(request.context, Workshop):
         context = request.context
     else:
         context = Workshop()  # creation form

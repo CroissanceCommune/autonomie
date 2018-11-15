@@ -153,6 +153,10 @@ class WorkshopAddView(BaseFormView):
         if not self.request.has_permission('edit.owner'):
             form['owner'].widget.readonly = True
 
+        # Default to current user
+        if not form['owner'].cstruct:
+            form['owner'].cstruct = self.request.user.id
+
     def submit_success(self, appstruct):
         """
         Create a new workshop

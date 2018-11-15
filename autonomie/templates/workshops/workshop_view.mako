@@ -20,15 +20,15 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%inherit file="${context['main_template'].uri}" />
+<%inherit file="/workshops/workshop_base.mako" />
 <%namespace file="/base/utils.mako" import="definition_list"/>
-<%block name="content">
+<% workshop = request.context %>
+<%block name="after_details">
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
-    ${request.context.title}
+        Horaires et présence
     </div>
-    <div class='panel-body'>
-        <div class='row'>
+    <div class="panel-body">
             <table class="table table-striped table-condensed table-hover">
                 <thead>
                     <tr>
@@ -59,7 +59,6 @@
                     % endfor
                 </tbody>
             </table>
-        </div>
     </div>
 </div>
 </%block>

@@ -2,3 +2,8 @@ table ul.workshop-managers {
     list-style-type: none;
     padding: 0;
 }
+
+.workshop-view .dl-horizontal dt {
+    white-space: normal;
+    width: 320px;
+}

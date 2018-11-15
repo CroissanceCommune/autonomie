@@ -444,7 +444,8 @@ def get_event_acl(self):
         (Allow, user.login.login, participants_perms)
         for user in self.participants
     )
-    if self.owner and self.owner.login:
+    # FIXME: there might be a better way than checking groups like this.
+    if self.owner and self.owner.login and 'manager' in self.owner.login.groups:
         acl.append(
             (Allow, self.owner.login.login, owner_perms)
         )

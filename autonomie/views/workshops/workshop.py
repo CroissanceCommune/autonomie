@@ -187,10 +187,15 @@ class WorkshopAddView(BaseFormView):
             user.User.get(id_) for id_ in trainers_ids
         ]
 
-        # If we have no owner form input, we must use current user id.
-        appstruct['owner'] = user.User.get(
-            appstruct.get('owner', self.request.user.id)
-        )
+        # Current user by default
+        if (
+                self.request.has_permission('edit_owner.event')
+                and
+                appstruct.get('owner')
+        ):
+            appstruct['owner'] = user.User.get(appstruct['owner'])
+        else:
+            appstruct['owner'] = user.User.get(self.request.user.id)
 
         workshop_obj = models.Workshop(**appstruct)
 

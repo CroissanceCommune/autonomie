@@ -217,7 +217,7 @@ ${records.item_count} Résultat(s)
                         <% signup_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signup")) %>
                         <% signout_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signout")) %>
 
-                        % if request.has_permission('event.signup', workshop):
+                        % if request.has_permission('signup.event', workshop):
                             % if workshop.is_participant(request.user.id):
                                 ${table_btn(signout_url, \
                                 u"Me désinscrire", \

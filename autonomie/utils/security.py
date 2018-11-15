@@ -426,9 +426,9 @@ def get_event_acl(self):
     # Prior to default ACL because we want to forbid self-signin on closed
     # workshops even for admins.
     if self.signup_mode == 'open':
-        acl.append((Allow, Authenticated, ('event.signup', 'event.signout')))
+        acl.append((Allow, Authenticated, ('signup.event', 'signout.event')))
     else:
-        acl.append((Deny, Everyone, ('event.signup', 'event.signout')))
+        acl.append((Deny, Everyone, ('signup.event', 'signout.event')))
 
     acl += DEFAULT_PERM_NEW[:]
 

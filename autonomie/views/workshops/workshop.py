@@ -903,13 +903,13 @@ def add_views(config):
     config.add_view(
         workshop_signup_view,
         route_name='workshop',
-        permission='event.signup',
+        permission='signup.event',
         request_param='action=signup',
     )
     config.add_view(
         workshop_signout_view,
         route_name='workshop',
-        permission='event.signout',
+        permission='signout.event',
         request_param='action=signout',
     )
 

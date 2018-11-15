@@ -1,23 +1,21 @@
-"""Merge alembic
+"""4.2.0 Remove Workshop.leaders field
 
-(suite rebase jd-workshops sur master)
-
-Revision ID: 1729bb7ed957
-Revises: ('3885e8260693', '30fe999bc58e')
-Create Date: 2018-11-02 09:33:32.730752
+Revision ID: 1e4eb742df36
+Revises: a9229288927
+Create Date: 2018-07-18 11:00:25.084656
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '1729bb7ed957'
-down_revision = ('3885e8260693', '2ed5c14be058')
+revision = '1e4eb742df36'
+down_revision = 'a9229288927'
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import mysql
 
 def update_database_structure():
-    pass
+    op.drop_column('workshop', 'leaders')
 
 def migrate_datas():
     from autonomie_base.models.base import DBSESSION
@@ -31,4 +29,4 @@ def upgrade():
 
 
 def downgrade():
-    pass
+    op.add_column('workshop', sa.Column('leaders', mysql.TEXT(), nullable=True))

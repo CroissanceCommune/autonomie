@@ -1,4 +1,4 @@
-"""Add Event.signup_mode
+"""4.2.0 Add Event.signup_mode
 
 Revision ID: 3fa09c31c2ac
 Revises: 1729bb7ed957

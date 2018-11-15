@@ -1,4 +1,4 @@
-"""Alembic merge
+"""4.2.0 Alembic merge
 
 Following rebase of master into jd-workshops
 

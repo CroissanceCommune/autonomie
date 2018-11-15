@@ -1,4 +1,4 @@
-"""Cascade delete workshop trainers
+"""4.2.0 Cascade delete workshop trainers
 
 Either removal of an user or a workshop would have to delete the many-to-many
 table entry.

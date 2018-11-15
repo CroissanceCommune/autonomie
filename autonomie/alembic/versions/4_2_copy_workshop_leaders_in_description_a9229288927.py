@@ -1,4 +1,4 @@
-"""copy workshop.leaders in description
+"""4.2.0 copy workshop.leaders in description
 
 Revision ID: a9229288927
 Revises: 470feca21286

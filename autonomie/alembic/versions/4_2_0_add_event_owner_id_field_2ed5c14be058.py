@@ -1,4 +1,4 @@
-"""Add Event.owner_id field
+"""4.2.0 Add Event.owner_id field
 
 Revision ID: 2ed5c14be058
 Revises: 1e4eb742df36

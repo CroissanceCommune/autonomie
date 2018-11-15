@@ -787,7 +787,7 @@ def populate_actionmenu(request):
     if company_id is not None:
         link = ViewLink(
             u"Liste des ateliers",
-            "view",
+            "list.workshop",
             path='company_workshops',
             id=company_id
         )

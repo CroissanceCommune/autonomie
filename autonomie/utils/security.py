@@ -178,6 +178,13 @@ DEFAULT_PERM_NEW = [
     ),
     (
         Allow,
+        "group:contractor",
+        (
+            'list.workshop',
+        )
+    ),
+    (
+        Allow,
         "group:manager",
         (
             'manage',

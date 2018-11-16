@@ -49,8 +49,6 @@ EXPENSE_INFO_MESSAGE=u"""
         <li><code>{expense_date:%m/%Y}</code> : produira <code>06/2017</code> pour Juin 2017</li>\
         </ul>\
     </li>\
-    <li>\
-        <code>{expense.description}</code> : motif de la dépense</li>\
     </ul>
     <p>NB : Penser à séparer les variables, par exemple par des espaces, sous peine de libellés peu lisibles.</p>\
     """

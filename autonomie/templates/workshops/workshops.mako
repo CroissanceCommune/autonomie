@@ -132,8 +132,8 @@ ${records.item_count} Résultat(s)
                         <ul class="workshop-managers">
                             % if workshop.owner:
                                 <li>
-                                    ${workshop.owner.label}
-                                    <i class="fa fa-key"
+                                    ${workshop.owner.label
+                                    }&nbsp;<i class="fa fa-key"
                                        title="Gestionnaire de l'atelier"></i>
                                     <span class="sr-only">
                                         Gestionnaire :

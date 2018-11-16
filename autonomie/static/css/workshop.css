@@ -3,6 +3,11 @@ table ul.workshop-managers {
     padding: 0;
 }
 
+table ul.workshop-managers i.fa {
+    /* Allows non-breakable space to work */
+    display: inline;
+}
+
 .workshop-view .dl-horizontal dt {
     white-space: normal;
     width: 320px;

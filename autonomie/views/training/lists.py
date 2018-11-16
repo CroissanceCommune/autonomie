@@ -182,5 +182,5 @@ def includeme(config):
         GlobalTrainingListView,
         route_name=TRAINING_LIST_URL,
         renderer="/training/list_trainings.mako",
-        permission="admin_trainings"
+        permission="admin.training"
     )

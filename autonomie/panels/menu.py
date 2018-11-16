@@ -435,7 +435,7 @@ def get_admin_menus(request):
 
     menu.add(gestion_sociale)
 
-    if request.has_permission('admin_trainings'):
+    if request.has_permission('admin.training'):
         formation = DropDown(label="Formations")
         href = request.route_path('/trainings')
         formation.add_item("Formations", href=href, icon="fa fa-list")

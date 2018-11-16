@@ -161,7 +161,7 @@ DEFAULT_PERM_NEW = [
             'admin',
             'manage',
             'admin_treasury',
-            'admin.trainings',
+            'admin.training',
             # activity
             'add.activity',
             'admin.activity',
@@ -182,7 +182,7 @@ DEFAULT_PERM_NEW = [
         (
             'manage',
             'admin_treasury',
-            'admin.trainings',
+            'admin.training',
             # activity
             'admin.activity',
             'add.activity',

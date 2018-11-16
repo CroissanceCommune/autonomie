@@ -2,7 +2,10 @@
 <%namespace file="/base/utils.mako" import="table_btn"/>
 <%namespace file="/base/pager.mako" import="pager"/>
 <%namespace file="/base/pager.mako" import="sortable"/>
+
 <%block name='afteractionmenu'>
+<% is_admin_view = request.context .__name__ != 'company' %>
+
 <div class='page-header-block'>
         % if request.has_permission('admin_treasury'):
         <div class='pull-right btn-group'>
@@ -44,15 +47,17 @@
             </ul>
         </div>
         % endif
-    % if request.has_permission('add.workshop'):
+    % if is_admin_view and request.has_permission('add.workshop'):
         <a class='btn btn-primary primary-action'
         href="${request.route_path('workshops', _query=dict(action='new'))}">
             <i class='glyphicon glyphicon-plus-sign'></i>&nbsp;Nouvel Atelier
         </a>
-    %endif
+    % endif
 </div>
 </%block>
+
 <%block name='content'>
+<% is_admin_view = request.context .__name__ != 'company' %>
 <div class='panel panel-default page-block'>
 <div class='panel-heading'>
 <a  href='#filter-form' data-toggle='collapse' aria-expanded="false" aria-controls="filter-form">
@@ -87,7 +92,6 @@
 ${records.item_count} Résultat(s)
 </div>
 <div class='panel-body'>
-    <% is_admin_view = request.context .__name__ != 'company' %>
     <table class="table table-condensed table-hover">
         <thead>
             <tr>

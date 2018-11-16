@@ -72,6 +72,12 @@ class TestIt(unittest.TestCase):
             "210,12"
         )
 
+        # With None input
+        self.assertEqual(
+            strings.format_amount(None),
+            ""
+        )
+
     def test_format_name(self):
         self.assertEqual(strings.format_name(None, u"LastName"),
                                                          u"LASTNAME ")

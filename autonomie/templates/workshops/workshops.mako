@@ -115,7 +115,7 @@ ${records.item_count} Résultat(s)
             <tr>
                 <th>${sortable("Date", "datetime")}</th>
                 <th>Intitulé de l'Atelier</th>
-                <th>Animateur(s)/Animatrice(s)</th>
+                <th>Gestion et animation</th>
                 <th>Nombre de participant(s)</th>
                 % if not is_admin_view:
                     <th>Présence</th>
@@ -147,9 +147,23 @@ ${records.item_count} Résultat(s)
                         ${workshop.name}
                     </td>
                     <td onclick="${onclick}" class="rowlink">
-                        <ul>
+                        <ul class="workshop-managers">
+                            % if workshop.owner:
+                                <li>
+                                    ${workshop.owner.label}
+                                    <i class="fa fa-key"
+                                       title="Gestionnaire de l'atelier"></i>
+                                    <span class="sr-only">
+                                        Gestionnaire :
+                                    </span>
+                                </li>
+                            % endif
                             % for trainer in workshop.trainers:
-                                <li>${trainer.label}</li>
+                                % if trainer != workshop.owner:
+                                    <li>
+                                        ${trainer.label}
+                                    </li>
+                                % endif
                             % endfor
                         </ul>
                     </td>
@@ -203,7 +217,7 @@ ${records.item_count} Résultat(s)
                         <% signup_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signup")) %>
                         <% signout_url = request.route_path('workshop', id=workshop.id, _query=dict(action="signout")) %>
 
-                        % if request.has_permission('event.signup', workshop):
+                        % if request.has_permission('signup.event', workshop):
                             % if workshop.is_participant(request.user.id):
                                 ${table_btn(signout_url, \
                                 u"Me désinscrire", \

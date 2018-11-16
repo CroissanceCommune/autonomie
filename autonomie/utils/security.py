@@ -172,8 +172,16 @@ DEFAULT_PERM_NEW = [
             'add.workshop',
             'admin.workshop',
             'edit.workshop',
+            'edit_owner.event',
             'list.workshop',
             'view.workshop',
+        )
+    ),
+    (
+        Allow,
+        "group:contractor",
+        (
+            'list.workshop',
         )
     ),
     (
@@ -418,9 +426,9 @@ def get_event_acl(self):
     # Prior to default ACL because we want to forbid self-signin on closed
     # workshops even for admins.
     if self.signup_mode == 'open':
-        acl.append((Allow, Authenticated, ('event.signup', 'event.signout')))
+        acl.append((Allow, Authenticated, ('signup.event', 'signout.event')))
     else:
-        acl.append((Deny, Everyone, ('event.signup', 'event.signout')))
+        acl.append((Deny, Everyone, ('signup.event', 'signout.event')))
 
     acl += DEFAULT_PERM_NEW[:]
 
@@ -429,14 +437,15 @@ def get_event_acl(self):
         "view.file",
     )
     owner_perms = (
-        "edit.owner",
+        "edit_owner.event",
     )
 
     acl.extend(
         (Allow, user.login.login, participants_perms)
         for user in self.participants
     )
-    if self.owner and self.owner.login:
+    # FIXME: there might be a better way than checking groups like this.
+    if self.owner and self.owner.login and 'manager' in self.owner.login.groups:
         acl.append(
             (Allow, self.owner.login.login, owner_perms)
         )

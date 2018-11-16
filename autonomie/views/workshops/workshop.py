@@ -51,6 +51,9 @@ from autonomie.utils.pdf import (
     render_html,
     write_pdf,
 )
+from autonomie.resources import (
+    workshop_css,
+)
 from sqla_inspect.csv import CsvExporter
 from sqla_inspect.excel import XlsExporter
 from sqla_inspect.ods import OdsExporter
@@ -147,8 +150,12 @@ class WorkshopAddView(BaseFormView):
             'owner': self.request.user.id,
         })
 
-        if not self.request.has_permission('edit.owner'):
+        if not self.request.has_permission('edit_owner.event'):
             form['owner'].widget.readonly = True
+
+        # Default to current user
+        if not form['owner'].cstruct:
+            form['owner'].cstruct = self.request.user.id
 
     def submit_success(self, appstruct):
         """
@@ -180,10 +187,15 @@ class WorkshopAddView(BaseFormView):
             user.User.get(id_) for id_ in trainers_ids
         ]
 
-        # If we have no owner form input, we must use current user id.
-        appstruct['owner'] = user.User.get(
-            appstruct.get('owner', self.request.user.id)
-        )
+        # Current user by default
+        if (
+                self.request.has_permission('edit_owner.event')
+                and
+                appstruct.get('owner')
+        ):
+            appstruct['owner'] = user.User.get(appstruct['owner'])
+        else:
+            appstruct['owner'] = user.User.get(self.request.user.id)
 
         workshop_obj = models.Workshop(**appstruct)
 
@@ -255,7 +267,7 @@ class WorkshopEditView(BaseFormView):
 
         form.set_appstruct(appstruct)
 
-        if not self.request.has_permission('edit.owner'):
+        if not self.request.has_permission('edit_owner.event'):
             form['owner'].widget.readonly = True
 
         return form
@@ -463,7 +475,13 @@ class WorkshopListTools(object):
         return query
 
 
-class WorkshopListView(WorkshopListTools, BaseListView):
+class BaseWorkshopListView(WorkshopListTools, BaseListView):
+    def __init__(self, *args, **kwargs):
+        super(BaseWorkshopListView, self).__init__(*args, **kwargs)
+        workshop_css.need()
+
+
+class WorkshopListView(BaseWorkshopListView):
     """
     Workshop listing view
     """
@@ -579,7 +597,7 @@ class WorkshopOdsView(WorkshopCsvView):
         return "ateliers.ods"
 
 
-class CompanyWorkshopListView(WorkshopListTools, BaseListView):
+class CompanyWorkshopListView(BaseWorkshopListView):
     """
     View for listing company's workshops
     """
@@ -787,7 +805,7 @@ def populate_actionmenu(request):
     if company_id is not None:
         link = ViewLink(
             u"Liste des ateliers",
-            "view",
+            "list.workshop",
             path='company_workshops',
             id=company_id
         )
@@ -885,13 +903,13 @@ def add_views(config):
     config.add_view(
         workshop_signup_view,
         route_name='workshop',
-        permission='event.signup',
+        permission='signup.event',
         request_param='action=signup',
     )
     config.add_view(
         workshop_signout_view,
         route_name='workshop',
-        permission='event.signout',
+        permission='signout.event',
         request_param='action=signout',
     )
 

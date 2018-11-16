@@ -20,8 +20,9 @@
     You should have received a copy of the GNU General Public License
     along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
 </%doc>
-<%inherit file="${context['main_template'].uri}" />
-<%block name="content">
+
+<%inherit file="/workshops/workshop_base.mako" />
+<%block name="before_details">
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
     Actions
@@ -57,18 +58,9 @@
             </div>
         </div>
     </div>
-</div>
-<div class='panel panel-default page-block'>
-    <div class='panel-heading'>
-    Détails
     </div>
-    <div class='panel-body'>
-        % if request.context.description != '':
-        <h4>Description</h4>
-        <p>${request.context.description}</p>
-        % endif
-    </div>
-</div>
+</%block>
+<%block name="after_details">
 <div class='panel panel-default page-block'>
     <div class='panel-heading'>
     Émargement

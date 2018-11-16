@@ -790,7 +790,11 @@ def populate_actionmenu(request):
             id=company_id
         )
     else:
-        link = ViewLink(u"Liste des ateliers", "manage", path='workshops')
+        link = ViewLink(
+            u"Liste des ateliers",
+            "add.workshop",
+            path='workshops',
+        )
 
     request.actionmenu.add(link)
 

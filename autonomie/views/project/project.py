@@ -352,6 +352,7 @@ class ProjectPhaseListView(BaseView, TreeMixin):
             tasks_by_phase=tasks_by_phase,
             tasks_without_phases=tasks_by_phase.pop(None, None),
             phases=phases,
+            title=self.title,
         )
 
 

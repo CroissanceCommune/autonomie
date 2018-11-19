@@ -84,7 +84,6 @@ ERROR : group %s doesn't exist, did you launched the syncdb command :
     db.add(login)
     db.flush()
 
-
     firstname = get_value(arguments, 'firstname', 'Admin')
     lastname = get_value(arguments, 'lastname', 'Majerti')
     email = get_value(arguments, 'email', 'admin@example.com')
@@ -143,16 +142,54 @@ def syncdb_command(arguments, env):
     populate_database()
 
 
+def resize_headers_command(arguments, env):
+    """
+    Resize headers to limit their size
+
+    :param dict arguments: The arguments parsed from the command-line
+    :param obj env: The pyramid environment
+    """
+    from sqlalchemy import distinct
+    from autonomie.models.files import File
+    from autonomie.models.company import Company
+    from autonomie.forms.company import HEADER_RESIZER
+
+    limit = get_value(arguments, 'limit', None)
+    offset = get_value(arguments, "offset", None)
+
+    session = DBSESSION()
+    file_id_query = session.query(distinct(Company.header_id))
+    if limit:
+        file_id_query = file_id_query.limit(limit)
+        if offset:
+            file_id_query = file_id_query.offset(offset)
+
+    header_ids = [i[0] for i in file_id_query]
+    header_files = File.query().filter(File.id.in_(header_ids))
+    for header_file in header_files:
+        file_datas = header_file.data_obj
+        if file_datas:
+            print(
+                u"Resizing header with id : {}".format(
+                    header_file.id
+                )
+            )
+            header_file.data = HEADER_RESIZER.complete(file_datas)
+            session.merge(header_file)
+
+
 def autonomie_admin_cmd():
     """Autonomie administration tool
     Usage:
         autonomie-admin <config_uri> useradd [--user=<user>] [--pwd=<password>] [--firstname=<firstname>] [--lastname=<lastname>] [--email=<email>] [--group=<group>]
         autonomie-admin <config_uri> testmail [--to=<mailadress>]
         autonomie-admin <config_uri> syncdb
+        autonomie-admin <config_uri> resize_headers [--limit=<limit>] [--offset=<offset>]
 
     o useradd : Add a user in the database
     o testmail : Send a test mail to the given address
     o syncdb : Populate the database with the initial datas
+    o resize_headers : bulk resize company header files to limit pdf size
 
     Options:
 
@@ -165,6 +202,8 @@ def autonomie_admin_cmd():
             func = test_mail_command
         elif arguments['syncdb']:
             func = syncdb_command
+        elif arguments['resize_headers']:
+            func = resize_headers_command
         return func(arguments, env)
     try:
         return command(callback, autonomie_admin_cmd.__doc__)

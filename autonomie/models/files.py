@@ -24,6 +24,7 @@
 """
     File model
 """
+import logging
 import cStringIO
 from datetime import datetime
 from sqlalchemy import (
@@ -65,6 +66,9 @@ from autonomie.export.utils import detect_file_headers
 from autonomie.forms import EXCLUDED
 
 
+logger = logging.getLogger(__name__)
+
+
 class File(Node):
     """
         A file model
@@ -96,7 +100,11 @@ class File(Node):
 
     @property
     def data_obj(self):
-        return cStringIO.StringIO(self.data.file.read())
+        try:
+            return cStringIO.StringIO(self.data.file.read())
+        except IOError:
+            logger.exception("!!! Filestorage File is missing on disk !!!")
+            return ""
 
     @classmethod
     def __declare_last__(cls):

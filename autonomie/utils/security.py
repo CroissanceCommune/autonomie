@@ -565,7 +565,6 @@ def _get_admin_user_base_acl(self):
         'edit.user',
         'admin.user',
         'delete.user',
-        'list.holiday',
         'add.holiday',
 
         "list.company",
@@ -607,6 +606,7 @@ def _get_user_base_acl(self):
             'list.holidays',
             'add.holiday',
             'edit.holiday',
+            'list_competences',
         )
         result = [
             (Allow, self.login.login, perms)

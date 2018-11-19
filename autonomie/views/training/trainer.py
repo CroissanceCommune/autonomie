@@ -76,7 +76,7 @@ def trainerdatas_add_entry_view(context, request):
     request.dbsession.flush()
     if context.login is not None:
         context.login.groups.append('trainer')
-    request.dbsession.merge(context.login)
+        request.dbsession.merge(context.login)
     return HTTPFound(
         request.route_path(
             USER_TRAINER_EDIT_URL,

@@ -320,11 +320,11 @@ def format_amount(amount, trim=True, grouping=True, precision=2, dividor=None):
             resp = resp.rstrip('0')
             resp = add_trailing_zeros(resp)
 
-    if grouping:
-        resp = resp.replace(' ', '&nbsp;').replace(u"\xe2\x80\xaf", "&nbsp;")
+        if grouping:
+            resp = resp.replace(' ', '&nbsp;').replace(u"\xe2\x80\xaf", "&nbsp;")
 
-    if isinstance(resp, str):
-        resp = resp.decode('utf-8')
+        if isinstance(resp, str):
+            resp = resp.decode('utf-8')
 
     return resp
 

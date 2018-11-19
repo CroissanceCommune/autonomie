@@ -148,7 +148,7 @@
                                 ${api.format_date(record.date)}
                             </td>
                             <td onclick="${onclick}" class="visible-lg rowlink" >
-                                <% first_measure = api.format_amount(record.get_first_measure() %>
+                                <% first_measure = api.format_amount(record.get_first_measure()) %>
                                 % if first_measure is not None:
                                 ${api.format_amount(record.get_first_measure().value, precision=0)|n}&nbsp;€
                                 % else:

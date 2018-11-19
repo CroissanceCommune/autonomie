@@ -34,6 +34,15 @@ from PIL import (
 from StringIO import StringIO
 
 
+def ensure_rgb(image):
+    """
+    Ensure the image is in RGB format
+    """
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+    return image
+
+
 class ImageRatio(object):
     """
     Ensure images respect the given proportions by adding white spaces
@@ -74,13 +83,14 @@ class ImageRatio(object):
         """
         img_buf.seek(0)
         img_obj = Image.open(img_buf)
+        img_obj = ensure_rgb(img_obj)
 
         width, height = img_obj.size
         img_proportions = float(width)/float(height)
 
         if img_proportions >= self.proportions:
             mybuffer = StringIO()
-            img_obj.save(mybuffer, format="PNG")
+            img_obj.save(mybuffer, format="PNG", mode="RGB")
             mybuffer.seek(0)
             return mybuffer
         else:
@@ -110,6 +120,7 @@ class ImageResizer(object):
         result = img_buf
         result.seek(0)
         img_obj = Image.open(result)
+        img_obj = ensure_rgb(img_obj)
         width, height = img_obj.size
 
         img_obj.thumbnail((self.width, self.height), Image.ANTIALIAS)

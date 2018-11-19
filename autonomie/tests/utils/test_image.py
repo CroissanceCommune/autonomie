@@ -78,3 +78,10 @@ def test_resize_height(resizer):
     image2 = resizer.complete(image)
     assert Image.open(image2).size[0] == 800
     assert Image.open(image2).size[1] == 160
+
+
+def test_resize_cmyk_bug880(resizer):
+    image = file(os.path.join(DATASDIR, 'cmyk.jpg'), 'r')
+    result = resizer.complete(image)
+    assert Image.open(result).size[0] <= 200
+    assert Image.open(result).mode == "RGB"

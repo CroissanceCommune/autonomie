@@ -53,7 +53,8 @@ def parent_label(node):
 
 
 def filetable_panel(
-    context, request, add_url, files, add_perm="add.file", help_message=None
+    context, request, add_url, files, add_perm="add.file", help_message=None,
+    show_parent=False,
 ):
     """
     render a table listing files
@@ -73,6 +74,7 @@ def filetable_panel(
     :param list files: A list of :class:`autonomie.models.files.File`
     :param str add_perm: The permission required to add a file
     :param str help_message: An optionnal help message
+    :param bool show_parent: Should a column show the parent ?
     :returns: dict
     """
     return dict(
@@ -82,6 +84,7 @@ def filetable_panel(
         add_perm=add_perm,
         help_message=help_message,
         parent_label=parent_label,
+        show_parent=show_parent,
     )
 
 

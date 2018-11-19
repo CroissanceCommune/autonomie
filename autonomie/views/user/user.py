@@ -42,6 +42,7 @@ def user_view(context, request):
     """
     return dict(
         user=context,
+        title=u'Compte utilisateur',
     )
 
 

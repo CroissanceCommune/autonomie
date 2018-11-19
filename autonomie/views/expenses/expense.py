@@ -44,6 +44,7 @@ from autonomie.models.expense.sheet import (
 from autonomie.models.expense.types import (
     ExpenseTelType,
 )
+from autonomie.models.user.user import User
 from autonomie.events.status_changed import StatusChanged
 from autonomie.utils.widgets import (
     ViewLink,
@@ -159,6 +160,13 @@ class ExpenseSheetAddView(BaseFormView):
     A simple expense sheet add view
     """
     schema = get_add_edit_sheet_schema()
+
+    @property
+    def title(self):
+        user = User.get(self.request.matchdict['uid'])
+        return u'Ajouter une feuille de notes de dépenses ({})'.format(
+            user.label,
+        )
 
     def before(self, form):
         populate_actionmenu(self.request)

@@ -163,8 +163,7 @@ def company_expenses_view(request):
     """
         View that lists the expenseSheets related to the current company
     """
-    title = u"Accès aux notes de dépense des employés de {0}"\
-            .format(request.context.name)
+    title = u"Notes de dépenses"
     if not expense_configured():
         return dict(
             title=title,

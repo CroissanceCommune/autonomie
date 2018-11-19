@@ -195,9 +195,6 @@ class ProjectEntryPointView(BaseView, TreeMixin):
 class ProjectPhaseListView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_PHASE_ROUTE
 
-    def __init__(self, *args, **kw):
-        BaseView.__init__(self, *args, **kw)
-
     def current_id(self):
         if hasattr(self.context, 'project_id'):
             return self.context.project_id
@@ -355,6 +352,7 @@ class ProjectPhaseListView(BaseView, TreeMixin):
             tasks_by_phase=tasks_by_phase,
             tasks_without_phases=tasks_by_phase.pop(None, None),
             phases=phases,
+            title=self.title,
         )
 
 

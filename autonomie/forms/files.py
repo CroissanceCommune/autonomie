@@ -225,7 +225,14 @@ class FileUploadSchema(colander.Schema):
     file_type_id = FileTypeNode(missing=colander.drop)
     upload = FileNode()
 
-    description = colander.SchemaNode(colander.String())
+    description = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(
+            min=5,
+            max=100,
+            min_err=u"La description ne doit pas être inférieure à 5 caractères",
+            max_err=u"La description ne doit pas être supérieure à 100 caractères"),
+    )
 
 
 def get_template_upload_schema():

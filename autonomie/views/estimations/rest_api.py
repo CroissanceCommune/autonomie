@@ -475,7 +475,7 @@ def add_views(config):
         route_name="/api/v1/estimations/{eid}/file_requirements/{id}",
         collection_route_name="/api/v1/estimations/{id}/file_requirements",
         factory=TaskFileRequirementRestView,
-        collection_view_rights="view.estimations",
+        collection_view_rights="view.estimation",
         view_rights="view.indicator",
     )
     config.add_view(

@@ -95,7 +95,6 @@
 %if not project.phases:
     <em>Aucun dossier n'a été créé dans ce projet</em>
 %endif
-% if tasks_without_phases is not None:
 <div class='panel panel-default'>
 % if phases:
     <div class='panel-heading section-header'>
@@ -107,7 +106,6 @@
         ${request.layout_manager.render_panel('phase_invoices', phase=None, invoices=tasks_without_phases['invoices'])}
     </div>
 </div>
-% endif
 </div>
 </%block>
 <%block name="footerjs">

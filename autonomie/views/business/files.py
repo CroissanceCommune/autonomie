@@ -28,12 +28,12 @@ class BusinessFilesView(ProjectFilesView):
     route_name = BUSINESS_ITEM_FILE_ROUTE
     add_route = BUSINESS_ITEM_ADD_FILE_ROUTE
     help_message = u"""
-    Liste des documents rattachés à l'affaire courante ou à un des documents
+    Liste des fichiers rattachés à l'affaire courante ou à un des documents
     qui la composent."""
 
     @property
     def title(self):
-        return u"Documents rattachés à l'affaire {0}".format(self.context.name)
+        return u"Fichiers rattachés à l'affaire {0}".format(self.context.name)
 
     def collect_parent_ids(self):
         ids = [i[0] for i in self.request.dbsession.query(Task.id).filter_by(

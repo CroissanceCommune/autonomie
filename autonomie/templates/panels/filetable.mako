@@ -30,10 +30,10 @@
 <button
     class='btn btn-primary primary-action'
     onclick='window.openPopup("${add_url}");'
-    title="Déposer un document dans autonomie"
+    title="Téléverser un fichier"
     >
-    <i class="glyphicon glyphicon-plus"></i>
-    Déposer un document
+    <i class="fa fa-upload"></i>
+    Téléverser un fichier
 </button>
 % endif
 <table class="table table-striped table-hover">

@@ -41,7 +41,7 @@ class Phase(DBBASE, PersistentACLMixin):
         info={'colanderalchemy': {'exclude': True}},
     )
 
-    name = Column("name", String(150), default=u'Phase par défaut')
+    name = Column("name", String(150), default=u"Dossier par défaut")
 
     project = relationship(
         "Project",
@@ -63,7 +63,12 @@ class Phase(DBBASE, PersistentACLMixin):
         """
             return True if this phase is a default one
         """
-        return self.name in (u'Phase par défaut', u"default", u"défaut",)
+        return self.name in (
+            u'Phase par défaut',
+            u"default",
+            u"défaut",
+            u"Dossier par défaut",
+        )
 
     @property
     def estimations(self):

@@ -59,7 +59,7 @@ ProjectMenu.add(
 ProjectMenu.add(
     MenuItem(
         name="project_phases",
-        label=u"Document rangés par dossiers",
+        label=u"Devis/Factures par dossier",
         route_name=PROJECT_ITEM_PHASE_ROUTE,
         icon=u'fa fa-folder-open',
         perm=deferred_phase_show_perms,

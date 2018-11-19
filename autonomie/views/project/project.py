@@ -345,12 +345,17 @@ class ProjectPhaseListView(BaseView, TreeMixin):
         phases = self.context.phases
         tasks_by_phase = self._collect_documents_by_phase(phases)
 
+        tasks_without_phases = tasks_by_phase.pop(None, None) or dict(
+            estimations=[],
+            invoices=[],
+        )
+
         return dict(
             project=self.context,
             latest_phase_id=self._get_latest_phase_id(tasks_by_phase),
             phase_form=self._get_phase_add_form(),
             tasks_by_phase=tasks_by_phase,
-            tasks_without_phases=tasks_by_phase.pop(None, None),
+            tasks_without_phases=tasks_without_phases,
             phases=phases,
             title=self.title,
         )

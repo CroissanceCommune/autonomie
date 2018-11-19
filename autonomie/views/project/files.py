@@ -45,12 +45,12 @@ class ProjectFilesView(BaseView, TreeMixin):
     route_name = PROJECT_ITEM_FILE_ROUTE
     add_route = PROJECT_ITEM_ADD_FILE_ROUTE
     help_message = u"""
-    Liste des documents rattachés au projet courant ou à un des documents
+    Liste des fichiers rattachés au projet courant ou à un des documents
     qui le composent."""
 
     @property
     def title(self):
-        return u"Documents rattachés au projet {0}".format(self.context.name)
+        return u"Fichiers rattachés au projet {0}".format(self.context.name)
 
     @property
     def tree_url(self):

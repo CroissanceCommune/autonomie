@@ -133,7 +133,7 @@ class ProjectType(BaseProjectType):
     __mapper_args__ = {'polymorphic_identity': 'project_type'}
     __colanderalchemy_config__ = {
         "help_msg": u"""Les types de projets permettent de prédéfinir des
-        comportements spécifiques (documents à rattacher, modèles à utiliser
+        comportements spécifiques (fichiers à rattacher, modèles à utiliser
         pour les PDFs, mentions ...)"""
     }
     id = Column(

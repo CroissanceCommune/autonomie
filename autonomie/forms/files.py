@@ -172,7 +172,7 @@ class ImageNode(FileNode):
 
 
 class FileTypeNode(colander.SchemaNode):
-    title = u"Type de fichier"
+    title = u"Type de document"
     schema_type = colander.Int
 
     def __init__(self, *args, **kwargs):

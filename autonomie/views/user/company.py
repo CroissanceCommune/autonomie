@@ -91,7 +91,7 @@ class UserCompaniesView(BaseView):
                     self.request.route_path(
                         "company",
                         id=item.id,
-                        _query={'action': 'enable'}
+                        _query={'action': 'disable'}
                     ),
                     u"Activer",
                     title=u"Ré-activer cette enseigne",

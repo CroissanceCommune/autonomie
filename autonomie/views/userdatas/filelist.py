@@ -123,6 +123,6 @@ def includeme(config):
         mydocuments_view,
         route_name=USER_USERDATAS_MYDOCUMENTS_URL,
         permission="filelist.userdatas",
-        renderer="/userdatas/mydocuments.mako",
+        renderer="/mydocuments.mako",
         layout='user',
     )

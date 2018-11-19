@@ -38,7 +38,9 @@
 % endif
 <table class="table table-striped table-hover">
     <thead>
-        <th>Document parent</th>
+    % if show_parent:
+        <th>Est attaché à</th>
+    % endif
         <th>Type de document</th>
         <th>Nom du fichier</th>
         <th>Déposé le</th>
@@ -47,10 +49,14 @@
     <tbody>
     % for doc in files:
         <tr>
+        % if show_parent:
             <td>${parent_label(doc)}</td>
+        % endif
             <td>
             % if doc.file_type_id:
             ${doc.file_type.label}
+            % else:
+            <em>Non spécifié</em>
             % endif
             <td>${doc.name}</td>
             <td>${api.format_date(doc.updated_at)}</td>
@@ -60,7 +66,15 @@
           </tr>
     % endfor
     % if documents == []:
-        <tr><td colspan='6'>Aucun document n'est disponible</td></tr>
+        <tr>
+        <td
+        % if show_parent:
+        colspan='6'
+        % else:
+        colspan='5'
+        % endif
+        >Aucun document n'est disponible</td>
+        </tr>
     % endif
     </tbody>
 </table>

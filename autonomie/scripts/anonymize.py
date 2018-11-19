@@ -209,7 +209,7 @@ facture payée après l’échéance fixée. Celle-ci n’est pas soumise à TVA
             p.definition = self.faker.text()
 
         for p in self.session.query(Phase):
-            if p.name != u"Phase par défaut":
+            if not p.name.is_default():
                 p.name = self.faker.sentence(nb_words=3)
 
     def _an_sale_product(self):

@@ -321,7 +321,8 @@ def format_amount(amount, trim=True, grouping=True, precision=2, dividor=None):
             resp = add_trailing_zeros(resp)
 
         if grouping:
-            resp = resp.replace(' ', '&nbsp;').replace(u"\xe2\x80\xaf", "&nbsp;")
+            resp = resp.replace(' ', '&nbsp;')
+            resp = resp.replace("\xe2\x80\xaf", "&nbsp;")
 
         if isinstance(resp, str):
             resp = resp.decode('utf-8')

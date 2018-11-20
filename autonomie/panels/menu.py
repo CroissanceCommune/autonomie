@@ -56,12 +56,7 @@ class Item(dict):
 
     def selected(self, request):
         href = self.get('href')
-
-        if href in request.current_route_path():
-            return True
-        else:
-            return False
-
+        return href == request.current_route_path(_query={})
 
 class HtmlItem(dict):
     """

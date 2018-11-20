@@ -174,6 +174,36 @@ class Company(DBBASE, PersistentACLMixin):
         ),
         group="edit",
     )
+
+    general_customer_account = deferred(
+        Column(
+            String(255),
+            default=""
+        ),
+        group="edit",
+    )
+
+    third_party_customer_account = deferred(
+        Column(
+            String(255),
+            default=""
+        ),
+        group="edit",
+    )
+
+    bank_account = deferred(
+        Column(
+            String(255),
+            default=""
+        ),
+        group="edit",
+    )
+
+    custom_insurance_rate = deferred(
+        Column(Float),
+        group='edit'
+    )
+
     contribution = deferred(
         Column(Float),
         group='edit'

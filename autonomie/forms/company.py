@@ -187,6 +187,43 @@ class CompanySchema(colander.MappingSchema):
 comptabilité",
             missing="")
 
+    general_customer_account = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte client général",
+        description="",
+        missing="",
+    )
+
+    third_party_customer_account = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte client tiers",
+        description="",
+        missing="",
+    )
+
+    bank_account = colander.SchemaNode(
+        colander.String(),
+        title=u"Compte de banque",
+        description="",
+        missing="",
+    )
+
+    custom_insurance_rate = colander.SchemaNode(
+            QuantityType(),
+            widget=deform.widget.TextInputWidget(
+                input_append="%",
+                css_class="col-md-1"
+                ),
+            validator=colander.Range(
+                min=0,
+                max=100,
+                min_err=u"Veuillez fournir un nombre supérieur à 0",
+                max_err=u"Veuillez fournir un nombre inférieur à 100"),
+            title=u"Taux de Responsabilité Civile Professionnel",
+            missing=colander.drop,
+            description=u"Pourcentage du taux d'assurance professionnelle de cette entreprise dans la CAE",
+    )
+
     contribution = colander.SchemaNode(
             QuantityType(),
             widget=deform.widget.TextInputWidget(

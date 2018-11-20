@@ -45,8 +45,8 @@ class ProjectEstimationListView(CompanyEstimationList, TreeMixin):
         return self.request.context.company_id
 
     def filter_project(self, query, appstruct):
-        remember_navigation_history(self.request, self.context.id)
         self.populate_navigation()
+        remember_navigation_history(self.request, self.context.id)
         query = query.filter(Estimation.project_id == self.context.id)
         return query
 

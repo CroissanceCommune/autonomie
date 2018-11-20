@@ -91,6 +91,7 @@ class ProjectBusinessListView(BaseListView, TreeMixin):
         return query
 
     def filter_closed(self, query, appstruct):
+        self.populate_navigation()
         closed = appstruct.get('closed', True)
         if not closed:
             query = query.filter_by(closed=False)

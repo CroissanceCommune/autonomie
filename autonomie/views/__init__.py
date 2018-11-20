@@ -1228,6 +1228,23 @@ class TreeMixin:
             return ""
 
     @classmethod
+    def get_me_as_back_url(cls, request):
+        """
+        Collect the back url pointing to the current view, ask the parent if
+        needed
+        """
+        if getattr(cls, "tree_is_visible", None) is not None:
+            visible = cls(request).tree_is_visible
+        else:
+            visible = True
+        if visible:
+            return cls.get_url(request)
+        elif cls.parent_view:
+            return cls.parent_view.get_me_as_back_url(request)
+        else:
+            return "#"
+
+    @classmethod
     def get_title(cls, request):
         if isinstance(cls.title, property):
             return cls(request).title
@@ -1262,7 +1279,7 @@ class TreeMixin:
     def get_back_url(cls, request):
         logger.debug(u"Asking for the parent url : {0}".format(cls))
         if cls.parent_view is not None:
-            return cls.parent_view.get_url(request)
+            return cls.parent_view.get_me_as_back_url(request)
         else:
             return None
 

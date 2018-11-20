@@ -1,27 +1,4 @@
 # -*- coding: utf-8 -*-
-# * Copyright (C) 2012-2013 Croissance Commune
-# * Authors:
-#       * Arezki Feth <f.a@majerti.fr>;
-#       * Miotte Julien <j.m@majerti.fr>;
-#       * Pettier Gabriel;
-#       * TJEBBES Gaston <g.t@majerti.fr>
-#
-# This file is part of Autonomie : Progiciel de gestion de CAE.
-#
-#    Autonomie is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    Autonomie is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-#
-
 """
 Customer handling forms schemas and related widgets
 """
@@ -293,7 +270,7 @@ def _customize_schema(schema):
     :param obj schema: The Customer form schema
     """
     schema['civilite'].widget = forms.get_select(
-        CIVILITE_OPTIONS[1:],
+        CIVILITE_OPTIONS,
     )
     schema['civilite'].validator = colander.OneOf(
         [a[0] for a in CIVILITE_OPTIONS]
@@ -304,7 +281,7 @@ def _customize_schema(schema):
     )
     schema['email'].validator = forms.mail_validator()
     schema['comments'].widget = deform.widget.TextAreaWidget(
-        css_class="col-md-10",
+        css_class="col-md-8",
         rows=5,
     )
     return schema
@@ -331,6 +308,7 @@ def get_individual_customer_schema():
     schema['firstname'].title = u"Prénom"
     schema['lastname'].title = u'Nom'
     schema['civilite'].missing = colander.required
+    schema['lastname'].missing = colander.required
     schema.after_bind = _customer_after_bind
     return schema
 

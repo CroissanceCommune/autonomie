@@ -1,4 +1,4 @@
-"""Added general_customer_account, third_party_customer_account, bank_account column to company
+"""4.2.0 : Added general_customer_account, third_party_customer_account, bank_account column to company
 
 Revision ID: 5362502b508c
 Revises: 4f011ed2a459
@@ -8,7 +8,7 @@ Create Date: 2018-10-26 17:37:20.149975
 
 # revision identifiers, used by Alembic.
 revision = '5362502b508c'
-down_revision = '4f011ed2a459'
+down_revision = 'd777c5e2750'
 
 from alembic import op
 import sqlalchemy as sa

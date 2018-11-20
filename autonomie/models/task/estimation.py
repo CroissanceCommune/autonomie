@@ -54,18 +54,12 @@ from autonomie.compute.task import (
     EstimationCompute,
 )
 from autonomie.compute.math_utils import integer_to_amount
-from autonomie.models.tva import Product
 from autonomie.interfaces import (
     IMoneyTask,
 )
 from autonomie.models.services.estimation import EstimationInvoicingService
-from .invoice import (
-    Invoice,
-)
 from .task import (
     Task,
-    TaskLine,
-    TaskLineGroup,
     TaskStatus,
 )
 from .actions import (
@@ -335,6 +329,10 @@ class Estimation(Task, EstimationCompute):
             return self._invoicing_service.gen_intermediate_invoice(
                 self, payment_line, user
             )
+
+    def add_default_payment_line(self):
+        self.payment_lines = [PaymentLine(description='Solde', amount=0)]
+        return self
 
 
 class PaymentLine(DBBASE):

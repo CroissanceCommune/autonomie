@@ -180,3 +180,45 @@ class BusinessService:
             id=project_type_id
         ).scalar()
         return ptype_name == u"default"
+
+    @classmethod
+    def add_estimation(cls, business, user):
+        """
+        Add a new estimation to the current business
+
+        :param obj business: The current business instance this service is
+        attached to
+        :returns: A new Estimation instance
+        """
+        from autonomie.models.task.estimation import Estimation
+        estimation = Estimation(
+            user=user,
+            company=business.project.company,
+            project=business.project,
+            customer_id=cls._get_customer_id(business),
+            business_id=business.id,
+            business_type_id=business.business_type_id,
+        )
+        estimation.add_default_payment_line()
+        estimation.initialize_business_datas()
+        DBSESSION().add(estimation)
+        DBSESSION().flush()
+        return estimation
+
+    @classmethod
+    def _get_customer_id(cls, business):
+        """
+        Find the customer associated to this bussiness
+
+        :param obj business: The business instance this service is attached to
+        :returns: A Customer id
+        :rtype: int
+        """
+        from autonomie.models.task import Task
+        result = DBSESSION().query(Task.customer_id).filter_by(
+            business_id=business.id
+        ).first()
+        if result:
+            return result[0]
+        else:
+            return None

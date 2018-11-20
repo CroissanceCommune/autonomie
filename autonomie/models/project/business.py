@@ -225,3 +225,12 @@ class Business(Node):
         :rtype: bool
         """
         return not self._autonomie_service.is_default_project_type(self)
+
+    def add_estimation(self, user):
+        """
+        Generate a new estimation attached to the current business
+
+        :param obj user: The user generating the estimation
+        :rtype: class autonomie.models.task.estimation.Estimation
+        """
+        return self._autonomie_service.add_estimation(self, user)

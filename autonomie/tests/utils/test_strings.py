@@ -30,52 +30,52 @@ class TestIt(unittest.TestCase):
         a = 1525
         b = 1525.3
         locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
-        self.assertEqual(strings.format_amount(a), "15,25")
-        self.assertEqual(strings.format_amount(a, trim=False), "15,25")
+        self.assertEqual(strings.format_amount(a), u"15,25")
+        self.assertEqual(strings.format_amount(a, trim=False), u"15,25")
 
-        self.assertEqual(strings.format_amount(b), "15,25")
-        self.assertEqual(strings.format_amount(b, trim=False), "15,25")
+        self.assertEqual(strings.format_amount(b), u"15,25")
+        self.assertEqual(strings.format_amount(b, trim=False), u"15,25")
 
         c = 210000
         self.assertEqual(
             strings.format_amount(c, grouping=False),
-            "2100,00"
+            u"2100,00"
         )
         self.assertEqual(
             strings.format_amount(c, grouping=True),
-            "2&nbsp;100,00"
+            u"2&nbsp;100,00"
         )
 
         c = 21000000.0
         self.assertEqual(
             strings.format_amount(c, trim=False, precision=5),
-            "210,00"
+            u"210,00"
         )
         c = 21000004.0
         self.assertEqual(
             strings.format_amount(c, trim=False,precision=5),
-            "210,00004"
+            u"210,00004"
         )
         c = 21000040.0
         self.assertEqual(
             strings.format_amount(c, trim=False,precision=5),
-            "210,0004"
+            u"210,0004"
         )
 
         self.assertEqual(
             strings.format_amount(c, trim=True, precision=5),
-            "210,00"
+            u"210,00"
         )
         c = 21012000.0
         self.assertEqual(
             strings.format_amount(c, trim=False, precision=5),
-            "210,12"
+            u"210,12"
         )
 
         # With None input
         self.assertEqual(
             strings.format_amount(None),
-            ""
+            u""
         )
 
     def test_format_name(self):
@@ -89,9 +89,9 @@ def test_format_float():
     locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
     from autonomie.utils.strings import format_float
 
-    assert format_float(1.256, precision=2) == "1,26"
+    assert format_float(1.256, precision=2) == u"1,26"
     res = format_float(1265.254, precision=2, html=False)
-    assert res == "1\xe2\x80\xaf265,25" or res == "1 265,25"
-    assert format_float(1265.254, precision=2) == "1&nbsp;265,25"
-    assert format_float(1265.254, precision=2, grouping=False) == "1265,25"
-    assert format_float(1.256, precision=None) == "1.256"
+    assert res == u"1\u202f265,25" or res == u"1 265,25"
+    assert format_float(1265.254, precision=2) == u"1&nbsp;265,25"
+    assert format_float(1265.254, precision=2, grouping=False) == u"1265,25"
+    assert format_float(1.256, precision=None) == u"1.256"

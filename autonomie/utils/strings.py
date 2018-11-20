@@ -320,12 +320,12 @@ def format_amount(amount, trim=True, grouping=True, precision=2, dividor=None):
             resp = resp.rstrip('0')
             resp = add_trailing_zeros(resp)
 
-        if grouping:
-            resp = resp.replace(' ', '&nbsp;')
-            resp = resp.replace("\xe2\x80\xaf", "&nbsp;")
-
         if isinstance(resp, str):
             resp = resp.decode('utf-8')
+
+        if grouping:
+            resp = resp.replace(u' ', u'&nbsp;')
+            resp = resp.replace(u"\u202f", u"&nbsp;")
 
     return resp
 
@@ -351,9 +351,13 @@ def format_float(value, precision=None, grouping=True, html=True):
             formatter = "%s"
         value = locale.format(formatter, value, grouping=grouping)
 
+        # des versions de locale fourniss
+        if isinstance(value, str):
+            value = value.decode('utf-8')
+
         if html:
-            value = value.replace(" ", "&nbsp;")
-            value = value.replace(u"\xe2\x80\xaf", "&nbsp;")
+            value = value.replace(u" ", u"&nbsp;")
+            value = value.replace(u"\u202f", u"&nbsp;")
     return value
 
 

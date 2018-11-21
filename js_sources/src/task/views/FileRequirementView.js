@@ -35,7 +35,7 @@ const FileRequirementView = Mn.View.extend({
         return {
             has_view: this.model.hasFile(),
             has_add: this.model.missingFile(),
-            has_valid_link: this.model.hasFile() && this.model.get('validation') && this.section.can_validate,
+            has_valid_link: this.model.hasFile() && this.model.get('validation') && this.section.can_validate && this.model.get('validation_status') != "valid",
             label: this.model.label()
         };
     },
@@ -57,7 +57,10 @@ const FileRequirementView = Mn.View.extend({
         );
     },
     onValidate(){
-        this.model.validate();
+        let res = this.model.validate();
+        if (res){
+            this.model.setValid();
+        }
     }
 });
 export default FileRequirementView;

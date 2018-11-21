@@ -7,47 +7,47 @@ webpackJsonp([2],[
 
 	'use strict';
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _bootstrap = __webpack_require__(/*! bootstrap */ 11);
+	var _bootstrap = __webpack_require__(/*! bootstrap */ 10);
 	
 	var _bootstrap2 = _interopRequireDefault(_bootstrap);
 	
-	__webpack_require__(/*! jstree */ 23);
+	__webpack_require__(/*! jstree */ 22);
 	
 	var _underscore = __webpack_require__(/*! underscore */ 1);
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone3 = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _App = __webpack_require__(/*! ./components/App.js */ 106);
+	var _App = __webpack_require__(/*! ./components/App.js */ 105);
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
-	var _backboneTools = __webpack_require__(/*! ../backbone-tools.js */ 29);
+	var _backboneTools = __webpack_require__(/*! ../backbone-tools.js */ 28);
 	
-	var _Router = __webpack_require__(/*! ./components/Router.js */ 107);
+	var _Router = __webpack_require__(/*! ./components/Router.js */ 106);
 	
 	var _Router2 = _interopRequireDefault(_Router);
 	
-	var _Controller = __webpack_require__(/*! ./components/Controller.js */ 108);
+	var _Controller = __webpack_require__(/*! ./components/Controller.js */ 107);
 	
 	var _Controller2 = _interopRequireDefault(_Controller);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -95,8 +95,7 @@ webpackJsonp([2],[
 /***/ }),
 /* 1 */,
 /* 2 */,
-/* 3 */,
-/* 4 */
+/* 3 */
 /*!**********************!*\
   !*** ./src/tools.js ***!
   \**********************/
@@ -113,20 +112,20 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _date = __webpack_require__(/*! ./date.js */ 5);
+	var _date = __webpack_require__(/*! ./date.js */ 4);
 	
-	var _math = __webpack_require__(/*! ./math.js */ 6);
+	var _math = __webpack_require__(/*! ./math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	__webpack_require__(/*! jquery */ 3);
+	__webpack_require__(/*! jquery */ 2);
 	
 	
-	var datepicker = __webpack_require__(/*! jquery-ui/ui/widgets/datepicker */ 7);
+	var datepicker = __webpack_require__(/*! jquery-ui/ui/widgets/datepicker */ 6);
 	
 	var setDatePicker = exports.setDatePicker = function setDatePicker(input_tag, altfield_selector, value, kwargs) {
 	    /*
@@ -365,7 +364,7 @@ webpackJsonp([2],[
 	};
 
 /***/ }),
-/* 5 */
+/* 4 */
 /*!*********************!*\
   !*** ./src/date.js ***!
   \*********************/
@@ -460,7 +459,7 @@ webpackJsonp([2],[
 	};
 
 /***/ }),
-/* 6 */
+/* 5 */
 /*!*********************!*\
   !*** ./src/math.js ***!
   \*********************/
@@ -659,7 +658,7 @@ webpackJsonp([2],[
 	};
 
 /***/ }),
-/* 7 */
+/* 6 */
 /*!**********************************************!*\
   !*** ./~/jquery-ui/ui/widgets/datepicker.js ***!
   \**********************************************/
@@ -690,9 +689,9 @@ webpackJsonp([2],[
 	
 			// AMD. Register as an anonymous module.
 			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-				__webpack_require__(/*! jquery */ 3),
-				__webpack_require__(/*! ../version */ 8),
-				__webpack_require__(/*! ../keycode */ 9)
+				__webpack_require__(/*! jquery */ 2),
+				__webpack_require__(/*! ../version */ 7),
+				__webpack_require__(/*! ../keycode */ 8)
 			], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
@@ -2788,7 +2787,7 @@ webpackJsonp([2],[
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /*!***********************************!*\
   !*** ./~/jquery-ui/ui/version.js ***!
   \***********************************/
@@ -2798,7 +2797,7 @@ webpackJsonp([2],[
 		if ( true ) {
 	
 			// AMD. Register as an anonymous module.
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 3) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 2) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
 			// Browser globals
@@ -2814,7 +2813,7 @@ webpackJsonp([2],[
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /*!***********************************!*\
   !*** ./~/jquery-ui/ui/keycode.js ***!
   \***********************************/
@@ -2838,7 +2837,7 @@ webpackJsonp([2],[
 		if ( true ) {
 	
 			// AMD. Register as an anonymous module.
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 3), __webpack_require__(/*! ./version */ 8) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__(/*! jquery */ 2), __webpack_require__(/*! ./version */ 7) ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 		} else {
 	
 			// Browser globals
@@ -2868,6 +2867,7 @@ webpackJsonp([2],[
 
 
 /***/ }),
+/* 9 */,
 /* 10 */,
 /* 11 */,
 /* 12 */,
@@ -2886,8 +2886,7 @@ webpackJsonp([2],[
 /* 25 */,
 /* 26 */,
 /* 27 */,
-/* 28 */,
-/* 29 */
+/* 28 */
 /*!*******************************!*\
   !*** ./src/backbone-tools.js ***!
   \*******************************/
@@ -3002,14 +3001,14 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
+/* 29 */,
 /* 30 */,
 /* 31 */,
 /* 32 */,
 /* 33 */,
 /* 34 */,
 /* 35 */,
-/* 36 */,
-/* 37 */
+/* 36 */
 /*!*************************************!*\
   !*** ./src/widgets/AnchorWidget.js ***!
   \*************************************/
@@ -3021,19 +3020,19 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
-	var _math = __webpack_require__(/*! ../math.js */ 6);
+	var _math = __webpack_require__(/*! ../math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var AnchorWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
-	    template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 38),
+	    template: __webpack_require__(/*! ./templates/AnchorWidget.mustache */ 37),
 	    ui: {
 	        anchor: 'a'
 	    },
@@ -3059,13 +3058,13 @@ webpackJsonp([2],[
 	exports.default = AnchorWidget;
 
 /***/ }),
-/* 38 */
+/* 37 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/AnchorWidget.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "#";
@@ -3103,7 +3102,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 39 */
+/* 38 */
 /*!*********************************!*\
   !*** ./~/handlebars/runtime.js ***!
   \*********************************/
@@ -3111,11 +3110,11 @@ webpackJsonp([2],[
 
 	// Create a simple path alias to allow browserify to resolve
 	// the runtime on a supported path.
-	module.exports = __webpack_require__(/*! ./dist/cjs/handlebars.runtime */ 40);
+	module.exports = __webpack_require__(/*! ./dist/cjs/handlebars.runtime */ 39);
 
 
 /***/ }),
-/* 40 */
+/* 39 */
 /*!*****************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars.runtime.js ***!
   \*****************************************************/
@@ -3123,14 +3122,14 @@ webpackJsonp([2],[
 
 	"use strict";
 	/*globals Handlebars: true */
-	var base = __webpack_require__(/*! ./handlebars/base */ 41);
+	var base = __webpack_require__(/*! ./handlebars/base */ 40);
 	
 	// Each of these augment the Handlebars object. No need to setup here.
 	// (This is done to easily share code between commonjs and browse envs)
-	var SafeString = __webpack_require__(/*! ./handlebars/safe-string */ 43)["default"];
-	var Exception = __webpack_require__(/*! ./handlebars/exception */ 44)["default"];
-	var Utils = __webpack_require__(/*! ./handlebars/utils */ 42);
-	var runtime = __webpack_require__(/*! ./handlebars/runtime */ 45);
+	var SafeString = __webpack_require__(/*! ./handlebars/safe-string */ 42)["default"];
+	var Exception = __webpack_require__(/*! ./handlebars/exception */ 43)["default"];
+	var Utils = __webpack_require__(/*! ./handlebars/utils */ 41);
+	var runtime = __webpack_require__(/*! ./handlebars/runtime */ 44);
 	
 	// For compatibility and usage outside of module systems, make the Handlebars object a namespace
 	var create = function() {
@@ -3158,15 +3157,15 @@ webpackJsonp([2],[
 	exports["default"] = Handlebars;
 
 /***/ }),
-/* 41 */
+/* 40 */
 /*!**************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/base.js ***!
   \**************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Utils = __webpack_require__(/*! ./utils */ 42);
-	var Exception = __webpack_require__(/*! ./exception */ 44)["default"];
+	var Utils = __webpack_require__(/*! ./utils */ 41);
+	var Exception = __webpack_require__(/*! ./exception */ 43)["default"];
 	
 	var VERSION = "2.0.0";
 	exports.VERSION = VERSION;var COMPILER_REVISION = 6;
@@ -3397,7 +3396,7 @@ webpackJsonp([2],[
 	exports.createFrame = createFrame;
 
 /***/ }),
-/* 42 */
+/* 41 */
 /*!***************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/utils.js ***!
   \***************************************************/
@@ -3405,7 +3404,7 @@ webpackJsonp([2],[
 
 	"use strict";
 	/*jshint -W004 */
-	var SafeString = __webpack_require__(/*! ./safe-string */ 43)["default"];
+	var SafeString = __webpack_require__(/*! ./safe-string */ 42)["default"];
 	
 	var escape = {
 	  "&": "&amp;",
@@ -3493,7 +3492,7 @@ webpackJsonp([2],[
 	exports.appendContextPath = appendContextPath;
 
 /***/ }),
-/* 43 */
+/* 42 */
 /*!*********************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/safe-string.js ***!
   \*********************************************************/
@@ -3512,7 +3511,7 @@ webpackJsonp([2],[
 	exports["default"] = SafeString;
 
 /***/ }),
-/* 44 */
+/* 43 */
 /*!*******************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/exception.js ***!
   \*******************************************************/
@@ -3548,18 +3547,18 @@ webpackJsonp([2],[
 	exports["default"] = Exception;
 
 /***/ }),
-/* 45 */
+/* 44 */
 /*!*****************************************************!*\
   !*** ./~/handlebars/dist/cjs/handlebars/runtime.js ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Utils = __webpack_require__(/*! ./utils */ 42);
-	var Exception = __webpack_require__(/*! ./exception */ 44)["default"];
-	var COMPILER_REVISION = __webpack_require__(/*! ./base */ 41).COMPILER_REVISION;
-	var REVISION_CHANGES = __webpack_require__(/*! ./base */ 41).REVISION_CHANGES;
-	var createFrame = __webpack_require__(/*! ./base */ 41).createFrame;
+	var Utils = __webpack_require__(/*! ./utils */ 41);
+	var Exception = __webpack_require__(/*! ./exception */ 43)["default"];
+	var COMPILER_REVISION = __webpack_require__(/*! ./base */ 40).COMPILER_REVISION;
+	var REVISION_CHANGES = __webpack_require__(/*! ./base */ 40).REVISION_CHANGES;
+	var createFrame = __webpack_require__(/*! ./base */ 40).createFrame;
 	
 	function checkRevision(compilerInfo) {
 	  var compilerRevision = compilerInfo && compilerInfo[0] || 1,
@@ -3749,7 +3748,7 @@ webpackJsonp([2],[
 	}
 
 /***/ }),
-/* 46 */
+/* 45 */
 /*!*************************************!*\
   !*** ./src/widgets/ToggleWidget.js ***!
   \*************************************/
@@ -3761,11 +3760,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -3779,7 +3778,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 47);
+	var template = __webpack_require__(/*! ./templates/ToggleWidget.mustache */ 46);
 	
 	var ToggleWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -3814,16 +3813,16 @@ webpackJsonp([2],[
 	});
 	
 	exports.default = ToggleWidget;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 47 */
+/* 46 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/ToggleWidget.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data,depths) {
 	  var stack1, lambda=this.lambda, escapeExpression=this.escapeExpression, buffer = "    <label class=\""
@@ -3857,9 +3856,9 @@ webpackJsonp([2],[
 	},"useData":true,"useDepths":true});
 
 /***/ }),
+/* 47 */,
 /* 48 */,
-/* 49 */,
-/* 50 */
+/* 49 */
 /*!*********************************************!*\
   !*** ./src/base/behaviors/ModalBehavior.js ***!
   \*********************************************/
@@ -3871,7 +3870,7 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -3925,6 +3924,7 @@ webpackJsonp([2],[
 	exports.default = ModalBehavior;
 
 /***/ }),
+/* 50 */,
 /* 51 */,
 /* 52 */,
 /* 53 */,
@@ -3947,8 +3947,7 @@ webpackJsonp([2],[
 /* 70 */,
 /* 71 */,
 /* 72 */,
-/* 73 */,
-/* 74 */
+/* 73 */
 /*!********************************************!*\
   !*** ./src/base/behaviors/FormBehavior.js ***!
   \********************************************/
@@ -3960,21 +3959,21 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 75);
+	var _BaseFormBehavior = __webpack_require__(/*! ./BaseFormBehavior.js */ 74);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -4094,7 +4093,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 75 */
+/* 74 */
 /*!************************************************!*\
   !*** ./src/base/behaviors/BaseFormBehavior.js ***!
   \************************************************/
@@ -4106,11 +4105,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
@@ -4157,7 +4156,7 @@ webpackJsonp([2],[
 	exports.default = BaseFormBehavior;
 
 /***/ }),
-/* 76 */
+/* 75 */
 /*!*****************************************!*\
   !*** ./src/widgets/DatePickerWidget.js ***!
   \*****************************************/
@@ -4173,13 +4172,13 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
-	var _date = __webpack_require__(/*! ../date.js */ 5);
+	var _date = __webpack_require__(/*! ../date.js */ 4);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -4193,7 +4192,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DatePickerWidget.mustache */ 77);
+	var template = __webpack_require__(/*! ./templates/DatePickerWidget.mustache */ 76);
 	
 	var DatePickerWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -4245,16 +4244,16 @@ webpackJsonp([2],[
 	    }
 	});
 	exports.default = DatePickerWidget;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 77 */
+/* 76 */
 /*!*********************************************************!*\
   !*** ./src/widgets/templates/DatePickerWidget.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "    <div class='form-group date'>\n        <label for='altdate'>"
@@ -4283,7 +4282,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 78 */
+/* 77 */
 /*!************************************!*\
   !*** ./src/widgets/InputWidget.js ***!
   \************************************/
@@ -4295,11 +4294,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -4316,7 +4315,7 @@ webpackJsonp([2],[
 	var InputWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-group',
-	    template: __webpack_require__(/*! ./templates/InputWidget.mustache */ 79),
+	    template: __webpack_require__(/*! ./templates/InputWidget.mustache */ 78),
 	    ui: {
 	        input: 'input'
 	    },
@@ -4346,13 +4345,13 @@ webpackJsonp([2],[
 	exports.default = InputWidget;
 
 /***/ }),
-/* 79 */
+/* 78 */
 /*!****************************************************!*\
   !*** ./src/widgets/templates/InputWidget.mustache ***!
   \****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -4402,7 +4401,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 80 */
+/* 79 */
 /*!*************************************!*\
   !*** ./src/widgets/SelectWidget.js ***!
   \*************************************/
@@ -4418,11 +4417,11 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -4436,7 +4435,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/SelectWidget.mustache */ 81);
+	var template = __webpack_require__(/*! ./templates/SelectWidget.mustache */ 80);
 	
 	var SelectWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -4485,13 +4484,13 @@ webpackJsonp([2],[
 	exports.default = SelectWidget;
 
 /***/ }),
-/* 81 */
+/* 80 */
 /*!*****************************************************!*\
   !*** ./src/widgets/templates/SelectWidget.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -4529,12 +4528,12 @@ webpackJsonp([2],[
 	},"useData":true,"useDepths":true});
 
 /***/ }),
+/* 81 */,
 /* 82 */,
 /* 83 */,
 /* 84 */,
 /* 85 */,
-/* 86 */,
-/* 87 */
+/* 86 */
 /*!*************************************************!*\
   !*** ./src/base/behaviors/ModalFormBehavior.js ***!
   \*************************************************/
@@ -4546,17 +4545,17 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 29);
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 28);
 	
-	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 50);
+	var _ModalBehavior = __webpack_require__(/*! ./ModalBehavior.js */ 49);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ./FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
@@ -4596,6 +4595,7 @@ webpackJsonp([2],[
 	exports.default = ModalFormBehavior;
 
 /***/ }),
+/* 87 */,
 /* 88 */,
 /* 89 */,
 /* 90 */,
@@ -4610,8 +4610,7 @@ webpackJsonp([2],[
 /* 99 */,
 /* 100 */,
 /* 101 */,
-/* 102 */,
-/* 103 */
+/* 102 */
 /*!****************************************!*\
   !*** ./src/base/components/AuthBus.js ***!
   \****************************************/
@@ -4623,11 +4622,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -4694,7 +4693,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 104 */
+/* 103 */
 /*!*******************************************!*\
   !*** ./src/base/components/MessageBus.js ***!
   \*******************************************/
@@ -4706,11 +4705,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -4786,7 +4785,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 105 */
+/* 104 */
 /*!******************************************!*\
   !*** ./src/base/components/ConfigBus.js ***!
   \******************************************/
@@ -4798,11 +4797,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -4868,7 +4867,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 106 */
+/* 105 */
 /*!************************************!*\
   !*** ./src/task/components/App.js ***!
   \************************************/
@@ -4880,7 +4879,7 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -4903,7 +4902,7 @@ webpackJsonp([2],[
 	exports.default = App;
 
 /***/ }),
-/* 107 */
+/* 106 */
 /*!***************************************!*\
   !*** ./src/task/components/Router.js ***!
   \***************************************/
@@ -4915,7 +4914,7 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -4939,7 +4938,7 @@ webpackJsonp([2],[
 	exports.default = Router;
 
 /***/ }),
-/* 108 */
+/* 107 */
 /*!*******************************************!*\
   !*** ./src/task/components/Controller.js ***!
   \*******************************************/
@@ -4951,31 +4950,31 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _MainView = __webpack_require__(/*! ../views/MainView.js */ 109);
+	var _MainView = __webpack_require__(/*! ../views/MainView.js */ 108);
 	
 	var _MainView2 = _interopRequireDefault(_MainView);
 	
-	var _App = __webpack_require__(/*! ./App.js */ 106);
+	var _App = __webpack_require__(/*! ./App.js */ 105);
 	
 	var _App2 = _interopRequireDefault(_App);
 	
-	var _Facade = __webpack_require__(/*! ./Facade.js */ 208);
+	var _Facade = __webpack_require__(/*! ./Facade.js */ 207);
 	
 	var _Facade2 = _interopRequireDefault(_Facade);
 	
-	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 103);
+	var _AuthBus = __webpack_require__(/*! ../../base/components/AuthBus.js */ 102);
 	
 	var _AuthBus2 = _interopRequireDefault(_AuthBus);
 	
-	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 104);
+	var _MessageBus = __webpack_require__(/*! ../../base/components/MessageBus.js */ 103);
 	
 	var _MessageBus2 = _interopRequireDefault(_MessageBus);
 	
-	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 105);
+	var _ConfigBus = __webpack_require__(/*! ../../base/components/ConfigBus.js */ 104);
 	
 	var _ConfigBus2 = _interopRequireDefault(_ConfigBus);
 	
@@ -5016,7 +5015,7 @@ webpackJsonp([2],[
 	exports.default = Controller;
 
 /***/ }),
-/* 109 */
+/* 108 */
 /*!************************************!*\
   !*** ./src/task/views/MainView.js ***!
   \************************************/
@@ -5028,83 +5027,83 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _FileBlockView = __webpack_require__(/*! ./FileBlockView.js */ 110);
+	var _FileBlockView = __webpack_require__(/*! ./FileBlockView.js */ 109);
 	
 	var _FileBlockView2 = _interopRequireDefault(_FileBlockView);
 	
-	var _GeneralView = __webpack_require__(/*! ./GeneralView.js */ 114);
+	var _GeneralView = __webpack_require__(/*! ./GeneralView.js */ 113);
 	
 	var _GeneralView2 = _interopRequireDefault(_GeneralView);
 	
-	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 131);
+	var _CommonView = __webpack_require__(/*! ./CommonView.js */ 130);
 	
 	var _CommonView2 = _interopRequireDefault(_CommonView);
 	
-	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 133);
+	var _TaskBlockView = __webpack_require__(/*! ./TaskBlockView.js */ 132);
 	
 	var _TaskBlockView2 = _interopRequireDefault(_TaskBlockView);
 	
-	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 162);
+	var _HtBeforeDiscountsView = __webpack_require__(/*! ./HtBeforeDiscountsView.js */ 161);
 	
 	var _HtBeforeDiscountsView2 = _interopRequireDefault(_HtBeforeDiscountsView);
 	
-	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 163);
+	var _DiscountBlockView = __webpack_require__(/*! ./DiscountBlockView.js */ 162);
 	
 	var _DiscountBlockView2 = _interopRequireDefault(_DiscountBlockView);
 	
-	var _ExpenseHtBlockView = __webpack_require__(/*! ./ExpenseHtBlockView.js */ 176);
+	var _ExpenseHtBlockView = __webpack_require__(/*! ./ExpenseHtBlockView.js */ 175);
 	
 	var _ExpenseHtBlockView2 = _interopRequireDefault(_ExpenseHtBlockView);
 	
-	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 178);
+	var _TotalView = __webpack_require__(/*! ./TotalView.js */ 177);
 	
 	var _TotalView2 = _interopRequireDefault(_TotalView);
 	
-	var _NotesBlockView = __webpack_require__(/*! ./NotesBlockView.js */ 180);
+	var _NotesBlockView = __webpack_require__(/*! ./NotesBlockView.js */ 179);
 	
 	var _NotesBlockView2 = _interopRequireDefault(_NotesBlockView);
 	
-	var _PaymentConditionBlockView = __webpack_require__(/*! ./PaymentConditionBlockView.js */ 182);
+	var _PaymentConditionBlockView = __webpack_require__(/*! ./PaymentConditionBlockView.js */ 181);
 	
 	var _PaymentConditionBlockView2 = _interopRequireDefault(_PaymentConditionBlockView);
 	
-	var _PaymentBlockView = __webpack_require__(/*! ./PaymentBlockView.js */ 184);
+	var _PaymentBlockView = __webpack_require__(/*! ./PaymentBlockView.js */ 183);
 	
 	var _PaymentBlockView2 = _interopRequireDefault(_PaymentBlockView);
 	
-	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 196);
+	var _RightBarView = __webpack_require__(/*! ./RightBarView.js */ 195);
 	
 	var _RightBarView2 = _interopRequireDefault(_RightBarView);
 	
-	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 201);
+	var _StatusView = __webpack_require__(/*! ./StatusView.js */ 200);
 	
 	var _StatusView2 = _interopRequireDefault(_StatusView);
 	
-	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 203);
+	var _BootomActionView = __webpack_require__(/*! ./BootomActionView.js */ 202);
 	
 	var _BootomActionView2 = _interopRequireDefault(_BootomActionView);
 	
-	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 205);
+	var _LoginView = __webpack_require__(/*! ../../base/views/LoginView.js */ 204);
 	
 	var _LoginView2 = _interopRequireDefault(_LoginView);
 	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 157);
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 156);
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 207); /*
+	var template = __webpack_require__(/*! ./templates/MainView.mustache */ 206); /*
 	                                                          * File Name : MainView.js
 	                                                          *
 	                                                          * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
@@ -5305,7 +5304,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 110 */
+/* 109 */
 /*!*****************************************!*\
   !*** ./src/task/views/FileBlockView.js ***!
   \*****************************************/
@@ -5318,11 +5317,11 @@ webpackJsonp([2],[
 	});
 	exports.FileRequirementCollectionView = undefined;
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FileRequirementView = __webpack_require__(/*! ./FileRequirementView.js */ 111);
+	var _FileRequirementView = __webpack_require__(/*! ./FileRequirementView.js */ 110);
 	
 	var _FileRequirementView2 = _interopRequireDefault(_FileRequirementView);
 	
@@ -5338,7 +5337,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/FileBlockView.mustache */ 113);
+	var template = __webpack_require__(/*! ./templates/FileBlockView.mustache */ 112);
 	
 	var FileRequirementCollectionView = exports.FileRequirementCollectionView = _backbone2.default.CollectionView.extend({
 	    tagName: 'div',
@@ -5363,7 +5362,7 @@ webpackJsonp([2],[
 	exports.default = FileBlockView;
 
 /***/ }),
-/* 111 */
+/* 110 */
 /*!***********************************************!*\
   !*** ./src/task/views/FileRequirementView.js ***!
   \***********************************************/
@@ -5375,11 +5374,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -5395,7 +5394,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/FileRequirementView.mustache */ 112);
+	var template = __webpack_require__(/*! ./templates/FileRequirementView.mustache */ 111);
 	
 	var FileRequirementView = _backbone2.default.View.extend({
 	    template: template,
@@ -5417,7 +5416,7 @@ webpackJsonp([2],[
 	        return {
 	            has_view: this.model.hasFile(),
 	            has_add: this.model.missingFile(),
-	            has_valid_link: this.model.hasFile() && this.model.get('validation') && this.section.can_validate,
+	            has_valid_link: this.model.hasFile() && this.model.get('validation') && this.section.can_validate && this.model.get('validation_status') != "valid",
 	            label: this.model.label()
 	        };
 	    },
@@ -5434,26 +5433,29 @@ webpackJsonp([2],[
 	        window.openPopup("/files/" + this.model.get("file_id"), this.onFilePopupCallback.bind(this));
 	    },
 	    onValidate: function onValidate() {
-	        this.model.validate();
+	        var res = this.model.validate();
+	        if (res) {
+	            this.model.setValid();
+	        }
 	    }
 	});
 	exports.default = FileRequirementView;
 
 /***/ }),
-/* 112 */
+/* 111 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/FileRequirementView.mustache ***!
   \***************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
-	  return "<button class='btn btn-default btn-circle btn-view' title=\"Voir le fichier\">\n    <i class='fa fa-pencil'></i>\n</button>\n";
+	  return "<button class='btn btn-default btn-circle btn-view' title=\"Voir / Modifier le fichier\">\n    <i class='fa fa-pencil'></i>\n</button>\n";
 	  },"3":function(depth0,helpers,partials,data) {
-	  return "<button class='btn btn-default btn-circle btn-add' title=\"Déposer un document\" >\n    <i class='fa fa-plus'></i>\n</button>\n";
+	  return "<button class='btn btn-default btn-circle btn-add' title=\"Déposer un fichier\" >\n    <i class='fa fa-plus'></i>\n</button>\n";
 	  },"5":function(depth0,helpers,partials,data) {
-	  return "<button class='btn btn-default btn-circle btn-validate' title=\"Valider le document fourni ?\">\n    <i class='fa fa-check'></i>\n</button>\n";
+	  return "<button class='btn btn-default btn-circle btn-validate' title=\"Valider le fichier fourni ?\">\n    <i class='fa fa-check'></i>\n</button>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div style=\"border: 1px solid #dedede\">\n<button class='btn btn-"
 	    + escapeExpression(((helper = (helper = helpers.status || (depth0 != null ? depth0.status : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"status","hash":{},"data":data}) : helper)))
@@ -5473,20 +5475,20 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 113 */
+/* 112 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/FileBlockView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Fichiers requis <small>(requis pour la validation)</small></h2>\n<div class='content'>\n    <div class='files'>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 114 */
+/* 113 */
 /*!***************************************!*\
   !*** ./src/task/views/GeneralView.js ***!
   \***************************************/
@@ -5498,51 +5500,51 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 115);
+	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 114);
 	
 	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
 	
-	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 117);
+	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 116);
 	
 	var _CheckboxWidget2 = _interopRequireDefault(_CheckboxWidget);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 76);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 75);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 126);
+	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 125);
 	
 	var _StatusHistoryView2 = _interopRequireDefault(_StatusHistoryView);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 130); /*
+	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 129); /*
 	                                                             * File Name : GeneralView.js
 	                                                             *
 	                                                             * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
@@ -5612,7 +5614,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 115 */
+/* 114 */
 /*!*******************************************!*\
   !*** ./src/widgets/CheckboxListWidget.js ***!
   \*******************************************/
@@ -5624,15 +5626,15 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -5646,7 +5648,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CheckboxListWidget.mustache */ 116);
+	var template = __webpack_require__(/*! ./templates/CheckboxListWidget.mustache */ 115);
 	
 	var CheckboxListWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -5686,13 +5688,13 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 116 */
+/* 115 */
 /*!***********************************************************!*\
   !*** ./src/widgets/templates/CheckboxListWidget.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -5752,7 +5754,7 @@ webpackJsonp([2],[
 	},"useData":true,"useDepths":true});
 
 /***/ }),
-/* 117 */
+/* 116 */
 /*!***************************************!*\
   !*** ./src/widgets/CheckboxWidget.js ***!
   \***************************************/
@@ -5764,15 +5766,15 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -5786,7 +5788,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CheckboxWidget.mustache */ 118);
+	var template = __webpack_require__(/*! ./templates/CheckboxWidget.mustache */ 117);
 	
 	var CheckboxWidget = _backbone2.default.View.extend({
 	    template: template,
@@ -5823,13 +5825,13 @@ webpackJsonp([2],[
 	exports.default = CheckboxWidget;
 
 /***/ }),
-/* 118 */
+/* 117 */
 /*!*******************************************************!*\
   !*** ./src/widgets/templates/CheckboxWidget.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -5870,7 +5872,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 119 */
+/* 118 */
 /*!***************************************!*\
   !*** ./src/widgets/TextAreaWidget.js ***!
   \***************************************/
@@ -5882,19 +5884,19 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
-	var _tinymce = __webpack_require__(/*! ../tinymce.js */ 120);
+	var _tinymce = __webpack_require__(/*! ../tinymce.js */ 119);
 	
 	var _tinymce2 = _interopRequireDefault(_tinymce);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TextAreaWidget.mustache */ 125); /*
+	var template = __webpack_require__(/*! ./templates/TextAreaWidget.mustache */ 124); /*
 	                                                                * File Name : TextAreaWidget.js
 	                                                                *
 	                                                                * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -5966,18 +5968,18 @@ webpackJsonp([2],[
 	exports.default = TextAreaWidget;
 
 /***/ }),
+/* 119 */,
 /* 120 */,
 /* 121 */,
 /* 122 */,
 /* 123 */,
-/* 124 */,
-/* 125 */
+/* 124 */
 /*!*******************************************************!*\
   !*** ./src/widgets/templates/TextAreaWidget.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
@@ -6026,7 +6028,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 126 */
+/* 125 */
 /*!*********************************************!*\
   !*** ./src/task/views/StatusHistoryView.js ***!
   \*********************************************/
@@ -6038,22 +6040,22 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _StatusHistoryCollectionView = __webpack_require__(/*! ./StatusHistoryCollectionView.js */ 127);
+	var _StatusHistoryCollectionView = __webpack_require__(/*! ./StatusHistoryCollectionView.js */ 126);
 	
 	var _StatusHistoryCollectionView2 = _interopRequireDefault(_StatusHistoryCollectionView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var StatusHistoryView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/StatusHistoryView.mustache */ 129),
+	    template: __webpack_require__(/*! ./templates/StatusHistoryView.mustache */ 128),
 	    regions: {
 	        comments: '.comments'
 	    },
@@ -6074,7 +6076,7 @@ webpackJsonp([2],[
 	exports.default = StatusHistoryView;
 
 /***/ }),
-/* 127 */
+/* 126 */
 /*!*******************************************************!*\
   !*** ./src/task/views/StatusHistoryCollectionView.js ***!
   \*******************************************************/
@@ -6086,11 +6088,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 5);
+	var _date = __webpack_require__(/*! ../../date.js */ 4);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -6107,7 +6109,7 @@ webpackJsonp([2],[
 	var StatusHistoryItemView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'row',
-	    template: __webpack_require__(/*! ./templates/StatusHistoryItemView.mustache */ 128),
+	    template: __webpack_require__(/*! ./templates/StatusHistoryItemView.mustache */ 127),
 	    templateContext: function templateContext() {
 	        return {
 	            date: (0, _date.formatDate)(this.model.get('date'))
@@ -6123,13 +6125,13 @@ webpackJsonp([2],[
 	exports.default = StatusHistoryCollectionView;
 
 /***/ }),
-/* 128 */
+/* 127 */
 /*!*****************************************************************!*\
   !*** ./src/task/views/templates/StatusHistoryItemView.mustache ***!
   \*****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -6150,26 +6152,26 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 129 */
+/* 128 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/StatusHistoryView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<a\n    data-target='#comments-more'\n    data-toggle='collapse'\n    aria-expanded=\"false\"\n    aria-controls=\"comments-more\"\n    >\n    <i class='glyphicon glyphicon-plus-sign'></i>\nHistorique des commentaires et changements de statut\n</a>\n<div id='comments-more' class='collapse row comments'>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 130 */
+/* 129 */
 /*!*******************************************************!*\
   !*** ./src/task/views/templates/GeneralView.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, buffer = "        <a\n                data-target='#files-more'\n                data-toggle='collapse'\n                aria-expanded=\"false\"\n                aria-controls=\"files-more\"\n                >\n                <i class='glyphicon glyphicon-plus-sign'></i>\n            Fichiers attachés\n        </a>\n        <div id=\"files-more\" class='collapse row'>\n        <div class='col-xs-12'>\n        <ul>\n";
@@ -6191,7 +6193,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 131 */
+/* 130 */
 /*!**************************************!*\
   !*** ./src/task/views/CommonView.js ***!
   \**************************************/
@@ -6203,41 +6205,41 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 115);
+	var _CheckboxListWidget = __webpack_require__(/*! ../../widgets/CheckboxListWidget.js */ 114);
 	
 	var _CheckboxListWidget2 = _interopRequireDefault(_CheckboxListWidget);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 76);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 75);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
@@ -6253,7 +6255,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 132);
+	var template = __webpack_require__(/*! ./templates/CommonView.mustache */ 131);
 	
 	var CommonView = _backbone2.default.View.extend({
 	    /*
@@ -6360,13 +6362,13 @@ webpackJsonp([2],[
 	exports.default = CommonView;
 
 /***/ }),
-/* 132 */
+/* 131 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/CommonView.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "in";
@@ -6378,7 +6380,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 133 */
+/* 132 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskBlockView.js ***!
   \*****************************************/
@@ -6390,36 +6392,36 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 134);
+	var _TaskGroupModel = __webpack_require__(/*! ../models/TaskGroupModel.js */ 133);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
-	var _TaskGroupCollectionView = __webpack_require__(/*! ./TaskGroupCollectionView.js */ 139);
+	var _TaskGroupCollectionView = __webpack_require__(/*! ./TaskGroupCollectionView.js */ 138);
 	
 	var _TaskGroupCollectionView2 = _interopRequireDefault(_TaskGroupCollectionView);
 	
-	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 155);
+	var _TaskGroupFormView = __webpack_require__(/*! ./TaskGroupFormView.js */ 154);
 	
 	var _TaskGroupFormView2 = _interopRequireDefault(_TaskGroupFormView);
 	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 29);
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 28);
 	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 157);
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 156);
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
-	var _DisplayUnitsView = __webpack_require__(/*! ./DisplayUnitsView.js */ 159);
+	var _DisplayUnitsView = __webpack_require__(/*! ./DisplayUnitsView.js */ 158);
 	
 	var _DisplayUnitsView2 = _interopRequireDefault(_DisplayUnitsView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TaskBlockView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 161),
+	    template: __webpack_require__(/*! ./templates/TaskBlockView.mustache */ 160),
 	    tagName: 'div',
 	    className: 'form-section',
 	    regions: {
@@ -6518,7 +6520,7 @@ webpackJsonp([2],[
 	exports.default = TaskBlockView;
 
 /***/ }),
-/* 134 */
+/* 133 */
 /*!*******************************************!*\
   !*** ./src/task/models/TaskGroupModel.js ***!
   \*******************************************/
@@ -6534,11 +6536,11 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 135);
+	var _TaskLineCollection = __webpack_require__(/*! ./TaskLineCollection.js */ 134);
 	
 	var _TaskLineCollection2 = _interopRequireDefault(_TaskLineCollection);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 137);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 136);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -6597,7 +6599,7 @@ webpackJsonp([2],[
 	exports.default = TaskGroupModel;
 
 /***/ }),
-/* 135 */
+/* 134 */
 /*!***********************************************!*\
   !*** ./src/task/models/TaskLineCollection.js ***!
   \***********************************************/
@@ -6613,17 +6615,17 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 136);
+	var _TaskLineModel = __webpack_require__(/*! ./TaskLineModel.js */ 135);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
-	var _backbone = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 138);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 137);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
@@ -6695,7 +6697,7 @@ webpackJsonp([2],[
 	exports.default = TaskLineCollection;
 
 /***/ }),
-/* 136 */
+/* 135 */
 /*!******************************************!*\
   !*** ./src/task/models/TaskLineModel.js ***!
   \******************************************/
@@ -6711,13 +6713,13 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 137);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 136);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -6787,7 +6789,7 @@ webpackJsonp([2],[
 	exports.default = TaskLineModel;
 
 /***/ }),
-/* 137 */
+/* 136 */
 /*!**************************************!*\
   !*** ./src/task/models/BaseModel.js ***!
   \**************************************/
@@ -6803,7 +6805,7 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -6849,7 +6851,7 @@ webpackJsonp([2],[
 	exports.default = BaseModel;
 
 /***/ }),
-/* 138 */
+/* 137 */
 /*!************************************************!*\
   !*** ./src/task/models/OrderableCollection.js ***!
   \************************************************/
@@ -6865,7 +6867,7 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -6941,7 +6943,7 @@ webpackJsonp([2],[
 	exports.default = OrderableCollection;
 
 /***/ }),
-/* 139 */
+/* 138 */
 /*!***************************************************!*\
   !*** ./src/task/views/TaskGroupCollectionView.js ***!
   \***************************************************/
@@ -6953,11 +6955,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 140);
+	var _TaskGroupView = __webpack_require__(/*! ./TaskGroupView.js */ 139);
 	
 	var _TaskGroupView2 = _interopRequireDefault(_TaskGroupView);
 	
@@ -6997,7 +6999,7 @@ webpackJsonp([2],[
 	exports.default = TaskGroupCollectionView;
 
 /***/ }),
-/* 140 */
+/* 139 */
 /*!*****************************************!*\
   !*** ./src/task/views/TaskGroupView.js ***!
   \*****************************************/
@@ -7009,41 +7011,41 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 141);
+	var _TaskLineCollectionView = __webpack_require__(/*! ./TaskLineCollectionView.js */ 140);
 	
 	var _TaskLineCollectionView2 = _interopRequireDefault(_TaskLineCollectionView);
 	
-	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 144);
+	var _TaskLineFormView = __webpack_require__(/*! ./TaskLineFormView.js */ 143);
 	
 	var _TaskLineFormView2 = _interopRequireDefault(_TaskLineFormView);
 	
-	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 136);
+	var _TaskLineModel = __webpack_require__(/*! ../models/TaskLineModel.js */ 135);
 	
 	var _TaskLineModel2 = _interopRequireDefault(_TaskLineModel);
 	
-	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 150);
+	var _TaskGroupTotalView = __webpack_require__(/*! ./TaskGroupTotalView.js */ 149);
 	
 	var _TaskGroupTotalView2 = _interopRequireDefault(_TaskGroupTotalView);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 29);
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 28);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 154); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupView.mustache */ 153); /*
 	                                                               * File Name : TaskGroupView.js
 	                                                               *
 	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -7185,7 +7187,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 141 */
+/* 140 */
 /*!**************************************************!*\
   !*** ./src/task/views/TaskLineCollectionView.js ***!
   \**************************************************/
@@ -7197,11 +7199,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 142);
+	var _TaskLineView = __webpack_require__(/*! ./TaskLineView.js */ 141);
 	
 	var _TaskLineView2 = _interopRequireDefault(_TaskLineView);
 	
@@ -7240,7 +7242,7 @@ webpackJsonp([2],[
 	exports.default = TaskLineCollectionView;
 
 /***/ }),
-/* 142 */
+/* 141 */
 /*!****************************************!*\
   !*** ./src/task/views/TaskLineView.js ***!
   \****************************************/
@@ -7256,13 +7258,13 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -7278,7 +7280,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 143);
+	var template = __webpack_require__(/*! ./templates/TaskLineView.mustache */ 142);
 	
 	var TaskLineView = _backbone2.default.View.extend({
 	    tagName: 'div',
@@ -7340,13 +7342,13 @@ webpackJsonp([2],[
 	exports.default = TaskLineView;
 
 /***/ }),
-/* 143 */
+/* 142 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/TaskLineView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "    <button type='button' class='btn btn-default btn-small up'>\n        <i class='glyphicon glyphicon-arrow-up'></i>\n    </button>\n    <br />\n";
@@ -7382,7 +7384,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 144 */
+/* 143 */
 /*!********************************************!*\
   !*** ./src/task/views/TaskLineFormView.js ***!
   \********************************************/
@@ -7394,39 +7396,39 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 80);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 79);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 87);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 86);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 145);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 144);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 147);
+	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 146);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -7442,7 +7444,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 149);
+	var template = __webpack_require__(/*! ./templates/TaskLineFormView.mustache */ 148);
 	
 	var TaskLineFormView = _backbone2.default.View.extend({
 	    template: template,
@@ -7603,7 +7605,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 145 */
+/* 144 */
 /*!*******************************************!*\
   !*** ./src/task/views/CatalogTreeView.js ***!
   \*******************************************/
@@ -7615,11 +7617,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7633,7 +7635,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 146);
+	var template = __webpack_require__(/*! ./templates/CatalogTreeView.mustache */ 145);
 	
 	var CatalogTreeView = _backbone2.default.View.extend({
 	    /*
@@ -7726,20 +7728,20 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 146 */
+/* 145 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/CatalogTreeView.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<input class=\"form-control\" name=\"catalog_search\" placeholder=\"Nom ou référence\" type=\"text\" />\n<div class='tree'>\n</div>\n<div class=\"form-group\">\n    <div class=\"text-right\">\n        <button class=\"btn btn-success primary-action edit-catalog\" type=\"button\">\n            Éditer comme un nouvel élément\n        </button>\n        <button class=\"btn btn-success secondary-action insert-catalog\" type=\"button\">\n            Insérer les éléments sélectionnés\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 147 */
+/* 146 */
 /*!**************************************!*\
   !*** ./src/widgets/LoadingWidget.js ***!
   \**************************************/
@@ -7751,13 +7753,13 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/LoadingWidget.mustache */ 148); /*
+	var template = __webpack_require__(/*! ./templates/LoadingWidget.mustache */ 147); /*
 	                                                               * File Name : LoadingWidget.js
 	                                                               *
 	                                                               * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -7774,26 +7776,26 @@ webpackJsonp([2],[
 	exports.default = LoadingWidget;
 
 /***/ }),
-/* 148 */
+/* 147 */
 /*!******************************************************!*\
   !*** ./src/widgets/templates/LoadingWidget.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='loader'>\n<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\" aria-hidden=\"true\"></i>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 149 */
+/* 148 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/TaskLineFormView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\"\n                        tabindex='-1'\n                        >\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        tabindex='-1'\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
@@ -7814,7 +7816,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 150 */
+/* 149 */
 /*!**********************************************!*\
   !*** ./src/task/views/TaskGroupTotalView.js ***!
   \**********************************************/
@@ -7826,20 +7828,20 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 151);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 150);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TaskGroupTotalView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 153),
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 152),
 	    regions: {
 	        line: {
 	            el: '.line',
@@ -7872,7 +7874,7 @@ webpackJsonp([2],[
 	exports.default = TaskGroupTotalView;
 
 /***/ }),
-/* 151 */
+/* 150 */
 /*!***************************************!*\
   !*** ./src/widgets/LabelRowWidget.js ***!
   \***************************************/
@@ -7884,11 +7886,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -7904,7 +7906,7 @@ webpackJsonp([2],[
 	 */
 	var LabelRowWidget = _backbone2.default.View.extend({
 	    tagName: 'div',
-	    template: __webpack_require__(/*! ./templates/LabelRowWidget.mustache */ 152),
+	    template: __webpack_require__(/*! ./templates/LabelRowWidget.mustache */ 151),
 	    templateContext: function templateContext() {
 	        var values = this.getOption('values');
 	        var label = (0, _tools.getOpt)(this, 'label', '');
@@ -7920,13 +7922,13 @@ webpackJsonp([2],[
 	exports.default = LabelRowWidget;
 
 /***/ }),
-/* 152 */
+/* 151 */
 /*!*******************************************************!*\
   !*** ./src/widgets/templates/LabelRowWidget.mustache ***!
   \*******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='row'>\n<div class='col-md-10 col-xs-8 text-right'>\n    <b>";
@@ -7944,26 +7946,26 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 153 */
+/* 152 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/LineContainerView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='line'></div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 154 */
+/* 153 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskGroupView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "                <button type='button' class='btn btn-default btn-small up' tabindex='-1'>\n                    <i class='glyphicon glyphicon-arrow-up'></i>\n                </button>\n                <br />\n";
@@ -8004,7 +8006,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 155 */
+/* 154 */
 /*!*********************************************!*\
   !*** ./src/task/views/TaskGroupFormView.js ***!
   \*********************************************/
@@ -8016,35 +8018,35 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 87);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 86);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 145);
+	var _CatalogTreeView = __webpack_require__(/*! ./CatalogTreeView.js */ 144);
 	
 	var _CatalogTreeView2 = _interopRequireDefault(_CatalogTreeView);
 	
-	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 147);
+	var _LoadingWidget = __webpack_require__(/*! ../../widgets/LoadingWidget.js */ 146);
 	
 	var _LoadingWidget2 = _interopRequireDefault(_LoadingWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 156); /*
+	var template = __webpack_require__(/*! ./templates/TaskGroupFormView.mustache */ 155); /*
 	                                                                   * File Name : TaskGroupFormView.js
 	                                                                   *
 	                                                                   * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -8131,13 +8133,13 @@ webpackJsonp([2],[
 	exports.default = TaskGroupFormView;
 
 /***/ }),
-/* 156 */
+/* 155 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/TaskGroupFormView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#form-container\"\n                        aria-controls=\"form-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie libre\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#catalog-container\"\n                        aria-controls=\"catalog-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Depuis le catalogue\n                    </a>\n                </li>\n            </ul>\n";
@@ -8158,7 +8160,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 157 */
+/* 156 */
 /*!*************************************!*\
   !*** ./src/task/views/ErrorView.js ***!
   \*************************************/
@@ -8170,7 +8172,7 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -8179,7 +8181,7 @@ webpackJsonp([2],[
 	var ErrorView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'alert alert-danger',
-	    template: __webpack_require__(/*! ./templates/ErrorView.mustache */ 158),
+	    template: __webpack_require__(/*! ./templates/ErrorView.mustache */ 157),
 	    initialize: function initialize() {
 	        this.errors = this.getOption('errors');
 	    },
@@ -8199,13 +8201,13 @@ webpackJsonp([2],[
 	exports.default = ErrorView;
 
 /***/ }),
-/* 158 */
+/* 157 */
 /*!*****************************************************!*\
   !*** ./src/task/views/templates/ErrorView.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -8220,7 +8222,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 159 */
+/* 158 */
 /*!********************************************!*\
   !*** ./src/task/views/DisplayUnitsView.js ***!
   \********************************************/
@@ -8232,22 +8234,22 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 117);
+	var _CheckboxWidget = __webpack_require__(/*! ../../widgets/CheckboxWidget.js */ 116);
 	
 	var _CheckboxWidget2 = _interopRequireDefault(_CheckboxWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var DisplayUnitsView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/DisplayUnitsView.mustache */ 160),
+	    template: __webpack_require__(/*! ./templates/DisplayUnitsView.mustache */ 159),
 	    fields: ['display_units'],
 	    behaviors: [_FormBehavior2.default],
 	    regions: {
@@ -8286,33 +8288,33 @@ webpackJsonp([2],[
 	exports.default = DisplayUnitsView;
 
 /***/ }),
-/* 160 */
+/* 159 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/DisplayUnitsView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div></div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 161 */
+/* 160 */
 /*!*********************************************************!*\
   !*** ./src/task/views/templates/TaskBlockView.mustache ***!
   \*********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Description des prestations</h2>\n<div class='content'>\n    <div class='display-units-container'></div>\n    <div class='group-errors'></div>\n    <div class='group-container'></div>\n    <div class='group-modalregion'></div>\n    <div class='actions text-right'>\n        <button class='btn btn-default add' type='button'>\n            <i class='glyphicon glyphicon-plus-sign'></i> Ajouter un ouvrage\n        </button>\n    </div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 162 */
+/* 161 */
 /*!*************************************************!*\
   !*** ./src/task/views/HtBeforeDiscountsView.js ***!
   \*************************************************/
@@ -8324,20 +8326,20 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 151);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 150);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var HtBeforeDiscountsView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 153),
+	    template: __webpack_require__(/*! ./templates/LineContainerView.mustache */ 152),
 	    regions: {
 	        line: {
 	            el: '.line',
@@ -8368,7 +8370,7 @@ webpackJsonp([2],[
 	exports.default = HtBeforeDiscountsView;
 
 /***/ }),
-/* 163 */
+/* 162 */
 /*!*********************************************!*\
   !*** ./src/task/views/DiscountBlockView.js ***!
   \*********************************************/
@@ -8380,27 +8382,27 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 164);
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 163);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 165);
+	var _DiscountCollectionView = __webpack_require__(/*! ./DiscountCollectionView.js */ 164);
 	
 	var _DiscountCollectionView2 = _interopRequireDefault(_DiscountCollectionView);
 	
-	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 168);
+	var _DiscountFormPopupView = __webpack_require__(/*! ./DiscountFormPopupView.js */ 167);
 	
 	var _DiscountFormPopupView2 = _interopRequireDefault(_DiscountFormPopupView);
 	
-	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 157);
+	var _ErrorView = __webpack_require__(/*! ./ErrorView.js */ 156);
 	
 	var _ErrorView2 = _interopRequireDefault(_ErrorView);
 	
-	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 29);
+	var _backboneTools = __webpack_require__(/*! ../../backbone-tools.js */ 28);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -8417,7 +8419,7 @@ webpackJsonp([2],[
 	var DiscountBlockView = _backbone2.default.View.extend({
 	    tagName: 'div',
 	    className: 'form-section discount-group',
-	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 175),
+	    template: __webpack_require__(/*! ./templates/DiscountBlockView.mustache */ 174),
 	    regions: {
 	        'lines': '.lines',
 	        'modalRegion': '.modalregion',
@@ -8506,7 +8508,7 @@ webpackJsonp([2],[
 	exports.default = DiscountBlockView;
 
 /***/ }),
-/* 164 */
+/* 163 */
 /*!******************************************!*\
   !*** ./src/task/models/DiscountModel.js ***!
   \******************************************/
@@ -8518,13 +8520,13 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 137);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 136);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
@@ -8577,7 +8579,7 @@ webpackJsonp([2],[
 	exports.default = DiscountModel;
 
 /***/ }),
-/* 165 */
+/* 164 */
 /*!**************************************************!*\
   !*** ./src/task/views/DiscountCollectionView.js ***!
   \**************************************************/
@@ -8589,19 +8591,19 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 166);
+	var _DiscountView = __webpack_require__(/*! ./DiscountView.js */ 165);
 	
 	var _DiscountView2 = _interopRequireDefault(_DiscountView);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
@@ -8649,7 +8651,7 @@ webpackJsonp([2],[
 	exports.default = DiscountCollectionView;
 
 /***/ }),
-/* 166 */
+/* 165 */
 /*!****************************************!*\
   !*** ./src/task/views/DiscountView.js ***!
   \****************************************/
@@ -8665,13 +8667,13 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -8687,7 +8689,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 167);
+	var template = __webpack_require__(/*! ./templates/DiscountView.mustache */ 166);
 	
 	var DiscountView = _backbone2.default.View.extend({
 	    template: template,
@@ -8727,13 +8729,13 @@ webpackJsonp([2],[
 	exports.default = DiscountView;
 
 /***/ }),
-/* 167 */
+/* 166 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/DiscountView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "<div class='col-md-3 col-sm-4 col-xs-12 description'>";
@@ -8751,7 +8753,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 168 */
+/* 167 */
 /*!*************************************************!*\
   !*** ./src/task/views/DiscountFormPopupView.js ***!
   \*************************************************/
@@ -8763,27 +8765,27 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 50);
+	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 49);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 169);
+	var _DiscountFormView = __webpack_require__(/*! ./DiscountFormView.js */ 168);
 	
 	var _DiscountFormView2 = _interopRequireDefault(_DiscountFormView);
 	
-	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 171);
+	var _DiscountPercentModel = __webpack_require__(/*! ../models/DiscountPercentModel.js */ 170);
 	
 	var _DiscountPercentModel2 = _interopRequireDefault(_DiscountPercentModel);
 	
-	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 172);
+	var _DiscountPercentView = __webpack_require__(/*! ./DiscountPercentView.js */ 171);
 	
 	var _DiscountPercentView2 = _interopRequireDefault(_DiscountPercentView);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -8797,7 +8799,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 174);
+	var template = __webpack_require__(/*! ./templates/DiscountFormPopupView.mustache */ 173);
 	
 	var DiscountFormPopupView = _backbone2.default.View.extend({
 	    behaviors: [_ModalBehavior2.default],
@@ -8845,7 +8847,7 @@ webpackJsonp([2],[
 	exports.default = DiscountFormPopupView;
 
 /***/ }),
-/* 169 */
+/* 168 */
 /*!********************************************!*\
   !*** ./src/task/views/DiscountFormView.js ***!
   \********************************************/
@@ -8857,35 +8859,35 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 80);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 79);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 170); /*
+	var template = __webpack_require__(/*! ./templates/DiscountFormView.mustache */ 169); /*
 	                                                                  * File Name : DiscountFormView.js
 	                                                                  *
 	                                                                  * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -8950,13 +8952,13 @@ webpackJsonp([2],[
 	exports.default = DiscountFormView;
 
 /***/ }),
-/* 170 */
+/* 169 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/DiscountFormView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -8966,7 +8968,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 171 */
+/* 170 */
 /*!*************************************************!*\
   !*** ./src/task/models/DiscountPercentModel.js ***!
   \*************************************************/
@@ -8978,7 +8980,7 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -9015,7 +9017,7 @@ webpackJsonp([2],[
 	exports.default = DiscountPercentModel;
 
 /***/ }),
-/* 172 */
+/* 171 */
 /*!***********************************************!*\
   !*** ./src/task/views/DiscountPercentView.js ***!
   \***********************************************/
@@ -9027,23 +9029,23 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 164);
+	var _DiscountModel = __webpack_require__(/*! ../models/DiscountModel.js */ 163);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _BaseFormBehavior = __webpack_require__(/*! ../../base/behaviors/BaseFormBehavior.js */ 75);
+	var _BaseFormBehavior = __webpack_require__(/*! ../../base/behaviors/BaseFormBehavior.js */ 74);
 	
 	var _BaseFormBehavior2 = _interopRequireDefault(_BaseFormBehavior);
 	
@@ -9051,7 +9053,7 @@ webpackJsonp([2],[
 	
 	var DiscountPercentView = _backbone2.default.View.extend({
 	    behaviors: [_BaseFormBehavior2.default],
-	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 173),
+	    template: __webpack_require__(/*! ./templates/DiscountPercentView.mustache */ 172),
 	    regions: {
 	        'description': '.description',
 	        'percentage': '.percentage'
@@ -9106,13 +9108,13 @@ webpackJsonp([2],[
 	exports.default = DiscountPercentView;
 
 /***/ }),
-/* 173 */
+/* 172 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/DiscountPercentView.mustache ***!
   \***************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -9122,13 +9124,13 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 174 */
+/* 173 */
 /*!*****************************************************************!*\
   !*** ./src/task/views/templates/DiscountFormPopupView.mustache ***!
   \*****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "            <ul class=\"nav nav-tabs\" role=\"tablist\">\n                <li role=\"presentation\" class=\"active\">\n                    <a href=\"#main-discount-container\"\n                        aria-controls=\"main-discount-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Saisie d'un montant\n                    </a>\n                </li>\n                <li role=\"presentation\">\n                    <a href=\"#percentage-container\"\n                        aria-controls=\"percentage-container\"\n                        role=\"tab\"\n                        data-toggle=\"tab\">\n                        Remise en pourcentage\n                    </a>\n                </li>\n            </ul>\n";
@@ -9142,13 +9144,13 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 175 */
+/* 174 */
 /*!*************************************************************!*\
   !*** ./src/task/views/templates/DiscountBlockView.mustache ***!
   \*************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "    <div class='row lines-header hidden-xs'>\n        <div class='col-md-3 col-sm-4'>Description</div>\n        <div class='col-md-3 ol-sm-2 col-xs-12'>Montant HT</div>\n        <div class='col-md-1 hidden-sm hidden-xs text-center'>TVA</div>\n        <div class='col-md-5 col-sm-6 col-xs-12 text-right'>Actions</div>\n    </div>\n";
@@ -9160,7 +9162,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 176 */
+/* 175 */
 /*!**********************************************!*\
   !*** ./src/task/views/ExpenseHtBlockView.js ***!
   \**********************************************/
@@ -9174,15 +9176,15 @@ webpackJsonp([2],[
 	
 	var _Mn$View$extend;
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
@@ -9200,7 +9202,7 @@ webpackJsonp([2],[
 	                                                                                                                                                                                                                   */
 	
 	
-	var template = __webpack_require__(/*! ./templates/ExpenseHtBlockView.mustache */ 177);
+	var template = __webpack_require__(/*! ./templates/ExpenseHtBlockView.mustache */ 176);
 	
 	var ExpenseHtBlockView = _backbone2.default.View.extend((_Mn$View$extend = {
 	    template: template,
@@ -9227,20 +9229,20 @@ webpackJsonp([2],[
 	exports.default = ExpenseHtBlockView;
 
 /***/ }),
-/* 177 */
+/* 176 */
 /*!**************************************************************!*\
   !*** ./src/task/views/templates/ExpenseHtBlockView.mustache ***!
   \**************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Frais forfaitaires</h2>\n<div class='content'>\n    <div class='row'>\n        <form class='form-inline'>\n            <div class='col-xs-11 expenses_ht text-right'></div>\n        </form>\n    </div>\n</div>\n\n";
 	  },"useData":true});
 
 /***/ }),
-/* 178 */
+/* 177 */
 /*!*************************************!*\
   !*** ./src/task/views/TotalView.js ***!
   \*************************************/
@@ -9252,20 +9254,20 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 151);
+	var _LabelRowWidget = __webpack_require__(/*! ../../widgets/LabelRowWidget.js */ 150);
 	
 	var _LabelRowWidget2 = _interopRequireDefault(_LabelRowWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var TotalView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 179),
+	    template: __webpack_require__(/*! ./templates/TotalView.mustache */ 178),
 	    regions: {
 	        ht: {
 	            el: '.ht',
@@ -9321,20 +9323,20 @@ webpackJsonp([2],[
 	exports.default = TotalView;
 
 /***/ }),
-/* 179 */
+/* 178 */
 /*!*****************************************************!*\
   !*** ./src/task/views/templates/TotalView.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class='ht'></div>\n<div class='tvas'></div>\n<div class='ttc'></div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 180 */
+/* 179 */
 /*!******************************************!*\
   !*** ./src/task/views/NotesBlockView.js ***!
   \******************************************/
@@ -9346,21 +9348,21 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/NotesBlockView.mustache */ 181); /*
+	var template = __webpack_require__(/*! ./templates/NotesBlockView.mustache */ 180); /*
 	                                                                * File Name : NotesBlockView.js
 	                                                                *
 	                                                                * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9411,13 +9413,13 @@ webpackJsonp([2],[
 	exports.default = NotesBlockView;
 
 /***/ }),
-/* 181 */
+/* 180 */
 /*!**********************************************************!*\
   !*** ./src/task/views/templates/NotesBlockView.mustache ***!
   \**********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "<i>\n        Notes complémentaires\n        </i>\n";
@@ -9436,7 +9438,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 182 */
+/* 181 */
 /*!*****************************************************!*\
   !*** ./src/task/views/PaymentConditionBlockView.js ***!
   \*****************************************************/
@@ -9448,35 +9450,35 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 80);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 79);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/PaymentConditionBlockView.mustache */ 183); /*
+	var template = __webpack_require__(/*! ./templates/PaymentConditionBlockView.mustache */ 182); /*
 	                                                                           * File Name : PaymentConditionBlockView.js
 	                                                                           *
 	                                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -9579,20 +9581,20 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 183 */
+/* 182 */
 /*!*********************************************************************!*\
   !*** ./src/task/views/templates/PaymentConditionBlockView.mustache ***!
   \*********************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Conditions de paiements</h2>\n<div class='content'>\n<div class='errors'>\n</div>\n    <div class='predefined-conditions'></div>\n    <div class='conditions'></div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 184 */
+/* 183 */
 /*!********************************************!*\
   !*** ./src/task/views/PaymentBlockView.js ***!
   \********************************************/
@@ -9604,33 +9606,33 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 80);
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 79);
 	
 	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 74);
+	var _FormBehavior = __webpack_require__(/*! ../../base/behaviors/FormBehavior.js */ 73);
 	
 	var _FormBehavior2 = _interopRequireDefault(_FormBehavior);
 	
-	var _PaymentLineTableView = __webpack_require__(/*! ./PaymentLineTableView.js */ 185);
+	var _PaymentLineTableView = __webpack_require__(/*! ./PaymentLineTableView.js */ 184);
 	
 	var _PaymentLineTableView2 = _interopRequireDefault(_PaymentLineTableView);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 28);
+	var _backboneValidation = __webpack_require__(/*! backbone-validation */ 27);
 	
 	var _backboneValidation2 = _interopRequireDefault(_backboneValidation);
 	
@@ -9646,7 +9648,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/PaymentBlockView.mustache */ 195);
+	var template = __webpack_require__(/*! ./templates/PaymentBlockView.mustache */ 194);
 	
 	var PaymentBlockView = _backbone2.default.View.extend({
 	    behaviors: [_FormBehavior2.default],
@@ -9789,7 +9791,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 185 */
+/* 184 */
 /*!************************************************!*\
   !*** ./src/task/views/PaymentLineTableView.js ***!
   \************************************************/
@@ -9801,35 +9803,35 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _PaymentDepositView = __webpack_require__(/*! ./PaymentDepositView.js */ 186);
+	var _PaymentDepositView = __webpack_require__(/*! ./PaymentDepositView.js */ 185);
 	
 	var _PaymentDepositView2 = _interopRequireDefault(_PaymentDepositView);
 	
-	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 188);
+	var _PaymentLineModel = __webpack_require__(/*! ../models/PaymentLineModel.js */ 187);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
 	
-	var _PaymentLineCollectionView = __webpack_require__(/*! ./PaymentLineCollectionView.js */ 189);
+	var _PaymentLineCollectionView = __webpack_require__(/*! ./PaymentLineCollectionView.js */ 188);
 	
 	var _PaymentLineCollectionView2 = _interopRequireDefault(_PaymentLineCollectionView);
 	
-	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 192);
+	var _PaymentLineFormView = __webpack_require__(/*! ./PaymentLineFormView.js */ 191);
 	
 	var _PaymentLineFormView2 = _interopRequireDefault(_PaymentLineFormView);
 	
-	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 190);
+	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 189);
 	
 	var _PaymentLineView2 = _interopRequireDefault(_PaymentLineView);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -9844,7 +9846,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var PaymentLineTableView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 194),
+	    template: __webpack_require__(/*! ./templates/PaymentLineTableView.mustache */ 193),
 	    regions: {
 	        lines: '.paymentlines',
 	        modalRegion: '.payment-line-modal-container',
@@ -9970,7 +9972,7 @@ webpackJsonp([2],[
 	exports.default = PaymentLineTableView;
 
 /***/ }),
-/* 186 */
+/* 185 */
 /*!**********************************************!*\
   !*** ./src/task/views/PaymentDepositView.js ***!
   \**********************************************/
@@ -9982,11 +9984,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -10002,7 +10004,7 @@ webpackJsonp([2],[
 	 */
 	var PaymentDepositView = _backbone2.default.View.extend({
 	    className: 'row taskline',
-	    template: __webpack_require__(/*! ./templates/PaymentDepositView.mustache */ 187),
+	    template: __webpack_require__(/*! ./templates/PaymentDepositView.mustache */ 186),
 	    modelEvents: {
 	        'change:amount': 'render'
 	    },
@@ -10016,13 +10018,13 @@ webpackJsonp([2],[
 	exports.default = PaymentDepositView;
 
 /***/ }),
-/* 187 */
+/* 186 */
 /*!**************************************************************!*\
   !*** ./src/task/views/templates/PaymentDepositView.mustache ***!
   \**************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, buffer = "<div class='col-lg-4 col-md-4 col-sm-4 col-xs-12 description'>\n    <b>Facture d'acompte</b>\n</div>\n";
@@ -10033,7 +10035,7 @@ webpackJsonp([2],[
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "</div>\n<div class='col-lg-3 col-md-5 col-sm-7 text-right'>\n</div>\n";
 	},"2":function(depth0,helpers,partials,data) {
-	  return "<div class='col-md-2 col-sm-4 col-xs-12 date'> à la commmande </div>\n";
+	  return "<div class='col-md-2 col-sm-4 col-xs-12 date'> à la commande </div>\n";
 	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var stack1, buffer = "";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.amount : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
@@ -10042,7 +10044,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 188 */
+/* 187 */
 /*!*********************************************!*\
   !*** ./src/task/models/PaymentLineModel.js ***!
   \*********************************************/
@@ -10054,17 +10056,17 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 137);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 136);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 5);
+	var _date = __webpack_require__(/*! ../../date.js */ 4);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -10113,7 +10115,7 @@ webpackJsonp([2],[
 	exports.default = PaymentLineModel;
 
 /***/ }),
-/* 189 */
+/* 188 */
 /*!*****************************************************!*\
   !*** ./src/task/views/PaymentLineCollectionView.js ***!
   \*****************************************************/
@@ -10125,11 +10127,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 190);
+	var _PaymentLineView = __webpack_require__(/*! ./PaymentLineView.js */ 189);
 	
 	var _PaymentLineView2 = _interopRequireDefault(_PaymentLineView);
 	
@@ -10173,7 +10175,7 @@ webpackJsonp([2],[
 	exports.default = PaymentLineCollectionView;
 
 /***/ }),
-/* 190 */
+/* 189 */
 /*!*******************************************!*\
   !*** ./src/task/views/PaymentLineView.js ***!
   \*******************************************/
@@ -10185,19 +10187,19 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 5);
+	var _date = __webpack_require__(/*! ../../date.js */ 4);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var PaymentLineView = _backbone2.default.View.extend({
 	    className: 'row taskline',
-	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 191),
+	    template: __webpack_require__(/*! ./templates/PaymentLineView.mustache */ 190),
 	    modelEvents: {
 	        'change': 'render'
 	    },
@@ -10240,13 +10242,13 @@ webpackJsonp([2],[
 	exports.default = PaymentLineView;
 
 /***/ }),
-/* 191 */
+/* 190 */
 /*!***********************************************************!*\
   !*** ./src/task/views/templates/PaymentLineView.mustache ***!
   \***********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -10290,7 +10292,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 192 */
+/* 191 */
 /*!***********************************************!*\
   !*** ./src/task/views/PaymentLineFormView.js ***!
   \***********************************************/
@@ -10302,25 +10304,25 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 78);
+	var _InputWidget = __webpack_require__(/*! ../../widgets/InputWidget.js */ 77);
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
-	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 119);
+	var _TextAreaWidget = __webpack_require__(/*! ../../widgets/TextAreaWidget.js */ 118);
 	
 	var _TextAreaWidget2 = _interopRequireDefault(_TextAreaWidget);
 	
-	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 87);
+	var _ModalFormBehavior = __webpack_require__(/*! ../../base/behaviors/ModalFormBehavior.js */ 86);
 	
 	var _ModalFormBehavior2 = _interopRequireDefault(_ModalFormBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 76);
+	var _DatePickerWidget = __webpack_require__(/*! ../../widgets/DatePickerWidget.js */ 75);
 	
 	var _DatePickerWidget2 = _interopRequireDefault(_DatePickerWidget);
 	
@@ -10336,7 +10338,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/PaymentLineFormView.mustache */ 193);
+	var template = __webpack_require__(/*! ./templates/PaymentLineFormView.mustache */ 192);
 	
 	var PaymentLineFormView = _backbone2.default.View.extend({
 	    behaviors: [_ModalFormBehavior2.default],
@@ -10387,13 +10389,13 @@ webpackJsonp([2],[
 	exports.default = PaymentLineFormView;
 
 /***/ }),
-/* 193 */
+/* 192 */
 /*!***************************************************************!*\
   !*** ./src/task/views/templates/PaymentLineFormView.mustache ***!
   \***************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
@@ -10405,13 +10407,13 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 194 */
+/* 193 */
 /*!****************************************************************!*\
   !*** ./src/task/views/templates/PaymentLineTableView.mustache ***!
   \****************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "<div class='col-md-2 col-sm-4 col-xs-12 date'>Date</div>\n";
@@ -10433,20 +10435,20 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 195 */
+/* 194 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/PaymentBlockView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<h2>Paiements</h2>\n<div class='content'>\n    <div class='payment_display-container'></div>\n    <div class='payment-deposit-container'></div>\n    <div class='payment_times-container'></div>\n    <div class='payment-lines-container'></div>\n</div>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 196 */
+/* 195 */
 /*!****************************************!*\
   !*** ./src/task/views/RightBarView.js ***!
   \****************************************/
@@ -10458,25 +10460,25 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _jquery = __webpack_require__(/*! jquery */ 3);
+	var _jquery = __webpack_require__(/*! jquery */ 2);
 	
 	var _jquery2 = _interopRequireDefault(_jquery);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 197);
+	var _ActionCollection = __webpack_require__(/*! ../models/ActionCollection.js */ 196);
 	
 	var _ActionCollection2 = _interopRequireDefault(_ActionCollection);
 	
-	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 199);
+	var _ActionListView = __webpack_require__(/*! ./ActionListView.js */ 198);
 	
 	var _ActionListView2 = _interopRequireDefault(_ActionListView);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
@@ -10492,7 +10494,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 200);
+	var template = __webpack_require__(/*! ./templates/RightBarView.mustache */ 199);
 	
 	var RightBarView = _backbone2.default.View.extend({
 	    regions: {
@@ -10533,7 +10535,7 @@ webpackJsonp([2],[
 	exports.default = RightBarView;
 
 /***/ }),
-/* 197 */
+/* 196 */
 /*!*********************************************!*\
   !*** ./src/task/models/ActionCollection.js ***!
   \*********************************************/
@@ -10545,11 +10547,11 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 198);
+	var _ActionModel = __webpack_require__(/*! ./ActionModel.js */ 197);
 	
 	var _ActionModel2 = _interopRequireDefault(_ActionModel);
 	
@@ -10571,7 +10573,7 @@ webpackJsonp([2],[
 	exports.default = ActionCollection;
 
 /***/ }),
-/* 198 */
+/* 197 */
 /*!****************************************!*\
   !*** ./src/task/models/ActionModel.js ***!
   \****************************************/
@@ -10583,7 +10585,7 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -10602,7 +10604,7 @@ webpackJsonp([2],[
 	exports.default = ActionModel;
 
 /***/ }),
-/* 199 */
+/* 198 */
 /*!******************************************!*\
   !*** ./src/task/views/ActionListView.js ***!
   \******************************************/
@@ -10618,15 +10620,15 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _AnchorWidget = __webpack_require__(/*! ../../widgets/AnchorWidget.js */ 37);
+	var _AnchorWidget = __webpack_require__(/*! ../../widgets/AnchorWidget.js */ 36);
 	
 	var _AnchorWidget2 = _interopRequireDefault(_AnchorWidget);
 	
-	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 46);
+	var _ToggleWidget = __webpack_require__(/*! ../../widgets/ToggleWidget.js */ 45);
 	
 	var _ToggleWidget2 = _interopRequireDefault(_ToggleWidget);
 	
@@ -10659,13 +10661,13 @@ webpackJsonp([2],[
 	exports.default = ActionListView;
 
 /***/ }),
-/* 200 */
+/* 199 */
 /*!********************************************************!*\
   !*** ./src/task/views/templates/RightBarView.mustache ***!
   \********************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -10714,7 +10716,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 201 */
+/* 200 */
 /*!**************************************!*\
   !*** ./src/task/views/StatusView.js ***!
   \**************************************/
@@ -10726,23 +10728,23 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 50);
+	var _ModalBehavior = __webpack_require__(/*! ../../base/behaviors/ModalBehavior.js */ 49);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _date = __webpack_require__(/*! ../../date.js */ 5);
+	var _date = __webpack_require__(/*! ../../date.js */ 4);
 	
-	var _FileBlockView = __webpack_require__(/*! ./FileBlockView.js */ 110);
+	var _FileBlockView = __webpack_require__(/*! ./FileBlockView.js */ 109);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -10756,7 +10758,7 @@ webpackJsonp([2],[
 	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
 	 *
 	 */
-	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 202);
+	var template = __webpack_require__(/*! ./templates/StatusView.mustache */ 201);
 	
 	var StatusView = _backbone2.default.View.extend({
 	    template: template,
@@ -10863,13 +10865,13 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 202 */
+/* 201 */
 /*!******************************************************!*\
   !*** ./src/task/views/templates/StatusView.mustache ***!
   \******************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  return "modal-lg";
@@ -10913,7 +10915,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 203 */
+/* 202 */
 /*!********************************************!*\
   !*** ./src/task/views/BootomActionView.js ***!
   \********************************************/
@@ -10925,14 +10927,14 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var BootomActionView = _backbone2.default.View.extend({
-	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 204),
+	    template: __webpack_require__(/*! ./templates/BootomActionView.mustache */ 203),
 	    tagName: 'footer',
 	    className: 'sticky-footer hidden-md hidden-lg text-center',
 	    ui: {
@@ -10966,16 +10968,16 @@ webpackJsonp([2],[
 	     *
 	     */
 	exports.default = BootomActionView;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 204 */
+/* 203 */
 /*!************************************************************!*\
   !*** ./src/task/views/templates/BootomActionView.mustache ***!
   \************************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"1":function(depth0,helpers,partials,data) {
 	  var lambda=this.lambda, escapeExpression=this.escapeExpression;
@@ -11002,7 +11004,7 @@ webpackJsonp([2],[
 	},"useData":true});
 
 /***/ }),
-/* 205 */
+/* 204 */
 /*!*************************************!*\
   !*** ./src/base/views/LoginView.js ***!
   \*************************************/
@@ -11014,21 +11016,21 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 50);
+	var _ModalBehavior = __webpack_require__(/*! ../behaviors/ModalBehavior.js */ 49);
 	
 	var _ModalBehavior2 = _interopRequireDefault(_ModalBehavior);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 206); /*
+	var template = __webpack_require__(/*! ./templates/LoginView.mustache */ 205); /*
 	                                                           * File Name : LoginView.js
 	                                                           *
 	                                                           * Copyright (C) 2017 Gaston TJEBBES g.t@majerti.fr
@@ -11083,33 +11085,33 @@ webpackJsonp([2],[
 	exports.default = LoginView;
 
 /***/ }),
-/* 206 */
+/* 205 */
 /*!*****************************************************!*\
   !*** ./src/base/views/templates/LoginView.mustache ***!
   \*****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div class=\"modal-dialog login-dialog\" role=\"document\">\n	<div class=\"modal-content\">\n		<form>\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n            <h4 class=\"modal-title\">Authentification</h4>\n          </div>\n            <div class=\"modal-body\">\n                <div class='icon'>\n                    <i class='fa fa-user-circle'></i>\n                </div>\n                <div class=\"errors alert alert-danger\" style=\"display:none;\"></div>\n                <div class=\"form-group  item-login item-login\" title=\"\" id=\"item-deformField1\">\n                    <label for=\"deformField1\" class=\"control-label required\" id=\"req-deformField1\">\n                        Identifiant\n                    </label>\n                    <input name=\"login\" value=\"\" id=\"deformField1\" class=\" form-control \" type=\"text\">\n                </div>\n                <div class=\"form-group   item-password\" title=\"\" id=\"item-deformField2\">\n                    <label for=\"deformField2\" class=\"control-label required\" id=\"req-deformField2\">\n                        Mot de passe\n                    </label>\n                    <input name=\"password\" value=\"\" id=\"deformField2\" class=\" form-control \" type=\"password\">\n                </div>\n                <div class=\"form-group   item-remember_me\" title=\"\" id=\"item-deformField4\">\n                    <div class=\"checkbox\">\n                        <label for=\"deformField4\">\n                            <input name=\"remember_me\" value=\"true\" id=\"deformField4\" type=\"checkbox\">\n                            Rester connecté\n                        </label>\n                    </div>\n                </div>\n            </div>\n            <div class=\"modal-footer\">\n            <button class='btn btn-primary btn-block' type='submit'>Connexion</button>\n            </div>\n        </form>\n	</div><!-- /.modal-content -->\n</div><!-- /.modal-dialog -->\n";
 	  },"useData":true});
 
 /***/ }),
-/* 207 */
+/* 206 */
 /*!****************************************************!*\
   !*** ./src/task/views/templates/MainView.mustache ***!
   \****************************************************/
 /***/ (function(module, exports, __webpack_require__) {
 
-	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 39);
+	var Handlebars = __webpack_require__(/*! ./~/handlebars/runtime.js */ 38);
 	function __default(obj) { return obj && (obj.__esModule ? obj["default"] : obj); }
 	module.exports = (Handlebars["default"] || Handlebars).template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
 	  return "<div id='modalregion'>\n</div>\n<div class='container-fluid page-content'>\n    <div class='task-edit col-md-9 col-xs-12'>\n        <div class='errors'>\n        </div>\n        <div id='file_requirements'>\n        </div>\n        <div id='general'>\n        </div>\n        <div id='common'>\n        </div>\n        <div id='tasklines'>\n        </div>\n        <div class='ht_before_discounts'>\n        </div>\n        <div id='discounts'>\n        </div>\n        <div id='expenses_ht'>\n        </div>\n        <div class='totals'>\n        </div>\n        <div class='notes'>\n        </div>\n        <div class='payment-conditions'>\n        </div>\n        <div class='payments'>\n        </div>\n    </div>\n\n    <div class='task-desktop-actions col-md-3 hidden-sm hidden-xs'\n         id='rightbar'>\n    </div>\n</div>\n<footer class='footer-actions'></footer>\n";
 	  },"useData":true});
 
 /***/ }),
-/* 208 */
+/* 207 */
 /*!***************************************!*\
   !*** ./src/task/components/Facade.js ***!
   \***************************************/
@@ -11121,43 +11123,43 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone.marionette */ 25);
+	var _backbone = __webpack_require__(/*! backbone.marionette */ 24);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FileRequirementCollection = __webpack_require__(/*! ../models/FileRequirementCollection.js */ 209);
+	var _FileRequirementCollection = __webpack_require__(/*! ../models/FileRequirementCollection.js */ 208);
 	
 	var _FileRequirementCollection2 = _interopRequireDefault(_FileRequirementCollection);
 	
-	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 211);
+	var _CommonModel = __webpack_require__(/*! ../models/CommonModel.js */ 210);
 	
 	var _CommonModel2 = _interopRequireDefault(_CommonModel);
 	
-	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 212);
+	var _TaskGroupCollection = __webpack_require__(/*! ../models/TaskGroupCollection.js */ 211);
 	
 	var _TaskGroupCollection2 = _interopRequireDefault(_TaskGroupCollection);
 	
-	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 213);
+	var _DiscountCollection = __webpack_require__(/*! ../models/DiscountCollection.js */ 212);
 	
 	var _DiscountCollection2 = _interopRequireDefault(_DiscountCollection);
 	
-	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 214);
+	var _PaymentLineCollection = __webpack_require__(/*! ../models/PaymentLineCollection.js */ 213);
 	
 	var _PaymentLineCollection2 = _interopRequireDefault(_PaymentLineCollection);
 	
-	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 215);
+	var _StatusHistoryCollection = __webpack_require__(/*! ../models/StatusHistoryCollection.js */ 214);
 	
 	var _StatusHistoryCollection2 = _interopRequireDefault(_StatusHistoryCollection);
 	
-	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 216);
+	var _TotalModel = __webpack_require__(/*! ../models/TotalModel.js */ 215);
 	
 	var _TotalModel2 = _interopRequireDefault(_TotalModel);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -11361,7 +11363,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 209 */
+/* 208 */
 /*!******************************************************!*\
   !*** ./src/task/models/FileRequirementCollection.js ***!
   \******************************************************/
@@ -11373,11 +11375,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _FileRequirementModel = __webpack_require__(/*! ./FileRequirementModel.js */ 210);
+	var _FileRequirementModel = __webpack_require__(/*! ./FileRequirementModel.js */ 209);
 	
 	var _FileRequirementModel2 = _interopRequireDefault(_FileRequirementModel);
 	
@@ -11412,7 +11414,7 @@ webpackJsonp([2],[
 	exports.default = FileRequirementCollection;
 
 /***/ }),
-/* 210 */
+/* 209 */
 /*!*************************************************!*\
   !*** ./src/task/models/FileRequirementModel.js ***!
   \*************************************************/
@@ -11424,11 +11426,11 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -11494,7 +11496,7 @@ webpackJsonp([2],[
 	exports.default = FileRequirementModel;
 
 /***/ }),
-/* 211 */
+/* 210 */
 /*!****************************************!*\
   !*** ./src/task/models/CommonModel.js ***!
   \****************************************/
@@ -11510,13 +11512,13 @@ webpackJsonp([2],[
 	
 	var _underscore2 = _interopRequireDefault(_underscore);
 	
-	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 137);
+	var _BaseModel = __webpack_require__(/*! ./BaseModel.js */ 136);
 	
 	var _BaseModel2 = _interopRequireDefault(_BaseModel);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _backbone = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -11613,7 +11615,7 @@ webpackJsonp([2],[
 	exports.default = CommonModel;
 
 /***/ }),
-/* 212 */
+/* 211 */
 /*!************************************************!*\
   !*** ./src/task/models/TaskGroupCollection.js ***!
   \************************************************/
@@ -11625,17 +11627,17 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 138);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 137);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
-	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 134);
+	var _TaskGroupModel = __webpack_require__(/*! ./TaskGroupModel.js */ 133);
 	
 	var _TaskGroupModel2 = _interopRequireDefault(_TaskGroupModel);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
-	var _backbone = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -11717,7 +11719,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 213 */
+/* 212 */
 /*!***********************************************!*\
   !*** ./src/task/models/DiscountCollection.js ***!
   \***********************************************/
@@ -11729,19 +11731,19 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 164);
+	var _DiscountModel = __webpack_require__(/*! ./DiscountModel.js */ 163);
 	
 	var _DiscountModel2 = _interopRequireDefault(_DiscountModel);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	
-	var _tools = __webpack_require__(/*! ../../tools.js */ 4);
+	var _tools = __webpack_require__(/*! ../../tools.js */ 3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -11819,7 +11821,7 @@ webpackJsonp([2],[
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1)))
 
 /***/ }),
-/* 214 */
+/* 213 */
 /*!**************************************************!*\
   !*** ./src/task/models/PaymentLineCollection.js ***!
   \**************************************************/
@@ -11831,19 +11833,19 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 138);
+	var _OrderableCollection = __webpack_require__(/*! ./OrderableCollection.js */ 137);
 	
 	var _OrderableCollection2 = _interopRequireDefault(_OrderableCollection);
 	
-	var _PaymentLineModel = __webpack_require__(/*! ./PaymentLineModel.js */ 188);
+	var _PaymentLineModel = __webpack_require__(/*! ./PaymentLineModel.js */ 187);
 	
 	var _PaymentLineModel2 = _interopRequireDefault(_PaymentLineModel);
 	
-	var _backbone = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -12000,10 +12002,10 @@ webpackJsonp([2],[
 	    }
 	});
 	exports.default = PaymentLineCollection;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1), __webpack_require__(/*! jquery */ 3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! underscore */ 1), __webpack_require__(/*! jquery */ 2)))
 
 /***/ }),
-/* 215 */
+/* 214 */
 /*!****************************************************!*\
   !*** ./src/task/models/StatusHistoryCollection.js ***!
   \****************************************************/
@@ -12015,7 +12017,7 @@ webpackJsonp([2],[
 	  value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
@@ -12038,7 +12040,7 @@ webpackJsonp([2],[
 	exports.default = StatusHistoryCollection;
 
 /***/ }),
-/* 216 */
+/* 215 */
 /*!***************************************!*\
   !*** ./src/task/models/TotalModel.js ***!
   \***************************************/
@@ -12050,13 +12052,13 @@ webpackJsonp([2],[
 	    value: true
 	});
 	
-	var _backbone = __webpack_require__(/*! backbone */ 24);
+	var _backbone = __webpack_require__(/*! backbone */ 23);
 	
 	var _backbone2 = _interopRequireDefault(_backbone);
 	
-	var _math = __webpack_require__(/*! ../../math.js */ 6);
+	var _math = __webpack_require__(/*! ../../math.js */ 5);
 	
-	var _backbone3 = __webpack_require__(/*! backbone.radio */ 26);
+	var _backbone3 = __webpack_require__(/*! backbone.radio */ 25);
 	
 	var _backbone4 = _interopRequireDefault(_backbone3);
 	

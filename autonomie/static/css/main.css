@@ -92,6 +92,8 @@ nav.sidebar-menu .subnav li {
     .panel.panel-default .panel-body {
       background-color: #fff;
       padding: 10px 15px; }
+  .panel .no-border {
+    border-color: transparent; }
 
 .breadcrumb-arrow {
   margin-top: 3px;

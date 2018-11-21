@@ -3,12 +3,14 @@
 #       * TJEBBES Gaston <g.t@majerti.fr>
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
-
+from pyramid.httpexceptions import HTTPFound
 from autonomie.models.task import Estimation
 from autonomie.forms.tasks.estimation import get_list_schema
 from autonomie.views.estimations.lists import CompanyEstimationList
 from autonomie.views import TreeMixin
-from autonomie.views.business.routes import BUSINESS_ITEM_ESTIMATION_ROUTE
+from autonomie.views.business.routes import (
+    BUSINESS_ITEM_ESTIMATION_ROUTE,
+)
 from autonomie.views.project.business import ProjectBusinessListView
 from autonomie.views.business.business import (
     remember_navigation_history,
@@ -50,6 +52,19 @@ class BusinessEstimationList(CompanyEstimationList, TreeMixin):
         return query
 
 
+def add_estimation_view(context, request):
+    """
+    View used to add an estimation to the current business
+    """
+    estimation = context.add_estimation(request.user)
+    return HTTPFound(
+        request.route_path(
+            "/estimations/{id}",
+            id=estimation.id
+        )
+    )
+
+
 def includeme(config):
     config.add_tree_view(
         BusinessEstimationList,
@@ -57,4 +72,11 @@ def includeme(config):
         renderer="project/estimations.mako",
         permission="list.estimations",
         layout="business"
+    )
+    config.add_view(
+        add_estimation_view,
+        route_name=BUSINESS_ITEM_ESTIMATION_ROUTE,
+        permission="add.estimation",
+        request_param="action=add",
+        layout="default"
     )

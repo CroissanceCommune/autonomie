@@ -33,7 +33,7 @@
                 <a
                     href="${invoice_all_url}"
                     % if not business.invoiced:
-                    class='btn btn-primary primary-action'
+                    class='btn btn-primary'
                     % else:
                     class='btn btn-primary'
                     % endif
@@ -45,6 +45,13 @@
                     Générer toutes les factures
                     % endif
                 </a>
+                    <a
+                        href="${estimation_add_url}"
+                        class='btn btn-primary'
+                        >
+                        <i class='fa fa-plus-circle'></i>&nbsp;
+                        Créer un devis
+                    </a>
                 % endif
                 <h3>Devis de référence</h3>
                 % if not estimations:

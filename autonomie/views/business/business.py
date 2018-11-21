@@ -23,6 +23,7 @@ from autonomie.views.business.routes import (
     BUSINESS_ITEM_OVERVIEW_ROUTE,
     BUSINESS_ITEM_INVOICING_ROUTE,
     BUSINESS_ITEM_INVOICING_ALL_ROUTE,
+    BUSINESS_ITEM_ESTIMATION_ROUTE,
 )
 from autonomie.views.project.project import ProjectEntryPointView
 
@@ -110,9 +111,26 @@ class BusinessOverviewView(BaseView, TreeMixin):
 
     # Lié à la vue elle-même
     def invoice_all_url(self):
+        """
+        Build the url used to generate all invoices
+
+        :rtype: str
+        """
         return self.request.route_path(
             BUSINESS_ITEM_INVOICING_ALL_ROUTE,
             id=self.context.id,
+        )
+
+    def estimation_add_url(self):
+        """
+        Build the estimation add url
+
+        :rtype: str
+        """
+        return self.request.route_path(
+            BUSINESS_ITEM_ESTIMATION_ROUTE,
+            id=self.context.id,
+            _query={'action': 'add'}
         )
 
     def __call__(self):
@@ -131,6 +149,7 @@ class BusinessOverviewView(BaseView, TreeMixin):
             invoice_all_url=self.invoice_all_url(),
             payment_deadlines=self.context.payment_deadlines,
             invoice_deadline_route=BUSINESS_ITEM_INVOICING_ROUTE,
+            estimation_add_url=self.estimation_add_url(),
         )
 
 

@@ -66,3 +66,8 @@ def test_is_visible(dbsession, business, project, mk_project_type):
     project.project_type = mk_project_type(name="newone")
     dbsession.merge(project)
     assert BusinessService.is_default_project_type(business) == False
+
+
+def test_get_customer_id(business, full_estimation):
+    result = BusinessService._get_customer_id(business)
+    assert result == full_estimation.customer_id

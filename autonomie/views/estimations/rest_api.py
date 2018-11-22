@@ -320,7 +320,7 @@ def add_routes(config):
     config.add_route(
         FILE_REQ_ITEM_ROUTE,
         FILE_REQ_ITEM_ROUTE,
-        traverse="/sale_file_requirements/{id}",
+        traverse="/indicators/{id}",
     )
 
     config.add_route(

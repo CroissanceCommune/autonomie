@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# * Authors:
-#       * TJEBBES Gaston <g.t@majerti.fr>
-#       * Arezki Feth <f.a@majerti.fr>;
-#       * Miotte Julien <j.m@majerti.fr>;
 import colander
 import pytest
 
@@ -23,11 +19,10 @@ def test_company_customer_schema():
     assert result['name'] == u'Test customer'
 
     # mandatory fields
-    for field in 'name', 'zip_code', 'city', 'lastname', 'address':
-        wrong = args.copy()
-        wrong.pop(field)
-        with pytest.raises(colander.Invalid):
-            schema.deserialize(wrong)
+    wrong = args.copy()
+    wrong.pop('name')
+    with pytest.raises(colander.Invalid):
+        schema.deserialize(wrong)
 
     wrong = args.copy()
     wrong['email'] = 'wrongmail'
@@ -55,10 +50,7 @@ def test_individual_customer_schema():
     assert result['lastname'] == u'Lastname'
 
     # mandatory fields
-    for field in (
-        'lastname', 'civilite', 'zip_code',
-        'city', 'address'
-    ):
+    for field in ('lastname', 'civilite'):
         wrong = args.copy()
         wrong.pop(field)
         with pytest.raises(colander.Invalid):

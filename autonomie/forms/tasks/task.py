@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# * Authors:
-#       * TJEBBES Gaston <g.t@majerti.fr>
-#       * Arezki Feth <f.a@majerti.fr>;
-#       * Miotte Julien <j.m@majerti.fr>;
 import functools
 import deform
 import colander
@@ -30,10 +26,7 @@ from autonomie.forms.custom_types import (
     QuantityType,
 )
 from autonomie.forms.user import get_deferred_user_choice
-from autonomie.forms.tasks.base import (
-    taskline_after_bind,
-    task_after_bind,
-)
+from autonomie.forms.tasks.base import task_after_bind
 
 
 def tva_product_validator(node, value):
@@ -92,7 +85,6 @@ def _customize_taskline_fields(schema):
     :param obj schema: The schema to modify
     """
     schema.validator = tva_product_validator
-    schema.after_bind = taskline_after_bind
     customize = functools.partial(forms.customize_field, schema)
     customize('id', widget=deform.widget.HiddenWidget())
     customize(

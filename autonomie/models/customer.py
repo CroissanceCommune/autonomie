@@ -1,27 +1,4 @@
 # -*- coding: utf-8 -*-
-# * Copyright (C) 2012-2013 Croissance Commune
-# * Authors:
-#       * Arezki Feth <f.a@majerti.fr>;
-#       * Miotte Julien <j.m@majerti.fr>;
-#       * Pettier Gabriel;
-#       * TJEBBES Gaston <g.t@majerti.fr>
-#
-# This file is part of Autonomie : Progiciel de gestion de CAE.
-#
-#    Autonomie is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    Autonomie is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with Autonomie.  If not, see <http://www.gnu.org/licenses/>.
-#
-
 """
     Customer model : represents customers
     Stores the company and its main contact
@@ -33,7 +10,6 @@
     >>> c.name = u"Compagnie Dupont avec un t"
     >>> c.code = u"DUPT"
     >>> DBSESSION.add(c)
-
 """
 import datetime
 import logging
@@ -173,7 +149,8 @@ class Customer(DBBASE, PersistentACLMixin):
                 'colanderalchemy': {
                     'title': u"Civilité",
                 }
-            }
+            },
+            default="",
         ),
         group='edit',
     )
@@ -187,7 +164,7 @@ class Customer(DBBASE, PersistentACLMixin):
                     'title': u"Nom du contact principal",
                 }
             },
-            nullable=False,
+            default="",
         ),
         group='edit',
     )
@@ -243,7 +220,7 @@ class Customer(DBBASE, PersistentACLMixin):
                     'title': u'Adresse',
                 }
             },
-            nullable=False,
+            default="",
         ),
         group='edit'
     )
@@ -257,7 +234,7 @@ class Customer(DBBASE, PersistentACLMixin):
                     'title': u'Code postal',
                 },
             },
-            nullable=False,
+            default="",
         ),
         group='edit',
     )
@@ -271,7 +248,7 @@ class Customer(DBBASE, PersistentACLMixin):
                     'title': u'Ville',
                 }
             },
-            nullable=False,
+            default="",
         ),
         group='edit',
     )
@@ -524,22 +501,25 @@ class Customer(DBBASE, PersistentACLMixin):
 
 COMPANY_FORM_GRID = (
     (
-        ('name', 4,), ('code', 4),
+        ('code', 4),
     ),
     (
-        ('civilite', 8),
+        ('name', 8),
+    ),
+    (
+        ('civilite', 4),
     ),
     (
         ('lastname', 4),
         ('firstname', 4),),
     (
-        ('function', 4),
+        ('function', 8),
     ),
     (
-        ('address', 6),
+        ('address', 8),
     ),
     (
-        ('zip_code', 2), ('city', 4),
+        ('zip_code', 2), ('city', 6),
     ),
     (
         ('country', 4),
@@ -548,19 +528,17 @@ COMPANY_FORM_GRID = (
         ('tva_intracomm', 4), ('registration', 4),
     ),
     (
-        ('email', 4),
+        ('email', 8),
     ),
     (
         ('mobile', 4),
-    ),
-    (
         ('phone', 4),
     ),
     (
         ('fax', 4),
     ),
     (
-        ('comments', 10),
+        ('comments', 8),
     ),
     (
         ('compte_cg', 4),
@@ -571,38 +549,36 @@ COMPANY_FORM_GRID = (
 
 INDIVIDUAL_FORM_GRID = (
     (
-        ('code', 6),
+        ('code', 4),
     ),
     (
-        ('civilite', 8),
+        ('civilite', 4),
     ),
     (
         ('lastname', 4),
         ('firstname', 4),
     ),
     (
-        ('address', 6),
+        ('address', 8),
     ),
     (
-        ('zip_code', 2), ('city', 4),
+        ('zip_code', 2), ('city', 6),
     ),
     (
         ('country', 4),
     ),
     (
-        ('email', 4),
+        ('email', 8),
     ),
     (
         ('mobile', 4),
-    ),
-    (
         ('phone', 4),
     ),
     (
         ('fax', 4),
     ),
     (
-        ('comments', 10),
+        ('comments', 8),
     ),
     (
         ('compte_cg', 4),

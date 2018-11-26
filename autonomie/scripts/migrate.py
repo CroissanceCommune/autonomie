@@ -36,7 +36,7 @@ from autonomie.alembic.exceptions import MigrationError, RollbackError
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.environment import EnvironmentContext
-from alembic.util import load_python_file
+from alembic.util import load_python_file, rev_id
 from alembic import autogenerate as autogen
 
 from autonomie_base.models.base import DBSESSION
@@ -47,7 +47,9 @@ from autonomie import version as autonomie_version
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')
 DEFAULT_LOCATION = 'autonomie:alembic'
 
-MIGRATION_FAILED_MSG = "Some migration operations failed, rolled back everything…"
+MIGRATION_FAILED_MSG = (
+    "Some migration operations failed, rolled back everything…"
+)
 ROLLBACK_FAILED_MSG = (
     "Some migration operations failed and ROLL BACK FAILED."
     " Database might be in an inconsistent state."
@@ -286,6 +288,45 @@ def revision(message, empty=False):
     return scripts
 
 
+def merge(rev1=None, rev2=None):
+    if (rev1 and not rev2) or (rev2 and not rev1):
+        logger.error('Either specify --rev1 and --rev2 or None of them')
+        return
+
+    env = PackageEnvironment(DEFAULT_LOCATION)
+
+    if rev1 and rev2:
+        heads = [rev1, rev2]
+    else:
+        heads = []
+
+        def get_heads(rev, context):
+            for i in context.script.get_heads():
+                heads.append(i)
+            return []
+        env.run_env(get_heads)
+
+    if len(heads) > 1:
+        def create_merge_revision(rev, context):
+            context.script.generate_revision(
+                revid=rev_id(),
+                message='Revision merge',
+                refresh=True,
+                head=heads,
+                # template-only arg:
+                autonomie_version=autonomie_version(),
+            )
+            return []
+        env.run_env(create_merge_revision)
+
+    else:
+        logger.error(
+            'There is nothing to merge (only one head : {}), aborting'.format(
+                heads[0]
+            )
+        )
+
+
 def migrate():
     """Migrate autonomie's database
     Usage:
@@ -294,12 +335,14 @@ def migrate():
         migrate <config_uri> fetch [--rev=<rev>]
         migrate <config_uri> revision [--m=<message>] [--empty]
         migrate <config_uri> downgrade [--rev=<rev>]
+        migrate <config_uri> merge [--rev1=<rev>] [--rev2=<rev>]
 
     o list : all the revisions
     o upgrade : upgrade the app to the latest revision
     o revision : create a migration file with the given message (trying to detect changes, unless --empty is used)
     o fetch : set the revision
     o downgrade : downgrade the database
+    o merge : create a merge revision between two diverging revisions (you might ommit --rev*, they will get autodected)
 
     Options:
         -h --help     Show this screen.
@@ -320,6 +363,9 @@ def migrate():
         elif arguments['downgrade']:
             args = (arguments['--rev'],)
             func = downgrade
+        elif arguments['merge']:
+            args = (arguments['--rev1'], arguments['--rev2'])
+            func = merge
         return func(*args)
     try:
         return command(callback, migrate.__doc__)

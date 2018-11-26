@@ -40,6 +40,8 @@ from alembic import autogenerate as autogen
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.scripts.utils import command
+from autonomie import version as autonomie_version
+
 
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')
 DEFAULT_LOCATION = 'autonomie:alembic'
@@ -108,11 +110,10 @@ class PackageEnvironment(object):
             cfg.set_main_option("sqlalchemy.url", settings['sqlalchemy.url'])
         else:
             cfg.set_main_option("sqlalchemy.url", sql_url)
-        from autonomie import version
-        autonomie_version = version().replace('.', '_')
+        version_slug = autonomie_version().replace('.', '_')
         cfg.set_main_option(
             'file_template',
-            autonomie_version + "_%%(slug)s_%%(rev)s"
+            version_slug + "_%%(slug)s_%%(rev)s"
         )
         return cfg
 
@@ -251,6 +252,7 @@ def revision(message, empty=False):
             revision_context.run_autogenerate(rev, context)
         return []
 
+    revision_context.template_args['autonomie_version'] = autonomie_version()
     env.run_env(
         get_rev,
         as_sql=False,

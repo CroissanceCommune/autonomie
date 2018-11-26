@@ -36,7 +36,7 @@ from autonomie.alembic.exceptions import MigrationError, RollbackError
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.environment import EnvironmentContext
-from alembic.util import load_python_file, rev_id
+from alembic.util import load_python_file, rev_id, CommandError
 from alembic import autogenerate as autogen
 
 from autonomie_base.models.base import DBSESSION
@@ -53,6 +53,11 @@ MIGRATION_FAILED_MSG = (
 ROLLBACK_FAILED_MSG = (
     "Some migration operations failed and ROLL BACK FAILED."
     " Database might be in an inconsistent state."
+)
+
+MULTIPLE_HEADS_MSG = (
+    "There are multiple heads."
+    " Use `alembic-merge <ini_file> merge` to create a merge revision."
 )
 
 logger = logging.getLogger('alembic.autonomie')
@@ -369,5 +374,9 @@ def migrate():
         return func(*args)
     try:
         return command(callback, migrate.__doc__)
-    finally:
-        pass
+    except CommandError as e:
+        if 'has multiple heads' in e.message:
+            print(MULTIPLE_HEADS_MSG)
+            exit(1)
+        else:
+            raise

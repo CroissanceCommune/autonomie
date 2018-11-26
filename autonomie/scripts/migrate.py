@@ -32,6 +32,7 @@ import logging
 from pyramid.threadlocal import get_current_registry
 from zope.sqlalchemy import mark_changed
 
+from autonomie.alembic.exceptions import MigrationError, RollbackError
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.environment import EnvironmentContext
@@ -46,6 +47,11 @@ from autonomie import version as autonomie_version
 SCRIPT_DIR = pkg_resources.resource_filename('autonomie', 'alembic')
 DEFAULT_LOCATION = 'autonomie:alembic'
 
+MIGRATION_FAILED_MSG = "Some migration operations failed, rolled back everything…"
+ROLLBACK_FAILED_MSG = (
+    "Some migration operations failed and ROLL BACK FAILED."
+    " Database might be in an inconsistent state."
+)
 
 logger = logging.getLogger('alembic.autonomie')
 
@@ -150,13 +156,21 @@ def upgrade(revision, sql_url=None):
             rev, revision))
         return context.script._upgrade_revs(revision, rev)
 
-    pkg_env.run_env(
-        upgrade_func,
-        starting_rev=None,
-        destination_rev=revision,
-    )
+    try:
+        pkg_env.run_env(
+            upgrade_func,
+            starting_rev=None,
+            destination_rev=revision,
+        )
 
-    fetch(revision)
+    except RollbackError:
+        logger.error(ROLLBACK_FAILED_MSG)
+
+    except MigrationError:
+        logger.error(MIGRATION_FAILED_MSG)
+
+    else:
+        fetch(revision)
     print
 
 
@@ -176,13 +190,20 @@ def downgrade(revision):
             rev, revision))
         return context.script._downgrade_revs(revision, rev)
 
-    pkg_env.run_env(
-        downgrade_func,
-        starting_rev=None,
-        destination_rev=revision,
-    )
+    try:
+        pkg_env.run_env(
+            downgrade_func,
+            starting_rev=None,
+            destination_rev=revision,
+        )
+    except RollbackError:
+        logger.error(ROLLBACK_FAILED_MSG)
 
-    fetch(revision)
+    except MigrationError:
+        logger.error(MIGRATION_FAILED_MSG)
+
+    else:
+        fetch(revision)
     print
 
 

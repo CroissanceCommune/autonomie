@@ -26,6 +26,7 @@ from alembic import context
 import traceback
 import transaction
 
+from autonomie.alembic.exceptions import MigrationError, RollbackError
 from autonomie_base.models.base import DBSESSION
 from autonomie.models import DBBASE
 
@@ -48,9 +49,15 @@ def run_migrations_online():
 
     try:
         context.run_migrations()
-    except:
+    except Exception as migration_e:
         traceback.print_exc()
-        transaction.abort()
+        try:
+            transaction.abort()
+        except Exception as rollback_e:
+            traceback.print_exc()
+            raise RollbackError(rollback_e)
+        else:
+            raise MigrationError(migration_e)
     else:
         transaction.commit()
     finally:

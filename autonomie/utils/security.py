@@ -507,14 +507,27 @@ def get_timeslot_acl(self):
     Return ACL for timeslots
     """
     acl = get_event_acl(self)
-    if self.workshop.owner and self.workshop.owner.login:
-        acl.append(
-            (Allow,
-             self.workshop.owner.login.login,
-             "view.timeslot"
-             )
-        )
+    if self.workshop:
+        if self.workshop.owner and self.workshop.owner.login:
+            acl.append(
+                (
+                     Allow,
+                     self.workshop.owner.login.login,
+                     "view.timeslot"
+                 )
+            )
+        for trainer in self.workshop.trainers:
+            if trainer.login:
+                acl.append(
+                    (
+                        Allow,
+                        trainer.login.login,
+                        "view.timeslot",
+                     )
+
+                )
     return acl
+
 
 def get_company_acl(self):
     """

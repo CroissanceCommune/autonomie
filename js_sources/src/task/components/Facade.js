@@ -130,7 +130,7 @@ const FacadeClass = Mn.Object.extend({
     },
     computeTotals(){
         this.totalmodel.set({
-            'ht_before_discounts': this.tasklines_ht(),
+            'ht_before_discounts': this.HT() - this.collections.discounts.ht(),
             'ht': this.HT(),
             'tvas': this.TVAParts(),
             'ttc': this.TTC()

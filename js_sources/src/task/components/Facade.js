@@ -25,8 +25,8 @@ const FacadeClass = Mn.Object.extend({
     ht: 5,
     radioEvents: {
         'changed:task': 'computeTotals',
-        'changed:discount': 'computeMainTotals',
-        'changed:expense_ht': 'computeMainTotals',
+        'changed:discount': 'computeTotals',
+        'changed:expense_ht': 'computeTotals',
         'changed:payment_lines': "updatePaymentLines",
         'sync:model': 'syncModel',
         'save:model': 'saveModel',
@@ -129,15 +129,6 @@ const FacadeClass = Mn.Object.extend({
         channel.trigger('update:payment_lines', this.totalmodel);
     },
     computeTotals(){
-        this.totalmodel.set({
-            'ht_before_discounts': this.tasklines_ht(),
-            'ht': this.HT(),
-            'tvas': this.TVAParts(),
-            'ttc': this.TTC()
-        });
-    },
-    computeMainTotals(){
-        console.log("computeMainTotals");
         this.totalmodel.set({
             'ht_before_discounts': this.tasklines_ht(),
             'ht': this.HT(),

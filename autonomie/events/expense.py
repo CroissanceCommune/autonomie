@@ -112,7 +112,11 @@ class ExpenseMailStatusChangedWrapper(object):
         status_str = EXPENSE_NOTIFY_STATUS.get(self.event.status)
         account_label = format_account(self.request.user)
         date_label = format_date(datetime.date.today())
-        return status_str.format(account_label, date_label)
+
+        if status_str != None:
+            return status_str.format(account_label, date_label)
+        else:
+            return ""
 
     @property
     def subject(self):

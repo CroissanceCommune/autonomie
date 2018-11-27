@@ -73,6 +73,7 @@
                 % endif
                 <% customer_id = document.customer.id %>
                 <% customer_label = document.customer.label %>
+                <% business_type = document.business_type %>
 
                 <tr class='status tolate-${document.is_tolate()} paid-status-${paid_status} status-${document.status}'>
                     <td
@@ -95,7 +96,10 @@
             <td>
                 <a href="${request.route_path('/%ss/{id}.html' % type_, id=id_)}"
                     title='Voir le document'>
-                    ${internal_number} <br />(<small>${name}</small>)
+                    ${internal_number}
+                    ${request.layout_manager.render_panel('business_type_label', business_type)}
+                    <br />
+                    (<small>${name}</small>)
                 </a>
                 % if not is_admin_view:
                     <% description = document.description %>

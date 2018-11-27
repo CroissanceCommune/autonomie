@@ -175,6 +175,7 @@ DEFAULT_PERM_NEW = [
             'edit_owner.event',
             'list.workshop',
             'view.workshop',
+            'view.timeslot',
         )
     ),
     (
@@ -203,6 +204,7 @@ DEFAULT_PERM_NEW = [
             'edit.workshop',
             'list.workshop',
             'view.workshop',
+            'view.timeslot',
         )
     ),
     (
@@ -509,7 +511,7 @@ def get_timeslot_acl(self):
         acl.append(
             (Allow,
              self.workshop.owner.login.login,
-             "view.workshop"
+             "view.timeslot"
              )
         )
     return acl

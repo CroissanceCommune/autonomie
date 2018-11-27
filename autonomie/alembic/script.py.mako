@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""${message}
+"""${autonomie_version} ${message}
 
 Revision ID: ${up_revision}
 Revises: ${down_revision}

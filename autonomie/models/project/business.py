@@ -36,7 +36,7 @@ class BusinessPaymentDeadline(DBBASE):
     estimation_payment_id = Column(Integer, ForeignKey('estimation_payment.id'))
     estimation_id = Column(Integer, ForeignKey('estimation.id'))
     invoiced = Column(Boolean(), default=False)
-    invoice_id = Column(Integer, ForeignKey('invoice.id'))
+    invoice_id = Column(Integer, ForeignKey('invoice.id', ondelete='SET NULL'))
     payment_line = relationship("PaymentLine")
     estimation = relationship("Estimation")
     invoice = relationship('Invoice')

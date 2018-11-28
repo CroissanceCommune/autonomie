@@ -11178,8 +11178,8 @@ webpackJsonp([2],[
 	    ht: 5,
 	    radioEvents: {
 	        'changed:task': 'computeTotals',
-	        'changed:discount': 'computeMainTotals',
-	        'changed:expense_ht': 'computeMainTotals',
+	        'changed:discount': 'computeTotals',
+	        'changed:expense_ht': 'computeTotals',
 	        'changed:payment_lines': "updatePaymentLines",
 	        'sync:model': 'syncModel',
 	        'save:model': 'saveModel'
@@ -11277,16 +11277,7 @@ webpackJsonp([2],[
 	    },
 	    computeTotals: function computeTotals() {
 	        this.totalmodel.set({
-	            'ht_before_discounts': this.tasklines_ht(),
-	            'ht': this.HT(),
-	            'tvas': this.TVAParts(),
-	            'ttc': this.TTC()
-	        });
-	    },
-	    computeMainTotals: function computeMainTotals() {
-	        console.log("computeMainTotals");
-	        this.totalmodel.set({
-	            'ht_before_discounts': this.tasklines_ht(),
+	            'ht_before_discounts': this.HT() - this.collections.discounts.ht(),
 	            'ht': this.HT(),
 	            'tvas': this.TVAParts(),
 	            'ttc': this.TTC()

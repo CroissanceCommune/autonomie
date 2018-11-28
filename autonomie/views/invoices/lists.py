@@ -156,7 +156,6 @@ class InvoiceListTools(object):
     def query(self):
         query = DBSESSION().query(Task)
         query = query.with_polymorphic([Invoice, CancelInvoice])
-        query = query.distinct()
         query = query.outerjoin(Invoice.payments)
         query = query.outerjoin(Task.customer)
         query = query.outerjoin(Task.company)

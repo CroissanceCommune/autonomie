@@ -122,7 +122,9 @@ class TaskRestView(BaseRestView):
         :param dict form_config: The current form_config
         """
         sections = {
-            'general': {'edit': True},
+            'general': {
+                'business_type_edit': False,
+            },
             'common': {'edit': True},
             'tasklines': {'edit': True},
             'expenses_ht': {'edit': True},

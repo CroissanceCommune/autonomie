@@ -70,6 +70,12 @@ const GeneralView = Mn.View.extend({
         }
     },
     showBusinessType() {
+        var business_type_edit = this.section.business_type_edit || false;
+        var business_type_description = '';
+
+        if (! business_type_edit && this.business_types_options.length > 1) {
+            business_type_description = "Est éditable au niveau de l'affaire";
+        }
         this.showChildView(
             'business_type',
             new SelectWidget({

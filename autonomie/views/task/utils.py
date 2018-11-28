@@ -21,7 +21,7 @@ def json_mentions(request):
     Return the taskmentions available for the task related forms
 
     :param obj request: The current request object
-    :returns: List of TaskMenion in their json repr
+    :returns: List of TaskMention in their json repr
     """
     context = request.context
     doctype = context.type_

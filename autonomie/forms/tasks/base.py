@@ -293,9 +293,9 @@ def deferred_default_phase(node, kw):
         return colander.null
 
 
-def _collect_business_types(request):
+def get_business_types_from_request(request):
     """
-    Collect available business types allowed for the current user
+    Collect available business types allowed for the current user/context
 
     :param obj request: The current Pyramid request
     """
@@ -318,7 +318,7 @@ def _collect_business_types(request):
 @colander.deferred
 def deferred_business_type_description(node, kw):
     request = kw['request']
-    business_types = _collect_business_types(request)
+    business_types = get_business_types_from_request(request)
     if len(business_types) == 1:
         return ""
     else:
@@ -335,7 +335,7 @@ def deferred_business_type_widget(node, kw):
     :returns: A SelectWidget or an hidden one
     """
     request = kw['request']
-    business_types = _collect_business_types(request)
+    business_types = get_business_types_from_request(request)
     if len(business_types) == 0:
         return deform.widget.HiddenWidget()
     else:
@@ -369,7 +369,7 @@ def deferred_business_type_default(node, kw):
     if project.project_type.default_business_type:
         return project.project_type.default_business_type.id
     else:
-        return _collect_business_types(request)[0].id
+        return get_business_types_from_request(request)[0].id
 
 
 class NewTaskSchema(colander.Schema):

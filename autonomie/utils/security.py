@@ -175,6 +175,7 @@ DEFAULT_PERM_NEW = [
             'edit_owner.event',
             'list.workshop',
             'view.workshop',
+            'view.timeslot',
         )
     ),
     (
@@ -203,6 +204,7 @@ DEFAULT_PERM_NEW = [
             'edit.workshop',
             'list.workshop',
             'view.workshop',
+            'view.timeslot',
         )
     ),
     (
@@ -498,6 +500,32 @@ def get_workshop_acl(self):
              (Allow, self.owner.login.login, owner_perms)
         )
 
+    return acl
+
+def get_timeslot_acl(self):
+    """
+    Return ACL for timeslots
+    """
+    acl = get_event_acl(self)
+    if self.workshop:
+        if self.workshop.owner and self.workshop.owner.login:
+            acl.append(
+                (
+                     Allow,
+                     self.workshop.owner.login.login,
+                     "view.timeslot"
+                 )
+            )
+        for trainer in self.workshop.trainers:
+            if trainer.login:
+                acl.append(
+                    (
+                        Allow,
+                        trainer.login.login,
+                        "view.timeslot",
+                     )
+
+                )
     return acl
 
 
@@ -1441,7 +1469,7 @@ def set_models_acl():
     TaskMention.__acl__ = get_base_acl
     Template.__default_acl__ = get_base_acl
     TemplatingHistory.__default_acl__ = get_base_acl
-    Timeslot.__default_acl__ = get_base_acl
+    Timeslot.__default_acl__ = get_timeslot_acl
     TrainerDatas.__default_acl__ = get_trainerdatas_acl
     TreasuryMeasureGrid.__acl__ = get_accounting_measure_acl
     TreasuryMeasureType.__acl__ = get_base_acl

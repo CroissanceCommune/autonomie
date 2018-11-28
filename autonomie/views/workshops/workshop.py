@@ -940,7 +940,7 @@ def add_views(config):
     config.add_view(
         timeslot_pdf_view,
         route_name='timeslot.pdf',
-        permission="view.workshop",
+        permission="view.timeslot",
     )
 
     config.add_view(

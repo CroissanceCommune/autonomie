@@ -282,12 +282,19 @@ def base_configure(config, dbsession, **settings):
     config.set_default_permission('view')
 
     # Adding some usefull properties to the request object
-    config.set_request_property(lambda _: dbsession(), 'dbsession', reify=True)
-    config.set_request_property(get_avatar, 'user', reify=True)
-    config.set_request_property(lambda _: get_config(), 'config', reify=True)
-    config.set_request_property(
+    config.add_request_method(
+        lambda _: dbsession(), 'dbsession', property=True, reify=True
+    )
+    config.add_request_method(
+        get_avatar, 'user', property=True, reify=True
+    )
+    config.add_request_method(
+        lambda _: get_config(), 'config', property=True, reify=True
+    )
+    config.add_request_method(
         get_current_company,
         'current_company',
+        property=True,
         reify=True
     )
 

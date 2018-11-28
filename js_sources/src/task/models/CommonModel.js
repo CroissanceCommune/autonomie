@@ -20,6 +20,7 @@ const CommonModel = BaseModel.extend({
         'name',
         'altdate',
         'date',
+        'business_type_id',
         'description',
         'address',
         'mentions',

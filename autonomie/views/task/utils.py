@@ -10,10 +10,20 @@ from autonomie.models.task import (
     PaymentConditions,
     WorkUnit,
 )
+
+from autonomie.forms.tasks.base import get_business_types_from_request
+
 from autonomie.models.tva import (
     Tva,
     Product,
 )
+
+
+def json_business_types(request):
+    return [
+        dict(label=i.label, value=i.id)
+        for i in get_business_types_from_request(request)
+    ]
 
 
 def json_mentions(request):

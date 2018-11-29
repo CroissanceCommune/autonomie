@@ -8,7 +8,7 @@
 </div>
 <div class='status-table list-legend collapse'>
   <div tal:repeat="legend legends">
-    <span class="btn btn-circle ${legend[0]}"><br /></span>
+    <span class="btn btn-circle no-cursor ${legend[0]}"><br /></span>
     <span tal:content="structure legend[1]"></span>
   </div>
 </div>

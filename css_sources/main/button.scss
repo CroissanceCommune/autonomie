@@ -34,6 +34,7 @@
 		font-size: 14px;
 		line-height: 1.428571429;
 		border-radius: 15px;
+    overflow: hidden;
 	}
 	&.btn-circle.btn-lg {
 		width: 50px;
@@ -51,6 +52,9 @@
 		line-height: 1.33;
 		border-radius: 35px;
 	}
+}
+.btn.no-cursor{
+  cursor: default;
 }
 // A button with no style
 .btn-nostyle{

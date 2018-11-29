@@ -87,7 +87,7 @@ Admin expenses list view
         </tr>
     </thead>
     <tbody>
-        % for expense in records:
+        % for id_, expense in records:
             <% url = request.route_path('/expenses/{id}', id=expense.id) %>
             <% onclick = "document.location='{url}'".format(url=url) %>
             <tr class="status status-${expense.status} paid-status-${expense.paid_status} justified-${expense.justified}">

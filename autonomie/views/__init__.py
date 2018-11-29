@@ -413,7 +413,7 @@ class BaseListView(BaseListClass):
             res = appstruct['page']
         else:
             res = 1
-        return convert_to_int(res)
+        return convert_to_int(res, 1)
 
     def _paginate(self, query, appstruct):
         """
@@ -425,7 +425,9 @@ class BaseListView(BaseListClass):
             page_url = partial(get_page_url, request=self.request)
 
             current_page = self._get_current_page(appstruct)
-            items_per_page = convert_to_int(appstruct.get('items_per_page', 30))
+            items_per_page = convert_to_int(
+                appstruct.get('items_per_page', 30), 30
+            )
 
             self.logger.debug(
                 " + Page : %s, items per page : %s" % (

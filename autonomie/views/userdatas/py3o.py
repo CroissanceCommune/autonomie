@@ -61,18 +61,18 @@ def store_compiled_file(context, request, output, template):
 
     :param context: The context of the
     """
-    logger.debug(u"Storing the compiled file")
+    logger.debug(u"Storing the compiled file {}".format(template.name))
     name = get_filename(template.name)
     output.seek(0)
     datas = output.getvalue()
     file_obj = files.File(
         name=name,
         description=template.description,
-        data=output,
         mimetype="application/vnd.oasis.opendocument.text",
         size=len(datas),
         parent_id=context.id
     )
+    file_obj.data = output
     request.dbsession.add(file_obj)
     return file_obj
 
@@ -126,7 +126,7 @@ def get_userdatas_py3o_stage_datas(userdatas):
             key = stage.replace(' ', '')
             datas = res.setdefault(key, {})
 
-            datas[index] = path_as_dict
+            datas["l%s" % index] = path_as_dict
 
             if index == 0:
                 datas['last'] = path_as_dict
@@ -138,6 +138,34 @@ def get_userdatas_py3o_stage_datas(userdatas):
                 res[compatibility_keys[stage]] = datas.copy()
 
     return res
+
+
+def get_userdatas_company_datas(userdatas):
+    """
+    Generate additionnal_context datas that can be used for the py3o compiling
+    context
+
+    :param obj userdatas: The UserDatas instance
+    :returns: a dict with company_datas
+    """
+    result = {'companydatas': {}}
+    if userdatas.user:
+        datas = result['companydatas']
+        context = None
+        num_companies = len(userdatas.user.companies)
+        for index, company in enumerate(userdatas.user.companies):
+            if context is None:
+                context = py3o.SqlaContext(company.__class__)
+            company_dict = context.compile_obj(company)
+            company_dict['title'] = company_dict['name']
+            datas["l%s" % index] = company_dict
+            if index == 0:
+                datas['first'] = company_dict
+
+            if index == num_companies:
+                datas['last'] = company_dict
+
+    return result
 
 
 def get_template_output(request, template, context):
@@ -157,6 +185,7 @@ def get_template_output(request, template, context):
     :returns: StringIO.StringIO
     """
     additionnal_context = get_userdatas_py3o_stage_datas(context)
+    additionnal_context.update(get_userdatas_company_datas(context))
     additionnal_context.update(request.config)
     return py3o.compile_template(
         context,

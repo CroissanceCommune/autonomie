@@ -122,7 +122,7 @@ class TaskListPanel(object):
         """
         result = []
         result.append(Column("<span class='fa fa-comment'></span>"))
-        result.append(Column(u"Identifiant", u"official_number"))
+        result.append(Column(u"N° facture", u"official_number"))
         if self.is_admin_view:
             result.append(Column(u"Enseigne", u"company"))
         result.append(Column(u"Émise le", 'date'))

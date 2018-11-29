@@ -78,7 +78,8 @@ class ExpenseList(BaseListView):
         return form_name
 
     def query(self):
-        query = ExpenseSheet.query().distinct().outerjoin(ExpenseSheet.user)
+        query = DBSESSION().query(distinct(ExpenseSheet.id), ExpenseSheet)
+        query = query.outerjoin(ExpenseSheet.user)
         return query
 
     def filter_search(self, query, appstruct):

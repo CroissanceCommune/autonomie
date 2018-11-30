@@ -77,7 +77,7 @@
 % if not estimation.invoices:
     <a
         href="${request.route_path('/estimations/{id}/attach_invoices', id=estimation.id)}"
-        class='btn btn-primary btn-xs'>
+        class='btn btn-default btn-block'>
         <i class='glyphicon glyphicon-link'></i> Rattacher ce devis à des factures
     </a>
 % endif

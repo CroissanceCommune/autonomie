@@ -164,10 +164,7 @@ DEFAULT_PERM_NEW = [
             'admin.training',
             # activity
             'add.activity',
-            'admin.activity',
-            'edit.activity',
             'list.activity',
-            'view.activity',
             # workshop
             'add.workshop',
             'admin.workshop',
@@ -193,11 +190,8 @@ DEFAULT_PERM_NEW = [
             'admin_treasury',
             'admin.training',
             # activity
-            'admin.activity',
             'add.activity',
-            'edit.activity',
             'list.activity',
-            'view.activity',
             # workshop
             'add.workshop',
             'admin.workshop',
@@ -459,6 +453,18 @@ def get_activity_acl(self):
     Return acl for activities : companies can also view
     """
     acl = get_event_acl(self)
+
+    admin_perms = (
+        'view.activity',
+        'view.file',
+        'edit.file',
+        'edit.activity',
+        'admin.activity'
+    )
+
+    acl.append((Allow, "group:admin", admin_perms))
+    acl.append((Allow, "group:manager", admin_perms))
+
     for company in self.companies:
         acl.append(
             (

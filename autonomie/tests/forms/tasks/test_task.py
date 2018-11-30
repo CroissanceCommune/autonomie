@@ -368,10 +368,10 @@ def test_task_isadmin():
     assert 'status' in schema
 
 
-def test_task(tva, unity):
+def test_task(tva, unity, request_with_config):
     import datetime
     schema = get_add_edit_task_schema(Task)
-    schema = schema.bind()
+    schema = schema.bind(request=request_with_config)
     value = {
         "name": u"Test task",
         'date': datetime.date.today().isoformat(),

@@ -304,6 +304,8 @@ def get_business_types_from_request(request):
         project = context
     elif hasattr(context, "project"):
         project = context.project
+    else:
+        return []
 
     result = []
     if project.project_type.default_business_type:
@@ -313,6 +315,15 @@ def get_business_types_from_request(request):
         if business_type.allowed(request):
             result.append(business_type)
     return result
+
+
+@colander.deferred
+def business_type_id_validator(node, kw):
+    allowed_ids = [
+        i.id
+        for i in get_business_types_from_request(kw['request'])
+    ]
+    return colander.OneOf(allowed_ids)
 
 
 @colander.deferred

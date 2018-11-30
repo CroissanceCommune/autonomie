@@ -116,3 +116,15 @@ def test_real_world_error(mk_expense_type):
     assert last_rounded_total == byline_rounded_total
     # Option 2
     assert last_rounded_total == byproduct_rounded_total
+
+
+def test_expense_label_with_non_ascii_date(pyramid_request):
+    pyramid_request.config = {
+        "bookentry_expense_label_template": u'{expense_date:%B}',
+    }
+    from autonomie.compute.sage import SageExpenseMain
+
+    expense_main = SageExpenseMain(context=None, request=pyramid_request)
+    expense_main.set_expense(MagicMock(year=2018, month=12))
+
+    assert expense_main.libelle == u'décembre'

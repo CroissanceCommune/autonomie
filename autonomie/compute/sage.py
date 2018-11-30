@@ -49,10 +49,8 @@ from autonomie.compute.math_utils import (
     reverse_tva,
     compute_tva,
 )
-from autonomie.utils.strings import (
-    format_account,
-    month_name,
-)
+from autonomie.utils.strings import format_account
+from autonomie.utils.datetimes import UnicodeDate
 
 log = logging.getLogger(__name__)
 
@@ -907,7 +905,7 @@ class SageExpenseBase(BaseSageBookEntryFactory):
             beneficiaire=format_account(self.expense.user, reverse=False),
             beneficiaire_LASTNAME=self.expense.user.lastname.upper(),
             expense=self.expense,
-            expense_date=datetime.date(self.expense.year, self.expense.month, 1)
+            expense_date=UnicodeDate(self.expense.year, self.expense.month, 1)
         )
 
 
@@ -1313,7 +1311,7 @@ class SageExpensePaymentMain(BaseSageBookEntryFactory):
             beneficiaire=format_account(self.expense.user, reverse=False),
             beneficiaire_LASTNAME=self.expense.user.lastname.upper(),
             expense=self.expense,
-            expense_date=datetime.date(self.expense.year, self.expense.month, 1)
+            expense_date=UnicodeDate(self.expense.year, self.expense.month, 1)
         )
 
     def set_payment(self, payment):

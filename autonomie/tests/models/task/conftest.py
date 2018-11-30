@@ -215,6 +215,11 @@ def invoice_20170808(dbsession, mk_invoice):
 
 
 @pytest.fixture
+def invoice_2018(dbsession, mk_invoice):
+    return mk_invoice(date=datetime.date(2018, 7, 7))
+
+
+@pytest.fixture
 def sale_product(dbsession):
     from autonomie.models.sale_product import SaleProduct
     s = SaleProduct(

@@ -129,6 +129,7 @@ class InvoiceNumberService(object):
             query = query.filter(
                 Task.official_number == invoice_number,
                 Task.id != invoice.id,
+                Task.legacy_number == False,
             ).scalar()
 
             if query is not None:

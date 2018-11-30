@@ -211,3 +211,26 @@ def test_invoice_number_service_generation(invoice_20170707, invoice_20170808):
     # Will not re-assign
     with pytest.raises(ValueError):
         InvoiceNumberService.assign_number(invoice_20170707, tpl)
+
+
+def test_invoice_number_collision_avoidance(
+        invoice_20170707,
+        invoice_2018,
+        dbsession,
+):
+    # goes back to zero and conflicts with other years invoices
+    # but that was how autonomie was configured by default before 4.2
+    tpl = '{SEQYEAR}'
+
+    # They will get the same official_number
+    InvoiceNumberService.assign_number(invoice_20170707, tpl)
+
+    with pytest.raises(ValueError):
+        InvoiceNumberService.assign_number(invoice_2018, tpl)
+
+    # With legacy tag, we want to allow that historic conflicts.
+    invoice_20170707.legacy_number = True
+    dbsession.merge(invoice_20170707)
+
+    # Just check it raises nothing
+    InvoiceNumberService.assign_number(invoice_2018, tpl)

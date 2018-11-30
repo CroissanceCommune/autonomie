@@ -4461,6 +4461,8 @@ webpackJsonp([2],[
 	        var options = this.getOption('options');
 	        var current_value = this.getOption('value');
 	        var add_default = (0, _tools.getOpt)(this, 'add_default', false);
+	        var editable = (0, _tools.getOpt)(this, 'editable', true);
+	        var description = (0, _tools.getOpt)(this, 'description', '');
 	        var found_one = (0, _tools.updateSelectOptions)(options, current_value, id_key);
 	        if (!found_one && add_default && !this.hasVoid(options)) {
 	            var void_option = {};
@@ -4477,7 +4479,9 @@ webpackJsonp([2],[
 	            title: title,
 	            field_name: field_name,
 	            id_key: id_key,
-	            multiple: multiple
+	            multiple: multiple,
+	            description: description,
+	            editable: editable
 	        };
 	    }
 	});
@@ -4501,18 +4505,25 @@ webpackJsonp([2],[
 	    + "</label>\n";
 	},"3":function(depth0,helpers,partials,data) {
 	  return "multiple";
-	  },"5":function(depth0,helpers,partials,data,depths) {
+	  },"5":function(depth0,helpers,partials,data) {
+	  return "disabled";
+	  },"7":function(depth0,helpers,partials,data,depths) {
 	  var stack1, escapeExpression=this.escapeExpression, lambda=this.lambda, buffer = "    <option value='"
 	    + escapeExpression(helpers.lookup.call(depth0, depth0, (depths[1] != null ? depths[1].id_key : depths[1]), {"name":"lookup","hash":{},"data":data}))
 	    + "' ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(6, data, depths),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(8, data, depths),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + ">"
 	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
 	    + "</option>\n";
-	},"6":function(depth0,helpers,partials,data) {
+	},"8":function(depth0,helpers,partials,data) {
 	  return "selected";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
+	  },"10":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "    <span class='help-block'>"
+	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
+	    + "</span>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
@@ -4521,10 +4532,16 @@ webpackJsonp([2],[
 	  if (stack1 != null) { buffer += stack1; }
 	  buffer += " name='"
 	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "'>\n";
-	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
+	    + "' ";
+	  stack1 = helpers.unless.call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"unless","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</select>\n";
+	  buffer += " >\n";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(7, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</select>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(10, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
 	},"useData":true,"useDepths":true});
 
 /***/ }),
@@ -5534,6 +5551,10 @@ webpackJsonp([2],[
 	
 	var _InputWidget2 = _interopRequireDefault(_InputWidget);
 	
+	var _SelectWidget = __webpack_require__(/*! ../../widgets/SelectWidget.js */ 79);
+	
+	var _SelectWidget2 = _interopRequireDefault(_SelectWidget);
+	
 	var _StatusHistoryView = __webpack_require__(/*! ./StatusHistoryView.js */ 125);
 	
 	var _StatusHistoryView2 = _interopRequireDefault(_StatusHistoryView);
@@ -5544,17 +5565,17 @@ webpackJsonp([2],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 129); /*
-	                                                             * File Name : GeneralView.js
-	                                                             *
-	                                                             * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
-	                                                             * Company : Majerti ( http://www.majerti.fr )
-	                                                             *
-	                                                             * This software is distributed under GPLV3
-	                                                             * License: http://www.gnu.org/licenses/gpl-3.0.txt
-	                                                             *
-	                                                             */
-	
+	/*
+	 * File Name : GeneralView.js
+	 *
+	 * Copyright (C) 2012 Gaston TJEBBES g.t@majerti.fr
+	 * Company : Majerti ( http://www.majerti.fr )
+	 *
+	 * This software is distributed under GPLV3
+	 * License: http://www.gnu.org/licenses/gpl-3.0.txt
+	 *
+	 */
+	var template = __webpack_require__(/*! ./templates/GeneralView.mustache */ 129);
 	
 	var GeneralView = _backbone2.default.View.extend({
 	    /*
@@ -5572,6 +5593,7 @@ webpackJsonp([2],[
 	    regions: {
 	        status_history: '.status_history',
 	        name: '.name',
+	        business_type: '.business_type',
 	        financial_year: '.financial_year'
 	    },
 	    childViewTriggers: {
@@ -5581,6 +5603,8 @@ webpackJsonp([2],[
 	    initialize: function initialize(options) {
 	        this.section = options['section'];
 	        this.attachments = _backbone4.default.channel('facade').request('get:attachments');
+	
+	        this.business_types_options = _backbone4.default.channel('config').request('get:options', 'business_types');
 	    },
 	
 	    templateContext: function templateContext() {
@@ -5593,6 +5617,22 @@ webpackJsonp([2],[
 	            this.showChildView('status_history', view);
 	        }
 	    },
+	    showBusinessType: function showBusinessType() {
+	        var business_type_edit = this.section.business_type_edit || false;
+	        var business_type_description = '';
+	
+	        if (!business_type_edit && this.business_types_options.length > 1) {
+	            business_type_description = "Est éditable au niveau de l'affaire";
+	        }
+	        this.showChildView('business_type', new _SelectWidget2.default({
+	            options: this.business_types_options,
+	            title: "Type d'affaire",
+	            value: this.model.get('business_type_id'),
+	            field_name: "business_type_id",
+	            editable: business_type_edit,
+	            description: business_type_description
+	        }));
+	    },
 	
 	    onRender: function onRender() {
 	        this.showStatusHistory();
@@ -5601,6 +5641,10 @@ webpackJsonp([2],[
 	            value: this.model.get('name'),
 	            field_name: 'name'
 	        }));
+	        this.payment_conditions_options = this.business_types_options;
+	        console.log(this.payment_conditions_options);
+	
+	        this.showBusinessType();
 	        if (_.has(this.section, 'financial_year')) {
 	            this.showChildView('financial_year', new _InputWidget2.default({
 	                title: "Année comptable de référence",
@@ -6186,7 +6230,7 @@ webpackJsonp([2],[
 	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
 	    + "\n                </a>\n            </li>\n";
 	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
-	  var stack1, buffer = "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-12 col-xs-12'>\n                <div class='name'></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n";
+	  var stack1, buffer = "<h2>Informations générales <small>Ces informations n'apparaissent pas dans le PDF</small></h2>\n<div class='content'>\n    <form class='form' name='common' action=\"#\" onSubmit=\"return false;\">\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='name'></div>\n            </div>\n            <div class='col-md-6 col-xs-12'>\n                <div class=\"business_type\"></div>\n            </div>\n        </div>\n        <div class='row'>\n            <div class='col-md-6 col-xs-12'>\n                <div class='financial_year'></div>\n            </div>\n        </div>\n    </form>\n    <div class='status_history'>\n    </div>\n";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.attachments : depth0), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + "</div>\n";
@@ -11526,7 +11570,7 @@ webpackJsonp([2],[
 	 *
 	 */
 	var CommonModel = _BaseModel2.default.extend({
-	    props: ['id', 'name', 'altdate', 'date', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'notes', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'display_units'],
+	    props: ['id', 'name', 'altdate', 'date', 'business_type_id', 'description', 'address', 'mentions', 'workplace', 'expenses_ht', 'notes', 'payment_conditions', 'deposit', 'payment_times', 'paymentDisplay', 'financial_year', 'display_units'],
 	    validation: {
 	        date: {
 	            required: true,

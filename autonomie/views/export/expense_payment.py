@@ -234,7 +234,7 @@ de notes de dépense",
         Write the exported csv file to the request
         """
         exporter = ExpensePaymentExport(self.context, self.request)
-        writer = SageExpensePaymentCsvWriter()
+        writer = SageExpensePaymentCsvWriter(self.context, self.request)
         writer.set_datas(exporter.get_book_entries(payments))
         write_file_to_request(
             self.request,

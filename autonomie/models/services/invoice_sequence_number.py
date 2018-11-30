@@ -55,13 +55,7 @@ class InvoiceNumberService(object):
     ALLOWED_KEYS = ALLOWED_VARS + SEQUENCES_MAP.keys()
 
     @classmethod
-    def validate_template(cls, template):
-        """
-        Validate the correctness of the invoice number template
-        """
-        fmt = string.Formatter()
-        tpl_vars = fmt.parse(template)
-
+    def _validate_variable_names(cls, fmt, tpl_vars):
         for _, key, _, _ in tpl_vars:
             if key is not None and key not in cls.ALLOWED_KEYS:
                 raise ValueError(
@@ -69,6 +63,16 @@ class InvoiceNumberService(object):
                         key,
                         ', '.join('{{{}}}'.format(i) for i in cls.ALLOWED_KEYS)
                     ))
+
+    @classmethod
+    def validate_template(cls, template):
+        """
+        Validate the correctness of the invoice number template
+        """
+        fmt = string.Formatter()
+        tpl_vars = list(fmt.parse(template))
+
+        cls._validate_variable_names(fmt, tpl_vars)
 
     @classmethod
     def get_involved_sequences(cls, invoice, template):

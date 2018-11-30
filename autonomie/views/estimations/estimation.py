@@ -224,8 +224,9 @@ class EstimationAttachInvoiceView(BaseFormView):
             invoice.estimation_id = self.context.id
             self.request.dbsession.merge(invoice)
 
-        self.context.geninv = True
-        self.request.dbsession.merge(self.context)
+        if invoice_ids:
+            self.context.geninv = True
+            self.request.dbsession.merge(self.context)
         return self.redirect()
 
     def cancel_success(self, appstruct):

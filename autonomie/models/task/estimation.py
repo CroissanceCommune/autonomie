@@ -280,7 +280,7 @@ class Estimation(Task, EstimationCompute):
         return estimation
 
     def __repr__(self):
-        return u"<Estimation id:{s.id} ({s.status}>".format(s=self)
+        return u"<Estimation id:{s.id} ({s.status})>".format(s=self)
 
     def __json__(self, request):
         if self.manualDeliverables == 1:

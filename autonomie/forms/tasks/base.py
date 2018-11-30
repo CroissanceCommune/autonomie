@@ -430,41 +430,6 @@ def deferred_customer_project_widget(node, kw):
     return wid
 
 
-def _get_customers_from_request(request):
-    """
-    Get customers options for new task and task duplicate form
-
-    Find customers regarding the current context
-
-    Project -> Project.customers
-    ...
-
-    :returns: A list of customers
-    :rtype: list
-    """
-    customers = []
-    context = request.context
-
-    if isinstance(context, Project):
-        customers = context.customers
-
-    elif isinstance(context, Task):
-        customers = [context.customer]
-
-    elif isinstance(context, Customer):
-        customers = [context]
-
-    elif hasattr(context, 'project') and context.project is not None:
-        customers = context.project.customers
-
-    else:
-        company_id = request.current_company
-        customers = Customer.label_query()
-        customers.filter_by(company_id=company_id).all()
-
-    return customers
-
-
 def validate_customer_project_phase(form, value):
     """
     Validate that customer project and phase are linked

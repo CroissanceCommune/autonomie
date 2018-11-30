@@ -143,7 +143,6 @@ class InvoiceNumberService(object):
         """
         if invoice.official_number:
             raise ValueError('This invoice already have an official number')
-        cls.validate_template(template)
 
         db = DBSESSION()
         formatter = InvoiceNumberFormatter(invoice, cls.SEQUENCES_MAP)

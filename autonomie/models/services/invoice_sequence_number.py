@@ -1,5 +1,4 @@
 import string
-from sqlalchemy import extract
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.task.sequence_number import (
@@ -130,7 +129,6 @@ class InvoiceNumberService(object):
             query = query.filter(
                 Task.official_number == invoice_number,
                 Task.id != invoice.id,
-                extract('year', Task.date),
             ).scalar()
 
             if query is not None:

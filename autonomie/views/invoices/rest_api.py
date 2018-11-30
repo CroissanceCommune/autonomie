@@ -47,7 +47,7 @@ class InvoiceRestView(TaskRestView):
         :param dict submitted: The submitted datas
         :returns: A colander.Schema
         """
-        excludes = ('status', 'children', 'parent',)
+        excludes = ('status', 'children', 'parent', 'business_type_id')
         return get_add_edit_invoice_schema(excludes=excludes)
 
     def _more_form_sections(self, sections):

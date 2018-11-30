@@ -130,7 +130,7 @@ class InvoiceNumberService(object):
             query = query.filter(
                 Task.official_number == invoice_number,
                 Task.id != invoice.id,
-                extract('year', Task.date) == invoice.date.year,
+                extract('year', Task.date),
             ).scalar()
 
             if query is not None:

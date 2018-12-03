@@ -30,6 +30,7 @@ import logging
 import deform
 import deform_extensions
 from collections import OrderedDict
+from sqlalchemy import distinct
 
 from sqlalchemy.orm import (
     load_only,
@@ -317,11 +318,22 @@ def deferred_company_customer_validator(node, kw):
     Ensure we don't query customers from other companies
     """
     company = kw['request'].context
-    values = [customer.id for customer in company.customers]
+    values = [
+        i[0]
+        for i in DBSESSION().query(
+            Customer.id
+        ).filter(Customer.company_id == company.id)
+    ]
     return colander.OneOf(values)
 
 
-def customer_node(is_admin=False, widget_options=None, **kwargs):
+def customer_node(
+    is_admin=False,
+    widget_options=None,
+    with_invoice=False,
+    with_estimation=False,
+    **kwargs
+):
     """
     return a customer selection node
 
@@ -329,22 +341,40 @@ def customer_node(is_admin=False, widget_options=None, **kwargs):
 
             is the associated view restricted to company's invoices
     """
+    from autonomie.models.task import Task
     widget_options = widget_options or {}
     default_option = widget_options.pop("default_option", None)
 
-    if default_option:
-        values = [default_option]
-    else:
-        values = []
-
     @colander.deferred
     def deferred_customer_widget(node, kw):
+
+        if default_option:
+            values = [default_option]
+        else:
+            values = []
         if is_admin:
             query = Customer.query().join(Customer.company)
             query = query.options(
                 contains_eager(Customer.company).load_only('name')
             )
             query = query.options(load_only('id', 'label'))
+
+            if with_invoice:
+                query = query.filter(
+                    Customer.id.in_(
+                        DBSESSION().query(distinct(Task.customer_id)).filter(
+                            Task.type_.in_(['invoice', 'cancelinvoice'])
+                        )
+                    )
+                )
+            elif with_estimation:
+                query = query.filter(
+                    Customer.id.in_(
+                        DBSESSION().query(distinct(Task.customer_id)).filter(
+                            Task.type_ == 'estimation'
+                        )
+                    )
+                )
 
             datas = OrderedDict()
 

@@ -67,6 +67,7 @@ def get_list_schema(is_global=False, excludes=()):
         schema.insert(0, customer_filter_node_factory(
             is_admin=is_global,
             name='customer_id',
+            with_estimation=True,
         ))
 
     if "company_id" not in excludes:

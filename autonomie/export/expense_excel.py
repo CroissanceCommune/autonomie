@@ -257,7 +257,7 @@ class XlsExpense(XlsWriter):
                     types.append(type_.id)
                     yield TypedColumn(
                         type_,
-                        label="%s (ce type de dépense n'existe plus)" % (
+                        label=u"%s (ce type de dépense n'existe plus)" % (
                             type_.label
                         )
                     )

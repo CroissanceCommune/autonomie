@@ -45,6 +45,8 @@ const SelectWidget = Mn.View.extend({
         var options = this.getOption('options');
         var current_value = this.getOption('value');
         var add_default = getOpt(this, 'add_default', false);
+        var editable = getOpt(this, 'editable', true);
+        var description = getOpt(this, 'description', '');
         var found_one = updateSelectOptions(options, current_value, id_key);
         if (!found_one && add_default && !this.hasVoid(options)){
             var void_option = {};
@@ -61,7 +63,9 @@ const SelectWidget = Mn.View.extend({
             title: title,
             field_name: field_name,
             id_key: id_key,
-            multiple: multiple
+            multiple: multiple,
+            description: description,
+            editable: editable,
         }
     },
 });

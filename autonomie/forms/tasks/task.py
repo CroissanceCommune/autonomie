@@ -26,7 +26,10 @@ from autonomie.forms.custom_types import (
     QuantityType,
 )
 from autonomie.forms.user import get_deferred_user_choice
-from autonomie.forms.tasks.base import task_after_bind
+from autonomie.forms.tasks.base import (
+    business_type_id_validator,
+    task_after_bind,
+)
 
 
 def tva_product_validator(node, value):
@@ -166,6 +169,10 @@ def _customize_task_fields(schema):
     customize(
         "status_person_id",
         widget=get_deferred_user_choice(),
+    )
+    customize(
+        "business_type_id",
+        validator=business_type_id_validator,
     )
     customize(
         "description",

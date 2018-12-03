@@ -26,6 +26,7 @@ from autonomie.forms.tasks.task import (
 from autonomie.utils.rest import RestError
 from autonomie.views import BaseRestView
 from autonomie.views.task.utils import (
+    json_business_types,
     json_tvas,
     json_workunits,
     json_products,
@@ -106,6 +107,7 @@ class TaskRestView(BaseRestView):
             "workunits": json_workunits(self.request),
             "products": json_products(self.request),
             "mentions": json_mentions(self.request),
+            "business_types": json_business_types(self.request),
         }
         if hasattr(self, '_more_form_options'):
             options = self._more_form_options(options)
@@ -120,7 +122,9 @@ class TaskRestView(BaseRestView):
         :param dict form_config: The current form_config
         """
         sections = {
-            'general': {'edit': True},
+            'general': {
+                'business_type_edit': False,
+            },
             'common': {'edit': True},
             'tasklines': {'edit': True},
             'expenses_ht': {'edit': True},

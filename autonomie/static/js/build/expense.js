@@ -8378,6 +8378,8 @@ webpackJsonp([1],[
 	        var options = this.getOption('options');
 	        var current_value = this.getOption('value');
 	        var add_default = (0, _tools.getOpt)(this, 'add_default', false);
+	        var editable = (0, _tools.getOpt)(this, 'editable', true);
+	        var description = (0, _tools.getOpt)(this, 'description', '');
 	        var found_one = (0, _tools.updateSelectOptions)(options, current_value, id_key);
 	        if (!found_one && add_default && !this.hasVoid(options)) {
 	            var void_option = {};
@@ -8394,7 +8396,9 @@ webpackJsonp([1],[
 	            title: title,
 	            field_name: field_name,
 	            id_key: id_key,
-	            multiple: multiple
+	            multiple: multiple,
+	            description: description,
+	            editable: editable
 	        };
 	    }
 	});
@@ -8418,18 +8422,25 @@ webpackJsonp([1],[
 	    + "</label>\n";
 	},"3":function(depth0,helpers,partials,data) {
 	  return "multiple";
-	  },"5":function(depth0,helpers,partials,data,depths) {
+	  },"5":function(depth0,helpers,partials,data) {
+	  return "disabled";
+	  },"7":function(depth0,helpers,partials,data,depths) {
 	  var stack1, escapeExpression=this.escapeExpression, lambda=this.lambda, buffer = "    <option value='"
 	    + escapeExpression(helpers.lookup.call(depth0, depth0, (depths[1] != null ? depths[1].id_key : depths[1]), {"name":"lookup","hash":{},"data":data}))
 	    + "' ";
-	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(6, data, depths),"inverse":this.noop,"data":data});
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.selected : depth0), {"name":"if","hash":{},"fn":this.program(8, data, depths),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
 	  return buffer + ">"
 	    + escapeExpression(lambda((depth0 != null ? depth0.label : depth0), depth0))
 	    + "</option>\n";
-	},"6":function(depth0,helpers,partials,data) {
+	},"8":function(depth0,helpers,partials,data) {
 	  return "selected";
-	  },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
+	  },"10":function(depth0,helpers,partials,data) {
+	  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+	  return "    <span class='help-block'>"
+	    + escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
+	    + "</span>\n";
+	},"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data,depths) {
 	  var stack1, helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
 	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.title : depth0), {"name":"if","hash":{},"fn":this.program(1, data, depths),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
@@ -8438,10 +8449,16 @@ webpackJsonp([1],[
 	  if (stack1 != null) { buffer += stack1; }
 	  buffer += " name='"
 	    + escapeExpression(((helper = (helper = helpers.field_name || (depth0 != null ? depth0.field_name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"field_name","hash":{},"data":data}) : helper)))
-	    + "'>\n";
-	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
+	    + "' ";
+	  stack1 = helpers.unless.call(depth0, (depth0 != null ? depth0.editable : depth0), {"name":"unless","hash":{},"fn":this.program(5, data, depths),"inverse":this.noop,"data":data});
 	  if (stack1 != null) { buffer += stack1; }
-	  return buffer + "</select>\n";
+	  buffer += " >\n";
+	  stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.options : depth0), {"name":"each","hash":{},"fn":this.program(7, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  buffer += "</select>\n";
+	  stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.description : depth0), {"name":"if","hash":{},"fn":this.program(10, data, depths),"inverse":this.noop,"data":data});
+	  if (stack1 != null) { buffer += stack1; }
+	  return buffer;
 	},"useData":true,"useDepths":true});
 
 /***/ }),

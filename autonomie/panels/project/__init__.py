@@ -5,3 +5,4 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 def includeme(config):
     config.include('.phase')
+    config.include('.type')

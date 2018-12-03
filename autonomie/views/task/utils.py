@@ -10,10 +10,20 @@ from autonomie.models.task import (
     PaymentConditions,
     WorkUnit,
 )
+
+from autonomie.forms.tasks.base import get_business_types_from_request
+
 from autonomie.models.tva import (
     Tva,
     Product,
 )
+
+
+def json_business_types(request):
+    return [
+        dict(label=i.label, value=i.id)
+        for i in get_business_types_from_request(request)
+    ]
 
 
 def json_mentions(request):
@@ -21,7 +31,7 @@ def json_mentions(request):
     Return the taskmentions available for the task related forms
 
     :param obj request: The current request object
-    :returns: List of TaskMenion in their json repr
+    :returns: List of TaskMention in their json repr
     """
     context = request.context
     doctype = context.type_

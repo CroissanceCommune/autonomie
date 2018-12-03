@@ -114,6 +114,7 @@
                     <% customer_label = document.customer.name %>
                     <% company_id = document.company_id %>
                     <% company_name = document.company.name %>
+                    <% business_type = document.business_type %>
                     <tr class="status status-${status} signed-status-${signed_status} geninv-${geninv}">
                         <td class="status-td" title="${api.format_estimation_status(document)}">
                         </td>
@@ -127,9 +128,10 @@
                 <td title="${api.format_status(document)}">${api.format_date(date)}</td>
                 <td>
                     <a href="${request.route_path('/estimations/{id}.html', id=id_)}"
-                    title="Voir le document">
-                    ${name} (<small>${internal_number}</small>)
+                        title="Voir le document">
+                        ${name} (<small>${internal_number}</small>)
                     </a>
+                    ${request.layout_manager.render_panel('business_type_label', business_type)}
                     <small>${format_text(description)}</small>
                 </td>
                 <td>

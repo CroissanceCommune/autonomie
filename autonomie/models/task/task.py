@@ -664,6 +664,7 @@ _{s.date:%m%y}"
             updated_at=self.updated_at.isoformat(),
 
             phase_id=self.phase_id,
+            business_type_id=self.business_type_id,
             status=self.status,
             status_comment=self.status_comment,
             status_person_id=self.status_person_id,

@@ -293,9 +293,9 @@ def deferred_default_phase(node, kw):
         return colander.null
 
 
-def _collect_business_types(request):
+def get_business_types_from_request(request):
     """
-    Collect available business types allowed for the current user
+    Collect available business types allowed for the current user/context
 
     :param obj request: The current Pyramid request
     """
@@ -304,6 +304,8 @@ def _collect_business_types(request):
         project = context
     elif hasattr(context, "project"):
         project = context.project
+    else:
+        return []
 
     result = []
     if project.project_type.default_business_type:
@@ -316,9 +318,18 @@ def _collect_business_types(request):
 
 
 @colander.deferred
+def business_type_id_validator(node, kw):
+    allowed_ids = [
+        i.id
+        for i in get_business_types_from_request(kw['request'])
+    ]
+    return colander.OneOf(allowed_ids)
+
+
+@colander.deferred
 def deferred_business_type_description(node, kw):
     request = kw['request']
-    business_types = _collect_business_types(request)
+    business_types = get_business_types_from_request(request)
     if len(business_types) == 1:
         return ""
     else:
@@ -335,7 +346,7 @@ def deferred_business_type_widget(node, kw):
     :returns: A SelectWidget or an hidden one
     """
     request = kw['request']
-    business_types = _collect_business_types(request)
+    business_types = get_business_types_from_request(request)
     if len(business_types) == 0:
         return deform.widget.HiddenWidget()
     else:
@@ -369,7 +380,7 @@ def deferred_business_type_default(node, kw):
     if project.project_type.default_business_type:
         return project.project_type.default_business_type.id
     else:
-        return _collect_business_types(request)[0].id
+        return get_business_types_from_request(request)[0].id
 
 
 class NewTaskSchema(colander.Schema):
@@ -417,41 +428,6 @@ def deferred_customer_project_widget(node, kw):
     choices = _get_project_choices(projects)
     wid = deform.widget.SelectWidget(values=choices)
     return wid
-
-
-def _get_customers_from_request(request):
-    """
-    Get customers options for new task and task duplicate form
-
-    Find customers regarding the current context
-
-    Project -> Project.customers
-    ...
-
-    :returns: A list of customers
-    :rtype: list
-    """
-    customers = []
-    context = request.context
-
-    if isinstance(context, Project):
-        customers = context.customers
-
-    elif isinstance(context, Task):
-        customers = [context.customer]
-
-    elif isinstance(context, Customer):
-        customers = [context]
-
-    elif hasattr(context, 'project') and context.project is not None:
-        customers = context.project.customers
-
-    else:
-        company_id = request.current_company
-        customers = Customer.label_query()
-        customers.filter_by(company_id=company_id).all()
-
-    return customers
 
 
 def validate_customer_project_phase(form, value):

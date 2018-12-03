@@ -290,6 +290,15 @@ class Task(Node):
         default=None,
     )
 
+    legacy_number = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        info={
+            'export': {'exclude': True},
+        },
+    )
+
     internal_number = deferred(
         Column(
             String(255),

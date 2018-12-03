@@ -192,12 +192,37 @@ def test_invoice_number_formatter(invoice_20170707, DummySequence):
 
 
 def test_invoice_number_service_validation():
-    InvoiceNumberService.validate_template('')
-    InvoiceNumberService.validate_template('aaa')
-    InvoiceNumberService.validate_template('@{SEQGLOBAL}-{YYYY}')
+    with pytest.raises(ValueError):
+        InvoiceNumberService.validate_template('@{DONOTEXIST}{{SEQGLOBAL}}')
 
     with pytest.raises(ValueError):
-        InvoiceNumberService.validate_template('@{DONOTEXIST}')
+        InvoiceNumberService.validate_template('')
+
+    with pytest.raises(ValueError):
+        InvoiceNumberService.validate_template('aaa')
+
+    # global
+    InvoiceNumberService.validate_template('{SEQGLOBAL}-{YYYY}')
+    InvoiceNumberService.validate_template('{SEQGLOBAL}')
+
+    # year
+    InvoiceNumberService.validate_template('{SEQYEAR}-{YYYY}')
+    InvoiceNumberService.validate_template('{SEQYEAR}-{YY}')
+    InvoiceNumberService.validate_template('{SEQYEAR}-{SEQMONTH}-{YY}')
+    with pytest.raises(ValueError):
+        InvoiceNumberService.validate_template('{SEQYEAR}')
+
+    # month
+    InvoiceNumberService.validate_template('{SEQMONTH}-{MM}-{YY}')
+    with pytest.raises(ValueError):
+        InvoiceNumberService.validate_template('{SEQMONTH}-{MM}')
+        InvoiceNumberService.validate_template('{SEQMONTH}-{YY}')
+
+    # month+company
+    InvoiceNumberService.validate_template('{SEQMONTHANA}-{MM}-{YY}-{ANA}')
+    with pytest.raises(ValueError):
+        InvoiceNumberService.validate_template('{SEQMONTH}-{MM}-{YY}')
+        InvoiceNumberService.validate_template('{SEQMONTH}-{MM}-{ANA}')
 
 
 def test_invoice_number_service_generation(invoice_20170707, invoice_20170808):
@@ -211,3 +236,26 @@ def test_invoice_number_service_generation(invoice_20170707, invoice_20170808):
     # Will not re-assign
     with pytest.raises(ValueError):
         InvoiceNumberService.assign_number(invoice_20170707, tpl)
+
+
+def test_invoice_number_collision_avoidance(
+        invoice_20170707,
+        invoice_2018,
+        dbsession,
+):
+    # goes back to zero and conflicts with other years invoices
+    # but that was how autonomie was configured by default before 4.2
+    tpl = '{SEQYEAR}'
+
+    # They will get the same official_number
+    InvoiceNumberService.assign_number(invoice_20170707, tpl)
+
+    with pytest.raises(ValueError):
+        InvoiceNumberService.assign_number(invoice_2018, tpl)
+
+    # With legacy tag, we want to allow that historic conflicts.
+    invoice_20170707.legacy_number = True
+    dbsession.merge(invoice_20170707)
+
+    # Just check it raises nothing
+    InvoiceNumberService.assign_number(invoice_2018, tpl)

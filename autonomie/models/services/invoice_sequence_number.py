@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import string
-from sqlalchemy import extract
 
 from autonomie_base.models.base import DBSESSION
 from autonomie.models.task.sequence_number import (
@@ -56,13 +59,7 @@ class InvoiceNumberService(object):
     ALLOWED_KEYS = ALLOWED_VARS + SEQUENCES_MAP.keys()
 
     @classmethod
-    def validate_template(cls, template):
-        """
-        Validate the correctness of the invoice number template
-        """
-        fmt = string.Formatter()
-        tpl_vars = fmt.parse(template)
-
+    def _validate_variable_names(cls, fmt, tpl_vars):
         for _, key, _, _ in tpl_vars:
             if key is not None and key not in cls.ALLOWED_KEYS:
                 raise ValueError(
@@ -70,6 +67,50 @@ class InvoiceNumberService(object):
                         key,
                         ', '.join('{{{}}}'.format(i) for i in cls.ALLOWED_KEYS)
                     ))
+
+    @classmethod
+    def _validate_generated_nums_uniqueness(cls, fmt, tpl_vars):
+        var_names = set([key for _, key, _, _ in tpl_vars])
+
+        def has(var_name):
+            return var_name in var_names
+
+        reqs = [
+            [
+                'SEQGLOBAL',
+                True
+            ],
+            [
+                'SEQYEAR',
+                has('YYYY') or has('YY')
+            ],
+            [
+                'SEQMONTH',
+                (has('YYYY') or has('YY')) and has('MM')
+            ],
+            [
+                'SEQMONTHANA',
+                (has('YYYY') or has('YY')) and has('MM') and has('ANA')
+            ],
+        ]
+        unicity = False
+        for var_name, req in reqs:
+            if var_name in var_names and req:
+                unicity = True
+
+        if not unicity:
+            raise ValueError('Ce gabarit produit des numéros non uniques.')
+
+    @classmethod
+    def validate_template(cls, template):
+        """
+        Validate the correctness of the invoice number template
+        """
+        fmt = string.Formatter()
+        tpl_vars = list(fmt.parse(template))
+
+        cls._validate_variable_names(fmt, tpl_vars)
+        cls._validate_generated_nums_uniqueness(fmt, tpl_vars)
 
     @classmethod
     def get_involved_sequences(cls, invoice, template):
@@ -102,7 +143,6 @@ class InvoiceNumberService(object):
         """
         if invoice.official_number:
             raise ValueError('This invoice already have an official number')
-        cls.validate_template(template)
 
         db = DBSESSION()
         formatter = InvoiceNumberFormatter(invoice, cls.SEQUENCES_MAP)
@@ -130,7 +170,7 @@ class InvoiceNumberService(object):
             query = query.filter(
                 Task.official_number == invoice_number,
                 Task.id != invoice.id,
-                extract('year', Task.date) == invoice.date.year,
+                Task.legacy_number == False,
             ).scalar()
 
             if query is not None:

@@ -69,7 +69,8 @@ class BaseUserListView(BaseListView):
                     User.lastname.like("%" + search + "%"),
                     User.firstname.like("%" + search + "%"),
                     User.companies.any(Company.name.like("%" + search + "%")),
-                    User.companies.any(Company.goal.like("%" + search + "%"))
+                    User.companies.any(Company.goal.like("%" + search + "%")),
+                    User.login.has(Login.login.like("%" + search + "%")),
                 )
             )
 

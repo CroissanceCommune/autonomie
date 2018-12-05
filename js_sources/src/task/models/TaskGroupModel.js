@@ -45,11 +45,6 @@ const TaskGroupModel = BaseModel.extend({
     updateLines(){
         this.set('lines', this.lines.toJSON());
     },
-    loadProductGroup: function(sale_product_group_datas){
-        this.set('title', sale_product_group_datas.title);
-        this.set('description', sale_product_group_datas.description);
-        this.trigger('set:product_group');
-    },
     ht: function(){
         return this.lines.ht();
     },

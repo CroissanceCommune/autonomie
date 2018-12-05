@@ -41,12 +41,10 @@ const CatalogTreeView = Mn.View.extend({
     ui: {
         tree: '.tree',
         search: 'input[name=catalog_search]',
-        edit_btn: 'button.edit-catalog',
         insert_btn: 'button.insert-catalog'
     },
     events: {
         'keyup @ui.search': 'onSearch',
-        'click @ui.edit_btn': 'onEdit',
         'click @ui.insert_btn': 'onInsert'
     },
     onSearch: function(){
@@ -64,28 +62,6 @@ const CatalogTreeView = Mn.View.extend({
             var tree_tag = this.getUI('tree');
             this.tree_options['core']['data'] = catalog.jstree;
             tree_tag.jstree(this.tree_options);
-        }
-    },
-    productLoadCallback: function(result){
-        this.triggerMethod("catalog:edit", result);
-    },
-    onEdit: function(){
-        var url = null;
-
-        var selected = this.getUI('tree').jstree('get_selected', true);
-        _.each(
-            selected,
-            function(node){
-                if (_.has(node.original, 'url')){
-                    url = node.original.url;
-                }
-            }
-        );
-        if (url === null){
-            alert("Veuillez sélectionner au moins un élément");
-        } else {
-            var serverRequest = ajax_call(url);
-            serverRequest.done(this.productLoadCallback.bind(this));
         }
     },
     onInsert: function(){

@@ -130,7 +130,7 @@ def get_list_schema():
     """
     schema = forms.lists.BaseListsSchema().clone()
 
-    schema['search'].description = u"Nom, entreprise"
+    schema['search'].description = u"Nom, entreprise, identifiant"
 
     schema.add(
         colander.SchemaNode(
